@@ -1,0 +1,2602 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io' as Io;
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:amio/utils/skeletons.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:flutter_switch/flutter_switch.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+
+import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
+import 'package:skeletons/skeletons.dart';
+
+import '../../../../main.dart';
+import '../../../../models/produkmodel.dart';
+import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
+import '../../../../services/apimethod.dart';
+import '../../../../services/checkConnection.dart';
+import '../../../../utils/component.dart';
+import '../../../tokopage/sidebar/produkToko/produk.dart';
+
+class LihatProdukPage extends StatefulWidget {
+  String token, name, merchId;
+  PageController pageController;
+  LihatProdukPage({
+    Key? key,
+    required this.token,
+    required this.name,
+    required this.merchId,
+    required this.pageController,
+  }) : super(key: key);
+
+  @override
+  State<LihatProdukPage> createState() => _LihatProdukPageState();
+}
+
+class _LihatProdukPageState extends State<LihatProdukPage> {
+  List<ModelDataProdukGrup>? datasProduk;
+
+  PageController _pageController = PageController();
+  bool isSelectionMode = false;
+  Map<int, bool> selectedFlag = {};
+  List<String> listProduct = List.empty(growable: true);
+
+  TextEditingController conNameProduk = TextEditingController();
+  TextEditingController conHarga = TextEditingController();
+
+  TextEditingController searchController = TextEditingController();
+
+  String textOrderBy = 'Nama Produk A ke Z';
+  String textvalueOrderBy = 'upDownNama';
+
+  void formatInputRp() {
+    String text = conHarga.text.replaceAll('.', '');
+
+    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
+
+    String formattedAmount = formatCurrency(value);
+
+    conHarga.value = TextEditingValue(
+      text: formattedAmount,
+      selection: TextSelection.collapsed(offset: formattedAmount.length),
+    );
+  }
+
+  void formatInputRpEdit() {
+    String text = conHargaEdit.text.replaceAll('.', '');
+
+    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
+
+    String formattedAmount = formatCurrency(value);
+
+    conHargaEdit.value = TextEditingValue(
+      text: formattedAmount,
+      selection: TextSelection.collapsed(offset: formattedAmount.length),
+    );
+  }
+
+  @override
+  void initState() {
+    checkConnection(context);
+    img64 = null;
+    nameEditProduk = '';
+    hargaEditProduk = '';
+    jenisProductEdit = '';
+
+    conHarga.addListener(formatInputRp);
+    conHargaEdit.addListener(formatInputRpEdit);
+
+    // getSingleProduct(context, widget.token, "", singleProductId, setState);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) async {
+        List<String> value = [widget.merchId];
+
+        await getDataProduk(value);
+
+        setState(() {
+          // log(datasProduk.toString());
+          datasProduk;
+        });
+
+        _pageController = PageController(
+          initialPage: 0,
+          keepPage: true,
+          viewportFraction: 1,
+        );
+      },
+    );
+
+    _getProductList();
+    super.initState();
+  }
+
+  Future<dynamic> getDataProduk(List<String> value) async {
+    return datasProduk = await getProductGrup(
+      context,
+      widget.token,
+      '',
+      widget.merchId,
+      textvalueOrderBy,
+    );
+  }
+
+  refreshDataProduk() {
+    datasProduk;
+    conNameProduk.text = '';
+    conHarga.text = '';
+    idProduct = null;
+    img64 = null;
+    setState(() {});
+  }
+
+  autoReload() {
+    setState(() {});
+  }
+
+  @override
+  dispose() {
+    productPrice;
+    _pageController.dispose();
+    conNameProduk.dispose();
+    conNameProdukEdit.dispose();
+    conHargaEdit.dispose();
+    conHarga.dispose();
+    super.dispose();
+  }
+
+  late TextEditingController conNameProdukEdit =
+      TextEditingController(text: nameEditProduk);
+  late TextEditingController conHargaEdit =
+      TextEditingController(text: hargaEditProduk);
+
+  File? myImage;
+  Uint8List? bytes;
+  String? img64;
+  List<String> images = [];
+
+  Future<void> getImage() async {
+    var picker = ImagePicker();
+    PickedFile? image;
+
+    image = await picker.getImage(source: ImageSource.gallery);
+    if (image!.path.isEmpty == false) {
+      myImage = File(image.path);
+
+      bytes = await Io.File(myImage!.path).readAsBytes();
+      setState(() {
+        img64 = base64Encode(bytes!);
+        images.add(img64!);
+      });
+      // Clipboard.setData(ClipboardData(text: img64));
+    } else {
+      print('Error Image');
+    }
+  }
+
+  refreshTampilan() {
+    nameEditProduk = '';
+    hargaEditProduk = '';
+    jenisProductEdit = '';
+    kodejenisProductEdit = '';
+  }
+
+  String? jenisProduct, idProduct;
+
+  bool onswitchppn = false;
+  bool onswitchtampikan = true;
+  String ppnAktif = "Tidak Aktif";
+  String kasirAktif = "Aktif";
+
+  String? imageEdit, nameEdit, kategoriEdit, hargaEdit;
+
+  String? singleProductId;
+
+  @override
+  Widget build(BuildContext context) {
+    bool isFalseAvailable = selectedFlag.containsValue(false);
+    bool light = true;
+
+    return StatefulBuilder(
+      builder: (context, setState) => Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size16),
+          color: bnw100,
+        ),
+        child: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          children: [
+            pageProdukToko(isFalseAvailable),
+            tambahProdukToko(setState, context),
+            ubahProdukGrupToko(setState, context, singleProductId),
+          ],
+        ),
+      ),
+    );
+  }
+
+  ubahProdukGrupToko(StateSetter setState, BuildContext context, productid) {
+    // TextEditingController nameProdukEdit = TextEditingController();
+    return StatefulBuilder(
+      builder: (context, setState) => FutureBuilder(
+          future: getSingleProduct(
+              context, widget.token, widget.merchId, productid, setState),
+          builder: (context, snapshot) {
+            var data = snapshot.data;
+            // nameProdukEdit.text = data['name'];
+            if (snapshot.hasData) {
+              // return Text(snapshot.data.name);
+              return Column(
+                children: [
+                  Container(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _pageController.jumpToPage(0);
+                            refreshTampilan();
+                          },
+                          child: Icon(
+                            PhosphorIcons.arrow_left,
+                            size: size48,
+                            color: bnw900,
+                          ),
+                        ),
+                        SizedBox(width: size16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ubah Produk',
+                              style:
+                                  heading1(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              'Produk akan ditambahkan kedalam Toko yang telah dipilih',
+                              style:
+                                  heading3(FontWeight.w300, bnw900, 'Outfit'),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: size16),
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      physics: BouncingScrollPhysics(),
+                      children: [
+                        Text(
+                          'Foto Produk',
+                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                        ),
+                        SizedBox(height: size12),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => getImage(),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: bnw900),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                height: 80,
+                                width: 80,
+                                child: snapshot.data['product_image'] != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          snapshot.data['product_image'],
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  SizedBox(
+                                            child: Icon(
+                                              PhosphorIcons.storefront_fill,
+                                              size: 60,
+                                              color: bnw900,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(PhosphorIcons.plus),
+                              ),
+                            ),
+                            SizedBox(width: size12),
+                            Text(
+                              'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                              style:
+                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () => getImage(),
+                          child: IntrinsicHeight(
+                            child: TextFormField(
+                              style:
+                                  heading2(FontWeight.w600, bnw900, 'Outfit'),
+                              decoration: InputDecoration(
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    width: 1.5,
+                                    color: bnw500,
+                                  ),
+                                ),
+                                enabled: false,
+                                suffixIcon: Icon(
+                                  PhosphorIcons.plus,
+                                  color: bnw900,
+                                ),
+                                hintText: 'Tambah Gambar',
+                                hintStyle:
+                                    heading2(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: size16),
+                        fieldEditProduk(
+                          'Nama Produk',
+                          conNameProdukEdit,
+                          TextInputType.text,
+                        ),
+                        SizedBox(height: size16),
+                        SizedBox(child: kategoriList(context)),
+                        SizedBox(height: size16),
+                        fieldEditProduk(
+                          'Harga',
+                          conHargaEdit,
+                          TextInputType.number,
+                        ),
+                        SizedBox(height: size16),
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            setState(() {
+                              onswitchppn = !onswitchppn;
+                              onswitchppn
+                                  ? ppnAktif = "Aktif"
+                                  : ppnAktif = "Tidak Aktif";
+
+                              // changePpn(
+                              //   context,
+                              //   widget.token,
+                              //   onswitchppn.toString(),
+                              //   listProduct,
+                              //   widget.merchId,
+                              // );
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'PPN',
+                                    style: heading2(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                  Text(
+                                    ppnAktif,
+                                    style: heading4(
+                                        FontWeight.w400, bnw900, 'Outfit'),
+                                  ),
+                                ],
+                              ),
+                              FlutterSwitch(
+                                width: 52,
+                                height: 28,
+                                value: onswitchppn,
+                                // value: snapshot.data['isPPN'] == 1 ? true : false,
+                                padding: 0,
+                                activeIcon: Icon(PhosphorIcons.check,
+                                    color: primary500),
+                                inactiveIcon:
+                                    Icon(PhosphorIcons.x, color: bnw100),
+                                activeColor: primary500,
+                                inactiveColor: bnw100,
+                                borderRadius: 30,
+                                inactiveToggleColor: bnw900,
+                                activeToggleColor: primary200,
+                                activeSwitchBorder:
+                                    Border.all(color: primary500),
+                                inactiveSwitchBorder:
+                                    Border.all(color: bnw300, width: 2),
+                                onToggle: (val) {
+                                  setState(
+                                    () {
+                                      setState(() {
+                                        onswitchppn = val;
+                                        onswitchppn
+                                            ? ppnAktif = "Aktif"
+                                            : ppnAktif = "Tidak Aktif";
+
+                                        // changePpn(
+                                        //   context,
+                                        //   widget.token,
+                                        //   onswitchppn.toString(),
+                                        //   listProduct,
+                                        //   widget.merchId,
+                                        // );
+                                      });
+                                      initState();
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: size16),
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            setState(
+                              () {
+                                onswitchtampikan = !onswitchtampikan;
+                                onswitchtampikan
+                                    ? kasirAktif = "Aktif"
+                                    : kasirAktif = "Tidak Aktif";
+                              },
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Tampilkan Di Kasir',
+                                    style: heading2(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                  Text(
+                                    kasirAktif,
+                                    style: heading4(
+                                        FontWeight.w400, bnw900, 'Outfit'),
+                                  ),
+                                ],
+                              ),
+                              FlutterSwitch(
+                                width: 52,
+                                height: 28,
+                                // value:
+                                //     snapshot.data['isActive'] == 1 ? true : false,
+                                value: onswitchtampikan,
+                                padding: 0,
+                                activeIcon: Icon(PhosphorIcons.check,
+                                    color: primary500),
+                                inactiveIcon:
+                                    Icon(PhosphorIcons.x, color: bnw100),
+                                activeColor: primary500,
+                                inactiveColor: bnw100,
+                                borderRadius: 30,
+                                inactiveToggleColor: bnw900,
+                                activeToggleColor: primary200,
+                                activeSwitchBorder:
+                                    Border.all(color: primary500),
+                                inactiveSwitchBorder:
+                                    Border.all(color: bnw300, width: 2),
+                                onToggle: (val) {
+                                  setState(() {
+                                    List<String> listProduct = [productid];
+                                    onswitchtampikan = val;
+                                    onswitchtampikan
+                                        ? kasirAktif = "Aktif"
+                                        : kasirAktif = "Tidak Aktif";
+
+                                    // changeActive(
+                                    //   context,
+                                    //   widget.token,
+                                    //   onswitchtampikan.toString(),
+                                    //   listProduct,
+                                    //   widget.merchId,
+                                    // );
+                                    // log(kasirAktif);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: size12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GestureDetector(
+                      onTap: () {
+                        // print(idProduct);
+                        // print(singleProductId);
+                        List<String> listProduct = [productid];
+                        updateProduk(
+                          context,
+                          widget.token,
+                          conNameProdukEdit.text,
+                          widget.merchId,
+                          singleProductId,
+                          idProduct,
+                          conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                          _pageController,
+                          onswitchtampikan.toString(),
+                          onswitchppn.toString(),
+                        );
+
+                        initState();
+                        setState(() {});
+                      },
+                      child: buttonXL(
+                        Center(
+                          child: Text(
+                            'Simpan',
+                            style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                        ),
+                        MediaQuery.of(context).size.width,
+                      ),
+                    ),
+                  )
+                ],
+              );
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return Scaffold(
+              backgroundColor: bnw100,
+              body: SkeletonJustLine(),
+            );
+          }),
+    );
+  }
+
+  tambahProdukToko(StateSetter setState, BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setState) => Column(
+        children: [
+          Container(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    _pageController.previousPage(
+                        duration: Duration(milliseconds: 10),
+                        curve: Curves.ease);
+                    refreshTampilan();
+                  },
+                  child: Icon(
+                    PhosphorIcons.arrow_left,
+                    size: size48,
+                    color: bnw900,
+                  ),
+                ),
+                SizedBox(width: size16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tambah Produk',
+                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      'Produk akan ditambahkan kedalam Toko yang telah dipilih',
+                      style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: size16),
+          Expanded(
+            child: ListView(
+              physics: BouncingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                Text(
+                  'Foto Produk',
+                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size12),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => tambahGambar(context),
+                      child: Container(
+                        child: myImage != null
+                            ? Image.file(myImage!, fit: BoxFit.cover)
+                            : Icon(PhosphorIcons.plus, color: bnw900),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: bnw900),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        height: 80,
+                        width: 80,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                      style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () => tambahGambar(context),
+                  child: IntrinsicHeight(
+                    child: TextFormField(
+                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 1.5,
+                            color: bnw500,
+                          ),
+                        ),
+                        enabled: false,
+                        suffixIcon: Icon(
+                          PhosphorIcons.plus,
+                          color: bnw900,
+                        ),
+                        hintText: 'Tambah Gambar',
+                        hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+                fieldAddProduk(
+                  'Nama Produk',
+                  'Matcha Latte Cappuchino',
+                  conNameProduk,
+                  TextInputType.text,
+                ),
+                SizedBox(height: size16),
+                SizedBox(
+                  child: kategoriList(context),
+                ),
+                SizedBox(height: size16),
+                fieldAddProduk(
+                  'Harga',
+                  'Rp 12.000',
+                  conHarga,
+                  TextInputType.number,
+                ),
+                SizedBox(height: size16),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(
+                      () {
+                        onswitchppn = !onswitchppn;
+                        onswitchppn
+                            ? ppnAktif = "Aktif"
+                            : ppnAktif = "Tidak Aktif";
+                        // log(onswitchppn.toString());
+                        log(ppnAktif);
+                      },
+                    );
+                  },
+                  child: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'PPN',
+                              style:
+                                  heading2(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              ppnAktif,
+                              style:
+                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        FlutterSwitch(
+                          width: 52,
+                          height: 28,
+                          value: onswitchppn,
+                          padding: 0,
+                          activeIcon:
+                              Icon(PhosphorIcons.check, color: primary500),
+                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                          activeColor: primary500,
+                          inactiveColor: bnw100,
+                          borderRadius: 30,
+                          inactiveToggleColor: bnw900,
+                          activeToggleColor: primary200,
+                          activeSwitchBorder: Border.all(color: primary500),
+                          inactiveSwitchBorder:
+                              Border.all(color: bnw300, width: 2),
+                          onToggle: (val) {
+                            setState(
+                              () {
+                                onswitchppn = val;
+                                onswitchppn
+                                    ? ppnAktif = "Aktif"
+                                    : ppnAktif = "Tidak Aktif";
+                                log(onswitchppn.toString());
+                                log(ppnAktif);
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+                Container(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // log(kasirAktif);
+                      setState(() {
+                        onswitchtampikan = !onswitchtampikan;
+                        onswitchtampikan
+                            ? kasirAktif = "Aktif"
+                            : kasirAktif = "Tidak Aktif";
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Tampilkan Di Kasir',
+                                style:
+                                    heading2(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                              Text(
+                                kasirAktif,
+                                style:
+                                    heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FlutterSwitch(
+                          width: 52,
+                          height: 28,
+                          value: onswitchtampikan,
+                          padding: 0,
+                          activeIcon:
+                              Icon(PhosphorIcons.check, color: primary500),
+                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                          activeColor: primary500,
+                          inactiveColor: bnw100,
+                          borderRadius: 30,
+                          inactiveToggleColor: bnw900,
+                          activeToggleColor: primary200,
+                          activeSwitchBorder: Border.all(color: primary500),
+                          inactiveSwitchBorder:
+                              Border.all(color: bnw300, width: 2),
+                          onToggle: (val) {
+                            onswitchtampikan = val;
+                            onswitchtampikan
+                                ? kasirAktif = "Aktif"
+                                : kasirAktif = "Tidak Aktif";
+                            log(onswitchtampikan.toString());
+                            // log(kasirAktif);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: size16),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    List<String> value = [widget.merchId];
+                    createProduct(
+                      context,
+                      widget.token,
+                      conNameProduk.text,
+                      idProduct,
+                      onswitchppn.toString(),
+                      onswitchtampikan.toString(),
+                      conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                      img64.toString(),
+                      value,
+                      _pageController,
+                    );
+                    refreshDataProduk();
+                  },
+                  child: buttonXLoutline(
+                    Center(
+                      child: Text(
+                        'Simpan & Tambah Baru',
+                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ),
+                    MediaQuery.of(context).size.width,
+                    bnw300,
+                  ),
+                ),
+              ),
+              SizedBox(width: size16),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    print(idProduct);
+                    List<String> value = [widget.merchId];
+
+                    createProduct(
+                      context,
+                      widget.token,
+                      conNameProduk.text,
+                      idProduct,
+                      onswitchppn.toString(),
+                      onswitchtampikan.toString(),
+                      conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                      img64.toString(),
+                      value,
+                      _pageController,
+                    ).then((value) {
+                      if (value == '00') {
+                        _pageController.jumpToPage(0);
+                        conNameProduk.text = '';
+                        conHarga.text = '';
+                        idProduct = null;
+                        refreshDataProduk();
+                      }
+                    });
+                    initState();
+                    setState(() {});
+                  },
+                  child: buttonXL(
+                    Center(
+                      child: Text(
+                        'Tambah',
+                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                    ),
+                    MediaQuery.of(context).size.width,
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  pageProdukToko(bool isFalseAvailable) {
+    List<String> value = [widget.merchId];
+    return FutureBuilder(
+      future: getProductGrup(
+          context, widget.token, '', widget.merchId, textvalueOrderBy),
+      builder: (context, snapshot) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      widget.pageController.jumpToPage(0);
+                      refreshTampilan();
+                    },
+                    child: Icon(
+                      PhosphorIcons.arrow_left,
+                      size: size48,
+                      color: bnw900,
+                    ),
+                  ),
+                  SizedBox(width: size16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.name,
+                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                      ),
+                      Text(
+                        'Produk',
+                        style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(width: size16),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: (value) async {
+                          datasProduk = await getProductGrup(
+                              context,
+                              widget.token,
+                              value,
+                              widget.merchId,
+                              textvalueOrderBy);
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: size12),
+                          isDense: true,
+                          filled: true,
+                          fillColor: bnw200,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(size8),
+                            borderSide: BorderSide(
+                              color: bnw300,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(size8),
+                            borderSide: BorderSide(
+                              width: 2,
+                              color: primary500,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(size8),
+                            borderSide: BorderSide(
+                              color: bnw300,
+                            ),
+                          ),
+                          prefixIcon: Container(
+                            margin: EdgeInsets.only(left: 20, right: size12),
+                            child: Icon(
+                              PhosphorIcons.magnifying_glass,
+                              color: bnw900,
+                              size: 20,
+                            ),
+                          ),
+                          suffixIcon: searchController.text.isNotEmpty
+                              ? GestureDetector(
+                                  onTap: () {
+                                    searchController.text = '';
+                                    initState();
+                                  },
+                                  child: Icon(
+                                    PhosphorIcons.x_fill,
+                                    size: size24,
+                                    color: bnw900,
+                                  ),
+                                )
+                              : null,
+                          hintText: 'Cari nama produk',
+                          hintStyle:
+                              heading3(FontWeight.w500, bnw400, 'Outfit'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: size16),
+                    GestureDetector(
+                      onTap: () {
+                        _pageController.nextPage(
+                            duration: Duration(milliseconds: 10),
+                            curve: Curves.ease);
+                      },
+                      child: buttonXL(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(PhosphorIcons.plus, color: bnw100),
+                            SizedBox(width: size12),
+                            Text(
+                              'Produk',
+                              style:
+                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        130,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: size16),
+          orderBy(context),
+          SizedBox(height: size16),
+          Expanded(
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: primary500,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(size12),
+                      topRight: Radius.circular(size12),
+                    ),
+                  ),
+                  child: isSelectionMode == false
+                      ? Row(
+                          children: [
+                            SizedBox(
+                              child: GestureDetector(
+                                // onTap: _selectAll,
+                                child: SizedBox(
+                                  width: 50,
+                                  // child: Icon(
+                                  //   isFalseAvailable
+                                  //       ? PhosphorIcons.square
+                                  //       : PhosphorIcons.check_square_fill,
+                                  //   color: bnw100,
+                                  // ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                child: Text(
+                                  'Info Produk',
+                                  style: heading4(
+                                      FontWeight.w700, bnw100, 'Outfit'),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              flex: 2,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width / 10,
+                                child: Text(
+                                  'Kategori',
+                                  style: heading4(
+                                      FontWeight.w600, bnw100, 'Outfit'),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              flex: 2,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width / 8,
+                                child: Text(
+                                  'Harga',
+                                  style: heading4(
+                                      FontWeight.w600, bnw100, 'Outfit'),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width / 18,
+                                minWidth:
+                                    MediaQuery.of(context).size.width / 18,
+                              ),
+                              child: Text(
+                                'PPN',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width / size12,
+                                minWidth:
+                                    MediaQuery.of(context).size.width / size12,
+                              ),
+                              child: Text(
+                                'Tampil Kasir',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Container(width: 96),
+                            SizedBox(width: size16),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            SizedBox(
+                              width: 50,
+                            ),
+                            Text(
+                              '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
+                              style:
+                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                            SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                showBottomPilihan(
+                                  context,
+                                  Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Yakin Ingin Menghapus Produk?',
+                                            style: heading1(FontWeight.w600,
+                                                bnw900, 'Outfit'),
+                                          ),
+                                          SizedBox(height: size16),
+                                          Text(
+                                            'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                            style: heading2(FontWeight.w400,
+                                                bnw900, 'Outfit'),
+                                          ),
+                                          SizedBox(height: size16),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                deleteProduk(
+                                                  context,
+                                                  widget.token,
+                                                  listProduct,
+                                                  widget.merchId,
+                                                );
+                                                selectedFlag.clear();
+                                                listProduct.clear();
+                                                isSelectionMode = false;
+                                                listProduct = [];
+
+                                                initState();
+                                                setState(() {});
+                                              },
+                                              child: buttonXLoutline(
+                                                Center(
+                                                  child: Text(
+                                                    'Iya, Hapus',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        primary500,
+                                                        'Outfit'),
+                                                  ),
+                                                ),
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                primary500,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: size12),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: buttonXL(
+                                                Center(
+                                                  child: Text(
+                                                    'Batalkan',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw100,
+                                                        'Outfit'),
+                                                  ),
+                                                ),
+                                                MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              child: buttonL(
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(PhosphorIcons.trash_fill,
+                                        color: bnw900),
+                                    Text(
+                                      'Hapus Semua',
+                                      style: heading3(
+                                          FontWeight.w600, bnw900, 'Outfit'),
+                                    ),
+                                  ],
+                                ),
+                                bnw100,
+                                bnw300,
+                              ),
+                            ),
+                            SizedBox(width: size8),
+                            GestureDetector(
+                              onTap: () {
+                                changePpn(
+                                  context,
+                                  widget.token,
+                                  'false',
+                                  listProduct,
+                                  "",
+                                );
+
+                                setState(() {});
+                                initState();
+                              },
+                              child: buttonL(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Nonaktifkan PPN',
+                                      style: heading3(
+                                          FontWeight.w600, bnw900, 'Outfit'),
+                                    ),
+                                  ],
+                                ),
+                                bnw100,
+                                bnw300,
+                              ),
+                            ),
+                            SizedBox(width: size8),
+                            GestureDetector(
+                              onTap: () {
+                                changeActive(
+                                  context,
+                                  widget.token,
+                                  value.toString(),
+                                  listProduct,
+                                  "",
+                                );
+                                initState();
+                                setState(() {});
+                              },
+                              child: buttonL(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Aktifkan Tampilkan dikasir',
+                                      style: heading3(
+                                          FontWeight.w600, bnw900, 'Outfit'),
+                                    ),
+                                  ],
+                                ),
+                                bnw100,
+                                bnw300,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+                datasProduk == null
+                    ? SkeletonCardLine()
+                    : Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: primary100,
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(size12),
+                              bottomRight: Radius.circular(size12),
+                            ),
+                          ),
+                          child: RefreshIndicator(
+                            color: bnw100,
+                            backgroundColor: primary500,
+                            onRefresh: () async {
+                              initState();
+                              setState(() {});
+                            },
+                            child: ListView.builder(
+                              padding: EdgeInsets.only(top: size8),
+                              itemCount: datasProduk!.length,
+                              itemBuilder: (builder, index) {
+                                ModelDataProdukGrup data = datasProduk![index];
+                                selectedFlag[index] =
+                                    selectedFlag[index] ?? false;
+                                bool? isSelected = selectedFlag[index];
+                                final dataProduk = datasProduk![index];
+
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        InkWell(
+                                          // onTap: () => onTap(isSelected, index),
+                                          onTap: () {
+                                            onTap(
+                                              isSelected,
+                                              index,
+                                              dataProduk.productid,
+                                            );
+                                            // log(data.name.toString());
+                                            // print(dataProduk.isActive);
+
+                                            print(dataProduk.productid);
+                                          },
+                                          child: SizedBox(
+                                            width: 50,
+                                            child: _buildSelectIcon(
+                                                isSelected!, data),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Container(
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 60,
+                                                  height: 60,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: datasProduk![index]
+                                                                .productImage !=
+                                                            null
+                                                        ? Image.network(
+                                                            datasProduk![index]
+                                                                .productImage
+                                                                .toString(),
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder: (context,
+                                                                    error,
+                                                                    stackTrace) =>
+                                                                SizedBox(
+                                                              child: SvgPicture
+                                                                  .asset(
+                                                                      'assets/logoProduct.svg'),
+                                                            ),
+                                                          )
+                                                        : Icon(
+                                                            Icons.person,
+                                                            size: 60,
+                                                          ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: size16),
+                                                Flexible(
+                                                  child: Text(
+                                                    datasProduk![index].name ??
+                                                        '',
+                                                    style: heading4(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                    maxLines: 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  10,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  10,
+                                            ),
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                10,
+                                            child: Text(
+                                              '${datasProduk![index].typeproducts}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: heading4(FontWeight.w400,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                            ),
+                                            child: Text(
+                                              FormatCurrency.convertToIdr(
+                                                      datasProduk![index].price)
+                                                  .toString(),
+                                              // '${datasProduk![index].price}',
+                                              maxLines: 3,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: heading4(FontWeight.w400,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Container(
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                18,
+                                            minWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                18,
+                                          ),
+                                          child: FlutterSwitch(
+                                            padding: 1,
+                                            value: dataProduk.isPPN == 1
+                                                ? true
+                                                : false,
+                                            activeIcon: Icon(
+                                                PhosphorIcons.check,
+                                                color: primary500),
+                                            inactiveIcon: Icon(PhosphorIcons.x,
+                                                color: bnw100),
+                                            activeColor: primary500,
+                                            inactiveColor: bnw100,
+                                            borderRadius: 30,
+                                            width: 50,
+                                            height: 27,
+                                            inactiveToggleColor: bnw900,
+                                            activeToggleColor: primary200,
+                                            activeSwitchBorder:
+                                                Border.all(color: primary500),
+                                            inactiveSwitchBorder: Border.all(
+                                                color: bnw300, width: 2),
+                                            onToggle: (bool value) {
+                                              // print('hello');
+                                              List<String> listProduct = [
+                                                dataProduk.productid!
+                                              ];
+                                              changePpn(
+                                                context,
+                                                widget.token,
+                                                value.toString(),
+                                                listProduct,
+                                                widget.merchId,
+                                              );
+                                              initState();
+                                              setState(() {});
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Container(
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                size12,
+                                            minWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                size12,
+                                          ),
+                                          child: FlutterSwitch(
+                                            value: dataProduk.isActive == 1
+                                                ? true
+                                                : false,
+                                            padding: 1,
+                                            width: 50,
+                                            height: 27,
+                                            activeIcon: Icon(
+                                                PhosphorIcons.check,
+                                                color: primary500),
+                                            inactiveIcon: Icon(PhosphorIcons.x,
+                                                color: bnw100),
+                                            activeColor: primary500,
+                                            inactiveColor: bnw100,
+                                            borderRadius: 30,
+                                            inactiveToggleColor: bnw900,
+                                            activeToggleColor: primary200,
+                                            activeSwitchBorder:
+                                                Border.all(color: primary500),
+                                            inactiveSwitchBorder: Border.all(
+                                                color: bnw300, width: 2),
+                                            onToggle: (bool value) {
+                                              // print('hello');
+                                              List<String> listProduct = [
+                                                dataProduk.productid!
+                                              ];
+                                              changeActive(
+                                                context,
+                                                widget.token,
+                                                value.toString(),
+                                                listProduct,
+                                                widget.merchId,
+                                              );
+                                              initState();
+                                              setState(() {});
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        SizedBox(
+                                          width: 96,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                showModalBottomDropdownAtur(
+                                                  context,
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      2.8,
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsets.all(size32),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          child: Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    dataProduk
+                                                                        .name!,
+                                                                    style: heading2(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                  Text(
+                                                                    dataProduk
+                                                                        .typeproducts!,
+                                                                    style: heading4(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () =>
+                                                                    Navigator.pop(
+                                                                        context),
+                                                                child: Icon(
+                                                                  PhosphorIcons
+                                                                      .x_fill,
+                                                                  color: bnw900,
+                                                                  size: size32,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                            height: size16),
+                                                        GestureDetector(
+                                                          behavior:
+                                                              HitTestBehavior
+                                                                  .translucent,
+                                                          onTap: () {
+                                                            _pageController
+                                                                .jumpToPage(2);
+                                                            Navigator.pop(
+                                                                context);
+
+                                                            singleProductId =
+                                                                dataProduk
+                                                                    .productid;
+
+                                                            conHargaEdit.text =
+                                                                dataProduk.price
+                                                                    .toString();
+
+                                                            jenisProductEdit =
+                                                                dataProduk
+                                                                    .kodeProduct!;
+
+                                                            onswitchtampikan =
+                                                                dataProduk.isActive ==
+                                                                        1
+                                                                    ? true
+                                                                    : false;
+
+                                                            onswitchppn =
+                                                                dataProduk.isPPN ==
+                                                                        1
+                                                                    ? true
+                                                                    : false;
+
+                                                            idProduct =
+                                                                jenisProductEdit;
+
+                                                            print(
+                                                                singleProductId);
+                                                            setState(() {});
+                                                          },
+                                                          child:
+                                                              modalBottomValue(
+                                                            'Ubah Produk',
+                                                            PhosphorIcons
+                                                                .pencil_line,
+                                                          ),
+                                                        ),
+                                                        GestureDetector(
+                                                          behavior:
+                                                              HitTestBehavior
+                                                                  .translucent,
+                                                          onTap: () {
+                                                            // List<String>
+                                                            //     listProduct = [
+                                                            //   dataProduk.productid!
+                                                            // ];
+                                                            // List<String> value = [
+                                                            //   ''
+                                                            // ];
+                                                            // deleteProduk(
+                                                            //   context,
+                                                            //   widget.token,
+                                                            //   listProduct,
+                                                            //   widget.merchId,
+                                                            // );
+
+                                                            Navigator.pop(
+                                                                context);
+                                                            showBottomPilihan(
+                                                              context,
+                                                              Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                children: [
+                                                                  Column(
+                                                                    children: [
+                                                                      Text(
+                                                                        'Yakin Ingin Menghapus Produk',
+                                                                        style: heading1(
+                                                                            FontWeight.w600,
+                                                                            bnw900,
+                                                                            'Outfit'),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          height:
+                                                                              size16),
+                                                                      Text(
+                                                                        'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                                                        style: heading2(
+                                                                            FontWeight.w400,
+                                                                            bnw900,
+                                                                            'Outfit'),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          height:
+                                                                              size16),
+                                                                    ],
+                                                                  ),
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceAround,
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            List<String>
+                                                                                listProduct =
+                                                                                [
+                                                                              dataProduk.productid!
+                                                                            ];
+                                                                            List<String>
+                                                                                value =
+                                                                                [
+                                                                              ''
+                                                                            ];
+                                                                            deleteProduk(
+                                                                              context,
+                                                                              widget.token,
+                                                                              listProduct,
+                                                                              widget.merchId,
+                                                                            );
+
+                                                                            initState();
+                                                                            setState(() {});
+                                                                          },
+                                                                          child:
+                                                                              buttonXLoutline(
+                                                                            Center(
+                                                                              child: Text(
+                                                                                'Iya, Hapus',
+                                                                                style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                              ),
+                                                                            ),
+                                                                            MediaQuery.of(context).size.width /
+                                                                                36,
+                                                                            primary500,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          width:
+                                                                              size16),
+                                                                      Expanded(
+                                                                        
+                                                                        child:
+                                                                            GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            Navigator.pop(context);
+                                                                          },
+                                                                          child:
+                                                                              buttonXL(
+                                                                            Center(
+                                                                              child: Text(
+                                                                                'Batalkan',
+                                                                                style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                              ),
+                                                                            ),
+                                                                            MediaQuery.of(context).size.width /
+                                                                                36,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+
+                                                            // initState();
+                                                            // Navigator.pop(context);
+                                                            setState(() {});
+                                                          },
+                                                          child:
+                                                              modalBottomValue(
+                                                            'Hapus Produk',
+                                                            PhosphorIcons.trash,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              });
+                                            },
+                                            child: buttonL(
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    PhosphorIcons
+                                                        .pencil_line_fill,
+                                                    size: 24,
+                                                  ),
+                                                  SizedBox(width: size12),
+                                                  Text(
+                                                    'Atur',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                ],
+                                              ),
+                                              bnw100,
+                                              bnw300,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                      ],
+                                    ),
+                                    Divider(thickness: 1.2)
+                                  ],
+                                );
+                              },
+                              // itemCount: staticData!.length,
+                            ),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  modalBottomValue(String title, icon) {
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(vertical: size16),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: bnw300,
+                width: 1,
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, color: bnw900),
+              SizedBox(width: size16),
+              Text(
+                title,
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+              )
+            ],
+          ),
+        ),
+        // Divider(color: bnw300)
+      ],
+    );
+  }
+
+  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: body1(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+              Text(
+                ' *',
+                style: body1(FontWeight.w700, red500, 'Outfit'),
+              ),
+            ],
+          ),
+          TextFormField(
+            keyboardType: numberNo,
+            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+            controller: mycontroller,
+            onChanged: (value) {},
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(vertical: size12),
+              isDense: true,
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 1.5,
+                  color: bnw500,
+                ),
+              ),
+              hintText: 'Cth : $hint',
+              hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  fieldEditProduk(title, mycontroller, TextInputType numberNo) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: body1(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+              Text(
+                ' *',
+                style: body1(FontWeight.w700, red500, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: TextFormField(
+              keyboardType: numberNo,
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              controller: mycontroller,
+              onSaved: (value) {
+                mycontroller.text = value;
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
+                isDense: true,
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: bnw500,
+                  ),
+                ),
+                hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void onTap(bool isSelected, int index, productId) {
+    if (index >= 0 && index < selectedFlag.length) {
+      selectedFlag[index] = !isSelected;
+      isSelectionMode = selectedFlag.containsValue(true);
+
+      if (selectedFlag[index] == true) {
+        // Periksa apakah productId sudah ada di dalam listProduct sebelum menambahkannya
+        if (!listProduct.contains(productId)) {
+          listProduct.add(productId);
+        }
+      } else {
+        // Hapus productId dari listProduct jika sudah ada
+        listProduct.remove(productId);
+      }
+
+      setState(() {});
+    }
+  }
+
+  void onLongPress(bool isSelected, int index) {
+    setState(() {
+      selectedFlag[index] = !isSelected;
+      isSelectionMode = selectedFlag.containsValue(true);
+    });
+  }
+
+  Widget _buildSelectIcon(bool isSelected, ModelDataProdukGrup data) {
+    return Icon(
+      isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
+      color: primary500,
+    );
+    // if (isSelectionMode) {
+    // } else {
+    //   return CircleAvatar(
+    //     child: Text('${data['id']}'),
+    //   );
+    // }
+  }
+
+  void _selectAll() {
+    bool isFalseAvailable = selectedFlag.containsValue(false);
+    // If false will be available then it will select all the checkbox
+    // If there will be no false then it will de-select all
+    selectedFlag.updateAll((key, value) => isFalseAvailable);
+    setState(() {
+      isSelectionMode = selectedFlag.containsValue(true);
+    });
+  }
+
+  kategoriList(BuildContext context) {
+    bool isKeyboardActive = false;
+
+    return GestureDetector(
+      onTap: () {
+        setState(
+          () {
+            // log(jenisProduct.toString());
+            showModalBottomSheet(
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(size24),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) =>
+                      FractionallySizedBox(
+                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    child: GestureDetector(
+                      onTap: () => textFieldFocusNode.unfocus(),
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                        // height: MediaQuery.of(context).size.height / 1,
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(left: size12, right: size12),
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.all(size8),
+                                height: 4,
+                                width: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  color: bnw300,
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    size8, size16, size8, size16),
+                                child: FocusScope(
+                                  child: Focus(
+                                    onFocusChange: (value) {
+                                      isKeyboardActive = value;
+                                      setState(() {});
+                                    },
+                                    child: TextField(
+                                      controller: searchController,
+                                      focusNode: textFieldFocusNode,
+                                      onChanged: (value) {
+                                        //   isKeyboardActive = value.isNotEmpty;
+                                        _runSearchProduct(value);
+                                        setState(() {});
+                                      },
+                                      decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          isDense: true,
+                                          filled: true,
+                                          fillColor: bnw200,
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                            borderSide: BorderSide(
+                                              color: bnw300,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                            borderSide: BorderSide(
+                                              width: 2,
+                                              color: primary500,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                            borderSide: BorderSide(
+                                              color: bnw300,
+                                            ),
+                                          ),
+                                          suffixIcon: searchController
+                                                  .text.isNotEmpty
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    searchController.text = '';
+                                                    _runSearchProduct('');
+                                                    setState(() {});
+                                                  },
+                                                  child: Icon(
+                                                    PhosphorIcons.x_fill,
+                                                    size: 20,
+                                                    color: bnw900,
+                                                  ),
+                                                )
+                                              : null,
+                                          prefixIcon: Icon(
+                                            PhosphorIcons.magnifying_glass,
+                                            color: bnw500,
+                                          ),
+                                          hintText: 'Cari',
+                                          hintStyle: heading3(FontWeight.w500,
+                                              bnw500, 'Outfit')),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: searchResultListProduct?.length,
+                                  itemBuilder: (context, index) {
+                                    final product =
+                                        searchResultListProduct?[index];
+                                    final isSelected =
+                                        product == selectedProduct;
+
+                                    return Column(
+                                      children: [
+                                        ListTile(
+                                          title: Text(capitalizeEachWord(
+                                              product['jenisproduct']
+                                                  .toString())),
+                                          trailing: Icon(
+                                            isSelected
+                                                ? PhosphorIcons
+                                                    .radio_button_fill
+                                                : PhosphorIcons.radio_button,
+                                            color: isSelected
+                                                ? primary500
+                                                : bnw900,
+                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              textFieldFocusNode.unfocus();
+                                              jenisProductEdit =
+                                                  product['jenisproduct'];
+
+                                              jenisProduct =
+                                                  product['jenisproduct'];
+
+                                              idProduct =
+                                                  product['kodeproduct'];
+
+                                              _selectProduct(product);
+
+                                              print(product['jenisproduct']);
+                                            });
+                                          },
+                                        ),
+                                        Divider(color: bnw300),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  autoReload();
+                                  Navigator.pop(context);
+                                },
+                                child: buttonXXL(
+                                  Center(
+                                    child: Text(
+                                      'Selesai',
+                                      style: heading2(
+                                          FontWeight.w600, bnw100, 'Outfit'),
+                                    ),
+                                  ),
+                                  double.infinity,
+                                ),
+                              ),
+                              SizedBox(height: size8)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: bnw100,
+          border: Border(
+            bottom: BorderSide(
+              width: 1.5,
+              color: bnw500,
+            ),
+          ),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Kategori',
+                    style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    ' *',
+                    style: heading4(FontWeight.w400, red500, 'Outfit'),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: size12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      jenisProductEdit.isEmpty
+                          ? 'Pilih Kategori'
+                          : capitalizeEachWord(jenisProductEdit.toString()),
+                      style: heading2(FontWeight.w600,
+                          jenisProductEdit.isEmpty ? bnw500 : bnw900, 'Outfit'),
+                    ),
+                    Icon(
+                      PhosphorIcons.caret_down,
+                      color: bnw900,
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List? typeproductList;
+  List<dynamic>? searchResultListProduct;
+
+  dynamic selectedProduct;
+  bool isItemSelected = false;
+
+  String provinceInfoUrl = '$url/api/typeproduct';
+  Future _getProductList() async {
+    await http.post(Uri.parse(provinceInfoUrl), body: {
+      "deviceid": identifier,
+    }).then((response) {
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data != null && data['data'] != null) {
+          setState(() {
+            typeproductList = List<dynamic>.from(data['data']);
+            searchResultListProduct = typeproductList;
+          });
+        }
+      }
+    });
+  }
+
+  void _runSearchProduct(String searchText) {
+    setState(() {
+      searchResultListProduct = typeproductList
+          ?.where((product) => product
+              .toString()
+              .toLowerCase()
+              .contains(searchText.toLowerCase()))
+          .toList();
+    });
+  }
+
+  void _selectProduct(dynamic product) {
+    setState(() {
+      selectedProduct = product;
+      isItemSelected = true;
+    });
+  }
+
+  orderBy(BuildContext context) {
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showModalBottomSheet(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit'),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByProductText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color:
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                          ),
+                                          label: Text(orderByProductText[index],
+                                              style: heading4(
+                                                  FontWeight.w400,
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit')),
+                                          selected:
+                                              valueOrderByProduct == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByProduct = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () {
+                                print(valueOrderByProduct);
+                                print(orderByProductText[valueOrderByProduct]);
+
+                                textOrderBy =
+                                    orderByProductText[valueOrderByProduct];
+                                textvalueOrderBy =
+                                    orderByProduct[valueOrderByProduct];
+                                Navigator.pop(context);
+                                initState();
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                        FontWeight.w600, bnw100, 'Outfit'),
+                                  ),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          });
+        },
+        child: buttonLoutline(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Urutkan',
+                style: heading3(
+                  FontWeight.w600,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              Text(
+                ' dari $textOrderBy',
+                style: heading3(
+                  FontWeight.w400,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              SizedBox(width: size12),
+              Icon(
+                PhosphorIcons.caret_down,
+                color: bnw900,
+                size: size24,
+              )
+            ],
+          ),
+          bnw300,
+        ),
+      ),
+    );
+  }
+
+  tambahGambar(BuildContext context) async {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) => IntrinsicHeight(
+        child: Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(size8),
+              topLeft: Radius.circular(size8),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                myImage != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(120),
+                        child: Container(
+                            height: 200,
+                            width: 200,
+                            color: bnw400,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(size8),
+                              child: Image.file(
+                                myImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )),
+                      )
+                    : Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(120),
+                          // border: Border.all(),
+                        ),
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(120),
+                            child: Icon(PhosphorIcons.plus_fill)),
+                      ),
+                SizedBox(height: size16),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await getImage();
+                        Navigator.pop(context);
+                      },
+                      child: SizedBox(
+                        child: TextFormField(
+                          enabled: false,
+                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          decoration: InputDecoration(
+                              focusColor: primary500,
+                              prefixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Foto',
+                              hintStyle:
+                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                        ),
+                      ),
+                    ),
+                    myImage != null
+                        ? GestureDetector(
+                            onTap: () async {
+                              img64 = null;
+                              myImage = null;
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: SizedBox(
+                              child: TextFormField(
+                                enabled: false,
+                                style:
+                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                decoration: InputDecoration(
+                                  focusColor: primary500,
+                                  prefixIcon: Icon(
+                                    PhosphorIcons.trash,
+                                    color: bnw900,
+                                  ),
+                                  hintText: 'Hapus Foto',
+                                  hintStyle: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

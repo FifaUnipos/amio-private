@@ -1,0 +1,2716 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:isolate';
+import 'package:amio/main.dart';
+import 'package:amio/models/lihatakunmodel.dart';
+import 'package:amio/models/produkmodel.dart';
+import 'package:amio/models/tokoModel/calculateCart.dart';
+import 'package:amio/models/tokoModel/riwayatTransaksiTokoModel.dart';
+import 'package:amio/models/tokoModel/singletokomodel.dart';
+import 'package:amio/models/tokoModel/tokomodel.dart';
+import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/chartModelData.dart';
+import '../models/dashboardItemModel.dart';
+import '../models/dropdowntokomodel.dart';
+import '../models/pelangganDataModel.dart';
+import '../models/promosiModel.dart';
+import '../models/tokoModel/keuanganModel.dart';
+import '../models/tokoModel/rekonModel.dart';
+import '../models/tokoModel/singleRiwayatModel.dart';
+import '../models/tokomodel.dart';
+import '../pageTablet/home/sidebar/profile_page.dart';
+import '../pageTablet/tokopage/dashboardtoko.dart';
+import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import '../utils/component.dart';
+import '../utils/providerModel/refreshTampilanModel.dart';
+
+String url = 'https://api.prod.amio.my.id';
+// String url = 'https://api.prod.smartlms.my.id/public';
+
+String registerbyotp = '$url/api/user/registerbyotp',
+    registerentryotp = '$url/api/user/registerentryotp',
+    loginbyotp = '$url/api/user/loginbyotp',
+    loginentryotp = '$url/api/user/loginentryotp',
+    checkpass = '$url/api/user/checkPassword',
+    myaccout = '$url/api/profile/myaccount',
+    dashboardNumber = '$url/api/user/dashboardNumber',
+    dashboardChart = '$url/api/user/dashboardChart',
+    createMerchan = '$url/api/merchant/create',
+    createProdukUrl = '$url/api/product/create',
+    createVoucherUrl = '$url/api/voucher/create',
+    updateVoucherUrl = '$url/api/voucher/update',
+    createTransaksiUrl = '$url/api/transaction/create',
+    deleteTransaksiUrl = '$url/api/transaction/delete',
+    headerTagihanUrl = '$url/api/transaction/create/reference/tagihan',
+    deleteTagihanUrl = '$url/api/transaction/delete/reference/tagihan',
+    getTransaksiRiwayatUrl = '$url/api/transaction/',
+    getPendapatanUrl = '$url/api/ppm/get',
+    getRekonUrl = '$url/api/rekon/',
+    getYearRekonUrl = '$url/api/rekon/year',
+    getMonthRekonUrl = '$url/api/rekon/month',
+    getTransaksiSingleRiwayatUrl = '$url/api/transaction/receipt',
+    calculateTransaksiUrl = '$url/api/transaction/calculating',
+    updateAkunUrl = '$url/api/user/update',
+    deleteAkunUrl = '$url/api/user/delete',
+    deleteMerchan = '$url/api/merchant/delete',
+    deleteProdukUrl = '$url/api/product/delete',
+    deletePelangganUrl = '$url/api/member/delete',
+    createPelangganUrl = '$url/api/member/create',
+    createPemasukanUrl = '$url/api/ppm/create',
+    ubahPemasukanUrl = '$url/api/ppm/update',
+    editPelangganUrl = '$url/api/member/edit',
+    changeProfileName = '$url/api/profile/change',
+    changeImage = '$url/api/profile/upload/image',
+    changeProfilePhone = '$url/api/profile/changephonenumber',
+    changeProfilePhoneOtp = '$url/api/profile/changenumberentryotp',
+    getMerch = '$url/api/merchant',
+    getSingleProductUrl = '$url/api/product/single',
+    getSinglePromosiUrl = '$url/api/voucher/single',
+    getSingleAkunUrl = '$url/api/user/single',
+    getProductUrl = '$url/api/product',
+    getVoucherUrl = '$url/api/voucher',
+    getPelanggantUrl = '$url/api/member/',
+    getAllAkun = '$url/api/merchant/account',
+    getSingleMerchant = '$url/api/merchant/single',
+    checkEmailVerified = '$url/api/user/isEmailVerified',
+    verifiedEmailLink = '$url/api/user/email/verfied',
+    verifiedEmailOtpLink = '$url/api/user/email/verfied/otp',
+    registerGlobalMerchbyOtp = '$url/api/register/single',
+    registerGlobalMerchEntry = '$url/api/register/single/entry',
+    updateMerchant = '$url/api/merchant/update',
+    updateProdukUrl = '$url/api/product/update',
+    changeActiveUrl = '$url/api/product/changeActive',
+    changePpnUrl = '$url/api/product/changePPN',
+    laporanDailyUrl = '$url/api/report/income/daily',
+    laporanMerchUrl = '$url/api/report/income/merchant',
+    laporanProdukUrl = '$url/api/report/income/product',
+    uploadQrisLink = '$url/api/transaction/save/qris',
+    transaksiViewReferenceLink = '$url/api/transaction/view/reference',
+    getQrisLink = '$url/api/transaction/view/qris',
+    uploadStrukLink = '$url/api/transaction/save/image/struk',
+    getStrukLink = '$url/api/transaction/view/image/struk',
+    getOtpSandiLink = '$url/api/user/password/otp',
+    validasiOtpSandiLink = '$url/api/user/password/otp/verified',
+    changeSandiLink = '$url/api/user/password/change',
+    valOtpEmailLink = '$url/api/user/email/otp',
+    valOtpEmailTahap1Link = '$url/api/user/email/otp/verified',
+    changeEmailLink = '$url/api/user/email/change',
+    changeEmailTahap2Link = '$url/api/user/email/change/verified',
+    tipeUsaha = '$url/api/tipeusaha';
+
+String out = '$url/api/logout';
+String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
+
+const background = Color(0xFF1363DF);
+const primaryColor = Color(0xFF1363DF);
+const canvasColor = Colors.white;
+
+const scaffoldBackgroundColor = Color(0xFFF5F5F5);
+// const accentCanvasColor = Color(0xFF3E3E61);
+const white = Colors.white;
+
+final divider = Divider(
+  color: bnw100,
+  thickness: 8,
+);
+
+Future firebaseToken(tokenFirebase, token) async {
+  try {
+    var response = await Dio().post(
+      firebaseTokenUrl,
+      data: {
+        'deviceid': identifier,
+        'token': tokenFirebase,
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      log('berhasil mengupload firebase token');
+    } else {
+      log('gagal mengupload firebase token');
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future logout(token, id, context, page) async {
+  try {
+    var response = await Dio().post(
+      out,
+      data: {
+        'deviceid': id.toString(),
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram");
+      print(response.data['token']);
+
+      
+
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => page,
+      //   ),
+      // );
+    } else {}
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+//* profile *//
+var nameProfile,
+    nameToko,
+    statusProfile,
+    emailProfile,
+    phoneProfile,
+    imageProfile;
+
+Future myprofile(token) async {
+  try {
+    var response = await Dio().post(
+      myaccout,
+      data: {
+        'deviceid': identifier,
+      },
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram di profile");
+      var responseValue = response.data['data'];
+
+      print(responseValue);
+      nameProfile = responseValue['fullname'];
+      nameToko = responseValue['nama_toko'];
+      statusProfile = responseValue['usertype'];
+      emailProfile = responseValue['email'];
+      phoneProfile = responseValue['phonenumber'];
+      imageProfile = responseValue['account_image'];
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changeName(token, id, context, mycontroller) async {
+  try {
+    final response = await http.post(
+      Uri.parse(changeProfileName),
+      body: {
+        'fullname': mycontroller,
+        'deviceid': id.toString(),
+      },
+      headers: {
+        'token': token,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      log("succes aman tentram");
+
+      Navigator.pop(context);
+      showSnackbar(context, jsonResponse);
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changePhoneByOtp(token, context, mycontroller, password) async {
+  try {
+    var response = await Dio().post(
+      changeProfilePhone,
+      data: {
+        "deviceid": identifier,
+        "phonenumber": mycontroller,
+        "password": password,
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram");
+      print(response.data);
+
+      Navigator.pop(context);
+    } else {
+      print(response.data['message']);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changePhoneEntryOtp(token, id, context, fieldController, pin) async {
+  try {
+    var response = await Dio().post(
+      changeProfilePhoneOtp,
+      data: {
+        'phonenumber': fieldController.text,
+        'otp': pin,
+        'deviceid': id.toString(),
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram");
+
+      Navigator.pop(context);
+    } else {}
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+int? getAllMerch;
+
+Future<List?> getMerchant(token, id, context) async {
+  try {
+    var response = await Dio().post(
+      getMerch,
+      data: {
+        'deviceid': id.toString(),
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+    int? responseLength = response.data?.length;
+    getAllMerch = responseLength;
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram di toko");
+
+      // print(categoriesList);
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+int emailChecker = 0;
+var statusVerified, statusPw;
+Future checkEmail(token, setState) async {
+  try {
+    var response = await Dio().post(
+      checkEmailVerified,
+      data: {
+        'email': emailProfile,
+        'deviceid': identifier,
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram check email");
+
+      statusVerified = response.data['data'].toString();
+      statusPw = response.data['data'].toString();
+
+      setState(() {});
+    } else {}
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future valOtpEmail(context, token, typeotp) async {
+  try {
+    var response = await Dio().post(
+      valOtpEmailLink,
+      data: {
+        'deviceid': identifier,
+        'typeotp': typeotp,
+      },
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram kirim otp : $typeotp");
+
+      print(response.data["data"]);
+    } else {}
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future valOtpEmailtahap1(context, token, typeotp, otp) async {
+  var response = await http.post(
+    Uri.parse(valOtpEmailTahap1Link),
+    body: {
+      'deviceid': identifier,
+      'otp': otp,
+      'typeotp': typeotp,
+    },
+    headers: {
+      "token": token,
+    },
+  );
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print("succes aman tentram validasi otp : $typeotp");
+
+    print(jsonResponse['data']);
+  } else {
+    // showSnackbar(context, jsonResponse);
+    errorText = jsonResponse['message'];
+  }
+  return jsonResponse['rc'];
+}
+
+Future changeEmail(context, token, email, typeotp) async {
+  try {
+    var response = await Dio().post(
+      changeEmailLink,
+      data: {
+        "deviceid": identifier,
+        "email": email,
+        "typeotp": typeotp,
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print(response.data["data"]);
+    } else {}
+    return response.data['rc'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changeEmailtahap2(context, token, typeotp, otp) async {
+  var response = await http.post(
+    Uri.parse(changeEmailTahap2Link),
+    body: {
+      'deviceid': identifier,
+      'otp': otp,
+      'typeotp': typeotp,
+    },
+    headers: {
+      "token": token,
+    },
+  );
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print(jsonResponse['data']);
+    Navigator.pop(context);
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+  } else {
+    // showSnackbar(context, jsonResponse);
+    errorText = jsonResponse['message'];
+  }
+  return jsonResponse['rc'];
+}
+
+Future changePhoto(token, id, context, imageCon, reload) async {
+  try {
+    var response = await Dio().post(
+      changeImage,
+      data: {
+        'deviceid': id.toString(),
+        'image': "data:image/png;base64," + imageCon.toString(),
+      },
+      options: Options(
+        headers: {
+          "token": "$token",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("succes aman tentram upload image");
+      print(response.data);
+      // myprofile(token);
+      Navigator.pop(context);
+      showSnackbar(context, response.data);
+    } else {}
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future getAllToko(context, token, name, orderby) async {
+  final response = await http.post(
+    Uri.parse(getMerch),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "name": name,
+      "address": "",
+      "orderby": orderby,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<ModelDataToko> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = ModelDataToko.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  }
+}
+
+Future<TokoModelToko> getToko(token) async {
+  final response = await http.post(
+    Uri.parse(getMerch),
+    // Uri.parse('$url/api/groupmerchant/user'),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return TokoModelToko.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load album');
+  }
+}
+
+Future getUserAkun(token, id, orderby) async {
+  final response = await http.post(
+    Uri.parse(getAllAkun),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": id,
+      'orderby': orderby,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<ModelDataAkun> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = ModelDataAkun.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  }
+}
+
+late String nameMerchantUbah,
+    addressMerchantUbah,
+    zipMerchantUbah,
+    nameProvUbah,
+    kodeProvUbah,
+    nameregUbah,
+    kodeRegUbah,
+    nameDisUbah,
+    kodeDisUbah,
+    nameVillageUbah,
+    kodeVillageUbah,
+    zipcodeUbah,
+    tipeUbah,
+    idtipeUbah,
+    logoMerchantUbah;
+
+Future getSingleMerch(context, token, String merchid) async {
+  final response = await http.post(
+    Uri.parse(getSingleMerchant),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  var data = jsonResponse['data'];
+
+  if (response.statusCode == 200) {
+    nameMerchantUbah = data['name'];
+    addressMerchantUbah = data['address'];
+    zipMerchantUbah = data['zipcode'];
+    nameProvUbah = data['nama_province'];
+    kodeProvUbah = data['kode_province'];
+    nameregUbah = data['nama_regencies'];
+    kodeRegUbah = data['kode_regencies'];
+    nameDisUbah = data['nama_district'];
+    kodeDisUbah = data['kode_district'];
+    nameVillageUbah = data['nama_village'];
+    kodeVillageUbah = data['kode_village'];
+    zipcodeUbah = data['zipcode'];
+    tipeUbah = data['nama_tipe_usaha'];
+    idtipeUbah = data['tipeusaha'];
+    logoMerchantUbah = data['logomerchant_url'];
+
+    return jsonResponse;
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future createMerch(
+  context,
+  token,
+  String nameMerch,
+  address,
+  province,
+  regencies,
+  district,
+  village,
+  zipcode,
+  image,
+  PageController pageController,
+  businesstype,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(createMerchan),
+      body: {
+        "deviceid": identifier,
+        "merchantid": "",
+        "fullname": "",
+        "userid": "",
+        "usertype": "",
+        "phonenumber": "",
+        "email": "",
+        "namemerchant": nameMerch,
+        "address": address,
+        "province": province,
+        "regencies": regencies,
+        "district": district,
+        "village": village,
+        "zipcode": zipcode,
+        "businesstype": businesstype,
+        "logomerchant_url": "data:image/png;base64,$image"
+      },
+      headers: {
+        "token": "$token",
+      },
+    );
+    // log(response.data['rc']);
+
+    var jsonResponse = jsonDecode(response.body);
+    // print(jsonResponse['rc']);
+
+    if (response.statusCode == 200) {
+      // log("succes aman tentram");
+      // print(response.data['data']);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return jsonResponse['message'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future createAkun(
+  context,
+  token,
+  String merchId,
+  fullName,
+  phoneNumber,
+  email,
+  nameMerchant,
+  address,
+  province,
+  regencies,
+  district,
+  village,
+  zipcode,
+  String image,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(createMerchan),
+      body: {
+        "deviceid": identifier,
+        "merchantid": merchId,
+        "fullname": fullName,
+        "usertype": "Merchant",
+        "role": "user",
+        "phonenumber": phoneNumber,
+        "email": email,
+        "namemerchant": nameMerchant,
+        "address": address,
+        "province": province,
+        "regencies": regencies,
+        "district": district,
+        "village": village,
+        "zipcode": zipcode,
+        "businesstype": "Car Wash",
+        "status": "0",
+        "image": "data:image/png;base64,$image"
+      },
+      headers: {
+        "token": "$token",
+      },
+    );
+    // log(response.data['rc']);
+
+    var jsonResponse = jsonDecode(response.body);
+    // print(jsonResponse['rc']);
+
+    if (response.statusCode == 200) {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return jsonResponse['message'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future updateAkun(
+  context,
+  token,
+  String userId,
+  fullName,
+  email,
+  phonenumber,
+  String image,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(updateAkunUrl),
+      body: {
+        "deviceid": identifier,
+        "userid": userId,
+        "fullname": fullName,
+        "email": email,
+        "phonenumber": phonenumber,
+        "image": "data:image/png;base64,$image"
+      },
+      headers: {
+        "token": "$token",
+      },
+    );
+    // log(response.data['rc']);
+
+    var jsonResponse = jsonDecode(response.body);
+    // print(jsonResponse['rc']);
+
+    if (response.statusCode == 200) {
+      log("succes aman tentram");
+      // print(response.data['data']);
+
+      return jsonResponse['rc'];
+    } else {}
+    return jsonResponse;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future updateMerch(
+  context,
+  token,
+  merchid,
+  String nameMerch,
+  address,
+  province,
+  regencies,
+  district,
+  village,
+  zipcode,
+  image,
+  PageController pageController,
+  type,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(updateMerchant),
+      body: {
+        "deviceid": identifier,
+        "merchantid": merchid,
+        "name": nameMerch,
+        "userid": "",
+        "usertype": "",
+        "phonenumber": "",
+        "email": "",
+        "namemerchant": nameMerch,
+        "address": address,
+        "province": province,
+        "regencies": regencies,
+        "district": district,
+        "village": village,
+        "zipcode": zipcode,
+        "businesstype": type,
+        "logomerchant_url": "data:image/png;base64,$image"
+      },
+      headers: {
+        "token": "$token",
+      },
+    );
+    // log(response.data['rc']);
+
+    var jsonResponse = jsonDecode(response.body);
+    // print(jsonResponse['rc']);
+
+    if (response.statusCode == 200) {
+      log("Succes Update Merchant");
+      // print(response.data['data']);
+      pageController.jumpTo(0);
+      showSnackbar(context, jsonResponse);
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future updateProduk(
+  context,
+  token,
+  name,
+  merchid,
+  productid,
+  typeproducts,
+  price,
+  PageController pageController,
+  isActive,
+  isPPN,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(updateProdukUrl),
+      body: {
+        "deviceid": identifier,
+        "productid": productid,
+        "name": name,
+        "typeproducts": typeproducts,
+        "merchantid": merchid,
+        "price": price,
+        "isActive": isActive,
+        "isPPN": isPPN,
+      },
+      headers: {
+        "token": "$token",
+      },
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      log("succes aman tentram");
+      showSnackbar(context, jsonResponse);
+      print(jsonResponse['data']);
+      pageController.jumpTo(0);
+    } else {
+      log(jsonResponse['rc']);
+      dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future deleteMerchant(
+  BuildContext context,
+  var token,
+  List<String> merchid,
+) async {
+  final String jsonTest = json.encode(merchid);
+
+  final response = await http.post(
+    Uri.parse(deleteMerchan),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    errorText = jsonResponse['message'];
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future deleteAkun(
+  BuildContext context,
+  token,
+  List userid,
+) async {
+  final String jsonTest = json.encode(userid);
+
+  final response = await http.post(
+    Uri.parse(deleteAkunUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "userid": jsonTest,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // log('Sukses Delete Data');
+    log(jsonResponse['data'].toString());
+    Navigator.pop(context);
+    return jsonResponse['rc'];
+  } else {
+    log(jsonResponse['message'].toString());
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future deleteProduk(
+  BuildContext context,
+  var token,
+  List productid,
+  merchid,
+) async {
+  String jsonData = jsonEncode(productid);
+
+  final response = await http.post(
+    Uri.parse(deleteProdukUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      'productid': jsonData,
+      // 'productid': jsonEncode(productid),
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Delete Data');
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+    log(jsonResponse['data'].toString());
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future deletePelanggan(
+  BuildContext context,
+  var token,
+  List memberid,
+) async {
+  var jsonData = jsonEncode(memberid);
+
+  final response = await http.post(
+    Uri.parse(deletePelangganUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "memberid": jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future changePpn(
+  BuildContext context,
+  var token,
+  isPPN,
+  List productid,
+  merchid,
+) async {
+  String jsonData = jsonEncode(productid);
+
+  final response = await http.post(
+    Uri.parse(changePpnUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "isPPN": isPPN,
+      'productid': jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Ganti Data');
+    // Navigator.pop(context);
+
+    log(jsonResponse['data'].toString());
+    showSnackbar(context, jsonResponse);
+  } else {
+    log(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future changeActive(
+  BuildContext context,
+  var token,
+  isActive,
+  List productid,
+  merchid,
+) async {
+  String jsonData = jsonEncode(productid);
+
+  final response = await http.post(
+    Uri.parse(changeActiveUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "isActive": isActive,
+      'productid': jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Ganti Data');
+    // Navigator.pop(context);
+
+    log(jsonResponse['data'].toString());
+    showSnackbar(context, jsonResponse);
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getAllProvince(token, id) async {
+  final response = await http.post(
+    Uri.parse('$url/api/province'),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": id,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<DataProvince> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = DataProvince.fromJson(item);
+      result.add(model);
+
+      print(model.toJson());
+    }
+
+    return result;
+  }
+}
+
+Future getTipeUsaha(token, id) async {
+  final response = await http.post(
+    Uri.parse(tipeUsaha),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": id,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<DataProvince> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = DataProvince.fromJson(item);
+      result.add(model);
+
+      print(model.toJson());
+    }
+
+    return result;
+  }
+}
+
+Future verifiedEmail(context, token, emailCon, passCon) async {
+  final response = await http.post(
+    Uri.parse(verifiedEmailLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "email": emailCon,
+      "password": passCon,
+      "confirmPassword": passCon
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print(jsonResponse.toString());
+  } else {
+    // showSnackbar(context, jsonResponse);
+    return jsonResponse['message'];
+  }
+
+  return jsonResponse['rc'];
+}
+
+Future verifiedEmailbyOTP(context, token, otp) async {
+  final response = await http.post(
+    Uri.parse(verifiedEmailOtpLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "otp": otp,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    Navigator.of(context).pop();
+    print("succes aman tentram verified email");
+    // log(jsonResponse.toString());
+    showSnackbar(context, jsonResponse);
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse['rc'];
+}
+
+Future changePassword(
+    BuildContext context, token, newPass, conPass, typeotp) async {
+  var response = await http.post(
+    Uri.parse(changeSandiLink),
+    headers: {
+      "token": "$token",
+    },
+    body: {
+      "deviceid": identifier,
+      "typeotp": typeotp,
+      "newPass": newPass,
+      "confirmPass": conPass,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print(jsonResponse["data"]);
+    Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    // showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse['message'];
+}
+
+int? pendapatanDas, membersDas, transaksiDas, rataTransaksiDas;
+Future dashboard(id, token) async {
+  try {
+    var response = await Dio().post(
+      dashboardNumber,
+      // dashboardValue,
+      data: {
+        'deviceid': id.toString(),
+      },
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      pendapatanDas = response.data['data']['income'];
+      print("succes aman tentram di profile");
+
+      var responseValue = response.data['data'];
+
+      log(membersDas.toString());
+      // pendapatanDas = responseValue['income'];
+      membersDas = responseValue['members'];
+      transaksiDas = responseValue['transaction'];
+      rataTransaksiDas = responseValue['averageTransaction'];
+    }
+    return response.data['data'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future<Map<String, dynamic>> dashboardSide(BuildContext context, token) async {
+  final response = await http.post(
+    Uri.parse(dashboardNumber),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+    },
+  );
+
+  var jsonResponseThrow = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('behasil get side');
+    return json.decode(response.body);
+  } else {
+    // log(jsonResponse['message'].toString());
+    throw Exception(jsonResponseThrow['message'].toString());
+    // log(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future<Map<String, dynamic>> getDataChart(BuildContext context, token) async {
+  final response = await http.post(
+    Uri.parse(dashboardChart),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "tipe": "1W",
+    },
+  );
+
+  var jsonResponseThrow = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('behasil get chart');
+    return json.decode(response.body);
+  } else {
+    // log(jsonResponse['message'].toString());
+    throw Exception(jsonResponseThrow['message'].toString());
+    // log(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getPelanggan(BuildContext context, token, orderby) async {
+  final response = await http.post(
+    Uri.parse(getPelanggantUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes get pelanggan');
+    var dataku = jsonResponse['data'];
+
+    // namaPelangganEdit,
+    // phonePelangganEdit,
+    // emailPelangganEdit,
+    // instagramPelangganEdit;
+
+    print(dataku);
+
+    final List<PelangganModelData> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = PelangganModelData.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getVoucher(context, token, orderby) async {
+  final response = await http.post(
+    Uri.parse(getVoucherUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      'orderby': orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    log(jsonResponse['data'].toString());
+
+    final List<ModelDataPromosi> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = ModelDataPromosi.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    showSnackbar(context, jsonResponse);
+    log(jsonResponse['message'].toString());
+  }
+}
+
+Future getProduct(BuildContext context, token, String name,
+    List<String> merchid, orderby) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(getProductUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "name": name,
+      "orderby": orderby,
+      "isActive": "false",
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // log(jsonResponse.toString());
+
+    final List<ModelDataProduk> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = ModelDataProduk.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getProductGrup(
+    BuildContext context, token, String name, merchid, orderby) async {
+  final response = await http.post(
+    Uri.parse(getProductUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "name": name,
+      "orderby": orderby,
+      // "isActive": "false",
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // log(jsonResponse.toString());
+
+    final List<ModelDataProdukGrup> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = ModelDataProdukGrup.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future createPelanggan(
+  BuildContext context,
+  token,
+  String name,
+  address,
+  phone,
+  email,
+  instagram,
+) async {
+  var body = {
+    "deviceid": identifier,
+    "nama_member": name,
+    "alamat_member": address,
+    "phonenumber": phone,
+    "email": email,
+    "twitter": "",
+    "instagram": instagram,
+    "facebook": ""
+  };
+
+  final response = await http.post(
+    Uri.parse(createPelangganUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse;
+}
+
+Future createPendapatan(
+  BuildContext context,
+  token,
+  ppm,
+  jenis,
+  keterangan,
+  jumlah,
+  merchid,
+  PageController controller,
+) async {
+  var body = {
+    "deviceid": identifier,
+    "tanggal": "27-01-2023",
+    "ppm": ppm,
+    "jenis": jenis,
+    "keterangan": keterangan,
+    "jumlah": jumlah,
+    "merchantid": ""
+  };
+
+  final response = await http.post(
+    Uri.parse(createPemasukanUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+    controller.jumpToPage(0);
+  } else {
+    log(jsonResponse['rc'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future ubahPendapatan(
+  BuildContext context,
+  token,
+  id,
+  ppm,
+  keterangan,
+  jumlah,
+  merchid,
+  PageController controller,
+) async {
+  var body = {
+    "deviceid": identifier,
+    "PPM_ID": "OUT-202301270003",
+    "tanggal": "27-01-2023",
+    "ppm": "Investasi",
+    "keterangan": "pembelian saham indomie",
+    "jumlah": "1500000",
+    "merchantid": ""
+  };
+
+  final response = await http.post(
+    Uri.parse(ubahPemasukanUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+    controller.jumpToPage(0);
+  } else {
+    log(jsonResponse['rc'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future editPelanggan(
+  BuildContext context,
+  token,
+  String memberid,
+  name,
+  address,
+  phone,
+  email,
+  instagram,
+) async {
+  var body = {
+    "deviceid": identifier,
+    "memberid": memberid,
+    "nama_member": name,
+    "alamat_member": address,
+    "phonenumber": phone,
+    "email": email,
+    "twitter": "",
+    "instagram": instagram,
+    "facebook": ""
+  };
+
+  final response = await http.post(
+    Uri.parse(editPelangganUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // print('succes');
+
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
+    // log(jsonResponse['rc'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+  return jsonResponse['message'];
+}
+
+Future createVoucher(
+  BuildContext context,
+  token,
+  String name,
+  isActive,
+  price,
+  point,
+  List<String> merchid,
+  PageController controller,
+) async {
+  final String jsonTest = json.encode(merchid);
+  var body = {
+    "deviceid": identifier,
+    "namavoucher": name,
+    "merchantid": jsonTest,
+    "isActive": isActive,
+    "harga": price,
+    "point": point,
+  };
+
+  final response = await http.post(
+    Uri.parse(createVoucherUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse;
+}
+
+Future updateVoucher(
+  BuildContext context,
+  token,
+  String name,
+  isActive,
+  price,
+  point,
+  List<String> merchid,
+  PageController controller,
+  productid,
+) async {
+  final String jsonTest = json.encode(merchid);
+  var body = {
+    "deviceid": identifier,
+    "namavoucher": name,
+    "merchantid": jsonTest,
+    "voucherid": productid,
+    "isActive": isActive,
+    "price": price,
+    "point": point,
+  };
+
+  final response = await http.post(
+    Uri.parse(updateVoucherUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // print('succes');
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse['message'];
+}
+
+Future createProduct(
+    BuildContext context,
+    token,
+    String name,
+    typeProduct,
+    isPPN,
+    isActive,
+    price,
+    image,
+    List<String> merchid,
+    PageController controller) async {
+  final String jsonTest = json.encode(merchid);
+  var body = {
+    "deviceid": identifier,
+    "name": name,
+    "shortname": "",
+    "merchantid": jsonTest,
+    "typeproducts": typeProduct,
+    "isPPN": isPPN,
+    "isActive": isActive,
+    "price": price,
+    "product_image": "data:image/jpeg;base64,$image",
+  };
+
+  final response = await http.post(
+    Uri.parse(createProdukUrl),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // print('succes');
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse['message'];
+}
+
+var subTotal,
+    ppnTransaksi,
+    totalTransaksi,
+    customerTransaksi,
+    namaCustomerCalculate;
+Future calculateTransaction(
+  BuildContext context,
+  token,
+  List<Map<String, String>> details,
+  StateSetter setState,
+  memberid,
+) async {
+  final String detail = json.encode(details);
+
+  final response = await http.post(
+    Uri.parse(calculateTransaksiUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "memberid": memberid,
+      "detail": detail,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  var data = jsonResponse['data'];
+  if (response.statusCode == 200) {
+    log('succes');
+    log(jsonResponse.toString());
+    // log(jsonResponse['data']['subTotal'].toString());
+    // log(totalTransaksi.toString());
+    totalTransaksi = data['total'];
+    subTotal = data['subTotal'];
+    ppnTransaksi = data['PPN'];
+    namaCustomerCalculate = data['customerName'];
+    setState(() {});
+  } else {
+    log(jsonResponse['message'].toString());
+    log(jsonResponse['rc'].toString());
+    // log(jsonResponse.toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+String printext = '',
+    transaksiNama = '',
+    transaksiMetode = '',
+    transaksiPesanan = '',
+    transaksiKasir = '';
+
+Future createTransaction(
+  BuildContext context,
+  token,
+  value,
+  List<Map<String, String>> details,
+  PageController pageController,
+  dynamic cart,
+  setState,
+  method,
+  reference,
+  transactionid,
+  memberid,
+) async {
+  final String detail = json.encode(details);
+
+  final response = await http.post(
+    Uri.parse(createTransaksiUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "discount": "",
+      "memberid": memberid,
+      "transactionid": transactionid,
+      "value": value,
+      "payment_method": method,
+      "payment_reference": reference,
+      "detail": detail
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  var data = jsonResponse['data'];
+  if (response.statusCode == 200) {
+    print('succes');
+    // pageController.jumpTo(0);
+    log(jsonResponse['data'].toString());
+    setState(() {
+      // subTotal = 0;
+      printext = jsonResponse['data']['raw'];
+      transaksiNama = data['customer'];
+      transaksiMetode = data['payment_method'];
+      transaksiPesanan = data['transactionid'];
+      transaksiKasir = data['pic'];
+
+      // cart.clear();
+    });
+  } else {
+    // log(jsonResponse.toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future saveTransaction(
+  BuildContext context,
+  token,
+  value,
+  List<Map<String, String>> details,
+  PageController pageController,
+  dynamic cart,
+  setState,
+  method,
+  reference,
+) async {
+  final String detail = json.encode(details);
+
+  final response = await http.post(
+    Uri.parse(createTransaksiUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "discount": "",
+      "memberid": "",
+      "value": value,
+      "payment_method": method,
+      "payment_reference": reference,
+      "detail": detail
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    pageController.jumpTo(0);
+    cart.clear();
+    setState(() {
+      subTotal = 0;
+    });
+    log(jsonResponse.toString());
+  } else {
+    log(jsonResponse['message'].toString());
+    // log(jsonResponse.toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future deletePesanan(
+  BuildContext context,
+  token,
+  transactionid,
+) async {
+  final response = await http.post(Uri.parse(deleteTransaksiUrl), headers: {
+    'token': token,
+  }, body: {
+    "deviceid": identifier,
+    "transactionid": transactionid,
+    "reason": "1"
+  });
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+  } else {
+    log(jsonResponse['rc'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future headerTagihan(
+  BuildContext context,
+  token,
+  transactionid,
+  typetransaksi,
+) async {
+  final response = await http.post(Uri.parse(headerTagihanUrl), headers: {
+    'token': token,
+  }, body: {
+    "deviceid": identifier,
+    "transactionid": transactionid,
+    "typetransaksi": typetransaksi,
+  });
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print('succes');
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['rc'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future deleteReference(
+  BuildContext context,
+  token,
+  transaksiReference,
+  idkategori,
+  detailAlasan,
+) async {
+  final response = await http.post(Uri.parse(deleteTagihanUrl), headers: {
+    'token': token,
+  }, body: {
+    "deviceid": identifier,
+    "transaksiid_reference": transaksiReference,
+    "idkategori": idkategori,
+    "detail_alasan": detailAlasan,
+  });
+
+  var jsonResponse = jsonDecode(response.body);
+
+  print(transaksiReference);
+
+  if (response.statusCode == 200) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    print(jsonResponse['rc'].toString());
+    return jsonResponse['message'];
+  }
+}
+
+Future getPendapatan(BuildContext context, token, condition) async {
+  final response = await http.post(
+    Uri.parse(getPendapatanUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "jenis": condition,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+
+    final List<PendapatanLainModel> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = PendapatanLainModel.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getYearRekon(token) async {
+  final response = await http.post(
+    Uri.parse(getYearRekonUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getMonthRekon(token, year, merchid) async {
+  merchid = 'asd';
+  final response = await http.post(
+    Uri.parse(getMonthRekonUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "tahun": year,
+      "merchantid": merchid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getPengeluaran(BuildContext context, token, condition) async {
+  final response = await http.post(
+    Uri.parse(getPendapatanUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "jenis": condition,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    // log(jsonResponse.toString());
+
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future<List<RekonModel>> getRekon(token, tahun, bulan) async {
+  final response = await http.post(
+    Uri.parse(getRekonUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "tahun": tahun,
+      "bulan": bulan,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print(bulan);
+    var data = jsonResponse['data'] as List;
+    List<RekonModel> rekonModels =
+        data.map((e) => RekonModel.fromJson(e)).toList();
+    return rekonModels;
+  } else {
+    throw Exception('Failed to load data');
+  }
+}
+
+Future getRiwayatTransaksi(
+    BuildContext context, token, condition, merchid) async {
+  final response = await http.post(
+    Uri.parse(getTransaksiRiwayatUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "condition": condition,
+      "orderby": "downUpCreate",
+      "merchantid": merchid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<TokoDataRiwayatModel> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = TokoDataRiwayatModel.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getDetailRiwayatTransaksi(
+    BuildContext context, token, transactionid) async {
+  final response = await http.post(
+    Uri.parse(getTransaksiSingleRiwayatUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "transactionid": transactionid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<DetailSingle> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = DetailSingle.fromJson(item);
+      result.add(model);
+    }
+
+    print(jsonResponse['message']);
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
+    token, transactionid, merchantid) async {
+  final body = {
+    "deviceid": identifier,
+    "transactionid": transactionid,
+    "merchantid": merchantid,
+  };
+
+  final response = await http.post(
+    Uri.parse(getTransaksiSingleRiwayatUrl),
+    body: body,
+    headers: {
+      'token': token,
+    },
+  );
+
+  Map<String, dynamic> data = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    log(data.toString());
+    printext = data['data']['rawstruk'];
+
+    return data;
+  } else {
+    throw Exception('Failed to load data ${data}');
+  }
+}
+
+Future<Map<String, dynamic>> getSingleRiwayatTransaksiGrup(
+    token, transactionid, merchid) async {
+  final body = {
+    "deviceid": identifier,
+    "transactionid": transactionid,
+    "merchantid": merchid
+  };
+
+  final response = await http.post(
+    Uri.parse(getTransaksiSingleRiwayatUrl),
+    body: body,
+    headers: {
+      'token': token,
+    },
+  );
+
+  // mengembalikan data yang didapat dari API sebagai objek Map
+  if (response.statusCode == 200) {
+    // Convert response body to JSON
+    Map<String, dynamic> data = jsonDecode(response.body);
+
+    printext = data['data']['raw'];
+    // log(data['data'].toString());
+
+    return data;
+  } else {
+    throw Exception('Failed to load data');
+  }
+}
+
+Future getProductTransaksi(BuildContext context, token, String name,
+    List<String> merchid, orderby) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(getProductUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "name": name,
+      "isActive": "1",
+      "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // log(jsonResponse.toString());
+
+    final List<ProductModel> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']['product']) {
+      final model = ProductModel.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getCoinTransaksi(
+    BuildContext context, token, String name, List<String> merchid) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(getProductUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "name": name,
+      "isActive": "1",
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // log(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['coin']);
+    // log(jsonResponse['data']['coin'].toString());
+    return data['data']['coin'];
+  } else {
+    log(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanDaily(
+  BuildContext context,
+  token,
+  orderBy,
+  keyword,
+  List merchid,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanDailyUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderBy.toString(),
+      "merchantid": jsonTest,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getLaporanMerchant(
+  BuildContext context,
+  token,
+  keyword,
+  orderby,
+  List merchid,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanMerchUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "merchantid": jsonTest,
+    },
+  );
+
+  // print(keyword + orderby);
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    log(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    log(jsonResponse['message'].toString() + jsonResponse['rc'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+Future getLaporanPerProduk(
+  BuildContext context,
+  token,
+  keyword,
+  orderby,
+  List merchid,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanProdukUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "merchantid": jsonTest
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // log(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+var productPrice = 0, nameChart;
+
+late String nameEditProduk,
+    hargaEditProduk,
+    jenisProductEdit,
+    kodejenisProductEdit,
+    ppnEdit,
+    tampilEdit;
+Future getSingleProduct(
+    BuildContext context, token, String merchid, productid, setState) async {
+  final response = await http.post(
+    Uri.parse(getSingleProductUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "productid": productid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    var dataku = jsonResponse['data'];
+    log(dataku.toString());
+
+    nameEditProduk = dataku['name'];
+    hargaEditProduk = dataku['price'].toString();
+    jenisProductEdit = dataku['typeproducts'];
+    kodejenisProductEdit = dataku['kodeproduct'];
+    ppnEdit = dataku['isPPN'].toString();
+    tampilEdit = dataku['isActive'].toString();
+    // setState(() {});
+    return jsonResponse['data'];
+  } else {
+    // log(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+late String namaEditAkun,
+    emailEditAkun,
+    nomorEditAkun,
+    statusEditAkun,
+    useridEditAkun,
+    imageEditAkun;
+Future getSingleAkun(BuildContext context, token, String userid) async {
+  final response = await http.post(
+    Uri.parse(getSingleAkunUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "userid": userid,
+    },
+  );
+
+  whenLoading(context);
+
+  var jsonResponse = jsonDecode(response.body);
+  var dataku = jsonResponse['data'];
+
+  if (response.statusCode == 200) {
+    Navigator.of(context, rootNavigator: true).pop();
+    namaEditAkun = dataku['fullname'];
+    nomorEditAkun = dataku['phonenumber'];
+    emailEditAkun = dataku['email'];
+    imageEditAkun = dataku['account_image'];
+    useridEditAkun = dataku['userid'];
+    statusEditAkun = dataku['status'];
+    return response.statusCode.toString();
+  } else {
+    Navigator.of(context, rootNavigator: true).pop();
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+late String nameEditPromosi, poinEditPromosi, hargaProductPromosi;
+Future getSinglePromosi(
+    BuildContext context, token, String merchid, voucherid, setState) async {
+  final response = await http.post(
+    Uri.parse(getSinglePromosiUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "voucherid": voucherid,
+    },
+  );
+  whenLoading(context);
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes get single promosi');
+    Navigator.of(context, rootNavigator: true).pop();
+    nameEditPromosi = jsonResponse['data']['name'];
+    poinEditPromosi = jsonResponse['data']['point'].toString();
+    hargaProductPromosi = jsonResponse['data']['price'].toString();
+    return jsonResponse['rc'];
+  } else {
+    print(jsonResponse['message'].toString());
+    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getOtpSandi(BuildContext context, token, typeotp) async {
+  final response = await http.post(
+    Uri.parse(getOtpSandiLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "typeotp": typeotp,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print(jsonResponse);
+  } else {
+    log(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+  return jsonResponse['rc'];
+}
+
+Future validasiOtpSandi(BuildContext context, token, otp, typeotp) async {
+  final response = await http.post(
+    Uri.parse(validasiOtpSandiLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "otp": otp,
+      "typeotp": typeotp,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print(jsonResponse);
+
+    showSnackbar(context, jsonResponse);
+  } else {
+    log(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
+    errorText = jsonResponse['message'];
+  }
+  return jsonResponse['rc'];
+}
+
+Future uploadQris(BuildContext context, token, imageQris) async {
+  final response = await http.post(
+    Uri.parse(uploadQrisLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "imageQris": "data:image/png;base64," + imageQris,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // print(jsonResponse.toString());
+
+    Navigator.pop(context);
+
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+
+    return jsonResponse['rc'];
+  } else {
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+  }
+}
+
+Future uploadStruk(BuildContext context, token, imageStruk) async {
+  final response = await http.post(
+    Uri.parse(uploadStrukLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "imageStruk": "data:image/png;base64," + imageStruk,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    Navigator.pop(context);
+
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+
+    return jsonResponse['data'];
+  } else {
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+  }
+}
+
+Future transaksiViewReference(
+    BuildContext context, token, transactionid) async {
+  final response = await http.post(
+    Uri.parse(transaksiViewReferenceLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "transactionid": transactionid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // log(jsonResponse.toString());
+
+    return jsonResponse;
+  } else {
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getQris(BuildContext context, token) async {
+  final response = await http.post(
+    Uri.parse(getQrisLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    log(jsonResponse.toString());
+    logoQris = jsonResponse['data']['qris'];
+
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['message'].toString());
+  }
+}
+
+Future getStruk(BuildContext context, token) async {
+  final response = await http.post(
+    Uri.parse(getQrisLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    log(jsonResponse.toString());
+    logoStruk = jsonResponse['data']['struk'];
+
+    return jsonResponse['data'];
+  } else {
+    log(jsonResponse['message'].toString());
+    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+  }
+}
+
+ReceivePort portDownload = ReceivePort();
+
+Future downloadFile(String link) async {
+  try {
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      final baseStorage = await getExternalStorageDirectory();
+
+      final taskId = await FlutterDownloader.enqueue(
+        url: link,
+        headers: {},
+        savedDir: baseStorage!.path,
+        showNotification: true,
+        openFileFromNotification: true,
+        saveInPublicStorage: true,
+      );
+
+      FlutterDownloader.open(taskId: taskId!);
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
