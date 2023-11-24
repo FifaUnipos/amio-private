@@ -239,29 +239,27 @@ class ProfilePageState extends State<ProfilePage> {
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
-                                    
                                     logout(
                                       widget.token,
                                       identifier,
                                       context,
                                       LoginPage(),
-                                    ).whenComplete(() async {
-                                      SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
-                                      prefs.remove('token');
-                                      prefs.remove('deviceid');
+                                    );
 
-                                      selectedIndexSideBar = false;
-                                      showingMenuSidebar == true;
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    prefs.remove('token');
+                                    prefs.remove('deviceid');
 
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (BuildContext context) =>
-                                                LoginPage()),
-                                        // (route) => false,
-                                      );
-                                    });
+                                    selectedIndexSideBar = false;
+                                    showingMenuSidebar == true;
+
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginPage(),
+                                      ),
+                                    );
                                   },
                                   child: buttonXL(
                                     Center(
@@ -1087,6 +1085,7 @@ class ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             );
+                          
                           },
                           child: Text(
                             'Ubah',
@@ -1492,7 +1491,9 @@ class ProfilePageState extends State<ProfilePage> {
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             focusColor: primary500,
-                            hintText: controllerEmail.text,
+                            hintText: emailProfile == null
+                                ? 'Cth: Nabil@gmail.com'
+                                : controllerEmail.text,
                             hintStyle:
                                 heading3(FontWeight.w500, bnw500, 'Outfit'),
                           ),
@@ -2712,7 +2713,7 @@ class ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ],
                               ),
-                            ),
+                            ), stream: null,
                           ),
                         ],
                       ),
@@ -2985,7 +2986,9 @@ class ProfilePageState extends State<ProfilePage> {
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             focusColor: primary500,
-                            hintText: controllerEmail.text,
+                            hintText: emailProfile == null
+                                ? 'Cth: Nabil@gmail.com'
+                                : controllerEmail.text,
                             hintStyle:
                                 heading3(FontWeight.w500, bnw500, 'Outfit'),
                           ),

@@ -194,7 +194,7 @@ class _AkunGrupState extends State<AkunGrup> {
                           ),
                         )
                       : null,
-                  hintText: 'Cari nama produk',
+                  hintText: 'Cari nama toko',
                   hintStyle: heading3(FontWeight.w500, bnw400, 'Outfit'),
                 ),
               ),
@@ -262,7 +262,7 @@ class _AkunGrupState extends State<AkunGrup> {
                                             )),
                                           )
                                         : Icon(
-                                            Icons.person,
+                                            PhosphorIcons.storefront_fill,
                                             size: 60,
                                           ),
                                   ),

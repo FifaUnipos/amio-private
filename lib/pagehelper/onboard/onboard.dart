@@ -1,3 +1,4 @@
+import 'package:amio/pageMobile/pageHelperMobile/masukAkunMobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +39,7 @@ class _OnbordingState extends State<Onbording> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: size12, horizontal: size16),
+        padding: EdgeInsets.symmetric(vertical: size12, horizontal: size32),
         child: Column(
           children: [
             Expanded(
@@ -79,7 +80,7 @@ class _OnbordingState extends State<Onbording> {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        widget.isTablet ? MasukAkunPage() : LoginPageMobile(),
+                        widget.isTablet ? MasukAkunPage() : MasukAkunPageMobile(),
                   ),
                 );
                 SharedPreferences prefs = await SharedPreferences.getInstance();

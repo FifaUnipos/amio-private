@@ -176,6 +176,12 @@ class _OtppageState extends State<Otppage> {
                                               } else if (widget.pageidentify ==
                                                   'public_register_page') {
                                                 globalRegisterEntry(pin);
+                                              } else if (widget.pageidentify ==
+                                                  'forgotPass') {
+                                                changePasswordVerify(
+                                                    context,
+                                                    userId,
+                                                    pin);
                                               }
                                             },
                                             onChanged: (value) {
@@ -301,19 +307,12 @@ class _OtppageState extends State<Otppage> {
       if (response.statusCode == 200) {
         print("succes");
         errorText = '';
-        // ignore: use_build_context_synchronously
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('deviceid', identifier.toString());
+
         myprofile(jsonResponse['token']);
-        late FirebaseMessaging messaging;
-        messaging = FirebaseMessaging.instance;
-        messaging.getToken().then((value) {
-          setState(() {
-            print("firebase token : $value");
-            firebaseToken(value, jsonResponse['token']);
-          });
-        });
-        final NotifFCM = FCM();
-        NotifFCM.setNotifiications();
-        // log(statusProfile);
+
         showDialog(
             barrierDismissible: true,
             useRootNavigator: true,
@@ -346,34 +345,26 @@ class _OtppageState extends State<Otppage> {
     }
   }
 
-  Future getOtpAgain() async {
-    try {
-      var response = await Dio().post(loginbyotp, data: {
-        'phonenumber': widget.phone,
-        'deviceid': identifier,
-      });
-      print(widget.phone);
-      if (response.statusCode == 200) {
-        print("succes");
-      }
-      return null;
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
-
   Future registerAgain() async {
     try {
-      var response = await Dio().post(registerbyotp, data: {
+      Map<String, String?> bodyEmail = {
+        'type': 'Group_Merchant',
+        'deviceid': identifier,
         'phonenumber': widget.phone,
         'fullname': widget.name,
-        // 'password': widget.pass,
         'email': widget.email,
-        'deviceid': identifier.toString(),
-      });
+      };
+
+      final response = await http.post(
+        Uri.parse(registerLink),
+        body: bodyEmail,
+      );
+      var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print("succes");
+        errorText = '';
+        print("succes kirim otp");
+        print(jsonResponse['data']);
       }
       return null;
     } catch (e) {
@@ -437,10 +428,27 @@ class _OtppageState extends State<Otppage> {
     }
   }
 
+  Future getOtpAgain() async {
+    try {
+      var response = await Dio().post(loginbyotp, data: {
+        'phonenumber': widget.phone,
+        'deviceid': identifier,
+      });
+      print(widget.phone);
+      if (response.statusCode == 200) {
+        errorText = '';
+        print("succes");
+      }
+      return null;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   Future globalRegisterEntry(pin) async {
     try {
       final response = await http.post(
-        Uri.parse(registerGlobalMerchEntry),
+        Uri.parse(registerentryotp),
         body: {
           'phonenumber': widget.phone,
           'otp': pin,
@@ -452,17 +460,36 @@ class _OtppageState extends State<Otppage> {
       if (response.statusCode == 200) {
         print("succes");
         errorText = '';
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                // Container()
-                SidebarXExampleApp(
-              id: identifier.toString(),
-              token: jsonResponse['token'],
-            ),
-          ),
-        );
+        print("succes");
+        errorText = '';
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('deviceid', identifier.toString());
+
+        myprofile(jsonResponse['token']);
+
+        showDialog(
+            barrierDismissible: true,
+            useRootNavigator: true,
+            context: context,
+            builder: (context) {
+              if (jsonResponse['token'] != null) {
+                Future.delayed(
+                  const Duration(seconds: 3),
+                  () {
+                    // Navigator.of(context).pop(true);
+                    sessionPage(context, jsonResponse['token']);
+                  },
+                );
+              }
+              return const Center(
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            });
       } else {
         // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
         errorText = jsonResponse['message'];

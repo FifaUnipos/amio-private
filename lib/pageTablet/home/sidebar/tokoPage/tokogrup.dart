@@ -55,11 +55,10 @@ class _TokoSidePageState extends State<TokoSidePage> {
       kode = "",
       merchid = "";
 
-  String? merchantid;
-
   @override
   void initState() {
     checkConnection(context);
+
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         datas = await getAllToko(context, widget.token, '', textvalueOrderBy);
@@ -117,7 +116,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                 ChangeMerchant(
                   token: widget.token,
                   pageController: _pageController,
-                  merchantid: merchantid == null ? '' : merchantid!,
+                  merchantid: merchid,
                 ),
               ],
             ),
@@ -281,28 +280,27 @@ class _TokoSidePageState extends State<TokoSidePage> {
                                         child: SizedBox(
                                           height: 60,
                                           width: 60,
-                                          child:
-                                              datas![i].logomerchant_url != null
-                                                  ? Image.network(
-                                                      datas![i]
-                                                          .logomerchant_url
-                                                          .toString(),
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                              error,
-                                                              stackTrace) =>
-                                                          SizedBox(
-                                                              child: Icon(
-                                                        PhosphorIcons
-                                                            .storefront_fill,
-                                                        size: 60,
-                                                        color: bnw900,
-                                                      )),
-                                                    )
-                                                  : Icon(
-                                                      PhosphorIcons.storefront,
-                                                      size: 60,
-                                                    ),
+                                          child: datas![i].logomerchant_url !=
+                                                  null
+                                              ? Image.network(
+                                                  datas![i]
+                                                      .logomerchant_url
+                                                      .toString(),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      SizedBox(
+                                                          child: Icon(
+                                                    PhosphorIcons
+                                                        .storefront_fill,
+                                                    size: 60,
+                                                    color: bnw900,
+                                                  )),
+                                                )
+                                              : Icon(
+                                                  PhosphorIcons.storefront_fill,
+                                                  size: 60,
+                                                ),
                                         ),
                                       ),
                                       SizedBox(width: size20),
@@ -335,10 +333,13 @@ class _TokoSidePageState extends State<TokoSidePage> {
                                         child: GestureDetector(
                                           onTap: () {
                                             whenLoading(context);
+                                            merchid =
+                                                datas![i].merchantid.toString();
+
                                             getSingleMerch(
                                               context,
                                               widget.token,
-                                              datas![i].merchantid.toString(),
+                                              merchid,
                                             ).then((value) {
                                               if (value['rc'] == '00') {
                                                 Navigator.of(context,
@@ -419,6 +420,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                                                     Expanded(
                                                       child: GestureDetector(
                                                         onTap: () {
+                                                          print(merchid);
                                                           Navigator.pop(
                                                               context);
                                                           showBotomHapusToko(
@@ -589,7 +591,9 @@ class _TokoSidePageState extends State<TokoSidePage> {
                               context,
                               widget.token,
                               value,
-                            )
+                            ).then((value) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                            })
                           : null;
 
                       initState();

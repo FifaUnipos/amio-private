@@ -57,6 +57,7 @@ class _LaporanTokoState extends State<LaporanToko> {
   void initState() {
     checkConnection(context);
     // print(_textvalueOrderBy);
+
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         pageController = PageController(
@@ -76,7 +77,7 @@ class _LaporanTokoState extends State<LaporanToko> {
     hapusController.dispose();
     super.dispose();
   }
-
+  
   void refresh() {
     setState(() {});
   }
@@ -139,7 +140,7 @@ class _LaporanTokoState extends State<LaporanToko> {
             lihatLaporanPage(objects),
             LaporanPendapatanHarianPage(
                 pageController: pageController, token: widget.token),
-    
+
             LaporanPendapatanTokoPage(
                 pageController: pageController, token: widget.token),
             LaporanPendapatanPerProduk(
@@ -164,8 +165,8 @@ class _LaporanTokoState extends State<LaporanToko> {
               },
               child: Icon(
                 PhosphorIcons.arrow_left,
+                size: size40,
                 color: bnw900,
-                size: 40,
               ),
             ),
             Column(
@@ -182,7 +183,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                 ),
               ],
             ),
-            orderBy(context, pilihUrutan, pendapatanHarianText, _textOrderBy),
+            orderBy(context),
             buttonXLoutline(
               Padding(
                 padding: EdgeInsets.only(left: 6, right: size8),
@@ -239,7 +240,7 @@ class _LaporanTokoState extends State<LaporanToko> {
             ),
           ],
         ),
-        SizedBox(height: 20),
+        SizedBox(height: size24),
         Container(
           width: double.infinity,
           height: 50,
@@ -310,7 +311,7 @@ class _LaporanTokoState extends State<LaporanToko> {
             ),
             child: FutureBuilder(
               future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, ['']),
+                  _textvalueKeyword, [''], ''),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -409,7 +410,7 @@ class _LaporanTokoState extends State<LaporanToko> {
         ),
         FutureBuilder(
           future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-              _textvalueKeyword, ['']),
+              _textvalueKeyword, [''], ''),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               Map<String, dynamic>? data = snapshot.data!['data'];
@@ -661,145 +662,140 @@ class _LaporanTokoState extends State<LaporanToko> {
     );
   }
 
-  orderBy(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-            context: context,
-            builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) => Container(
-                  height: MediaQuery.of(context).size.height / 2,
-                  decoration: BoxDecoration(
-                    color: bnw100,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(size12),
-                      topLeft: Radius.circular(size12),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.only(left: size12, right: size12),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.only(right: 15, top: 15),
-                          color: bnw100,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
-                              ),
-                              Text(
-                                'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
-                              ),
-                              SizedBox(height: 20),
-                              Text(
-                                'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                              Wrap(
-                                children: List<Widget>.generate(
-                                  pilihUrutan.length,
-                                  (int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(right: size8),
-                                      child: ChoiceChip(
-                                        padding:
-                                            EdgeInsets.fromLTRB(0, 10, 0, 10),
-                                        backgroundColor: bnw100,
-                                        selectedColor: primary200,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: _valueOrder == index
-                                                ? primary500
-                                                : bnw300,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                        ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
-                                        selected: _valueOrder == index,
-                                        onSelected: (bool selected) {
-                                          setState(() {
-                                            print(index);
-                                            // _value =
-                                            //     selected ? index : null;
-                                            _valueOrder = index;
-                                          });
-                                          setState(() {});
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
-                              ),
-                            ],
-                          ),
+  orderBy(BuildContext context) {
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showModalBottomSheet(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
                         ),
-                        Spacer(),
-                        GestureDetector(
-                          onTap: () {
-                            // print(_valueOrder);
-                            // print(pilihUrutan[_valueOrder]);
-
-                            textOrderByProduct = pilihUrutan[_valueOrder];
-                            _textvalueOrderBy = pilihUrutan[_valueOrder];
-                            pendapatanHarianText[_valueOrder];
-                            textvalueOrderByToko =
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Rentang Waktu',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit'),
+                                ),
+                                SizedBox(height: size24),
+                                Text(
+                                  'Pilih Rentang Waktu',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    pilihUrutan.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color: _valueOrder == index
+                                                  ? primary500
+                                                  : bnw300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                          ),
+                                          label: Text(pilihUrutan[index],
+                                              style: heading4(
+                                                  FontWeight.w400,
+                                                  _valueOrder == index
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit')),
+                                          selected: _valueOrder == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              _valueOrder = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () {
+                                textOrderBy = pilihUrutan[_valueOrder];
+                                _textvalueOrderBy =
+                                    pendapatanHarianText[_valueOrder];
                                 pendapatanHarianText[_valueOrder];
 
-                            // print(_textvalueOrderBy);
-                            refresh();
-                            Navigator.pop(context);
-                            // initState();
-                          },
-                          child: buttonXL(
-                            Center(
-                              child: Text(
-                                'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                refresh();
+                                Navigator.pop(context);
+                                initState();
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                        FontWeight.w600, bnw100, 'Outfit'),
+                                  ),
+                                ),
+                                0,
                               ),
                             ),
-                            double.infinity,
                           ),
-                        ),
-                        SizedBox(height: size8)
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        });
-      },
-      child: buttonXLExpanded(
-        Padding(
-          padding: EdgeInsets.only(left: 6, right: size8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                );
+              },
+            );
+          });
+        },
+        child: buttonXLoutline(
+          Row(
             children: [
               SvgPicture.asset('assets/minimize.svg'),
-              SizedBox(width: 4),
+              SizedBox(width: size12),
               Text(
                 textOrderBy,
                 style: heading3(
@@ -810,8 +806,9 @@ class _LaporanTokoState extends State<LaporanToko> {
               ),
             ],
           ),
+          double.infinity,
+          bnw300,
         ),
-        bnw300,
       ),
     );
   }
@@ -858,7 +855,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 style:
                                     heading4(FontWeight.w400, bnw600, 'Outfit'),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
                                 style:
@@ -1011,7 +1008,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 style:
                                     heading4(FontWeight.w400, bnw600, 'Outfit'),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
                                 style:
@@ -1177,7 +1174,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 style:
                                     heading4(FontWeight.w400, bnw600, 'Outfit'),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
                                 style:

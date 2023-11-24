@@ -70,6 +70,12 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
 
   String? tipe, prov, kab, kec, desa;
 
+  String emailError = '';
+
+  refreshText() {
+    emailError = '';
+  }
+
   @override
   void initState() {
     conCodePos.addListener(() {
@@ -129,7 +135,74 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                 padding: EdgeInsets.fromLTRB(size32, 0, size32, size16),
                 child: Column(
                   children: [
-                    appbar(context, false),
+                    SafeArea(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: size12),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {});
+                                },
+                                child: Icon(
+                                  PhosphorIcons.arrow_left,
+                                  size: size40,
+                                  color: bnw900,
+                                ),
+                              ),
+                              Container(
+                                  child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Icon(PhosphorIcons.number_circle_one_fill,
+                                          color: primary500),
+                                      Text(
+                                        'Buat Toko',
+                                        style: heading4(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      )
+                                    ],
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.circular(size8),
+                                      color: primary500,
+                                    ),
+                                    height: size4,
+                                    width: size120,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Icon(PhosphorIcons.number_circle_two,
+                                          color: primary500),
+                                      Text(
+                                        'Buat Akun',
+                                        style: heading4(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              )),
+                              GestureDetector(
+                                onTap: () {
+                                  helpQuestionShow(context);
+                                },
+                                child: Icon(
+                                  PhosphorIcons.question,
+                                  size: size40,
+                                  color: bnw900,
+                                ),
+                              ),
+                            ]),
+                      ),
+                    ),
                     Expanded(
                       child: SingleChildScrollView(
                         keyboardDismissBehavior:
@@ -144,7 +217,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Daftar Sebagai Pemilik Toko',
+                                    'Daftar Sebagai Toko',
                                     style: heading1(
                                         FontWeight.w700, bnw900, 'Outfit'),
                                   ),
@@ -229,7 +302,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                             SizedBox(height: size16),
                             SizedBox(
                               width: double.infinity,
-                              child: textfieldXLdaftar(
+                              child: textfieldXLdaftarKodePos(
                                 'Kode Pos',
                                 '1234',
                                 'Form harus diisi!',
@@ -379,7 +452,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
       onTap: () => setState(
         () {
           autoReload();
-          log(tipe.toString());
+          print(tipe.toString());
           showModalBottomSheet(
             isScrollControlled: true,
             shape: RoundedRectangleBorder(
@@ -528,6 +601,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                             _selectTipeUsaha(tipeUsaha);
 
                                             print(tipeUsaha['nama_tipe']);
+                                            autoReload();
                                           });
                                         },
                                       ),
@@ -714,7 +788,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(
             () {
               autoReload();
-              log(prov.toString());
+              print(prov.toString());
               showModalBottomSheet(
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
@@ -860,6 +934,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                                 _selectProvince(province);
 
                                                 print(province['NAME']);
+                                                _getRegenciesList(_myProvince);
                                               });
                                             },
                                           ),
@@ -909,7 +984,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(
             () {
               autoReload();
-              log(kab.toString());
+              print(kab.toString());
               showModalBottomSheet(
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
@@ -1083,6 +1158,8 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                                           regencies);
 
                                                       print(regencies['NAME']);
+                                                      _getDistrictList(
+                                                          _myRegencies);
                                                     });
                                                   },
                                                 ),
@@ -1132,7 +1209,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(
             () {
               autoReload();
-              log(kec.toString());
+              print(kec.toString());
               showModalBottomSheet(
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
@@ -1305,6 +1382,8 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                                       _selectDistrict(district);
 
                                                       print(district['NAME']);
+                                                      _getVillageList(
+                                                          _mydistrict);
                                                     });
                                                   },
                                                 ),
@@ -1354,7 +1433,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(
             () {
               autoReload();
-              log(desa.toString());
+              print(desa.toString());
               showModalBottomSheet(
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
@@ -1801,7 +1880,73 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
       padding: EdgeInsets.fromLTRB(size32, 0, size32, size16),
       child: Column(
         children: [
-          appbar(context, false),
+          SafeArea(
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: size12),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        isSwitched = !isSwitched;
+                        setState(() {});
+                      },
+                      child: Icon(
+                        PhosphorIcons.arrow_left,
+                        size: size40,
+                        color: bnw900,
+                      ),
+                    ),
+                    Container(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Icon(PhosphorIcons.number_circle_one,
+                                color: primary500),
+                            Text(
+                              'Buat Toko',
+                              style:
+                                  heading4(FontWeight.w600, bnw900, 'Outfit'),
+                            )
+                          ],
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(size8),
+                            color: primary500,
+                          ),
+                          height: size4,
+                          width: size120,
+                        ),
+                        Column(
+                          children: [
+                            Icon(PhosphorIcons.number_circle_two_fill,
+                                color: primary500),
+                            Text(
+                              'Buat Akun',
+                              style:
+                                  heading4(FontWeight.w600, bnw900, 'Outfit'),
+                            )
+                          ],
+                        ),
+                      ],
+                    )),
+                    GestureDetector(
+                      onTap: () {
+                        helpQuestionShow(context);
+                      },
+                      child: Icon(
+                        PhosphorIcons.question,
+                        size: size40,
+                        color: bnw900,
+                      ),
+                    ),
+                  ]),
+            ),
+          ),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1823,7 +1968,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Daftar',
+                            'Daftar Sebagai Toko',
                             style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                           ),
                           Text(
@@ -1864,34 +2009,39 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                           ),
                           fieldMethodPhone('08123456789', phoneController),
                           SizedBox(height: size12),
-                          Row(
-                            children: [
-                              Text(
-                                'Email ',
-                                style:
-                                    heading4(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                              Text(
-                                '*',
-                                style:
-                                    heading4(FontWeight.w700, red500, 'Outfit'),
-                              ),
-                            ],
+                          Text(
+                            'Email',
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                           ),
                           fieldMethod('Cth: nabil@gmail.com', emailController),
+                          // emailError.isNotEmpty
+                          //     ? Column(
+                          //         children: [
+                          //           SizedBox(height: size16),
+                          //           Text(
+                          //             emailError.isNotEmpty ? emailError : '',
+                          //             style: heading4(
+                          //                 FontWeight.w500, red500, 'Outfit'),
+                          //           ),
+                          //         ],
+                          //       )
+                          //     : SizedBox(),
                           SizedBox(height: size48),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
                             child: GestureDetector(
-                              onTap: () => register(
-                                context,
-                                Otppage(
-                                  phoneController.text,
-                                  nameController.text,
-                                  emailController.text,
-                                  'public_register_page',
-                                ),
-                              ),
+                              onTap: () {
+                                errorText = '';
+                                register(
+                                  context,
+                                  Otppage(
+                                    phoneController.text,
+                                    nameController.text,
+                                    emailController.text,
+                                    'public_register_page',
+                                  ),
+                                );
+                              },
                               child: buttonXXLonOff(
                                 Center(
                                   child: Text(
@@ -1958,6 +2108,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
         },
         controller: mycontroller,
         decoration: InputDecoration(
+          isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: size12),
           hintText: text,
           hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1982,6 +2133,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
         },
         controller: mycontroller,
         decoration: InputDecoration(
+          isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: size12),
           hintText: text,
           hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -2011,45 +2163,54 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
   }
 
   Future register(context, page) async {
-    try {
-      final response = await http.post(
-        Uri.parse(registerGlobalMerchbyOtp),
-        body: {
-          "email": emailController.text,
-          "fullname": nameController.text,
-          "phonenumber": phoneController.text,
-          "namemerchant": conNameMerch.text,
-          "address": conAddress.text,
-          "businesstype": tipe,
-          "province": _myProvince.toString(),
-          "regency": _myRegencies.toString(),
-          "district": _mydistrict.toString(),
-          "village": _myvillage.toString(),
-          "zipcode": conCodePos.text,
-          'deviceid': identifier.toString(),
-          "reg_type": "single/multi",
-          "image": "data:image/png;base64,$img64"
-        },
-      );
-      var jsonResponse = jsonDecode(response.body);
+    whenLoading(context);
+    Map<String, String?> bodyEmail = {
+      'type': 'Merchant',
+      "email": emailController.text,
+      "fullname": nameController.text,
+      "phonenumber": phoneController.text,
+      "namemerchant": conNameMerch.text,
+      "address": conAddress.text,
+      "businesstype": tipe,
+      "province": _myProvince.toString(),
+      "regency": _myRegencies.toString(),
+      "district": _mydistrict.toString(),
+      "village": _myvillage.toString(),
+      "zipcode": conCodePos.text,
+      'deviceid': identifier.toString(),
+      "reg_type": "single/multi",
+      "image": "data:image/png;base64,$img64"
+    };
 
-      if (response.statusCode == 200) {
-        log(jsonResponse['data']);
-        log("succes");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
-      } else {
-        log(jsonResponse['message']);
-        dialogError(context, jsonResponse['message'], jsonResponse['rc']);
-      }
-      return null;
-    } catch (e) {
-      throw Exception(e.toString());
+    if (emailController.text.isEmpty) {
+      bodyEmail.remove('email');
+    } else {
+      bodyEmail['email'] = emailController.text;
     }
+
+    final response = await http.post(
+      // Uri.parse(registerGlobalMerchbyOtp),
+      Uri.parse(registerLink),
+      body: bodyEmail,
+    );
+    var jsonResponse = jsonDecode(response.body);
+
+    print(jsonResponse['data']);
+    if (response.statusCode == 200) {
+      print("succes");
+      Navigator.of(context, rootNavigator: true).pop();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => page,
+        ),
+      );
+    } else {
+      Navigator.of(context, rootNavigator: true).pop();
+      emailError = jsonResponse['data']['email'];
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
   }
 
   textfieldXLdaftar(
@@ -2087,7 +2248,77 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                 cursorColor: primary500,
                 controller: controller,
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: size12),
+                  hintText: hintText,
+                  hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
+                  errorText: validate ? textError : null,
+                  errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: primary500,
+                    ),
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: bnw400,
+                    ),
+                  ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: red500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  textfieldXLdaftarKodePos(
+    title,
+    hintText,
+    textError,
+    TextEditingController controller,
+    bool validate,
+  ) {
+    return StatefulBuilder(
+      builder: (context, setState) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+              Text(
+                '*',
+                style: heading4(FontWeight.w700, red500, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: Container(
+              child: TextFormField(
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                onChanged: (value) {
+                  setState(() {
+                    refreshData();
+                  });
+                },
+                cursorColor: primary500,
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: size12),
                   hintText: hintText,
                   hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
                   errorText: validate ? textError : null,

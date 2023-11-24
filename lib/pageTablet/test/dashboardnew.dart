@@ -1,9 +1,11 @@
+import 'package:amio/services/checkConnection.dart';
 import 'package:amio/utils/skeletons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:amio/main.dart';
 import 'package:amio/services/apimethod.dart';
 import 'package:amio/utils/component.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:skeletons/skeletons.dart';
 
 class Dashboarpagenew extends StatefulWidget {
@@ -20,13 +22,16 @@ class Dashboarpagenew extends StatefulWidget {
 class _DashboarpagenewState extends State<Dashboarpagenew> {
   @override
   void initState() {
-    super.initState();
+    checkConnection(context);
+
     // dashboard(identifier, widget.token);
 
     pendapatanDas;
     membersDas;
     transaksiDas;
     rataTransaksiDas;
+    // rangeDate;
+    super.initState();
   }
 
   @override
@@ -153,50 +158,91 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                       if (snapshot.hasData) {
                                         return Column(
                                           children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                frameDash(
-                                                  'Pendapatan',
-                                                  FormatCurrency.convertToIdr(
-                                                      pendapatanDas),
-                                                  // 'Rp. $pendapatanDas',
-                                                  '',
-                                                  PhosphorIcons.money_fill,
+                                            SizedBox(height: size16),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: size16,
+                                                  vertical: size16),
+                                              decoration: BoxDecoration(
+                                                color: bnw200,
+                                              ),
+                                              child: Row(children: [
+                                                Icon(
+                                                  PhosphorIcons.info_fill,
+                                                  size: size24,
+                                                  color: bnw600,
                                                 ),
-                                                frameDash(
-                                                  'Total Pelanggan',
-                                                  membersDas,
-                                                  'Pelanggan',
-                                                  PhosphorIcons
-                                                      .users_three_fill,
-                                                ),
-                                              ],
+                                                SizedBox(width: size12),
+                                                Text(
+                                                    'Dibawah ini adalah data dalam kurun waktu (${snapshot.data['rangeDate']}).',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw600,
+                                                        'Outfit')),
+                                              ]),
                                             ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                frameDash(
-                                                  'Transaksi',
-                                                  transaksiDas,
-                                                  'Produk Terjual',
-                                                  PhosphorIcons
-                                                      .shopping_cart_simple_fill,
-                                                ),
-                                                frameDash(
-                                                  'Rata - rata Perhari',
-                                                  FormatCurrency.convertToIdr(
-                                                      rataTransaksiDas),
-                                                  'Transaksi',
-                                                  PhosphorIcons
-                                                      .shopping_cart_simple_fill,
-                                                ),
-                                              ],
-                                            )
+                                            SizedBox(height: size16),
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                // vertical: size16,
+                                                horizontal: size16,
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      frameDash(
+                                                        'Pendapatan',
+                                                        FormatCurrency
+                                                            .convertToIdr(
+                                                                pendapatanDas),
+                                                        // 'Rp. $pendapatanDas',
+                                                        '',
+                                                        PhosphorIcons
+                                                            .money_fill,
+                                                      ),
+                                                      SizedBox(width: size16),
+                                                      frameDash(
+                                                        'Total Pelanggan',
+                                                        membersDas,
+                                                        'Pelanggan',
+                                                        PhosphorIcons
+                                                            .users_three_fill,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: size16),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      frameDash(
+                                                        'Transaksi',
+                                                        transaksiDas,
+                                                        'Produk Terjual',
+                                                        PhosphorIcons
+                                                            .shopping_cart_simple_fill,
+                                                      ),
+                                                      SizedBox(width: size16),
+                                                      frameDash(
+                                                        'Rata - rata Perhari',
+                                                        FormatCurrency
+                                                            .convertToIdr(
+                                                                rataTransaksiDas),
+                                                        'Transaksi',
+                                                        PhosphorIcons
+                                                            .shopping_cart_simple_fill,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: size16),
+                                                ],
+                                              ),
+                                            ),
                                           ],
                                         );
                                       }
@@ -467,6 +513,13 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                                           datatop[index]
                                                               ['product_image'],
                                                           fit: BoxFit.cover,
+                                                          errorBuilder: (context,
+                                                                  error,
+                                                                  stackTrace) =>
+                                                              SizedBox(
+                                                            child: SvgPicture.asset(
+                                                                'assets/logoProduct.svg'),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
@@ -575,9 +628,16 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                                       height: 48,
                                                       width: 48,
                                                       child: Image.network(
-                                                        datatop[index]
+                                                        dataunder[index]
                                                             ['product_image'],
                                                         fit: BoxFit.cover,
+                                                        errorBuilder: (context,
+                                                                error,
+                                                                stackTrace) =>
+                                                            SizedBox(
+                                                          child: SvgPicture.asset(
+                                                              'assets/logoProduct.svg'),
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(
@@ -592,7 +652,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                                         children: [
                                                           Flexible(
                                                             child: Text(
-                                                              datatop[index]
+                                                              dataunder[index]
                                                                   ['name'],
                                                               style: heading3(
                                                                   FontWeight
@@ -602,7 +662,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                                             ),
                                                           ),
                                                           Text(
-                                                            datatop[index][
+                                                            dataunder[index][
                                                                 'typeproducts'],
                                                             style: body1(
                                                                 FontWeight.w400,
@@ -614,7 +674,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                                     ),
                                                     Spacer(),
                                                     Text(
-                                                      datatop[index]['qty'],
+                                                      dataunder[index]['qty'],
                                                       style: heading2(
                                                           FontWeight.w700,
                                                           primary500,
@@ -731,63 +791,62 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
   //   );
   // }
 
-  Container frameDash(String title, value, desc, IconData icon) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(0, size8, size8, 0),
-      height: 80,
-      width: 236,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size8),
-        // color: primary200,
-      ),
-      child: Row(
-        children: [
-          Container(
-            margin: EdgeInsets.all(size8),
-            height: 49,
-            width: 49,
-            decoration: BoxDecoration(
-              color: primary100,
-              borderRadius: BorderRadius.circular(size8),
-            ),
-            child: Icon(
-              icon,
-              color: primary500,
-              size: 30,
-            ),
-          ),
-          Expanded(
-            child: SizedBox(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        Text(
-                          '$value',
-                          style:
-                              heading3(FontWeight.w700, primary500, 'Outfit'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    PhosphorIcons.caret_right_fill,
-                    size: size16,
-                    color: primary500,
-                  )
-                ],
+  frameDash(String title, value, desc, IconData icon) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size8),
+          // color: primary200,
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 49,
+              width: 49,
+              decoration: BoxDecoration(
+                color: primary100,
+                borderRadius: BorderRadius.circular(size8),
+              ),
+              child: Icon(
+                icon,
+                color: primary500,
+                size: 30,
               ),
             ),
-          )
-        ],
+            SizedBox(width: size16),
+            Expanded(
+              child: SizedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          Text(
+                            '$value',
+                            style:
+                                heading3(FontWeight.w700, primary500, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      PhosphorIcons.caret_right_fill,
+                      size: size16,
+                      color: primary500,
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

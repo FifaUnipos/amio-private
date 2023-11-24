@@ -334,7 +334,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
             ),
             child: FutureBuilder(
               future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, ['']),
+                  _textvalueKeyword, [''], ''),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -421,7 +421,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
         ),
         FutureBuilder(
             future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, ['']),
+                _textvalueKeyword, [''], ''),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Map<String, dynamic>? data = snapshot.data!['data'];
@@ -718,7 +718,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
         ),
         FutureBuilder(
             future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, ['']),
+                _textvalueKeyword, [''], ''),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Map<String, dynamic>? data = snapshot.data!['data'];
@@ -1019,7 +1019,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
         ),
         FutureBuilder(
             future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, ['']),
+                _textvalueKeyword, [''], ''),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Map<String, dynamic>? data = snapshot.data!['data'];
@@ -1250,7 +1250,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
             ),
             child: FutureBuilder(
               future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, ['']),
+                  _textvalueKeyword, [''], ''),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -1349,7 +1349,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
         ),
         FutureBuilder(
             future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, ['']),
+                _textvalueKeyword, [''], ''),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 Map<String, dynamic>? data = snapshot.data!['data'];

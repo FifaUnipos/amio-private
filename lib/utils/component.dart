@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
+import 'package:amio/pageMobile/pageTokoMobile/pengembanganPage.dart';
 import 'package:amio/pagehelper/loginregis/login_page.dart';
 import 'package:amio/utils/skeletons.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,7 @@ import '../pageTablet/tokopage/dashboardtoko.dart';
 import '../services/apimethod.dart';
 
 String linkCSwa =
-    'https://api.whatsapp.com/send?phone=6282311139839&text=Hallo%20saya%20ingin%20menanyakan%20tentang%20UniPOS!';
+    'https://api.whatsapp.com/send?phone=6285947737725&text=Hallo%20saya%20ingin%20menanyakan%20tentang%20UniPOS';
 
 //? sp to double px
 double sp32 = 22;
@@ -175,6 +177,24 @@ List orderByProductText = [
   "Harga Terendah",
 ];
 
+List orderByRiwayatText = [
+  "Riwayat Terbaru",
+  "Riwayat Terlama",
+  "Nama Pembeli A ke Z",
+  "Nama Pembeli Z ke A",
+  "Total Tertinggi",
+  "Total Terendah",
+];
+
+List orderByTagihanText = [
+  "Tagihan Terbaru",
+  "Tagihan Terlama",
+  "Nama Pembeli A ke Z",
+  "Nama Pembeli Z ke A",
+  "Total Tertinggi",
+  "Total Terendah",
+];
+
 List orderByVoucherText = [
   "Nama Voucher A ke Z",
   "Nama Voucher Z ke A",
@@ -205,6 +225,7 @@ List orderByAkunText = [
   "Akun Terlama",
 ];
 
+//! orderby
 List orderByProduct = [
   "upDownNama",
   "downUpNama",
@@ -230,6 +251,14 @@ List orderByAkun = [
   "downUpNama",
   "upDownAccount",
   "downUpAccount",
+];
+List orderByRiwayatTagihan = [
+  "upDownCreate",
+  "downUpCreate",
+  "upDownNama",
+  "downUpNama",
+  "downUpAmount",
+  "upDownAmount",
 ];
 
 int valueOrderByProduct = 0;
@@ -335,8 +364,7 @@ buttonXXL(Widget mywidget, double width) {
 buttonXXLoutline(Widget mywidget, double width, Color colorBorder) {
   return IntrinsicWidth(
     child: Container(
-      height: size64,
-      padding: EdgeInsets.symmetric(horizontal: size24),
+      padding: EdgeInsets.symmetric(horizontal: size24, vertical: size16),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           side: BorderSide(
@@ -346,12 +374,7 @@ buttonXXLoutline(Widget mywidget, double width, Color colorBorder) {
           borderRadius: BorderRadius.circular(size8),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          mywidget,
-        ],
-      ),
+      child: mywidget,
     ),
   );
 }
@@ -767,7 +790,8 @@ textfieldXL(
               cursorColor: primary500,
               controller: controller,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
                 hintText: hintText,
                 hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
                 errorText: validate ? textError : null,
@@ -836,7 +860,7 @@ dropdownfieldXL(
             ],
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            padding: EdgeInsets.symmetric(vertical: size12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -917,7 +941,7 @@ imagefieldXL(
             child: Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: EdgeInsets.symmetric(vertical: size12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -1002,75 +1026,6 @@ notifLpembayaran(
         ),
       ],
     ),
-  );
-}
-
-Future<dynamic> dialogError(context, text, rc) {
-  return showDialog(
-    useRootNavigator: false,
-    context: context,
-    builder: (_) {
-      return Center(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(size8),
-            color: Colors.white,
-          ),
-          height: 156,
-          width: 281,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                text,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 40),
-              GestureDetector(
-                onTap: () async {
-                  // log(rc.toString());
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-
-                  if (rc.toString() == '63' || rc.toString() == '14') {
-                    prefs.remove('token');
-                    prefs.remove('deviceid');
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                      ),
-                    );
-                  }
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  height: 44,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(size8),
-                    border: Border.all(),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Batal',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    },
   );
 }
 
@@ -1231,6 +1186,16 @@ sessionPage(BuildContext context, String token) {
   );
 }
 
+sessionPageMobile(BuildContext context, String token) {
+  return Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+        builder: (context) => statusProfile == 'Group_Merchant'
+            ? TahapPengembanganPage()
+            : TahapPengembanganPage()),
+  );
+}
+
 searchField(double width, Widget mywidget) {
   return Container();
 }
@@ -1250,9 +1215,10 @@ searchField(double width, Widget mywidget) {
 
 //* Appbar
 appbar(BuildContext context, bool login) {
-  return SafeArea(
+  return 
+  SafeArea(
     child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: EdgeInsets.symmetric(vertical: size12),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1263,6 +1229,43 @@ appbar(BuildContext context, bool login) {
                       context,
                       MaterialPageRoute(
                         builder: (context) => LoginPage(),
+                      ))
+                  : Navigator.of(context).pop(),
+              child: Icon(
+                PhosphorIcons.arrow_left,
+                size: size40,
+                color: bnw900,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                helpQuestionShow(context);
+              },
+              child: Icon(
+                PhosphorIcons.question,
+                size: size40,
+                color: bnw900,
+              ),
+            ),
+          ]),
+    ),
+  );
+}
+
+appbarMobile(BuildContext context, bool login) {
+  return SafeArea(
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: size12),
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => login
+                  ? Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginPageMobile(),
                       ))
                   : Navigator.of(context).pop(),
               child: Icon(
@@ -1285,60 +1288,6 @@ appbar(BuildContext context, bool login) {
     ),
   );
 }
-
-// helpQuestion(BuildContext context) {
-//   showHelpSheet(
-//     context,
-//     ClipRRect(
-//       borderRadius: BorderRadius.circular(12),
-//       child: Padding(
-//         padding: const EdgeInsets.all(28.0),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text(
-//               "Butuh Bantuan?",
-//               style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-//             ),
-//             SizedBox(height: 20),
-//             Image.asset(
-//               'assets/images/help.png',
-//             ),
-//             SizedBox(height: 20),
-//             Text(
-//               "Silahkan untuk menghubungi customer service untuk menanyakan permasalahan.",
-//               style: heading2(FontWeight.w400, bnw900, 'Outfit'),
-//             ),
-//             Spacer(),
-//             GestureDetector(
-//                 onTap: () {
-//                   try {
-//                     launch(linkCSwa);
-//                   } catch (e) {}
-//                 },
-//                 child: buttonXL(
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       Icon(
-//                         PhosphorIcons.whatsapp_logo_fill,
-//                         color: bnw100,
-//                       ),
-//                       SizedBox(width: 10),
-//                       Text(
-//                         'Hubungkan ke Customer Service',
-//                         style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-//                       )
-//                     ],
-//                   ),
-//                   double.infinity,
-//                 )),
-//           ],
-//         ),
-//       ),
-//     ),
-//   );
-// }
 
 helpQuestionShow(BuildContext context) {
   return showModalBottomSheet(
@@ -1364,7 +1313,12 @@ helpQuestionShow(BuildContext context) {
                 children: [
                   dividerShowdialog(),
                   SizedBox(height: size16),
-                  SvgPicture.asset('assets/newIllustration/help.svg'),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 2.2,
+                    child: SvgPicture.asset(
+                      'assets/newIllustration/Help.svg',
+                    ),
+                  ),
                   SizedBox(height: size16),
                   Text(
                     "Butuh Bantuan?",
@@ -1395,30 +1349,33 @@ helpQuestionShow(BuildContext context) {
                       ),
                       SizedBox(width: size16),
                       Expanded(
-                        child: GestureDetector(
-                            onTap: () {
-                              try {
-                                launch(linkCSwa);
-                              } catch (e) {}
-                            },
-                            child: buttonXL(
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.whatsapp_logo_fill,
-                                    color: bnw100,
-                                  ),
-                                  SizedBox(width: size12),
-                                  Text(
-                                    'Hubungkan ke Customer Service',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
-                                  )
-                                ],
-                              ),
-                              double.infinity,
-                            )),
+                        child: SizedBox(
+                          height: size56,
+                          child: GestureDetector(
+                              onTap: () {
+                                try {
+                                  launch(linkCSwa);
+                                } catch (e) {}
+                              },
+                              child: buttonXL(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      PhosphorIcons.whatsapp_logo_fill,
+                                      color: bnw100,
+                                    ),
+                                    SizedBox(width: size12),
+                                    Text(
+                                      'Hubungkan ke Customer Service',
+                                      style: heading3(
+                                          FontWeight.w600, bnw100, 'Outfit'),
+                                    )
+                                  ],
+                                ),
+                                double.infinity,
+                              )),
+                        ),
                       ),
                     ],
                   ),
@@ -1437,29 +1394,33 @@ void showSnackBarComponent(BuildContext context, String text, String rc) {
     backgroundColor: Colors.transparent,
     barrierColor: Colors.transparent,
     isDismissible: false,
+    enableDrag: false,
     context: context,
     builder: (BuildContext context) {
-      return FutureBuilder(
-        future: Future.delayed(Duration(seconds: 2)),
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            Navigator.pop(context);
-          }
-          return Container(
-            margin: const EdgeInsets.all(20),
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size8),
-              color: rc == '00' ? succes600 : red500,
-            ),
-            child: Center(
-              child: Text(
-                text,
-                style: heading2(FontWeight.w700, bnw100, 'Outfit'),
+      return WillPopScope(
+        onWillPop: () async => false,
+        child: FutureBuilder(
+          future: Future.delayed(Duration(seconds: 2)),
+          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              Navigator.pop(context);
+            }
+            return Container(
+              margin: const EdgeInsets.all(20),
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(size8),
+                color: rc == '00' ? succes600 : red500,
               ),
-            ),
-          );
-        },
+              child: Center(
+                child: Text(
+                  text,
+                  style: heading2(FontWeight.w700, bnw100, 'Outfit'),
+                ),
+              ),
+            );
+          },
+        ),
       );
     },
   );
@@ -1480,11 +1441,27 @@ dash() {
   );
 }
 
-void showSnackbar(BuildContext context, jsonResponse) => showSnackBarComponent(
+void showSnackbar(BuildContext context, jsonResponse) async {
+  showSnackBarComponent(
+    context,
+    jsonResponse['message'] ?? jsonResponse['data'],
+    jsonResponse['rc'],
+  );
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  if (jsonResponse['rc'] == '63' || jsonResponse['rc'] == '14') {
+    prefs.remove('token');
+    prefs.remove('deviceid');
+
+    Navigator.pushReplacement(
       context,
-      jsonResponse['message'] ?? jsonResponse['data'],
-      jsonResponse['rc'],
+      MaterialPageRoute(
+        builder: (context) => LoginPage(),
+      ),
     );
+  }
+}
 
 String nameku = nameProfile;
 String getInitials() {

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/component.dart';
 import 'loginregis/daftar_akun_toko.dart';
+import 'masukakun.dart';
 
 class DaftarAkunPage extends StatefulWidget {
   const DaftarAkunPage({super.key});
@@ -32,7 +33,37 @@ class _DaftarAkunPageState extends State<DaftarAkunPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              appbar(context, true),
+              SafeArea(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: size12),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MasukAkunPage())),
+                          child: Icon(
+                            PhosphorIcons.arrow_left,
+                            size: size40,
+                            color: bnw900,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            helpQuestionShow(context);
+                          },
+                          child: Icon(
+                            PhosphorIcons.question,
+                            size: size40,
+                            color: bnw900,
+                          ),
+                        ),
+                      ]),
+                ),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

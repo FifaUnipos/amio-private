@@ -213,10 +213,11 @@ class _TokoPageTokoState extends State<TokoPageToko> {
                                 GestureDetector(
                                   onTap: () {
                                     whenLoading(context);
+                                    merchid = datas![i].merchantid.toString();
                                     getSingleMerch(
                                       context,
                                       widget.token,
-                                      datas![i].merchantid.toString(),
+                                      merchid,
                                     ).then((value) {
                                       if (value['rc'] == '00') {
                                         Navigator.of(context,

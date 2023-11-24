@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
 import 'package:amio/utils/skeletons.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
@@ -51,6 +52,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
       setState(() {
         img64 = base64Encode(bytes!);
         images.add(img64!);
+        imageEditToko = '';
       });
       // Clipboard.setData(ClipboardData(text: img64));
     } else {
@@ -61,29 +63,6 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
   late PageController pageController = widget.pageController;
 
   List<SingleDataToko>? singleDatas;
-
-  @override
-  void initState() {
-    checkConnection(context);
-
-    pageController;
-    _getProvinceList();
-    _getTipeList();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    conNameMerch.dispose();
-    conAddress.dispose();
-    conCodePos.dispose();
-    pageController.dispose();
-    super.dispose();
-  }
-
-  void autoReload() {
-    setState(() {});
-  }
 
   TextEditingController searchController = TextEditingController();
 
@@ -111,6 +90,29 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
       idkec = kodeDisUbah,
       iddesa = kodeVillageUbah,
       idtipe = idtipeUbah;
+
+  @override
+  void initState() {
+    checkConnection(context);
+
+    pageController;
+    _getProvinceList();
+    _getTipeList();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    conNameMerch.dispose();
+    conAddress.dispose();
+    conCodePos.dispose();
+    pageController.dispose();
+    super.dispose();
+  }
+
+  void autoReload() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,65 +168,93 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                         'Foto Profil',
                         style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(height: size12),
+                      SizedBox(height: size16),
                       Row(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: bnw900),
-                              borderRadius: BorderRadius.circular(90),
+                          GestureDetector(
+                            onTap: () => tambahGambar(context),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: bnw900),
+                                borderRadius: BorderRadius.circular(size8),
+                              ),
+                              height: 80,
+                              width: 80,
+                              child: myImage != null
+                                  ? ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(size8),
+                                      child: Image.file(
+                                        myImage!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : imageEditToko == ''
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(size8),
+                                          child: Image.network(
+                                            imageEditToko,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    SizedBox(
+                                              child: SvgPicture.asset(
+                                                  'assets/logoProduct.svg'),
+                                            ),
+                                          ),
+                                        )
+                                      : ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(size8),
+                                          child: Image.network(
+                                            imageEditToko,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    GestureDetector(
+                                              onTap: () {
+                                                tambahGambar(context);
+                                              },
+                                              child: SizedBox(
+                                                child: Icon(
+                                                  PhosphorIcons.plus,
+                                                  color: bnw900,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                             ),
-                            height: 80,
-                            width: 80,
-                            child: logoMerchantUbah.isEmpty
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(90),
-                                    child: Icon(PhosphorIcons.person))
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(90),
-                                    child: Image.network(
-                                      logoMerchantUbah,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              SizedBox(
-                                                  child: Icon(
-                                        PhosphorIcons.storefront_fill,
-                                        size: 60,
-                                        color: bnw900,
-                                      )),
-                                    )),
                           ),
-                          SizedBox(width: size12),
+                          SizedBox(width: size16),
                           Text(
-                            'Masukkan Foto Terbaikmu. Fotomu akan bisa dilihat siapa saja',
+                            'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
                             style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                           ),
                         ],
                       ),
-                      Theme(
-                        data: ThemeData(
-                          disabledColor: bnw900,
-                        ),
-                        child: GestureDetector(
-                          onTap: () => getImage(),
-                          child: IntrinsicHeight(
-                            child: TextFormField(
-                              style:
-                                  heading2(FontWeight.w600, bnw900, 'Outfit'),
-                              decoration: InputDecoration(
-                                enabled: false,
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    width: 1.5,
-                                    color: bnw500,
-                                  ),
+
+                      GestureDetector(
+                        onTap: () => tambahGambar(context),
+                        child: IntrinsicHeight(
+                          child: TextFormField(
+                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                            decoration: InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 1.5,
+                                  color: bnw500,
                                 ),
-                                suffixIcon: Icon(PhosphorIcons.plus),
-                                hintText: 'Ubah Gambar',
-                                hintStyle:
-                                    heading2(FontWeight.w600, bnw900, 'Outfit'),
                               ),
+                              enabled: false,
+                              suffixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Gambar',
+                              hintStyle:
+                                  heading2(FontWeight.w600, bnw900, 'Outfit'),
                             ),
                           ),
                         ),
@@ -275,6 +305,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                   width: double.infinity,
                   child: GestureDetector(
                     onTap: () {
+                      // print(img64);
                       updateMerch(
                         context,
                         widget.token,
@@ -560,7 +591,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                             selectedTipeUsaha =
                                                 tipeUsaha.toString();
                                             _selectTipeUsaha(tipeUsaha);
-
+                                            _getRegenciesList(_myProvince);
                                             print(tipeUsaha['nama_tipe']);
                                           });
                                         },
@@ -816,7 +847,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                               selectedProvince =
                                                   province.toString();
                                               _selectProvince(province);
-
+                                              _getRegenciesList(_myProvince);
                                               print(province['NAME']);
                                             });
                                           },
@@ -1087,7 +1118,8 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                                     selectedRegencies =
                                                         regencies.toString();
                                                     _selectRegencies(regencies);
-
+                                                    _getDistrictList(
+                                                        _myRegencies);
                                                     print(regencies['NAME']);
                                                   });
                                                 },
@@ -1359,7 +1391,8 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                                     selectedRegencies =
                                                         district.toString();
                                                     _selectDistrict(district);
-
+                                                    _getVillageList(
+                                                        _mydistrict);
                                                     print(district['NAME']);
                                                   });
                                                 },
@@ -1952,5 +1985,137 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
       selectedTipeUsaha = tipeUsaha;
       isItemSelected = true;
     });
+  }
+
+  tambahGambar(BuildContext context) async {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) => IntrinsicHeight(
+        child: Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(size8),
+              topLeft: Radius.circular(size8),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                imageEditToko.isNotEmpty
+                    ? Container(
+                        height: 200,
+                        width: 200,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(120),
+                          child: Image.network(
+                            imageEditToko,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                SizedBox(
+                              child: SvgPicture.asset('assets/logoProduct.svg'),
+                            ),
+                          ),
+                        ),
+                      )
+                    : myImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(120),
+                            child: Container(
+                                height: 200,
+                                width: 200,
+                                color: bnw400,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  child: Image.file(
+                                    myImage!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )),
+                          )
+                        : Container(
+                            height: 200,
+                            width: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(120),
+                            ),
+                            child: SvgPicture.asset(
+                              'assets/logoProduct.svg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                SizedBox(height: size16),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await getImage();
+                        Navigator.pop(context);
+                      },
+                      child: SizedBox(
+                        child: TextFormField(
+                          enabled: false,
+                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          decoration: InputDecoration(
+                              focusColor: primary500,
+                              prefixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Foto',
+                              hintStyle:
+                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                        ),
+                      ),
+                    ),
+                    (myImage != null || imageEditToko != '')
+                        ? GestureDetector(
+                            onTap: () async {
+                              img64 = null;
+                              myImage = null;
+                              imageEditToko = '';
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: SizedBox(
+                              child: TextFormField(
+                                enabled: false,
+                                style:
+                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                decoration: InputDecoration(
+                                  focusColor: primary500,
+                                  prefixIcon: Icon(
+                                    PhosphorIcons.trash,
+                                    color: bnw900,
+                                  ),
+                                  hintText: 'Hapus Foto',
+                                  hintStyle: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

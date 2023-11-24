@@ -27,7 +27,7 @@ Future<void> main() async {
 
   await FlutterDownloader.initialize(
     debug: true,
-    ignoreSsl: true,
+    // ignoreSsl: true,
   );
 
   checkToken = mytokenGet;

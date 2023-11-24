@@ -162,7 +162,7 @@ class _PilihPelangganTokoFifaKoinState
                     style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                   ),
                   Text(
-                    'Produk akan ditambahkan kedalam pelanggan yang telah dipilih',
+                    'Pelanggan akan ditambahkan kedalam pelanggan yang telah dipilih',
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
@@ -174,29 +174,17 @@ class _PilihPelangganTokoFifaKoinState
               // padding: EdgeInsets.zero,
               physics: BouncingScrollPhysics(),
               children: [
-                fieldAddProduk(
-                  'Nama Pelanggan',
-                  'Muhammad Nabil Musyaffa',
-                  conName,
-                  TextInputType.text,
-                ),
+                fieldAddProduk('Nama Pelanggan', 'Muhammad Nabil Musyaffa',
+                    conName, TextInputType.text, true),
                 SizedBox(height: size16),
-                fieldAddProduk(
-                  'Nomor Telepon',
-                  '0812346789',
-                  conPhone,
-                  TextInputType.number,
-                ),
+                fieldAddProduk('Nomor Telepon', '0812346789', conPhone,
+                    TextInputType.number, true),
                 SizedBox(height: size16),
-                fieldAddProduk(
-                  'Email',
-                  'nabil@gmail.com',
-                  conEmail,
-                  TextInputType.emailAddress,
-                ),
+                fieldAddProduk('Email', 'nabil@gmail.com', conEmail,
+                    TextInputType.emailAddress, false),
                 SizedBox(height: size16),
-                fieldAddProduk(
-                    'Instagram', '@nabil123', conInstagram, TextInputType.text),
+                fieldAddProduk('Instagram', '@nabil123', conInstagram,
+                    TextInputType.text, false),
                 SizedBox(height: size16),
               ],
             ),
@@ -409,32 +397,43 @@ class _PilihPelangganTokoFifaKoinState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              buttonLoutline(
-                GestureDetector(
-                    onTap: () {},
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+              orderBy(context),
+              buttonLoutlineColor(
+                Row(
+                  children: [
+                    Icon(
+                      PhosphorIcons.info_fill,
+                      color: succes600,
+                      size: size24,
+                    ),
+                    SizedBox(width: size12),
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Urutkan',
-                              style:
-                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            Text(
-                              ' dari Nama A ke Z',
-                              style:
-                                  heading3(FontWeight.w400, bnw600, 'Outfit'),
-                            ),
-                          ],
+                        Text(
+                          'Total Pelanggan : ',
+                          style: TextStyle(
+                            color: succes600,
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                        Icon(PhosphorIcons.caret_down),
+                        Text(
+                          datasPelanggan?.length == null
+                              ? '0'
+                              : datasPelanggan!.length.toString(),
+                          style: TextStyle(
+                            color: succes600,
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ],
-                    )),
-                bnw300,
-              ),
-              Text(datasPelanggan!.length.toString()),
+                    ),
+                  ],
+                ),
+                succes100,
+                succes600,
+              )
             ],
           ),
           SizedBox(height: size16),
@@ -694,7 +693,7 @@ class _PilihPelangganTokoFifaKoinState
     );
   }
 
-  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo) {
+  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo, bintang) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -706,7 +705,7 @@ class _PilihPelangganTokoFifaKoinState
                 style: body1(FontWeight.w500, bnw900, 'Outfit'),
               ),
               Text(
-                ' *',
+                bintang == true ? ' *' : '',
                 style: body1(FontWeight.w700, red500, 'Outfit'),
               ),
             ],
@@ -770,6 +769,170 @@ class _PilihPelangganTokoFifaKoinState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  orderBy(BuildContext context) {
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showModalBottomSheet(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit'),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByPelangganText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color:
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                          ),
+                                          label: Text(
+                                              orderByPelangganText[index],
+                                              style: heading4(
+                                                  FontWeight.w400,
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit')),
+                                          selected:
+                                              valueOrderByProduct == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByProduct = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () {
+                                textOrderBy =
+                                    orderByPelangganText[valueOrderByProduct];
+                                textvalueOrderBy =
+                                    orderByPelanggan[valueOrderByProduct];
+                                Navigator.pop(context);
+                                initState();
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                        FontWeight.w600, bnw100, 'Outfit'),
+                                  ),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          });
+        },
+        child: buttonLoutline(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Urutkan',
+                style: heading3(
+                  FontWeight.w600,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              Text(
+                ' dari $textOrderBy',
+                style: heading3(
+                  FontWeight.w400,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              SizedBox(width: size12),
+              Icon(
+                PhosphorIcons.caret_down,
+                color: bnw900,
+                size: size24,
+              )
+            ],
+          ),
+          bnw300,
+        ),
       ),
     );
   }

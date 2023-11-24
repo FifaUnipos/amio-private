@@ -28,6 +28,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Color onOffButton = bnw300;
 
+  String emailError = '';
+
+  refreshText() {
+    emailError = '';
+    errorText = '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -64,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Daftar Sebagai Pemilik Toko',
+                              'Daftar Sebagai Grup Toko',
                               style:
                                   heading1(FontWeight.w700, bnw900, 'Outfit'),
                             ),
@@ -73,7 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               style:
                                   heading3(FontWeight.w500, bnw500, 'Outfit'),
                             ),
-                            SizedBox(height: 24),
+                            SizedBox(height: size24),
                             Row(
                               children: [
                                 Text(
@@ -108,28 +115,43 @@ class _RegisterPageState extends State<RegisterPage> {
                             fieldMethodPhone('08123456789', phoneController),
                             SizedBox(height: size16),
                             Text(
-                              'Email ',
+                              'Email',
                               style:
                                   heading4(FontWeight.w400, bnw900, 'Outfit'),
                             ),
                             fieldMethod(
                                 'Cth: nabil@gmail.com', emailController),
+                            // emailError.isNotEmpty
+                            //     ? Column(
+                            //         children: [
+                            //           SizedBox(height: size16),
+                            //           Text(
+                            //             emailError.isNotEmpty ? emailError : '',
+                            //             style: heading4(
+                            //                 FontWeight.w500, red500, 'Outfit'),
+                            //           ),
+                            //         ],
+                            //       )
+                            //     : SizedBox(),
                             SizedBox(height: size48),
                             Column(
                               children: [
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width,
                                   child: GestureDetector(
-                                    onTap: () => register(
-                                      context,
-                                      Otppage(
-                                        phoneController.text,
-                                        nameController.text,
-                                        // passController.text,
-                                        emailController.text,
-                                        'register_page',
-                                      ),
-                                    ),
+                                    onTap: () {
+                                      refreshText();
+                                      register(
+                                        context,
+                                        Otppage(
+                                          phoneController.text,
+                                          nameController.text,
+                                          // passController.text,
+                                          emailController.text,
+                                          'register_page',
+                                        ),
+                                      );
+                                    },
                                     child: buttonXXLonOff(
                                       Center(
                                         child: Text(
@@ -191,6 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
         style: heading2(FontWeight.w600, bnw900, 'Outfit'),
         onChanged: (value) {
           setState(() {
+            refreshText();
             if (value.contains('@') || value.endsWith('.com')) {
               onOffButton = primary500;
             } else if (value.startsWith('08') || value.length < 10) {
@@ -235,6 +258,7 @@ class _RegisterPageState extends State<RegisterPage> {
         keyboardType: TextInputType.number,
         onChanged: (value) {
           setState(() {
+            refreshText();
             if (value.contains('@') || value.endsWith('.com')) {
               onOffButton = primary500;
             } else if (value.startsWith('08') || value.length < 10) {
@@ -272,34 +296,43 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future register(context, page) async {
-    try {
-      final response = await http.post(
-        Uri.parse(registerbyotp),
-        body: {
-          'phonenumber': phoneController.text,
-          'fullname': nameController.text,
-          // 'password': passController.text,
-          'email': emailController.text,
-          'deviceid': identifier.toString(),
-        },
-      );
-      var jsonResponse = jsonDecode(response.body);
+    whenLoading(context);
+    Map<String, String?> bodyEmail = {
+      'type': 'Group_Merchant',
+      'deviceid': identifier,
+      'phonenumber': phoneController.text,
+      'fullname': nameController.text,
+      'email': emailController.text,
+    };
 
-      if (response.statusCode == 200) {
-        log(jsonResponse['data']);
-        print("succes");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
-      } else {
-        dialogError(context, jsonResponse['message'], jsonResponse['rc']);
-      }
-      return null;
-    } catch (e) {
-      throw Exception(e.toString());
+    if (emailController.text.isEmpty) {
+      bodyEmail.remove('email');
+    } else {
+      bodyEmail['email'] = emailController.text;
     }
+
+    final response = await http.post(
+      Uri.parse(registerLink),
+      body: bodyEmail,
+    );
+    var jsonResponse = jsonDecode(response.body);
+
+    print(jsonResponse['data']);
+    if (response.statusCode == 200) {
+      Navigator.of(context, rootNavigator: true).pop();
+      print("succes");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => page,
+        ),
+      );
+    } else {
+      Navigator.of(context, rootNavigator: true).pop();
+      emailError = jsonResponse['data']['email'];
+      showSnackbar(context, jsonResponse);
+    }
+    setState(() {});
+    return null;
   }
 }

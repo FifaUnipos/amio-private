@@ -33,6 +33,8 @@ class TagihanPageGrup extends StatefulWidget {
 
 class _TagihanPageGrupState extends State<TagihanPageGrup> {
   List<TokoDataRiwayatModel>? datasRiwayat;
+  String textOrderBy = 'Tagihan Terbaru';
+  String textvalueOrderBy = 'upDownCreate';
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
           widget.token,
           '0',
           widget.merchid,
+          textvalueOrderBy,
         );
         setState(() {});
       },
@@ -157,38 +160,9 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
             ],
           ),
         ),
-
-        // Padding(
-        //   padding:  EdgeInsets.only(top: size16, bottom: size16),
-        //   child: buttonLoutline(
-        //     GestureDetector(
-        //       child: Row(
-        //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        //         children: [
-        //           Row(
-        //             children: [
-        //               Text(
-        //                 'Urutkan',
-        //                 style:
-        //                     heading3(FontWeight.w600, bnw900, 'Outfit'),
-        //               ),
-        //               Text(
-        //                 ' dari Nama Toko A ke Z',
-        //                 style:
-        //                     heading3(FontWeight.w400, bnw600, 'Outfit'),
-        //               ),
-        //             ],
-        //           ),
-        //            Icon(PhosphorIcons.caret_down),
-        //         ],
-        //       ),
-        //     ),
-        //     280,
-        //     bnw300,
-        //   ),
-        // ),
-
-        SizedBox(height: 20),
+        SizedBox(height: size16),
+        orderBy(context),
+        SizedBox(height: size16),
         Flexible(
           child: Row(
             children: [
@@ -339,7 +313,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                             .transactionid
                                                             .toString())
                                                     ? primary200
-                                                    : null,
+                                                    : Colors.transparent,
                                                 border: Border(
                                                   bottom: BorderSide(
                                                     color: bnw300,
@@ -358,8 +332,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     width: widtValue,
                                                     child: Text(
                                                       datasRiwayat![index]
-                                                          .customer
-                                                          .toString(),
+                                                              .customer ??
+                                                          '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -370,8 +344,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     width: widtValue,
                                                     child: Text(
                                                       datasRiwayat![index]
-                                                          .transactionid
-                                                          .toString(),
+                                                              .transactionid ??
+                                                          '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -382,8 +356,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     width: widtValue,
                                                     child: Text(
                                                       datasRiwayat![index]
-                                                          .pic
-                                                          .toString(),
+                                                              .pic ??
+                                                          '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -409,8 +383,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     width: widtValue,
                                                     child: Text(
                                                       datasRiwayat![index]
-                                                          .entrydate
-                                                          .toString(),
+                                                              .entrydate ??
+                                                          '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -580,7 +554,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                       CrossAxisAlignment.end,
                                                   children: [
                                                     Text(
-                                                      data['entrydate'],
+                                                      data['entrydate'] ?? '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -588,7 +562,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     ),
                                                     SizedBox(height: 8),
                                                     Text(
-                                                      data['transactionid'],
+                                                      data['transactionid'] ??
+                                                          '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -596,7 +571,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     ),
                                                     SizedBox(height: 8),
                                                     Text(
-                                                      data['pic'],
+                                                      data['pic'] ?? '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -604,7 +579,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     ),
                                                     SizedBox(height: 8),
                                                     Text(
-                                                      data['customer'],
+                                                      data['customer'] ?? '',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -644,33 +619,37 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                             bnw900,
                                                             'Outfit'),
                                                       ),
-                                                      Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 8, right: 8),
-                                                        height: 48,
-                                                        width: 48,
-                                                        child: Image.network(
-                                                          detail[index]
-                                                              ['product_image'],
-                                                          fit: BoxFit.cover,
-                                                          loadingBuilder: (context,
-                                                              child,
-                                                              loadingProgress) {
-                                                            if (loadingProgress ==
-                                                                null) {
-                                                              return child;
-                                                            }
-
-                                                            return Center(
-                                                                child:
-                                                                    loading());
-                                                          },
-                                                          errorBuilder: (context,
-                                                                  error,
-                                                                  stackTrace) =>
-                                                              SizedBox(
-                                                            child: SvgPicture.asset(
-                                                                'assets/logoProduct.svg'),
+                                                      ClipRRect(
+                                                        borderRadius: BorderRadius.circular(size8),
+                                                        child: Container(
+                                                          margin: EdgeInsets.only(
+                                                              left: 8, right: 8),
+                                                          height: 48,
+                                                          width: 48,
+                                                          child: Image.network(
+                                                            detail[index][
+                                                                    'product_image'] ??
+                                                                '',
+                                                            fit: BoxFit.cover,
+                                                            loadingBuilder: (context,
+                                                                child,
+                                                                loadingProgress) {
+                                                              if (loadingProgress ==
+                                                                  null) {
+                                                                return child;
+                                                              }
+                                                      
+                                                              return Center(
+                                                                  child:
+                                                                      loading());
+                                                            },
+                                                            errorBuilder: (context,
+                                                                    error,
+                                                                    stackTrace) =>
+                                                                SizedBox(
+                                                              child: SvgPicture.asset(
+                                                                  'assets/logoProduct.svg'),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -684,7 +663,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                         children: [
                                                           Text(
                                                             detail[index]
-                                                                ['name'],
+                                                                    ['name'] ??
+                                                                '',
                                                             style: heading3(
                                                                 FontWeight.w600,
                                                                 bnw900,
@@ -952,6 +932,173 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
           ),
         ),
       ],
+    );
+  }
+
+  orderBy(BuildContext context) {
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showModalBottomSheet(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit'),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByTagihanText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color:
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                          ),
+                                          label: Text(orderByTagihanText[index],
+                                              style: heading4(
+                                                  FontWeight.w400,
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit')),
+                                          selected:
+                                              valueOrderByProduct == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByProduct = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () {
+                                print(valueOrderByProduct);
+                                print(orderByTagihanText[valueOrderByProduct]);
+
+                                textOrderBy =
+                                    orderByTagihanText[valueOrderByProduct];
+                                textvalueOrderBy =
+                                    orderByRiwayatTagihan[valueOrderByProduct];
+                                orderByRiwayatTagihan[valueOrderByProduct];
+                                Navigator.pop(context);
+                                initState();
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                        FontWeight.w600, bnw100, 'Outfit'),
+                                  ),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          });
+        },
+        child: buttonLoutline(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Urutkan',
+                style: heading3(
+                  FontWeight.w600,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              Text(
+                ' dari $textOrderBy',
+                style: heading3(
+                  FontWeight.w400,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              SizedBox(width: size12),
+              Icon(
+                PhosphorIcons.caret_down,
+                color: bnw900,
+                size: size24,
+              )
+            ],
+          ),
+          bnw300,
+        ),
+      ),
     );
   }
 }

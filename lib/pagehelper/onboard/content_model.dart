@@ -17,7 +17,7 @@ List<UnbordingContent> contents = [
       image: 'assets/newIllustration/OnBoarding2.svg',
       discription: "Melakukkan Transaksi Jual Beli Yang Terintegrasi"),
   UnbordingContent(
-      title: 'Pembeli senang dengan pelayanan yang cepat dengan menggunakan UniPOS5',
+      title: 'Pembeli senang dengan pelayanan yang cepat dengan menggunakan UniPOS',
       image: 'assets/newIllustration/OnBoarding3.svg',
       discription: "Melakukkan Transaksi Jual Beli Yang Terintegrasi"),
 ];

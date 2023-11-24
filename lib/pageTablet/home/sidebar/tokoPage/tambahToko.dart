@@ -512,7 +512,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                             selectedTipeUsaha =
                                                 tipeUsaha.toString();
                                             _selectTipeUsaha(tipeUsaha);
-
+                                            _getRegenciesList(_myProvince);
                                             print(tipeUsaha['nama_tipe']);
                                           });
                                         },
@@ -526,7 +526,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                             GestureDetector(
                               onTap: () {
                                 print(tipe);
-
+                                _getRegenciesList(_myProvince);
                                 autoReload();
                                 // initState();
                                 Navigator.pop(context);
@@ -870,7 +870,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                               selectedProvince =
                                                   province.toString();
                                               _selectProvince(province);
-
+                                              _getRegenciesList(_myProvince);
                                               print(province['NAME']);
                                             });
                                           },
@@ -1140,7 +1140,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                                     selectedRegencies =
                                                         regencies.toString();
                                                     _selectRegencies(regencies);
-
+                                                    _getDistrictList(
+                                                        _myRegencies);
                                                     print(regencies['NAME']);
                                                   });
                                                 },
@@ -1411,7 +1412,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                                     selectedRegencies =
                                                         district.toString();
                                                     _selectDistrict(district);
-
+                                                    _getVillageList(
+                                                        _mydistrict);
                                                     print(district['NAME']);
                                                   });
                                                 },

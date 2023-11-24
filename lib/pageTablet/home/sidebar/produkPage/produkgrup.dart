@@ -288,7 +288,7 @@ class _ProdukGrupState extends State<ProdukGrup> {
                                             ),
                                           )
                                         : Icon(
-                                            Icons.person,
+                                            PhosphorIcons.storefront_fill,
                                             size: 60,
                                           ),
                                   ),
@@ -651,7 +651,7 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
                                   fit: BoxFit.cover,
                                 )
                               : Icon(
-                                  Icons.person,
+                                  PhosphorIcons.storefront_fill,
                                   size: 60,
                                 ),
                         ),

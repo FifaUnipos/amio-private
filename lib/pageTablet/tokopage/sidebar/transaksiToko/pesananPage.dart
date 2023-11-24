@@ -19,6 +19,7 @@ import 'pilihPelangganPage.dart';
 import 'transaksi.dart';
 
 String? transactionidValue;
+bool isTagihan = false;
 
 class SimpanPage extends StatefulWidget {
   String token;
@@ -58,6 +59,9 @@ class _SimpanPageState extends State<SimpanPage> {
   List<String> cartProductIds = [];
   String? nameSingle, transaksiReference, idKategori;
 
+  String textOrderBy = 'Tagihan Terbaru';
+  String textvalueOrderBy = 'upDownCreate';
+
   @override
   void initState() {
     checkConnection(context);
@@ -68,6 +72,7 @@ class _SimpanPageState extends State<SimpanPage> {
           widget.token,
           '0',
           '',
+          textvalueOrderBy,
         );
 
         setState(() {});
@@ -118,6 +123,7 @@ class _SimpanPageState extends State<SimpanPage> {
                     GestureDetector(
                       onTap: () {
                         widget.pageController.jumpToPage(0);
+
                         setState(() {});
                       },
                       child: Icon(
@@ -143,37 +149,12 @@ class _SimpanPageState extends State<SimpanPage> {
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: size12, bottom: size12),
+                  padding: EdgeInsets.only(top: size16, bottom: size16),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // buttonLoutline(
-                      //   GestureDetector(
-                      //     child: Row(
-                      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      //       children: [
-                      //         Row(
-                      //           children: [
-                      //             Text(
-                      //               'Urutkan',
-                      //               style: heading3(
-                      //                   FontWeight.w600, bnw900, 'Outfit'),
-                      //             ),
-                      //             Text(
-                      //               ' dari Nama Toko A ke Z',
-                      //               style: heading3(
-                      //                   FontWeight.w400, bnw600, 'Outfit'),
-                      //             ),
-                      //           ],
-                      //         ),
-                      //         Icon(PhosphorIcons.caret_down),
-                      //       ],
-                      //     ),
-                      //   ),
-                      //   bnw300,
-                      // ),
-
+                      orderBy(context),
                       buttonLoutlineColor(
                         Row(
                           children: [
@@ -433,11 +414,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                               .toString(),
                                                           style: heading4(
                                                               FontWeight.w400,
-                                                              datasRiwayat![index]
-                                                                          .status ==
-                                                                      'Berhasil'
-                                                                  ? waring500
-                                                                  : bnw900,
+                                                              succes500,
                                                               'Outfit'),
                                                         ),
                                                       ),
@@ -511,7 +488,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                         vertical: size16,
                                                       ),
                                                       decoration: BoxDecoration(
-                                                        color: waring100,
+                                                        color: succes100,
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(
@@ -527,13 +504,13 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                 'status_transactions'],
                                                             style: body1(
                                                                 FontWeight.w400,
-                                                                waring500,
+                                                                succes500,
                                                                 'Outfit'),
                                                           ),
                                                           Icon(
                                                             PhosphorIcons
                                                                 .info_fill,
-                                                            color: waring500,
+                                                            color: succes500,
                                                             size: size24,
                                                           ),
                                                         ],
@@ -1012,7 +989,9 @@ class _SimpanPageState extends State<SimpanPage> {
                                                       // widget.bluetooth.printNewLine();
                                                       widget.bluetooth
                                                           .paperCut();
-                                                    } else {}
+                                                    } else {
+                                                      dialogNoPrinter(context);
+                                                    }
                                                   });
                                                   setState(() {});
                                                 },
@@ -1050,11 +1029,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () async {
-                                                  width = null;
-                                                  widtValue = 120;
-                                                  heightInformation = 0;
-                                                  widthInformation = 0;
-
                                                   cart.clear();
                                                   cartMap.clear();
 
@@ -1153,15 +1127,35 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                                   if (cartMap.isNotEmpty) {
                                                     // initState();
-                                                    widget.pageController
-                                                        .jumpToPage(1);
+
+                                                    isTagihan = true;
+
                                                     await calculateTransaction(
                                                       context,
                                                       widget.token,
                                                       cartMap,
                                                       setState,
                                                       pelangganId,
-                                                    );
+                                                    ).then((value) {
+                                                      if (value == '00') {
+                                                        width = null;
+                                                        widtValue = 120;
+                                                        heightInformation = 0;
+                                                        widthInformation = 0;
+
+                                                        Future.delayed(
+                                                          const Duration(
+                                                              seconds: 1),
+                                                          () {
+                                                            widget
+                                                                .pageController
+                                                                .jumpToPage(1);
+                                                          },
+                                                        );
+                                                      } else {
+                                                        isTagihan = true;
+                                                      }
+                                                    });
                                                     setState(() {
                                                       transactionidValue;
                                                       subTotal;
@@ -1173,19 +1167,12 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     });
                                                   }
 
-                                                  transactionidValue == ''
-                                                      ? log("kosong")
-                                                      : log("ada");
-
-                                                  // calculateTransaction(
-                                                  //   context,
-                                                  //   widget.token,
-                                                  //   cartMap,
-                                                  //   setState,
-                                                  //   pelangganId,
-                                                  // );
-
-                                                  // log(cartMap.toString());
+                                                  total;
+                                                  subTotal;
+                                                  sumTotal;
+                                                  namaCustomerCalculate;
+                                                  subTotal;
+                                                  ppnTransaksi;
 
                                                   setState(() {});
                                                 },
@@ -1293,102 +1280,102 @@ class _SimpanPageState extends State<SimpanPage> {
                 ],
               ),
               SizedBox(height: size24),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () async {
-                  setState(() async {
-                    refreshSelectedProvider.valueSelected = null;
-                    widget.pageController.jumpToPage(0);
-                    cart.clear();
-                    cartMap.clear();
+              // GestureDetector(
+              //   behavior: HitTestBehavior.translucent,
+              //   onTap: () async {
+              //     setState(() async {
+              //       refreshSelectedProvider.valueSelected = null;
+              //       widget.pageController.jumpToPage(0);
+              //       cart.clear();
+              //       cartMap.clear();
 
-                    int newtotal = 0;
-                    for (var element in cartMap) {
-                      var myelement = int.parse(element['amount']!);
+              //       int newtotal = 0;
+              //       for (var element in cartMap) {
+              //         var myelement = int.parse(element['amount']!);
 
-                      newtotal = newtotal + myelement;
-                    }
+              //         newtotal = newtotal + myelement;
+              //       }
 
-                    sumTotal = newtotal;
-                    total = [];
-                    subTotal = 0;
-                    sumTotal = 0;
-                    transactionidValue;
-                    printext = '';
-                    pelangganName = '';
-                    pelangganId = '';
-                    namaCustomerCalculate = '';
+              //       sumTotal = newtotal;
+              //       total = [];
+              //       subTotal = 0;
+              //       sumTotal = 0;
+              //       transactionidValue;
+              //       printext = '';
+              //       pelangganName = '';
+              //       pelangganId = '';
+              //       namaCustomerCalculate = '';
 
-                    int i;
-                    for (i = 0; i < detailUbah.length; i++) {
-                      // print(detailUbah[i]['name']);
+              //       int i;
+              //       for (i = 0; i < detailUbah.length; i++) {
+              //         // print(detailUbah[i]['name']);
 
-                      Map<String, String> map1 = {};
-                      map1['name'] = detailUbah[i]['name'].toString();
-                      map1['productid'] =
-                          detailUbah![i]['productid'].toString();
-                      map1['quantity'] = detailUbah[i]['quantity'].toString();
-                      map1['image'] = detailUbah[i]['product_image'].toString();
-                      map1['amount'] = detailUbah[i]['amount'].toString();
-                      map1['description'] = 'berhasil';
+              //         Map<String, String> map1 = {};
+              //         map1['name'] = detailUbah[i]['name'].toString();
+              //         map1['productid'] =
+              //             detailUbah![i]['productid'].toString();
+              //         map1['quantity'] = detailUbah[i]['quantity'].toString();
+              //         map1['image'] = detailUbah[i]['product_image'].toString();
+              //         map1['amount'] = detailUbah[i]['amount'].toString();
+              //         map1['description'] = 'berhasil';
 
-                      cartMap.add(map1);
+              //         cartMap.add(map1);
 
-                      String name = detailUbah[i]['name'].toString().trim();
-                      String productid =
-                          detailUbah[i]['productid'].toString().trim();
-                      String image =
-                          detailUbah![i]['product_image'].toString().trim();
-                      int? price = detailUbah[i]['amount'];
-                      int quantity = detailUbah[i]['quantity'];
-                      String desc =
-                          detailUbah![i]['description'].toString().trim();
+              //         String name = detailUbah[i]['name'].toString().trim();
+              //         String productid =
+              //             detailUbah[i]['productid'].toString().trim();
+              //         String image =
+              //             detailUbah![i]['product_image'].toString().trim();
+              //         int? price = detailUbah[i]['amount'];
+              //         int quantity = detailUbah[i]['quantity'];
+              //         String desc =
+              //             detailUbah![i]['description'].toString().trim();
 
-                      sumTotal = sumTotal + price!.toInt();
-                      // subTotal =
-                      //     subTotal + price.toInt();
-                      total.add(price);
+              //         sumTotal = sumTotal + price!.toInt();
+              //         // subTotal =
+              //         //     subTotal + price.toInt();
+              //         total.add(price);
 
-                      cart.add(
-                        CartTransaksi(
-                          name: name,
-                          productid: productid,
-                          image: image,
-                          price: price,
-                          quantity: quantity,
-                          desc: desc,
-                          // desc: 'berhasil',
-                          // quantity:
-                          //     cart[i].quantity,
-                        ),
-                      );
-                    }
+              //         cart.add(
+              //           CartTransaksi(
+              //             name: name,
+              //             productid: productid,
+              //             image: image,
+              //             price: price,
+              //             quantity: quantity,
+              //             desc: desc,
+              //             // desc: 'berhasil',
+              //             // quantity:
+              //             //     cart[i].quantity,
+              //           ),
+              //         );
+              //       }
 
-                    if (cartMap.isNotEmpty) {
-                      // initState();
-                      widget.pageController.jumpToPage(0);
-                      setState(() {
-                        transactionidValue;
-                        subTotal;
-                        printext;
-                        transaksiNama;
-                        transaksiMetode;
-                        transaksiPesanan;
-                        transaksiKasir;
-                      });
-                    }
+              //       if (cartMap.isNotEmpty) {
+              //         // initState();
+              //         widget.pageController.jumpToPage(0);
+              //         setState(() {
+              //           transactionidValue;
+              //           subTotal;
+              //           printext;
+              //           transaksiNama;
+              //           transaksiMetode;
+              //           transaksiPesanan;
+              //           transaksiKasir;
+              //         });
+              //       }
 
-                    transactionidValue == '' ? log("kosong") : log("ada");
+              //       transactionidValue == '' ? log("kosong") : log("ada");
 
-                    setState(() {});
-                  });
-                },
-                child: modalBottomValue(
-                  'Ubah Produk',
-                  PhosphorIcons.pencil_line,
-                ),
-              ),
-              SizedBox(height: size12),
+              //       setState(() {});
+              //     });
+              //   },
+              //   child: modalBottomValue(
+              //     'Ubah Produk',
+              //     PhosphorIcons.pencil_line,
+              //   ),
+              // ),
+              // SizedBox(height: size12),
               GestureDetector(
                 onTap: () {
                   refreshSelectedProvider.valueSelected = null;
@@ -1464,7 +1451,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Alasan Hapus',
+                                    'Batalkan Tagihan',
                                     style: heading2(
                                         FontWeight.w700, bnw900, 'Outfit'),
                                   ),
@@ -1636,20 +1623,30 @@ class _SimpanPageState extends State<SimpanPage> {
                                       child: GestureDetector(
                                         onTap: () {
                                           setState(() {
+                                            whenLoading(context);
                                             // print(
                                             //     '$transaksiReference $idKategori ${textController.text}');
 
-                                            print(snapshot
-                                                .data['transaksiid_reference']);
+                                            // print(snapshot
+                                            //     .data['transaksiid_reference']);
+                                            cartProductIds.clear();
+                                            width = null;
+                                            widtValue = 120;
+                                            heightInformation = 0;
+                                            widthInformation = 0;
+
+                                            cart.clear();
+                                            cartMap.clear();
 
                                             deleteReference(
-                                              context,
-                                              widget.token,
-                                              snapshot.data[
-                                                  'transaksiid_reference'],
-                                              idKategori,
-                                              textController.text,
-                                            ).then((value) {
+                                                    context,
+                                                    widget.token,
+                                                    snapshot.data[
+                                                        'transaksiid_reference'],
+                                                    idKategori,
+                                                    textController.text,
+                                                    transactionidValue)
+                                                .then((value) {
                                               if (value != '00') {
                                                 setState(() {
                                                   errorText = value;
@@ -1659,14 +1656,20 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     scrollToTextField();
                                                   });
                                                 });
+                                              } else {
+                                                Navigator.of(context,
+                                                        rootNavigator: true)
+                                                    .pop();
                                               }
                                             });
+                                            setState(() {});
+                                            initState();
                                           });
                                         },
                                         child: buttonXL(
                                           Center(
                                             child: Text(
-                                              'Tampilkan',
+                                              'Batalkan Tagihan',
                                               style: heading3(FontWeight.w600,
                                                   bnw100, 'Outfit'),
                                             ),
@@ -1706,6 +1709,173 @@ class _SimpanPageState extends State<SimpanPage> {
             style: heading4(FontWeight.w500, bnw900, 'Outfit'),
           ),
         ],
+      ),
+    );
+  }
+
+  orderBy(BuildContext context) {
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showModalBottomSheet(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              context: context,
+              builder: (context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit'),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByTagihanText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: size12),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color:
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw300,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(size8),
+                                          ),
+                                          label: Text(orderByTagihanText[index],
+                                              style: heading4(
+                                                  FontWeight.w400,
+                                                  valueOrderByProduct == index
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit')),
+                                          selected:
+                                              valueOrderByProduct == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByProduct = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () {
+                                print(valueOrderByProduct);
+                                print(orderByTagihanText[valueOrderByProduct]);
+
+                                textOrderBy =
+                                    orderByTagihanText[valueOrderByProduct];
+                                textvalueOrderBy =
+                                    orderByRiwayatTagihan[valueOrderByProduct];
+                                orderByRiwayatTagihan[valueOrderByProduct];
+                                Navigator.pop(context);
+                                initState();
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                        FontWeight.w600, bnw100, 'Outfit'),
+                                  ),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          });
+        },
+        child: buttonLoutline(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Urutkan',
+                style: heading3(
+                  FontWeight.w600,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              Text(
+                ' dari $textOrderBy',
+                style: heading3(
+                  FontWeight.w400,
+                  bnw900,
+                  'Outfit',
+                ),
+              ),
+              SizedBox(width: size12),
+              Icon(
+                PhosphorIcons.caret_down,
+                color: bnw900,
+                size: size24,
+              )
+            ],
+          ),
+          bnw300,
+        ),
       ),
     );
   }

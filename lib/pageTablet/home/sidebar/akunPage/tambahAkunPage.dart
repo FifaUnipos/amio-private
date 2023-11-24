@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -186,7 +187,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                       Row(
                         children: [
                           GestureDetector(
-                            onTap: () => getImage(),
+                            onTap: () => tambahGambar(context),
                             child: Container(
                               child: myImage != null
                                   ? Image.file(myImage!, fit: BoxFit.cover)
@@ -211,7 +212,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                           disabledColor: bnw900,
                         ),
                         child: GestureDetector(
-                          onTap: () => getImage(),
+                          onTap: () => tambahGambar(context),
                           child: TextFormField(
                             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                             decoration: InputDecoration(
@@ -223,7 +224,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                                 ),
                               ),
                               suffixIcon: Icon(PhosphorIcons.plus),
-                              hintText: 'Ubah Gambar',
+                              hintText: 'Tambah Foto',
                               hintStyle:
                                   heading2(FontWeight.w600, bnw900, 'Outfit'),
                             ),
@@ -330,6 +331,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                             widget.village,
                             widget.zipcode,
                             img64.toString(),
+                            onswitchAktif ? '1' : '0',
                           );
 
                           conNameMerch.text = '';
@@ -371,6 +373,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                                 widget.village,
                                 widget.zipcode,
                                 img64.toString(),
+                                onswitchAktif ? '1' : '0',
                               ).then((value) {
                                 if (value == '00') {
                                   widget.pageController.jumpToPage(1);
@@ -653,6 +656,119 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  tambahGambar(BuildContext context) async {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) => IntrinsicHeight(
+        child: Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(size8),
+              topLeft: Radius.circular(size8),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                myImage != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(120),
+                        child: Container(
+                            height: 200,
+                            width: 200,
+                            color: bnw400,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(size8),
+                              child: Image.file(
+                                myImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )),
+                      )
+                    : Container(
+                        height: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(120),
+                        ),
+                        child: SvgPicture.asset('assets/logoProduct.svg',
+                            fit: BoxFit.cover),
+                      ),
+                SizedBox(height: size16),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await getImage();
+                        Navigator.pop(context);
+                      },
+                      child: SizedBox(
+                        child: TextFormField(
+                          enabled: false,
+                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          decoration: InputDecoration(
+                              focusColor: primary500,
+                              prefixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Foto',
+                              hintStyle:
+                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                        ),
+                      ),
+                    ),
+                    myImage != null
+                        ? GestureDetector(
+                            onTap: () async {
+                              img64 = null;
+                              myImage = null;
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: SizedBox(
+                              child: TextFormField(
+                                enabled: false,
+                                style:
+                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                decoration: InputDecoration(
+                                  focusColor: primary500,
+                                  prefixIcon: Icon(
+                                    PhosphorIcons.trash,
+                                    color: bnw900,
+                                  ),
+                                  hintText: 'Hapus Foto',
+                                  hintStyle: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

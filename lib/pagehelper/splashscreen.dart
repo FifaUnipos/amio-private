@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
 import 'package:amio/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+import 'package:amio/utils/component.dart';
 import 'package:flutter/material.dart';
 
 import 'package:amio/pagehelper/masukakun.dart';
@@ -113,22 +114,22 @@ class _SplashCheckerState extends State<SplashChecker> {
     deviceDetails();
     Future.delayed(const Duration(seconds: 3)).then(
       (value) => {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => statusProfile == 'Group_Merchant'
-                ? widget.isTab == true
-                    ? SidebarXExampleApp(
-                        id: identifier.toString(),
-                        token: checkToken,
-                      )
-                    : SidebarXExampleAppToko(
-                        token: checkToken,
-                        id: identifier.toString(),
-                      )
-                : Container(),
-          ),
-        )
+        widget.isTab
+            ? Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => statusProfile == 'Group_Merchant'
+                      ? SidebarXExampleApp(
+                          id: identifier.toString(),
+                          token: checkToken,
+                        )
+                      : SidebarXExampleAppToko(
+                          token: checkToken,
+                          id: identifier.toString(),
+                        ),
+                ),
+              )
+            : sessionPageMobile(context, checkToken),
       },
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:isolate';
 import 'package:amio/main.dart';
 import 'package:amio/models/lihatakunmodel.dart';
@@ -9,11 +10,12 @@ import 'package:amio/models/tokoModel/riwayatTransaksiTokoModel.dart';
 import 'package:amio/models/tokoModel/singletokomodel.dart';
 import 'package:amio/models/tokoModel/tokomodel.dart';
 import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
+import 'package:amio/pagehelper/loginregis/lupaSandiPage/buat_sandi_baru.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:path_provider/path_provider.dart';
@@ -40,10 +42,15 @@ String url = 'https://api.prod.amio.my.id';
 // String url = 'https://api.prod.smartlms.my.id/public';
 
 String registerbyotp = '$url/api/user/registerbyotp',
-    registerentryotp = '$url/api/user/registerentryotp',
+    registerentryotp = '$url/api/register/verify',
+    registerLink = '$url/api/register',
+    loginEmailLink = '$url/api/login',
     loginbyotp = '$url/api/user/loginbyotp',
     loginentryotp = '$url/api/user/loginentryotp',
     checkpass = '$url/api/user/checkPassword',
+    forgotPassRequestLink = '$url/api/forgot-password/request',
+    forgotPassVerifyLink = '$url/api/forgot-password/verify',
+    forgotPassChangeLink = '$url/api/forgot-password/change',
     myaccout = '$url/api/profile/myaccount',
     dashboardNumber = '$url/api/user/dashboardNumber',
     dashboardChart = '$url/api/user/dashboardChart',
@@ -51,6 +58,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     createProdukUrl = '$url/api/product/create',
     createVoucherUrl = '$url/api/voucher/create',
     updateVoucherUrl = '$url/api/voucher/update',
+    approveTransaksiUrl = '$url/api/transaction/approve/reference',
     createTransaksiUrl = '$url/api/transaction/create',
     deleteTransaksiUrl = '$url/api/transaction/delete',
     headerTagihanUrl = '$url/api/transaction/create/reference/tagihan',
@@ -93,14 +101,17 @@ String registerbyotp = '$url/api/user/registerbyotp',
     updateProdukUrl = '$url/api/product/update',
     changeActiveUrl = '$url/api/product/changeActive',
     changePpnUrl = '$url/api/product/changePPN',
+    changeActiveAkunUrl = '$url/api/user/changeStatus',
     laporanDailyUrl = '$url/api/report/income/daily',
     laporanMerchUrl = '$url/api/report/income/merchant',
     laporanProdukUrl = '$url/api/report/income/product',
-    uploadQrisLink = '$url/api/transaction/save/qris',
     transaksiViewReferenceLink = '$url/api/transaction/view/reference',
-    getQrisLink = '$url/api/transaction/view/qris',
-    uploadStrukLink = '$url/api/transaction/save/image/struk',
-    getStrukLink = '$url/api/transaction/view/image/struk',
+    uploadQrisLink = '$url/api/merchant/qris/save',
+    deleteQrisLink = '$url/api/merchant/qris/delete',
+    getQrisLink = '$url/api/merchant/qris/view',
+    getStrukLink = '$url/api/merchant/struk/view',
+    uploadStrukLink = '$url/api/merchant/struk/save',
+    deleteStrukLink = '$url/api/merchant/struk/delete',
     getOtpSandiLink = '$url/api/user/password/otp',
     validasiOtpSandiLink = '$url/api/user/password/otp/verified',
     changeSandiLink = '$url/api/user/password/change',
@@ -108,6 +119,9 @@ String registerbyotp = '$url/api/user/registerbyotp',
     valOtpEmailTahap1Link = '$url/api/user/email/otp/verified',
     changeEmailLink = '$url/api/user/email/change',
     changeEmailTahap2Link = '$url/api/user/email/change/verified',
+    tambahKategoriLink = '$url/api/typeproduct/store',
+    ubahKategoriLink = '$url/api/typeproduct/update',
+    hapusKategoriLink = '$url/api/typeproduct/delete',
     tipeUsaha = '$url/api/tipeusaha';
 
 String out = '$url/api/logout';
@@ -142,9 +156,9 @@ Future firebaseToken(tokenFirebase, token) async {
     );
 
     if (response.statusCode == 200) {
-      log('berhasil mengupload firebase token');
+      print('berhasil mengupload firebase token');
     } else {
-      log('gagal mengupload firebase token');
+      print('gagal mengupload firebase token');
     }
     return null;
   } catch (e) {
@@ -154,23 +168,20 @@ Future firebaseToken(tokenFirebase, token) async {
 
 Future logout(token, id, context, page) async {
   try {
-    var response = await Dio().post(
-      out,
-      data: {
-        'deviceid': id.toString(),
+    final response = await http.post(
+      Uri.parse(changeProfileName),
+      body: {
+        'deviceid': identifier,
       },
-      options: Options(
-        headers: {
-          "token": "$token",
-        },
-      ),
+      headers: {
+        'token': token,
+      },
     );
+    var jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      print("succes aman tentram");
-      print(response.data['token']);
-
-      
+      print("succes aman tentram logout");
+      // print(response.data['token']);
 
       // Navigator.pushReplacement(
       //   context,
@@ -225,6 +236,88 @@ Future myprofile(token) async {
   }
 }
 
+Future tambahKategoriForm(context, name, token) async {
+  try {
+    final response = await http.post(
+      Uri.parse(tambahKategoriLink),
+      body: {
+        'name': name,
+      },
+      headers: {
+        'token': token,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    log(response.body.toString());
+    if (response.statusCode == 200) {
+      print("succes tambah kategori");
+
+      Navigator.pop(context);
+      showSnackbar(context, jsonResponse);
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future hapusKategoriForm(context, token, idkategori) async {
+  try {
+    final response = await http.post(
+      Uri.parse(hapusKategoriLink),
+      body: {
+        'id': idkategori,
+      },
+      headers: {
+        'token': token,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    log(response.body.toString());
+    if (response.statusCode == 200) {
+      print("succes hapus kategori");
+
+      Navigator.pop(context);
+      showSnackbar(context, jsonResponse);
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future ubahKategoriForm(context, token, idkategori, name) async {
+  try {
+    final response = await http.post(
+      Uri.parse(ubahKategoriLink),
+      body: {
+        'id': idkategori,
+        'name': name,
+      },
+      headers: {
+        'token': token,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    log(response.body.toString());
+    if (response.statusCode == 200) {
+      print("succes hapus kategori");
+
+      Navigator.pop(context);
+      showSnackbar(context, jsonResponse);
+    } else {
+      showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
 Future changeName(token, id, context, mycontroller) async {
   try {
     final response = await http.post(
@@ -240,12 +333,92 @@ Future changeName(token, id, context, mycontroller) async {
     var jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      log("succes aman tentram");
+      print("succes aman tentram");
 
       Navigator.pop(context);
       showSnackbar(context, jsonResponse);
     } else {
       showSnackbar(context, jsonResponse);
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+String userPhone = '', userEmail = '', userId = '';
+Future changePasswordRequest(context, type, id) async {
+  try {
+    final response = await http.post(
+      Uri.parse(forgotPassRequestLink),
+      body: {
+        'type': type,
+        'identifier': id,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    print(jsonResponse);
+    if (response.statusCode == 200) {
+      userPhone = jsonResponse['user']['phonenumber'];
+      userEmail = jsonResponse['user']['email'];
+      userId = jsonResponse['data']['id'];
+      errorText = '';
+      return jsonResponse['rc'];
+    } else {
+      errorText = jsonResponse['message'];
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changePasswordVerify(context, id, otp) async {
+  try {
+    final response = await http.post(
+      Uri.parse(forgotPassVerifyLink),
+      body: {
+        'id': id,
+        'otp': otp,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    print(jsonResponse);
+    if (response.statusCode == 200) {
+      errorText = '';
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BuatSandiBaruPage(userid: id),
+          ));
+      return jsonResponse['rc'];
+    } else {
+      errorText = jsonResponse['message'];
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changePasswordChange(context, id, pass, conPass) async {
+  try {
+    final response = await http.post(
+      Uri.parse(forgotPassChangeLink),
+      body: {
+        'id': id,
+        'passsword': pass,
+        'password_confirmation': conPass,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    print(jsonResponse);
+    if (response.statusCode == 200) {
+      errorText = '';
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      errorText = jsonResponse['message'];
     }
     return null;
   } catch (e) {
@@ -597,7 +770,7 @@ late String nameMerchantUbah,
     zipcodeUbah,
     tipeUbah,
     idtipeUbah,
-    logoMerchantUbah;
+    imageEditToko;
 
 Future getSingleMerch(context, token, String merchid) async {
   final response = await http.post(
@@ -627,9 +800,9 @@ Future getSingleMerch(context, token, String merchid) async {
     nameVillageUbah = data['nama_village'];
     kodeVillageUbah = data['kode_village'];
     zipcodeUbah = data['zipcode'];
-    tipeUbah = data['nama_tipe_usaha'];
+    tipeUbah = data['nama_tipe_usaha'] ?? '';
     idtipeUbah = data['tipeusaha'];
-    logoMerchantUbah = data['logomerchant_url'];
+    imageEditToko = data['logomerchant_url'];
 
     return jsonResponse;
   } else {
@@ -676,13 +849,13 @@ Future createMerch(
         "token": "$token",
       },
     );
-    // log(response.data['rc']);
+    // print(response.data['rc']);
 
     var jsonResponse = jsonDecode(response.body);
     // print(jsonResponse['rc']);
 
     if (response.statusCode == 200) {
-      // log("succes aman tentram");
+      // print("succes aman tentram");
       // print(response.data['data']);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
@@ -710,6 +883,7 @@ Future createAkun(
   village,
   zipcode,
   String image,
+  isactive,
 ) async {
   try {
     final response = await http.post(
@@ -729,18 +903,18 @@ Future createAkun(
         "district": district,
         "village": village,
         "zipcode": zipcode,
-        "businesstype": "Car Wash",
-        "status": "0",
+        "businesstype": "",
+        "status": isactive,
         "image": "data:image/png;base64,$image"
       },
       headers: {
         "token": "$token",
       },
     );
-    // log(response.data['rc']);
+    // print(response.data['rc']);
 
     var jsonResponse = jsonDecode(response.body);
-    // print(jsonResponse['rc']);
+    print(jsonResponse);
 
     if (response.statusCode == 200) {
       showSnackbar(context, jsonResponse);
@@ -762,37 +936,35 @@ Future updateAkun(
   email,
   phonenumber,
   String image,
+  isactive,
 ) async {
-  try {
-    final response = await http.post(
-      Uri.parse(updateAkunUrl),
-      body: {
-        "deviceid": identifier,
-        "userid": userId,
-        "fullname": fullName,
-        "email": email,
-        "phonenumber": phonenumber,
-        "image": "data:image/png;base64,$image"
-      },
-      headers: {
-        "token": "$token",
-      },
-    );
-    // log(response.data['rc']);
+  final response = await http.post(
+    Uri.parse(updateAkunUrl),
+    body: {
+      "deviceid": identifier,
+      "userid": userId,
+      "fullname": fullName,
+      "email": email,
+      "phonenumber": phonenumber,
+      "image": "data:image/png;base64,$image",
+      "status": isactive,
+    },
+    headers: {
+      "token": "$token",
+    },
+  );
+  // print(response.data['rc']);
 
-    var jsonResponse = jsonDecode(response.body);
-    // print(jsonResponse['rc']);
+  var jsonResponse = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      log("succes aman tentram");
-      // print(response.data['data']);
-
-      return jsonResponse['rc'];
-    } else {}
-    return jsonResponse;
-  } catch (e) {
-    throw Exception(e.toString());
+  print(jsonResponse['data']);
+  if (response.statusCode == 200) {
+    print("succes aman tentram");
+    return jsonResponse['rc'];
+  } else {
+    showSnackbar(context, jsonResponse);
   }
+  return jsonResponse;
 }
 
 Future updateMerch(
@@ -835,13 +1007,13 @@ Future updateMerch(
         "token": "$token",
       },
     );
-    // log(response.data['rc']);
+    // print(response.data['rc']);
 
     var jsonResponse = jsonDecode(response.body);
     // print(jsonResponse['rc']);
 
     if (response.statusCode == 200) {
-      log("Succes Update Merchant");
+      print("Succes Update Merchant");
       // print(response.data['data']);
       pageController.jumpTo(0);
       showSnackbar(context, jsonResponse);
@@ -855,17 +1027,18 @@ Future updateMerch(
 }
 
 Future updateProduk(
-  context,
-  token,
-  name,
-  merchid,
-  productid,
-  typeproducts,
-  price,
-  PageController pageController,
-  isActive,
-  isPPN,
-) async {
+    context,
+    token,
+    name,
+    merchid,
+    productid,
+    typeproducts,
+    price,
+    onlinePrice,
+    PageController pageController,
+    isActive,
+    isPPN,
+    img) async {
   try {
     final response = await http.post(
       Uri.parse(updateProdukUrl),
@@ -876,8 +1049,10 @@ Future updateProduk(
         "typeproducts": typeproducts,
         "merchantid": merchid,
         "price": price,
+        "price_online_shop": onlinePrice,
         "isActive": isActive,
         "isPPN": isPPN,
+        "product_image": 'data:image/jpeg;base64,$img',
       },
       headers: {
         "token": "$token",
@@ -887,13 +1062,13 @@ Future updateProduk(
     var jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      log("succes aman tentram");
+      print("succes aman tentram");
       showSnackbar(context, jsonResponse);
       print(jsonResponse['data']);
       pageController.jumpTo(0);
     } else {
-      log(jsonResponse['rc']);
-      dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+      print(jsonResponse['rc']);
+      showSnackbar(context, jsonResponse);
     }
     return null;
   } catch (e) {
@@ -906,6 +1081,7 @@ Future deleteMerchant(
   var token,
   List<String> merchid,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
 
   final response = await http.post(
@@ -924,8 +1100,10 @@ Future deleteMerchant(
     errorText = jsonResponse['message'];
     Navigator.pop(context);
     showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
   } else {
     showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
   }
 }
 
@@ -949,12 +1127,12 @@ Future deleteAkun(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    // log('Sukses Delete Data');
-    log(jsonResponse['data'].toString());
+    // print('Sukses Delete Data');
+    print(jsonResponse['data'].toString());
     Navigator.pop(context);
     return jsonResponse['rc'];
   } else {
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
     Navigator.pop(context);
     showSnackbar(context, jsonResponse);
   }
@@ -986,10 +1164,10 @@ Future deleteProduk(
     print('Sukses Delete Data');
     Navigator.pop(context);
     showSnackbar(context, jsonResponse);
-    log(jsonResponse['data'].toString());
+    print(jsonResponse['data'].toString());
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1016,6 +1194,36 @@ Future deletePelanggan(
     Navigator.pop(context);
     showSnackbar(context, jsonResponse);
   } else {
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future changeActiveAkun(
+  BuildContext context,
+  token,
+  status,
+  userid,
+) async {
+  final response = await http.put(
+    Uri.parse('$url/api/user/changeStatus'),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "userid": userid,
+      "status": status,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Ganti Keatifan');
+
+    print(jsonResponse['data'].toString());
+    showSnackbar(context, jsonResponse);
+  } else {
+    print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1047,10 +1255,10 @@ Future changePpn(
     print('Sukses Ganti Data');
     // Navigator.pop(context);
 
-    log(jsonResponse['data'].toString());
+    print(jsonResponse['data'].toString());
     showSnackbar(context, jsonResponse);
   } else {
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1082,7 +1290,7 @@ Future changeActive(
     print('Sukses Ganti Data');
     // Navigator.pop(context);
 
-    log(jsonResponse['data'].toString());
+    print(jsonResponse['data'].toString());
     showSnackbar(context, jsonResponse);
   } else {
     print(jsonResponse['message'].toString());
@@ -1192,7 +1400,7 @@ Future verifiedEmailbyOTP(context, token, otp) async {
   if (response.statusCode == 200) {
     Navigator.of(context).pop();
     print("succes aman tentram verified email");
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
     showSnackbar(context, jsonResponse);
   } else {
     showSnackbar(context, jsonResponse);
@@ -1250,7 +1458,7 @@ Future dashboard(id, token) async {
 
       var responseValue = response.data['data'];
 
-      log(membersDas.toString());
+      print(membersDas.toString());
       // pendapatanDas = responseValue['income'];
       membersDas = responseValue['members'];
       transaksiDas = responseValue['transaction'];
@@ -1278,10 +1486,10 @@ Future<Map<String, dynamic>> dashboardSide(BuildContext context, token) async {
     print('behasil get side');
     return json.decode(response.body);
   } else {
-    // log(jsonResponse['message'].toString());
+    // print(jsonResponse['message'].toString());
     throw Exception(jsonResponseThrow['message'].toString());
-    // log(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    // print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1302,10 +1510,10 @@ Future<Map<String, dynamic>> getDataChart(BuildContext context, token) async {
     print('behasil get chart');
     return json.decode(response.body);
   } else {
-    // log(jsonResponse['message'].toString());
+    // print(jsonResponse['message'].toString());
     throw Exception(jsonResponseThrow['message'].toString());
-    // log(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    // print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1347,8 +1555,8 @@ Future getPelanggan(BuildContext context, token, orderby) async {
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1367,7 +1575,7 @@ Future getVoucher(context, token, orderby) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    log(jsonResponse['data'].toString());
+    print(jsonResponse['data'].toString());
 
     final List<ModelDataPromosi> result = [];
 
@@ -1380,7 +1588,7 @@ Future getVoucher(context, token, orderby) async {
     return result;
   } else {
     showSnackbar(context, jsonResponse);
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
   }
 }
 
@@ -1405,7 +1613,7 @@ Future getProduct(BuildContext context, token, String name,
   if (response.statusCode == 200) {
     print('succes');
 
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     final List<ModelDataProduk> result = [];
 
@@ -1421,8 +1629,8 @@ Future getProduct(BuildContext context, token, String name,
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1446,7 +1654,7 @@ Future getProductGrup(
   if (response.statusCode == 200) {
     print('succes');
 
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     final List<ModelDataProdukGrup> result = [];
 
@@ -1462,8 +1670,8 @@ Future getProductGrup(
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1472,30 +1680,29 @@ Future createPelanggan(
   token,
   String name,
   address,
-  phone,
+  String phone,
   email,
   instagram,
 ) async {
-  var body = {
-    "deviceid": identifier,
-    "nama_member": name,
-    "alamat_member": address,
-    "phonenumber": phone,
-    "email": email,
-    "twitter": "",
-    "instagram": instagram,
-    "facebook": ""
-  };
-
   final response = await http.post(
     Uri.parse(createPelangganUrl),
     headers: {
       'token': token,
     },
-    body: body,
+    body: {
+      "deviceid": identifier,
+      "nama_member": name,
+      "alamat_member": address,
+      "phonenumber": phone,
+      "email": email,
+      "twitter": '',
+      "instagram": instagram,
+      "facebook": ''
+    },
   );
 
   var jsonResponse = jsonDecode(response.body);
+  print(jsonResponse);
   if (response.statusCode == 200) {
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
@@ -1536,11 +1743,11 @@ Future createPendapatan(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
     controller.jumpToPage(0);
   } else {
-    log(jsonResponse['rc'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1575,11 +1782,11 @@ Future ubahPendapatan(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
     controller.jumpToPage(0);
   } else {
-    log(jsonResponse['rc'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1621,8 +1828,8 @@ Future editPelanggan(
     return jsonResponse['rc'];
   } else {
     showSnackbar(context, jsonResponse);
-    // log(jsonResponse['rc'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    // print(jsonResponse['rc'].toString());
+    // showSnackbar(context, jsonResponse);
   }
   return jsonResponse['message'];
 }
@@ -1714,6 +1921,7 @@ Future createProduct(
     isPPN,
     isActive,
     price,
+    onlinePrice,
     image,
     List<String> merchid,
     PageController controller) async {
@@ -1727,6 +1935,7 @@ Future createProduct(
     "isPPN": isPPN,
     "isActive": isActive,
     "price": price,
+    "price_online_shop": onlinePrice,
     "product_image": "data:image/jpeg;base64,$image",
   };
 
@@ -1778,20 +1987,19 @@ Future calculateTransaction(
   var jsonResponse = jsonDecode(response.body);
   var data = jsonResponse['data'];
   if (response.statusCode == 200) {
-    log('succes');
-    log(jsonResponse.toString());
-    // log(jsonResponse['data']['subTotal'].toString());
-    // log(totalTransaksi.toString());
+    print('succes');
+    print(jsonResponse.toString());
+    // print(jsonResponse['data']['subTotal'].toString());
+    // print(totalTransaksi.toString());
     totalTransaksi = data['total'];
     subTotal = data['subTotal'];
     ppnTransaksi = data['PPN'];
     namaCustomerCalculate = data['customerName'];
     setState(() {});
+    return jsonResponse['rc'];
   } else {
-    log(jsonResponse['message'].toString());
-    log(jsonResponse['rc'].toString());
-    // log(jsonResponse.toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
   }
 }
 
@@ -1838,7 +2046,7 @@ Future createTransaction(
   if (response.statusCode == 200) {
     print('succes');
     // pageController.jumpTo(0);
-    log(jsonResponse['data'].toString());
+    print(jsonResponse['data'].toString());
     setState(() {
       // subTotal = 0;
       printext = jsonResponse['data']['raw'];
@@ -1850,8 +2058,8 @@ Future createTransaction(
       // cart.clear();
     });
   } else {
-    // log(jsonResponse.toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    // print(jsonResponse.toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1892,11 +2100,11 @@ Future saveTransaction(
     setState(() {
       subTotal = 0;
     });
-    log(jsonResponse.toString());
+    print(jsonResponse.toString());
   } else {
-    log(jsonResponse['message'].toString());
-    // log(jsonResponse.toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    // print(jsonResponse.toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1917,8 +2125,8 @@ Future deletePesanan(
   if (response.statusCode == 200) {
     print('succes');
   } else {
-    log(jsonResponse['rc'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -1942,23 +2150,19 @@ Future headerTagihan(
     print('succes');
     return jsonResponse['data'];
   } else {
-    log(jsonResponse['rc'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
-Future deleteReference(
-  BuildContext context,
-  token,
-  transaksiReference,
-  idkategori,
-  detailAlasan,
-) async {
+Future deleteReference(BuildContext context, token, transaksiReference,
+    idkategori, detailAlasan, transactionidValue) async {
   final response = await http.post(Uri.parse(deleteTagihanUrl), headers: {
     'token': token,
   }, body: {
     "deviceid": identifier,
-    "transaksiid_reference": transaksiReference,
+    // "transaksiid_reference": transaksiReference,
+    "transactionid": transactionidValue,
     "idkategori": idkategori,
     "detail_alasan": detailAlasan,
   });
@@ -1967,6 +2171,33 @@ Future deleteReference(
 
   print(transaksiReference);
 
+  if (response.statusCode == 200) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    print(jsonResponse['rc'].toString());
+    return jsonResponse['rc'];
+  }
+}
+
+Future approveReference(
+  BuildContext context,
+  token,
+  transactionid,
+  status,
+) async {
+  final response = await http.post(Uri.parse(approveTransaksiUrl), headers: {
+    'token': token,
+  }, body: {
+    "deviceid": identifier,
+    "transactionid": transactionid,
+    "status": status
+  });
+
+  var jsonResponse = jsonDecode(response.body);
+
+  print(jsonResponse['data']);
   if (response.statusCode == 200) {
     Navigator.of(context).popUntil((route) => route.isFirst);
     showSnackbar(context, jsonResponse);
@@ -1992,7 +2223,7 @@ Future getPendapatan(BuildContext context, token, condition) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     final List<PendapatanLainModel> result = [];
 
@@ -2004,8 +2235,8 @@ Future getPendapatan(BuildContext context, token, condition) async {
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2023,12 +2254,12 @@ Future getYearRekon(token) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     return jsonResponse['data'];
   } else {
-    log(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2049,12 +2280,12 @@ Future getMonthRekon(token, year, merchid) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     return jsonResponse['data'];
   } else {
-    log(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2073,12 +2304,12 @@ Future getPengeluaran(BuildContext context, token, condition) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes');
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     return jsonResponse['data'];
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2108,7 +2339,7 @@ Future<List<RekonModel>> getRekon(token, tahun, bulan) async {
 }
 
 Future getRiwayatTransaksi(
-    BuildContext context, token, condition, merchid) async {
+    BuildContext context, token, condition, merchid, orderby) async {
   final response = await http.post(
     Uri.parse(getTransaksiRiwayatUrl),
     headers: {
@@ -2117,7 +2348,7 @@ Future getRiwayatTransaksi(
     body: {
       "deviceid": identifier,
       "condition": condition,
-      "orderby": "downUpCreate",
+      "orderby": orderby,
       "merchantid": merchid,
     },
   );
@@ -2136,8 +2367,8 @@ Future getRiwayatTransaksi(
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2170,8 +2401,8 @@ Future getDetailRiwayatTransaksi(
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2193,7 +2424,7 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
 
   Map<String, dynamic> data = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    log(data.toString());
+    print(data.toString());
     printext = data['data']['rawstruk'];
 
     return data;
@@ -2224,7 +2455,7 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksiGrup(
     Map<String, dynamic> data = jsonDecode(response.body);
 
     printext = data['data']['raw'];
-    // log(data['data'].toString());
+    // print(data['data'].toString());
 
     return data;
   } else {
@@ -2253,7 +2484,7 @@ Future getProductTransaksi(BuildContext context, token, String name,
   if (response.statusCode == 200) {
     print('succes');
 
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     final List<ProductModel> result = [];
 
@@ -2265,8 +2496,8 @@ Future getProductTransaksi(BuildContext context, token, String name,
 
     return result;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2290,14 +2521,14 @@ Future getCoinTransaksi(
   if (response.statusCode == 200) {
     print('succes');
 
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     Map<String, dynamic> data = jsonDecode(response.body);
     // print(data['data']['coin']);
-    // log(jsonResponse['data']['coin'].toString());
+    // print(jsonResponse['data']['coin'].toString());
     return data['data']['coin'];
   } else {
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -2308,6 +2539,7 @@ Future getLaporanDaily(
   orderBy,
   keyword,
   List merchid,
+  export,
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
@@ -2320,10 +2552,12 @@ Future getLaporanDaily(
       "keyword": keyword.toString(),
       "orderby": orderBy.toString(),
       "merchantid": jsonTest,
+      "export": export,
     },
   );
 
   var jsonResponse = jsonDecode(response.body);
+
   if (response.statusCode == 200) {
     print('succes');
 
@@ -2331,8 +2565,45 @@ Future getLaporanDaily(
     // print(data['data']['detail']['tanggal']);
     return data;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanDailyExport(
+  BuildContext context,
+  token,
+  orderBy,
+  keyword,
+  List merchid,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanDailyUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderBy.toString(),
+      "merchantid": jsonTest,
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print('succes');
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2363,14 +2634,54 @@ Future getLaporanMerchant(
   if (response.statusCode == 200) {
     print('succes');
 
-    log(jsonResponse.toString());
+    print(jsonResponse.toString());
 
     Map<String, dynamic> data = jsonDecode(response.body);
     // print(data['data']['detail']['tanggal']);
     return data;
   } else {
-    log(jsonResponse['message'].toString() + jsonResponse['rc'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString() + jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanMerchantExport(
+  BuildContext context,
+  token,
+  keyword,
+  orderby,
+  List merchid,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanMerchUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "merchantid": jsonTest,
+      "export": export,
+    },
+  );
+
+  // print(keyword + orderby);
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    print(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString() + jsonResponse['rc'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2391,7 +2702,7 @@ Future getLaporanPerProduk(
       "deviceid": identifier,
       "keyword": keyword.toString(),
       "orderby": orderby.toString(),
-      "merchantid": jsonTest
+      "merchantid": jsonTest,
     },
   );
 
@@ -2399,14 +2710,51 @@ Future getLaporanPerProduk(
   if (response.statusCode == 200) {
     print('succes');
 
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     Map<String, dynamic> data = jsonDecode(response.body);
     // print(data['data']['detail']['tanggal']);
     return data;
   } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanPerProdukExport(
+  BuildContext context,
+  token,
+  keyword,
+  orderby,
+  List merchid,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanProdukUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "merchantid": jsonTest,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // print(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2414,10 +2762,12 @@ var productPrice = 0, nameChart;
 
 late String nameEditProduk,
     hargaEditProduk,
+    hargaEditOnlineProduk,
     jenisProductEdit,
     kodejenisProductEdit,
     ppnEdit,
-    tampilEdit;
+    tampilEdit,
+    imageEdit;
 Future getSingleProduct(
     BuildContext context, token, String merchid, productid, setState) async {
   final response = await http.post(
@@ -2435,18 +2785,20 @@ Future getSingleProduct(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     var dataku = jsonResponse['data'];
-    log(dataku.toString());
+    print(dataku.toString());
 
     nameEditProduk = dataku['name'];
     hargaEditProduk = dataku['price'].toString();
+    hargaEditOnlineProduk = dataku['price_online_shop'].toString();
     jenisProductEdit = dataku['typeproducts'];
     kodejenisProductEdit = dataku['kodeproduct'];
     ppnEdit = dataku['isPPN'].toString();
     tampilEdit = dataku['isActive'].toString();
+    imageEdit = dataku['product_image'].toString();
     // setState(() {});
     return jsonResponse['data'];
   } else {
-    // log(jsonResponse['message'].toString());
+    // print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -2474,12 +2826,14 @@ Future getSingleAkun(BuildContext context, token, String userid) async {
   var jsonResponse = jsonDecode(response.body);
   var dataku = jsonResponse['data'];
 
+  print(jsonResponse);
+
   if (response.statusCode == 200) {
     Navigator.of(context, rootNavigator: true).pop();
     namaEditAkun = dataku['fullname'];
     nomorEditAkun = dataku['phonenumber'];
     emailEditAkun = dataku['email'];
-    imageEditAkun = dataku['account_image'];
+    imageEditAkun = dataku['account_image'] ?? '';
     useridEditAkun = dataku['userid'];
     statusEditAkun = dataku['status'];
     return response.statusCode.toString();
@@ -2515,7 +2869,7 @@ Future getSinglePromosi(
     return jsonResponse['rc'];
   } else {
     print(jsonResponse['message'].toString());
-    // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+    // showSnackbar(context, jsonResponse);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -2536,7 +2890,7 @@ Future getOtpSandi(BuildContext context, token, typeotp) async {
   if (response.statusCode == 200) {
     print(jsonResponse);
   } else {
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['rc'];
@@ -2561,14 +2915,43 @@ Future validasiOtpSandi(BuildContext context, token, otp, typeotp) async {
 
     showSnackbar(context, jsonResponse);
   } else {
-    log(jsonResponse['message'].toString());
+    print(jsonResponse['message'].toString());
     // showSnackbar(context, jsonResponse);
     errorText = jsonResponse['message'];
   }
   return jsonResponse['rc'];
 }
 
-Future uploadQris(BuildContext context, token, imageQris) async {
+Future deleteQris(BuildContext context, token, merchantid) async {
+  final response = await http.post(
+    Uri.parse(deleteQrisLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchantid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    // print(jsonResponse.toString());
+    Navigator.pop(context);
+
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+
+    logoQris = '';
+    getQris(context, token, merchantid);
+
+    return jsonResponse['rc'];
+  } else {
+    // print(jsonResponse['message'].toString());
+  }
+}
+
+Future uploadQris(BuildContext context, token, imageQris, merchantid) async {
   final response = await http.post(
     Uri.parse(uploadQrisLink),
     headers: {
@@ -2576,7 +2959,8 @@ Future uploadQris(BuildContext context, token, imageQris) async {
     },
     body: {
       "deviceid": identifier,
-      "imageQris": "data:image/png;base64," + imageQris,
+      "qris": "data:image/png;base64," + imageQris,
+      "merchantid": merchantid,
     },
   );
 
@@ -2589,6 +2973,8 @@ Future uploadQris(BuildContext context, token, imageQris) async {
     showSnackBarComponent(
         context, jsonResponse['data']['message'], jsonResponse['rc']);
 
+    logoQris = jsonResponse['data']['qris'];
+
     return jsonResponse['rc'];
   } else {
     showSnackBarComponent(
@@ -2597,7 +2983,7 @@ Future uploadQris(BuildContext context, token, imageQris) async {
   }
 }
 
-Future uploadStruk(BuildContext context, token, imageStruk) async {
+Future uploadStruk(BuildContext context, token, imageStruk, merchantid) async {
   final response = await http.post(
     Uri.parse(uploadStrukLink),
     headers: {
@@ -2605,7 +2991,8 @@ Future uploadStruk(BuildContext context, token, imageStruk) async {
     },
     body: {
       "deviceid": identifier,
-      "imageStruk": "data:image/png;base64," + imageStruk,
+      "struk": "data:image/png;base64," + imageStruk,
+      "merchantid": merchantid,
     },
   );
 
@@ -2616,11 +3003,72 @@ Future uploadStruk(BuildContext context, token, imageStruk) async {
     showSnackBarComponent(
         context, jsonResponse['data']['message'], jsonResponse['rc']);
 
-    return jsonResponse['data'];
+    logoStruk = jsonResponse['data']['struk'];
+    logoStrukPrinter = jsonResponse['data']['struk_printer'];
+    getStruk(context, token, merchantid);
+    return jsonResponse['rc'];
   } else {
     showSnackBarComponent(
         context, jsonResponse['data']['message'], jsonResponse['rc']);
   }
+}
+
+Future getStruk(BuildContext context, token, merchantid) async {
+  final response = await http.post(
+    Uri.parse(getStrukLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchantid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    if (jsonResponse['data']['struk'] == null) {
+      logoStruk = '';
+      logoStrukPrinter = '';
+    } else {
+      logoStruk = jsonResponse['data']['struk'];
+      logoStrukPrinter = jsonResponse['data']['struk_printer'];
+    }
+
+    print(jsonResponse);
+
+    return jsonResponse['rc'];
+  } else {
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+  }
+}
+
+Future deleteStruk(BuildContext context, token, merchantid) async {
+  final response = await http.post(
+    Uri.parse(deleteStrukLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchantid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    logoStruk = '';
+    logoStrukPrinter = '';
+    getStruk(context, token, merchantid);
+
+    Navigator.pop(context);
+
+    showSnackBarComponent(
+        context, jsonResponse['data']['message'], jsonResponse['rc']);
+
+    return jsonResponse['rc'];
+  } else {}
 }
 
 Future transaksiViewReference(
@@ -2638,7 +3086,7 @@ Future transaksiViewReference(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    // log(jsonResponse.toString());
+    // print(jsonResponse.toString());
 
     return jsonResponse;
   } else {
@@ -2646,71 +3094,46 @@ Future transaksiViewReference(
   }
 }
 
-Future getQris(BuildContext context, token) async {
+Future getQris(BuildContext context, token, merchantid) async {
   final response = await http.post(
     Uri.parse(getQrisLink),
     headers: {
       'token': token,
     },
-    body: {
-      "deviceid": identifier,
-    },
+    body: {"deviceid": identifier, "merchantid": merchantid},
   );
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    log(jsonResponse.toString());
-    logoQris = jsonResponse['data']['qris'];
+    if (jsonResponse['data']['qris'] == null) {
+      logoQris = '';
+    } else {
+      logoQris = jsonResponse['data']['qris'];
+    }
 
-    return jsonResponse['data'];
+    return jsonResponse['rc'];
   } else {
-    log(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
   }
 }
 
-Future getStruk(BuildContext context, token) async {
-  final response = await http.post(
-    Uri.parse(getQrisLink),
-    headers: {
-      'token': token,
-    },
-    body: {
-      "deviceid": identifier,
-    },
-  );
-
-  var jsonResponse = jsonDecode(response.body);
-  if (response.statusCode == 200) {
-    log(jsonResponse.toString());
-    logoStruk = jsonResponse['data']['struk'];
-
-    return jsonResponse['data'];
-  } else {
-    log(jsonResponse['message'].toString());
-    dialogError(context, jsonResponse['message'], jsonResponse['rc']);
-  }
-}
-
-ReceivePort portDownload = ReceivePort();
-
-Future downloadFile(String link) async {
+Future<void> downloadFile(String link) async {
+  var statusstorage = await Permission.storage.request();
   try {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
+    if (statusstorage.isGranted) {
+      print(link);
       final baseStorage = await getExternalStorageDirectory();
 
-      final taskId = await FlutterDownloader.enqueue(
+      await FlutterDownloader.enqueue(
         url: link,
         headers: {},
         savedDir: baseStorage!.path,
         showNotification: true,
         openFileFromNotification: true,
-        saveInPublicStorage: true,
+        fileName: 'Report_Laporan',
       );
-
-      FlutterDownloader.open(taskId: taskId!);
     }
   } catch (e) {
-    throw Exception(e.toString());
+    print('Error: $e');
   }
 }

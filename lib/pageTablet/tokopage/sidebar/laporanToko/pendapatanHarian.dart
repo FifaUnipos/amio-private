@@ -6,15 +6,16 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
+
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:skeletons/skeletons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../utils/component.dart';
 
@@ -65,7 +66,11 @@ class LaporanPendapatanHarianPageState
 
   GlobalKey _globalKey = GlobalKey();
 
-  ScreenshotController screenshotController = ScreenshotController();
+
+  bool isTokoSelected = false;
+  bool isSelectionMode = false;
+  Map<int, bool> selectedFlag = {};
+  List<String> listToko = List.empty(growable: true);
 
   void refresh() {
     setState(() {});
@@ -76,9 +81,7 @@ class LaporanPendapatanHarianPageState
     double width = 100;
     return RepaintBoundary(
       key: _globalKey,
-      child: Screenshot(
-        controller: screenshotController,
-        child: Column(
+      child:   Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,37 +120,8 @@ class LaporanPendapatanHarianPageState
                 SizedBox(width: size16),
                 keyword(context),
                 SizedBox(width: size16),
-                // IntrinsicWidth(
-                //   child: Container(
-                //     padding: EdgeInsets.symmetric(horizontal: 6),
-                //     height: 48,
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: bnw300, width: 1.6),
-                //       borderRadius: BorderRadius.circular(size16),
-                //     ),
-                //     child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                //       children: [
-                //         Icon(PhosphorIcons.storefront, color: bnw900),
-                //         SizedBox(width: 4),
-                //         Flexible(
-                //           child: Text(
-                //             'Semua Toko',
-                //             maxLines: 1,
-                //             overflow: TextOverflow.ellipsis,
-                //             style: heading3(
-                //               FontWeight.w600,
-                //               bnw900,
-                //               'Outfit',
-                //             ),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-
-                // SizedBox(width: size16),
+                sortToko(context),
+                SizedBox(width: size16),
                 GestureDetector(
                   onTap: () {
                     showBottomPilihan(
@@ -169,15 +143,29 @@ class LaporanPendapatanHarianPageState
                               ),
                             ],
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: size20),
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 2.6,
                             child: Row(
                               children: [
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () => downloadFile(
-                                        'https://api.prod.amio.my.id/storage/file/20230217-5524.pdf'),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      getLaporanDailyExport(
+                                              context,
+                                              widget.token,
+                                              _textvalueOrderBy,
+                                              _textvalueKeyword,
+                                              listToko,
+                                              'pdf')
+                                          .then((value) {
+                                        try {
+                                          launch(value['data']);
+                                          downloadFile(value['data']);
+                                        } catch (e) {}
+                                      });
+                                    },
                                     child: buttonXXLoutline(
                                       Column(
                                         children: [
@@ -202,57 +190,36 @@ class LaporanPendapatanHarianPageState
                                   child: GestureDetector(
                                     onTap: () {
                                       Navigator.pop(context);
-                                      screenshotController
-                                          .capture(
-                                              delay: Duration(milliseconds: 10))
-                                          .then((capturedImage) async {
-                                        await ImageGallerySaver.saveImage(
-                                            capturedImage!.buffer
-                                                .asUint8List());
-                                      }).catchError((onError) {
-                                        print(onError);
+                                      getLaporanDailyExport(
+                                              context,
+                                              widget.token,
+                                              _textvalueOrderBy,
+                                              _textvalueKeyword,
+                                              listToko,
+                                              'excel')
+                                          .then((value) {
+                                        try {
+                                          launch(value['data']);
+                                          downloadFile(value['data']);
+                                        } catch (e) {}
                                       });
                                     },
                                     child: buttonXXLoutline(
                                       Column(
                                         children: [
                                           Icon(
-                                            PhosphorIcons.user_circle,
+                                            PhosphorIcons
+                                                .microsoft_excel_logo_fill,
                                             color: primary500,
                                           ),
                                           Text(
-                                            'Gambar',
+                                            'Excel',
                                             style: heading2(FontWeight.w600,
                                                 primary500, 'Outfit'),
                                           ),
                                         ],
                                       ),
                                       120,
-                                      primary500,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: buttonXXLoutline(
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            PhosphorIcons.pencil_line,
-                                            color: primary500,
-                                          ),
-                                          Text(
-                                            'Teks',
-                                            style: heading2(FontWeight.w600,
-                                                primary500, 'Outfit'),
-                                          ),
-                                        ],
-                                      ),
-                                      110,
                                       primary500,
                                     ),
                                   ),
@@ -292,7 +259,7 @@ class LaporanPendapatanHarianPageState
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   SizedBox(
-                    width: width + 20,
+                    width: width + size20,
                     child: Row(
                       children: [
                         Text(
@@ -340,13 +307,8 @@ class LaporanPendapatanHarianPageState
                   color: primary100,
                 ),
                 child: FutureBuilder(
-                  future: getLaporanDaily(
-                    context,
-                    widget.token,
-                    _textvalueOrderBy,
-                    _textvalueKeyword,
-                    [''],
-                  ),
+                  future: getLaporanDaily(context, widget.token,
+                      _textvalueOrderBy, _textvalueKeyword, listToko, ''),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       Map<String, dynamic>? data = snapshot.data!['data'];
@@ -354,13 +316,15 @@ class LaporanPendapatanHarianPageState
                       var header = data['header'];
                       // print(snapshot.data['data']);
                       return RefreshIndicator(
+                        color: bnw100,
                         onRefresh: () async {
                           getLaporanDaily(
                             context,
                             widget.token,
                             _textvalueOrderBy,
                             _textvalueKeyword,
-                            [''],
+                            listToko,
+                            '',
                           );
                           setState(() {});
                         },
@@ -376,7 +340,7 @@ class LaporanPendapatanHarianPageState
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     SizedBox(
-                                      width: width + 20,
+                                      width: width + size20,
                                       child: Text(
                                         detail[index]['tanggal'].toString(),
                                         style: heading4(
@@ -456,14 +420,14 @@ class LaporanPendapatanHarianPageState
             ),
             FutureBuilder(
                 future: getLaporanDaily(context, widget.token,
-                    _textvalueOrderBy, _textvalueKeyword, ['']),
+                    _textvalueOrderBy, _textvalueKeyword, listToko, ''),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     Map<String, dynamic>? data = snapshot.data!['data'];
 
                     var header = data!['header'];
                     return Container(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      padding: EdgeInsets.only(top: size16, bottom: size16),
                       decoration: BoxDecoration(
                         color: primary200,
                         borderRadius: BorderRadius.only(
@@ -475,7 +439,7 @@ class LaporanPendapatanHarianPageState
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           SizedBox(
-                            width: width + 20,
+                            width: width + size20,
                             child: Text(
                               'Total',
                               style:
@@ -535,32 +499,7 @@ class LaporanPendapatanHarianPageState
                 }),
           ],
         ),
-      ),
-    );
-  }
-
-  GestureDetector buttonBagikanLaporan(link, icon, text) {
-    return GestureDetector(
-      onTap: () {
-        downloadFile(link);
-        //'https://api.prod.amio.my.id/storage/file/20230217-5524.pdf'
-      },
-      child: buttonXXLoutline(
-        Column(
-          children: [
-            Icon(
-              icon,
-              color: primary500,
-            ),
-            Text(
-              text,
-              style: heading2(FontWeight.w600, primary500, 'Outfit'),
-            ),
-          ],
-        ),
-        110,
-        primary500,
-      ),
+      
     );
   }
 
@@ -607,7 +546,7 @@ class LaporanPendapatanHarianPageState
                                   style: heading4(
                                       FontWeight.w400, bnw600, 'Outfit'),
                                 ),
-                                SizedBox(height: 20),
+                                SizedBox(height: size20),
                                 Text(
                                   'Pilih Rentang Waktu',
                                   style: heading3(
@@ -770,7 +709,7 @@ class LaporanPendapatanHarianPageState
                                   style: heading4(
                                       FontWeight.w400, bnw600, 'Outfit'),
                                 ),
-                                SizedBox(height: 20),
+                                SizedBox(height: size20),
                                 Text(
                                   'Pilih Rentang Waktu',
                                   style: heading3(
@@ -879,5 +818,291 @@ class LaporanPendapatanHarianPageState
         ),
       ),
     );
+  }
+
+  sortToko(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          showModalBottomSheet(
+            isScrollControlled: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return FutureBuilder(
+                  future: getAllToko(context, widget.token, '', ''),
+                  builder: (context, snapshot) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, setState) => Container(
+                        height: MediaQuery.of(context).size.height / 1.4,
+                        padding:
+                            EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pilih Toko',
+                                    style: heading2(
+                                        FontWeight.w700, bnw900, 'Outfit'),
+                                  ),
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                        FontWeight.w400, bnw600, 'Outfit'),
+                                  ),
+                                  SizedBox(height: size20),
+                                  Text(
+                                    '${listToko.length} Toko Terpilih',
+                                    style: heading2(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                  SizedBox(height: size24),
+                                ],
+                              ),
+                            ),
+                            snapshot.data == null
+                                ? Center(child: CircularProgressIndicator())
+                                : Expanded(
+                                    child: GridView.builder(
+                                      physics: BouncingScrollPhysics(),
+                                      padding: EdgeInsets.zero,
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        mainAxisExtent: size120,
+                                        // childAspectRatio: 2.977,
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: size16,
+                                        mainAxisSpacing: size16,
+                                      ),
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: (context, i) {
+                                        ModelDataToko data = snapshot.data![i];
+                                        selectedFlag[i] =
+                                            selectedFlag[i] ?? false;
+                                        bool? isSelected = selectedFlag[i];
+                                        return GestureDetector(
+                                          behavior: HitTestBehavior.translucent,
+                                          onTap: () {
+                                            // valueMerchid.add(data.merchantid);
+                                            // log(data.name.toString());
+                                            setState(() {
+                                              onTap(isSelected, i,
+                                                  data.merchantid);
+                                              print(listToko);
+                                            });
+
+                                            // print(dataProduk.productid);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(size16),
+                                            // margin:  EdgeInsets.only(right: size16),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(size16),
+                                              border: Border.all(color: bnw300),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              1000),
+                                                      child: SizedBox(
+                                                        height: 60,
+                                                        width: 60,
+                                                        child: snapshot.data![i]
+                                                                    .logomerchant_url !=
+                                                                null
+                                                            ? Image.network(
+                                                                snapshot
+                                                                    .data![i]
+                                                                    .logomerchant_url
+                                                                    .toString(),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorBuilder: (context,
+                                                                        error,
+                                                                        stackTrace) =>
+                                                                    SizedBox(
+                                                                        child:
+                                                                            Icon(
+                                                                  PhosphorIcons
+                                                                      .storefront_fill,
+                                                                  size: 60,
+                                                                  color: bnw900,
+                                                                )),
+                                                              )
+                                                            : Icon(
+                                                                PhosphorIcons
+                                                                    .storefront_fill,
+                                                                size: 60,
+                                                              ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: size20),
+                                                    Flexible(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            snapshot.data![i]
+                                                                    .name ??
+                                                                '',
+                                                            style: heading2(
+                                                                FontWeight.w700,
+                                                                bnw900,
+                                                                'Outfit'),
+                                                          ),
+                                                          Text(
+                                                            '${snapshot.data![i].address}',
+                                                            style: body1(
+                                                                FontWeight.w400,
+                                                                bnw800,
+                                                                'Outfit'),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            maxLines: 2,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 50,
+                                                      child: _buildSelectIcon(
+                                                          isSelected!, data),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                            snapshot.data == null
+                                ? Spacer()
+                                : SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  listToko;
+                                  getLaporanDaily(
+                                    context,
+                                    widget.token,
+                                    _textvalueOrderBy,
+                                    _textvalueKeyword,
+                                    listToko,
+                                    '',
+                                  );
+                                  Navigator.pop(context);
+                                  initState();
+                                  setState(() {});
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                          FontWeight.w600, bnw100, 'Outfit'),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+            },
+          );
+        });
+      },
+      child: buttonXLoutline(
+        Row(
+          children: [
+            Icon(PhosphorIcons.storefront, color: bnw900),
+            SizedBox(width: size12),
+            Text(
+              listToko.isEmpty ? 'Semua' : '${listToko.length} Toko',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: heading3(
+                FontWeight.w600,
+                bnw900,
+                'Outfit',
+              ),
+            ),
+          ],
+        ),
+        double.infinity,
+        bnw300,
+      ),
+    );
+  }
+
+  void onTap(bool isSelected, int index, merchId) {
+    if (index >= 0 && index < selectedFlag.length) {
+      selectedFlag[index] = !isSelected;
+      isSelectionMode = selectedFlag.containsValue(true);
+
+      if (selectedFlag[index] == true) {
+        // Periksa apakah productId sudah ada di dalam listProduct sebelum menambahkannya
+        if (!listToko.contains(merchId)) {
+          listToko.add(merchId);
+        }
+      } else {
+        // Hapus productId dari listProduct jika sudah ada
+        listToko.remove(merchId);
+      }
+
+      setState(() {});
+    }
+  }
+
+  void onLongPress(bool isSelected, int index) {
+    setState(() {
+      selectedFlag[index] = !isSelected;
+      isSelectionMode = selectedFlag.containsValue(true);
+    });
+  }
+
+  Widget _buildSelectIcon(bool isSelected, ModelDataToko data) {
+    return Icon(
+      isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
+      color: primary500,
+    );
+    // if (isSelectionMode) {
+    // } else {
+    //   return CircleAvatar(
+    //     child: Text('${data['id']}'),
+    //   );
+    // }
   }
 }

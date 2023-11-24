@@ -41,8 +41,8 @@ class MasukAkunPage extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Image.asset(
-                  'assets/images/masukdaftar.png',
+                child: SvgPicture.asset(
+                  'assets/newIllustration/OnBoarding1.svg',
                 ),
               ),
               SizedBox(width: size16),

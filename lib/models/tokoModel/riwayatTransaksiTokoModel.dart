@@ -5,6 +5,7 @@ class TokoDataRiwayatModel {
   num? amount;
   String? entrydate;
   String? isPaid;
+  String? isColor;
   String? pic;
   num? isBackdate;
   String? paymentName;
@@ -18,6 +19,7 @@ class TokoDataRiwayatModel {
     this.amount,
     this.entrydate,
     this.isPaid,
+    this.isColor,
     this.pic,
     this.isBackdate,
     this.paymentName,
@@ -33,6 +35,7 @@ class TokoDataRiwayatModel {
     amount = json['amount'];
     entrydate = json['entrydate'];
     isPaid = json['isPaid'];
+    isColor = json['status_color'];
     pic = json['pic'];
     isBackdate = json['isBackdate'];
     paymentName = json['payment_name'];
@@ -49,6 +52,7 @@ class TokoDataRiwayatModel {
     data['amount'] = this.amount;
     data['entrydate'] = this.entrydate;
     data['isPaid'] = this.isPaid;
+    data['status_color'] = this.isColor;
     data['pic'] = this.pic;
     data['isBackdate'] = this.isBackdate;
     data['payment_name'] = this.paymentName;

@@ -2,6 +2,7 @@ class ProductModel {
   String? productid;
   String? name;
   int? price;
+  int? price_online_shop;
   // String? isActive;
   int? isActive;
   int? isPPN;
@@ -12,6 +13,7 @@ class ProductModel {
     required this.productid,
     required this.name,
     required this.price,
+    required this.price_online_shop,
     required this.isActive,
     required this.isPPN,
     required this.typeproducts,
@@ -22,6 +24,7 @@ class ProductModel {
     productid = json['productid'];
     name = json['name'];
     price = json['price'];
+    price_online_shop = json['price_online_shop'];
     isActive = json['isActive'];
     isPPN = json['isPPN'];
     typeproducts = json['typeproducts'];
@@ -33,6 +36,7 @@ class ProductModel {
     data['productid'] = this.productid;
     data['name'] = this.name;
     data['price'] = this.price;
+    data['price_online_shop'] = this.price_online_shop;
     data['isActive'] = this.isActive;
     data['isPPN'] = this.isPPN;
     data['typeproducts'] = this.typeproducts;

@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:amio/pagehelper/masukakun.dart';
 import 'package:amio/utils/component.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,8 +18,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:amio/main.dart';
 
 import '../../pageTablet/home/dashboard.dart';
+import '../../pageTablet/tokopage/dashboardtoko.dart';
 import '../../services/apimethod.dart';
+import '../../services/notification.dart';
 import '../daftarAkun.dart';
+import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
 import 'register_page.dart';
 
@@ -30,6 +34,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  FocusScopeNode _focusScopeNode = FocusScopeNode();
+
   var phoneEmailController = TextEditingController();
   var pass, email;
   var name = 'login';
@@ -73,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                                   builder: (context) => MasukAkunPage())),
                           child: Icon(
                             PhosphorIcons.arrow_left,
-                            size: size32,
+                            size: size40,
                             color: bnw900,
                           ),
                         ),
@@ -83,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                           child: Icon(
                             PhosphorIcons.question,
-                            size: size32,
+                            size: size40,
                             color: bnw900,
                           ),
                         ),
@@ -143,6 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                                     Container(
                                       child: IntrinsicHeight(
                                         child: TextFormField(
+                                          focusNode: _focusScopeNode,
                                           style: heading2(FontWeight.w600,
                                               bnw900, 'Outfit'),
                                           onChanged: (value) {
@@ -197,6 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                                         onTap: () async {
                                           setState(() {
                                             errorText = '';
+                                            _focusScopeNode.unfocus();
                                             if (validated == 'number') {
                                               getOtp(
                                                 Otppage(
@@ -283,6 +291,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future getOtp(page) async {
     try {
+      whenLoading(context);
       final response = await http.post(
         Uri.parse(loginbyotp),
         body: {
@@ -294,7 +303,8 @@ class _LoginPageState extends State<LoginPage> {
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        log(jsonResponse['data']);
+        Navigator.of(context, rootNavigator: true).pop();
+        print(jsonResponse['data']);
         print("succes");
         _validate = false;
         // ignore: use_build_context_synchronously
@@ -306,6 +316,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         setState(() {
+          Navigator.of(context, rootNavigator: true).pop();
           errorText = jsonResponse['message'];
           _validate = true;
         });
@@ -355,17 +366,18 @@ class LoginWithEmail extends StatefulWidget {
 }
 
 class _LoginWithEmailState extends State<LoginWithEmail> {
-  TextEditingController _controller = TextEditingController();
+  TextEditingController passController = TextEditingController();
+  bool _obscureText = true;
+  bool _validate = false;
 
   @override
   void initState() {
-    _controller;
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller;
+    passController.dispose();
     super.dispose();
   }
 
@@ -433,15 +445,15 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                 children: [
                                   Text(
                                     'Masukkan Kata Sandi',
-                                    style: heading1(FontWeight.w700,
-                                        Colors.black, 'Outfit'),
+                                    style: heading1(
+                                        FontWeight.w700, bnw900, 'Outfit'),
                                   ),
                                   Text(
                                     'Masukkan kata sandi anda.',
                                     style: heading3(
                                         FontWeight.w500, bnw500, 'Outfit'),
                                   ),
-                                  SizedBox(height: 24),
+                                  SizedBox(height: size24),
                                   Row(
                                     children: [
                                       Text(
@@ -461,12 +473,16 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                       child: TextFormField(
                                         style: heading2(
                                             FontWeight.w600, bnw900, 'Outfit'),
-                                        onChanged: (value) {},
                                         cursorColor: primary500,
-                                        // controller: phoneEmailController,
+                                        controller: passController,
+                                        obscureText: _obscureText,
+                                        obscuringCharacter: '*',
+                                        onChanged: (value) {
+                                          setState(() {});
+                                        },
                                         decoration: InputDecoration(
-                                          // errorText:
-                                          //     _validate ? errorText : null,
+                                          errorText:
+                                              _validate ? errorText : null,
                                           errorStyle: body1(FontWeight.w500,
                                               red500, 'Outfit'),
                                           focusedBorder: UnderlineInputBorder(
@@ -474,6 +490,20 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                               width: 2,
                                               color: primary500,
                                             ),
+                                          ),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              !_obscureText
+                                                  ? PhosphorIcons.eye_closed
+                                                  : PhosphorIcons.eye,
+                                              color: bnw900,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _obscureText = !_obscureText;
+                                                print(_obscureText);
+                                              });
+                                            },
                                           ),
                                           focusedErrorBorder:
                                               UnderlineInputBorder(
@@ -491,29 +521,32 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                       ),
                                     ),
                                   ),
-                                  // SizedBox(height: size16),
-                                  // Row(
-                                  //   mainAxisAlignment: MainAxisAlignment.start,
-                                  //   children: [
-                                  //     GestureDetector(
-                                  //       // onTap: () async => getOtp(),
-                                  //       onTap: () => Navigator.pushReplacement(
-                                  //         context,
-                                  //         MaterialPageRoute(
-                                  //           builder: (context) =>
-                                  //               DaftarAkunPage(),
-                                  //         ),
-                                  //       ),
-                                  //       child: Text(
-                                  //         'Lupa Kata Sandi',
-                                  //         style: heading4(FontWeight.w500,
-                                  //             primary500, 'Outfit'),
-                                  //       ),
-                                  //     ),
-                                  //   ],
-                                  // ),
+                                  SizedBox(height: size16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      GestureDetector(
+                                        // onTap: () async => getOtp(),
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ForgotPasswordPage(),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Lupa Kata Sandi',
+                                          style: heading4(FontWeight.w500,
+                                              primary500, 'Outfit'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   SizedBox(height: size32),
                                   GestureDetector(
+                                    onTap: () {
+                                      loginEmail();
+                                    },
                                     child: buttonXXL(
                                       Center(
                                         child: Text('Masuk',
@@ -540,5 +573,71 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         ),
       ),
     );
+  }
+
+  Future loginEmail() async {
+    try {
+      whenLoading(context);
+
+      final response = await http.post(
+        Uri.parse(loginEmailLink),
+        body: {
+          'deviceid': identifier,
+          'email': widget.email,
+          'password': passController.text,
+        },
+      );
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        Navigator.of(context, rootNavigator: true).pop();
+        print("succes login with email");
+
+        myprofile(jsonResponse['token']);
+        late FirebaseMessaging messaging;
+        messaging = FirebaseMessaging.instance;
+        messaging.getToken().then((value) {
+          setState(() {
+            print("firebase token : $value");
+            firebaseToken(value, jsonResponse['token']);
+          });
+        });
+        final NotifFCM = FCM();
+
+        NotifFCM.setNotifiications();
+        Future.delayed(
+          const Duration(seconds: 3),
+          () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => statusProfile == 'Group_Merchant'
+                    ? SidebarXExampleApp(
+                        id: identifier.toString(),
+                        token: jsonResponse['token'],
+                      )
+                    : SidebarXExampleAppToko(
+                        token: jsonResponse['token'],
+                        id: identifier.toString(),
+                      ),
+              ),
+            );
+          },
+        );
+
+        print(jsonResponse['data']);
+
+        _validate = false;
+        errorText = '';
+      } else {
+        setState(() {
+          Navigator.of(context, rootNavigator: true).pop();
+          errorText = jsonResponse['message'];
+          _validate = true;
+        });
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }

@@ -595,20 +595,6 @@ class _PromosiTokoState extends State<PromosiToko> {
             ),
             Row(
               children: [
-                searchField(
-                  260,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Icon(PhosphorIcons.magnifying_glass),
-                      Text(
-                        'Cari nama atau alamat toko',
-                        style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: size12),
                 GestureDetector(
                   onTap: () {
                     _pageController.nextPage(
@@ -641,7 +627,7 @@ class _PromosiTokoState extends State<PromosiToko> {
           child: Column(
             children: [
               Container(
-                width: double.infinity,
+                // width: double.infinity,
                 // height: 50,
                 padding:
                     EdgeInsets.symmetric(horizontal: size16, vertical: size12),
@@ -946,7 +932,7 @@ class _PromosiTokoState extends State<PromosiToko> {
                                     Expanded(
                                       child: Text(
                                         FormatCurrency.convertToIdr(
-                                            datasProduk![index].price),
+                                            datasProduk![index].price ?? 0),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
@@ -957,7 +943,7 @@ class _PromosiTokoState extends State<PromosiToko> {
                                     Expanded(
                                       child: Text(
                                         FormatCurrency.convertToIdr(
-                                                datasProduk![index].point)
+                                                datasProduk![index].point ?? 0)
                                             .toString(),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

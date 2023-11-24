@@ -1,4 +1,5 @@
 import 'package:amio/pageMobile/dashboardMobile.dart';
+import 'package:amio/pageMobile/pageHelperMobile/daftarAkunMobile.dart';
 import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
 import 'package:amio/utils/component.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class _MasukAkunPageMobileState extends State<MasukAkunPageMobile> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DashboardPageMobile(),
+                          builder: (context) => DaftarAkunPageMobile(),
                         ));
                   },
                   child: SizedBox(

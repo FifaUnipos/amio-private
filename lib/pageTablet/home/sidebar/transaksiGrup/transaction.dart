@@ -43,6 +43,7 @@ class _TransaksiGrupState extends State<TransaksiGrup>
   @override
   void initState() {
     checkConnection(context);
+
     _tabController = TabController(length: 3, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -111,6 +112,7 @@ class _TransaksiGrupState extends State<TransaksiGrup>
                   pageController: _pageController,
                   tabController: _tabController!,
                   namemerch: namemerch,
+                  merchid: merchid,
                 ),
               ],
             ),
@@ -271,7 +273,7 @@ class _TransaksiGrupState extends State<TransaksiGrup>
                                                       )),
                                                     )
                                                   : Icon(
-                                                      Icons.person,
+                                                      PhosphorIcons.storefront_fill,
                                                       size: 60,
                                                     ),
                                         ),
