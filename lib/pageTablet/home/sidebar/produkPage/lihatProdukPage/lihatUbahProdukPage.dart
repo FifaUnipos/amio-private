@@ -593,9 +593,30 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                     initState();
                                   },
                                   child: ListView(
+                                    padding: EdgeInsets.zero,
                                     children: [
+                                      SizedBox(height: size16),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          tambahKategori(context,
+                                              isKeyboardActive, setState);
+                                          _getProductList();
+                                        },
+                                        child: buttonXLoutline(
+                                            Center(
+                                                child: Text(
+                                              'Tambah Kategori',
+                                              style: heading2(FontWeight.w600,
+                                                  primary500, 'Outfit'),
+                                            )),
+                                            double.infinity,
+                                            primary500),
+                                      ),
+                                      SizedBox(height: size16),
                                       ListView.builder(
                                         shrinkWrap: true,
+                                        padding: EdgeInsets.zero,
                                         physics: BouncingScrollPhysics(),
                                         keyboardDismissBehavior:
                                             ScrollViewKeyboardDismissBehavior
@@ -660,24 +681,6 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                             ],
                                           );
                                         },
-                                      ),
-                                      SizedBox(height: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          tambahKategori(context,
-                                              isKeyboardActive, setState);
-                                          _getProductList();
-                                        },
-                                        child: buttonXLoutline(
-                                            Center(
-                                                child: Text(
-                                              'Tambah Kategori',
-                                              style: heading2(FontWeight.w600,
-                                                  primary500, 'Outfit'),
-                                            )),
-                                            double.infinity,
-                                            primary500),
                                       ),
                                       SizedBox(height: size16),
                                     ],
@@ -904,9 +907,13 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                           widget.token,
                                           product['kodeproduct'],
                                           controllerNameEdit.text,
-                                        );
+                                        ).then((value) {
+                                          if (value == '00') {
+                                            errorText = '';
+                                            controllerNameEdit.text = '';
+                                          }
+                                        });
                                         _getProductList();
-                                        errorText = '';
                                         setState(() {});
                                         initState();
                                       },
@@ -1120,10 +1127,19 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
+                          whenLoading(context);
                           tambahKategoriForm(
-                              context, controllerName.text, widget.token);
+                                  context, controllerName.text, widget.token)
+                              .then((value) {
+                            if (value == '00') {
+                              Navigator.pop(context);
+
+                              errorText = '';
+                              controllerName.text = '';
+                            }
+                          });
                           _getProductList();
-                          errorText = '';
+
                           setState(() {});
                           initState();
                         },

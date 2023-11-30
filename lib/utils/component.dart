@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
@@ -280,19 +281,33 @@ String formatCurrency(int amount) {
   return formatter.format(amount);
 }
 
-whenLoading(context) {
-  return showDialog(
+Completer<void> loadingCompleter = Completer<void>();
+
+void whenLoading(context) {
+  showDialog(
     barrierDismissible: true,
     useRootNavigator: true,
     context: context,
-    builder: (context) => const Center(
-      child: SizedBox(
-        width: 40,
-        height: 40,
-        child: CircularProgressIndicator(),
-      ),
+    builder: (context) => Builder(
+      builder: (BuildContext context) {
+        loadingCompleter = Completer<void>();
+        return const Center(
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     ),
   );
+}
+
+Future<void> closeLoading(context) async {
+  if (!loadingCompleter.isCompleted) {
+    Navigator.of(context, rootNavigator: true).pop();
+    loadingCompleter.complete();
+  }
 }
 
 dividerShowdialog() {
@@ -1215,8 +1230,7 @@ searchField(double width, Widget mywidget) {
 
 //* Appbar
 appbar(BuildContext context, bool login) {
-  return 
-  SafeArea(
+  return SafeArea(
     child: Container(
       padding: EdgeInsets.symmetric(vertical: size12),
       child: Row(

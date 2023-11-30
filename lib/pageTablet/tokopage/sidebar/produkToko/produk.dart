@@ -2220,14 +2220,21 @@ class _ProdukTokoState extends State<ProdukToko> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
+                                        whenLoading(context);
                                         ubahKategoriForm(
                                           context,
                                           widget.token,
                                           product['kodeproduct'],
                                           controllerNameEdit.text,
-                                        );
+                                        ).then((value) {
+                                          if (value == '00') {
+                                            errorText = '';
+                                            controllerNameEdit.text = '';
+                                          }
+                                        });
                                         _getProductList();
-                                        errorText = '';
+                                        refreshDataProduk();
+                                        getDataProduk(['']);
                                         setState(() {});
                                         initState();
                                       },
@@ -2441,10 +2448,20 @@ class _ProdukTokoState extends State<ProdukToko> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
+                          whenLoading(context);
                           tambahKategoriForm(
-                              context, controllerName.text, widget.token);
+                                  context, controllerName.text, widget.token)
+                              .then((value) {
+                            if (value == '00') {
+                              Navigator.pop(context);
+
+                              errorText = '';
+                              controllerName.text = '';
+                            }
+                          });
                           _getProductList();
-                          errorText = '';
+                          refreshDataProduk();
+                          getDataProduk(['']);
                           setState(() {});
                           initState();
                         },

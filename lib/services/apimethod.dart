@@ -248,16 +248,16 @@ Future tambahKategoriForm(context, name, token) async {
       },
     );
     var jsonResponse = jsonDecode(response.body);
-    log(response.body.toString());
+    print(response.body.toString());
     if (response.statusCode == 200) {
       print("succes tambah kategori");
-
-      Navigator.pop(context);
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     } else {
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     }
-    return null;
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -307,10 +307,13 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
     if (response.statusCode == 200) {
       print("succes hapus kategori");
 
+      closeLoading(context);
       Navigator.pop(context);
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     } else {
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     }
     return null;
   } catch (e) {

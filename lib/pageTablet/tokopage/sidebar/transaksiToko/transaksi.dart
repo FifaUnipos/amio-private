@@ -114,7 +114,7 @@ class _TransactionPageState extends State<TransactionPage>
   // Set<String> cartProductIds = Set();
   int counterCart = 1;
   bool isExpand = false;
-  int tapTrue = 0;
+  int tapTrue = 1;
 
   void formatInput() {
     String text = kreditpinController.text.replaceAll('-', '');
@@ -2679,6 +2679,536 @@ class _TransactionPageState extends State<TransactionPage>
                                 ),
                               ),
                             ),
+                            SizedBox(width: size16),
+                            GestureDetector(
+                              onTap: () {
+                                customProdukName.text = "";
+                                customProdukPrice.text = "";
+                                showModalBottomSheet(
+                                  backgroundColor: Colors.transparent,
+                                  useRootNavigator: false,
+                                  isScrollControlled: true,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(size16),
+                                  ),
+                                  context: context,
+                                  builder: (context) {
+                                    return Container(
+                                      margin: EdgeInsets.only(top: size16),
+                                      padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(context)
+                                              .viewInsets
+                                              .bottom),
+                                      decoration: ShapeDecoration(
+                                        color: bnw100,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(size16),
+                                            topRight: Radius.circular(size16),
+                                          ),
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                            size32, size16, size32, size32),
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                              dividerShowdialog(),
+                                              SizedBox(height: size16),
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Kustom Produk',
+                                                    style: heading1(
+                                                        FontWeight.w700,
+                                                        bnw900,
+                                                        'Outfit')),
+                                              ),
+                                              SizedBox(width: size16),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Nama Produk',
+                                                          style: body1(
+                                                              FontWeight.w500,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        IntrinsicHeight(
+                                                          child: TextFormField(
+                                                            // keyboardType: numberNo,
+                                                            style: heading2(
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit'),
+                                                            controller:
+                                                                customProdukName,
+
+                                                            decoration:
+                                                                InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                                  EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          size12),
+                                                              enabledBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
+                                                                  width: 1.5,
+                                                                  color: bnw500,
+                                                                ),
+                                                              ),
+                                                              hintText:
+                                                                  'Cth : Lemon Tea',
+                                                              hintStyle:
+                                                                  heading2(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw500,
+                                                                      'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: size16),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Harga',
+                                                          style: body1(
+                                                              FontWeight.w500,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        IntrinsicHeight(
+                                                          child: TextFormField(
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .number,
+                                                            style: heading2(
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit'),
+                                                            controller:
+                                                                customProdukPrice,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                                  EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          size12),
+                                                              enabledBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
+                                                                  width: 1.5,
+                                                                  color: bnw500,
+                                                                ),
+                                                              ),
+                                                              hintText:
+                                                                  'Cth : 25.000',
+                                                              hintStyle:
+                                                                  heading2(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw500,
+                                                                      'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: size16),
+                                                  Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text('Jumlah',
+                                                          style: heading3(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit')),
+                                                      SizedBox(height: size8),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              if (counterCart >
+                                                                  1) {
+                                                                counterCart--;
+                                                                conCounterPreview
+                                                                        .text =
+                                                                    counterCart
+                                                                        .toString();
+                                                              }
+                                                              setState(() {});
+                                                            },
+                                                            child:
+                                                                buttonMoutlineColor(
+                                                              Icon(
+                                                                PhosphorIcons
+                                                                    .minus,
+                                                                color:
+                                                                    primary500,
+                                                                size: size24,
+                                                              ),
+                                                              primary500,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              width: size8),
+                                                          SizedBox(
+                                                            height: size48,
+                                                            width: size56,
+                                                            child:
+                                                                TextFormField(
+                                                              enabled: true,
+                                                              controller:
+                                                                  conCounterPreview,
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .number,
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  int parsedValue =
+                                                                      int.tryParse(
+                                                                              value) ??
+                                                                          0;
+                                                                  counterCart =
+                                                                      parsedValue;
+                                                                  conCounterPreview
+                                                                          .text =
+                                                                      counterCart
+                                                                          .toString();
+                                                                });
+                                                              },
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                // alignLabelWithHint: true,
+                                                                hintText:
+                                                                    counterCart
+                                                                        .toString(),
+
+                                                                // .toString(),
+                                                                // _itemCount.toString(),
+                                                                hintStyle: heading4(
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw800,
+                                                                    'Outfit'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              width: size8),
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              counterCart++;
+                                                              conCounterPreview
+                                                                      .text =
+                                                                  counterCart
+                                                                      .toString();
+                                                              setState(() {});
+                                                            },
+                                                            child:
+                                                                buttonMoutlineColor(
+                                                              Icon(
+                                                                PhosphorIcons
+                                                                    .plus,
+                                                                color:
+                                                                    primary500,
+                                                                size: size24,
+                                                              ),
+                                                              primary500,
+                                                              // 50,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: size16),
+                                              Container(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Catatan',
+                                                      style: body1(
+                                                          FontWeight.w500,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        // keyboardType: numberNo,
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                        controller:
+                                                            conCatatanPreview,
+                                                        onChanged: (value) {
+                                                          // String formattedValue = formatCurrency(value);
+                                                          // conHarga.value = TextEditingValue(
+                                                          //   text: formattedValue,
+                                                          //   selection:
+                                                          //       TextSelection.collapsed(offset: formattedValue.length),
+                                                          // );
+                                                        },
+                                                        decoration:
+                                                            InputDecoration(
+                                                          isDense: true,
+                                                          contentPadding:
+                                                              EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          size12),
+                                                          enabledBorder:
+                                                              UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              width: 1.5,
+                                                              color: bnw500,
+                                                            ),
+                                                          ),
+                                                          hintText:
+                                                              'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
+                                                          hintStyle: heading2(
+                                                              FontWeight.w600,
+                                                              bnw500,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: size16),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        setState(() {});
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: buttonXLoutline(
+                                                          Center(
+                                                            child: Text(
+                                                              'Batalkan',
+                                                              style: heading3(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  primary500,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                          primary500),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: size16),
+                                                  Expanded(
+                                                      child: GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        if (!isItemAdded) {
+                                                          Navigator.pop(
+                                                              context);
+                                                          Map<String, String>
+                                                              map1 = {};
+                                                          map1['name'] =
+                                                              customProdukName
+                                                                  .text;
+                                                          map1['productid'] =
+                                                              'custom';
+                                                          // map1['quantity'] = '1';
+                                                          map1['quantity'] =
+                                                              counterCart
+                                                                  .toString();
+
+                                                          map1['image'] =
+                                                              'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
+                                                          map1['amount'] =
+                                                              customProdukPrice
+                                                                  .text
+                                                                  .replaceAll(
+                                                                      RegExp(
+                                                                          r'[^0-9]'),
+                                                                      '');
+                                                          map1['description'] =
+                                                              conCatatanPreview
+                                                                  .text;
+
+                                                          cartMap.add(map1);
+
+                                                          // log(datasTransaksi![i].product_image.toString());
+
+                                                          String name =
+                                                              customProdukName
+                                                                  .text;
+                                                          String productid =
+                                                              'custom';
+                                                          String image =
+                                                              'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
+                                                          // String desc = conCatatan[i]
+                                                          //     .text
+                                                          //     .toString()
+                                                          //     .trim();
+
+                                                          //int? price = ( datasTransaksi![i].price!);
+                                                          int? price = int.parse(
+                                                              customProdukPrice
+                                                                  .text
+                                                                  .replaceAll(
+                                                                      RegExp(
+                                                                          r'[^0-9]'),
+                                                                      ''));
+
+                                                          int index = 0;
+                                                          for (index;
+                                                              index <
+                                                                  cart.length;
+                                                              index++) {}
+
+                                                          // int? quantity = cart[i];
+
+                                                          // log(name.toString());
+                                                          // log(price.toString());
+                                                          // log(productid.toString());
+                                                          // log(image.toString());
+
+                                                          sumTotal = sumTotal +
+                                                              (price *
+                                                                  counterCart);
+                                                          // subTotal =
+                                                          //     subTotal + price.toInt();
+                                                          total.add(price *
+                                                              counterCart);
+
+                                                          cart.add(
+                                                            CartTransaksi(
+                                                              name: name,
+                                                              productid:
+                                                                  productid,
+                                                              image: image,
+                                                              price: price,
+                                                              quantity:
+                                                                  counterCart,
+                                                              desc:
+                                                                  conCatatanPreview
+                                                                      .text,
+                                                              // quantity: cart[i]
+                                                              //     .quantity
+                                                              //     .toInt(),
+                                                            ),
+                                                          );
+                                                          for (int i = 0;
+                                                              i <= cart.length;
+                                                              i++) {
+                                                            conCatatan.add(
+                                                              TextEditingController(
+                                                                text:
+                                                                    conCatatanPreview
+                                                                        .text,
+                                                              ),
+                                                            );
+                                                            inputValues.add(
+                                                                conCatatanPreview
+                                                                    .text);
+                                                            setState(() {});
+                                                            initState();
+                                                          }
+
+                                                          refreshColor();
+
+                                                          int totalku = 0;
+                                                          cartMap.forEach(
+                                                              (element) {
+                                                            var myelement = int
+                                                                .parse(element[
+                                                                    'amount']!);
+                                                            totalku = totalku +
+                                                                (myelement *
+                                                                    counterCart);
+                                                          });
+
+                                                          sumTotal = totalku;
+                                                        } else {
+                                                          // isItemAdded = false;
+                                                          // cartProductIds.remove(productSelect);
+                                                        }
+                                                      });
+
+                                                      initState();
+                                                    },
+                                                    child: buttonXL(
+                                                      Center(
+                                                        child: Text(
+                                                          'Tambah Ke Keranjang',
+                                                          style: heading3(
+                                                              FontWeight.w600,
+                                                              bnw100,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .width,
+                                                    ),
+                                                  )),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: buttonXLoutlineExpanded(
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Kustom Produk',
+                                      style: heading2(FontWeight.w600,
+                                          primary500, 'Outfit'),
+                                    ),
+                                  ],
+                                ),
+                                primary500,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -2752,520 +3282,23 @@ class _TransactionPageState extends State<TransactionPage>
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
                                               orderBy(context),
-                                              GestureDetector(
-                                                onTap: () {
-                                                  customProdukName.text = "";
-                                                  customProdukPrice.text = "";
-                                                  showModalBottomSheet(
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    useRootNavigator: false,
-                                                    isScrollControlled: true,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              size16),
-                                                    ),
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return Container(
-                                                        margin: EdgeInsets.only(
-                                                            top: size16),
-                                                        padding: EdgeInsets.only(
-                                                            bottom:
-                                                                MediaQuery.of(
-                                                                        context)
-                                                                    .viewInsets
-                                                                    .bottom),
-                                                        decoration:
-                                                            ShapeDecoration(
-                                                          color: bnw100,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .only(
-                                                              topLeft: Radius
-                                                                  .circular(
-                                                                      size16),
-                                                              topRight: Radius
-                                                                  .circular(
-                                                                      size16),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Padding(
-                                                          padding: EdgeInsets
-                                                              .fromLTRB(
-                                                                  size32,
-                                                                  size16,
-                                                                  size32,
-                                                                  size32),
-                                                          child:
-                                                              SingleChildScrollView(
-                                                            child: Column(
-                                                              children: [
-                                                                dividerShowdialog(),
-                                                                SingleChildScrollView(
-                                                                  child: Column(
-                                                                    children: [
-                                                                      SizedBox(
-                                                                          height:
-                                                                              size16),
-                                                                      Container(
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(size12),
-                                                                              border: Border.all(color: bnw300)),
-                                                                          child: Column(
-                                                                            children: [
-                                                                              Padding(
-                                                                                padding: EdgeInsets.all(size8),
-                                                                                child: Column(
-                                                                                  children: [
-                                                                                    Row(
-                                                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                                                      children: [
-                                                                                        Container(
-                                                                                          height: size120,
-                                                                                          width: size120,
-                                                                                          child: SvgPicture.asset(
-                                                                                            'assets/logoProduct.svg',
-                                                                                            fit: BoxFit.cover,
-                                                                                          ),
-                                                                                        ),
-                                                                                        SizedBox(width: size12),
-                                                                                        Column(
-                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                          children: [
-                                                                                            Text('Kustom Produk', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
-                                                                                          ],
-                                                                                        ),
-                                                                                        Spacer(),
-                                                                                        Column(
-                                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                                          children: [
-                                                                                            Text('Jumlah', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
-                                                                                            SizedBox(height: size8),
-                                                                                            Row(
-                                                                                              children: [
-                                                                                                GestureDetector(
-                                                                                                  onTap: () {
-                                                                                                    if (counterCart > 1) {
-                                                                                                      counterCart--;
-                                                                                                      conCounterPreview.text = counterCart.toString();
-                                                                                                    }
-                                                                                                    setState(() {});
-                                                                                                  },
-                                                                                                  child: buttonMoutlineColor(
-                                                                                                    Icon(
-                                                                                                      PhosphorIcons.minus,
-                                                                                                      color: primary500,
-                                                                                                      size: size24,
-                                                                                                    ),
-                                                                                                    primary500,
-                                                                                                  ),
-                                                                                                ),
-                                                                                                SizedBox(width: size8),
-                                                                                                SizedBox(
-                                                                                                  height: size48,
-                                                                                                  width: size56,
-                                                                                                  child: TextFormField(
-                                                                                                    enabled: true,
-                                                                                                    controller: conCounterPreview,
-                                                                                                    keyboardType: TextInputType.number,
-                                                                                                    onChanged: (value) {
-                                                                                                      setState(() {
-                                                                                                        int parsedValue = int.tryParse(value) ?? 0;
-                                                                                                        counterCart = parsedValue;
-                                                                                                        conCounterPreview.text = counterCart.toString();
-                                                                                                      });
-                                                                                                    },
-                                                                                                    textAlign: TextAlign.center,
-                                                                                                    decoration: InputDecoration(
-                                                                                                      // alignLabelWithHint: true,
-                                                                                                      hintText: counterCart.toString(),
-
-                                                                                                      // .toString(),
-                                                                                                      // _itemCount.toString(),
-                                                                                                      hintStyle: heading4(FontWeight.w600, bnw800, 'Outfit'),
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                                SizedBox(width: size8),
-                                                                                                GestureDetector(
-                                                                                                  onTap: () {
-                                                                                                    counterCart++;
-                                                                                                    conCounterPreview.text = counterCart.toString();
-                                                                                                    setState(() {});
-                                                                                                  },
-                                                                                                  child: buttonMoutlineColor(
-                                                                                                    Icon(
-                                                                                                      PhosphorIcons.plus,
-                                                                                                      color: primary500,
-                                                                                                      size: size24,
-                                                                                                    ),
-                                                                                                    primary500,
-                                                                                                    // 50,
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ],
-                                                                                        )
-                                                                                      ],
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          )),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Container(
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Nama Produk',
-                                                                        style: body1(
-                                                                            FontWeight.w500,
-                                                                            bnw900,
-                                                                            'Outfit'),
-                                                                      ),
-                                                                      IntrinsicHeight(
-                                                                        child:
-                                                                            TextFormField(
-                                                                          // keyboardType: numberNo,
-                                                                          style: heading2(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                          controller:
-                                                                              customProdukName,
-
-                                                                          decoration:
-                                                                              InputDecoration(
-                                                                            isDense:
-                                                                                true,
-                                                                            contentPadding:
-                                                                                EdgeInsets.symmetric(vertical: size12),
-                                                                            enabledBorder:
-                                                                                UnderlineInputBorder(
-                                                                              borderSide: BorderSide(
-                                                                                width: 1.5,
-                                                                                color: bnw500,
-                                                                              ),
-                                                                            ),
-                                                                            hintText:
-                                                                                'Cth : Lemon Tea',
-                                                                            hintStyle: heading2(
-                                                                                FontWeight.w600,
-                                                                                bnw500,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Container(
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Harga',
-                                                                        style: body1(
-                                                                            FontWeight.w500,
-                                                                            bnw900,
-                                                                            'Outfit'),
-                                                                      ),
-                                                                      IntrinsicHeight(
-                                                                        child:
-                                                                            TextFormField(
-                                                                          keyboardType:
-                                                                              TextInputType.number,
-                                                                          style: heading2(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                          controller:
-                                                                              customProdukPrice,
-                                                                          decoration:
-                                                                              InputDecoration(
-                                                                            isDense:
-                                                                                true,
-                                                                            contentPadding:
-                                                                                EdgeInsets.symmetric(vertical: size12),
-                                                                            enabledBorder:
-                                                                                UnderlineInputBorder(
-                                                                              borderSide: BorderSide(
-                                                                                width: 1.5,
-                                                                                color: bnw500,
-                                                                              ),
-                                                                            ),
-                                                                            hintText:
-                                                                                'Cth : 25.000',
-                                                                            hintStyle: heading2(
-                                                                                FontWeight.w600,
-                                                                                bnw500,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Container(
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Catatan',
-                                                                        style: body1(
-                                                                            FontWeight.w500,
-                                                                            bnw900,
-                                                                            'Outfit'),
-                                                                      ),
-                                                                      IntrinsicHeight(
-                                                                        child:
-                                                                            TextFormField(
-                                                                          // keyboardType: numberNo,
-                                                                          style: heading2(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                          controller:
-                                                                              conCatatanPreview,
-                                                                          onChanged:
-                                                                              (value) {
-                                                                            // String formattedValue = formatCurrency(value);
-                                                                            // conHarga.value = TextEditingValue(
-                                                                            //   text: formattedValue,
-                                                                            //   selection:
-                                                                            //       TextSelection.collapsed(offset: formattedValue.length),
-                                                                            // );
-                                                                          },
-                                                                          decoration:
-                                                                              InputDecoration(
-                                                                            isDense:
-                                                                                true,
-                                                                            contentPadding:
-                                                                                EdgeInsets.symmetric(vertical: size12),
-                                                                            enabledBorder:
-                                                                                UnderlineInputBorder(
-                                                                              borderSide: BorderSide(
-                                                                                width: 1.5,
-                                                                                color: bnw500,
-                                                                              ),
-                                                                            ),
-                                                                            hintText:
-                                                                                'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                                                            hintStyle: heading2(
-                                                                                FontWeight.w600,
-                                                                                bnw500,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Row(
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child:
-                                                                          GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          setState(
-                                                                              () {});
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                        },
-                                                                        child: buttonXLoutline(
-                                                                            Center(
-                                                                              child: Text(
-                                                                                'Batalkan',
-                                                                                style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                                                                              ),
-                                                                            ),
-                                                                            MediaQuery.of(context).size.width,
-                                                                            primary500),
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        width:
-                                                                            size16),
-                                                                    Expanded(
-                                                                        child:
-                                                                            GestureDetector(
-                                                                      onTap:
-                                                                          () {
-                                                                        setState(
-                                                                            () {
-                                                                          if (!isItemAdded) {
-                                                                            Navigator.pop(context);
-                                                                            Map<String, String>
-                                                                                map1 =
-                                                                                {};
-                                                                            map1['name'] =
-                                                                                customProdukName.text;
-                                                                            map1['productid'] =
-                                                                                'custom';
-                                                                            // map1['quantity'] = '1';
-                                                                            map1['quantity'] =
-                                                                                counterCart.toString();
-
-                                                                            map1['image'] =
-                                                                                'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
-                                                                            map1['amount'] =
-                                                                                customProdukPrice.text.replaceAll(RegExp(r'[^0-9]'), '');
-                                                                            map1['description'] =
-                                                                                conCatatanPreview.text;
-
-                                                                            cartMap.add(map1);
-
-                                                                            // log(datasTransaksi![i].product_image.toString());
-
-                                                                            String
-                                                                                name =
-                                                                                customProdukName.text;
-                                                                            String
-                                                                                productid =
-                                                                                'custom';
-                                                                            String
-                                                                                image =
-                                                                                'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
-                                                                            // String desc = conCatatan[i]
-                                                                            //     .text
-                                                                            //     .toString()
-                                                                            //     .trim();
-
-                                                                            //int? price = ( datasTransaksi![i].price!);
-                                                                            int?
-                                                                                price =
-                                                                                int.parse(customProdukPrice.text.replaceAll(RegExp(r'[^0-9]'), ''));
-
-                                                                            int index =
-                                                                                0;
-                                                                            for (index;
-                                                                                index < cart.length;
-                                                                                index++) {}
-
-                                                                            // int? quantity = cart[i];
-
-                                                                            // log(name.toString());
-                                                                            // log(price.toString());
-                                                                            // log(productid.toString());
-                                                                            // log(image.toString());
-
-                                                                            sumTotal =
-                                                                                sumTotal + (price * counterCart);
-                                                                            // subTotal =
-                                                                            //     subTotal + price.toInt();
-                                                                            total.add(price *
-                                                                                counterCart);
-
-                                                                            cart.add(
-                                                                              CartTransaksi(
-                                                                                name: name,
-                                                                                productid: productid,
-                                                                                image: image,
-                                                                                price: price,
-                                                                                quantity: counterCart,
-                                                                                desc: conCatatanPreview.text,
-                                                                                // quantity: cart[i]
-                                                                                //     .quantity
-                                                                                //     .toInt(),
-                                                                              ),
-                                                                            );
-                                                                            for (int i = 0;
-                                                                                i <= cart.length;
-                                                                                i++) {
-                                                                              conCatatan.add(
-                                                                                TextEditingController(
-                                                                                  text: conCatatanPreview.text,
-                                                                                ),
-                                                                              );
-                                                                              inputValues.add(conCatatanPreview.text);
-                                                                              setState(() {});
-                                                                              initState();
-                                                                            }
-
-                                                                            refreshColor();
-
-                                                                            int totalku =
-                                                                                0;
-                                                                            cartMap.forEach((element) {
-                                                                              var myelement = int.parse(element['amount']!);
-                                                                              totalku = totalku + (myelement * counterCart);
-                                                                            });
-
-                                                                            sumTotal =
-                                                                                totalku;
-                                                                          } else {
-                                                                            // isItemAdded = false;
-                                                                            // cartProductIds.remove(productSelect);
-                                                                          }
-                                                                        });
-
-                                                                        initState();
-                                                                      },
-                                                                      child:
-                                                                          buttonXL(
-                                                                        Center(
-                                                                          child:
-                                                                              Text(
-                                                                            'Tambah Ke Keranjang',
-                                                                            style: heading3(
-                                                                                FontWeight.w600,
-                                                                                bnw100,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                        ),
-                                                                        MediaQuery.of(context)
-                                                                            .size
-                                                                            .width,
-                                                                      ),
-                                                                    )),
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                child: buttonLoutlineColor(
+                                              buttonLoutlineColor(
                                                   Row(
                                                     children: [
+                                                      Icon(
+                                                        PhosphorIcons.info_fill,
+                                                        color: cart.isEmpty
+                                                            ? bnw600
+                                                            : succes600,
+                                                        size: size24,
+                                                      ),
+                                                      SizedBox(width: size12),
                                                       Text(
-                                                        'Kustom Produk',
+                                                        '${cart.length} Produk Terpilih',
                                                         style: TextStyle(
-                                                          color: bnw600,
+                                                          color: cart.isEmpty
+                                                              ? bnw600
+                                                              : succes600,
                                                           fontFamily: 'Outfit',
                                                           fontWeight:
                                                               FontWeight.w400,
@@ -3273,41 +3306,12 @@ class _TransactionPageState extends State<TransactionPage>
                                                       ),
                                                     ],
                                                   ),
-                                                  bnw200,
-                                                  bnw400,
-                                                ),
-                                              ),
-
-                                              // buttonLoutlineColor(
-                                              //     Row(
-                                              //       children: [
-                                              //         Icon(
-                                              //           PhosphorIcons.info_fill,
-                                              //           color: cart.isEmpty
-                                              //               ? bnw600
-                                              //               : succes600,
-                                              //           size: size24,
-                                              //         ),
-                                              //         SizedBox(width: size12),
-                                              //         Text(
-                                              //           '${cart.length} Produk Terpilih',
-                                              //           style: TextStyle(
-                                              //             color: cart.isEmpty
-                                              //                 ? bnw600
-                                              //                 : succes600,
-                                              //             fontFamily: 'Outfit',
-                                              //             fontWeight:
-                                              //                 FontWeight.w400,
-                                              //           ),
-                                              //         ),
-                                              //       ],
-                                              //     ),
-                                              //     cart.isEmpty
-                                              //         ? bnw200
-                                              //         : succes100,
-                                              //     cart.isEmpty
-                                              //         ? bnw400
-                                              //         : succes600)
+                                                  cart.isEmpty
+                                                      ? bnw200
+                                                      : succes100,
+                                                  cart.isEmpty
+                                                      ? bnw400
+                                                      : succes600)
                                             ],
                                           ),
                                           SizedBox(height: size16),
@@ -4766,7 +4770,7 @@ class _TransactionPageState extends State<TransactionPage>
   Future<dynamic> showPriviewCart(BuildContext context, int i) {
     conCounterPreview.text = '1';
     conCatatanPreview.text = '';
-    tapTrue = 0;
+    tapTrue = 1;
 
     return showModalBottomSheet(
       useRootNavigator: false,
@@ -4795,197 +4799,207 @@ class _TransactionPageState extends State<TransactionPage>
                 children: [
                   dividerShowdialog(),
                   SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        SizedBox(height: size16),
-                        Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(size12),
-                                border: Border.all(color: bnw300)),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(size8),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            height: size120,
-                                            width: size120,
-                                            child: Image.network(
-                                              datasTransaksi![i]
-                                                  .product_image
-                                                  .toString(),
-                                              fit: BoxFit.cover,
-                                              loadingBuilder: (context, child,
-                                                  loadingProgress) {
-                                                if (loadingProgress == null) {
-                                                  return child;
-                                                }
+                    child: StatefulBuilder(
+                      builder: (context, setState) => Column(
+                        children: [
+                          SizedBox(height: size16),
+                          Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(size12),
+                                  border: Border.all(color: bnw300)),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(size8),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              height: size120,
+                                              width: size120,
+                                              child: Image.network(
+                                                datasTransaksi![i]
+                                                    .product_image
+                                                    .toString(),
+                                                fit: BoxFit.cover,
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null) {
+                                                    return child;
+                                                  }
 
-                                                return Center(child: loading());
-                                              },
-                                              errorBuilder: (context, error,
-                                                      stackTrace) =>
-                                                  Container(
-                                                // height: size64,
-                                                // width: size64,
-                                                child: SvgPicture.asset(
-                                                  'assets/logoProduct.svg',
-                                                  fit: BoxFit.cover,
+                                                  return Center(
+                                                      child: loading());
+                                                },
+                                                errorBuilder: (context, error,
+                                                        stackTrace) =>
+                                                    Container(
+                                                  // height: size64,
+                                                  // width: size64,
+                                                  child: SvgPicture.asset(
+                                                    'assets/logoProduct.svg',
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(width: size12),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                  datasTransaksi![i].name ?? '',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              Text(
-                                                  FormatCurrency.convertToIdr(
-                                                      datasTransaksi![i].price),
-                                                  style: heading3(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              Text(
-                                                  datasTransaksi![i]
-                                                          .typeproducts ??
-                                                      '',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw500,
-                                                      'Outfit')),
-                                            ],
-                                          ),
-                                          Spacer(),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text('Jumlah',
-                                                  style: heading3(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Row(
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      if (counterCart > 1) {
-                                                        counterCart--;
-                                                        conCounterPreview.text =
-                                                            counterCart
-                                                                .toString();
-                                                      }
-                                                      setState(() {});
-                                                    },
-                                                    child: buttonMoutlineColor(
-                                                      Icon(
-                                                        PhosphorIcons.minus,
-                                                        color: primary500,
-                                                        size: size24,
-                                                      ),
-                                                      primary500,
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: size8),
-                                                  SizedBox(
-                                                    height: size48,
-                                                    width: size56,
-                                                    child: TextFormField(
-                                                      enabled: true,
-                                                      controller:
-                                                          conCounterPreview,
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          int parsedValue =
-                                                              int.tryParse(
-                                                                      value) ??
-                                                                  0;
-                                                          counterCart =
-                                                              parsedValue;
+                                            SizedBox(width: size12),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    datasTransaksi![i].name ??
+                                                        '',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit')),
+                                                Text(
+                                                    FormatCurrency.convertToIdr(
+                                                        tapTrue == 1
+                                                            ? datasTransaksi![i]
+                                                                .price
+                                                            : datasTransaksi![i]
+                                                                .price_online_shop),
+                                                    style: heading3(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit')),
+                                                Text(
+                                                    datasTransaksi![i]
+                                                            .typeproducts ??
+                                                        '',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw500,
+                                                        'Outfit')),
+                                              ],
+                                            ),
+                                            Spacer(),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text('Jumlah',
+                                                    style: heading3(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit')),
+                                                SizedBox(height: size8),
+                                                Row(
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        if (counterCart > 1) {
+                                                          counterCart--;
                                                           conCounterPreview
                                                                   .text =
                                                               counterCart
                                                                   .toString();
-                                                        });
+                                                        }
+                                                        setState(() {});
                                                       },
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      decoration:
-                                                          InputDecoration(
-                                                        // alignLabelWithHint: true,
-                                                        hintText: counterCart
-                                                            .toString(),
+                                                      child:
+                                                          buttonMoutlineColor(
+                                                        Icon(
+                                                          PhosphorIcons.minus,
+                                                          color: primary500,
+                                                          size: size24,
+                                                        ),
+                                                        primary500,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: size8),
+                                                    SizedBox(
+                                                      height: size48,
+                                                      width: size56,
+                                                      child: TextFormField(
+                                                        enabled: true,
+                                                        controller:
+                                                            conCounterPreview,
+                                                        keyboardType:
+                                                            TextInputType
+                                                                .number,
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            int parsedValue =
+                                                                int.tryParse(
+                                                                        value) ??
+                                                                    0;
+                                                            counterCart =
+                                                                parsedValue;
+                                                            conCounterPreview
+                                                                    .text =
+                                                                counterCart
+                                                                    .toString();
+                                                          });
+                                                        },
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          // alignLabelWithHint: true,
+                                                          hintText: counterCart
+                                                              .toString(),
 
-                                                        // .toString(),
-                                                        // _itemCount.toString(),
-                                                        hintStyle: heading4(
-                                                            FontWeight.w600,
-                                                            bnw800,
-                                                            'Outfit'),
+                                                          // .toString(),
+                                                          // _itemCount.toString(),
+                                                          hintStyle: heading4(
+                                                              FontWeight.w600,
+                                                              bnw800,
+                                                              'Outfit'),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  SizedBox(width: size8),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      counterCart++;
-                                                      conCounterPreview.text =
-                                                          counterCart
-                                                              .toString();
-                                                      setState(() {});
-                                                    },
-                                                    child: buttonMoutlineColor(
-                                                      Icon(
-                                                        PhosphorIcons.plus,
-                                                        color: primary500,
-                                                        size: size24,
+                                                    SizedBox(width: size8),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        counterCart++;
+                                                        conCounterPreview.text =
+                                                            counterCart
+                                                                .toString();
+                                                        setState(() {});
+                                                      },
+                                                      child:
+                                                          buttonMoutlineColor(
+                                                        Icon(
+                                                          PhosphorIcons.plus,
+                                                          color: primary500,
+                                                          size: size24,
+                                                        ),
+                                                        primary500,
+                                                        // 50,
                                                       ),
-                                                      primary500,
-                                                      // 50,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ],
+                                                  ],
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                ],
+                              )),
+                          SizedBox(height: size16),
+                          Container(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Pilih Tipe Pesanan',
+                                  style: heading2(
+                                      FontWeight.w400, bnw900, 'Outfit'),
                                 ),
-                              ],
-                            )),
-                        SizedBox(height: size16),
-                        Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Pilih Tipe Pesanan',
-                                style:
-                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                              SizedBox(height: size16),
-                              StatefulBuilder(
-                                builder: (context, setState) => Row(
+                                SizedBox(height: size16),
+                                Row(
                                   children: [
                                     Expanded(
                                       child: GestureDetector(
@@ -5037,8 +5051,6 @@ class _TransactionPageState extends State<TransactionPage>
                                       child: GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            print(datasTransaksi![i]
-                                                .price_online_shop);
                                             tapTrue = 2;
                                           });
                                         },
@@ -5082,47 +5094,48 @@ class _TransactionPageState extends State<TransactionPage>
                                     ),
                                   ],
                                 ),
-                              ),
-                              SizedBox(height: size16),
-                              Text(
-                                'Catatan',
-                                style: body1(FontWeight.w500, bnw900, 'Outfit'),
-                              ),
-                              IntrinsicHeight(
-                                child: TextFormField(
-                                  // keyboardType: numberNo,
-                                  style: heading2(
-                                      FontWeight.w600, bnw900, 'Outfit'),
-                                  controller: conCatatanPreview,
-                                  onChanged: (value) {
-                                    // String formattedValue = formatCurrency(value);
-                                    // conHarga.value = TextEditingValue(
-                                    //   text: formattedValue,
-                                    //   selection:
-                                    //       TextSelection.collapsed(offset: formattedValue.length),
-                                    // );
-                                  },
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding:
-                                        EdgeInsets.symmetric(vertical: size12),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        width: 1.5,
-                                        color: bnw500,
+                                SizedBox(height: size16),
+                                Text(
+                                  'Catatan',
+                                  style:
+                                      body1(FontWeight.w500, bnw900, 'Outfit'),
+                                ),
+                                IntrinsicHeight(
+                                  child: TextFormField(
+                                    // keyboardType: numberNo,
+                                    style: heading2(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                    controller: conCatatanPreview,
+                                    onChanged: (value) {
+                                      // String formattedValue = formatCurrency(value);
+                                      // conHarga.value = TextEditingValue(
+                                      //   text: formattedValue,
+                                      //   selection:
+                                      //       TextSelection.collapsed(offset: formattedValue.length),
+                                      // );
+                                    },
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.symmetric(
+                                          vertical: size12),
+                                      enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          width: 1.5,
+                                          color: bnw500,
+                                        ),
                                       ),
+                                      hintText:
+                                          'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
+                                      hintStyle: heading2(
+                                          FontWeight.w600, bnw500, 'Outfit'),
                                     ),
-                                    hintText:
-                                        'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                    hintStyle: heading2(
-                                        FontWeight.w600, bnw500, 'Outfit'),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: size16),
@@ -5192,8 +5205,7 @@ class _TransactionPageState extends State<TransactionPage>
 //                                  (datasTransaksi![i].price! * counterCart)
                                   (tapTrue == 2
                                           ? datasTransaksi![i].price_online_shop
-                                          : datasTransaksi![i].price! *
-                                              counterCart)
+                                          : datasTransaksi![i].price!)
                                       .toString();
                               map1['description'] = conCatatanPreview.text;
 
