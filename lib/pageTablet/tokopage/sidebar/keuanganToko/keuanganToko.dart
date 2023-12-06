@@ -35,7 +35,7 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
 
   @override
   void initState() {
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 1, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
@@ -84,39 +84,38 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
     return datasPendapatan == null
-        ? Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: bnw100,
-            ),
-            child: Scaffold(
-              backgroundColor: bnw100,
-              body: Center(child: loading()),
+        ? SafeArea(
+            child: Container(
+              padding: EdgeInsets.all(size16),
+              margin: EdgeInsets.all(size16),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.circular(size16),
+              ),
+              child: Scaffold(
+                backgroundColor: bnw100,
+                body: Center(child: loading()),
+              ),
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Scaffold(
-              body: Container(
-                margin: const EdgeInsets.all(12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: bnw100,
-                ),
-                child: PageView(
-                  controller: pageController,
-                  physics: NeverScrollableScrollPhysics(),
-                  children: [
-                    mainPageKeuangan(context, isFalseAvailable),
-                    tambahPendapatan(setState, context),
-                    tambahPengeluaran(setState, context),
-                    ubahPendapatanPage(setState, context),
-                    ubahPengeluaranPage(setState, context),
-                  ],
-                ),
+        : SafeArea(
+            child: Container(
+              padding: EdgeInsets.all(size16),
+              margin: EdgeInsets.all(size16),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.circular(size16),
+              ),
+              child: PageView(
+                controller: pageController,
+                physics: NeverScrollableScrollPhysics(),
+                children: [
+                  mainPageKeuangan(context, isFalseAvailable),
+                  tambahPendapatan(setState, context),
+                  tambahPengeluaran(setState, context),
+                  ubahPendapatanPage(setState, context),
+                  ubahPengeluaranPage(setState, context),
+                ],
               ),
             ),
           );
@@ -137,101 +136,163 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 Text(
-                  'Keuangan',
+                  nameToko ?? '',
                   style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                 ),
               ],
             ),
-            selectedIndex == 2
-                ? Container()
-                : GestureDetector(
+            rekonPageController.initialPage == 0
+                ? GestureDetector(
                     onTap: () {
-                      pageController.jumpToPage(selectedIndex == 0 ? 1 : 2);
+                      showModalBottomProfile(
+                        context,
+                        MediaQuery.of(context).size.height / 2.8,
+                        Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Text(
+                              'Kamu yakin ingin keluar akun?',
+                              style:
+                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                            SizedBox(height: size8),
+                            Text(
+                              'Jika kamu keluar, kamu harus memasukkan akun lagi untuk melakukkan transaksi.',
+                              style:
+                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                            SizedBox(height: size32),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.pop(context),
+                                    child: buttonXLoutline(
+                                      Center(
+                                        child: Text(
+                                          'Batal',
+                                          style: heading3(FontWeight.w600,
+                                              primary500, 'Outfit'),
+                                        ),
+                                      ),
+                                      MediaQuery.of(context).size.width,
+                                      primary500,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      whenLoading(context);
+                                      postingRekon(context, widget.token,
+                                          yearRekon, monthRekon);
+                                    },
+                                    child: buttonXL(
+                                      Center(
+                                        child: Text(
+                                          'Ya, Posting',
+                                          style: heading3(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
+                                      ),
+                                      MediaQuery.of(context).size.width,
+                                      // primary500,
+                                      // primary500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
                     },
                     child: buttonXL(
                       Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Icon(
-                              PhosphorIcons.plus,
-                              color: bnw100,
-                              size: 18,
-                            ),
-                            Text(
-                              selectedIndex == 0 ? 'Pendapatan' : 'Pengeluaran',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
-                            )
-                          ]),
-                      140,
-                    )),
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(PhosphorIcons.plus, color: bnw100),
+                          SizedBox(width: size12),
+                          Text(
+                            'Posting',
+                            style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                      0,
+                    ),
+                  )
+                : Container(),
           ],
         ),
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: TabBar(
-            controller: tabController,
-            unselectedLabelColor: bnw600,
-            labelColor: primary500,
-            labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
-            physics: const NeverScrollableScrollPhysics(),
-            onTap: (value) {
-              setState(() {
-                if (value == 0) {
-                  selectedIndex = 0;
-                } else if (value == 1) {
-                  selectedIndex = 1;
-                } else if (value == 2) {
-                  selectedIndex = 2;
-                }
-              });
-            },
-            tabs: const [
-              Tab(
-                text: 'Pendapatan Lain-Lain',
-              ),
-              Tab(
-                text: 'Pengeluaran Lain-Lain',
-              ),
-              Tab(
-                text: 'Rekonsiliasi',
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 10),
-          child: buttonLoutline(
-            GestureDetector(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Urutkan',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                      Text(
-                        ' dari Nama Toko A ke Z',
-                        style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-                      ),
-                    ],
-                  ),
-                  const Icon(PhosphorIcons.caret_down),
-                ],
-              ),
-            ),
-            bnw300,
-          ),
-        ),
+        // SizedBox(
+        //   width: MediaQuery.of(context).size.width,
+        //   child: TabBar(
+        //     controller: tabController,
+        //     unselectedLabelColor: bnw600,
+        //     labelColor: primary500,
+        //     labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
+        //     physics: const NeverScrollableScrollPhysics(),
+        //     onTap: (value) {
+        //       setState(() {
+        //         if (value == 0) {
+        //           selectedIndex = 0;
+        //         } else if (value == 1) {
+        //           selectedIndex = 1;
+        //         } else if (value == 2) {
+        //           selectedIndex = 2;
+        //         }
+        //       });
+        //     },
+        //     tabs: const [
+        //       // Tab(
+        //       //   text: 'Pendapatan Lain-Lain',
+        //       // ),
+        //       // Tab(
+        //       //   text: 'Pengeluaran Lain-Lain',
+        //       // ),
+        //       Tab(
+        //         text: 'Rekonsiliasi',
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.only(top: 10, bottom: 10),
+        //   child: buttonLoutline(
+        //     GestureDetector(
+        //       child: Row(
+        //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+        //         children: [
+        //           Row(
+        //             children: [
+        //               Text(
+        //                 'Urutkan',
+        //                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+        //               ),
+        //               Text(
+        //                 ' dari Nama Toko A ke Z',
+        //                 style: heading3(FontWeight.w400, bnw600, 'Outfit'),
+        //               ),
+        //             ],
+        //           ),
+        //           const Icon(PhosphorIcons.caret_down),
+        //         ],
+        //       ),
+        //     ),
+        //     bnw300,
+        //   ),
+        // ),
+        SizedBox(height: size16),
         Expanded(
           child: TabBarView(
             controller: tabController,
             physics: NeverScrollableScrollPhysics(),
             children: [
-              pendapatanLain(isFalseAvailable),
-              pengeluaranLain(isFalseAvailable),
+              // pendapatanLain(isFalseAvailable),
+              // pengeluaranLain(isFalseAvailable),
               RekonToko(token: widget.token),
             ],
           ),

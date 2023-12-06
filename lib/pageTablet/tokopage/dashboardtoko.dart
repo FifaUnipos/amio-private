@@ -591,9 +591,9 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 4
-              ? PhosphorIcons.identification_card_fill
-              : PhosphorIcons.identification_card,
-          label: 'Pelanggan',
+              ? PhosphorIcons.money_fill
+              : PhosphorIcons.money,
+          label: 'Keuangan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -606,9 +606,9 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 5
-              ? PhosphorIcons.tag_fill
-              : PhosphorIcons.tag,
-          label: 'Voucher',
+              ? PhosphorIcons.identification_card_fill
+              : PhosphorIcons.identification_card,
+          label: 'Pelanggan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -619,36 +619,26 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             });
           },
         ),
-        // SidebarXItem(
-        //   icon: PhosphorIcons.money,
-        //   label: 'Keuangan',
-        //   onTap: () {
-        //     widget.pageController.jumpToPage(0);
-        //     widget.controller.selectedIndex;
-        //     setState(() {
-        //       selectedIndexSideBar = false;
-        //     });
-        //   },
-        // ),
         SidebarXItem(
           icon: iconSelectedSidebar == 6
-              ? PhosphorIcons.file_text_fill
-              : PhosphorIcons.file_text,
-          label: 'Laporan',
+              ? PhosphorIcons.tag_fill
+              : PhosphorIcons.tag,
+          label: 'Voucher',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 6;
+              valueOrderByProduct = 0;
             });
           },
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 7
-              ? PhosphorIcons.question_fill
-              : PhosphorIcons.question,
-          label: 'Bantuan',
+              ? PhosphorIcons.file_text_fill
+              : PhosphorIcons.file_text,
+          label: 'Laporan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -660,6 +650,20 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 8
+              ? PhosphorIcons.question_fill
+              : PhosphorIcons.question,
+          label: 'Bantuan',
+          onTap: () {
+            widget.pageController.jumpToPage(0);
+            widget.controller.selectedIndex;
+            setState(() {
+              selectedIndexSideBar = false;
+              iconSelectedSidebar = 8;
+            });
+          },
+        ),
+        SidebarXItem(
+          icon: iconSelectedSidebar == 9
               ? PhosphorIcons.printer_fill
               : PhosphorIcons.printer,
           label: 'Printer',
@@ -668,7 +672,7 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 8;
+              iconSelectedSidebar = 9;
             });
           },
         ),
@@ -731,21 +735,22 @@ class _ScreensExampleState extends State<_ScreensExample> {
             // case 5:
             return TransactionPage(token: widget.token);
           case 4:
+            return LihatKeuanganToko(token: widget.token);
+          case 5:
             // case 6:
             return PelangganToko(token: widget.token);
-          case 5:
-            return PromosiToko(token: widget.token);
-          // case 6:
-          //   return LihatKeuanganToko(token: widget.token);
           case 6:
+            return PromosiToko(token: widget.token);
+
+          case 7:
             return LaporanToko(
               token: widget.token,
               controller: widget.controller,
             );
-          case 7:
+          case 8:
             return BantuanGrup();
           // return TestingSaja();
-          case 8:
+          case 9:
             return BluetoothPage();
           default:
             return Text(

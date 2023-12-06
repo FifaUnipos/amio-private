@@ -66,6 +66,8 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getTransaksiRiwayatUrl = '$url/api/transaction/',
     getPendapatanUrl = '$url/api/ppm/get',
     getRekonUrl = '$url/api/rekon/',
+    saveRekonUrl = '$url/api/rekon/save',
+    postingRekonUrl = '$url/api/rekon/posting',
     getYearRekonUrl = '$url/api/rekon/year',
     getMonthRekonUrl = '$url/api/rekon/month',
     getTransaksiSingleRiwayatUrl = '$url/api/transaction/receipt',
@@ -1207,6 +1209,7 @@ Future changeActiveAkun(
   status,
   userid,
 ) async {
+  whenLoading(context);
   final response = await http.put(
     Uri.parse('$url/api/user/changeStatus'),
     headers: {
@@ -1224,9 +1227,11 @@ Future changeActiveAkun(
     print('Sukses Ganti Keatifan');
 
     print(jsonResponse['data'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   } else {
     print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1238,6 +1243,7 @@ Future changePpn(
   List productid,
   merchid,
 ) async {
+  whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1259,9 +1265,11 @@ Future changePpn(
     // Navigator.pop(context);
 
     print(jsonResponse['data'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   } else {
     print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1273,6 +1281,7 @@ Future changeActive(
   List productid,
   merchid,
 ) async {
+  whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1290,13 +1299,15 @@ Future changeActive(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    print('Sukses Ganti Data');
+    //print('Sukses Ganti Data');
     // Navigator.pop(context);
 
-    print(jsonResponse['data'].toString());
+    //print(jsonResponse['data'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   } else {
-    print(jsonResponse['message'].toString());
+    //print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -2316,7 +2327,7 @@ Future getPengeluaran(BuildContext context, token, condition) async {
   }
 }
 
-Future<List<RekonModel>> getRekon(token, tahun, bulan) async {
+Future getRekon(token, tahun, bulan) async {
   final response = await http.post(
     Uri.parse(getRekonUrl),
     headers: {
@@ -2330,14 +2341,63 @@ Future<List<RekonModel>> getRekon(token, tahun, bulan) async {
   );
 
   var jsonResponse = jsonDecode(response.body);
+
   if (response.statusCode == 200) {
-    print(bulan);
-    var data = jsonResponse['data'] as List;
-    List<RekonModel> rekonModels =
-        data.map((e) => RekonModel.fromJson(e)).toList();
-    return rekonModels;
+    return jsonResponse['data'];
   } else {
-    throw Exception('Failed to load data');
+    print(jsonResponse['message'].toString());
+  }
+}
+
+Future saveRekon(context, token, id, status) async {
+  final response = await http.post(
+    Uri.parse(saveRekonUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "id": id,
+      "isDone": status,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    Navigator.pop(context);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['data'];
+  } else {
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['message'].toString());
+  }
+}
+
+Future postingRekon(context, token, tahun, bulan) async {
+  final response = await http.post(
+    Uri.parse(postingRekonUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "tahun": tahun,
+      "bulan": bulan,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    Navigator.pop(context);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['data'];
+  } else {
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['message'].toString());
   }
 }
 

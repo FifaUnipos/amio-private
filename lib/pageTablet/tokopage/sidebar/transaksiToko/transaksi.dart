@@ -3196,7 +3196,7 @@ class _TransactionPageState extends State<TransactionPage>
                                   },
                                 );
                               },
-                              child: buttonXLoutlineExpanded(
+                              child: buttonXLoutline(
                                 Row(
                                   children: [
                                     Text(
@@ -3206,6 +3206,7 @@ class _TransactionPageState extends State<TransactionPage>
                                     ),
                                   ],
                                 ),
+                                double.infinity,
                                 primary500,
                               ),
                             ),
@@ -3388,6 +3389,8 @@ class _TransactionPageState extends State<TransactionPage>
 
                                                                             if (cart.isEmpty) {
                                                                               sumTotal = 0;
+                                                                              isItemAdded = false;
+                                                                              cartProductIds.removeAt(index);
                                                                             }
                                                                             break;
                                                                           }
@@ -5269,7 +5272,7 @@ class _TransactionPageState extends State<TransactionPage>
                                 );
                                 inputValues.add(conCatatanPreview.text);
                                 setState(() {});
-                                initState();
+                                //initState();
                               }
 
                               refreshColor();
@@ -5289,7 +5292,7 @@ class _TransactionPageState extends State<TransactionPage>
                             }
                           });
 
-                          initState();
+                          //initState();
                         },
                         child: buttonXL(
                           Center(

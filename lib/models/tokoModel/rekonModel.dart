@@ -1,6 +1,6 @@
 class RekonModel {
   String? rekonid;
-  String? tanggal;
+  String? bulanTahun;
   String? hari;
   int? statusBD;
   int? statusTS;
@@ -10,7 +10,7 @@ class RekonModel {
 
   RekonModel({
     this.rekonid,
-    this.tanggal,
+    this.bulanTahun,
     this.hari,
     this.statusBD,
     this.statusTS,
@@ -27,7 +27,7 @@ class RekonModel {
 
   RekonModel.fromJson(Map<String, dynamic> json) {
     rekonid = json['rekonid'];
-    tanggal = json['tanggal'];
+    bulanTahun = json['bulanTahun'];
     hari = json['hari'];
     statusBD = json['statusBD'];
     statusTS = json['statusTS'];
@@ -43,7 +43,7 @@ class RekonModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['rekonid'] = this.rekonid;
-    data['tanggal'] = this.tanggal;
+    data['bulanTahun'] = this.bulanTahun;
     data['hari'] = this.hari;
     data['statusBD'] = this.statusBD;
     data['statusTS'] = this.statusTS;

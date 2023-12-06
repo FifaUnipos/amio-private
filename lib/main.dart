@@ -76,6 +76,7 @@ Future<void> main() async {
               primarySwatch: Colors.blue,
               scaffoldBackgroundColor: bnw100,
               errorColor: red500,
+              visualDensity: VisualDensity.adaptivePlatformDensity, 
               primaryColor: Colors.blue,
               focusColor: Colors.blue,
               colorScheme:

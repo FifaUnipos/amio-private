@@ -285,7 +285,7 @@ Completer<void> loadingCompleter = Completer<void>();
 
 void whenLoading(context) {
   showDialog(
-    barrierDismissible: true,
+    barrierDismissible: false,
     useRootNavigator: true,
     context: context,
     builder: (context) => Builder(

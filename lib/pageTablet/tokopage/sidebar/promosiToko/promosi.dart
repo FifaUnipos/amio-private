@@ -842,8 +842,8 @@ class _PromosiTokoState extends State<PromosiToko> {
                                 "",
                               );
                               refreshDataProduk();
-                              initState();
                               setState(() {});
+                              initState();
                             },
                             child: buttonL(
                               Row(
@@ -993,8 +993,8 @@ class _PromosiTokoState extends State<PromosiToko> {
                                             listProduct,
                                             "",
                                           );
-                                          initState();
                                           setState(() {});
+                                          initState();
                                         },
                                       ),
                                     ),
