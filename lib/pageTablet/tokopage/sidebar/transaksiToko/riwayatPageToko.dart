@@ -854,6 +854,31 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       MainAxisAlignment
                                                           .spaceBetween,
                                                   children: [
+                                                    Text(
+                                                      'Total',
+                                                      style: heading2(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                    Text(
+                                                      FormatCurrency.convertToIdr(
+                                                              data['amount'] ??
+                                                                  '-')
+                                                          .toString(),
+                                                      style: heading2(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: size8),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
                                                     Column(
                                                       children: [
                                                         SizedBox(height: size8),
@@ -869,7 +894,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           'Kembalian',
                                                           style: heading4(
                                                               FontWeight.w400,
-                                                              bnw900,
+                                                              primary500,
                                                               'Outfit'),
                                                         ),
                                                         SizedBox(height: size8),
@@ -895,9 +920,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         SizedBox(height: size8),
                                                         Text(
                                                           FormatCurrency.convertToIdr(
-                                                                  (data['total_before_dsc_tax'] +
-                                                                              data['ppn']) -
-                                                                          data['amount'] ??
+                                                                  int.parse(data[
+                                                                          'change_money']) ??
                                                                       '-')
                                                               .toString(),
                                                           style: heading4(
@@ -907,33 +931,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         ),
                                                         SizedBox(height: size8),
                                                       ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: size8),
-                                                dash(),
-                                                SizedBox(height: size8),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      'Total',
-                                                      style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
-                                                    ),
-                                                    Text(
-                                                      FormatCurrency.convertToIdr(
-                                                              data['amount'] ??
-                                                                  '-')
-                                                          .toString(),
-                                                      style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
                                                     ),
                                                   ],
                                                 ),

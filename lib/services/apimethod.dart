@@ -124,7 +124,12 @@ String registerbyotp = '$url/api/user/registerbyotp',
     tambahKategoriLink = '$url/api/typeproduct/store',
     ubahKategoriLink = '$url/api/typeproduct/update',
     hapusKategoriLink = '$url/api/typeproduct/delete',
-    tipeUsaha = '$url/api/tipeusaha';
+    tipeUsaha = '$url/api/tipeusaha',
+    diskonLink = '$url/api/discount',
+    createDiskonLink = '$url/api/discount/store',
+    deleteDiskonLink = '$url/api/discount/delete',
+    updateDiskonLink = '$url/api/discount/update',
+    updateTransaksiLink = '$url/api/discount/transaction';
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
@@ -811,6 +816,7 @@ Future getSingleMerch(context, token, String merchid) async {
 
     return jsonResponse;
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -967,6 +973,7 @@ Future updateAkun(
     print("succes aman tentram");
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse;
@@ -1107,6 +1114,7 @@ Future deleteMerchant(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   }
@@ -1199,6 +1207,7 @@ Future deletePelanggan(
     Navigator.pop(context);
     showSnackbar(context, jsonResponse);
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1417,6 +1426,7 @@ Future verifiedEmailbyOTP(context, token, otp) async {
     // print(jsonResponse.toString());
     showSnackbar(context, jsonResponse);
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['rc'];
@@ -1601,6 +1611,7 @@ Future getVoucher(context, token, orderby) async {
 
     return result;
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['message'].toString());
   }
@@ -1721,6 +1732,7 @@ Future createPelanggan(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse;
@@ -1841,6 +1853,7 @@ Future editPelanggan(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     // print(jsonResponse['rc'].toString());
     // showSnackbar(context, jsonResponse);
@@ -1881,6 +1894,7 @@ Future createVoucher(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse;
@@ -1922,6 +1936,7 @@ Future updateVoucher(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['message'];
@@ -1967,6 +1982,7 @@ Future createProduct(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['message'];
@@ -1976,7 +1992,8 @@ var subTotal,
     ppnTransaksi,
     totalTransaksi,
     customerTransaksi,
-    namaCustomerCalculate;
+    namaCustomerCalculate,
+    discountProduct;
 Future calculateTransaction(
   BuildContext context,
   token,
@@ -2009,9 +2026,11 @@ Future calculateTransaction(
     subTotal = data['subTotal'];
     ppnTransaksi = data['PPN'];
     namaCustomerCalculate = data['customerName'];
+    discountProduct = data['discount'];
     setState(() {});
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   }
@@ -2370,6 +2389,7 @@ Future saveRekon(context, token, id, status) async {
     showSnackbar(context, jsonResponse);
     return jsonResponse['data'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['message'].toString());
   }
@@ -2396,6 +2416,7 @@ Future postingRekon(context, token, tahun, bulan) async {
     showSnackbar(context, jsonResponse);
     return jsonResponse['data'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['message'].toString());
   }
@@ -3153,6 +3174,7 @@ Future transaksiViewReference(
 
     return jsonResponse;
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -3176,6 +3198,7 @@ Future getQris(BuildContext context, token, merchantid) async {
 
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }

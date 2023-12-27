@@ -491,12 +491,7 @@ buttonXLoutline(Widget mywidget, double width, Color colorBorder) {
           borderRadius: BorderRadius.circular(size8),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          mywidget,
-        ],
-      ),
+      child: mywidget,
     ),
   );
 }
