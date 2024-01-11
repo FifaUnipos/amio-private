@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:amio/main.dart';
+import 'package:amio/models/diskonModel.dart';
 import 'package:amio/models/lihatakunmodel.dart';
 import 'package:amio/models/produkmodel.dart';
 import 'package:amio/models/tokoModel/calculateCart.dart';
@@ -38,8 +39,8 @@ import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 import '../utils/component.dart';
 import '../utils/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url = 'https://api.prod.smartlms.my.id/public';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://0e15-2001-448a-2011-3535-9503-78da-1cfb-3a79.ngrok-free.app';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -129,7 +130,8 @@ String registerbyotp = '$url/api/user/registerbyotp',
     createDiskonLink = '$url/api/discount/store',
     deleteDiskonLink = '$url/api/discount/delete',
     updateDiskonLink = '$url/api/discount/update',
-    updateTransaksiLink = '$url/api/discount/transaction';
+    getProdukDiskonLink = '$url/api/discount/get-products',
+    diskonTransaksiLink = '$url/api/discount/transaction';
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
@@ -310,7 +312,7 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
       },
     );
     var jsonResponse = jsonDecode(response.body);
-    log(response.body.toString());
+    // log(response.body.toString());
     if (response.statusCode == 200) {
       print("succes hapus kategori");
 
@@ -319,10 +321,10 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
-    return null;
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -1617,6 +1619,115 @@ Future getVoucher(context, token, orderby) async {
   }
 }
 
+Future getDiskon(context, token, merchantid, orderby) async {
+  final response = await http.post(
+    Uri.parse(diskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchantid,
+      'orderby': orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+    print(jsonResponse['data'].toString());
+
+    final List<ModelDataDiskon> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = ModelDataDiskon.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['message'].toString());
+  }
+}
+
+Future tambahDiskon(
+  BuildContext context,
+  token,
+  merchantid,
+  productid,
+  name,
+  discount,
+  discount_type,
+  start_date,
+  end_date,
+  is_active,
+) async {
+  final String merchantidList = json.encode(merchantid);
+  final String productidList = json.encode(productid);
+  final response = await http.post(
+    Uri.parse(createDiskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      'merchantid': merchantidList,
+      'productid': productidList,
+      'name': name,
+      'discount': discount,
+      'discount_type': discount_type,
+      'start_date': start_date,
+      'end_date': end_date,
+      'is_active': is_active
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Delete Data');
+   
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['data'].toString());
+    return jsonResponse['rc'];
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  }
+}
+
+Future deleteDiskon(
+  BuildContext context,
+  token,
+  id,
+) async {
+  final String productidList = json.encode(id);
+  final response = await http.post(
+    Uri.parse(deleteDiskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      'id': productidList,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Delete Data');
+    // Navigator.pop(context);
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['data'].toString());
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
 Future getProduct(BuildContext context, token, String name,
     List<String> merchid, orderby) async {
   final String jsonTest = json.encode(merchid);
@@ -2000,6 +2111,7 @@ Future calculateTransaction(
   List<Map<String, String>> details,
   StateSetter setState,
   memberid,
+  typePrice,
 ) async {
   final String detail = json.encode(details);
 
@@ -2012,6 +2124,7 @@ Future calculateTransaction(
       "deviceid": identifier,
       "memberid": memberid,
       "detail": detail,
+      "typePrice": typePrice,
     },
   );
 
@@ -2055,6 +2168,7 @@ Future createTransaction(
   transactionid,
   memberid,
 ) async {
+  whenLoading(context);
   final String detail = json.encode(details);
 
   final response = await http.post(
@@ -2077,9 +2191,11 @@ Future createTransaction(
   var jsonResponse = jsonDecode(response.body);
   var data = jsonResponse['data'];
   if (response.statusCode == 200) {
-    print('succes');
+    print(jsonResponse);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
     // pageController.jumpTo(0);
-    print(jsonResponse['data'].toString());
+    // print(jsonResponse['data'].toString());
     setState(() {
       // subTotal = 0;
       printext = jsonResponse['data']['raw'];
@@ -2089,9 +2205,10 @@ Future createTransaction(
       transaksiKasir = data['pic'];
 
       // cart.clear();
+      // closeLoading(context);
     });
   } else {
-    // print(jsonResponse.toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }

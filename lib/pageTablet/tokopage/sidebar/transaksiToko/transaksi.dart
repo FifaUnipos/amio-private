@@ -120,7 +120,9 @@ class _TransactionPageState extends State<TransactionPage>
   // Set<String> cartProductIds = Set();
   int counterCart = 1;
   bool isExpand = false;
-  int tapTrue = 1;
+  int tapTrue = 0;
+
+  String? discountId;
 
   void formatInput() {
     String text = kreditpinController.text.replaceAll('-', '');
@@ -319,6 +321,7 @@ class _TransactionPageState extends State<TransactionPage>
     transactionid,
     memberid,
     dialog,
+    discount,
   ) async {
     showDialog(
       barrierDismissible: true,
@@ -342,7 +345,7 @@ class _TransactionPageState extends State<TransactionPage>
       },
       body: {
         "deviceid": identifier,
-        "discount": "",
+        "discount": discount,
         "memberid": memberid,
         "transactionid": transactionid,
         "value": value,
@@ -1521,8 +1524,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                 controller: searchController,
                                                 focusNode: textFieldFocusNode,
                                                 onChanged: (value) {
-                                                  isKeyboardActive =
-                                                      value.isNotEmpty;
+                                                  //   isKeyboardActive = value.isNotEmpty;
                                                   _runSearchProduct(value);
                                                   setState(() {});
                                                 },
@@ -1611,116 +1613,64 @@ class _TransactionPageState extends State<TransactionPage>
                                                   final product =
                                                       searchResultListProduct?[
                                                           index];
-                                                  selectedFlag[index] =
-                                                      selectedFlag[index] ??
-                                                          false;
-                                                  bool isSelected =
-                                                      selectedFlag[index]!;
+                                                  final isSelected = product ==
+                                                      selectedProduct;
 
-                                                  return GestureDetector(
-                                                    behavior: HitTestBehavior
-                                                        .translucent,
-                                                    onTap: () {
-                                                      setState(() {
-                                                        selectDiscount(
-                                                            isSelected,
-                                                            index,
-                                                            product['id']);
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                        margin: EdgeInsets.only(
-                                                            top: size16),
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical:
-                                                                    size16,
-                                                                horizontal:
-                                                                    size32),
+                                                  return Column(
+                                                    children: [
+                                                      Container(
                                                         decoration:
                                                             BoxDecoration(
-                                                          color: isSelected
-                                                              ? primary100
-                                                              : bnw100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      size16),
-                                                          border: Border.all(
-                                                            width: width2,
-                                                            color: isSelected
-                                                                ? primary500
-                                                                : bnw500,
+                                                          border: Border(
+                                                            bottom: BorderSide(
+                                                                color: bnw300,
+                                                                width: width1),
                                                           ),
                                                         ),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Icon(
-                                                                  PhosphorIcons
-                                                                      .tag_fill,
-                                                                  size: size48,
-                                                                  color:
-                                                                      primary500,
-                                                                ),
-                                                                SizedBox(
-                                                                    width:
-                                                                        size12),
-                                                                Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      product['name'] !=
-                                                                              null
-                                                                          ? capitalizeEachWord(
-                                                                              product['name'].toString())
-                                                                          : '',
-                                                                      style: heading3(
-                                                                          FontWeight
-                                                                              .w400,
-                                                                          bnw900,
-                                                                          'Outfit'),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            size4),
-                                                                    Text(
-                                                                      product['discount'] !=
-                                                                              null
-                                                                          ? FormatCurrency.convertToIdr(
-                                                                              product['discount'])
-                                                                          : '',
-                                                                      style: heading4(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit'),
-                                                                    ),
-                                                                    //
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            ),
-                                                            GestureDetector(
-                                                              child: Icon(
-                                                                isSelected
-                                                                    ? PhosphorIcons
-                                                                        .radio_button_fill
-                                                                    : PhosphorIcons
-                                                                        .radio_button,
-                                                                color: isSelected
-                                                                    ? primary500
-                                                                    : bnw900,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        )),
+                                                        child: ListTile(
+                                                          contentPadding:
+                                                              EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          size16),
+                                                          title: Text(
+                                                            product['name'] !=
+                                                                    null
+                                                                ? capitalizeEachWord(
+                                                                    product['name']
+                                                                        .toString())
+                                                                : '',
+                                                          ),
+                                                          trailing: Icon(
+                                                            isSelected
+                                                                ? PhosphorIcons
+                                                                    .radio_button_fill
+                                                                : PhosphorIcons
+                                                                    .radio_button,
+                                                            color: isSelected
+                                                                ? primary500
+                                                                : bnw900,
+                                                          ),
+                                                          onTap: () {
+                                                            setState(() {
+                                                              textFieldFocusNode
+                                                                  .unfocus();
+
+                                                              _selectProduct(
+                                                                  product);
+
+                                                              print(product[
+                                                                  'id']);
+
+                                                              discountId =
+                                                                  product[
+                                                                      'id'];
+                                                              setState(() {});
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
                                                   );
                                                 },
                                               ),
@@ -1733,7 +1683,7 @@ class _TransactionPageState extends State<TransactionPage>
                                             child: buttonXXL(
                                               Center(
                                                 child: Text(
-                                                  'Selesai',
+                                                  'Pilih Diskon',
                                                   style: heading2(
                                                       FontWeight.w600,
                                                       bnw100,
@@ -2758,6 +2708,7 @@ class _TransactionPageState extends State<TransactionPage>
                       transactionidValue ?? '',
                       pelangganId,
                       '',
+                      discountId,
                     );
                   }
                 }
@@ -3568,6 +3519,12 @@ class _TransactionPageState extends State<TransactionPage>
                               child: buttonXLoutline(
                                 Row(
                                   children: [
+                                    Icon(
+                                      PhosphorIcons.plus,
+                                      size: size24,
+                                      color: primary500,
+                                    ),
+                                    SizedBox(width: size12),
                                     Text(
                                       'Kustom Produk',
                                       style: heading2(FontWeight.w600,
@@ -3754,6 +3711,18 @@ class _TransactionPageState extends State<TransactionPage>
                                                                             conCounterPreview.clear();
                                                                             conCatatanPreview.text =
                                                                                 '';
+
+                                                                            int newTotal =
+                                                                                0;
+
+                                                                            for (int i = 0;
+                                                                                i < cart.length;
+                                                                                i++) {
+                                                                              newTotal += total[i];
+                                                                            }
+
+                                                                            sumTotal =
+                                                                                newTotal;
 
                                                                             if (cart.isEmpty) {
                                                                               sumTotal = 0;
@@ -4830,11 +4799,11 @@ class _TransactionPageState extends State<TransactionPage>
                                                           newquantity
                                                               .toString();
 
-                                                      cartMap[i]['amount'] =
-                                                          (cart[i].quantity *
-                                                                  cart[i]
-                                                                      .price!)
-                                                              .toString();
+                                                      // cartMap[i]['amount'] =
+                                                      //     (cart[i].quantity *
+                                                      //             cart[i]
+                                                      //                 .price!)
+                                                      //         .toString();
 
                                                       int newtotal = 0;
                                                       cartMap
@@ -5086,7 +5055,13 @@ class _TransactionPageState extends State<TransactionPage>
                               ? GestureDetector(
                                   onTap: () async {
                                     // log(conCatatan.toList().toString());
-
+                                    String typePrice = "dine_in";
+                                    if (tapTrue == 1) {
+                                      typePrice = "dine_in";
+                                    } else if (typePrice == 2) {
+                                      typePrice = "price_online_shop    ";
+                                    }
+                                    print(tapTrue);
                                     if (cartMap.isNotEmpty) {
                                       _pageController.nextPage(
                                           duration: Duration(milliseconds: 10),
@@ -5099,7 +5074,8 @@ class _TransactionPageState extends State<TransactionPage>
                                         widget.token,
                                         cartMap,
                                         setState,
-                                        pelangganId);
+                                        pelangganId,
+                                        typePrice);
 
                                     setState(() {});
                                   },
@@ -5536,6 +5512,9 @@ class _TransactionPageState extends State<TransactionPage>
                           child: GestureDetector(
                         onTap: () {
                           setState(() {
+                            if (tapTrue == 0) {
+                              tapTrue = 1;
+                            }
                             String productId =
                                 datasTransaksi![i].productid.toString();
 
@@ -5646,13 +5625,13 @@ class _TransactionPageState extends State<TransactionPage>
 
                               refreshColor();
 
-                              int totalku = 0;
-                              cartMap.forEach((element) {
-                                var myelement = int.parse(element['amount']!);
-                                totalku = totalku + (myelement * counterCart);
-                              });
+                              // int totalku = 0;
+                              // cartMap.forEach((element) {
+                              //   var myelement = int.parse(element['amount']!);
+                              //   totalku = totalku + (myelement * counterCart);
+                              // });
 
-                              sumTotal = totalku;
+                              // sumTotal = totalku;
 
                               selectedIndexTransaksi[i];
                             } else {
@@ -6213,7 +6192,7 @@ class _TransactionPageState extends State<TransactionPage>
   bool isItemSelected = false;
 
   Future _getProductList() async {
-    await http.post(Uri.parse(diskonLink), body: {
+    await http.post(Uri.parse(diskonTransaksiLink), body: {
       "deviceid": identifier,
     }, headers: {
       "token": widget.token,
@@ -6238,6 +6217,13 @@ class _TransactionPageState extends State<TransactionPage>
               .toLowerCase()
               .contains(searchText.toLowerCase()))
           .toList();
+    });
+  }
+
+  void _selectProduct(dynamic product) {
+    setState(() {
+      selectedProduct = product;
+      isItemSelected = true;
     });
   }
 

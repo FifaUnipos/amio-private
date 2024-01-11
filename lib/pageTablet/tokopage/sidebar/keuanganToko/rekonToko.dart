@@ -749,7 +749,7 @@ class _RekonTokoState extends State<RekonToko> {
                   title,
                   style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                 ),
-                Text(data['status']['$status'].toString(),
+                Text(data['detail']['$status'].toString(),
                     style: heading3(FontWeight.w700, primary500, 'Outfit')),
               ],
             ),
@@ -976,7 +976,7 @@ class _RekonTokoState extends State<RekonToko> {
                                                     color: bnw900),
                                                 SizedBox(width: size16),
                                                 Text(
-                                                  data![index]['bulan']
+                                                  data![index]['bulanTahun']
                                                       .toString(),
                                                   style: heading4(
                                                       FontWeight.w400,

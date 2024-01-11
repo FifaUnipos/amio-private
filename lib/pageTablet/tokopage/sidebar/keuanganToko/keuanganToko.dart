@@ -152,13 +152,13 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                             dividerShowdialog(),
                             SizedBox(height: size16),
                             Text(
-                              'Kamu yakin ingin keluar akun?',
+                              'Kamu yakin ingin Memposting Data Rekonsialisasi?',
                               style:
                                   heading1(FontWeight.w600, bnw900, 'Outfit'),
                             ),
                             SizedBox(height: size8),
                             Text(
-                              'Jika kamu keluar, kamu harus memasukkan akun lagi untuk melakukkan transaksi.',
+                              'Data yang telah diposting tidak dapat diubah kembali.',
                               style:
                                   heading2(FontWeight.w400, bnw900, 'Outfit'),
                             ),

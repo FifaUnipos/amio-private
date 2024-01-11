@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as Io;
 import 'dart:io';
+import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/diskonToko.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/tambahDiskonToko.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/ubahPromosi.dart';
 import 'package:amio/utils/skeletons.dart';
 import 'package:http/http.dart' as http;
@@ -33,13 +35,16 @@ class PromosiToko extends StatefulWidget {
   State<PromosiToko> createState() => _PromosiTokoState();
 }
 
-class _PromosiTokoState extends State<PromosiToko> {
+class _PromosiTokoState extends State<PromosiToko>
+    with TickerProviderStateMixin {
   List<ModelDataPromosi>? datasProduk;
 
   PageController _pageController = PageController();
   bool isSelectionMode = false;
   Map<int, bool> selectedFlag = {};
   List<String> listProduct = List.empty(growable: true);
+
+  TabController? _tabController;
 
   String textOrderBy = 'Nama Voucher A ke Z';
   String textvalueOrderBy = 'upDownNama';
@@ -77,6 +82,8 @@ class _PromosiTokoState extends State<PromosiToko> {
     nameEditPromosi = '';
     poinEditPromosi = '';
     hargaProductPromosi = '';
+
+    _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         List<String> value = [''];
@@ -185,200 +192,21 @@ class _PromosiTokoState extends State<PromosiToko> {
             children: [
               pageProdukToko(isFalseAvailable),
               tambahProdukToko(setState, context),
-              // ubahProdukToko(setState, context, singleProductId),
               UbahPromosiPage(
                 token: widget.token,
                 pageController: _pageController,
                 productid: singleProductId ?? '',
-              )
+              ),
+              TambahDiskonPage(
+                token: widget.token,
+                pageController: _pageController,
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  // ubahProdukToko(StateSetter setState, BuildContext context, productid) {
-  //   // TextEditingController nameProdukEdit = TextEditingController();
-  //   return StatefulBuilder(
-  //     builder: (context, setState) => FutureBuilder(
-  //         future:
-  //             getSinglePromosi(context, widget.token, "", productid, setState),
-  //         builder: (context, snapshot) {
-  //           var data = snapshot.data;
-  //           // nameProdukEdit.text = data['name'];
-  //           if (snapshot.hasData) {
-  //             return
-  //             Column(
-  //               children: [
-  //                 Row(
-  //                   children: [
-  //                     GestureDetector(
-  //                       onTap: () {
-  //                         _pageController.jumpToPage(0);
-  //                         refreshDataProduk();
-  //                       },
-  //                       child: Icon(
-  //                         PhosphorIcons.arrow_left,
-  //                         size: size48,
-  //                         color: bnw900,
-  //                       ),
-  //                     ),
-  //                     SizedBox(width: size12),
-  //                     Column(
-  //                       crossAxisAlignment: CrossAxisAlignment.start,
-  //                       children: [
-  //                         Text(
-  //                           'Ubah Voucher',
-  //                           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-  //                         ),
-  //                         Text(
-  //                           'Voucher akan ditambahkan kedalam Toko yang telah dipilih',
-  //                           style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-  //                         ),
-  //                       ],
-  //                     )
-  //                   ],
-  //                 ),
-  //                 SizedBox(height: size16),
-  //                 Expanded(
-  //                   child: ListView(
-  //                     padding: EdgeInsets.zero,
-  //                     physics: BouncingScrollPhysics(),
-  //                     children: [
-  //                       fieldEditProduk(
-  //                         'Nama Produk',
-  //                         conNameProdukEdit,
-  //                         TextInputType.text,
-  //                       ),
-  //                       SizedBox(height: size16),
-  //                       fieldEditProduk(
-  //                         'Point Voucher',
-  //                         conPointEdit,
-  //                         TextInputType.number,
-  //                       ),
-  //                       SizedBox(height: size16),
-  //                       fieldEditProduk(
-  //                         'Harga Jual',
-  //                         conHargaEdit,
-  //                         TextInputType.number,
-  //                       ),
-  //                       SizedBox(height: size16),
-  //                       GestureDetector(
-  //                         behavior: HitTestBehavior.translucent,
-  //                         onTap: () {
-  //                           setState(() {
-  //                             onswitchtampikan = !onswitchtampikan;
-  //                             onswitchtampikan
-  //                                 ? kasirAktif = "Aktif"
-  //                                 : kasirAktif = "Tidak Aktif";
-  //                           });
-  //                         },
-  //                         child: Row(
-  //                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                           children: [
-  //                             Column(
-  //                               crossAxisAlignment: CrossAxisAlignment.start,
-  //                               children: [
-  //                                 Text(
-  //                                   'Tampilkan Di Kasir',
-  //                                   style: heading2(
-  //                                       FontWeight.w600, bnw900, 'Outfit'),
-  //                                 ),
-  //                                 Text(
-  //                                   kasirAktif,
-  //                                   style: heading4(
-  //                                       FontWeight.w400, bnw900, 'Outfit'),
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                             FlutterSwitch(
-  //                               width: 52.0,
-  //                               height: 28.0,
-  //                               // value: snapshot.data['isPPN'] == 1 ? true : false,
-  //                               value: onswitchtampikan,
-  //                               padding: 0,
-  //                               activeIcon: Icon(PhosphorIcons.check,
-  //                                   color: primary500),
-  //                               inactiveIcon:
-  //                                   Icon(PhosphorIcons.x, color: bnw100),
-  //                               activeColor: primary500,
-  //                               inactiveColor: bnw100,
-  //                               borderRadius: 30.0,
-  //                               inactiveToggleColor: bnw900,
-  //                               activeToggleColor: primary200,
-  //                               activeSwitchBorder:
-  //                                   Border.all(color: primary500),
-  //                               inactiveSwitchBorder:
-  //                                   Border.all(color: bnw300, width: 2),
-  //                               onToggle: (val) {
-  //                                 onswitchtampikan = val;
-  //                                 onswitchtampikan
-  //                                     ? kasirAktif = "Aktif"
-  //                                     : kasirAktif = "Tidak Aktif";
-  //                                 log(onswitchtampikan.toString());
-  //                                 // log(kasirAktif);
-  //                                 setState(() {});
-  //                               },
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: size12),
-  //                 SizedBox(
-  //                   width: double.infinity,
-  //                   child: GestureDetector(
-  //                     onTap: () {
-  //                       List<String> value = [""];
-
-  //                       updateVoucher(
-  //                         context,
-  //                         widget.token,
-  //                         conNameProdukEdit.text,
-  //                         onswitchtampikan.toString(),
-  //                         conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
-  //                         conPointEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
-  //                         value,
-  //                         _pageController,
-  //                         productid,
-  //                       ).then((value) {
-  //                         if (value == '00') {
-  //                           refreshDataProduk();
-  //                           _pageController.jumpToPage(0);
-  //                         }
-  //                       });
-
-  //                       initState();
-  //                       setState(() {});
-  //                     },
-  //                     child: buttonXL(
-  //                       Center(
-  //                         child: Text(
-  //                           'Simpan',
-  //                           style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-  //                         ),
-  //                       ),
-  //                       MediaQuery.of(context).size.width,
-  //                       // primary500,
-  //                     ),
-  //                   ),
-  //                 )
-  //               ],
-  //             );
-
-  //           } else if (snapshot.hasError) {
-  //             return Text("${snapshot.error}");
-  //           }
-  //           return Scaffold(
-  //             backgroundColor: bnw100,
-  //             body: Center(child: loading()),
-  //           );
-  //         }),
-  //   );
-  // }
 
   tambahProdukToko(StateSetter setState, BuildContext context) {
     return StatefulBuilder(
@@ -584,7 +412,7 @@ class _PromosiTokoState extends State<PromosiToko> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Voucher',
+                  _tabController!.index == 0 ? 'Voucher' : 'Diskon',
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 Text(
@@ -597,9 +425,11 @@ class _PromosiTokoState extends State<PromosiToko> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    _pageController.nextPage(
-                        duration: Duration(milliseconds: 10),
-                        curve: Curves.ease);
+                    _tabController!.index == 0
+                        ? _pageController.nextPage(
+                            duration: Duration(milliseconds: 10),
+                            curve: Curves.ease)
+                        : _pageController.jumpToPage(3);
                   },
                   child: buttonXL(
                     Row(
@@ -608,7 +438,7 @@ class _PromosiTokoState extends State<PromosiToko> {
                         Icon(PhosphorIcons.plus, color: bnw100),
                         SizedBox(width: size12),
                         Text(
-                          'Voucher',
+                          _tabController!.index == 0 ? 'Voucher' : 'Diskon',
                           style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ],
@@ -620,626 +450,669 @@ class _PromosiTokoState extends State<PromosiToko> {
             ),
           ],
         ),
-        SizedBox(height: size16),
-        orderBy(context),
-        SizedBox(height: size16),
         Expanded(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                // width: double.infinity,
-                // height: 50,
-                padding:
-                    EdgeInsets.symmetric(horizontal: size16, vertical: size12),
-                decoration: BoxDecoration(
-                  color: primary500,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(size12),
-                    topRight: Radius.circular(size12),
-                  ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: TabBar(
+                  controller: _tabController,
+                  automaticIndicatorColorAdjustment: false,
+                  indicatorColor: primary500,
+                  unselectedLabelColor: bnw600,
+                  labelColor: primary500,
+                  labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
+                  physics: NeverScrollableScrollPhysics(),
+                  onTap: (value) {
+                    if (value == 0) {
+                      // _pageController.animateToPage(
+                      //   0,
+                      //   duration: Duration(milliseconds: 10),
+                      //   curve: Curves.ease,
+                      // );
+                    } else if (value == 1) {
+                      // _pageController.animateToPage(
+                      //   2,
+                      //   duration: Duration(milliseconds: 10),
+                      //   curve: Curves.ease,
+                      // );
+                    }
+                    setState(() {});
+                  },
+                  tabs: [
+                    Tab(
+                      text: 'Voucher',
+                    ),
+                    Tab(
+                      text: 'Diskon',
+                    ),
+                  ],
                 ),
-                child: isSelectionMode == false
-                    ? Row(
-                        children: [
-                          Opacity(
-                            opacity: 0,
-                            child: GestureDetector(
-                              onTap: () {
-                                // selectAll(1, datasProduk);
-                              },
-                              child: SizedBox(
-                                child: Icon(
-                                  isFalseAvailable
-                                      ? PhosphorIcons.square
-                                      : PhosphorIcons.check_square_fill,
-                                  color: bnw100,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          Expanded(
-                            child: Text(
-                              'Info Voucher',
-                              style:
-                                  heading4(FontWeight.w700, bnw100, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          Expanded(
-                            child: Text(
-                              'Harga Jual',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          Expanded(
-                            child: Text(
-                              'Coin',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width / 12,
-                              minWidth: MediaQuery.of(context).size.width / 12,
-                            ),
-                            child: Text(
-                              'Tampil Kasir',
-                              textAlign: TextAlign.center,
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          Opacity(
-                            opacity: 0,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: size12),
-                              decoration: BoxDecoration(
-                                color: bnw300,
-                                border:
-                                    Border.all(color: bnw300, width: width1),
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(PhosphorIcons.pencil_line),
-                                  SizedBox(width: size12),
-                                  Text(
-                                    'Atur',
-                                    style: body1(
-                                        FontWeight.w600, bnw900, 'Outfit'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          SizedBox(
-                            width: 50,
-                          ),
-                          Text(
-                            '${listProduct.length}/${datasProduk!.length} Voucher Terpilih',
-                            style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-                          ),
-                          SizedBox(width: size16),
-                          GestureDetector(
-                            onTap: () {
-                              showBottomPilihan(
-                                context,
-                                Column(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          'Yakin Ingin Menghapus Voucher?',
-                                          style: heading1(FontWeight.w600,
-                                              bnw900, 'Outfit'),
-                                        ),
-                                        SizedBox(height: size16),
-                                        Text(
-                                          'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                          style: heading2(FontWeight.w400,
-                                              bnw900, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: size16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              // Navigator.pop(context);
-                                              deleteProduk(
-                                                context,
-                                                widget.token,
-                                                listProduct,
-                                                "",
-                                              );
-                                              refreshDataProduk();
-
-                                              setState(() {});
-                                              initState();
-                                            },
-                                            child: buttonXLoutline(
-                                              Center(
-                                                child: Text(
-                                                  'Iya, Hapus',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
-                                                ),
-                                              ),
-                                              MediaQuery.of(context).size.width,
-                                              primary500,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: buttonXL(
-                                              Center(
-                                                child: Text(
-                                                  'Batalkan',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw100,
-                                                      'Outfit'),
-                                                ),
-                                              ),
-                                              MediaQuery.of(context).size.width,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: buttonL(
-                              Row(
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.trash_fill,
-                                    color: bnw900,
-                                    size: size24,
-                                  ),
-                                  SizedBox(width: size12),
-                                  Text(
-                                    'Hapus Semua',
-                                    style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
-                                  ),
-                                ],
-                              ),
-                              bnw100,
-                              bnw300,
-                            ),
-                          ),
-                          SizedBox(width: size16),
-                          GestureDetector(
-                            onTap: () {
-                              changeActive(
-                                context,
-                                widget.token,
-                                'true',
-                                listProduct,
-                                "",
-                              );
-                              refreshDataProduk();
-                              setState(() {});
-                              initState();
-                            },
-                            child: buttonL(
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Aktifkan Tampilkan dikasir',
-                                    style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
-                                  ),
-                                ],
-                              ),
-                              bnw100,
-                              bnw300,
-                            ),
-                          ),
-                        ],
-                      ),
               ),
-              datasProduk == null
-                  ? SkeletonCardLine()
-                  : Expanded(
-                      child: RefreshIndicator(
-                        color: bnw100,
-                        backgroundColor: primary500,
-                        onRefresh: () async {
-                          initState();
-                          setState(() {});
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: primary100,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(size12),
-                              bottomRight: Radius.circular(size12),
-                            ),
-                          ),
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            itemCount: datasProduk!.length,
-                            itemBuilder: (builder, index) {
-                              ModelDataPromosi data = datasProduk![index];
-                              selectedFlag[index] =
-                                  selectedFlag[index] ?? false;
-                              bool? isSelected = selectedFlag[index];
-                              final dataProduk = datasProduk![index];
-
-                              return Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: size16, vertical: size12),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                        color: bnw300, width: width1),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    InkWell(
-                                      // onTap: () => onTap(isSeleced, index),
-                                      onTap: () {
-                                        onTap(
-                                          isSelected,
-                                          index,
-                                          dataProduk.productid,
-                                        );
-                                        // log(data.name.toString());
-                                        // print(dataProduk.isActive);
-                                        // print(dataProduk.productid);
-                                      },
-                                      child: SizedBox(
-                                        // width: 50,
-                                        child:
-                                            _buildSelectIcon(isSelected!, data),
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      child: Text(
-                                        datasProduk![index].name ?? '',
-                                        style: heading4(
-                                            FontWeight.w600, bnw900, 'Outfit'),
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                            datasProduk![index].price ?? 0),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                                datasProduk![index].point ?? 0)
-                                            .toString(),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth:
-                                            MediaQuery.of(context).size.width /
-                                                12,
-                                        minWidth:
-                                            MediaQuery.of(context).size.width /
-                                                12,
-                                      ),
-                                      child: FlutterSwitch(
-                                        value: dataProduk.isActive == 1
-                                            ? true
-                                            : false,
-                                        padding: 1,
-                                        activeIcon: Icon(PhosphorIcons.check,
-                                            color: primary500),
-                                        inactiveIcon: Icon(PhosphorIcons.x,
-                                            color: bnw100),
-                                        activeColor: primary500,
-                                        inactiveColor: bnw100,
-                                        borderRadius: 30.0,
-                                        width: 50.0,
-                                        height: 27.0,
-                                        inactiveToggleColor: bnw900,
-                                        activeToggleColor: primary200,
-                                        activeSwitchBorder:
-                                            Border.all(color: primary500),
-                                        inactiveSwitchBorder:
-                                            Border.all(color: bnw300, width: 2),
-                                        onToggle: (bool value) {
-                                          // print('hello');
-                                          List<String> listProduct = [
-                                            dataProduk.productid!
-                                          ];
-                                          changeActive(
-                                            context,
-                                            widget.token,
-                                            value.toString(),
-                                            listProduct,
-                                            "",
-                                          );
-                                          setState(() {});
-                                          initState();
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          showModalBottom(
-                                            context,
-                                            MediaQuery.of(context).size.height /
-                                                2.8,
-                                            Padding(
-                                              padding: EdgeInsets.all(28.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            dataProduk.name!,
-                                                            style: heading2(
-                                                                FontWeight.w600,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            dataProduk
-                                                                .typeproducts!,
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      GestureDetector(
-                                                        onTap: () =>
-                                                            Navigator.pop(
-                                                                context),
-                                                        child: Icon(
-                                                          PhosphorIcons.x_fill,
-                                                          color: bnw900,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 20),
-                                                  GestureDetector(
-                                                    behavior: HitTestBehavior
-                                                        .translucent,
-                                                    onTap: () {
-                                                      singleProductId =
-                                                          dataProduk.productid;
-                                                      getSinglePromosi(
-                                                              context,
-                                                              widget.token,
-                                                              "",
-                                                              singleProductId,
-                                                              setState)
-                                                          .then((value) {
-                                                        if (value == '00') {
-                                                          _pageController
-                                                              .jumpToPage(2);
-                                                          print(
-                                                              singleProductId);
-                                                          Navigator.pop(
-                                                              context);
-                                                        }
-                                                      });
-                                                      setState(() {});
-                                                    },
-                                                    child: modalBottomValue(
-                                                      'Ubah Voucher',
-                                                      PhosphorIcons.pencil_line,
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  GestureDetector(
-                                                    behavior: HitTestBehavior
-                                                        .translucent,
-                                                    onTap: () {
-                                                      List<String> listProduct =
-                                                          [
-                                                        dataProduk.productid!
-                                                      ];
-                                                      List<String> value = [''];
-                                                      Navigator.pop(context);
-                                                      showBottomPilihan(
-                                                        context,
-                                                        Column(
-                                                          children: [
-                                                            Column(
-                                                              children: [
-                                                                Text(
-                                                                  'Yakin Ingin Menghapus Voucher?',
-                                                                  style: heading1(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw900,
-                                                                      'Outfit'),
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Text(
-                                                                  'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                                                  style: heading2(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                                height: size16),
-                                                            Row(
-                                                              children: [
-                                                                Expanded(
-                                                                  child:
-                                                                      GestureDetector(
-                                                                    onTap: () {
-                                                                      // Navigator.pop(context);
-                                                                      deleteProduk(
-                                                                        context,
-                                                                        widget
-                                                                            .token,
-                                                                        listProduct,
-                                                                        "",
-                                                                      );
-                                                                      refreshDataProduk();
-
-                                                                      setState(
-                                                                          () {});
-                                                                      initState();
-                                                                    },
-                                                                    child:
-                                                                        buttonXLoutline(
-                                                                      Center(
-                                                                        child:
-                                                                            Text(
-                                                                          'Iya, Hapus',
-                                                                          style: heading3(
-                                                                              FontWeight.w600,
-                                                                              primary500,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                      ),
-                                                                      MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width,
-                                                                      primary500,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                    width:
-                                                                        size16),
-                                                                Expanded(
-                                                                  child:
-                                                                      GestureDetector(
-                                                                    onTap: () {
-                                                                      Navigator.pop(
-                                                                          context);
-                                                                    },
-                                                                    child:
-                                                                        buttonXL(
-                                                                      Center(
-                                                                        child:
-                                                                            Text(
-                                                                          'Batalkan',
-                                                                          style: heading3(
-                                                                              FontWeight.w600,
-                                                                              bnw100,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                      ),
-                                                                      MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    },
-                                                    child: modalBottomValue(
-                                                      'Hapus Voucher',
-                                                      PhosphorIcons.trash,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        });
-                                      },
-                                      child: buttonL(
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(PhosphorIcons.pencil_line),
-                                            SizedBox(width: size12),
-                                            Text(
-                                              'Atur',
-                                              style: body1(FontWeight.w600,
-                                                  bnw900, 'Outfit'),
-                                            ),
-                                          ],
-                                        ),
-                                        bnw100,
-                                        bnw900,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            // itemCount: staticData!.length,
-                          ),
+              Expanded(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: _tabController,
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: size16),
+                            orderBy(context),
+                            SizedBox(height: size16),
+                            VoucherPage(isFalseAvailable)
+                          ],
                         ),
                       ),
-                    ),
+                      DiskonToko(token: widget.token),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Expanded VoucherPage(bool isFalseAvailable) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            // width: double.infinity,
+            // height: 50,
+            padding: EdgeInsets.symmetric(horizontal: size16, vertical: size12),
+            decoration: BoxDecoration(
+              color: primary500,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(size12),
+                topRight: Radius.circular(size12),
+              ),
+            ),
+            child: isSelectionMode == false
+                ? Row(
+                    children: [
+                      Opacity(
+                        opacity: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            // selectAll(1, datasProduk);
+                          },
+                          child: SizedBox(
+                            child: Icon(
+                              isFalseAvailable
+                                  ? PhosphorIcons.square
+                                  : PhosphorIcons.check_square_fill,
+                              color: bnw100,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: Text(
+                          'Info Voucher',
+                          style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: Text(
+                          'Harga Jual',
+                          style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: Text(
+                          'Coin',
+                          style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width / 12,
+                          minWidth: MediaQuery.of(context).size.width / 12,
+                        ),
+                        child: Text(
+                          'Tampil Kasir',
+                          textAlign: TextAlign.center,
+                          style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      Opacity(
+                        opacity: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: size12),
+                          decoration: BoxDecoration(
+                            color: bnw300,
+                            border: Border.all(color: bnw300, width: width1),
+                            borderRadius: BorderRadius.circular(size8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(PhosphorIcons.pencil_line),
+                              SizedBox(width: size12),
+                              Text(
+                                'Atur',
+                                style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                : Row(
+                    children: [
+                      SizedBox(
+                        width: 50,
+                      ),
+                      Text(
+                        '${listProduct.length}/${datasProduk!.length} Voucher Terpilih',
+                        style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                      SizedBox(width: size16),
+                      GestureDetector(
+                        onTap: () {
+                          showBottomPilihan(
+                            context,
+                            Column(
+                              children: [
+                                Column(
+                                  children: [
+                                    Text(
+                                      'Yakin Ingin Menghapus Voucher?',
+                                      style: heading1(
+                                          FontWeight.w600, bnw900, 'Outfit'),
+                                    ),
+                                    SizedBox(height: size16),
+                                    Text(
+                                      'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                      style: heading2(
+                                          FontWeight.w400, bnw900, 'Outfit'),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: size16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          // Navigator.pop(context);
+                                          deleteProduk(
+                                            context,
+                                            widget.token,
+                                            listProduct,
+                                            "",
+                                          );
+                                          refreshDataProduk();
+
+                                          setState(() {});
+                                          initState();
+                                        },
+                                        child: buttonXLoutline(
+                                          Center(
+                                            child: Text(
+                                              'Iya, Hapus',
+                                              style: heading3(FontWeight.w600,
+                                                  primary500, 'Outfit'),
+                                            ),
+                                          ),
+                                          MediaQuery.of(context).size.width,
+                                          primary500,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: size16),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: buttonXL(
+                                          Center(
+                                            child: Text(
+                                              'Batalkan',
+                                              style: heading3(FontWeight.w600,
+                                                  bnw100, 'Outfit'),
+                                            ),
+                                          ),
+                                          MediaQuery.of(context).size.width,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: buttonL(
+                          Row(
+                            children: [
+                              Icon(
+                                PhosphorIcons.trash_fill,
+                                color: bnw900,
+                                size: size24,
+                              ),
+                              SizedBox(width: size12),
+                              Text(
+                                'Hapus Semua',
+                                style:
+                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                          bnw100,
+                          bnw300,
+                        ),
+                      ),
+                      SizedBox(width: size16),
+                      GestureDetector(
+                        onTap: () {
+                          changeActive(
+                            context,
+                            widget.token,
+                            'true',
+                            listProduct,
+                            "",
+                          );
+                          refreshDataProduk();
+                          setState(() {});
+                          initState();
+                        },
+                        child: buttonL(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Aktifkan Tampilkan dikasir',
+                                style:
+                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                          bnw100,
+                          bnw300,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          datasProduk == null
+              ? SkeletonCardLine()
+              : Expanded(
+                  child: RefreshIndicator(
+                    color: bnw100,
+                    backgroundColor: primary500,
+                    onRefresh: () async {
+                      initState();
+                      setState(() {});
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: primary100,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(size12),
+                          bottomRight: Radius.circular(size12),
+                        ),
+                      ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: datasProduk!.length,
+                        itemBuilder: (builder, index) {
+                          ModelDataPromosi data = datasProduk![index];
+                          selectedFlag[index] = selectedFlag[index] ?? false;
+                          bool? isSelected = selectedFlag[index];
+                          final dataProduk = datasProduk![index];
+
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: size16, vertical: size12),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom:
+                                    BorderSide(color: bnw300, width: width1),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  // onTap: () => onTap(isSeleced, index),
+                                  onTap: () {
+                                    onTap(
+                                      isSelected,
+                                      index,
+                                      dataProduk.productid,
+                                    );
+                                    // log(data.name.toString());
+                                    // print(dataProduk.isActive);
+                                    // print(dataProduk.productid);
+                                  },
+                                  child: SizedBox(
+                                    // width: 50,
+                                    child: _buildSelectIcon(isSelected!, data),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: Text(
+                                    datasProduk![index].name ?? '',
+                                    style: heading4(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: Text(
+                                    FormatCurrency.convertToIdr(
+                                        datasProduk![index].price ?? 0),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: heading4(
+                                        FontWeight.w400, bnw900, 'Outfit'),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: Text(
+                                    FormatCurrency.convertToIdr(
+                                            datasProduk![index].point ?? 0)
+                                        .toString(),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: heading4(
+                                        FontWeight.w400, bnw900, 'Outfit'),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width / 12,
+                                    minWidth:
+                                        MediaQuery.of(context).size.width / 12,
+                                  ),
+                                  child: FlutterSwitch(
+                                    value:
+                                        dataProduk.isActive == 1 ? true : false,
+                                    padding: 1,
+                                    activeIcon: Icon(PhosphorIcons.check,
+                                        color: primary500),
+                                    inactiveIcon:
+                                        Icon(PhosphorIcons.x, color: bnw100),
+                                    activeColor: primary500,
+                                    inactiveColor: bnw100,
+                                    borderRadius: 30.0,
+                                    width: 50.0,
+                                    height: 27.0,
+                                    inactiveToggleColor: bnw900,
+                                    activeToggleColor: primary200,
+                                    activeSwitchBorder:
+                                        Border.all(color: primary500),
+                                    inactiveSwitchBorder:
+                                        Border.all(color: bnw300, width: 2),
+                                    onToggle: (bool value) {
+                                      // print('hello');
+                                      List<String> listProduct = [
+                                        dataProduk.productid!
+                                      ];
+                                      changeActive(
+                                        context,
+                                        widget.token,
+                                        value.toString(),
+                                        listProduct,
+                                        "",
+                                      );
+                                      setState(() {});
+                                      initState();
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      showModalBottom(
+                                        context,
+                                        MediaQuery.of(context).size.height /
+                                            2.8,
+                                        Padding(
+                                          padding: EdgeInsets.all(28.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        dataProduk.name!,
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                      Text(
+                                                        dataProduk
+                                                            .typeproducts!,
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  GestureDetector(
+                                                    onTap: () =>
+                                                        Navigator.pop(context),
+                                                    child: Icon(
+                                                      PhosphorIcons.x_fill,
+                                                      color: bnw900,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 20),
+                                              GestureDetector(
+                                                behavior:
+                                                    HitTestBehavior.translucent,
+                                                onTap: () {
+                                                  singleProductId =
+                                                      dataProduk.productid;
+                                                  getSinglePromosi(
+                                                          context,
+                                                          widget.token,
+                                                          "",
+                                                          singleProductId,
+                                                          setState)
+                                                      .then((value) {
+                                                    if (value == '00') {
+                                                      _pageController
+                                                          .jumpToPage(2);
+                                                      print(singleProductId);
+                                                      Navigator.pop(context);
+                                                    }
+                                                  });
+                                                  setState(() {});
+                                                },
+                                                child: modalBottomValue(
+                                                  'Ubah Voucher',
+                                                  PhosphorIcons.pencil_line,
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              GestureDetector(
+                                                behavior:
+                                                    HitTestBehavior.translucent,
+                                                onTap: () {
+                                                  List<String> listProduct = [
+                                                    dataProduk.productid!
+                                                  ];
+                                                  List<String> value = [''];
+                                                  Navigator.pop(context);
+                                                  showBottomPilihan(
+                                                    context,
+                                                    Column(
+                                                      children: [
+                                                        Column(
+                                                          children: [
+                                                            Text(
+                                                              'Yakin Ingin Menghapus Voucher?',
+                                                              style: heading1(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size16),
+                                                            Text(
+                                                              'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                                              style: heading2(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                            height: size16),
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap: () {
+                                                                  // Navigator.pop(context);
+                                                                  deleteProduk(
+                                                                    context,
+                                                                    widget
+                                                                        .token,
+                                                                    listProduct,
+                                                                    "",
+                                                                  );
+                                                                  refreshDataProduk();
+
+                                                                  setState(
+                                                                      () {});
+                                                                  initState();
+                                                                },
+                                                                child:
+                                                                    buttonXLoutline(
+                                                                  Center(
+                                                                    child: Text(
+                                                                      'Iya, Hapus',
+                                                                      style: heading3(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          primary500,
+                                                                          'Outfit'),
+                                                                    ),
+                                                                  ),
+                                                                  MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width,
+                                                                  primary500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                width: size16),
+                                                            Expanded(
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child: buttonXL(
+                                                                  Center(
+                                                                    child: Text(
+                                                                      'Batalkan',
+                                                                      style: heading3(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw100,
+                                                                          'Outfit'),
+                                                                    ),
+                                                                  ),
+                                                                  MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                                child: modalBottomValue(
+                                                  'Hapus Voucher',
+                                                  PhosphorIcons.trash,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  child: buttonL(
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(PhosphorIcons.pencil_line),
+                                        SizedBox(width: size12),
+                                        Text(
+                                          'Atur',
+                                          style: body1(FontWeight.w600, bnw900,
+                                              'Outfit'),
+                                        ),
+                                      ],
+                                    ),
+                                    bnw100,
+                                    bnw900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        // itemCount: staticData!.length,
+                      ),
+                    ),
+                  ),
+                ),
+        ],
+      ),
     );
   }
 
