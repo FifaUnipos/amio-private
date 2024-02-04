@@ -39,8 +39,9 @@ import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 import '../utils/component.dart';
 import '../utils/providerModel/refreshTampilanModel.dart';
 
-// String url = 'https://api.prod.amio.my.id';
-String url = 'https://0e15-2001-448a-2011-3535-9503-78da-1cfb-3a79.ngrok-free.app';
+String url = 'https://api.prod.amio.my.id';
+// String url =
+// 'https://0e15-2001-448a-2011-3535-9503-78da-1cfb-3a79.ngrok-free.app';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -130,7 +131,9 @@ String registerbyotp = '$url/api/user/registerbyotp',
     createDiskonLink = '$url/api/discount/store',
     deleteDiskonLink = '$url/api/discount/delete',
     updateDiskonLink = '$url/api/discount/update',
+    getSingleDiskonLink = '$url/api/discount/show',
     getProdukDiskonLink = '$url/api/discount/get-products',
+    aktifDiskonLink = '$url/api/discount/change-is-active',
     diskonTransaksiLink = '$url/api/discount/transaction';
 
 String out = '$url/api/logout';
@@ -264,6 +267,7 @@ Future tambahKategoriForm(context, name, token) async {
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
@@ -284,16 +288,18 @@ Future hapusKategoriForm(context, token, idkategori) async {
       },
     );
     var jsonResponse = jsonDecode(response.body);
-    log(response.body.toString());
+    print(response.body.toString());
     if (response.statusCode == 200) {
       print("succes hapus kategori");
 
-      Navigator.pop(context);
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     } else {
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
     }
-    return null;
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -317,7 +323,7 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
       print("succes hapus kategori");
 
       closeLoading(context);
-      Navigator.pop(context);
+
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
@@ -1323,6 +1329,45 @@ Future changeActive(
   }
 }
 
+Future changeActiveDiskon(
+  BuildContext context,
+  var token,
+  isActive,
+  productid,
+  merchid,
+) async {
+  whenLoading(context);
+  String jsonData = jsonEncode(productid);
+
+  final response = await http.post(
+    Uri.parse(aktifDiskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": merchid,
+      "is_active": isActive,
+      // 'id': productid,
+      'id': jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    //print('Sukses Ganti Data');
+    // Navigator.pop(context);
+
+    //print(jsonResponse['data'].toString());
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  } else {
+    //print(jsonResponse['message'].toString());
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
 Future getAllProvince(token, id) async {
   final response = await http.post(
     Uri.parse('$url/api/province'),
@@ -1586,7 +1631,7 @@ Future getPelanggan(BuildContext context, token, orderby) async {
   }
 }
 
-Future getVoucher(context, token, orderby) async {
+Future getVoucher(context, token, orderby, merchantid) async {
   final response = await http.post(
     Uri.parse(getVoucherUrl),
     headers: {
@@ -1595,6 +1640,7 @@ Future getVoucher(context, token, orderby) async {
     body: {
       "deviceid": identifier,
       'orderby': orderby,
+      'merchantid': merchantid
     },
   );
 
@@ -1687,8 +1733,56 @@ Future tambahDiskon(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    print('Sukses Delete Data');
-   
+    print('Sukses Tambah Diskon $jsonResponse');
+
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse['data'].toString());
+    return jsonResponse['rc'];
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  }
+}
+
+Future ubahDiskon(
+  BuildContext context,
+  token,
+  diskonId,
+  merchantid,
+  productid,
+  name,
+  discount,
+  discount_type,
+  start_date,
+  end_date,
+  is_active,
+) async {
+  final String merchantidList = json.encode(merchantid);
+  final String productidList = json.encode(productid);
+  final response = await http.post(
+    Uri.parse(updateDiskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      'id': diskonId,
+      'merchantid': merchantidList,
+      'productid': productidList,
+      'name': name,
+      'discount': discount,
+      'discount_type': discount_type,
+      'start_date': start_date,
+      'end_date': end_date,
+      'is_active': is_active
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('Sukses Tambah Diskon $jsonResponse');
+
     showSnackbar(context, jsonResponse);
     print(jsonResponse['data'].toString());
     return jsonResponse['rc'];
@@ -1979,14 +2073,16 @@ Future createVoucher(
   isActive,
   price,
   point,
-  List<String> merchid,
+  merchid,
   PageController controller,
 ) async {
   final String jsonTest = json.encode(merchid);
+
   var body = {
     "deviceid": identifier,
     "namavoucher": name,
-    "merchantid": jsonTest,
+    "merchantid": merchid,
+    "price_online_shop": "0",
     "isActive": isActive,
     "harga": price,
     "point": point,
@@ -2001,11 +2097,12 @@ Future createVoucher(
   );
 
   var jsonResponse = jsonDecode(response.body);
+  print(jsonResponse);
   if (response.statusCode == 200) {
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
-    closeLoading(context);
+    // closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse;
@@ -2018,7 +2115,7 @@ Future updateVoucher(
   isActive,
   price,
   point,
-  List<String> merchid,
+  merchid,
   PageController controller,
   productid,
 ) async {
@@ -2026,7 +2123,7 @@ Future updateVoucher(
   var body = {
     "deviceid": identifier,
     "namavoucher": name,
-    "merchantid": jsonTest,
+    "merchantid": merchid,
     "voucherid": productid,
     "isActive": isActive,
     "price": price,
@@ -2047,7 +2144,7 @@ Future updateVoucher(
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
-    closeLoading(context);
+    // closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['message'];
@@ -2065,6 +2162,7 @@ Future createProduct(
     image,
     List<String> merchid,
     PageController controller) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
   var body = {
     "deviceid": identifier,
@@ -2090,6 +2188,7 @@ Future createProduct(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     // print('succes');
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
@@ -2112,6 +2211,7 @@ Future calculateTransaction(
   StateSetter setState,
   memberid,
   typePrice,
+  discount,
 ) async {
   final String detail = json.encode(details);
 
@@ -2124,6 +2224,7 @@ Future calculateTransaction(
       "deviceid": identifier,
       "memberid": memberid,
       "detail": detail,
+      "discount": discount,
       "typePrice": typePrice,
     },
   );
@@ -2132,7 +2233,7 @@ Future calculateTransaction(
   var data = jsonResponse['data'];
   if (response.statusCode == 200) {
     print('succes');
-    print(jsonResponse.toString());
+    log(jsonResponse.toString());
     // print(jsonResponse['data']['subTotal'].toString());
     // print(totalTransaksi.toString());
     totalTransaksi = data['total'];
@@ -2305,8 +2406,14 @@ Future headerTagihan(
   }
 }
 
-Future deleteReference(BuildContext context, token, transaksiReference,
-    idkategori, detailAlasan, transactionidValue) async {
+Future deleteReference(
+  BuildContext context,
+  token,
+  transaksiReference,
+  idkategori,
+  detailAlasan,
+  transactionidValue,
+) async {
   final response = await http.post(Uri.parse(deleteTagihanUrl), headers: {
     'token': token,
   }, body: {
@@ -2319,14 +2426,17 @@ Future deleteReference(BuildContext context, token, transaksiReference,
 
   var jsonResponse = jsonDecode(response.body);
 
-  print(transaksiReference);
+  print(jsonResponse);
 
   if (response.statusCode == 200) {
+    closeLoading(context);
     Navigator.of(context).popUntil((route) => route.isFirst);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     print(jsonResponse['rc'].toString());
+    errorText = jsonResponse['message'];
     return jsonResponse['rc'];
   }
 }
@@ -2358,7 +2468,7 @@ Future approveReference(
   }
 }
 
-Future getPendapatan(BuildContext context, token, condition) async {
+Future getPendapatan(BuildContext context, token, condition, merchantid) async {
   final response = await http.post(
     Uri.parse(getPendapatanUrl),
     headers: {
@@ -2367,6 +2477,7 @@ Future getPendapatan(BuildContext context, token, condition) async {
     body: {
       "deviceid": identifier,
       "jenis": condition,
+      "merchantid": merchantid,
     },
   );
 
@@ -2390,7 +2501,7 @@ Future getPendapatan(BuildContext context, token, condition) async {
   }
 }
 
-Future getYearRekon(token) async {
+Future getYearRekon(token, merchantid) async {
   final response = await http.post(
     Uri.parse(getYearRekonUrl),
     headers: {
@@ -2398,6 +2509,7 @@ Future getYearRekon(token) async {
     },
     body: {
       "deviceid": identifier,
+      "merchantid": merchantid,
     },
   );
 
@@ -2414,7 +2526,6 @@ Future getYearRekon(token) async {
 }
 
 Future getMonthRekon(token, year, merchid) async {
-  merchid = 'asd';
   final response = await http.post(
     Uri.parse(getMonthRekonUrl),
     headers: {
@@ -2428,9 +2539,9 @@ Future getMonthRekon(token, year, merchid) async {
   );
 
   var jsonResponse = jsonDecode(response.body);
+  print(jsonResponse.toString());
   if (response.statusCode == 200) {
     print('succes');
-    // print(jsonResponse.toString());
 
     return jsonResponse['data'];
   } else {
@@ -2463,7 +2574,7 @@ Future getPengeluaran(BuildContext context, token, condition) async {
   }
 }
 
-Future getRekon(token, tahun, bulan) async {
+Future getRekon(token, tahun, bulan, merchantid) async {
   final response = await http.post(
     Uri.parse(getRekonUrl),
     headers: {
@@ -2473,6 +2584,7 @@ Future getRekon(token, tahun, bulan) async {
       "deviceid": identifier,
       "tahun": tahun,
       "bulan": bulan,
+      "merchantid": merchantid,
     },
   );
 
@@ -2512,7 +2624,7 @@ Future saveRekon(context, token, id, status) async {
   }
 }
 
-Future postingRekon(context, token, tahun, bulan) async {
+Future postingRekon(context, token, tahun, bulan, merchantid) async {
   final response = await http.post(
     Uri.parse(postingRekonUrl),
     headers: {
@@ -2522,6 +2634,7 @@ Future postingRekon(context, token, tahun, bulan) async {
       "deviceid": identifier,
       "tahun": tahun,
       "bulan": bulan,
+      "merchantid": merchantid,
     },
   );
 
@@ -3004,6 +3117,67 @@ Future getSingleProduct(
   }
 }
 
+late String idDiskonUpdate,
+    tipeDiskonUpdate,
+    namaDiskonUpdate,
+    hargaDiskonUpdate,
+    tipeHargaDiskonUpdate,
+    aktifDiskonUpdate,
+    statusDiskonUpdate,
+    tanggalAwalDiskon,
+    tanggalAkhirDiskon,
+    totalProdukDiskon;
+List<String> productIdDiskon = [];
+
+Future getSingleDiskon(context, token, id) async {
+  whenLoading(context);
+  final response = await http.post(
+    Uri.parse(getSingleDiskonLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "id": id,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  // log(jsonResponse.toString());
+  if (response.statusCode == 200) {
+    var dataku = jsonResponse['data'];
+    //print(dataku.toString());
+
+    idDiskonUpdate = dataku['id'].toString();
+    tipeDiskonUpdate = dataku['type'].toString();
+    namaDiskonUpdate = dataku['name'].toString();
+    hargaDiskonUpdate = dataku['discount'].toString();
+    tipeHargaDiskonUpdate = dataku['discount_type'].toString();
+    aktifDiskonUpdate = dataku['date'].toString();
+    statusDiskonUpdate = dataku['is_active'].toString();
+    tanggalAwalDiskon = dataku['start_date'].toString();
+    tanggalAkhirDiskon = dataku['end_date'].toString();
+
+    // log(productIdDiskon.toString());
+    productIdDiskon.clear();
+
+    List<dynamic> products = dataku['products'];
+    for (var product in products) {
+      String productId = product['productid'].toString();
+      productIdDiskon.add(productId);
+    }
+
+    totalProdukDiskon = products.length.toString();
+
+    closeLoading(context);
+    return jsonResponse['rc'].toString();
+  } else {
+    // print(jsonResponse['message'].toString());
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
 late String namaEditAkun,
     emailEditAkun,
     nomorEditAkun,
@@ -3044,7 +3218,10 @@ Future getSingleAkun(BuildContext context, token, String userid) async {
   }
 }
 
-late String nameEditPromosi, poinEditPromosi, hargaProductPromosi;
+late String nameEditPromosi,
+    poinEditPromosi,
+    hargaProductPromosi,
+    statusPromosiUpdate;
 Future getSinglePromosi(
     BuildContext context, token, String merchid, voucherid, setState) async {
   final response = await http.post(
@@ -3067,6 +3244,7 @@ Future getSinglePromosi(
     nameEditPromosi = jsonResponse['data']['name'];
     poinEditPromosi = jsonResponse['data']['point'].toString();
     hargaProductPromosi = jsonResponse['data']['price'].toString();
+    statusPromosiUpdate = jsonResponse['data']['isActive'].toString();
     return jsonResponse['rc'];
   } else {
     print(jsonResponse['message'].toString());

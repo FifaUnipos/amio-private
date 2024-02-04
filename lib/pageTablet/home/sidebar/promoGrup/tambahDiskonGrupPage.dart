@@ -11,20 +11,21 @@ import '../../../../main.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../utils/component.dart';
 
-class TambahDiskonPage extends StatefulWidget {
-  String token;
+class TambahDiskonGrupPage extends StatefulWidget {
+  String token, merchid;
   PageController pageController;
-  TambahDiskonPage({
+  TambahDiskonGrupPage({
     Key? key,
     required this.token,
+    required this.merchid,
     required this.pageController,
   }) : super(key: key);
 
   @override
-  State<TambahDiskonPage> createState() => _TambahDiskonPageState();
+  State<TambahDiskonGrupPage> createState() => _TambahDiskonGrupPageState();
 }
 
-class _TambahDiskonPageState extends State<TambahDiskonPage> {
+class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
   List<String> productidDiskon = List.empty(growable: true);
   bool onswitchtampikan = true;
   int tipeUmumAktif = 0, tipeProdukAktif = 0;
@@ -955,6 +956,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<String> merchid = [widget.merchid];
+
                   bool statusDiskon = true;
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
@@ -962,7 +965,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                   tambahDiskon(
                     context,
                     widget.token,
-                    '',
+                    merchid,
                     productidDiskon,
                     conNameDiskon.text,
                     conHarga.text,
@@ -990,6 +993,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<String> merchid = [widget.merchid];
                   bool statusDiskon = true;
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
@@ -997,7 +1001,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                   tambahDiskon(
                     context,
                     widget.token,
-                    '',
+                    merchid,
                     productidDiskon,
                     conNameDiskon.text,
                     conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -1118,11 +1122,15 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
   bool isItemSelected = false;
 
   Future _getProductList() async {
+    List<String> merchid = [widget.merchid];
+    String merchidJson = json.encode(merchid);
     await http.post(Uri.parse(getProdukDiskonLink), body: {
       "deviceid": identifier,
+      "merchantid": merchidJson,
     }, headers: {
       "token": widget.token,
     }).then((response) {
+      print(response.body);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data != null && data['data'] != null) {

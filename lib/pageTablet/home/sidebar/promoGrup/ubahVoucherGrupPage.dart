@@ -7,21 +7,22 @@ import 'package:flutter_switch/flutter_switch.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../utils/component.dart';
 
-class UbahPromosiPage extends StatefulWidget {
-  String token, productid;
+class UbahPromosiGrupPage extends StatefulWidget {
+  String token, productid, merchid;
   PageController pageController;
-  UbahPromosiPage({
+  UbahPromosiGrupPage({
     Key? key,
     required this.token,
     required this.productid,
+    required this.merchid,
     required this.pageController,
   }) : super(key: key);
 
   @override
-  State<UbahPromosiPage> createState() => _UbahPromosiPageState();
+  State<UbahPromosiGrupPage> createState() => _UbahPromosiGrupPageState();
 }
 
-class _UbahPromosiPageState extends State<UbahPromosiPage> {
+class _UbahPromosiGrupPageState extends State<UbahPromosiGrupPage> {
   bool onswitchtampikan = true;
   String kasirAktif = "Aktif";
 
@@ -57,12 +58,12 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
   @override
   void initState() {
     super.initState();
-    
+
     conHargaEdit.addListener(formatInputRpHargaEdit);
     conPointEdit.addListener(formatInputRpPoinEdit);
   }
 
-  void initial(){
+  void initial() {
     // if(){}
   }
 
@@ -201,7 +202,7 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
                 onswitchtampikan.toString(),
                 conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                 conPointEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                value,
+                widget.merchid,
                 widget.pageController,
                 widget.productid,
               ).then((value) {

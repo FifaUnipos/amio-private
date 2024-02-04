@@ -400,11 +400,12 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                   SizedBox(width: size16),
                                                   Expanded(
                                                     child: Text(
-                                                      FormatCurrency
-                                                              .convertToIdr(
+                                                      FormatCurrency.convertToIdr(
+                                                              int.parse(
                                                                   datasRiwayat![
                                                                           index]
-                                                                      .amount)
+                                                                      .amount
+                                                                      .toString()))
                                                           .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
@@ -728,9 +729,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                     'Outfit'),
                                                               ),
                                                               Text(
-                                                                FormatCurrency.convertToIdr(
-                                                                        detail[index]['amount'] ??
-                                                                            '-')
+                                                                FormatCurrency.convertToIdr(int.parse(detail[index]
+                                                                            [
+                                                                            'amount']
+                                                                        .toString()))
                                                                     .toString(),
                                                                 style: body1(
                                                                     FontWeight
@@ -863,8 +865,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     ),
                                                     Text(
                                                       FormatCurrency.convertToIdr(
-                                                              data['amount'] ??
-                                                                  '-')
+                                                              int.parse(data[
+                                                                      'amount']
+                                                                  .toString()))
                                                           .toString(),
                                                       style: heading2(
                                                           FontWeight.w600,
@@ -907,10 +910,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       children: [
                                                         SizedBox(height: size8),
                                                         Text(
-                                                          FormatCurrency
-                                                                  .convertToIdr(
-                                                                      data['amount'] ??
-                                                                          '-')
+                                                          FormatCurrency.convertToIdr(
+                                                                  int.parse(data[
+                                                                          'amount']
+                                                                      .toString()))
                                                               .toString(),
                                                           style: heading4(
                                                               FontWeight.w400,
@@ -920,9 +923,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         SizedBox(height: size8),
                                                         Text(
                                                           FormatCurrency.convertToIdr(
-                                                                  int.parse(data[
-                                                                          'change_money']) ??
-                                                                      '-')
+                                                                  int.parse(
+                                                                      data['change_money'] ??
+                                                                          "-"))
                                                               .toString(),
                                                           style: heading4(
                                                               FontWeight.w400,
@@ -1471,7 +1474,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                               'Outfit'),
                                                                         ),
                                                                         Text(
-                                                                          FormatCurrency.convertToIdr(detail[index]['amount'] ?? '-')
+                                                                          FormatCurrency.convertToIdr(int.parse(detail[index]['amount'].toString()))
                                                                               .toString(),
                                                                           style: body1(
                                                                               FontWeight.w400,
@@ -1962,14 +1965,14 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
                                             // print(snapshot
                                             //     .data['transaksiid_reference']);
-                                            cartProductIds.clear();
+                                            // cartProductIds.clear();
                                             width = null;
                                             widtValue = 120;
                                             heightInformation = 0;
                                             widthInformation = 0;
 
-                                            cart.clear();
-                                            cartMap.clear();
+                                            // cart.clear();
+                                            // cartMap.clear();
 
                                             deleteReference(
                                                     context,
@@ -1982,7 +1985,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                 .then((value) {
                                               if (value != '00') {
                                                 setState(() {
-                                                  errorText = value;
                                                   WidgetsBinding.instance
                                                       .addPostFrameCallback(
                                                           (_) {

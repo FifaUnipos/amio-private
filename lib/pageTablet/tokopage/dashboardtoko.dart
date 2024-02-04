@@ -623,7 +623,7 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
           icon: iconSelectedSidebar == 6
               ? PhosphorIcons.tag_fill
               : PhosphorIcons.tag,
-          label: 'Voucher',
+          label: 'Promo',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;

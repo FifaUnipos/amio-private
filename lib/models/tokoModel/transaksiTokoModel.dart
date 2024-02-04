@@ -1,34 +1,46 @@
 class ProductModel {
   String? productid;
   String? name;
-  int? price;
-  int? price_online_shop;
+  num? price;
+  num? price_after;
+  num? price_online_shop;
+  num? price_online_shop_after;
   // String? isActive;
   int? isActive;
   int? isPPN;
   String? typeproducts;
   String? product_image;
+  String? discount_type;
+  int? discount;
 
   ProductModel({
     required this.productid,
     required this.name,
     required this.price,
+    required this.price_after,
     required this.price_online_shop,
+    required this.price_online_shop_after,
     required this.isActive,
     required this.isPPN,
     required this.typeproducts,
     required this.product_image,
+    required this.discount_type,
+    required this.discount,
   });
 
   ProductModel.fromJson(Map<String, dynamic> json) {
     productid = json['productid'];
     name = json['name'];
     price = json['price'];
+    price_after = json['price_after'];
     price_online_shop = json['price_online_shop'];
+    price_online_shop_after = json['price_online_shop_after'];
     isActive = json['isActive'];
     isPPN = json['isPPN'];
     typeproducts = json['typeproducts'];
     product_image = json['product_image'];
+    discount_type = json['discount_type'];
+    discount = json['discount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -36,11 +48,15 @@ class ProductModel {
     data['productid'] = this.productid;
     data['name'] = this.name;
     data['price'] = this.price;
+    data['price_after'] = this.price_after;
     data['price_online_shop'] = this.price_online_shop;
+    data['price_online_shop_after'] = this.price_online_shop_after;
     data['isActive'] = this.isActive;
     data['isPPN'] = this.isPPN;
     data['typeproducts'] = this.typeproducts;
     data['product_image'] = this.product_image;
+    data['discount_type'] = this.discount_type;
+    data['discount'] = this.discount_type;
     return data;
   }
 }

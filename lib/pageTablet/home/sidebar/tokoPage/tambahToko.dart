@@ -376,7 +376,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) =>
                     FractionallySizedBox(
-                  heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                  heightFactor: isKeyboardActive ? 0.9 : 0.80,
                   child: GestureDetector(
                     onTap: () => textFieldFocusNode.unfocus(),
                     child: Container(
@@ -732,7 +732,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -985,7 +985,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -1256,7 +1256,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -1529,7 +1529,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(

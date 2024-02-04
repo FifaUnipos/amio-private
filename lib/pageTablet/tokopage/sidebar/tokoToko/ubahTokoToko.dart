@@ -459,7 +459,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) =>
                     FractionallySizedBox(
-                  heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                  heightFactor: isKeyboardActive ? 0.9 : 0.80,
                   child: GestureDetector(
                     onTap: () => textFieldFocusNode.unfocus(),
                     child: Container(
@@ -495,6 +495,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                     setState(() {});
                                   },
                                   child: TextField(
+                                    cursorColor: primary500,
                                     controller: searchController,
                                     focusNode: textFieldFocusNode,
                                     onChanged: (value) {
@@ -512,9 +513,10 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                             color: bnw300,
                                           ),
                                         ),
-                                        focusedBorder: OutlineInputBorder(
+                                        focusedBorder: UnderlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: bnw200,
+                                            width: 2,
+                                            color: primary500,
                                           ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
@@ -705,7 +707,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -742,6 +744,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: (value) {
@@ -958,7 +961,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -996,6 +999,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {
@@ -1230,7 +1234,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -1268,6 +1272,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {
@@ -1503,7 +1508,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) =>
                       FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
                     child: GestureDetector(
                       onTap: () => textFieldFocusNode.unfocus(),
                       child: Container(
@@ -1541,6 +1546,7 @@ class _ChangeMerchantTokoState extends State<ChangeMerchantToko> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'package:amio/models/diskonModel.dart';
+import 'package:amio/pageTablet/home/sidebar/promoGrup/ubahDiskonGrup.dart';
 import 'package:amio/utils/skeletons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
@@ -21,22 +22,22 @@ import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component.dart';
 import '../../../home/sidebar/tokoPage/ubahToko.dart';
-import 'ubahPromosi.dart';
 
-class DiskonToko extends StatefulWidget {
-  String token;
+class DiskonGrup extends StatefulWidget {
+  String token, merchid;
   PageController pageController;
-  DiskonToko({
+  DiskonGrup({
     Key? key,
     required this.token,
+    required this.merchid,
     required this.pageController,
   }) : super(key: key);
 
   @override
-  State<DiskonToko> createState() => _DiskonTokoState();
+  State<DiskonGrup> createState() => _DiskonGrupState();
 }
 
-class _DiskonTokoState extends State<DiskonToko> {
+class _DiskonGrupState extends State<DiskonGrup> {
   List<ModelDataDiskon>? datasProduk;
 
   PageController _pageController = PageController();
@@ -110,7 +111,7 @@ class _DiskonTokoState extends State<DiskonToko> {
     return datasProduk = await getDiskon(
       context,
       widget.token,
-      '',
+      widget.merchid,
       textvalueOrderBy,
     );
   }
@@ -187,7 +188,13 @@ class _DiskonTokoState extends State<DiskonToko> {
             children: [
               pageProdukToko(isFalseAvailable),
               tambahProdukToko(setState, context),
+              // UbahDiskonGrupPage(
+              //   token: widget.token,
+              //   pageController: _pageController,
+              //   merchid: widget.merchid,
+              // ),
               // ubahProdukToko(setState, context, singleid),
+
               // UbahPromosiPage(
               //   token: widget.token,
               //   pageController: _pageController,
@@ -333,7 +340,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                       onswitchtampikan.toString(),
                       conHarga.text,
                       condiscount.text,
-                      [''],
+                      widget.merchid,
                       _pageController,
                     );
                     refreshDataProduk();
@@ -362,7 +369,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                       onswitchtampikan.toString(),
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       condiscount.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                      value,
+                      widget.merchid,
                       _pageController,
                     ).then((value) {
                       if (value == '00') {
@@ -606,7 +613,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                                 widget.token,
                                 'true',
                                 listProduct,
-                                "",
+                                widget.merchid,
                               );
                               refreshDataProduk();
                               setState(() {});

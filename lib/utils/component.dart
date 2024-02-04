@@ -205,6 +205,15 @@ List orderByVoucherText = [
   "Harga Terendah",
 ];
 
+List orderByDiskonText = [
+  "Nama Diskon A ke Z",
+  "Nama Diskon Z ke A",
+  "Diskon Terbaru",
+  "Diskon Terlama",
+  "Harga Tertinggi",
+  "Harga Terendah",
+];
+
 List orderByPelangganText = [
   "Nama Pelanggan A ke Z",
   "Nama Pelanggan Z ke A",
@@ -722,6 +731,28 @@ heading4(FontWeight fontWeight, Color color, String family) {
     fontSize: sp18,
     fontWeight: fontWeight,
     height: 1.22,
+  );
+}
+
+heading4lineThrough(FontWeight fontWeight, Color color, String family) {
+  return TextStyle(
+    fontFamily: family,
+    color: color,
+    fontSize: sp18,
+    fontWeight: fontWeight,
+    height: 1.22,
+    decoration: TextDecoration.lineThrough,
+  );
+}
+
+body3lineThrough(FontWeight fontWeight, Color color, String family) {
+  return TextStyle(
+    fontFamily: family,
+    color: color,
+    fontSize: sp12,
+    fontWeight: fontWeight,
+    height: 1.22,
+    decoration: TextDecoration.lineThrough,
   );
 }
 

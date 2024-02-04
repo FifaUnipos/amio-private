@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as Io;
 import 'dart:io';
+import 'package:amio/pageTablet/home/sidebar/promoGrup/tambahDiskonGrupPage.dart';
+import 'package:amio/pageTablet/home/sidebar/promoGrup/ubahDiskonGrup.dart';
+import 'package:amio/pageTablet/home/sidebar/promoGrup/ubahVoucherGrupPage.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/diskonToko.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/tambahDiskonToko.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/promosiToko/ubahDiskon.dart';
@@ -24,19 +27,24 @@ import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component.dart';
 import '../../../home/sidebar/tokoPage/ubahToko.dart';
+import 'diskonGrup.dart';
 
-class PromosiToko extends StatefulWidget {
-  String token;
-  PromosiToko({
+class PromosiGrup extends StatefulWidget {
+  String token, merchid, name;
+  PageController pageController;
+  PromosiGrup({
     Key? key,
     required this.token,
+    required this.name,
+    required this.merchid,
+    required this.pageController,
   }) : super(key: key);
 
   @override
-  State<PromosiToko> createState() => _PromosiTokoState();
+  State<PromosiGrup> createState() => _PromosiGrupState();
 }
 
-class _PromosiTokoState extends State<PromosiToko>
+class _PromosiGrupState extends State<PromosiGrup>
     with TickerProviderStateMixin {
   List<ModelDataPromosi>? datasProduk;
 
@@ -115,7 +123,7 @@ class _PromosiTokoState extends State<PromosiToko>
       context,
       widget.token,
       textvalueOrderBy,
-      '',
+      widget.merchid,
     );
   }
 
@@ -180,35 +188,34 @@ class _PromosiTokoState extends State<PromosiToko>
     bool light = true;
 
     return StatefulBuilder(
-      builder: (context, setState) => SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          padding: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              pageProdukToko(isFalseAvailable),
-              tambahProdukToko(setState, context),
-              UbahPromosiPage(
-                token: widget.token,
-                pageController: _pageController,
-                productid: singleProductId ?? '',
-              ),
-              TambahDiskonPage(
-                token: widget.token,
-                pageController: _pageController,
-              ),
-              UbahDiskonPage(
-                token: widget.token,
-                pageController: _pageController,
-              )
-            ],
-          ),
+      builder: (context, setState) => Container(
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.circular(size16),
+        ),
+        child: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          children: [
+            pageProdukToko(isFalseAvailable),
+            tambahProdukToko(setState, context),
+            UbahPromosiGrupPage(
+              token: widget.token,
+              pageController: _pageController,
+              productid: singleProductId ?? '',
+              merchid: widget.merchid,
+            ),
+            TambahDiskonGrupPage(
+              token: widget.token,
+              merchid: widget.merchid,
+              pageController: _pageController,
+            ),
+            UbahDiskonGrupPage(
+              token: widget.token,
+              pageController: _pageController,
+              merchid: widget.merchid,
+            )
+          ],
         ),
       ),
     );
@@ -347,7 +354,7 @@ class _PromosiTokoState extends State<PromosiToko>
                       onswitchtampikan.toString(),
                       conHarga.text,
                       conPoint.text,
-                      [''],
+                      widget.merchid,
                       _pageController,
                     );
                     refreshDataProduk();
@@ -368,7 +375,7 @@ class _PromosiTokoState extends State<PromosiToko>
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    List<String> value = [""];
+                    List<String> value = [widget.merchid];
                     createVoucher(
                       context,
                       widget.token,
@@ -376,7 +383,7 @@ class _PromosiTokoState extends State<PromosiToko>
                       onswitchtampikan.toString(),
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       conPoint.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                      value,
+                      widget.merchid,
                       _pageController,
                     ).then((value) {
                       if (value == '00') {
@@ -384,7 +391,7 @@ class _PromosiTokoState extends State<PromosiToko>
                         _pageController.jumpToPage(0);
                       }
                     });
-                    initState();
+                    //initState();
                     setState(() {});
                   },
                   child: buttonXL(
@@ -515,8 +522,9 @@ class _PromosiTokoState extends State<PromosiToko>
                           ],
                         ),
                       ),
-                      DiskonToko(
+                      DiskonGrup(
                         token: widget.token,
+                        merchid: widget.merchid,
                         pageController: _pageController,
                       ),
                     ],
@@ -664,7 +672,7 @@ class _PromosiTokoState extends State<PromosiToko>
                                             context,
                                             widget.token,
                                             listProduct,
-                                            "",
+                                            widget.merchid,
                                           );
                                           refreshDataProduk();
 
@@ -736,7 +744,7 @@ class _PromosiTokoState extends State<PromosiToko>
                             widget.token,
                             'true',
                             listProduct,
-                            "",
+                            widget.merchid,
                           );
                           refreshDataProduk();
                           setState(() {});
@@ -883,7 +891,7 @@ class _PromosiTokoState extends State<PromosiToko>
                                         widget.token,
                                         value.toString(),
                                         listProduct,
-                                        "",
+                                        widget.merchid,
                                       );
                                       setState(() {});
                                       initState();
@@ -953,7 +961,7 @@ class _PromosiTokoState extends State<PromosiToko>
                                                   getSinglePromosi(
                                                           context,
                                                           widget.token,
-                                                          "",
+                                                          widget.merchid,
                                                           singleProductId,
                                                           setState)
                                                       .then((value) {
@@ -1021,7 +1029,8 @@ class _PromosiTokoState extends State<PromosiToko>
                                                                     widget
                                                                         .token,
                                                                     listProduct,
-                                                                    "",
+                                                                    widget
+                                                                        .merchid,
                                                                   );
                                                                   refreshDataProduk();
 

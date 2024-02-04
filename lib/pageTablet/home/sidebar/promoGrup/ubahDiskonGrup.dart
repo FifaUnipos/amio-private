@@ -11,22 +11,24 @@ import '../../../../main.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../utils/component.dart';
 
-class TambahDiskonPage extends StatefulWidget {
-  String token;
+class UbahDiskonGrupPage extends StatefulWidget {
+  String token, merchid;
   PageController pageController;
-  TambahDiskonPage({
+  UbahDiskonGrupPage({
     Key? key,
     required this.token,
+    required this.merchid,
     required this.pageController,
   }) : super(key: key);
 
   @override
-  State<TambahDiskonPage> createState() => _TambahDiskonPageState();
+  State<UbahDiskonGrupPage> createState() => _UbahDiskonGrupPageState();
 }
 
-class _TambahDiskonPageState extends State<TambahDiskonPage> {
-  List<String> productidDiskon = List.empty(growable: true);
+class _UbahDiskonGrupPageState extends State<UbahDiskonGrupPage> {
+  List<dynamic> productidDiskon = List.empty(growable: true);
   bool onswitchtampikan = true;
+
   int tipeUmumAktif = 0, tipeProdukAktif = 0;
   int hargaRupiahAktif = 0, hargaPersenAktif = 0;
   int masaSelamanya = 0, masaKustom = 0;
@@ -34,14 +36,17 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
   String kasirAktif = "Aktif";
   String? idProduct;
 
-  String tanggalAwal = '', tanggalAkhir = '';
+  String tanggalAwal = '';
+  String tanggalAkhir = '';
 
   bool isKeyboardActive = false;
   Map<int, bool> selectedFlag = {};
   bool isSelectionMode = false;
 
-  late TextEditingController conNameDiskon = TextEditingController();
-  late TextEditingController conHarga = TextEditingController();
+  late TextEditingController conNameDiskon =
+      TextEditingController(text: namaDiskonUpdate);
+  late TextEditingController conHarga =
+      TextEditingController(text: hargaDiskonUpdate);
   late TextEditingController conPointEdit = TextEditingController();
 
   TextEditingController searchController = TextEditingController();
@@ -68,9 +73,49 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
     );
   }
 
+  initial() {
+    txtFieldAktif = 1;
+
+    if (tanggalAwalDiskon != '') {
+      tanggalAwal = tanggalAwalDiskon;
+    }
+
+    if (tanggalAkhirDiskon != '') {
+      tanggalAkhir = tanggalAkhirDiskon;
+    }
+
+    if (tipeDiskonUpdate == 'per_produk') {
+      tipeProdukAktif = 1;
+    } else {
+      tipeUmumAktif = 1;
+    }
+
+    if (tipeHargaDiskonUpdate == 'price') {
+      hargaRupiahAktif = 1;
+    } else {
+      hargaPersenAktif = 1;
+    }
+
+    if (aktifDiskonUpdate == 'Selamanya') {
+      masaSelamanya = 1;
+    } else {
+      masaKustom = 1;
+    }
+
+    if (statusDiskonUpdate == 'true') {
+      kasirAktif = 'Aktif';
+      onswitchtampikan = true;
+    } else {
+      kasirAktif = 'Tidak Aktif';
+      onswitchtampikan = false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    productidDiskon.clear();
+    initial();
     _getProductList();
     conHarga.addListener(formatInputRpHargaEdit);
     conPointEdit.addListener(formatInputRpPoinEdit);
@@ -105,7 +150,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tambah Diskon',
+                  'Ubah Diskon',
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 Text(
@@ -216,156 +261,158 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                         ),
                                         context: context,
                                         builder: (context) {
-                                          return StatefulBuilder(
-                                            builder: (BuildContext context,
-                                                    setState) =>
-                                                FractionallySizedBox(
-                                              heightFactor:
-                                                  isKeyboardActive ? 0.9 : 0.80,
-                                              child: GestureDetector(
-                                                onTap: () => textFieldFocusNode
-                                                    .unfocus(),
-                                                child: Container(
-                                                  padding: EdgeInsets.only(
-                                                      bottom:
-                                                          MediaQuery.of(context)
-                                                              .viewInsets
-                                                              .bottom),
-                                                  // height: MediaQuery.of(context).size.height / 1,
-                                                  decoration: BoxDecoration(
-                                                    color: bnw100,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(12),
-                                                      topLeft:
-                                                          Radius.circular(12),
-                                                    ),
+                                          return FractionallySizedBox(
+                                            heightFactor:
+                                                isKeyboardActive ? 0.9 : 0.80,
+                                            child: GestureDetector(
+                                              onTap: () =>
+                                                  textFieldFocusNode.unfocus(),
+                                              child: Container(
+                                                padding: EdgeInsets.only(
+                                                    bottom:
+                                                        MediaQuery.of(context)
+                                                            .viewInsets
+                                                            .bottom),
+                                                // height: MediaQuery.of(context).size.height / 1,
+                                                decoration: BoxDecoration(
+                                                  color: bnw100,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(12),
+                                                    topLeft:
+                                                        Radius.circular(12),
                                                   ),
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            size32,
-                                                            size16,
-                                                            size32,
-                                                            size32),
-                                                    child: Column(
-                                                      children: [
-                                                        dividerShowdialog(),
-                                                        SizedBox(
-                                                            height: size16),
-                                                        Align(
-                                                          alignment: Alignment
-                                                              .centerLeft,
-                                                          child: Text(
-                                                            'Pilih Produk',
-                                                            style: heading1(
-                                                                FontWeight.w700,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
+                                                ),
+                                                child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      size32,
+                                                      size16,
+                                                      size32,
+                                                      size32),
+                                                  child: Column(
+                                                    children: [
+                                                      dividerShowdialog(),
+                                                      SizedBox(height: size16),
+                                                      Align(
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        child: Text(
+                                                          'Pilih Produk',
+                                                          style: heading1(
+                                                              FontWeight.w700,
+                                                              bnw900,
+                                                              'Outfit'),
                                                         ),
-                                                        SizedBox(
-                                                            height: size16),
-                                                        FocusScope(
-                                                          child: Focus(
-                                                            onFocusChange:
-                                                                (value) {
-                                                              isKeyboardActive =
-                                                                  value;
+                                                      ),
+                                                      SizedBox(height: size16),
+                                                      FocusScope(
+                                                        child: Focus(
+                                                          onFocusChange:
+                                                              (value) {
+                                                            isKeyboardActive =
+                                                                value;
+                                                            setState(() {});
+                                                          },
+                                                          child: TextField(
+                                                            cursorColor:
+                                                                primary500,
+                                                            controller:
+                                                                searchController,
+                                                            focusNode:
+                                                                textFieldFocusNode,
+                                                            onChanged: (value) {
+                                                              //   isKeyboardActive = value.isNotEmpty;
+                                                              _runSearchProduct(
+                                                                  value);
                                                               setState(() {});
                                                             },
-                                                            child: TextField(
-                                                              cursorColor:
-                                                                  primary500,
-                                                              controller:
-                                                                  searchController,
-                                                              focusNode:
-                                                                  textFieldFocusNode,
-                                                              onChanged:
-                                                                  (value) {
-                                                                //   isKeyboardActive = value.isNotEmpty;
-                                                                _runSearchProduct(
-                                                                    value);
-                                                                setState(() {});
-                                                              },
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                      contentPadding: EdgeInsets.symmetric(
-                                                                          vertical:
-                                                                              size12),
-                                                                      isDense:
-                                                                          true,
-                                                                      filled:
-                                                                          true,
-                                                                      fillColor:
-                                                                          bnw200,
-                                                                      border:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              bnw300,
-                                                                        ),
-                                                                      ),
-                                                                      focusedBorder:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          width:
-                                                                              2,
-                                                                          color:
-                                                                              primary500,
-                                                                        ),
-                                                                      ),
-                                                                      enabledBorder:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              bnw300,
-                                                                        ),
-                                                                      ),
-                                                                      suffixIcon: searchController
-                                                                              .text
-                                                                              .isNotEmpty
-                                                                          ? GestureDetector(
-                                                                              onTap: () {
-                                                                                searchController.text = '';
-                                                                                _runSearchProduct('');
-                                                                                setState(() {});
-                                                                              },
-                                                                              child: Icon(
-                                                                                PhosphorIcons.x_fill,
-                                                                                size: 20,
-                                                                                color: bnw900,
-                                                                              ),
-                                                                            )
-                                                                          : null,
-                                                                      prefixIcon:
-                                                                          Icon(
-                                                                        PhosphorIcons
-                                                                            .magnifying_glass,
+                                                            decoration:
+                                                                InputDecoration(
+                                                                    contentPadding:
+                                                                        EdgeInsets.symmetric(
+                                                                            vertical:
+                                                                                size12),
+                                                                    isDense:
+                                                                        true,
+                                                                    filled:
+                                                                        true,
+                                                                    fillColor:
+                                                                        bnw200,
+                                                                    border:
+                                                                        OutlineInputBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              size8),
+                                                                      borderSide:
+                                                                          BorderSide(
                                                                         color:
-                                                                            bnw500,
+                                                                            bnw300,
                                                                       ),
-                                                                      hintText:
-                                                                          'Cari',
-                                                                      hintStyle: heading3(
-                                                                          FontWeight
-                                                                              .w500,
+                                                                    ),
+                                                                    focusedBorder:
+                                                                        OutlineInputBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              size8),
+                                                                      borderSide:
+                                                                          BorderSide(
+                                                                        width:
+                                                                            2,
+                                                                        color:
+                                                                            primary500,
+                                                                      ),
+                                                                    ),
+                                                                    enabledBorder:
+                                                                        OutlineInputBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              size8),
+                                                                      borderSide:
+                                                                          BorderSide(
+                                                                        color:
+                                                                            bnw300,
+                                                                      ),
+                                                                    ),
+                                                                    suffixIcon: searchController
+                                                                            .text
+                                                                            .isNotEmpty
+                                                                        ? GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              searchController.text = '';
+                                                                              _runSearchProduct('');
+                                                                              setState(() {});
+                                                                            },
+                                                                            child:
+                                                                                Icon(
+                                                                              PhosphorIcons.x_fill,
+                                                                              size: 20,
+                                                                              color: bnw900,
+                                                                            ),
+                                                                          )
+                                                                        : null,
+                                                                    prefixIcon:
+                                                                        Icon(
+                                                                      PhosphorIcons
+                                                                          .magnifying_glass,
+                                                                      color:
                                                                           bnw500,
-                                                                          'Outfit')),
-                                                            ),
+                                                                    ),
+                                                                    hintText:
+                                                                        'Cari',
+                                                                    hintStyle: heading3(
+                                                                        FontWeight
+                                                                            .w500,
+                                                                        bnw500,
+                                                                        'Outfit')),
                                                           ),
                                                         ),
-                                                        Expanded(
+                                                      ),
+                                                      StatefulBuilder(
+                                                        builder: (context,
+                                                                setState) =>
+                                                            Expanded(
                                                           child:
                                                               RefreshIndicator(
                                                             onRefresh:
@@ -424,64 +471,39 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                                             final bool
                                                                                 isSelected =
                                                                                 productidDiskon.contains(product['productid']); // Periksa apakah produk dipilih
-                                                                            return GestureDetector(
-                                                                              onTap: () {
-                                                                                print('Selected product: ${product['name']}');
-                                                                                textFieldFocusNode.unfocus();
+                                                                            return Container(
+                                                                              margin: EdgeInsets.only(bottom: size16),
+                                                                              decoration: BoxDecoration(
+                                                                                color: isSelected ? primary100 : bnw100,
+                                                                                border: Border.all(color: isSelected ? primary500 : bnw300),
+                                                                                borderRadius: BorderRadius.circular(size16),
+                                                                              ),
+                                                                              child: ListTile(
+                                                                                title: Text(
+                                                                                  product['name'] != null ? capitalizeEachWord(product['name'].toString()) : '',
+                                                                                ),
+                                                                                trailing: Icon(
+                                                                                  isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square, // Menggunakan status isSelected untuk menentukan ikon
+                                                                                  color: isSelected ? primary500 : bnw900,
+                                                                                ),
+                                                                                onTap: () {
+                                                                                  print('Selected product: ${product['name']}');
+                                                                                  textFieldFocusNode.unfocus();
 
-                                                                                // Ubah status produk (tambah atau hapus dari list tergantung kondisi)
-                                                                                setState(() {
-                                                                                  if (isSelected) {
-                                                                                    productidDiskon.remove(product['productid']);
-                                                                                  } else {
-                                                                                    productidDiskon.add(product['productid']);
-                                                                                  }
-                                                                                });
-                                                                                print(productidDiskon);
-                                                                                // Panggil fungsi _selectProduct dengan produk yang dipilih
-                                                                                idProduct = product['productid'];
-                                                                                _selectProduct(product);
-                                                                              },
-                                                                              child: Container(
-                                                                                  padding: EdgeInsets.all(size8),
-                                                                                  margin: EdgeInsets.only(bottom: size16),
-                                                                                  decoration: BoxDecoration(
-                                                                                    color: isSelected ? primary100 : bnw100,
-                                                                                    border: Border.all(color: isSelected ? primary500 : bnw300),
-                                                                                    borderRadius: BorderRadius.circular(size16),
-                                                                                  ),
-                                                                                  child: Row(
-                                                                                    children: [
-                                                                                      ClipRRect(
-                                                                                        borderRadius: BorderRadius.circular(size8),
-                                                                                        child: Image.network(
-                                                                                          product['product_image'],
-                                                                                          fit: BoxFit.cover,
-                                                                                          width: size48,
-                                                                                          height: size48,
-                                                                                        ),
-                                                                                      ),
-                                                                                      SizedBox(width: size16),
-                                                                                      Column(
-                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                        children: [
-                                                                                          Text(
-                                                                                            product['name'],
-                                                                                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                          ),
-                                                                                          Text(
-                                                                                            FormatCurrency.convertToIdr(product['price']),
-                                                                                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                                                                          ),
-                                                                                        ],
-                                                                                      ),
-                                                                                      Spacer(),
-                                                                                      Icon(
-                                                                                        isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
-                                                                                        color: isSelected ? primary500 : bnw900,
-                                                                                      ),
-                                                                                    ],
-                                                                                  )),
+                                                                                  // Ubah status produk (tambah atau hapus dari list tergantung kondisi)
+                                                                                  setState(() {
+                                                                                    if (isSelected) {
+                                                                                      productidDiskon.remove(product['productid']);
+                                                                                    } else {
+                                                                                      productidDiskon.add(product['productid']);
+                                                                                    }
+                                                                                  });
+                                                                                  print(productidDiskon);
+                                                                                  // Panggil fungsi _selectProduct dengan produk yang dipilih
+                                                                                  idProduct = product['productid'];
+                                                                                  _selectProduct(product);
+                                                                                },
+                                                                              ),
                                                                             );
                                                                           })),
                                                                         ),
@@ -496,28 +518,33 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                             ),
                                                           ),
                                                         ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                          },
-                                                          child: buttonXXL(
-                                                            Center(
-                                                              child: Text(
-                                                                'Selesai',
-                                                                style: heading2(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw100,
-                                                                    'Outfit'),
-                                                              ),
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                          totalProdukDiskon =
+                                                              productidDiskon
+                                                                  .length
+                                                                  .toString();
+                                                          setState(() {});
+                                                        },
+                                                        child: buttonXXL(
+                                                          Center(
+                                                            child: Text(
+                                                              'Selesai',
+                                                              style: heading2(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw100,
+                                                                  'Outfit'),
                                                             ),
-                                                            double.infinity,
                                                           ),
+                                                          double.infinity,
                                                         ),
-                                                        SizedBox(height: size8)
-                                                      ],
-                                                    ),
+                                                      ),
+                                                      SizedBox(height: size8)
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -534,13 +561,17 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            productidDiskon.isEmpty
-                                                ? 'Pilih Produk'
-                                                : '${productidDiskon.length} Produk Terpilih',
+                                            totalProdukDiskon == '0'
+                                                ? productidDiskon.isEmpty
+                                                    ? 'Pilih Produk'
+                                                    : '${productidDiskon.length} Produk Terpilih'
+                                                : '${totalProdukDiskon} Produk Terpilih',
                                             style: heading2(
                                                 FontWeight.w600,
-                                                productidDiskon.isEmpty
-                                                    ? bnw500
+                                                totalProdukDiskon == '0'
+                                                    ? productidDiskon.isEmpty
+                                                        ? bnw500
+                                                        : bnw900
                                                     : bnw900,
                                                 'Outfit'),
                                           ),
@@ -680,8 +711,6 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                             onTap: () {
                               masaKustom = 0;
                               masaSelamanya = 1;
-                              tanggalAwal = 'null';
-                              tanggalAkhir = 'null';
                               setState(() {});
                             },
                             child: buttonActive(
@@ -750,7 +779,12 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.now(),
+                                              initialDate: DateTime.parse(
+                                                  tanggalAwalDiskon == ''
+                                                      ? DateTime.now()
+                                                          .toString()
+                                                          .substring(0, 10)
+                                                      : tanggalAwalDiskon),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -836,7 +870,12 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.now(),
+                                              initialDate: DateTime.parse(
+                                                  tanggalAkhirDiskon == ''
+                                                      ? DateTime.now()
+                                                          .toString()
+                                                          .substring(0, 10)
+                                                      : tanggalAkhirDiskon),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -955,14 +994,16 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<String> merchid = [widget.merchid];
                   bool statusDiskon = true;
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;
-                  tambahDiskon(
+                  ubahDiskon(
                     context,
                     widget.token,
-                    '',
+                    idDiskonUpdate,
+                    merchid,
                     productidDiskon,
                     conNameDiskon.text,
                     conHarga.text,
@@ -990,14 +1031,16 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<String> merchid = [widget.merchid];
                   bool statusDiskon = true;
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;
-                  tambahDiskon(
+                  ubahDiskon(
                     context,
                     widget.token,
-                    '',
+                    idDiskonUpdate,
+                    merchid,
                     productidDiskon,
                     conNameDiskon.text,
                     conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -1118,17 +1161,23 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
   bool isItemSelected = false;
 
   Future _getProductList() async {
+    List<String> merchid = [widget.merchid];
+    String merchidJson = json.encode(merchid);
     await http.post(Uri.parse(getProdukDiskonLink), body: {
       "deviceid": identifier,
+      "merchantid": merchidJson,
     }, headers: {
       "token": widget.token,
     }).then((response) {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
         if (data != null && data['data'] != null) {
           setState(() {
             typeproductList = List<dynamic>.from(data['data']);
             searchResultListProduct = typeproductList;
+            productidDiskon.addAll(productIdDiskon);
+            print(productidDiskon);
           });
         }
       }

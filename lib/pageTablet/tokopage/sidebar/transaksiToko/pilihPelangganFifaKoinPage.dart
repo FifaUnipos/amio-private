@@ -301,6 +301,7 @@ class _PilihPelangganTokoFifaKoinState
                     Expanded(
                       child: SizedBox(
                         child: TextField(
+                          cursorColor: primary500,
                           controller: searchController,
                           onChanged: (value) async {
                             // datasTransaksi = await getProductTransaksi(

@@ -3,8 +3,8 @@ class CartTransaksi {
   String? productid;
   String? image;
   String? desc;
-  int? price;
-  int quantity = 1;
+  num? price;
+  num quantity = 1;
   CartTransaksi({
     required this.name,
     required this.productid,

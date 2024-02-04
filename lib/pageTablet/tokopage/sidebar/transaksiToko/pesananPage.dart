@@ -1131,13 +1131,14 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     isTagihan = true;
 
                                                     await calculateTransaction(
-                                                      context,
-                                                      widget.token,
-                                                      cartMap,
-                                                      setState,
-                                                      pelangganId,
-                                                      ""
-                                                    ).then((value) {
+                                                            context,
+                                                            widget.token,
+                                                            cartMap,
+                                                            setState,
+                                                            pelangganId,
+                                                            "",
+                                                            "")
+                                                        .then((value) {
                                                       if (value == '00') {
                                                         width = null;
                                                         widtValue = 120;
@@ -1630,14 +1631,14 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                             // print(snapshot
                                             //     .data['transaksiid_reference']);
-                                            cartProductIds.clear();
+                                            //cartProductIds.clear();
                                             width = null;
                                             widtValue = 120;
                                             heightInformation = 0;
                                             widthInformation = 0;
 
-                                            cart.clear();
-                                            cartMap.clear();
+                                            //cart.clear();
+                                            //cartMap.clear();
 
                                             deleteReference(
                                                     context,
@@ -1650,17 +1651,12 @@ class _SimpanPageState extends State<SimpanPage> {
                                                 .then((value) {
                                               if (value != '00') {
                                                 setState(() {
-                                                  errorText = value;
                                                   WidgetsBinding.instance
                                                       .addPostFrameCallback(
                                                           (_) {
                                                     scrollToTextField();
                                                   });
                                                 });
-                                              } else {
-                                                Navigator.of(context,
-                                                        rootNavigator: true)
-                                                    .pop();
                                               }
                                             });
                                             setState(() {});

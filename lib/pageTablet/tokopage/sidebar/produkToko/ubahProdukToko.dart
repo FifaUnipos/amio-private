@@ -233,8 +233,15 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                   onTap: () => tambahGambar(context),
                   child: IntrinsicHeight(
                     child: TextFormField(
+                      cursorColor: primary500,
                       style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       decoration: InputDecoration(
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 2,
+                            color: primary500,
+                          ),
+                        ),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
                             width: 1.5,
@@ -267,8 +274,8 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                   TextInputType.number,
                 ),
                 SizedBox(height: size16),
-                fieldEditProduk(
-                  'Harga Online Gojek/Grab',
+                fieldEditProdukTanpaBintang(
+                  'Harga Online',
                   conHargaOnlineEdit,
                   TextInputType.number,
                 ),
@@ -456,6 +463,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               keyboardType: numberNo,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
@@ -464,6 +472,59 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                 setState(() {});
               },
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
+                isDense: true,
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: bnw500,
+                  ),
+                ),
+                hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  fieldEditProdukTanpaBintang(title, mycontroller, TextInputType numberNo) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: TextFormField(
+              cursorColor: primary500,
+              keyboardType: numberNo,
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              controller: mycontroller,
+              onSaved: (value) {
+                mycontroller.text = value;
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -489,230 +550,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
         setState(
           () {
             // log(jenisProduct.toString());
-            showModalBottomSheet(
-              isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) =>
-                      FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
-                    child: GestureDetector(
-                      onTap: () => textFieldFocusNode.unfocus(),
-                      child: Container(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        // height: MediaQuery.of(context).size.height / 1,
-                        decoration: BoxDecoration(
-                          color: bnw100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            topLeft: Radius.circular(12),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size32, size16, size32, size32),
-                          child: Column(
-                            children: [
-                              dividerShowdialog(),
-                              SizedBox(height: size16),
-                              FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
-                                    setState(() {});
-                                  },
-                                  child: TextField(
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: (value) {
-                                      //   isKeyboardActive = value.isNotEmpty;
-                                      _runSearchProduct(value);
-                                      setState(() {});
-                                    },
-                                    decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(
-                                            vertical: size12),
-                                        isDense: true,
-                                        filled: true,
-                                        fillColor: bnw200,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            width: 2,
-                                            color: primary500,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        suffixIcon: searchController
-                                                .text.isNotEmpty
-                                            ? GestureDetector(
-                                                onTap: () {
-                                                  searchController.text = '';
-                                                  _runSearchProduct('');
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  PhosphorIcons.x_fill,
-                                                  size: 20,
-                                                  color: bnw900,
-                                                ),
-                                              )
-                                            : null,
-                                        prefixIcon: Icon(
-                                          PhosphorIcons.magnifying_glass,
-                                          color: bnw500,
-                                        ),
-                                        hintText: 'Cari',
-                                        hintStyle: heading3(
-                                            FontWeight.w500, bnw500, 'Outfit')),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: RefreshIndicator(
-                                  onRefresh: () async {
-                                    initState();
-                                  },
-                                  child: ListView(
-                                    padding: EdgeInsets.zero,
-                                    children: [
-                                      SizedBox(height: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          tambahKategori(context,
-                                              isKeyboardActive, setState);
-                                          _getProductList();
-                                        },
-                                        child: buttonXLoutline(
-                                            Center(
-                                                child: Text(
-                                              'Tambah Kategori',
-                                              style: heading2(FontWeight.w600,
-                                                  primary500, 'Outfit'),
-                                            )),
-                                            double.infinity,
-                                            primary500),
-                                      ),
-                                      SizedBox(height: size16),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        padding: EdgeInsets.zero,
-                                        physics: BouncingScrollPhysics(),
-                                        keyboardDismissBehavior:
-                                            ScrollViewKeyboardDismissBehavior
-                                                .onDrag,
-                                        itemCount:
-                                            searchResultListProduct?.length,
-                                        itemBuilder: (context, index) {
-                                          final product =
-                                              searchResultListProduct?[index];
-                                          final isSelected =
-                                              product == selectedProduct;
-
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                title: Text(
-                                                  product['jenisproduct'] !=
-                                                          null
-                                                      ? capitalizeEachWord(
-                                                          product['jenisproduct']
-                                                              .toString())
-                                                      : '',
-                                                ),
-                                                trailing: Icon(
-                                                  isSelected
-                                                      ? PhosphorIcons
-                                                          .radio_button_fill
-                                                      : PhosphorIcons
-                                                          .radio_button,
-                                                  color: isSelected
-                                                      ? primary500
-                                                      : bnw900,
-                                                ),
-                                                onTap: () {
-                                                  setState(() {
-                                                    textFieldFocusNode
-                                                        .unfocus();
-                                                    jenisProductEdit =
-                                                        product['jenisproduct'];
-
-                                                    jenisProduct =
-                                                        product['jenisproduct'];
-
-                                                    idProduct =
-                                                        product['kodeproduct'];
-
-                                                    _selectTypeProduct(product);
-
-                                                    print(product[
-                                                        'jenisproduct']);
-                                                  });
-                                                },
-                                                onLongPress: () {
-                                                  Navigator.pop(context);
-                                                  nameKategoriEdit =
-                                                      product['jenisproduct'];
-                                                  ubahHapusKategori(
-                                                      product, setState);
-                                                },
-                                              ),
-                                              Divider(color: bnw300),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                      SizedBox(height: size16),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  autoReload();
-                                  Navigator.pop(context);
-                                },
-                                child: buttonXXL(
-                                  Center(
-                                    child: Text(
-                                      'Selesai',
-                                      style: heading2(
-                                          FontWeight.w600, bnw100, 'Outfit'),
-                                    ),
-                                  ),
-                                  double.infinity,
-                                ),
-                              ),
-                              SizedBox(height: size8)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
+            kategoriListForm(context, isKeyboardActive);
           },
         );
       },
@@ -767,6 +605,218 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> kategoriListForm(
+      BuildContext context, bool isKeyboardActive) {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) => FractionallySizedBox(
+            heightFactor: isKeyboardActive ? 0.9 : 0.80,
+            child: GestureDetector(
+              onTap: () => textFieldFocusNode.unfocus(),
+              child: Container(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                // height: MediaQuery.of(context).size.height / 1,
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(12),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                  child: Column(
+                    children: [
+                      dividerShowdialog(),
+                      SizedBox(height: size16),
+                      FocusScope(
+                        child: Focus(
+                          onFocusChange: (value) {
+                            isKeyboardActive = value;
+                            setState(() {});
+                          },
+                          child: TextField(
+                            cursorColor: primary500,
+                            controller: searchController,
+                            focusNode: textFieldFocusNode,
+                            onChanged: (value) {
+                              //   isKeyboardActive = value.isNotEmpty;
+                              _runSearchProduct(value);
+                              setState(() {});
+                            },
+                            decoration: InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: size12),
+                                isDense: true,
+                                filled: true,
+                                fillColor: bnw200,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    color: bnw300,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    width: 2,
+                                    color: primary500,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    color: bnw300,
+                                  ),
+                                ),
+                                suffixIcon: searchController.text.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: () {
+                                          searchController.text = '';
+                                          _runSearchProduct('');
+                                          setState(() {});
+                                        },
+                                        child: Icon(
+                                          PhosphorIcons.x_fill,
+                                          size: 20,
+                                          color: bnw900,
+                                        ),
+                                      )
+                                    : null,
+                                prefixIcon: Icon(
+                                  PhosphorIcons.magnifying_glass,
+                                  color: bnw500,
+                                ),
+                                hintText: 'Cari',
+                                hintStyle: heading3(
+                                    FontWeight.w500, bnw500, 'Outfit')),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            initState();
+                          },
+                          child: ListView(
+                            padding: EdgeInsets.zero,
+                            children: [
+                              SizedBox(height: size16),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  tambahKategori(
+                                      context, isKeyboardActive, setState);
+                                  _getProductList();
+                                },
+                                child: buttonXLoutline(
+                                    Center(
+                                        child: Text(
+                                      'Tambah Kategori',
+                                      style: heading2(FontWeight.w600,
+                                          primary500, 'Outfit'),
+                                    )),
+                                    double.infinity,
+                                    primary500),
+                              ),
+                              SizedBox(height: size16),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: BouncingScrollPhysics(),
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                itemCount: searchResultListProduct?.length,
+                                itemBuilder: (context, index) {
+                                  final product =
+                                      searchResultListProduct?[index];
+                                  final isSelected = product == selectedProduct;
+
+                                  return Column(
+                                    children: [
+                                      ListTile(
+                                        title: Text(
+                                          product['jenisproduct'] != null
+                                              ? capitalizeEachWord(
+                                                  product['jenisproduct']
+                                                      .toString())
+                                              : '',
+                                        ),
+                                        trailing: Icon(
+                                          isSelected
+                                              ? PhosphorIcons.radio_button_fill
+                                              : PhosphorIcons.radio_button,
+                                          color:
+                                              isSelected ? primary500 : bnw900,
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            textFieldFocusNode.unfocus();
+                                            jenisProductEdit =
+                                                product['jenisproduct'];
+
+                                            jenisProduct =
+                                                product['jenisproduct'];
+
+                                            idProduct = product['kodeproduct'];
+
+                                            _selectTypeProduct(product);
+
+                                            print(product['jenisproduct']);
+                                          });
+                                        },
+                                        onLongPress: () {
+                                          Navigator.pop(context);
+                                          nameKategoriEdit =
+                                              product['jenisproduct'];
+                                          ubahHapusKategori(product, setState);
+                                        },
+                                      ),
+                                      Divider(color: bnw300),
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(height: size16),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          autoReload();
+                          Navigator.pop(context);
+                        },
+                        child: buttonXXL(
+                          Center(
+                            child: Text(
+                              'Selesai',
+                              style:
+                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                          ),
+                          double.infinity,
+                        ),
+                      ),
+                      SizedBox(height: size8)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -857,6 +907,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                                   ),
                                   FocusScope(
                                     child: TextFormField(
+                                      cursorColor: primary500,
                                       style: heading2(
                                         FontWeight.w600,
                                         bnw900,
@@ -864,6 +915,12 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                                       ),
                                       controller: controllerName,
                                       decoration: InputDecoration(
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              width: 2,
+                                              color: primary500,
+                                            ),
+                                          ),
                                           focusColor: primary500,
                                           hintText: 'Cth : Rental Mobil',
                                           hintStyle: heading2(
@@ -884,6 +941,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                                     child: GestureDetector(
                                       onTap: () {
                                         Navigator.pop(context);
+                                        kategoriListForm(context, false);
                                       },
                                       child: buttonXLoutline(
                                         Center(
@@ -910,6 +968,10 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                                           controllerName.text,
                                         ).then((value) {
                                           if (value == '00') {
+                                            Navigator.pop(context);
+                                            kategoriListForm(context, false);
+                                            showSnackBarComponent(context,
+                                                'Berhasil ubah kategori', '00');
                                             errorText = '';
                                             controllerName.text = '';
                                           }
@@ -976,7 +1038,16 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                               child: GestureDetector(
                                 onTap: () {
                                   hapusKategoriForm(context, widget.token,
-                                      product['kodeproduct']);
+                                          product['kodeproduct'])
+                                      .then((value) {
+                                    if (value == '00') {
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      kategoriListForm(context, false);
+                                      showSnackBarComponent(context,
+                                          'Berhasil hapus kategori', '00');
+                                    }
+                                  });
 
                                   initState();
                                   setState(() {});
@@ -999,6 +1070,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.pop(context);
+                                  kategoriListForm(context, false);
                                 },
                                 child: buttonXL(
                                   Center(
@@ -1083,6 +1155,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                           setState(() {});
                         },
                         child: TextFormField(
+                          cursorColor: primary500,
                           style: heading2(
                             FontWeight.w600,
                             bnw900,
@@ -1090,6 +1163,12 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                           ),
                           controller: controllerName,
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               hintText: 'Cth : Rental Mobil',
                               hintStyle: heading2(
@@ -1110,6 +1189,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                       child: GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
+                          kategoriListForm(context, isKeyboardActive);
                         },
                         child: buttonXLoutline(
                           Center(
@@ -1134,7 +1214,9 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                               .then((value) {
                             if (value == '00') {
                               Navigator.pop(context);
-
+                              kategoriListForm(context, isKeyboardActive);
+                              showSnackBarComponent(
+                                  context, 'Berhasil tambah kategori', '00');
                               errorText = '';
                               controllerName.text = '';
                             }
@@ -1242,9 +1324,16 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -1267,10 +1356,17 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,
