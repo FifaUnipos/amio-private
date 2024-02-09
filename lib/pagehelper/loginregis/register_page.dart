@@ -223,6 +223,7 @@ class _RegisterPageState extends State<RegisterPage> {
         },
         controller: mycontroller,
         decoration: InputDecoration(
+          focusColor: primary500,
           contentPadding: EdgeInsets.symmetric(vertical: size12),
           hintText: text,
           hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
@@ -254,6 +255,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return SizedBox(
       width: double.infinity,
       child: TextFormField(
+        cursorColor: primary500,
         style: heading2(FontWeight.w600, bnw900, 'Outfit'),
         keyboardType: TextInputType.number,
         onChanged: (value) {

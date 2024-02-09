@@ -402,6 +402,14 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
               onTap: () {
                 // print(idProduct);
                 // print(singleProductId);
+                if (img64 == 'hapus') {
+                  img64 = null;
+                } else if (imageEdit.isNotEmpty) {
+                  img64 = '';
+                } else {
+                  img64 = img64;
+                }
+
                 List<String> value = [""];
                 updateProduk(
                   context,

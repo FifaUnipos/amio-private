@@ -5,6 +5,7 @@ import 'package:amio/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:amio/pagehelper/loginregis/daftar_akun_toko.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import '../../../../main.dart';
@@ -33,6 +34,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
   int txtFieldAktif = 0;
   String kasirAktif = "Aktif";
   String? idProduct;
+
+  DateTime? _selectedDate, _selectedDate2;
 
   String tanggalAwal = '', tanggalAkhir = '';
 
@@ -429,57 +432,114 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                                                 print('Selected product: ${product['name']}');
                                                                                 textFieldFocusNode.unfocus();
 
-                                                                                // Ubah status produk (tambah atau hapus dari list tergantung kondisi)
-                                                                                setState(() {
+                                                                                if (product['discount_status'] == '') {
                                                                                   if (isSelected) {
                                                                                     productidDiskon.remove(product['productid']);
                                                                                   } else {
                                                                                     productidDiskon.add(product['productid']);
                                                                                   }
-                                                                                });
+                                                                                }
                                                                                 print(productidDiskon);
                                                                                 // Panggil fungsi _selectProduct dengan produk yang dipilih
                                                                                 idProduct = product['productid'];
                                                                                 _selectProduct(product);
+                                                                                setState(() {});
                                                                               },
                                                                               child: Container(
                                                                                   padding: EdgeInsets.all(size8),
                                                                                   margin: EdgeInsets.only(bottom: size16),
                                                                                   decoration: BoxDecoration(
-                                                                                    color: isSelected ? primary100 : bnw100,
-                                                                                    border: Border.all(color: isSelected ? primary500 : bnw300),
+                                                                                    color: product['discount_status'] == ''
+                                                                                        ? isSelected
+                                                                                            ? primary100
+                                                                                            : bnw100
+                                                                                        : bnw200,
+                                                                                    border: Border.all(
+                                                                                      color: product['discount_status'] == ''
+                                                                                          ? isSelected
+                                                                                              ? primary500
+                                                                                              : bnw300
+                                                                                          : bnw200,
+                                                                                    ),
                                                                                     borderRadius: BorderRadius.circular(size16),
                                                                                   ),
-                                                                                  child: Row(
+                                                                                  child: Column(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
                                                                                     children: [
-                                                                                      ClipRRect(
-                                                                                        borderRadius: BorderRadius.circular(size8),
-                                                                                        child: Image.network(
-                                                                                          product['product_image'],
-                                                                                          fit: BoxFit.cover,
-                                                                                          width: size48,
-                                                                                          height: size48,
-                                                                                        ),
-                                                                                      ),
-                                                                                      SizedBox(width: size16),
-                                                                                      Column(
-                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                      Row(
                                                                                         children: [
-                                                                                          Text(
-                                                                                            product['name'],
-                                                                                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                          ClipRRect(
+                                                                                            borderRadius: BorderRadius.circular(size8),
+                                                                                            child: Image.network(
+                                                                                              product['product_image'],
+                                                                                              fit: BoxFit.cover,
+                                                                                              width: size48,
+                                                                                              height: size48,
+                                                                                              loadingBuilder: (context, child, loadingProgress) {
+                                                                                                if (loadingProgress == null) {
+                                                                                                  return child;
+                                                                                                }
+
+                                                                                                return Center(child: loading());
+                                                                                              },
+                                                                                              errorBuilder: (context, error, stackTrace) => SizedBox(
+                                                                                                // height: 227,
+                                                                                                // width: 227,
+                                                                                                child: SvgPicture.asset('assets/logoProduct.svg'),
+                                                                                              ),
+                                                                                            ),
                                                                                           ),
-                                                                                          Text(
-                                                                                            FormatCurrency.convertToIdr(product['price']),
-                                                                                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                          SizedBox(width: size16),
+                                                                                          Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                product['name'],
+                                                                                                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                              ),
+                                                                                              Text(
+                                                                                                FormatCurrency.convertToIdr(product['price']),
+                                                                                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                          Spacer(),
+                                                                                          Icon(
+                                                                                            product['discount_status'] == ''
+                                                                                                ? isSelected
+                                                                                                    ? PhosphorIcons.check_square_fill
+                                                                                                    : PhosphorIcons.square
+                                                                                                : PhosphorIcons.square,
+                                                                                            color: product['discount_status'] == ''
+                                                                                                ? isSelected
+                                                                                                    ? primary500
+                                                                                                    : bnw900
+                                                                                                : bnw400,
                                                                                           ),
                                                                                         ],
                                                                                       ),
-                                                                                      Spacer(),
-                                                                                      Icon(
-                                                                                        isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
-                                                                                        color: isSelected ? primary500 : bnw900,
-                                                                                      ),
+                                                                                      SizedBox(height: size8),
+                                                                                      product['discount_status'] != ''
+                                                                                          ? Container(
+                                                                                              padding: EdgeInsets.symmetric(vertical: size8, horizontal: size16),
+                                                                                              height: size32,
+                                                                                              decoration: BoxDecoration(
+                                                                                                color: danger100,
+                                                                                                borderRadius: BorderRadius.circular(size8),
+                                                                                              ),
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    product['discount_status'],
+                                                                                                    style: body3(FontWeight.w400, danger500, 'Outfit'),
+                                                                                                  ),
+                                                                                                  Spacer(),
+                                                                                                  Icon(PhosphorIcons.clock, color: danger500, size: size16),
+                                                                                                ],
+                                                                                              ),
+                                                                                            )
+                                                                                          : SizedBox(),
                                                                                     ],
                                                                                   )),
                                                                             );
@@ -750,7 +810,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.now(),
+                                              initialDate: _selectedDate ??
+                                                  DateTime.now(),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -760,6 +821,11 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
+
+                                              _selectedDate = DateTime(
+                                                  selectedDate.year,
+                                                  selectedDate.month,
+                                                  selectedDate.day);
 
                                               tanggalAwal =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
@@ -836,7 +902,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.now(),
+                                              initialDate: _selectedDate2 ??
+                                                  DateTime.now(),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -846,6 +913,10 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
+                                              _selectedDate2 = DateTime(
+                                                  selectedDate.year,
+                                                  selectedDate.month,
+                                                  selectedDate.day);
 
                                               tanggalAkhir =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
@@ -970,6 +1041,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
+                    masaSelamanya == 1 ? 'forever' : 'custom',
                   );
 
                   setState(() {});
@@ -991,6 +1063,18 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
               child: GestureDetector(
                 onTap: () {
                   bool statusDiskon = true;
+                  String tipeUmumAktifError = "";
+
+                  if (tipeUmumAktif == 0) {
+                    tipeUmumAktifError = "";
+                  } else if (tipeUmumAktif == 1) {
+                    tipeUmumAktifError = "terisi";
+                    productidDiskon = [''];
+                  } else {
+                    tipeUmumAktifError = "terisi";
+                    productidDiskon = productidDiskon;
+                  }
+
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;
@@ -998,13 +1082,14 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                     context,
                     widget.token,
                     '',
-                    productidDiskon,
+                    tipeUmumAktifError == "" ? '' : productidDiskon,
                     conNameDiskon.text,
                     conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                     hargaRupiahAktif == 1 ? 'price' : 'percentage',
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
+                    masaSelamanya == 1 ? 'forever' : 'range',
                   ).then((value) {
                     if (value == '00') {
                       widget.pageController.jumpToPage(0);

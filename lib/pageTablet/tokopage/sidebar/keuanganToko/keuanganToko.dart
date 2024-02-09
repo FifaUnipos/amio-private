@@ -82,293 +82,301 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
   String? ppmId;
   int selectedIndex = 0;
 
+  int _expandedIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     // double width = MediaQuery.of(context).size.width;
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
-    return datasPendapatan == null
-        ? SafeArea(
-            child: Container(
-              padding: EdgeInsets.all(size16),
-              margin: EdgeInsets.all(size16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.circular(size16),
-              ),
-              child: Scaffold(
-                backgroundColor: bnw100,
-                body: Center(child: loading()),
-              ),
-            ),
-          )
-        : SafeArea(
-            child: Container(
-              padding: EdgeInsets.all(size16),
-              margin: EdgeInsets.all(size16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.circular(size16),
-              ),
-              child: PageView(
-                controller: pageController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  mainPageKeuangan(context, isFalseAvailable),
-                  tambahPendapatan(setState, context),
-                  tambahPengeluaran(setState, context),
-                  ubahPendapatanPage(setState, context),
-                  ubahPengeluaranPage(setState, context),
-                ],
-              ),
-            ),
-          );
+    return SafeArea(
+      child: Container(
+        padding: EdgeInsets.all(size16),
+        margin: EdgeInsets.all(size16),
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.circular(size16),
+        ),
+        child: PageView(
+          controller: pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            mainPageKeuangan(context, isFalseAvailable),
+            tambahPendapatan(setState, context),
+            tambahPengeluaran(setState, context),
+            ubahPendapatanPage(setState, context),
+            ubahPengeluaranPage(setState, context),
+          ],
+        ),
+      ),
+    );
   }
 
   mainPageKeuangan(BuildContext context, bool isFalseAvailable) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Keuangan',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  nameToko ?? '',
-                  style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-                ),
-              ],
-            ),
-            tabController!.index == 2
-                ? GestureDetector(
-                    onTap: () {
-                      showModalBottomProfile(
-                        context,
-                        MediaQuery.of(context).size.height / 2.8,
-                        Column(
-                          children: [
-                            dividerShowdialog(),
-                            SizedBox(height: size16),
-                            Text(
-                              'Kamu yakin ingin Memposting Data Rekonsialisasi?',
-                              style:
-                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            SizedBox(height: size8),
-                            Text(
-                              'Data yang telah diposting tidak dapat diubah kembali.',
-                              style:
-                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                            SizedBox(height: size32),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () => Navigator.pop(context),
-                                    child: buttonXLoutline(
-                                      Center(
-                                        child: Text(
-                                          'Batal',
-                                          style: heading3(FontWeight.w600,
-                                              primary500, 'Outfit'),
-                                        ),
-                                      ),
-                                      MediaQuery.of(context).size.width,
-                                      primary500,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () async {
-                                      whenLoading(context);
-                                      postingRekon(context, widget.token,
-                                          yearRekon, monthRekon,'');
-                                    },
-                                    child: buttonXL(
-                                      Center(
-                                        child: Text(
-                                          'Ya, Posting',
-                                          style: heading3(FontWeight.w600,
-                                              bnw100, 'Outfit'),
-                                        ),
-                                      ),
-                                      MediaQuery.of(context).size.width,
-                                      // primary500,
-                                      // primary500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    child: buttonXL(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Icon(PhosphorIcons.plus, color: bnw100),
-                          SizedBox(width: size12),
-                          Text(
-                            'Posting',
-                            style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      0,
-                    ))
-                : SizedBox(),
-          ],
-        ),
-        // SizedBox(
-        //   width: MediaQuery.of(context).size.width,
-        //   child: TabBar(
-        //     controller: tabController,
-        //     unselectedLabelColor: bnw600,
-        //     labelColor: primary500,
-        //     labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
-        //     physics: const NeverScrollableScrollPhysics(),
-        //     onTap: (value) {
-        //       setState(() {
-        //         if (value == 0) {
-        //           selectedIndex = 0;
-        //         } else if (value == 1) {
-        //           selectedIndex = 1;
-        //         } else if (value == 2) {
-        //           selectedIndex = 2;
-        //         }
-        //       });
-        //     },
-        //     tabs: const [
-        //       // Tab(
-        //       //   text: 'Pendapatan Lain-Lain',
-        //       // ),
-        //       // Tab(
-        //       //   text: 'Pengeluaran Lain-Lain',
-        //       // ),
-        //       Tab(
-        //         text: 'Rekonsiliasi',
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // Padding(
-        //   padding: const EdgeInsets.only(top: 10, bottom: 10),
-        //   child: buttonLoutline(
-        //     GestureDetector(
-        //       child: Row(
-        //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        //         children: [
-        //           Row(
-        //             children: [
-        //               Text(
-        //                 'Urutkan',
-        //                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-        //               ),
-        //               Text(
-        //                 ' dari Nama Toko A ke Z',
-        //                 style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-        //               ),
-        //             ],
-        //           ),
-        //           const Icon(PhosphorIcons.caret_down),
-        //         ],
-        //       ),
-        //     ),
-        //     bnw300,
-        //   ),
-        // ),
-        SizedBox(height: size16),
-        Expanded(
-          child: TabBarView(
-            controller: tabController,
-            physics: NeverScrollableScrollPhysics(),
+    return StatefulBuilder(
+      builder: (context, setState) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              getYear(),
-              getMonth(),
-              RefreshIndicator(
-                onRefresh: () async {
-                  setState(() {});
-                  await getRekon(widget.token, yearRekon, monthRekon, '');
-                },
-                child: FutureBuilder(
-                  future: getRekon(widget.token, yearRekon, monthRekon, ''),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      //List<RekonModel>? data = snapshot.data;
-                      var data = snapshot.data;
-                      return Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: primary500,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(size12),
-                                topRight: Radius.circular(size12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keuangan',
+                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    nameToko ?? '',
+                    style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                  ),
+                ],
+              ),
+              tabController!.index == 2
+                  ? GestureDetector(
+                      onTap: () {
+                        showModalBottomProfile(
+                          context,
+                          MediaQuery.of(context).size.height / 2.8,
+                          Column(
+                            children: [
+                              dividerShowdialog(),
+                              SizedBox(height: size16),
+                              Text(
+                                'Kamu yakin ingin Memposting Data Rekonsialisasi?',
+                                style:
+                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
                               ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                              SizedBox(height: size8),
+                              Text(
+                                'Data yang telah diposting tidak dapat diubah kembali.',
+                                style:
+                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                              SizedBox(height: size32),
+                              Row(
                                 children: [
-                                  SizedBox(
-                                    child: Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            tabController!.animateTo(
-                                              1,
-                                              duration: Duration
-                                                  .zero, // kurva animasi
-                                            );
-                                            setState(() {});
-                                          },
-                                          child: Icon(PhosphorIcons.arrow_left,
-                                              color: bnw100),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: buttonXLoutline(
+                                        Center(
+                                          child: Text(
+                                            'Batal',
+                                            style: heading3(FontWeight.w600,
+                                                primary500, 'Outfit'),
+                                          ),
                                         ),
-                                        SizedBox(width: size16),
-                                        Text(
-                                          'Rekonsiliasi - Bulan ${data['bulanTahun']}',
-                                          style: heading4(FontWeight.w700,
-                                              bnw100, 'Outfit'),
+                                        MediaQuery.of(context).size.width,
+                                        primary500,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        whenLoading(context);
+                                        postingRekon(context, widget.token,
+                                            yearRekon, monthRekon, '');
+                                      },
+                                      child: buttonXL(
+                                        Center(
+                                          child: Text(
+                                            'Ya, Posting',
+                                            style: heading3(FontWeight.w600,
+                                                bnw100, 'Outfit'),
+                                          ),
                                         ),
-                                      ],
+                                        MediaQuery.of(context).size.width,
+                                        // primary500,
+                                        // primary500,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                          Expanded(
-                              child: Container(
-                            decoration: BoxDecoration(
-                              color: primary100,
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(size12),
-                                bottomRight: Radius.circular(size12),
+                        );
+                      },
+                      child: buttonXL(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(PhosphorIcons.plus, color: bnw100),
+                            SizedBox(width: size12),
+                            Text(
+                              'Posting',
+                              style:
+                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        0,
+                      ))
+                  : SizedBox(),
+            ],
+          ),
+          // SizedBox(
+          //   width: MediaQuery.of(context).size.width,
+          //   child: TabBar(
+          //     controller: tabController,
+          //     unselectedLabelColor: bnw600,
+          //     labelColor: primary500,
+          //     labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
+          //     physics: const NeverScrollableScrollPhysics(),
+          //     onTap: (value) {
+          //       setState(() {
+          //         if (value == 0) {
+          //           selectedIndex = 0;
+          //         } else if (value == 1) {
+          //           selectedIndex = 1;
+          //         } else if (value == 2) {
+          //           selectedIndex = 2;
+          //         }
+          //       });
+          //     },
+          //     tabs: const [
+          //       // Tab(
+          //       //   text: 'Pendapatan Lain-Lain',
+          //       // ),
+          //       // Tab(
+          //       //   text: 'Pengeluaran Lain-Lain',
+          //       // ),
+          //       Tab(
+          //         text: 'Rekonsiliasi',
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.only(top: 10, bottom: 10),
+          //   child: buttonLoutline(
+          //     GestureDetector(
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //         children: [
+          //           Row(
+          //             children: [
+          //               Text(
+          //                 'Urutkan',
+          //                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+          //               ),
+          //               Text(
+          //                 ' dari Nama Toko A ke Z',
+          //                 style: heading3(FontWeight.w400, bnw600, 'Outfit'),
+          //               ),
+          //             ],
+          //           ),
+          //           const Icon(PhosphorIcons.caret_down),
+          //         ],
+          //       ),
+          //     ),
+          //     bnw300,
+          //   ),
+          // ),
+          SizedBox(height: size16),
+          Expanded(
+            child: TabBarView(
+              controller: tabController,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                getYear(),
+                getMonth(),
+                RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {});
+                    await getRekon(widget.token, yearRekon, monthRekon, '');
+                  },
+                  child: FutureBuilder(
+                    future: getRekon(widget.token, yearRekon, monthRekon, ''),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        //List<RekonModel>? data = snapshot.data;
+                        var data = snapshot.data;
+                        return Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: primary500,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(size12),
+                                  topRight: Radius.circular(size12),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 16.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      child: Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              tabController!.animateTo(
+                                                1,
+                                                duration: Duration
+                                                    .zero, // kurva animasi
+                                              );
+                                              setState(() {});
+                                            },
+                                            child: Icon(
+                                                PhosphorIcons.arrow_left,
+                                                color: bnw100),
+                                          ),
+                                          SizedBox(width: size16),
+                                          Text(
+                                            'Rekonsiliasi - Bulan ${data['bulanTahun']}',
+                                            style: heading4(FontWeight.w700,
+                                                bnw100, 'Outfit'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: data['rekonsiliasi'].length,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    ExpansionTile(
+                            Expanded(
+                                child: Container(
+                              decoration: BoxDecoration(
+                                color: primary100,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(size12),
+                                  bottomRight: Radius.circular(size12),
+                                ),
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: data['rekonsiliasi'].length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          width: 1.5,
+                                          color: bnw300,
+                                        ),
+                                      ),
+                                    ),
+                                    child: ExpansionTile(
+                                      onExpansionChanged: (bool expanded) {
+                                        setState(() {
+                                          if (expanded) {
+                                            setState(() {
+                                              _expandedIndex = index;
+                                            });
+                                          }
+                                        });
+                                      },
+                                      initiallyExpanded:
+                                          _expandedIndex == index,
                                       backgroundColor: primary200,
                                       trailing: Icon(
                                         PhosphorIcons.caret_down_fill,
@@ -907,240 +915,247 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                         ),
                                       ],
                                     ),
-                                  ],
-                                );
-                              },
-                            ),
-                          )),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                        ),
-                                        context: context,
-                                        builder: (context) {
-                                          return IntrinsicHeight(
-                                            child: Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: MediaQuery.of(context)
-                                                      .viewInsets
-                                                      .bottom),
-                                              decoration: BoxDecoration(
-                                                color: bnw100,
-                                                borderRadius: BorderRadius.only(
-                                                  topRight:
-                                                      Radius.circular(size12),
-                                                  topLeft:
-                                                      Radius.circular(size12),
+                                  );
+                                },
+                              ),
+                            )),
+                            SizedBox(height: size16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                          context: context,
+                                          builder: (context) {
+                                            return IntrinsicHeight(
+                                              child: Container(
+                                                padding: EdgeInsets.only(
+                                                    bottom:
+                                                        MediaQuery.of(context)
+                                                            .viewInsets
+                                                            .bottom),
+                                                decoration: BoxDecoration(
+                                                  color: bnw100,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(size12),
+                                                    topLeft:
+                                                        Radius.circular(size12),
+                                                  ),
                                                 ),
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    size32,
-                                                    size16,
-                                                    size32,
-                                                    size32),
-                                                child: Column(
-                                                  children: [
-                                                    dividerShowdialog(),
-                                                    SizedBox(height: size16),
-                                                    Container(
-                                                      width: double.infinity,
-                                                      color: bnw100,
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            'Detail',
-                                                            style: heading2(
-                                                                FontWeight.w700,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            'Tentukan data yang akan tampil',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw600,
-                                                                'Outfit'),
-                                                          ),
-                                                          SizedBox(
-                                                              height: size32),
-                                                          Row(
-                                                            children: [
-                                                              Expanded(
-                                                                child: Column(
-                                                                  children: [
-                                                                    detailCard(
-                                                                        data,
-                                                                        'Total Keseluruhan',
-                                                                        'total_keseluruhan',
-                                                                        false),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            size16),
-                                                                    detailCard(
-                                                                        data,
-                                                                        'Tidak Sesuai',
-                                                                        'tidakSesuai',
-                                                                        true),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                  width:
-                                                                      size16),
-                                                              Expanded(
-                                                                child: Column(
-                                                                  children: [
-                                                                    detailCard(
-                                                                        data,
-                                                                        'Sesuai',
-                                                                        'sesuai',
-                                                                        true),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            size16),
-                                                                    detailCard(
-                                                                        data,
-                                                                        'Belum Dicek',
-                                                                        'belumDiCek',
-                                                                        true),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: size32),
-                                                    SizedBox(
-                                                      width: double.infinity,
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: buttonXL(
-                                                          Center(
-                                                            child: Text(
-                                                              'Selesai',
-                                                              style: heading3(
+                                                child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      size32,
+                                                      size16,
+                                                      size32,
+                                                      size32),
+                                                  child: Column(
+                                                    children: [
+                                                      dividerShowdialog(),
+                                                      SizedBox(height: size16),
+                                                      Container(
+                                                        width: double.infinity,
+                                                        color: bnw100,
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              'Detail',
+                                                              style: heading2(
                                                                   FontWeight
-                                                                      .w600,
-                                                                  bnw100,
+                                                                      .w700,
+                                                                  bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                          ),
-                                                          0,
+                                                            Text(
+                                                              'Tentukan data yang akan tampil',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw600,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size32),
+                                                            Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      detailCard(
+                                                                          data,
+                                                                          'Total Keseluruhan',
+                                                                          'total_keseluruhan',
+                                                                          false),
+                                                                      SizedBox(
+                                                                          height:
+                                                                              size16),
+                                                                      detailCard(
+                                                                          data,
+                                                                          'Tidak Sesuai',
+                                                                          'tidakSesuai',
+                                                                          true),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    width:
+                                                                        size16),
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      detailCard(
+                                                                          data,
+                                                                          'Sesuai',
+                                                                          'sesuai',
+                                                                          true),
+                                                                      SizedBox(
+                                                                          height:
+                                                                              size16),
+                                                                      detailCard(
+                                                                          data,
+                                                                          'Belum Dicek',
+                                                                          'belumDiCek',
+                                                                          true),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                      SizedBox(height: size32),
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: buttonXL(
+                                                            Center(
+                                                              child: Text(
+                                                                'Selesai',
+                                                                style: heading3(
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw100,
+                                                                    'Outfit'),
+                                                              ),
+                                                            ),
+                                                            0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
+                                            );
+                                          },
+                                        );
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(size8),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(size8),
+                                        border: Border.all(color: bnw300),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: primary100,
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
                                             ),
-                                          );
-                                        },
-                                      );
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(size8),
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.circular(size8),
-                                      border: Border.all(color: bnw300),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: primary100,
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            padding: EdgeInsets.all(size12),
+                                            child: Center(
+                                              child: Icon(
+                                                PhosphorIcons.money_fill,
+                                                color: primary500,
+                                              ),
+                                            ),
                                           ),
-                                          padding: EdgeInsets.all(size12),
-                                          child: Center(
-                                            child: Icon(
-                                              PhosphorIcons.money_fill,
-                                              color: primary500,
-                                            ),
+                                          SizedBox(width: size16),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Total Keseluruhan',
+                                                style: heading3(FontWeight.w600,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              Text(
+                                                  FormatCurrency.convertToIdr(
+                                                      data[
+                                                          'total_keseluruhan']),
+                                                  style: heading3(
+                                                      FontWeight.w700,
+                                                      primary500,
+                                                      'Outfit')),
+                                            ],
                                           ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Total Keseluruhan',
-                                              style: heading3(FontWeight.w600,
-                                                  bnw900, 'Outfit'),
-                                            ),
-                                            Text(
-                                                FormatCurrency.convertToIdr(
-                                                    data['total_keseluruhan']),
-                                                style: heading3(FontWeight.w700,
-                                                    primary500, 'Outfit')),
-                                          ],
-                                        ),
-                                        Spacer(),
-                                        Icon(
-                                          PhosphorIcons.dots_three_vertical,
-                                          color: bnw900,
-                                        ),
-                                      ],
+                                          Spacer(),
+                                          Icon(
+                                            PhosphorIcons.dots_three_vertical,
+                                            color: bnw900,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: size16),
-                              pendapatanDetail(data, 'Belum Dicek',
-                                  'belumDiCek', PhosphorIcons.square),
-                              SizedBox(width: size16),
-                              pendapatanDetail(data, 'Tidak Sesuai',
-                                  'tidakSesuai', PhosphorIcons.x),
-                              SizedBox(width: size16),
-                              pendapatanDetail(data, 'Sesuai', 'sesuai',
-                                  PhosphorIcons.check_square),
-                            ],
-                          )
-                        ],
-                      );
-                    } else if (snapshot.hasError) {
-                      print(snapshot.error);
-                      print(snapshot.data);
+                                SizedBox(width: size16),
+                                pendapatanDetail(data, 'Belum Dicek',
+                                    'belumDiCek', PhosphorIcons.square),
+                                SizedBox(width: size16),
+                                pendapatanDetail(data, 'Tidak Sesuai',
+                                    'tidakSesuai', PhosphorIcons.x),
+                                SizedBox(width: size16),
+                                pendapatanDetail(data, 'Sesuai', 'sesuai',
+                                    PhosphorIcons.check_square),
+                              ],
+                            )
+                          ],
+                        );
+                      } else if (snapshot.hasError) {
+                        print(snapshot.error);
+                        print(snapshot.data);
 
-                      return SizedBox(
-                        width: size20,
-                        height: size20,
-                        child: loading(),
+                        return Center(
+                          child: SizedBox(
+                            child: loading(),
+                          ),
+                        );
+                      }
+                      return Center(
+                        child: SizedBox(
+                          child: loading(),
+                        ),
                       );
-                    }
-                    return SizedBox(
-                      width: size20,
-                      height: size20,
-                      child: loading(),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1300,7 +1315,10 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                             );
                           }
 
-                          return Container();
+                          return SizedBox(
+                            width: double.infinity,
+                            child: loading(),
+                          );
                         }),
                   ),
                 ),
@@ -1474,7 +1492,10 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                             );
                           }
 
-                          return Container();
+                          return SizedBox(
+                            width: double.infinity,
+                            child: loading(),
+                          );
                         }),
                   ),
                 ),

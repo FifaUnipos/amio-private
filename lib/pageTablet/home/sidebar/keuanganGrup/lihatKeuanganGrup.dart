@@ -91,32 +91,17 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
     // double width = MediaQuery.of(context).size.width;
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
-    return datasPendapatan == null
-        ? SafeArea(
-            child: Container(
-              padding: EdgeInsets.all(size16),
-              margin: EdgeInsets.all(size16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.circular(size16),
-              ),
-              child: Scaffold(
-                backgroundColor: bnw100,
-                body: Center(child: loading()),
-              ),
-            ),
-          )
-        : PageView(
-            controller: pageController,
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              mainPageKeuangan(context, isFalseAvailable),
-              tambahPendapatan(setState, context),
-              tambahPengeluaran(setState, context),
-              ubahPendapatanPage(setState, context),
-              ubahPengeluaranPage(setState, context),
-            ],
-          );
+    return PageView(
+      controller: pageController,
+      physics: NeverScrollableScrollPhysics(),
+      children: [
+        mainPageKeuangan(context, isFalseAvailable),
+        tambahPendapatan(setState, context),
+        tambahPengeluaran(setState, context),
+        ubahPendapatanPage(setState, context),
+        ubahPengeluaranPage(setState, context),
+      ],
+    );
   }
 
   mainPageKeuangan(BuildContext context, bool isFalseAvailable) {
@@ -377,548 +362,547 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                               padding: EdgeInsets.zero,
                               itemCount: data['rekonsiliasi'].length,
                               itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    ExpansionTile(
-                                      backgroundColor: primary200,
-                                      trailing: Icon(
-                                        PhosphorIcons.caret_down_fill,
-                                        color: bnw900,
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        width: 1.5,
+                                        color: bnw300,
                                       ),
-                                      title: Row(
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                  data['rekonsiliasi'][index]
-                                                      ['hari'],
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              Text(
-                                                  data['rekonsiliasi'][index]
-                                                      ['tanggal'],
-                                                  style: heading4(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit')),
-                                            ],
-                                          ),
-                                          Spacer(),
-                                          data['rekonsiliasi'][index]['status']
-                                                          ['belumDiCek']
-                                                      .toString() ==
-                                                  '0'
-                                              ? Container()
-                                              : buttonLoutlineColor(
-                                                  Row(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text('Belum Dicek : ',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  danger500,
-                                                                  'Outfit')),
-                                                          Text(
-                                                              data['rekonsiliasi']
-                                                                              [
-                                                                              index]
-                                                                          [
-                                                                          'status']
-                                                                      [
-                                                                      'belumDiCek']
-                                                                  .toString(),
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  danger500,
-                                                                  'Outfit')),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  danger100,
-                                                  danger100,
-                                                ),
-                                          SizedBox(width: size16),
-                                          data['rekonsiliasi'][index]['status']
-                                                          ['tidakSesuai']
-                                                      .toString() ==
-                                                  '0'
-                                              ? Container()
-                                              : buttonLoutlineColor(
-                                                  Row(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                              'Tidak Sesuai : ',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw500,
-                                                                  'Outfit')),
-                                                          Text(
-                                                              data['rekonsiliasi']
-                                                                              [
-                                                                              index]
-                                                                          [
-                                                                          'status']
-                                                                      [
-                                                                      'tidakSesuai']
-                                                                  .toString(),
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw500,
-                                                                  'Outfit')),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  bnw200,
-                                                  bnw200,
-                                                ),
-                                          SizedBox(width: size16),
-                                          data['rekonsiliasi'][index]['status']
-                                                          ['sesuai']
-                                                      .toString() ==
-                                                  '0'
-                                              ? Container()
-                                              : buttonLoutlineColor(
-                                                  Row(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text('Sesuai : ',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  succes500,
-                                                                  'Outfit')),
-                                                          Text(
-                                                              data['rekonsiliasi']
-                                                                              [
-                                                                              index]
-                                                                          [
-                                                                          'status']
-                                                                      ['sesuai']
-                                                                  .toString(),
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  succes500,
-                                                                  'Outfit')),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  succes100,
-                                                  succes100,
-                                                ),
-                                          SizedBox(width: size16),
-                                        ],
-                                      ),
+                                    ),
+                                  ),
+                                  child: ExpansionTile(
+                                    backgroundColor: primary200,
+                                    trailing: Icon(
+                                      PhosphorIcons.caret_down_fill,
+                                      color: bnw900,
+                                    ),
+                                    title: Row(
                                       children: [
-                                        if (data['rekonsiliasi'][index]
-                                                ['detail']
-                                            .isEmpty)
-                                          Container(),
-                                        Container(
-                                          width: double.infinity,
-                                          margin: EdgeInsets.all(size16),
-                                          child: Wrap(
-                                            spacing: size8,
-                                            runSpacing: size8,
-                                            children: data['rekonsiliasi']
-                                                    [index]['detail']
-                                                .map<Widget>((detailItem) {
-                                              return Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    2.7,
-                                                padding: EdgeInsets.all(size8),
-                                                decoration: BoxDecoration(
-                                                  color: bnw100,
-                                                  border:
-                                                      Border.all(color: bnw300),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          size8),
-                                                ),
-                                                child: Row(
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                                data['rekonsiliasi'][index]
+                                                    ['hari'],
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit')),
+                                            Text(
+                                                data['rekonsiliasi'][index]
+                                                    ['tanggal'],
+                                                style: heading4(FontWeight.w600,
+                                                    bnw900, 'Outfit')),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        data['rekonsiliasi'][index]['status']
+                                                        ['belumDiCek']
+                                                    .toString() ==
+                                                '0'
+                                            ? Container()
+                                            : buttonLoutlineColor(
+                                                Row(
                                                   children: [
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                    Row(
                                                       children: [
-                                                        Text(
-                                                          '${detailItem['payment_method']['payment_method']}',
-                                                          style: heading4(
-                                                              FontWeight.w600,
-                                                              bnw900,
-                                                              'Outfit'),
-                                                        ),
-                                                        Text(
-                                                            FormatCurrency
-                                                                .convertToIdr(
-                                                                    detailItem[
-                                                                        'amount']),
+                                                        Text('Belum Dicek : ',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
+                                                                FontWeight.w600,
+                                                                danger500,
                                                                 'Outfit')),
-                                                        // Add other details from 'detailItem'
+                                                        Text(
+                                                            data['rekonsiliasi']
+                                                                            [
+                                                                            index]
+                                                                        [
+                                                                        'status']
+                                                                    [
+                                                                    'belumDiCek']
+                                                                .toString(),
+                                                            style: heading4(
+                                                                FontWeight.w600,
+                                                                danger500,
+                                                                'Outfit')),
                                                       ],
-                                                    ),
-                                                    Spacer(),
-                                                    detailItem['isDone'] == '0'
-                                                        ? buttonLoutlineColor(
-                                                            Row(
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                        'Belum Dicek',
-                                                                        style: heading4(
-                                                                            FontWeight.w600,
-                                                                            danger500,
-                                                                            'Outfit')),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            danger100,
-                                                            danger100,
-                                                          )
-                                                        : detailItem[
-                                                                    'isDone'] ==
-                                                                '1'
-                                                            ? buttonLoutlineColor(
-                                                                Row(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                            'Tidak Sesuai',
-                                                                            style: heading4(
-                                                                                FontWeight.w600,
-                                                                                bnw900,
-                                                                                'Outfit')),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                bnw200,
-                                                                bnw200,
-                                                              )
-                                                            : buttonLoutlineColor(
-                                                                Row(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                            'Sesuai',
-                                                                            style: heading4(
-                                                                                FontWeight.w600,
-                                                                                succes500,
-                                                                                'Outfit')),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                succes100,
-                                                                succes100,
-                                                              ),
-                                                    SizedBox(width: size16),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        if (detailItem[
-                                                                'isDone'] ==
-                                                            '0') {
-                                                          tapTrue = 0;
-                                                        } else if (detailItem[
-                                                                'isDone'] ==
-                                                            '1') {
-                                                          tapTrue = 1;
-                                                        } else if (detailItem[
-                                                                'isDone'] ==
-                                                            '2') {
-                                                          tapTrue = 2;
-                                                        } else {
-                                                          tapTrue = 0;
-                                                        }
-
-                                                        showModalBottomSheet(
-                                                          isScrollControlled:
-                                                              true,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        25),
-                                                          ),
-                                                          context: context,
-                                                          builder: (context) =>
-                                                              StatefulBuilder(
-                                                            builder: (context,
-                                                                    setState) =>
-                                                                IntrinsicHeight(
-                                                              child: Container(
-                                                                padding: EdgeInsets.only(
-                                                                    bottom: MediaQuery.of(
-                                                                            context)
-                                                                        .viewInsets
-                                                                        .bottom),
-                                                                // height: MediaQuery.of(context).size.height / 1,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: bnw100,
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .only(
-                                                                    topRight: Radius
-                                                                        .circular(
-                                                                            12),
-                                                                    topLeft: Radius
-                                                                        .circular(
-                                                                            12),
-                                                                  ),
-                                                                ),
-                                                                child: Padding(
-                                                                  padding: EdgeInsets
-                                                                      .fromLTRB(
-                                                                          size32,
-                                                                          size16,
-                                                                          size32,
-                                                                          size32),
-                                                                  child: Column(
-                                                                    children: [
-                                                                      dividerShowdialog(),
-                                                                      Column(
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          SizedBox(
-                                                                              height: size16),
-                                                                          Text(
-                                                                            'Tunai',
-                                                                            style: heading1(
-                                                                                FontWeight.w700,
-                                                                                bnw900,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                          Text(
-                                                                            'Konfirmasi data sesuai atau tidak tidak ',
-                                                                            style: heading4(
-                                                                                FontWeight.w400,
-                                                                                bnw700,
-                                                                                'Outfit'),
-                                                                          ),
-                                                                          SizedBox(
-                                                                              height: size16),
-                                                                          Container(
-                                                                            child:
-                                                                                Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                Text(
-                                                                                  'Pilih Tipe Pesanan',
-                                                                                  style: heading2(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                ),
-                                                                                SizedBox(height: size16),
-                                                                                Row(
-                                                                                  children: [
-                                                                                    Expanded(
-                                                                                      child: GestureDetector(
-                                                                                        onTap: () {
-                                                                                          setState(() {
-                                                                                            tapTrue = 2;
-                                                                                          });
-                                                                                        },
-                                                                                        child: IntrinsicWidth(
-                                                                                          child: Container(
-                                                                                            height: size56,
-                                                                                            padding: EdgeInsets.symmetric(horizontal: size20),
-                                                                                            decoration: ShapeDecoration(
-                                                                                              color: tapTrue == 2 ? primary100 : bnw100,
-                                                                                              shape: RoundedRectangleBorder(
-                                                                                                side: BorderSide(
-                                                                                                  width: width2,
-                                                                                                  color: tapTrue == 2 ? primary500 : bnw300,
-                                                                                                ),
-                                                                                                borderRadius: BorderRadius.circular(size8),
-                                                                                              ),
-                                                                                            ),
-                                                                                            child: Row(
-                                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                                              children: [
-                                                                                                Text('Sesuai', style: heading3(FontWeight.w400, tapTrue == 2 ? primary500 : bnw900, 'Outfit')),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    SizedBox(width: size16),
-                                                                                    Expanded(
-                                                                                      child: GestureDetector(
-                                                                                        onTap: () {
-                                                                                          setState(() {
-                                                                                            tapTrue = 1;
-                                                                                          });
-                                                                                        },
-                                                                                        child: IntrinsicWidth(
-                                                                                          child: Container(
-                                                                                            height: size56,
-                                                                                            padding: EdgeInsets.symmetric(horizontal: size20),
-                                                                                            decoration: ShapeDecoration(
-                                                                                              color: tapTrue == 1 ? primary100 : bnw100,
-                                                                                              shape: RoundedRectangleBorder(
-                                                                                                side: BorderSide(
-                                                                                                  width: width2,
-                                                                                                  color: tapTrue == 1 ? primary500 : bnw300,
-                                                                                                ),
-                                                                                                borderRadius: BorderRadius.circular(size8),
-                                                                                              ),
-                                                                                            ),
-                                                                                            child: Row(
-                                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                                              children: [
-                                                                                                Text('Tidak Sesuai', style: heading3(FontWeight.w400, tapTrue == 1 ? primary500 : bnw900, 'Outfit')),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                              height: size16),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'Keterangan ',
-                                                                                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                              ),
-                                                                              Text(
-                                                                                '*',
-                                                                                style: heading4(FontWeight.w400, danger500, 'Outfit'),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          FocusScope(
-                                                                            child:
-                                                                                Focus(
-                                                                              onFocusChange: (value) {
-                                                                                setState(() {});
-                                                                              },
-                                                                              child: TextFormField(
-                                                                                style: heading2(
-                                                                                  FontWeight.w600,
-                                                                                  bnw900,
-                                                                                  'Outfit',
-                                                                                ),
-                                                                                decoration: InputDecoration(
-                                                                                    focusColor: primary500,
-                                                                                    hintText: 'Cth : Tidak sesuai dengan pengeluaran',
-                                                                                    hintStyle: heading2(
-                                                                                      FontWeight.w600,
-                                                                                      bnw400,
-                                                                                      'Outfit',
-                                                                                    )),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              size32),
-                                                                      tapTrue ==
-                                                                              0
-                                                                          ? Container()
-                                                                          : Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                              children: [
-                                                                                Expanded(
-                                                                                  child: GestureDetector(
-                                                                                    onTap: () {
-                                                                                      Navigator.pop(context);
-                                                                                    },
-                                                                                    child: buttonXLoutline(
-                                                                                      Center(
-                                                                                        child: Text(
-                                                                                          'Batal',
-                                                                                          style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                                                                                        ),
-                                                                                      ),
-                                                                                      MediaQuery.of(context).size.width,
-                                                                                      primary500,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                SizedBox(width: size16),
-                                                                                Expanded(
-                                                                                  child: GestureDetector(
-                                                                                    onTap: () {
-                                                                                      whenLoading(context);
-                                                                                      saveRekon(context, widget.token, detailItem['id'], tapTrue.toString());
-                                                                                      errorText = '';
-
-                                                                                      setState(() {
-                                                                                        getRekon(widget.token, yearRekon, monthRekon, widget.merchid);
-                                                                                        data = snapshot.data;
-                                                                                      });
-                                                                                    },
-                                                                                    child: buttonXL(
-                                                                                      Center(
-                                                                                        child: Text(
-                                                                                          'Simpan',
-                                                                                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                                                                                        ),
-                                                                                      ),
-                                                                                      MediaQuery.of(context).size.width,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Icon(
-                                                        PhosphorIcons
-                                                            .pencil_line,
-                                                        color: primary500,
-                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ),
+                                                danger100,
+                                                danger100,
+                                              ),
+                                        SizedBox(width: size16),
+                                        data['rekonsiliasi'][index]['status']
+                                                        ['tidakSesuai']
+                                                    .toString() ==
+                                                '0'
+                                            ? Container()
+                                            : buttonLoutlineColor(
+                                                Row(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text('Tidak Sesuai : ',
+                                                            style: heading4(
+                                                                FontWeight.w600,
+                                                                bnw500,
+                                                                'Outfit')),
+                                                        Text(
+                                                            data['rekonsiliasi']
+                                                                            [
+                                                                            index]
+                                                                        [
+                                                                        'status']
+                                                                    [
+                                                                    'tidakSesuai']
+                                                                .toString(),
+                                                            style: heading4(
+                                                                FontWeight.w600,
+                                                                bnw500,
+                                                                'Outfit')),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                bnw200,
+                                                bnw200,
+                                              ),
+                                        SizedBox(width: size16),
+                                        data['rekonsiliasi'][index]['status']
+                                                        ['sesuai']
+                                                    .toString() ==
+                                                '0'
+                                            ? Container()
+                                            : buttonLoutlineColor(
+                                                Row(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text('Sesuai : ',
+                                                            style: heading4(
+                                                                FontWeight.w600,
+                                                                succes500,
+                                                                'Outfit')),
+                                                        Text(
+                                                            data['rekonsiliasi']
+                                                                            [
+                                                                            index]
+                                                                        [
+                                                                        'status']
+                                                                    ['sesuai']
+                                                                .toString(),
+                                                            style: heading4(
+                                                                FontWeight.w600,
+                                                                succes500,
+                                                                'Outfit')),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                succes100,
+                                                succes100,
+                                              ),
+                                        SizedBox(width: size16),
                                       ],
                                     ),
-                                  ],
+                                    children: [
+                                      if (data['rekonsiliasi'][index]['detail']
+                                          .isEmpty)
+                                        Container(),
+                                      Container(
+                                        width: double.infinity,
+                                        margin: EdgeInsets.all(size16),
+                                        child: Wrap(
+                                          spacing: size8,
+                                          runSpacing: size8,
+                                          children: data['rekonsiliasi'][index]
+                                                  ['detail']
+                                              .map<Widget>((detailItem) {
+                                            return Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  2.7,
+                                              padding: EdgeInsets.all(size8),
+                                              decoration: BoxDecoration(
+                                                color: bnw100,
+                                                border:
+                                                    Border.all(color: bnw300),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        size8),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '${detailItem['payment_method']['payment_method']}',
+                                                        style: heading4(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                      Text(
+                                                          FormatCurrency
+                                                              .convertToIdr(
+                                                                  detailItem[
+                                                                      'amount']),
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit')),
+                                                      // Add other details from 'detailItem'
+                                                    ],
+                                                  ),
+                                                  Spacer(),
+                                                  detailItem['isDone'] == '0'
+                                                      ? buttonLoutlineColor(
+                                                          Row(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                      'Belum Dicek',
+                                                                      style: heading4(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          danger500,
+                                                                          'Outfit')),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          danger100,
+                                                          danger100,
+                                                        )
+                                                      : detailItem['isDone'] ==
+                                                              '1'
+                                                          ? buttonLoutlineColor(
+                                                              Row(
+                                                                children: [
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                          'Tidak Sesuai',
+                                                                          style: heading4(
+                                                                              FontWeight.w600,
+                                                                              bnw900,
+                                                                              'Outfit')),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              bnw200,
+                                                              bnw200,
+                                                            )
+                                                          : buttonLoutlineColor(
+                                                              Row(
+                                                                children: [
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                          'Sesuai',
+                                                                          style: heading4(
+                                                                              FontWeight.w600,
+                                                                              succes500,
+                                                                              'Outfit')),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              succes100,
+                                                              succes100,
+                                                            ),
+                                                  SizedBox(width: size16),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      if (detailItem[
+                                                              'isDone'] ==
+                                                          '0') {
+                                                        tapTrue = 0;
+                                                      } else if (detailItem[
+                                                              'isDone'] ==
+                                                          '1') {
+                                                        tapTrue = 1;
+                                                      } else if (detailItem[
+                                                              'isDone'] ==
+                                                          '2') {
+                                                        tapTrue = 2;
+                                                      } else {
+                                                        tapTrue = 0;
+                                                      }
+
+                                                      showModalBottomSheet(
+                                                        isScrollControlled:
+                                                            true,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(25),
+                                                        ),
+                                                        context: context,
+                                                        builder: (context) =>
+                                                            StatefulBuilder(
+                                                          builder: (context,
+                                                                  setState) =>
+                                                              IntrinsicHeight(
+                                                            child: Container(
+                                                              padding: EdgeInsets.only(
+                                                                  bottom: MediaQuery.of(
+                                                                          context)
+                                                                      .viewInsets
+                                                                      .bottom),
+                                                              // height: MediaQuery.of(context).size.height / 1,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: bnw100,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .only(
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          12),
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          12),
+                                                                ),
+                                                              ),
+                                                              child: Padding(
+                                                                padding: EdgeInsets
+                                                                    .fromLTRB(
+                                                                        size32,
+                                                                        size16,
+                                                                        size32,
+                                                                        size32),
+                                                                child: Column(
+                                                                  children: [
+                                                                    dividerShowdialog(),
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        SizedBox(
+                                                                            height:
+                                                                                size16),
+                                                                        Text(
+                                                                          'Tunai',
+                                                                          style: heading1(
+                                                                              FontWeight.w700,
+                                                                              bnw900,
+                                                                              'Outfit'),
+                                                                        ),
+                                                                        Text(
+                                                                          'Konfirmasi data sesuai atau tidak tidak ',
+                                                                          style: heading4(
+                                                                              FontWeight.w400,
+                                                                              bnw700,
+                                                                              'Outfit'),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                size16),
+                                                                        Container(
+                                                                          child:
+                                                                              Column(
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              Text(
+                                                                                'Pilih Tipe Pesanan',
+                                                                                style: heading2(FontWeight.w400, bnw900, 'Outfit'),
+                                                                              ),
+                                                                              SizedBox(height: size16),
+                                                                              Row(
+                                                                                children: [
+                                                                                  Expanded(
+                                                                                    child: GestureDetector(
+                                                                                      onTap: () {
+                                                                                        setState(() {
+                                                                                          tapTrue = 2;
+                                                                                        });
+                                                                                      },
+                                                                                      child: IntrinsicWidth(
+                                                                                        child: Container(
+                                                                                          height: size56,
+                                                                                          padding: EdgeInsets.symmetric(horizontal: size20),
+                                                                                          decoration: ShapeDecoration(
+                                                                                            color: tapTrue == 2 ? primary100 : bnw100,
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              side: BorderSide(
+                                                                                                width: width2,
+                                                                                                color: tapTrue == 2 ? primary500 : bnw300,
+                                                                                              ),
+                                                                                              borderRadius: BorderRadius.circular(size8),
+                                                                                            ),
+                                                                                          ),
+                                                                                          child: Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                                            children: [
+                                                                                              Text('Sesuai', style: heading3(FontWeight.w400, tapTrue == 2 ? primary500 : bnw900, 'Outfit')),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                  SizedBox(width: size16),
+                                                                                  Expanded(
+                                                                                    child: GestureDetector(
+                                                                                      onTap: () {
+                                                                                        setState(() {
+                                                                                          tapTrue = 1;
+                                                                                        });
+                                                                                      },
+                                                                                      child: IntrinsicWidth(
+                                                                                        child: Container(
+                                                                                          height: size56,
+                                                                                          padding: EdgeInsets.symmetric(horizontal: size20),
+                                                                                          decoration: ShapeDecoration(
+                                                                                            color: tapTrue == 1 ? primary100 : bnw100,
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              side: BorderSide(
+                                                                                                width: width2,
+                                                                                                color: tapTrue == 1 ? primary500 : bnw300,
+                                                                                              ),
+                                                                                              borderRadius: BorderRadius.circular(size8),
+                                                                                            ),
+                                                                                          ),
+                                                                                          child: Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                                            children: [
+                                                                                              Text('Tidak Sesuai', style: heading3(FontWeight.w400, tapTrue == 1 ? primary500 : bnw900, 'Outfit')),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                size16),
+                                                                        Row(
+                                                                          children: [
+                                                                            Text(
+                                                                              'Keterangan ',
+                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                                                            ),
+                                                                            Text(
+                                                                              '*',
+                                                                              style: heading4(FontWeight.w400, danger500, 'Outfit'),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        FocusScope(
+                                                                          child:
+                                                                              Focus(
+                                                                            onFocusChange:
+                                                                                (value) {
+                                                                              setState(() {});
+                                                                            },
+                                                                            child:
+                                                                                TextFormField(
+                                                                              style: heading2(
+                                                                                FontWeight.w600,
+                                                                                bnw900,
+                                                                                'Outfit',
+                                                                              ),
+                                                                              decoration: InputDecoration(
+                                                                                  focusColor: primary500,
+                                                                                  hintText: 'Cth : Tidak sesuai dengan pengeluaran',
+                                                                                  hintStyle: heading2(
+                                                                                    FontWeight.w600,
+                                                                                    bnw400,
+                                                                                    'Outfit',
+                                                                                  )),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            size32),
+                                                                    tapTrue == 0
+                                                                        ? Container()
+                                                                        : Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceAround,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: GestureDetector(
+                                                                                  onTap: () {
+                                                                                    Navigator.pop(context);
+                                                                                  },
+                                                                                  child: buttonXLoutline(
+                                                                                    Center(
+                                                                                      child: Text(
+                                                                                        'Batal',
+                                                                                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                      ),
+                                                                                    ),
+                                                                                    MediaQuery.of(context).size.width,
+                                                                                    primary500,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(width: size16),
+                                                                              Expanded(
+                                                                                child: GestureDetector(
+                                                                                  onTap: () {
+                                                                                    whenLoading(context);
+                                                                                    saveRekon(context, widget.token, detailItem['id'], tapTrue.toString());
+                                                                                    errorText = '';
+
+                                                                                    setState(() {
+                                                                                      getRekon(widget.token, yearRekon, monthRekon, widget.merchid);
+                                                                                      data = snapshot.data;
+                                                                                    });
+                                                                                  },
+                                                                                  child: buttonXL(
+                                                                                    Center(
+                                                                                      child: Text(
+                                                                                        'Simpan',
+                                                                                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                      ),
+                                                                                    ),
+                                                                                    MediaQuery.of(context).size.width,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: Icon(
+                                                      PhosphorIcons.pencil_line,
+                                                      color: primary500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
                               },
                             ),
@@ -1311,7 +1295,10 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                             );
                           }
 
-                          return Container();
+                          return SizedBox(
+                            width: double.infinity,
+                            child: loading(),
+                          );
                         }),
                   ),
                 ),
@@ -1486,7 +1473,10 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                             );
                           }
 
-                          return Container();
+                          return SizedBox(
+                            width: double.infinity,
+                            child: loading(),
+                          );
                         }),
                   ),
                 ),
@@ -2183,7 +2173,10 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                             );
                           }
 
-                          return loading();
+                          return SizedBox(
+                            width: double.infinity,
+                            child: loading(),
+                          );
                         }),
                   ),
                 ),

@@ -409,6 +409,14 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
               onTap: () {
                 // print(idProduct);
                 // print(singleProductId);
+                if (img64 == 'hapus') {
+                  img64 = null;
+                } else if (imageEdit.isNotEmpty) {
+                  img64 = '';
+                } else {
+                  img64 = img64;
+                }
+
                 List<String> value = [""];
                 updateProduk(
                   context,
@@ -424,7 +432,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                   onswitchppn.toString(),
                   img64.toString(),
                 );
-
+                print(img64.toString());
                 // Provider.of<RefreshTampilan>(context, listen: false)
                 //     .getDataProduk(widget.datasProduk!, context, widget.token);
               },
@@ -1348,7 +1356,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                     (myImage != null || imageEdit != '')
                         ? GestureDetector(
                             onTap: () async {
-                              img64 = null;
+                              img64 = 'hapus';
                               myImage = null;
                               imageEdit = '';
                               Navigator.pop(context);

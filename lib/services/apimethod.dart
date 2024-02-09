@@ -1059,6 +1059,13 @@ Future updateProduk(
     isActive,
     isPPN,
     img) async {
+  String imgFix = '';
+  if (img == '') {
+    imgFix = '';
+  } else {
+    imgFix = 'data:image/jpeg;base64,$img';
+  }
+
   try {
     final response = await http.post(
       Uri.parse(updateProdukUrl),
@@ -1072,7 +1079,8 @@ Future updateProduk(
         "price_online_shop": onlinePrice,
         "isActive": isActive,
         "isPPN": isPPN,
-        "product_image": 'data:image/jpeg;base64,$img',
+        // "product_image": 'data:image/jpeg;base64,$img',
+        "product_image": imgFix,
       },
       headers: {
         "token": "$token",
@@ -1710,9 +1718,15 @@ Future tambahDiskon(
   start_date,
   end_date,
   is_active,
+  active_period,
 ) async {
+  String productidList;
+  if (productid == '') {
+    productidList = '';
+  } else {
+    productidList = json.encode(productid);
+  }
   final String merchantidList = json.encode(merchantid);
-  final String productidList = json.encode(productid);
   final response = await http.post(
     Uri.parse(createDiskonLink),
     headers: {
@@ -1727,7 +1741,8 @@ Future tambahDiskon(
       'discount_type': discount_type,
       'start_date': start_date,
       'end_date': end_date,
-      'is_active': is_active
+      'is_active': is_active,
+      "active_period": active_period,
     },
   );
 
@@ -2203,7 +2218,8 @@ var subTotal,
     totalTransaksi,
     customerTransaksi,
     namaCustomerCalculate,
-    discountProduct;
+    discountProduct,
+    discountProductUmum;
 Future calculateTransaction(
   BuildContext context,
   token,
@@ -2213,6 +2229,7 @@ Future calculateTransaction(
   typePrice,
   discount,
 ) async {
+  
   final String detail = json.encode(details);
 
   final response = await http.post(
@@ -2241,7 +2258,9 @@ Future calculateTransaction(
     ppnTransaksi = data['PPN'];
     namaCustomerCalculate = data['customerName'];
     discountProduct = data['discount'];
+    discountProductUmum = data['discount_umum'];
     setState(() {});
+    closeLoading(context);
     return jsonResponse['rc'];
   } else {
     closeLoading(context);
@@ -3097,6 +3116,7 @@ Future getSingleProduct(
   );
 
   var jsonResponse = jsonDecode(response.body);
+  // print(jsonResponse.toString());
   if (response.statusCode == 200) {
     var dataku = jsonResponse['data'];
     print(dataku.toString());

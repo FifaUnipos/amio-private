@@ -1344,7 +1344,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                           .ellipsis,
                                                                   style: body2(
                                                                       FontWeight
-                                                                          .w400,
+                                                                          .w700,
                                                                       danger500,
                                                                       'Outfit'),
                                                                 ),
@@ -1478,7 +1478,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                           .ellipsis,
                                                                   style: body2(
                                                                       FontWeight
-                                                                          .w400,
+                                                                          .w700,
                                                                       danger500,
                                                                       'Outfit'),
                                                                 ),

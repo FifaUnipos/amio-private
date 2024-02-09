@@ -154,6 +154,7 @@ class _OtppageState extends State<Otppage> {
                                                   ? primary500
                                                   : red500,
                                               inactiveColor: bnw300,
+                                              selectedColor: primary500,
                                               selectedBorderWidth: 2,
                                               inactiveBorderWidth: 1,
                                             ),
@@ -179,9 +180,7 @@ class _OtppageState extends State<Otppage> {
                                               } else if (widget.pageidentify ==
                                                   'forgotPass') {
                                                 changePasswordVerify(
-                                                    context,
-                                                    userId,
-                                                    pin);
+                                                    context, userId, pin);
                                               }
                                             },
                                             onChanged: (value) {

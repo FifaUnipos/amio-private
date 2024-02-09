@@ -699,7 +699,9 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                 bnw900, 'Outfit'),
                                           ),
                                           Text(
-                                            datasProduk![index].type ?? '',
+                                            datasProduk![index].type == 'umum'
+                                                ? 'umum'
+                                                : 'per produk',
                                             style: heading4(FontWeight.w400,
                                                 bnw900, 'Outfit'),
                                           ),

@@ -50,6 +50,8 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
 
   TextEditingController searchController = TextEditingController();
 
+  DateTime? _selectedDate, _selectedDate2;
+
   void formatInputRpHargaEdit() {
     String text = conHarga.text.replaceAll('.', '');
     int value = int.tryParse(text)!;
@@ -411,7 +413,7 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                       StatefulBuilder(
                                                         builder: (context,
                                                                 setState) =>
-                                                               Expanded(
+                                                            Expanded(
                                                           child:
                                                               RefreshIndicator(
                                                             onRefresh:
@@ -778,12 +780,12 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.parse(
+                                              initialDate:
                                                   tanggalAwalDiskon == ''
-                                                      ? DateTime.now()
-                                                          .toString()
-                                                          .substring(0, 10)
-                                                      : tanggalAwalDiskon),
+                                                      ? _selectedDate ??
+                                                          DateTime.now()
+                                                      : DateTime.parse(
+                                                          tanggalAwalDiskon),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -793,7 +795,10 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
-
+                                              _selectedDate = DateTime(
+                                                  selectedDate.year,
+                                                  selectedDate.month,
+                                                  selectedDate.day);
                                               tanggalAwal =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
                                               print(tanggalAwal);
@@ -869,12 +874,12 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: DateTime.parse(
-                                                  tanggalAkhirDiskon == ''
-                                                      ? DateTime.now()
-                                                          .toString()
-                                                          .substring(0, 10)
-                                                      : tanggalAkhirDiskon),
+                                              initialDate:
+                                                  tanggalAwalDiskon == ''
+                                                      ? _selectedDate2 ??
+                                                          DateTime.now()
+                                                      : DateTime.parse(
+                                                          tanggalAwalDiskon),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
@@ -884,7 +889,11 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
-
+                                              
+                                              _selectedDate2 = DateTime(
+                                                  selectedDate.year,
+                                                  selectedDate.month,
+                                                  selectedDate.day);
                                               tanggalAkhir =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
                                               print(tanggalAkhir);
@@ -1030,6 +1039,9 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
               child: GestureDetector(
                 onTap: () {
                   bool statusDiskon = true;
+                  if (tipeUmumAktif == 1) {
+                    productidDiskon.clear();
+                  }
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;

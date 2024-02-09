@@ -973,6 +973,7 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
+                    masaSelamanya == 1 ? 'forever' : 'custom',
                   );
 
                   setState(() {});
@@ -1009,6 +1010,7 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
+                    masaSelamanya == 1 ? 'forever' : 'custom',
                   ).then((value) {
                     if (value == '00') {
                       widget.pageController.jumpToPage(0);

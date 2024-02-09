@@ -1507,7 +1507,7 @@ class _TransactionPageState extends State<TransactionPage>
                           style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                         ),
                         Text(
-                          FormatCurrency.convertToIdr(discountProduct),
+                          FormatCurrency.convertToIdr(discountProductUmum),
                           style: heading2(FontWeight.w600, succes600, 'Outfit'),
                         ),
                       ],
@@ -1731,6 +1731,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                                       size:
                                                                           size48,
                                                                     ),
+                                                                    SizedBox(
+                                                                        width:
+                                                                            size16),
                                                                     Column(
                                                                       crossAxisAlignment:
                                                                           CrossAxisAlignment
@@ -1746,8 +1749,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               'Outfit'),
                                                                         ),
                                                                         Text(
-                                                                          FormatCurrency.convertToIdr(product['discount'] ??
-                                                                              0),
+                                                                          product['discount_type'] == 'percentage'
+                                                                              ? '${product['discount']}%'
+                                                                              : FormatCurrency.convertToIdr(product['discount'] ?? 0),
                                                                           style: heading4(
                                                                               FontWeight.w600,
                                                                               bnw900,
@@ -3275,6 +3279,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                             child:
                                                                 TextFormField(
                                                               // keyboardType: numberNo,
+                                                              cursorColor:
+                                                                  primary500,
                                                               style: heading2(
                                                                   FontWeight
                                                                       .w600,
@@ -3286,6 +3292,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                               decoration:
                                                                   InputDecoration(
                                                                 isDense: true,
+                                                                focusedBorder:
+                                                                    UnderlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                                ),
                                                                 contentPadding:
                                                                     EdgeInsets.symmetric(
                                                                         vertical:
@@ -3359,6 +3374,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                           IntrinsicHeight(
                                                             child:
                                                                 TextFormField(
+                                                              cursorColor:
+                                                                  primary500,
                                                               keyboardType:
                                                                   TextInputType
                                                                       .number,
@@ -3372,6 +3389,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                               decoration:
                                                                   InputDecoration(
                                                                 isDense: true,
+                                                                focusedBorder:
+                                                                    UnderlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                                ),
                                                                 contentPadding:
                                                                     EdgeInsets.symmetric(
                                                                         vertical:
@@ -3445,6 +3471,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                           .toString();
                                                                 }
                                                                 setState(() {});
+                                                                // initState();
                                                               },
                                                               child:
                                                                   buttonMoutlineColor(
@@ -3465,6 +3492,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                               width: size56,
                                                               child:
                                                                   TextFormField(
+                                                                cursorColor:
+                                                                    primary500,
                                                                 enabled: true,
                                                                 controller:
                                                                     conCounterPreview,
@@ -3490,6 +3519,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                                         .center,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  focusedBorder:
+                                                                      UnderlineInputBorder(
+                                                                    borderSide:
+                                                                        BorderSide(
+                                                                      width: 2,
+                                                                      color:
+                                                                          primary500,
+                                                                    ),
+                                                                  ),
                                                                   // alignLabelWithHint: true,
                                                                   hintText:
                                                                       counterCart
@@ -3569,6 +3607,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                       IntrinsicHeight(
                                                         child: TextFormField(
                                                           // keyboardType: numberNo,
+                                                          cursorColor:
+                                                              primary500,
                                                           style: heading2(
                                                               FontWeight.w600,
                                                               bnw900,
@@ -3596,6 +3636,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                                   BorderSide(
                                                                 width: 1.5,
                                                                 color: bnw500,
+                                                              ),
+                                                            ),
+                                                            focusedBorder:
+                                                                UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                width: 2,
+                                                                color:
+                                                                    primary500,
                                                               ),
                                                             ),
                                                             hintText:
@@ -4413,6 +4462,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                     ),
                                                                                                     IntrinsicHeight(
                                                                                                       child: TextFormField(
+                                                                                                        cursorColor: primary500,
                                                                                                         // keyboardType: numberNo,
                                                                                                         style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                                                                                                         controller: conCatatanPreview,
@@ -4425,6 +4475,12 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                           // );
                                                                                                         },
                                                                                                         decoration: InputDecoration(
+                                                                                                          focusedBorder: UnderlineInputBorder(
+                                                                                                            borderSide: BorderSide(
+                                                                                                              width: 2,
+                                                                                                              color: primary500,
+                                                                                                            ),
+                                                                                                          ),
                                                                                                           isDense: true,
                                                                                                           contentPadding: EdgeInsets.symmetric(vertical: size12),
                                                                                                           enabledBorder: UnderlineInputBorder(
@@ -5169,6 +5225,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                       refreshColor();
 
                                                       setState(() {});
+                                                      initState();
                                                     },
                                                   ),
                                                   SizedBox(width: size8),
@@ -5371,6 +5428,7 @@ class _TransactionPageState extends State<TransactionPage>
                               ? GestureDetector(
                                   onTap: () async {
                                     // log(conCatatan.toList().toString());
+                                    whenLoading(context);
                                     String typePrice = "price";
                                     if (tapTrue == 1) {
                                       typePrice = "price";
@@ -6143,7 +6201,22 @@ class _TransactionPageState extends State<TransactionPage>
                                               onChanged: (value) {
                                                 setState(() {});
                                               },
+                                              cursorColor: primary500,
                                               decoration: InputDecoration(
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                          vertical: size12),
+                                                  isDense: true,
+                                                  focusedBorder:
+                                                      UnderlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            size8),
+                                                    borderSide: BorderSide(
+                                                      width: 2,
+                                                      color: primary500,
+                                                    ),
+                                                  ),
                                                   focusColor: primary500,
                                                   hintText:
                                                       'Cth : Muhammad Nabil Musyaffa',

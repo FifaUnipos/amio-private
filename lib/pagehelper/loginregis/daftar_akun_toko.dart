@@ -463,7 +463,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) =>
                     FractionallySizedBox(
-                  heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                  heightFactor: isKeyboardActive ? 0.9 : 0.80,
                   child: GestureDetector(
                     onTap: () => textFieldFocusNode,
                     child: Container(
@@ -500,6 +500,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                     setState(() {});
                                   },
                                   child: TextField(
+                                    cursorColor: primary500,
                                     controller: searchController,
                                     focusNode: textFieldFocusNode,
                                     onChanged: (value) {
@@ -721,6 +722,12 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                 refreshData();
               },
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     width: 1.5,
@@ -764,6 +771,12 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
               },
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     width: 1.5,
@@ -799,7 +812,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) =>
                         FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
                       child: GestureDetector(
                         onTap: () => textFieldFocusNode.unfocus(),
                         child: Container(
@@ -829,6 +842,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: (value) {
@@ -995,7 +1009,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) =>
                         FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
                       child: GestureDetector(
                         onTap: () => textFieldFocusNode.unfocus(),
                         child: Container(
@@ -1033,6 +1047,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                         setState(() {});
                                       },
                                       child: TextField(
+                                        cursorColor: primary500,
                                         controller: searchController,
                                         focusNode: textFieldFocusNode,
                                         onChanged: ((value) {
@@ -1220,7 +1235,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) =>
                         FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
                       child: GestureDetector(
                         onTap: () => textFieldFocusNode.unfocus(),
                         child: Container(
@@ -1258,6 +1273,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                         setState(() {});
                                       },
                                       child: TextField(
+                                        cursorColor: primary500,
                                         controller: searchController,
                                         focusNode: textFieldFocusNode,
                                         onChanged: ((value) {
@@ -1444,7 +1460,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                   return StatefulBuilder(
                     builder: (BuildContext context, setState) =>
                         FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
                       child: GestureDetector(
                         onTap: () => textFieldFocusNode.unfocus(),
                         child: Container(
@@ -1482,6 +1498,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                         setState(() {});
                                       },
                                       child: TextField(
+                                        cursorColor: primary500,
                                         controller: searchController,
                                         focusNode: textFieldFocusNode,
                                         onChanged: ((value) {
@@ -2101,13 +2118,19 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(() {
             if (value.contains('@') || value.endsWith('.com')) {
               onOffButton = primary500;
-            } else if (value.startsWith('0size8') || value.length < 10) {
+            } else if (value.startsWith('0') || value.length < 10) {
               onOffButton = primary500;
             }
           });
         },
         controller: mycontroller,
         decoration: InputDecoration(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              width: 2,
+              color: primary500,
+            ),
+          ),
           isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: size12),
           hintText: text,
@@ -2126,13 +2149,19 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
           setState(() {
             if (value.contains('@') || value.endsWith('.com')) {
               onOffButton = primary500;
-            } else if (value.startsWith('0size8') || value.length < 10) {
+            } else if (value.startsWith('0') || value.length < 10) {
               onOffButton = primary500;
             }
           });
         },
         controller: mycontroller,
         decoration: InputDecoration(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              width: 2,
+              color: primary500,
+            ),
+          ),
           isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: size12),
           hintText: text,
