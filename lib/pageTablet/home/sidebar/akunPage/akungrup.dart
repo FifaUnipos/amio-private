@@ -144,6 +144,7 @@ class _AkunGrupState extends State<AkunGrup> {
             SizedBox(width: size16),
             Expanded(
               child: TextField(
+                cursorColor: primary500,
                 controller: searchController,
                 onChanged: (value) async {
                   datas = await getAllToko(context, widget.token, value, '');

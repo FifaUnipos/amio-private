@@ -165,11 +165,17 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             keyboardType: numberNo,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
-            decoration: InputDecoration(
+            decoration: InputDecoration(focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(

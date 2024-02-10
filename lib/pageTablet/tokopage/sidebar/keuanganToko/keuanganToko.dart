@@ -823,12 +823,19 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                                                 setState(() {});
                                                                               },
                                                                               child: TextFormField(
+                                                                                cursorColor: primary500,
                                                                                 style: heading2(
                                                                                   FontWeight.w600,
                                                                                   bnw900,
                                                                                   'Outfit',
                                                                                 ),
                                                                                 decoration: InputDecoration(
+                                                                                    focusedBorder: UnderlineInputBorder(
+                                                                                      borderSide: BorderSide(
+                                                                                        width: 2,
+                                                                                        color: primary500,
+                                                                                      ),
+                                                                                    ),
                                                                                     focusColor: primary500,
                                                                                     hintText: 'Cth : Tidak sesuai dengan pengeluaran',
                                                                                     hintStyle: heading2(
@@ -1252,74 +1259,81 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                         bottomRight: Radius.circular(size12),
                       ),
                     ),
-                    child: FutureBuilder(
-                        future: getYearRekon(widget.token, ''),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            var data = snapshot.data;
-                            // print(snapshot.data);
-                            return ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: snapshot.data.length,
-                              physics: BouncingScrollPhysics(),
-                              itemBuilder: (builder, index) {
-                                return Column(
-                                  children: [
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        setState(() {
-                                          yearRekon =
-                                              (data![index]['year'].toString());
-                                        });
-                                        tabController!.animateTo(
-                                          1,
-                                          duration: Duration.zero,
-                                        );
-                                      },
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: EdgeInsets.fromLTRB(
-                                            16, size12, 0, size12),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                      PhosphorIcons
-                                                          .calendar_blank_fill,
-                                                      color: bnw900),
-                                                  SizedBox(width: size16),
-                                                  Text(
-                                                    data![index]['year']
-                                                        .toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
-                                                ],
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        initState();
+                      },
+                      child: FutureBuilder(
+                          future: getYearRekon(widget.token, ''),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              var data = snapshot.data;
+                              // print(snapshot.data);
+                              return ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: snapshot.data.length,
+                                // physics: BouncingScrollPhysics(),
+                                itemBuilder: (builder, index) {
+                                  return Column(
+                                    children: [
+                                      GestureDetector(
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          setState(() {
+                                            yearRekon = (data![index]['year']
+                                                .toString());
+                                          });
+                                          tabController!.animateTo(
+                                            1,
+                                            duration: Duration.zero,
+                                          );
+                                        },
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: EdgeInsets.fromLTRB(
+                                              16, size12, 0, size12),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                        PhosphorIcons
+                                                            .calendar_blank_fill,
+                                                        color: bnw900),
+                                                    SizedBox(width: size16),
+                                                    Text(
+                                                      data![index]['year']
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Divider(thickness: 1.2)
-                                  ],
-                                );
-                              },
-                            );
-                          }
+                                      Divider(thickness: 1.2)
+                                    ],
+                                  );
+                                },
+                              );
+                            }
 
-                          return SizedBox(
-                            width: double.infinity,
-                            child: loading(),
-                          );
-                        }),
+                            return Center(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: loading(),
+                              ),
+                            );
+                          }),
+                    ),
                   ),
                 ),
               ],
@@ -1389,114 +1403,122 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                         bottomRight: Radius.circular(size12),
                       ),
                     ),
-                    child: FutureBuilder(
-                        future: getMonthRekon(widget.token, yearRekon, ''),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            var data = snapshot.data;
-                            // print(snapshot.data);
-                            return ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: snapshot.data.length,
-                              physics: BouncingScrollPhysics(),
-                              itemBuilder: (builder, index) {
-                                return GestureDetector(
-                                  behavior: HitTestBehavior.translucent,
-                                  onTap: () {
-                                    setState(() {
-                                      monthRekon =
-                                          data![index]['bulan'].toString();
-                                      getRekon(widget.token, yearRekon,
-                                          monthRekon, '');
-                                    });
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        getMonthRekon(widget.token, yearRekon, '');
+                        setState(() {});
+                      },
+                      child: FutureBuilder(
+                          future: getMonthRekon(widget.token, yearRekon, ''),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              var data = snapshot.data;
+                              // print(snapshot.data);
+                              return ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: snapshot.data.length,
+                                // physics: BouncingScrollPhysics(),
+                                itemBuilder: (builder, index) {
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      setState(() {
+                                        monthRekon =
+                                            data![index]['bulan'].toString();
+                                        getRekon(widget.token, yearRekon,
+                                            monthRekon, '');
+                                      });
 
-                                    tabController!.animateTo(
-                                      2,
-                                      duration: Duration.zero,
-                                    );
-                                    setState(() {});
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.fromLTRB(
-                                            16, size12, size12, size12),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                    PhosphorIcons
-                                                        .calendar_blank_fill,
-                                                    color: bnw900),
-                                                SizedBox(width: size16),
-                                                Text(
-                                                  data![index]['bulanTahun']
-                                                      .toString(),
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                              ],
-                                            ),
-                                            data![index]['angka'] == 0
-                                                ? Container(
-                                                    width: 80,
-                                                    height: 30,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      color: danger100,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        'Sesuai',
-                                                        style: heading4(
-                                                            FontWeight.w600,
-                                                            danger500,
-                                                            'Outfit'),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Container(
-                                                    width: 80,
-                                                    height: 30,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      color: succes100,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        'Sesuai ',
-                                                        style: heading4(
-                                                            FontWeight.w600,
-                                                            succes600,
-                                                            'Outfit'),
-                                                      ),
-                                                    ),
+                                      tabController!.animateTo(
+                                        2,
+                                        duration: Duration.zero,
+                                      );
+                                      setState(() {});
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.fromLTRB(
+                                              16, size12, size12, size12),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                      PhosphorIcons
+                                                          .calendar_blank_fill,
+                                                      color: bnw900),
+                                                  SizedBox(width: size16),
+                                                  Text(
+                                                    data![index]['bulanTahun']
+                                                        .toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
                                                   ),
-                                          ],
+                                                ],
+                                              ),
+                                              data![index]['angka'] == 0
+                                                  ? Container(
+                                                      width: 80,
+                                                      height: 30,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        color: danger100,
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          'Sesuai',
+                                                          style: heading4(
+                                                              FontWeight.w600,
+                                                              danger500,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Container(
+                                                      width: 80,
+                                                      height: 30,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        color: succes100,
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          'Sesuai ',
+                                                          style: heading4(
+                                                              FontWeight.w600,
+                                                              succes600,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                    ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Divider(thickness: 1.2)
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          }
+                                        Divider(thickness: 1.2)
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            }
 
-                          return SizedBox(
-                            width: double.infinity,
-                            child: loading(),
-                          );
-                        }),
+                            return Center(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: loading(),
+                              ),
+                            );
+                          }),
+                    ),
                   ),
                 ),
               ],
@@ -2441,11 +2463,18 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             keyboardType: numberNo,
             style: heading3(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: primary500,
+                ),
+              ),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   width: 1.5,
@@ -2481,11 +2510,18 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             keyboardType: numberNo,
             style: heading3(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: primary500,
+                ),
+              ),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   width: 1.5,
@@ -2660,10 +2696,17 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
         );
       },
       child: TextFormField(
+        cursorColor: primary500,
         style: heading3(FontWeight.w600, bnw900, 'Outfit'),
         enabled: false,
         onTap: () {},
         decoration: InputDecoration(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              width: 2,
+              color: primary500,
+            ),
+          ),
           enabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(
               width: 1.5,

@@ -5,6 +5,7 @@ import 'package:amio/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:amio/pagehelper/loginregis/daftar_akun_toko.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import '../../../../main.dart';
@@ -472,21 +473,9 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                             final bool
                                                                                 isSelected =
                                                                                 productidDiskon.contains(product['productid']); // Periksa apakah produk dipilih
-                                                                            return Container(
-                                                                              margin: EdgeInsets.only(bottom: size16),
-                                                                              decoration: BoxDecoration(
-                                                                                color: isSelected ? primary100 : bnw100,
-                                                                                border: Border.all(color: isSelected ? primary500 : bnw300),
-                                                                                borderRadius: BorderRadius.circular(size16),
-                                                                              ),
-                                                                              child: ListTile(
-                                                                                title: Text(
-                                                                                  product['name'] != null ? capitalizeEachWord(product['name'].toString()) : '',
-                                                                                ),
-                                                                                trailing: Icon(
-                                                                                  isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square, // Menggunakan status isSelected untuk menentukan ikon
-                                                                                  color: isSelected ? primary500 : bnw900,
-                                                                                ),
+                                                                            return Padding(
+                                                                              padding: EdgeInsets.only(bottom: size12),
+                                                                              child: GestureDetector(
                                                                                 onTap: () {
                                                                                   print('Selected product: ${product['name']}');
                                                                                   textFieldFocusNode.unfocus();
@@ -494,9 +483,13 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                                   // Ubah status produk (tambah atau hapus dari list tergantung kondisi)
                                                                                   setState(() {
                                                                                     if (isSelected) {
-                                                                                      productidDiskon.remove(product['productid']);
+                                                                                      if (productidDiskon.contains(product['productid'])) {
+                                                                                        productidDiskon.remove(product['productid']);
+                                                                                      }
                                                                                     } else {
-                                                                                      productidDiskon.add(product['productid']);
+                                                                                      if (product['discount_status'] == '') {
+                                                                                        productidDiskon.add(product['productid']);
+                                                                                      }
                                                                                     }
                                                                                   });
                                                                                   print(productidDiskon);
@@ -504,6 +497,102 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                                   idProduct = product['productid'];
                                                                                   _selectProduct(product);
                                                                                 },
+                                                                                child: Container(
+                                                                                  padding: EdgeInsets.all(size8),
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: isSelected
+                                                                                        ? primary100
+                                                                                        : product['discount_status'] == ''
+                                                                                            ? bnw100
+                                                                                            : bnw200,
+                                                                                    border: Border.all(
+                                                                                      color: isSelected
+                                                                                          ? primary500
+                                                                                          : product['discount_status'] == ''
+                                                                                              ? bnw300
+                                                                                              : bnw200,
+                                                                                    ),
+                                                                                    borderRadius: BorderRadius.circular(size16),
+                                                                                  ),
+                                                                                  child: Column(
+                                                                                    children: [
+                                                                                      Row(children: [
+                                                                                        ClipRRect(
+                                                                                          borderRadius: BorderRadius.circular(size8),
+                                                                                          child: Image.network(
+                                                                                            product['product_image'],
+                                                                                            fit: BoxFit.cover,
+                                                                                            width: size48,
+                                                                                            height: size48,
+                                                                                            loadingBuilder: (context, child, loadingProgress) {
+                                                                                              if (loadingProgress == null) {
+                                                                                                return child;
+                                                                                              }
+
+                                                                                              return Center(child: loading());
+                                                                                            },
+                                                                                            errorBuilder: (context, error, stackTrace) => SizedBox(
+                                                                                              // height: 227,
+                                                                                              // width: 227,
+                                                                                              child: SvgPicture.asset('assets/logoProduct.svg'),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        SizedBox(width: size16),
+                                                                                        Column(
+                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                          children: [
+                                                                                            Text(
+                                                                                              product['name'],
+                                                                                              style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                            ),
+                                                                                            Text(
+                                                                                              FormatCurrency.convertToIdr(product['price']),
+                                                                                              style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                        Spacer(),
+                                                                                        Icon(
+                                                                                          isSelected
+                                                                                              ? PhosphorIcons.check_square_fill
+                                                                                              : product['discount_status'] == ''
+                                                                                                  ? PhosphorIcons.square
+                                                                                                  : PhosphorIcons.square,
+                                                                                          color: isSelected
+                                                                                              ? primary500
+                                                                                              : product['discount_status'] == ''
+                                                                                                  ? bnw900
+                                                                                                  : bnw400,
+                                                                                        ),
+                                                                                      ]),
+                                                                                      SizedBox(height: size8),
+                                                                                      isSelected
+                                                                                          ? SizedBox()
+                                                                                          : product['discount_status'] != ''
+                                                                                              ? Container(
+                                                                                                  padding: EdgeInsets.symmetric(vertical: size8, horizontal: size16),
+                                                                                                  height: size32,
+                                                                                                  decoration: BoxDecoration(
+                                                                                                    color: danger100,
+                                                                                                    borderRadius: BorderRadius.circular(size8),
+                                                                                                  ),
+                                                                                                  child: Row(
+                                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                    children: [
+                                                                                                      Text(
+                                                                                                        product['discount_status'],
+                                                                                                        style: body3(FontWeight.w400, danger500, 'Outfit'),
+                                                                                                      ),
+                                                                                                      Spacer(),
+                                                                                                      Icon(PhosphorIcons.clock, color: danger500, size: size16),
+                                                                                                    ],
+                                                                                                  ),
+                                                                                                )
+                                                                                              : SizedBox(),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
                                                                               ),
                                                                             );
                                                                           })),
@@ -889,7 +978,7 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
-                                              
+
                                               _selectedDate2 = DateTime(
                                                   selectedDate.year,
                                                   selectedDate.month,

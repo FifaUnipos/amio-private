@@ -157,6 +157,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                     SizedBox(
                       width: 300,
                       child: TextField(
+                        cursorColor: primary500,
                         onChanged: (value) async {
                           datas = await getAllToko(
                               context, widget.token, value, '');
@@ -545,6 +546,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                   ],
                 ),
                 TextField(
+                  cursorColor: primary500,
                   style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                   controller: hapusController,
                   onChanged: (value) {
@@ -552,6 +554,12 @@ class _TokoSidePageState extends State<TokoSidePage> {
                     setState(() {});
                   },
                   decoration: InputDecoration(
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: primary500,
+                      ),
+                    ),
                     errorText: _validate
                         ? 'Silahkan tuliskan konfirmasi dengan menuliskan nama toko.'
                         : null,

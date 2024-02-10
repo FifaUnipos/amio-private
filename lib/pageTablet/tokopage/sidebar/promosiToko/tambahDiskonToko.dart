@@ -1027,6 +1027,20 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
               child: GestureDetector(
                 onTap: () {
                   bool statusDiskon = true;
+                  String tipeUmumAktifError = "";
+                  if (tipeUmumAktif == 0 && tipeProdukAktif == 0) {
+                    tipeUmumAktifError = '';
+                  } else if (tipeUmumAktif == 1) {
+                    tipeUmumAktifError = 'umum';
+                    productidDiskon = [''];
+                  } else if (tipeProdukAktif == 1) {
+                    if (productidDiskon.isEmpty) {
+                      tipeUmumAktifError = '';
+                    } else {
+                      tipeUmumAktifError = 'perproduk';
+                      productidDiskon = productidDiskon;
+                    }
+                  }
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;
@@ -1034,7 +1048,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                     context,
                     widget.token,
                     '',
-                    productidDiskon,
+                    tipeUmumAktifError == "" ? '' : productidDiskon,
                     conNameDiskon.text,
                     conHarga.text,
                     hargaRupiahAktif == 1 ? 'price' : 'percentage',
@@ -1064,20 +1078,26 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                 onTap: () {
                   bool statusDiskon = true;
                   String tipeUmumAktifError = "";
-
-                  if (tipeUmumAktif == 0) {
-                    tipeUmumAktifError = "";
+                  if (tipeUmumAktif == 0 && tipeProdukAktif == 0) {
+                    tipeUmumAktifError = '';
                   } else if (tipeUmumAktif == 1) {
-                    tipeUmumAktifError = "terisi";
+                    tipeUmumAktifError = 'umum';
                     productidDiskon = [''];
-                  } else {
-                    tipeUmumAktifError = "terisi";
-                    productidDiskon = productidDiskon;
+                  } else if (tipeProdukAktif == 1) {
+                    if (productidDiskon.isEmpty) {
+                      tipeUmumAktifError = '';
+                    } else {
+                      tipeUmumAktifError = 'perproduk';
+                      productidDiskon = productidDiskon;
+                    }
                   }
 
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
                       : statusDiskon = false;
+
+                  print(productidDiskon);
+                  print(tipeUmumAktifError);
                   tambahDiskon(
                     context,
                     widget.token,

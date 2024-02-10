@@ -122,7 +122,7 @@ class _TransactionPageState extends State<TransactionPage>
   bool isExpand = false;
   int tapTrue = 0;
 
-  String? discountId, discountIdFix;
+  String? discountId, discountIdFix, discountName = '', discountNameFix = '';
 
   void formatInput() {
     String text = kreditpinController.text.replaceAll('-', '');
@@ -914,10 +914,18 @@ class _TransactionPageState extends State<TransactionPage>
                                             },
                                             child: SizedBox(
                                               child: TextFormField(
+                                                cursorColor: primary500,
                                                 enabled: false,
                                                 style: heading3(FontWeight.w400,
                                                     bnw900, 'Outfit'),
                                                 decoration: InputDecoration(
+                                                    focusedBorder:
+                                                        UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        width: 2,
+                                                        color: primary500,
+                                                      ),
+                                                    ),
                                                     contentPadding:
                                                         EdgeInsets.symmetric(
                                                             vertical: size16),
@@ -955,6 +963,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                   },
                                                   child: SizedBox(
                                                     child: TextFormField(
+                                                      cursorColor: primary500,
                                                       enabled: false,
                                                       style: heading3(
                                                           FontWeight.w400,
@@ -962,6 +971,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                           'Outfit'),
                                                       decoration:
                                                           InputDecoration(
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
+                                                                  width: 2,
+                                                                  color:
+                                                                      primary500,
+                                                                ),
+                                                              ),
                                                               focusColor:
                                                                   primary500,
                                                               prefixIcon: Icon(
@@ -1123,12 +1141,21 @@ class _TransactionPageState extends State<TransactionPage>
                                                 },
                                                 child: SizedBox(
                                                   child: TextFormField(
+                                                    cursorColor: primary500,
                                                     enabled: false,
                                                     style: heading3(
                                                         FontWeight.w400,
                                                         bnw900,
                                                         'Outfit'),
                                                     decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                            width: 2,
+                                                            color: primary500,
+                                                          ),
+                                                        ),
                                                         focusColor: primary500,
                                                         prefixIcon: Icon(
                                                           logoStruk != ''
@@ -1163,6 +1190,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                       },
                                                       child: SizedBox(
                                                         child: TextFormField(
+                                                          cursorColor:
+                                                              primary500,
                                                           enabled: false,
                                                           style: heading3(
                                                               FontWeight.w400,
@@ -1170,6 +1199,15 @@ class _TransactionPageState extends State<TransactionPage>
                                                               'Outfit'),
                                                           decoration:
                                                               InputDecoration(
+                                                                  focusedBorder:
+                                                                      UnderlineInputBorder(
+                                                                    borderSide:
+                                                                        BorderSide(
+                                                                      width: 2,
+                                                                      color:
+                                                                          primary500,
+                                                                    ),
+                                                                  ),
                                                                   focusColor:
                                                                       primary500,
                                                                   prefixIcon:
@@ -1684,14 +1722,14 @@ class _TransactionPageState extends State<TransactionPage>
                                                             textFieldFocusNode
                                                                 .unfocus();
 
-                                                            _selectProduct(
-                                                                product);
-
+                                                            if (product[
+                                                                    'date'] !=
+                                                                'Kedaluwarsa') {
+                                                              _selectProduct(
+                                                                  product);
+                                                            }
                                                             print(
                                                                 product['id']);
-
-                                                            discountId =
-                                                                product['id'];
                                                             setState(() {});
                                                           });
                                                         },
@@ -1705,9 +1743,13 @@ class _TransactionPageState extends State<TransactionPage>
                                                                     size16),
                                                             decoration:
                                                                 BoxDecoration(
-                                                              color: isSelected
-                                                                  ? primary100
-                                                                  : bnw100,
+                                                              color: product[
+                                                                          'date'] ==
+                                                                      'Kedaluwarsa'
+                                                                  ? bnw300
+                                                                  : isSelected
+                                                                      ? primary100
+                                                                      : bnw100,
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
@@ -1726,8 +1768,10 @@ class _TransactionPageState extends State<TransactionPage>
                                                                     Icon(
                                                                       PhosphorIcons
                                                                           .tag_fill,
-                                                                      color:
-                                                                          primary500,
+                                                                      color: product['date'] ==
+                                                                              'Kedaluwarsa'
+                                                                          ? bnw100
+                                                                          : primary500,
                                                                       size:
                                                                           size48,
                                                                     ),
@@ -1745,7 +1789,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               : '',
                                                                           style: heading3(
                                                                               FontWeight.w400,
-                                                                              bnw900,
+                                                                              product['date'] == 'Kedaluwarsa' ? bnw100 : bnw900,
                                                                               'Outfit'),
                                                                         ),
                                                                         Text(
@@ -1754,7 +1798,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               : FormatCurrency.convertToIdr(product['discount'] ?? 0),
                                                                           style: heading4(
                                                                               FontWeight.w600,
-                                                                              bnw900,
+                                                                              product['date'] == 'Kedaluwarsa' ? bnw100 : bnw900,
                                                                               'Outfit'),
                                                                         )
                                                                       ],
@@ -1772,41 +1816,46 @@ class _TransactionPageState extends State<TransactionPage>
                                                                             size12),
                                                                     decoration:
                                                                         BoxDecoration(
-                                                                      color:
-                                                                          bnw200,
+                                                                      color: product['date'] ==
+                                                                              'Kedaluwarsa'
+                                                                          ? danger100
+                                                                          : bnw200,
                                                                       borderRadius:
                                                                           BorderRadius.circular(
                                                                               size16),
                                                                       border:
                                                                           Border
                                                                               .all(
-                                                                        color:
-                                                                            bnw300,
+                                                                        color: product['date'] ==
+                                                                                'Kedaluwarsa'
+                                                                            ? danger100
+                                                                            : bnw300,
                                                                       ),
                                                                     ),
                                                                     child: Row(
                                                                       crossAxisAlignment:
                                                                           CrossAxisAlignment
                                                                               .start,
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
                                                                       children: [
-                                                                        Icon(
-                                                                          PhosphorIcons
-                                                                              .clock_fill,
-                                                                          color:
-                                                                              bnw600,
-                                                                          size:
-                                                                              size16,
-                                                                        ),
-                                                                        SizedBox(
-                                                                            width:
-                                                                                size8),
                                                                         Text(
                                                                             product[
                                                                                 'date'],
                                                                             style: body3(
                                                                                 FontWeight.w400,
-                                                                                bnw600,
+                                                                                product['date'] == 'Kedaluwarsa' ? danger500 : bnw600,
                                                                                 'Outfit')),
+                                                                        Icon(
+                                                                          PhosphorIcons
+                                                                              .clock,
+                                                                          color: product['date'] == 'Kedaluwarsa'
+                                                                              ? danger500
+                                                                              : bnw600,
+                                                                          size:
+                                                                              size16,
+                                                                        ),
                                                                       ],
                                                                     ))
                                                               ],
@@ -1867,6 +1916,7 @@ class _TransactionPageState extends State<TransactionPage>
                                             setState(() {
                                               print(discountId);
                                               discountIdFix = discountId;
+                                              discountNameFix = discountName;
                                               Navigator.pop(context);
                                               String typePrice = "price";
                                               if (tapTrue == 1) {
@@ -1909,20 +1959,27 @@ class _TransactionPageState extends State<TransactionPage>
                       },
                       child: SizedBox(
                         width: double.infinity,
-                        child: buttonXLoutline(
+                        child: buttonXLactive(
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Pilih Diskon',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                discountName == ''
+                                    ? 'Pilih Diskon'
+                                    : discountName.toString(),
+                                style: heading3(
+                                    FontWeight.w400,
+                                    discountName == '' ? bnw900 : primary500,
+                                    'Outfit'),
                               ),
-                              Icon(PhosphorIcons.tag_fill, color: bnw900)
+                              Icon(PhosphorIcons.tag_fill,
+                                  color:
+                                      discountName == '' ? bnw900 : primary500)
                             ],
                           ),
                           double.infinity,
-                          bnw300,
+                          discountName == '' ? bnw300 : primary500,
+                          discountName == '' ? bnw100 : primary100,
                         ),
                       ),
                     ),
@@ -2380,6 +2437,7 @@ class _TransactionPageState extends State<TransactionPage>
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             onTap: () {
               displayCode = true;
               print(displayCode);
@@ -2622,6 +2680,7 @@ class _TransactionPageState extends State<TransactionPage>
                 IntrinsicHeight(
                   child: Container(
                     child: TextFormField(
+                      cursorColor: primary500,
                       onTap: () {
                         displayCode = true;
                         print(displayCode);
@@ -3780,6 +3839,14 @@ class _TransactionPageState extends State<TransactionPage>
                                                               total.add(price *
                                                                   counterCart);
 
+                                                              conCatatan.add(
+                                                                TextEditingController(
+                                                                  text:
+                                                                      conCatatanPreview
+                                                                          .text,
+                                                                ),
+                                                              );
+
                                                               cart.add(
                                                                 CartTransaksi(
                                                                   name: name,
@@ -3797,24 +3864,22 @@ class _TransactionPageState extends State<TransactionPage>
                                                                   //     .toInt(),
                                                                 ),
                                                               );
-                                                              for (int i = 0;
-                                                                  i <=
-                                                                      cart.length;
-                                                                  i++) {
-                                                                conCatatan.add(
-                                                                  TextEditingController(
-                                                                    text: conCatatanPreview
-                                                                        .text,
-                                                                  ),
-                                                                );
-                                                                inputValues.add(
-                                                                    conCatatanPreview
-                                                                        .text);
-                                                                setState(() {});
-                                                                initState();
-                                                              }
+                                                              // for (int i = 0;
+                                                              //     i <=
+                                                              //         cart.length;
+                                                              //     i++) {
+                                                              //   conCatatan.add(
+                                                              //     TextEditingController(
+                                                              //       text: conCatatanPreview
+                                                              //           .text,
+                                                              //     ),
+                                                              //   );
+                                                              //   inputValues.add(
+                                                              //       conCatatanPreview
+                                                              //           .text);
+                                                              // }
 
-                                                              refreshColor();
+                                                              setState(() {});
 
                                                               num totalku = 0;
                                                               cartMap.forEach(
@@ -3830,6 +3895,8 @@ class _TransactionPageState extends State<TransactionPage>
 
                                                               sumTotal =
                                                                   totalku;
+                                                              initState();
+                                                              refreshColor();
                                                             }
                                                           } else {
                                                             errorText =
@@ -4402,6 +4469,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                                           height: size48,
                                                                                                                           width: size56,
                                                                                                                           child: TextFormField(
+                                                                                                                            cursorColor: primary500,
                                                                                                                             enabled: true,
                                                                                                                             controller: conCounterPreview,
                                                                                                                             keyboardType: TextInputType.number,
@@ -5147,6 +5215,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                     child: Container(
                                                       height: 38,
                                                       child: TextFormField(
+                                                        cursorColor: primary500,
                                                         controller:
                                                             conCatatan[i],
                                                         onChanged: (newValue) {
@@ -5203,7 +5272,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                       if (cart[i].quantity <
                                                           1) {
                                                         // Remove the item from the lists
-                                                        cart.removeAt(i);
+                                                        // cart.removeAt(i);
+                                                        cart.remove(cart[i]);
                                                         cartMap.removeAt(i);
                                                         total.removeAt(i);
                                                         conCatatan.removeAt(i);
@@ -5214,12 +5284,14 @@ class _TransactionPageState extends State<TransactionPage>
                                                         conCatatanPreview.text =
                                                             '';
 
+                                                        // conCatatan.removeAt(i);
                                                         // Remove the product ID
                                                         cartProductIds
                                                             .removeAt(i);
 
                                                         // Reset flags or variables
                                                         isItemAdded = false;
+                                                        setState(() {});
                                                       }
 
                                                       refreshColor();
@@ -5233,6 +5305,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                     child: SizedBox(
                                                       height: 38,
                                                       child: TextFormField(
+                                                        cursorColor: primary500,
                                                         enabled: false,
                                                         textAlign:
                                                             TextAlign.center,
@@ -5647,6 +5720,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                       height: size48,
                                                       width: size56,
                                                       child: TextFormField(
+                                                        cursorColor: primary500,
                                                         enabled: true,
                                                         controller:
                                                             conCounterPreview,
@@ -5829,6 +5903,7 @@ class _TransactionPageState extends State<TransactionPage>
                                 ),
                                 IntrinsicHeight(
                                   child: TextFormField(
+                                    cursorColor: primary500,
                                     // keyboardType: numberNo,
                                     style: heading2(
                                         FontWeight.w600, bnw900, 'Outfit'),
@@ -5842,6 +5917,12 @@ class _TransactionPageState extends State<TransactionPage>
                                       // );
                                     },
                                     decoration: InputDecoration(
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          width: 2,
+                                          color: primary500,
+                                        ),
+                                      ),
                                       isDense: true,
                                       contentPadding: EdgeInsets.symmetric(
                                           vertical: size12),
@@ -6627,9 +6708,13 @@ class _TransactionPageState extends State<TransactionPage>
       if (selectedProduct == product) {
         selectedProduct = null;
         isItemSelected = false;
+        discountId = '';
+        discountName = '';
       } else {
         selectedProduct = product;
         isItemSelected = true;
+        discountId = product['id'];
+        discountName = product['name'];
       }
     });
   }

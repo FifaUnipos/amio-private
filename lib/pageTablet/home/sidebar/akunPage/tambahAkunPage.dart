@@ -155,7 +155,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                       //     ),
                       //     Container(
                       //       color: bnw300,
-                      //       child: TextFormField(
+                      //       child: TextFormField(cursorColor:primary500,
                       //         enabled: false,
                       //         style:
                       //             heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -214,8 +214,15 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                         child: GestureDetector(
                           onTap: () => tambahGambar(context),
                           child: TextFormField(
+                            cursorColor: primary500,
                             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                             decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               enabled: false,
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
@@ -596,10 +603,17 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {},
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -637,11 +651,18 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {},
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -719,9 +740,16 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -743,10 +771,17 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,

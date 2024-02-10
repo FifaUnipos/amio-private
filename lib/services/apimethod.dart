@@ -2250,7 +2250,7 @@ Future calculateTransaction(
   var data = jsonResponse['data'];
   if (response.statusCode == 200) {
     print('succes');
-    log(jsonResponse.toString());
+    // log(jsonResponse.toString());
     // print(jsonResponse['data']['subTotal'].toString());
     // print(totalTransaksi.toString());
     totalTransaksi = data['total'];

@@ -473,8 +473,15 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                 onTap: () => tambahGambar(context),
                 child: IntrinsicHeight(
                   child: TextFormField(
+                    cursorColor: primary500,
                     style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                     decoration: InputDecoration(
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: primary500,
+                        ),
+                      ),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
                           width: 1.5,
@@ -779,11 +786,18 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               keyboardType: numberNo,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {},
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -848,6 +862,7 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                     setState(() {});
                                   },
                                   child: TextField(
+                                    cursorColor: primary500,
                                     controller: searchController,
                                     focusNode: textFieldFocusNode,
                                     onChanged: (value) {
@@ -1178,6 +1193,7 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                   ),
                                   FocusScope(
                                     child: TextFormField(
+                                      cursorColor: primary500,
                                       style: heading2(
                                         FontWeight.w600,
                                         bnw900,
@@ -1185,6 +1201,12 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                       ),
                                       controller: controllerNameEdit,
                                       decoration: InputDecoration(
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              width: 2,
+                                              color: primary500,
+                                            ),
+                                          ),
                                           focusColor: primary500,
                                           hintText: 'Cth : Rental Mobil',
                                           hintStyle: heading2(
@@ -1405,6 +1427,7 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                           setState(() {});
                         },
                         child: TextFormField(
+                          cursorColor: primary500,
                           style: heading2(
                             FontWeight.w600,
                             bnw900,
@@ -1412,6 +1435,12 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                           ),
                           controller: controllerName,
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               hintText: 'Cth : Rental Mobil',
                               hintStyle: heading2(
@@ -1590,9 +1619,16 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -1614,10 +1650,17 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,

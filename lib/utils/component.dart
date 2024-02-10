@@ -474,15 +474,23 @@ buttonXLonOff(Widget mywidget, double width, Color color) {
   );
 }
 
-buttonXLpress(Widget mywidget, double width) {
-  return Container(
-    width: width,
-    padding: EdgeInsets.symmetric(horizontal: size20, vertical: size16),
-    decoration: BoxDecoration(
-      color: primary600,
-      borderRadius: BorderRadius.circular(size8),
+buttonXLactive(Widget mywidget, double width, Color colorBorder, Color color) {
+  return IntrinsicWidth(
+    child: Container(
+      height: size56,
+      padding: EdgeInsets.symmetric(horizontal: size20),
+      decoration: ShapeDecoration(
+        color: color,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            width: width1,
+            color: colorBorder,
+          ),
+          borderRadius: BorderRadius.circular(size8),
+        ),
+      ),
+      child: mywidget,
     ),
-    child: mywidget,
   );
 }
 

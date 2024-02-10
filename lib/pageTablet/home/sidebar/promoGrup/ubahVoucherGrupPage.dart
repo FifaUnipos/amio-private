@@ -114,7 +114,7 @@ class _UbahPromosiGrupPageState extends State<UbahPromosiGrupPage> {
             physics: BouncingScrollPhysics(),
             children: [
               fieldEditProduk(
-                'Nama Produk',
+                'Nama Voucher',
                 conNameProdukEdit,
                 TextInputType.text,
               ),

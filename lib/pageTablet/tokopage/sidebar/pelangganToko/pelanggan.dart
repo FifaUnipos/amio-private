@@ -555,7 +555,8 @@ class _PelangganTokoState extends State<PelangganToko> {
                                     SizedBox(width: size16),
                                     Expanded(
                                       child: Text(
-                                        datasPelanggan![index].phonenumber ?? '-',
+                                        datasPelanggan![index].phonenumber ??
+                                            '-',
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
@@ -565,8 +566,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                                     SizedBox(width: size16),
                                     Expanded(
                                       child: Text(
-                                        datasPelanggan![index].email ??
-                                            '-',
+                                        datasPelanggan![index].email ?? '-',
                                         // '${datasPelanggan![index].price}',
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -912,11 +912,18 @@ class _PelangganTokoState extends State<PelangganToko> {
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             keyboardType: numberNo,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: primary500,
+                ),
+              ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
@@ -952,11 +959,18 @@ class _PelangganTokoState extends State<PelangganToko> {
             ],
           ),
           TextFormField(
+            cursorColor: primary500,
             keyboardType: numberNo,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: primary500,
+                ),
+              ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
@@ -1137,5 +1151,4 @@ class _PelangganTokoState extends State<PelangganToko> {
       ),
     );
   }
-
 }

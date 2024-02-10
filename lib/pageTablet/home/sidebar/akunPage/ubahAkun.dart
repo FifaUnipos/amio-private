@@ -209,7 +209,6 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
                             ),
                           ],
                         ),
-                        
                         Theme(
                           data: ThemeData(
                             disabledColor: bnw900,
@@ -217,12 +216,19 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
                           child: GestureDetector(
                             onTap: () => getImage(),
                             child: TextFormField(
+                              cursorColor: primary500,
                               style:
                                   heading2(FontWeight.w600, bnw900, 'Outfit'),
                               onChanged: ((value) {
                                 log(value);
                               }),
                               decoration: InputDecoration(
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    width: 2,
+                                    color: primary500,
+                                  ),
+                                ),
                                 enabled: false,
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
@@ -347,7 +353,8 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
                   )
                 ],
               ),
-            ), future: null,
+            ),
+            future: null,
           ),
         ),
       ],
@@ -373,10 +380,17 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {},
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -414,11 +428,18 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {},
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -496,9 +517,16 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -520,10 +548,17 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,
@@ -549,5 +584,4 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
       ),
     );
   }
-
 }

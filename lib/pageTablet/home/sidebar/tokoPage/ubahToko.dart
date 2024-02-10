@@ -239,8 +239,15 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                         onTap: () => tambahGambar(context),
                         child: IntrinsicHeight(
                           child: TextFormField(
+                            cursorColor: primary500,
                             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                             decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                   width: 1.5,
@@ -365,6 +372,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
             ),
             IntrinsicHeight(
               child: TextFormField(
+                cursorColor: primary500,
                 style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                 controller: mycontroller,
                 // onChanged: (value) {
@@ -377,6 +385,12 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                   });
                 },
                 decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: primary500,
+                    ),
+                  ),
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: size12),
                   enabledBorder: UnderlineInputBorder(
@@ -415,6 +429,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
             ),
             IntrinsicHeight(
               child: TextFormField(
+                cursorColor: primary500,
                 style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                 controller: mycontroller,
                 // onChanged: (value) {
@@ -428,6 +443,12 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                   });
                 },
                 decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: primary500,
+                    ),
+                  ),
                   contentPadding: EdgeInsets.symmetric(vertical: size12),
                   isDense: true,
                   enabledBorder: UnderlineInputBorder(
@@ -499,6 +520,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                     setState(() {});
                                   },
                                   child: TextField(
+                                    cursorColor: primary500,
                                     controller: searchController,
                                     focusNode: textFieldFocusNode,
                                     onChanged: (value) {
@@ -746,6 +768,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: (value) {
@@ -1000,6 +1023,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {
@@ -1272,6 +1296,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {
@@ -1545,6 +1570,7 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: ((value) {
@@ -2064,9 +2090,16 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -2089,10 +2122,17 @@ class _ChangeMerchantState extends State<ChangeMerchant> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,

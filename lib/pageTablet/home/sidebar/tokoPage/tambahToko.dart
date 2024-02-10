@@ -180,9 +180,16 @@ class _CreateMerchantState extends State<CreateMerchant> {
                           onTap: () => tambahGambar(context),
                           child: SizedBox(
                             child: TextFormField(
+                              cursorColor: primary500,
                               style:
                                   heading3(FontWeight.w600, bnw900, 'Outfit'),
                               decoration: InputDecoration(
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    width: 2,
+                                    color: primary500,
+                                  ),
+                                ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
                                     width: width1,
@@ -413,6 +420,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                     setState(() {});
                                   },
                                   child: TextField(
+                                    cursorColor: primary500,
                                     controller: searchController,
                                     focusNode: textFieldFocusNode,
                                     onChanged: (value) {
@@ -641,6 +649,12 @@ class _CreateMerchantState extends State<CreateMerchant> {
                   }
                 },
                 decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: primary500,
+                    ),
+                  ),
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: size12),
                   enabledBorder: UnderlineInputBorder(
@@ -681,6 +695,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
           IntrinsicHeight(
             child: Container(
               child: TextFormField(
+                cursorColor: primary500,
                 style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                 controller: mycontroller,
                 keyboardType: TextInputType.number,
@@ -694,6 +709,12 @@ class _CreateMerchantState extends State<CreateMerchant> {
                   }
                 },
                 decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 2,
+                      color: primary500,
+                    ),
+                  ),
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: size12),
                   enabledBorder: UnderlineInputBorder(
@@ -769,6 +790,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       controller: searchController,
                                       focusNode: textFieldFocusNode,
                                       onChanged: (value) {
@@ -1022,6 +1044,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       onChanged: ((value) {
                                         _runSearchRegencies(value);
                                         setState(() {});
@@ -1293,6 +1316,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       focusNode: textFieldFocusNode,
                                       controller: searchController,
                                       onChanged: ((value) {
@@ -1566,6 +1590,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                       setState(() {});
                                     },
                                     child: TextField(
+                                      cursorColor: primary500,
                                       focusNode: textFieldFocusNode,
                                       controller: searchController,
                                       onChanged: ((value) {
@@ -2070,9 +2095,16 @@ class _CreateMerchantState extends State<CreateMerchant> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -2094,10 +2126,17 @@ class _CreateMerchantState extends State<CreateMerchant> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,
