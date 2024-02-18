@@ -76,45 +76,54 @@ class _ProdukGrupState extends State<ProdukGrup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-          child: Container(
-              padding: EdgeInsets.all(size16),
-              margin: EdgeInsets.all(size16),
-              decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+          body: SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(size16),
+          margin: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            pageSnapping: true,
+            reverse: false,
+            physics: NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              print('$index');
+            },
+            children: [
+              mainPageProduk(context),
+              LihatProdukPage(
+                token: widget.token,
+                merchId: _merchid,
+                name: _name,
+                pageController: _pageController,
               ),
-              child: PageView(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          pageSnapping: true,
-          reverse: false,
-          physics: NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            print('$index');
-          },
-          children: [
-            mainPageProduk(context),
-            LihatProdukPage(
-              token: widget.token,
-              merchId: _merchid,
-              name: _name,
-              pageController: _pageController,
-            ),
-            TambahProdukPage(
-              name: _name,
-              datas: datas ?? [],
-              pageController: _pageController,
-            ),
-            TambahBanyakProdukPagPage(
-              pageController: _pageController,
-              token: widget.token,
-            )
-          ],
+              TambahProdukPage(
+                name: _name,
+                datas: datas ?? [],
+                pageController: _pageController,
               ),
-            ),
-        ));
+              TambahBanyakProdukPagPage(
+                pageController: _pageController,
+                token: widget.token,
+              )
+            ],
+          ),
+        ),
+      )),
+    );
   }
 
   mainPageProduk(BuildContext context) {

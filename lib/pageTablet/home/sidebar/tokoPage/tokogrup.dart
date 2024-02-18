@@ -87,38 +87,49 @@ class _TokoSidePageState extends State<TokoSidePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, value, child) => Scaffold(
-        body: SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(size16),
-            margin: EdgeInsets.all(size16),
-            decoration: BoxDecoration(
-              color: bnw100,
-              borderRadius: BorderRadius.circular(size16),
-            ),
-            child: PageView(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              pageSnapping: true,
-              reverse: false,
-              physics: NeverScrollableScrollPhysics(),
-              onPageChanged: (index) {
-                print('$index');
-              },
-              children: [
-                mainPage(context),
-                CreateMerchant(
-                  token: widget.token,
-                  pageController: _pageController,
-                  datas: datas ?? [],
-                ),
-                ChangeMerchant(
-                  token: widget.token,
-                  pageController: _pageController,
-                  merchantid: merchid,
-                ),
-              ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: Consumer(
+        builder: (context, value, child) => Scaffold(
+          body: SafeArea(
+            child: Container(
+              padding: EdgeInsets.all(size16),
+              margin: EdgeInsets.all(size16),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.circular(size16),
+              ),
+              child: PageView(
+                controller: _pageController,
+                scrollDirection: Axis.vertical,
+                pageSnapping: true,
+                reverse: false,
+                physics: NeverScrollableScrollPhysics(),
+                onPageChanged: (index) {
+                  print('$index');
+                },
+                children: [
+                  mainPage(context),
+                  CreateMerchant(
+                    token: widget.token,
+                    pageController: _pageController,
+                    datas: datas ?? [],
+                  ),
+                  ChangeMerchant(
+                    token: widget.token,
+                    pageController: _pageController,
+                    merchantid: merchid,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

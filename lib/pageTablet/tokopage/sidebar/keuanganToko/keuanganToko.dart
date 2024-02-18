@@ -89,24 +89,37 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
     // double width = MediaQuery.of(context).size.width;
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
-    return SafeArea(
-      child: Container(
-        padding: EdgeInsets.all(size16),
-        margin: EdgeInsets.all(size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        child: PageView(
-          controller: pageController,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            mainPageKeuangan(context, isFalseAvailable),
-            tambahPendapatan(setState, context),
-            tambahPengeluaran(setState, context),
-            ubahPendapatanPage(setState, context),
-            ubahPengeluaranPage(setState, context),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (tabController!.index.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          pageController.jumpToPage(0);
+          tabController!.animateTo(tabController!.index - 1);
+          print(tabController!.previousIndex);
+          return Future.value(false);
+        }
+      },
+      child: SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(size16),
+          margin: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            controller: pageController,
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              mainPageKeuangan(context, isFalseAvailable),
+              tambahPendapatan(setState, context),
+              tambahPengeluaran(setState, context),
+              ubahPendapatanPage(setState, context),
+              ubahPengeluaranPage(setState, context),
+            ],
+          ),
         ),
       ),
     );

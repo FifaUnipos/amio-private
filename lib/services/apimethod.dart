@@ -804,7 +804,7 @@ Future getSingleMerch(context, token, String merchid) async {
 
   var jsonResponse = jsonDecode(response.body);
   var data = jsonResponse['data'];
-
+  log(data.toString());
   if (response.statusCode == 200) {
     nameMerchantUbah = data['name'];
     addressMerchantUbah = data['address'];
@@ -1720,6 +1720,7 @@ Future tambahDiskon(
   is_active,
   active_period,
 ) async {
+  whenLoading(context);
   String productidList;
   if (productid == '') {
     productidList = '';
@@ -1750,11 +1751,13 @@ Future tambahDiskon(
   if (response.statusCode == 200) {
     print('Sukses Tambah Diskon $jsonResponse');
 
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['data'].toString());
     return jsonResponse['rc'];
   } else {
     print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   }
@@ -2229,7 +2232,6 @@ Future calculateTransaction(
   typePrice,
   discount,
 ) async {
-  
   final String detail = json.encode(details);
 
   final response = await http.post(
@@ -2448,8 +2450,8 @@ Future deleteReference(
   print(jsonResponse);
 
   if (response.statusCode == 200) {
-    closeLoading(context);
     Navigator.of(context).popUntil((route) => route.isFirst);
+    // closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {

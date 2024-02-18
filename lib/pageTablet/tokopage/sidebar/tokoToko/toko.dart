@@ -68,32 +68,43 @@ class _TokoPageTokoState extends State<TokoPageToko> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          padding: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            pageSnapping: true,
-            reverse: false,
-            physics: NeverScrollableScrollPhysics(),
-            onPageChanged: (index) {
-              print('$index');
-            },
-            children: [
-              mainPageToko(),
-              ChangeMerchantToko(
-                token: widget.token,
-                pageController: _pageController,
-                merchantid: merchid,
-              ),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Container(
+            margin: EdgeInsets.all(size16),
+            padding: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              pageSnapping: true,
+              reverse: false,
+              physics: NeverScrollableScrollPhysics(),
+              onPageChanged: (index) {
+                print('$index');
+              },
+              children: [
+                mainPageToko(),
+                ChangeMerchantToko(
+                  token: widget.token,
+                  pageController: _pageController,
+                  merchantid: merchid,
+                ),
+              ],
+            ),
           ),
         ),
       ),

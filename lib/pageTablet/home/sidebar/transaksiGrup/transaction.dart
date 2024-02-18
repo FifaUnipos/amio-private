@@ -73,8 +73,13 @@ class _TransaksiGrupState extends State<TransaksiGrup>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        print('haai');
-        return true;
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
       },
       child: Scaffold(
         // backgroundColor: primaryColor,
@@ -254,28 +259,27 @@ class _TransaksiGrupState extends State<TransaksiGrup>
                                         child: SizedBox(
                                           height: 60,
                                           width: 60,
-                                          child:
-                                              datas![i].logomerchant_url != null
-                                                  ? Image.network(
-                                                      datas![i]
-                                                          .logomerchant_url
-                                                          .toString(),
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                              error,
-                                                              stackTrace) =>
-                                                          SizedBox(
-                                                              child: Icon(
-                                                        PhosphorIcons
-                                                            .storefront_fill,
-                                                        size: 60,
-                                                        color: bnw900,
-                                                      )),
-                                                    )
-                                                  : Icon(
-                                                      PhosphorIcons.storefront_fill,
-                                                      size: 60,
-                                                    ),
+                                          child: datas![i].logomerchant_url !=
+                                                  null
+                                              ? Image.network(
+                                                  datas![i]
+                                                      .logomerchant_url
+                                                      .toString(),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      SizedBox(
+                                                          child: Icon(
+                                                    PhosphorIcons
+                                                        .storefront_fill,
+                                                    size: 60,
+                                                    color: bnw900,
+                                                  )),
+                                                )
+                                              : Icon(
+                                                  PhosphorIcons.storefront_fill,
+                                                  size: 60,
+                                                ),
                                         ),
                                       ),
                                       SizedBox(width: size16),

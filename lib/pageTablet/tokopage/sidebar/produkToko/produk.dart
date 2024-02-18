@@ -206,30 +206,41 @@ class _ProdukTokoState extends State<ProdukToko> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.all(size16),
-          margin: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              pageProdukToko(isFalseAvailable),
-              tambahProdukToko(),
-              // ubahProdukToko(setState, context, singleProductId),
-              UbahProdukToko(
-                token: widget.token,
-                productid: singleProductId!,
-                image: singleImage!,
-                pageController: _pageController,
-                datasProduk: datasProduk,
-              )
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(size16),
+            margin: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                pageProdukToko(isFalseAvailable),
+                tambahProdukToko(),
+                // ubahProdukToko(setState, context, singleProductId),
+                UbahProdukToko(
+                  token: widget.token,
+                  productid: singleProductId!,
+                  image: singleImage!,
+                  pageController: _pageController,
+                  datasProduk: datasProduk,
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -248,8 +259,7 @@ class _ProdukTokoState extends State<ProdukToko> {
 
                   getDataProduk(['']);
 
-                  _pageController.previousPage(
-                      duration: Duration(milliseconds: 10), curve: Curves.ease);
+                  _pageController.jumpToPage(0);
                 },
                 child: Icon(
                   PhosphorIcons.arrow_left,
@@ -789,9 +799,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                   GestureDetector(
                     onTap: () {
                       refreshDataProduk();
-                      _pageController.nextPage(
-                          duration: Duration(milliseconds: 10),
-                          curve: Curves.ease);
+                      _pageController.jumpToPage(1);
                     },
                     child: buttonXL(
                       Row(
@@ -3030,7 +3038,6 @@ class _ProdukTokoState extends State<ProdukToko> {
       ),
     );
   }
-
 }
 
 modalBottomValue(String title, icon) {

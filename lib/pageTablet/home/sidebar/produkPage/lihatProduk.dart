@@ -235,26 +235,38 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return StatefulBuilder(
-      builder: (context, setState) => Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(size16),
-          color: bnw100,
-        ),
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          children: [
-            pageProdukToko(isFalseAvailable),
-            tambahProdukToko(setState, context),
-            // ubahProdukGrupToko(setState, context, singleProductId),
-            LihatProdukUbahPage(
-              token: widget.token,
-              productid: singleProductId ?? '',
-              pageController: _pageController,
-              merchId: widget.merchId,
-            )
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        
+        if (_pageController.page!.round() == 0) {
+          widget.pageController.jumpToPage(0);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: StatefulBuilder(
+        builder: (context, setState) => Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size16),
+            color: bnw100,
+          ),
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: [
+              pageProdukToko(isFalseAvailable),
+              tambahProdukToko(setState, context),
+              // ubahProdukGrupToko(setState, context, singleProductId),
+              LihatProdukUbahPage(
+                token: widget.token,
+                productid: singleProductId ?? '',
+                pageController: _pageController,
+                merchId: widget.merchId,
+              )
+            ],
+          ),
         ),
       ),
     );

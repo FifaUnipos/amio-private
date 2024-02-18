@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                                     Container(
                                       child: IntrinsicHeight(
                                         child: TextFormField(
-                                          focusNode: _focusScopeNode,
+                                          // focusNode: _focusScopeNode,
                                           style: heading2(FontWeight.w600,
                                               bnw900, 'Outfit'),
                                           onChanged: (value) {

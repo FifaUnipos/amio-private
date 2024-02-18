@@ -113,32 +113,43 @@ class _PelangganTokoState extends State<PelangganToko> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return StatefulBuilder(
-      builder: (context, setState) => SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          padding: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              pageProdukPelanggan(isFalseAvailable),
-              tambahProdukpelanggan(setState, context),
-              // ubahPelangganToko(setState, context, memberId),
-              UbahPelangganPage(
-                token: widget.token,
-                memberid: memberId ?? '',
-                pageController: _pageController,
-                nameEdit: nameEdit ?? '',
-                nomorEdit: nomorEdit ?? '',
-                emailEdit: emailEdit ?? '',
-                instagramEdit: instagramEdit ?? '',
-              )
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: StatefulBuilder(
+        builder: (context, setState) => SafeArea(
+          child: Container(
+            margin: EdgeInsets.all(size16),
+            padding: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                pageProdukPelanggan(isFalseAvailable),
+                tambahProdukpelanggan(setState, context),
+                // ubahPelangganToko(setState, context, memberId),
+                UbahPelangganPage(
+                  token: widget.token,
+                  memberid: memberId ?? '',
+                  pageController: _pageController,
+                  nameEdit: nameEdit ?? '',
+                  nomorEdit: nomorEdit ?? '',
+                  emailEdit: emailEdit ?? '',
+                  instagramEdit: instagramEdit ?? '',
+                )
+              ],
+            ),
           ),
         ),
       ),

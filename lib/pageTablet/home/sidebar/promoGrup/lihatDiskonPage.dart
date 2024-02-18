@@ -187,35 +187,46 @@ class _PromosiGrupState extends State<PromosiGrup>
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return StatefulBuilder(
-      builder: (context, setState) => Container(
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          children: [
-            pageProdukToko(isFalseAvailable),
-            tambahProdukToko(setState, context),
-            UbahPromosiGrupPage(
-              token: widget.token,
-              pageController: _pageController,
-              productid: singleProductId ?? '',
-              merchid: widget.merchid,
-            ),
-            TambahDiskonGrupPage(
-              token: widget.token,
-              merchid: widget.merchid,
-              pageController: _pageController,
-            ),
-            UbahDiskonGrupPage(
-              token: widget.token,
-              pageController: _pageController,
-              merchid: widget.merchid,
-            )
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          widget.pageController.jumpToPage(0);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: StatefulBuilder(
+        builder: (context, setState) => Container(
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: [
+              pageProdukToko(isFalseAvailable),
+              tambahProdukToko(setState, context),
+              UbahPromosiGrupPage(
+                token: widget.token,
+                pageController: _pageController,
+                productid: singleProductId ?? '',
+                merchid: widget.merchid,
+              ),
+              TambahDiskonGrupPage(
+                token: widget.token,
+                merchid: widget.merchid,
+                pageController: _pageController,
+              ),
+              UbahDiskonGrupPage(
+                token: widget.token,
+                pageController: _pageController,
+                merchid: widget.merchid,
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -414,127 +425,139 @@ class _PromosiGrupState extends State<PromosiGrup>
 
   pageProdukToko(bool isFalseAvailable) {
     List<String> value = [''];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          widget.pageController.jumpToPage(0);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Promo',
+                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    nameToko ?? '',
+                    style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _tabController!.index == 0
+                          ? _pageController.nextPage(
+                              duration: Duration(milliseconds: 10),
+                              curve: Curves.ease)
+                          : _pageController.jumpToPage(3);
+                    },
+                    child: buttonXL(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(PhosphorIcons.plus, color: bnw100),
+                          SizedBox(width: size12),
+                          Text(
+                            _tabController!.index == 0 ? 'Voucher' : 'Diskon',
+                            style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                      130,
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Promo',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  nameToko ?? '',
-                  style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    _tabController!.index == 0
-                        ? _pageController.nextPage(
-                            duration: Duration(milliseconds: 10),
-                            curve: Curves.ease)
-                        : _pageController.jumpToPage(3);
-                  },
-                  child: buttonXL(
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Icon(PhosphorIcons.plus, color: bnw100),
-                        SizedBox(width: size12),
-                        Text(
-                          _tabController!.index == 0 ? 'Voucher' : 'Diskon',
-                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                        ),
-                      ],
-                    ),
-                    130,
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: TabBar(
-                  controller: _tabController,
-                  automaticIndicatorColorAdjustment: false,
-                  indicatorColor: primary500,
-                  unselectedLabelColor: bnw600,
-                  labelColor: primary500,
-                  labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
-                  physics: NeverScrollableScrollPhysics(),
-                  onTap: (value) {
-                    if (value == 0) {
-                      // _pageController.animateToPage(
-                      //   0,
-                      //   duration: Duration(milliseconds: 10),
-                      //   curve: Curves.ease,
-                      // );
-                    } else if (value == 1) {
-                      // _pageController.animateToPage(
-                      //   2,
-                      //   duration: Duration(milliseconds: 10),
-                      //   curve: Curves.ease,
-                      // );
-                    }
-                    setState(() {});
-                  },
-                  tabs: [
-                    Tab(
-                      text: 'Voucher',
-                    ),
-                    Tab(
-                      text: 'Diskon',
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SizedBox(
+                SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  child: TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
+                  child: TabBar(
                     controller: _tabController,
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: size16),
-                            orderBy(context),
-                            SizedBox(height: size16),
-                            VoucherPage(isFalseAvailable)
-                          ],
-                        ),
+                    automaticIndicatorColorAdjustment: false,
+                    indicatorColor: primary500,
+                    unselectedLabelColor: bnw600,
+                    labelColor: primary500,
+                    labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
+                    physics: NeverScrollableScrollPhysics(),
+                    onTap: (value) {
+                      if (value == 0) {
+                        // _pageController.animateToPage(
+                        //   0,
+                        //   duration: Duration(milliseconds: 10),
+                        //   curve: Curves.ease,
+                        // );
+                      } else if (value == 1) {
+                        // _pageController.animateToPage(
+                        //   2,
+                        //   duration: Duration(milliseconds: 10),
+                        //   curve: Curves.ease,
+                        // );
+                      }
+                      setState(() {});
+                    },
+                    tabs: [
+                      Tab(
+                        text: 'Voucher',
                       ),
-                      DiskonGrup(
-                        token: widget.token,
-                        merchid: widget.merchid,
-                        pageController: _pageController,
+                      Tab(
+                        text: 'Diskon',
                       ),
                     ],
                   ),
                 ),
-              )
-            ],
+                Expanded(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: TabBarView(
+                      physics: NeverScrollableScrollPhysics(),
+                      controller: _tabController,
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: size16),
+                              orderBy(context),
+                              SizedBox(height: size16),
+                              VoucherPage(isFalseAvailable)
+                            ],
+                          ),
+                        ),
+                        DiskonGrup(
+                          token: widget.token,
+                          merchid: widget.merchid,
+                          pageController: _pageController,
+                          tabController: _tabController!,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

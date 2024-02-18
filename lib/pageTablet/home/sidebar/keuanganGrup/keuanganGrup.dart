@@ -72,7 +72,10 @@ class _KeuanganGrupState extends State<KeuanganGrup>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        print('haai');
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        }
         return true;
       },
       child: Scaffold(

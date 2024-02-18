@@ -77,7 +77,7 @@ class _LaporanTokoState extends State<LaporanToko> {
     hapusController.dispose();
     super.dispose();
   }
-  
+
   void refresh() {
     setState(() {});
   }
@@ -119,34 +119,45 @@ class _LaporanTokoState extends State<LaporanToko> {
       //     'Profit Toko', 'Laporan Profit Toko', PhosphorIcons.chart_line),
     ];
 
-    return SafeArea(
-      child: Container(
-        margin: EdgeInsets.all(size16),
-        padding: EdgeInsets.all(size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        child: PageView(
-          controller: pageController,
-          scrollDirection: Axis.vertical,
-          pageSnapping: true,
-          reverse: false,
-          physics: NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            print('index berganti ke $index');
-          },
-          children: [
-            lihatLaporanPage(objects),
-            LaporanPendapatanHarianPage(
-                pageController: pageController, token: widget.token),
+    return WillPopScope(
+      onWillPop: () async {
+        if (pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          pageController.jumpToPage(0);
+          return Future.value(false);
+        }
+      },
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(size16),
+          padding: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            controller: pageController,
+            scrollDirection: Axis.vertical,
+            pageSnapping: true,
+            reverse: false,
+            physics: NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              print('index berganti ke $index');
+            },
+            children: [
+              lihatLaporanPage(objects),
+              LaporanPendapatanHarianPage(
+                  pageController: pageController, token: widget.token),
 
-            LaporanPendapatanTokoPage(
-                pageController: pageController, token: widget.token),
-            LaporanPendapatanPerProduk(
-                pageController: pageController, token: widget.token),
-            // profitHarian(context),
-          ],
+              LaporanPendapatanTokoPage(
+                  pageController: pageController, token: widget.token),
+              LaporanPendapatanPerProduk(
+                  pageController: pageController, token: widget.token),
+              // profitHarian(context),
+            ],
+          ),
         ),
       ),
     );

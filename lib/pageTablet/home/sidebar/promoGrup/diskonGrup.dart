@@ -26,11 +26,13 @@ import '../../../home/sidebar/tokoPage/ubahToko.dart';
 class DiskonGrup extends StatefulWidget {
   String token, merchid;
   PageController pageController;
+  TabController tabController;
   DiskonGrup({
     Key? key,
     required this.token,
     required this.merchid,
     required this.pageController,
+    required this.tabController,
   }) : super(key: key);
 
   @override
@@ -175,32 +177,43 @@ class _DiskonGrupState extends State<DiskonGrup> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return StatefulBuilder(
-      builder: (context, setState) => SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              pageProdukToko(isFalseAvailable),
-              tambahProdukToko(setState, context),
-              // UbahDiskonGrupPage(
-              //   token: widget.token,
-              //   pageController: _pageController,
-              //   merchid: widget.merchid,
-              // ),
-              // ubahProdukToko(setState, context, singleid),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          widget.tabController.animateTo(0);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+      },
+      child: StatefulBuilder(
+        builder: (context, setState) => SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                pageProdukToko(isFalseAvailable),
+                tambahProdukToko(setState, context),
+                // UbahDiskonGrupPage(
+                //   token: widget.token,
+                //   pageController: _pageController,
+                //   merchid: widget.merchid,
+                // ),
+                // ubahProdukToko(setState, context, singleid),
 
-              // UbahPromosiPage(
-              //   token: widget.token,
-              //   pageController: _pageController,
-              //   id: singleid ?? '',
-              // )
-            ],
+                // UbahPromosiPage(
+                //   token: widget.token,
+                //   pageController: _pageController,
+                //   id: singleid ?? '',
+                // )
+              ],
+            ),
           ),
         ),
       ),

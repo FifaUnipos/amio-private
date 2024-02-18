@@ -141,19 +141,30 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
   @override
   Widget build(BuildContext context) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    return PageView(
-      controller: _pageController,
-      scrollDirection: Axis.vertical,
-      pageSnapping: true,
-      reverse: false,
-      physics: NeverScrollableScrollPhysics(),
-      onPageChanged: (index) {
-        print('$index');
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          widget.pageController.jumpToPage(0);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          return false;
+        }
       },
-      children: [
-        mainPage(isFalseAvailable),
-        addAllProduct(context),
-      ],
+      child: PageView(
+        controller: _pageController,
+        scrollDirection: Axis.vertical,
+        pageSnapping: true,
+        reverse: false,
+        physics: NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          print('$index');
+        },
+        children: [
+          mainPage(isFalseAvailable),
+          addAllProduct(context),
+        ],
+      ),
     );
   }
 

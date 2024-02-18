@@ -1217,6 +1217,67 @@ showModalBottomProfile(BuildContext context, height, child) {
   );
 }
 
+showModalBottomExit(context) {
+  showModalBottomProfile(
+    context,
+    MediaQuery.of(context).size.height / 2.8,
+    Column(
+      children: [
+        dividerShowdialog(),
+        SizedBox(height: size16),
+        Text(
+          'Kamu yakin ingin keluar aplikasi?',
+          style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+        ),
+        SizedBox(height: size8),
+        Text(
+          'Jika kamu keluar, kamu data akan tetap tersimpan.',
+          style: heading2(FontWeight.w400, bnw900, 'Outfit'),
+        ),
+        SizedBox(height: size32),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: buttonXLoutline(
+                  Center(
+                    child: Text(
+                      'Gak Jadi',
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    ),
+                  ),
+                  MediaQuery.of(context).size.width,
+                  primary500,
+                ),
+              ),
+            ),
+            SizedBox(width: size16),
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  SystemNavigator.pop();
+                },
+                child: buttonXL(
+                  Center(
+                    child: Text(
+                      'Iya, Keluar',
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+                  MediaQuery.of(context).size.width,
+                  // primary500,
+                  // primary500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
 sessionPage(BuildContext context, String token) {
   return Navigator.pushReplacement(
     context,

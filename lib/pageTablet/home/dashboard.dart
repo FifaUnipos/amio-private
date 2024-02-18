@@ -75,87 +75,82 @@ class _SidebarXExampleAppState extends State<SidebarXExampleApp> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: MaterialApp(
-        title: 'UniPOS',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: primary500,
-          canvasColor: bnw100,
-          fontFamily: 'Outfit',
-          scaffoldBackgroundColor: primary500,
-        ),
-        home: Builder(
-          builder: (context) {
-            final isSmallScreen = MediaQuery.of(context).size.width < 600;
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: const SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.light,
-              ),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                drawerEnableOpenDragGesture: false,
-                key: _key,
-                appBar: isSmallScreen
-                    ? AppBar(
-                        backgroundColor: canvasColor,
-                        title:
-                            Text(_getTitleByIndex(_controller.selectedIndex)),
-                        leading: IconButton(
-                          onPressed: () {
-                            _controller.setExtended(true);
-                            _key.currentState?.openDrawer();
-                            print(widget.token);
-                          },
-                          icon: Icon(Icons.menu),
-                        ),
-                      )
-                    : null,
-                drawer: ExampleSidebarX(
-                  controller: _controller,
-                  token: widget.token,
-                  pageController: _pageController,
-                ),
-                body: Row(
-                  children: [
-                    if (!isSmallScreen)
-                      ExampleSidebarX(
-                        controller: _controller,
-                        token: widget.token,
-                        pageController: _pageController,
+    return MaterialApp(
+      title: 'UniPOS',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: primary500,
+        canvasColor: bnw100,
+        fontFamily: 'Outfit',
+        scaffoldBackgroundColor: primary500,
+      ),
+      home: Builder(
+        builder: (context) {
+          final isSmallScreen = MediaQuery.of(context).size.width < 600;
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+            ),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              drawerEnableOpenDragGesture: false,
+              key: _key,
+              appBar: isSmallScreen
+                  ? AppBar(
+                      backgroundColor: canvasColor,
+                      title:
+                          Text(_getTitleByIndex(_controller.selectedIndex)),
+                      leading: IconButton(
+                        onPressed: () {
+                          _controller.setExtended(true);
+                          _key.currentState?.openDrawer();
+                          print(widget.token);
+                        },
+                        icon: Icon(Icons.menu),
                       ),
-                    Expanded(
-                      child: Center(
-                        child: PageView(
-                          controller: _pageController,
-                          // scrollDirection: Axis.horizontal,
-                          physics: NeverScrollableScrollPhysics(),
-                          scrollDirection: Axis.vertical,
-                          pageSnapping: true,
-                          reverse: false,
-                          onPageChanged: (index) {
-                            print('$index');
-                          },
-                          children: [
-                            _ScreensExample(
-                              controller: _controller,
-                              token: widget.token,
-                            ),
-                            ProfilePage(token: widget.token)
-                          ],
-                        ),
+                    )
+                  : null,
+              drawer: ExampleSidebarX(
+                controller: _controller,
+                token: widget.token,
+                pageController: _pageController,
+              ),
+              body: Row(
+                children: [
+                  if (!isSmallScreen)
+                    ExampleSidebarX(
+                      controller: _controller,
+                      token: widget.token,
+                      pageController: _pageController,
+                    ),
+                  Expanded(
+                    child: Center(
+                      child: PageView(
+                        controller: _pageController,
+                        // scrollDirection: Axis.horizontal,
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        pageSnapping: true,
+                        reverse: false,
+                        onPageChanged: (index) {
+                          print('$index');
+                        },
+                        children: [
+                          _ScreensExample(
+                            controller: _controller,
+                            token: widget.token,
+                          ),
+                          ProfilePage(token: widget.token)
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

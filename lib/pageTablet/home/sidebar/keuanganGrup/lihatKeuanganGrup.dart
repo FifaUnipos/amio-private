@@ -91,16 +91,29 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
     // double width = MediaQuery.of(context).size.width;
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
-    return PageView(
-      controller: pageController,
-      physics: NeverScrollableScrollPhysics(),
-      children: [
-        mainPageKeuangan(context, isFalseAvailable),
-        tambahPendapatan(setState, context),
-        tambahPengeluaran(setState, context),
-        ubahPendapatanPage(setState, context),
-        ubahPengeluaranPage(setState, context),
-      ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (tabController!.index.round() == 0) {
+          widget.pageController.jumpToPage(0);
+          return false;
+        } else {
+          // pageController.jumpToPage(0);
+          tabController!.animateTo(tabController!.index - 1);
+          print(tabController!.previousIndex);
+          return Future.value(false);
+        }
+      },
+      child: PageView(
+        controller: pageController,
+        physics: NeverScrollableScrollPhysics(),
+        children: [
+          mainPageKeuangan(context, isFalseAvailable),
+          tambahPendapatan(setState, context),
+          tambahPengeluaran(setState, context),
+          ubahPendapatanPage(setState, context),
+          ubahPengeluaranPage(setState, context),
+        ],
+      ),
     );
   }
 
@@ -1125,16 +1138,20 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                       print(snapshot.error);
                       print(snapshot.data);
 
-                      return SizedBox(
+                      return Center(
+                        child: SizedBox(
+                          width: size20,
+                          height: size20,
+                          child: loading(),
+                        ),
+                      );
+                    }
+                    return Center(
+                      child: SizedBox(
                         width: size20,
                         height: size20,
                         child: loading(),
-                      );
-                    }
-                    return SizedBox(
-                      width: size20,
-                      height: size20,
-                      child: loading(),
+                      ),
                     );
                   },
                 ),
@@ -2195,9 +2212,11 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                             );
                           }
 
-                          return SizedBox(
-                            width: double.infinity,
-                            child: loading(),
+                          return Center(
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: loading(),
+                            ),
                           );
                         }),
                   ),

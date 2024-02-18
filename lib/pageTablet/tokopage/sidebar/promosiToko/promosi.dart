@@ -179,35 +179,50 @@ class _PromosiTokoState extends State<PromosiToko>
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
-    return StatefulBuilder(
-      builder: (context, setState) => SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          padding: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              pageProdukToko(isFalseAvailable),
-              tambahProdukToko(setState, context),
-              UbahPromosiPage(
-                token: widget.token,
-                pageController: _pageController,
-                productid: singleProductId ?? '',
-              ),
-              TambahDiskonPage(
-                token: widget.token,
-                pageController: _pageController,
-              ),
-              UbahDiskonPage(
-                token: widget.token,
-                pageController: _pageController,
-              )
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_tabController!.index.round() == 0 && _pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(0);
+          // _tabController!.animateTo(0);
+          // if(_tabController!.index.round() == 1){
+          //   _tabController!.animateTo(0);
+          // }
+          return false;
+        }
+      },
+      child: StatefulBuilder(
+        builder: (context, setState) => SafeArea(
+          child: Container(
+            margin: EdgeInsets.all(size16),
+            padding: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                pageProdukToko(isFalseAvailable),
+                tambahProdukToko(setState, context),
+                UbahPromosiPage(
+                  token: widget.token,
+                  pageController: _pageController,
+                  productid: singleProductId ?? '',
+                ),
+                TambahDiskonPage(
+                  token: widget.token,
+                  pageController: _pageController,
+                ),
+                UbahDiskonPage(
+                  token: widget.token,
+                  pageController: _pageController,
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -75,41 +75,50 @@ class _PromoGrupState extends State<PromoGrup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-      child: Container(
-        padding: EdgeInsets.all(size16),
-        margin: EdgeInsets.all(size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+          body: SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(size16),
+          margin: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            pageSnapping: true,
+            reverse: false,
+            physics: NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              print('$index');
+            },
+            children: [
+              mainPageProduk(context),
+              PromosiGrup(
+                token: widget.token,
+                merchid: _merchid,
+                name: _name,
+                pageController: _pageController,
+              ),
+              // TambahBanyakVoucherPage(
+              //   pageController: _pageController,
+              //   token: widget.token,
+              //   merchid: _merchid,
+              // )
+            ],
+          ),
         ),
-        child: PageView(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          pageSnapping: true,
-          reverse: false,
-          physics: NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            print('$index');
-          },
-          children: [
-            mainPageProduk(context),
-            PromosiGrup(
-              token: widget.token,
-              merchid: _merchid,
-              name: _name,
-              pageController: _pageController,
-            ),
-            // TambahBanyakVoucherPage(
-            //   pageController: _pageController,
-            //   token: widget.token,
-            //   merchid: _merchid,
-            // )
-          ],
-        ),
-      ),
-    ));
+      )),
+    );
   }
 
   mainPageProduk(BuildContext context) {
@@ -124,11 +133,11 @@ class _PromoGrupState extends State<PromoGrup> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Produk',
+                    'Promo',
                     style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                   ),
                   Text(
-                    'Produk yang akan dijual belikan',
+                    'Promo yang akan dijual belikan',
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],

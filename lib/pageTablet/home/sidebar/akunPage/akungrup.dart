@@ -74,46 +74,57 @@ class _AkunGrupState extends State<AkunGrup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: primaryColor,
-      body: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          padding: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(size16),
-            color: bnw100,
-          ),
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              mainAkunPage(context),
-              lihatAkunPage(
-                title: nameMerchant,
-                token: widget.token,
-                pageController: _pageController,
-                merchid: merchantId,
-              ),
-              TambahAkunPage(
-                merchid: merchantId,
-                token: widget.token,
-                pageController: _pageController,
-                namemerchant: nameMerchant,
-                address: address,
-                province: province,
-                regencies: regencies,
-                district: district,
-                village: village,
-                zipcode: zipcode,
-                businesstype: businesstype,
-                logomerchant_url: logomerchant_url,
-              ),
-              UbahAkunPage(
-                token: widget.token,
-                pageController: _pageController,
-              ),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          _pageController.jumpToPage(_pageController.page!.round() - 1);
+          return false;
+        }
+      },
+      child: Scaffold(
+        // backgroundColor: primaryColor,
+        body: SafeArea(
+          child: Container(
+            margin: EdgeInsets.all(size16),
+            padding: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(size16),
+              color: bnw100,
+            ),
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                mainAkunPage(context),
+                lihatAkunPage(
+                  title: nameMerchant,
+                  token: widget.token,
+                  pageController: _pageController,
+                  merchid: merchantId,
+                ),
+                TambahAkunPage(
+                  merchid: merchantId,
+                  token: widget.token,
+                  pageController: _pageController,
+                  namemerchant: nameMerchant,
+                  address: address,
+                  province: province,
+                  regencies: regencies,
+                  district: district,
+                  village: village,
+                  zipcode: zipcode,
+                  businesstype: businesstype,
+                  logomerchant_url: logomerchant_url,
+                ),
+                UbahAkunPage(
+                  token: widget.token,
+                  pageController: _pageController,
+                ),
+              ],
+            ),
           ),
         ),
       ),

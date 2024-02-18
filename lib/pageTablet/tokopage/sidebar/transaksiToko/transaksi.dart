@@ -704,49 +704,81 @@ class _TransactionPageState extends State<TransactionPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            pageSnapping: true,
-            reverse: false,
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              getAllProduct(context, _pageController),
-              pembayaranPage(context),
-              RiwayatPage(
-                token: widget.token,
-                pageController: _pageController,
-                tabController: _tabController!,
-                bluetooth: bluetooth,
-              ),
-              pengaturanPage(context),
-              SimpanPage(
-                bluetooth: bluetooth,
-                token: widget.token,
-                pageController: _pageController,
-              ),
-              PilihPelangganToko(
-                token: widget.token,
-                pageController: _pageController,
-                pageMetodeSwap: pageControllerPayment,
-                selectedIndex: selectedIndex,
-              ),
-              PilihPelangganTokoFifaKoin(
-                token: widget.token,
-                pageController: _pageController,
-                pageMetodeSwap: pageControllerPayment,
-                selectedIndex: selectedIndex,
-              ),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          showModalBottomExit(context);
+          return false;
+        } else {
+          if (isTagihan == true) {
+            isTagihan = false;
+            cart.clear();
+            cartMap.clear();
+
+            isItemAdded = false;
+
+            total = [];
+            subTotal = 0;
+            sumTotal = 0;
+
+            refreshColor();
+            cartProductIds.clear();
+            conCatatan.clear();
+            conCounterPreview.clear();
+          }
+
+          _pageController.jumpToPage(0);
+          _tabController!.animateTo(0);
+          selectedIndex = 0;
+          selectedIndexDompetDigital = 0;
+          uangTunaiController.text = '0';
+          return Future.value(false);
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: Container(
+            margin: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              pageSnapping: true,
+              reverse: false,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                getAllProduct(context, _pageController),
+                pembayaranPage(context),
+                RiwayatPage(
+                  token: widget.token,
+                  pageController: _pageController,
+                  tabController: _tabController!,
+                  bluetooth: bluetooth,
+                ),
+                pengaturanPage(context),
+                SimpanPage(
+                  bluetooth: bluetooth,
+                  token: widget.token,
+                  pageController: _pageController,
+                ),
+                PilihPelangganToko(
+                  token: widget.token,
+                  pageController: _pageController,
+                  pageMetodeSwap: pageControllerPayment,
+                  selectedIndex: selectedIndex,
+                ),
+                PilihPelangganTokoFifaKoin(
+                  token: widget.token,
+                  pageController: _pageController,
+                  pageMetodeSwap: pageControllerPayment,
+                  selectedIndex: selectedIndex,
+                ),
+              ],
+            ),
           ),
         ),
       ),

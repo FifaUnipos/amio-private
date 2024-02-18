@@ -72,105 +72,82 @@ class _SidebarXExampleAppTokoState extends State<SidebarXExampleAppToko> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-        // return await showDialog(
-        //   context: context,
-        //   builder: (context) => AlertDialog(
-        //     title: Text("Apakah anda yakin?"),
-        //     content: Text("Do you want to exit the app?"),
-        //     actions: <Widget>[
-        //       ElevatedButton(
-        //         onPressed: () => Navigator.of(context).pop(false),
-        //         child: Text("No"),
-        //       ),
-        //       ElevatedButton(
-        //         onPressed: () => Navigator.of(context).pop(true),
-        //         child: Text("Yes"),
-        //       ),
-        //     ],
-        //   ),
-        // );
-      },
-      child: MaterialApp(
-        title: 'UniPOS',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: primary500,
-          canvasColor: primary500,
-          fontFamily: 'Outfit',
-          scaffoldBackgroundColor: primary500,
-          // textTheme: TextTheme(
-          //     // bodyText2: heading4(FontWeight.w600, bnw100, 'Outfit'),
-          //     ),
-        ),
-        home: Builder(
-          builder: (context) {
-            final isSmallScreen = MediaQuery.of(context).size.width < 600;
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: const SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.light,
-              ),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                drawerEnableOpenDragGesture: false,
-                key: _key,
-                appBar: isSmallScreen
-                    ? AppBar(
-                        title:
-                            Text(_getTitleByIndex(_controller.selectedIndex)),
-                        leading: IconButton(
-                          onPressed: () {
-                            _controller.setExtended(true);
-                            _key.currentState?.openDrawer();
-                            print(widget.token);
-                          },
-                          icon: Icon(Icons.menu),
-                        ),
-                      )
-                    : null,
-                drawer: ExampleSidebarXToko(
-                  controller: _controller,
-                  token: widget.token,
-                  pageController: _pageController,
-                ),
-                body: Row(
-                  children: [
-                    if (!isSmallScreen)
-                      ExampleSidebarXToko(
-                        controller: _controller,
-                        token: widget.token,
-                        pageController: _pageController,
+    return MaterialApp(
+      title: 'UniPOS',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: primary500,
+        canvasColor: primary500,
+        fontFamily: 'Outfit',
+        scaffoldBackgroundColor: primary500,
+        // textTheme: TextTheme(
+        //     // bodyText2: heading4(FontWeight.w600, bnw100, 'Outfit'),
+        //     ),
+      ),
+      home: Builder(
+        builder: (context) {
+          final isSmallScreen = MediaQuery.of(context).size.width < 600;
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+            ),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              drawerEnableOpenDragGesture: false,
+              key: _key,
+              appBar: isSmallScreen
+                  ? AppBar(
+                      title: Text(_getTitleByIndex(_controller.selectedIndex)),
+                      leading: IconButton(
+                        onPressed: () {
+                          _controller.setExtended(true);
+                          _key.currentState?.openDrawer();
+                          print(widget.token);
+                        },
+                        icon: Icon(Icons.menu),
                       ),
-                    Expanded(
-                      child: Center(
-                        child: PageView(
-                          physics: NeverScrollableScrollPhysics(),
-                          controller: _pageController,
-                          scrollDirection: Axis.vertical,
-                          pageSnapping: true,
-                          reverse: false,
-                          onPageChanged: (index) {
-                            print('index ke $index');
-                          },
-                          children: [
-                            _ScreensExample(
-                              controller: _controller,
-                              token: widget.token,
-                            ),
-                            ProfilePage(token: widget.token)
-                          ],
-                        ),
+                    )
+                  : null,
+              drawer: ExampleSidebarXToko(
+                controller: _controller,
+                token: widget.token,
+                pageController: _pageController,
+              ),
+              body: Row(
+                children: [
+                  if (!isSmallScreen)
+                    ExampleSidebarXToko(
+                      controller: _controller,
+                      token: widget.token,
+                      pageController: _pageController,
+                    ),
+                  Expanded(
+                    child: Center(
+                      child: PageView(
+                        physics: NeverScrollableScrollPhysics(),
+                        controller: _pageController,
+                        scrollDirection: Axis.vertical,
+                        pageSnapping: true,
+                        reverse: false,
+                        onPageChanged: (index) {
+                          print('index ke $index');
+                        },
+                        children: [
+                          _ScreensExample(
+                            controller: _controller,
+                            token: widget.token,
+                          ),
+                          ProfilePage(token: widget.token)
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -699,66 +676,75 @@ class _ScreensExampleState extends State<_ScreensExample> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, child) {
-        // final pageTitle = _getTitleByIndex(widget.controller.selectedIndex);
-
-        switch (widget.controller.selectedIndex) {
-          // case 0:
-          //   return Container(
-          //     color: Colors.white,
-          //     height: MediaQuery.of(context).size.height,
-          //     width: MediaQuery.of(context).size.width,
-          //     child: Column(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         Image.asset('assets/progress.gif'),
-          //          SizedBox(height: size12),
-          //         Text(
-          //           'On Proggress',
-          //         )
-          //       ],
-          //     ),
-          //   );
-          case 0:
-            // case 1:
-            return Dashboarpagenew(token: widget.token);
-          // return DashboarPage();
-          case 1:
-            return TokoPageToko(token: widget.token);
-
-          case 2:
-            return ProdukToko(token: widget.token);
-          case 3:
-            //   return InventoriPage();
-            // case 5:
-            return TransactionPage(token: widget.token);
-          case 4:
-            return LihatKeuanganToko(token: widget.token);
-          case 5:
-            // case 6:
-            return PelangganToko(token: widget.token);
-          case 6:
-            return PromosiToko(token: widget.token);
-
-          case 7:
-            return LaporanToko(
-              token: widget.token,
-              controller: widget.controller,
-            );
-          case 8:
-            return BantuanGrup();
-          // return TestingSaja();
-          case 9:
-            return BluetoothPage();
-          default:
-            return Text(
-              'Not found page',
-              style: theme.textTheme.headline5,
-            );
-        }
+    return WillPopScope(
+      onWillPop: () async {
+        // print(widget.controller.selectedIndex);
+        // widget.controller.jumpToPage(0);
+        // widget.controller.selectIndex(widget.controller.selectedIndex - 1);
+        // showModalBottomExit(context);
+        return true;
       },
+      child: AnimatedBuilder(
+        animation: widget.controller,
+        builder: (context, child) {
+          // final pageTitle = _getTitleByIndex(widget.controller.selectedIndex);
+
+          switch (widget.controller.selectedIndex) {
+            // case 0:
+            //   return Container(
+            //     color: Colors.white,
+            //     height: MediaQuery.of(context).size.height,
+            //     width: MediaQuery.of(context).size.width,
+            //     child: Column(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       children: [
+            //         Image.asset('assets/progress.gif'),
+            //          SizedBox(height: size12),
+            //         Text(
+            //           'On Proggress',
+            //         )
+            //       ],
+            //     ),
+            //   );
+            case 0:
+              // case 1:
+              return Dashboarpagenew(token: widget.token);
+            // return DashboarPage();
+            case 1:
+              return TokoPageToko(token: widget.token);
+
+            case 2:
+              return ProdukToko(token: widget.token);
+            case 3:
+              //   return InventoriPage();
+              // case 5:
+              return TransactionPage(token: widget.token);
+            case 4:
+              return LihatKeuanganToko(token: widget.token);
+            case 5:
+              // case 6:
+              return PelangganToko(token: widget.token);
+            case 6:
+              return PromosiToko(token: widget.token);
+
+            case 7:
+              return LaporanToko(
+                token: widget.token,
+                controller: widget.controller,
+              );
+            case 8:
+              return BantuanGrup();
+            // return TestingSaja();
+            case 9:
+              return BluetoothPage();
+            default:
+              return Text(
+                'Not found page',
+                style: theme.textTheme.headline5,
+              );
+          }
+        },
+      ),
     );
   }
 }

@@ -161,747 +161,756 @@ class ProfilePageState extends State<ProfilePage> {
     if (nameProfile == null) {
       return CircularProgressIndicator();
     }
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      padding: EdgeInsets.all(size16),
-      margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
-      decoration: BoxDecoration(
-        color: bnw100,
-        borderRadius: BorderRadius.circular(size16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Profile Anda',
-                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                    ),
-                    Text(
-                      'Hai, $nameProfile',
-                      style: heading3(FontWeight.w300, bnw500, 'Outfit'),
-                    ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: () {
-                    showModalBottomProfile(
-                      // shape:  RoundedRectangleBorder(
-                      //   borderRadius: BorderRadius.only(
-                      //     topRight: Radius.circular(12),
-                      //     topLeft: Radius.circular(12),
-                      //   ),
-                      // ),
-
-                      context,
-                      MediaQuery.of(context).size.height / 2.8,
-                      Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Text(
-                            'Kamu yakin ingin keluar akun?',
-                            style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(height: size8),
-                          Text(
-                            'Jika kamu keluar, kamu harus memasukkan akun lagi untuk melakukkan transaksi.',
-                            style: heading2(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(height: size32),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: buttonXLoutline(
-                                    Center(
-                                      child: Text(
-                                        'Gak Jadi',
-                                        style: heading3(FontWeight.w600,
-                                            primary500, 'Outfit'),
-                                      ),
-                                    ),
-                                    MediaQuery.of(context).size.width,
-                                    primary500,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    logout(
-                                      widget.token,
-                                      identifier,
-                                      context,
-                                      LoginPage(),
-                                    );
-
-                                    SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
-                                    prefs.remove('token');
-                                    prefs.remove('deviceid');
-
-                                    selectedIndexSideBar = false;
-                                    showingMenuSidebar == true;
-
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPage(),
-                                      ),
-                                    );
-                                  },
-                                  child: buttonXL(
-                                    Center(
-                                      child: Text(
-                                        'Iya, Keluar',
-                                        style: heading3(
-                                            FontWeight.w600, bnw100, 'Outfit'),
-                                      ),
-                                    ),
-                                    MediaQuery.of(context).size.width,
-                                    // primary500,
-                                    // primary500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+    return WillPopScope(
+      onWillPop: () async {
+        showModalBottomExit(context);
+        return false;
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.all(size16),
+        margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.circular(size16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Profile Anda',
+                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                       ),
-                    );
-                  },
-                  child: buttonXXLoutline(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            PhosphorIcons.sign_out_bold,
-                            color: bnw900,
-                            size: size32,
-                          ),
-                          SizedBox(width: size16),
-                          Text(
-                            'Keluar Akun',
-                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                        ],
+                      Text(
+                        'Hai, $nameProfile',
+                        style: heading3(FontWeight.w300, bnw500, 'Outfit'),
                       ),
-                      0,
-                      bnw900),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: size16),
-          Expanded(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(size16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                border: Border.all(color: bnw300),
-                borderRadius: BorderRadius.circular(size16),
-              ),
-              child: RefreshIndicator(
-                color: bnw100,
-                backgroundColor: primary500,
-                onRefresh: () async {
-                  initState();
-                  setState(() {});
-                },
-                child: ListView(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              imageProfile == null
-                                  ? Container(
-                                      height: 227,
-                                      width: 227,
-                                      child: CircleAvatar(
-                                        backgroundColor: primary200,
-                                        radius: 50,
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomProfile(
+                        // shape:  RoundedRectangleBorder(
+                        //   borderRadius: BorderRadius.only(
+                        //     topRight: Radius.circular(12),
+                        //     topLeft: Radius.circular(12),
+                        //   ),
+                        // ),
 
-                                        // backgroundImage: NetworkImage(imageUrl),
-                                        child: Center(
-                                          child: Text(
-                                            getInitials().toUpperCase(),
-                                            style: heading1(FontWeight.w600,
-                                                bnw900, 'Outfit'),
-                                          ),
+                        context,
+                        MediaQuery.of(context).size.height / 2.8,
+                        Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Text(
+                              'Kamu yakin ingin keluar akun?',
+                              style:
+                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                            SizedBox(height: size8),
+                            Text(
+                              'Jika kamu keluar, kamu harus memasukkan akun lagi untuk melakukkan transaksi.',
+                              style:
+                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                            SizedBox(height: size32),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.pop(context),
+                                    child: buttonXLoutline(
+                                      Center(
+                                        child: Text(
+                                          'Gak Jadi',
+                                          style: heading3(FontWeight.w600,
+                                              primary500, 'Outfit'),
                                         ),
                                       ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(120),
-                                        // border: Border.all(),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(120),
-                                        child: Image.network(imageProfile,
-                                            height: 227,
-                                            width: 227,
-                                            fit: BoxFit.cover, loadingBuilder:
-                                                (context, child,
-                                                    loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          }
-
-                                          return Center(child: loading());
-                                        }, errorBuilder:
-                                                (context, error, stackTrace) {
-                                          imageError = 'true';
-                                          return SizedBox(
-                                            height: 227,
-                                            width: 227,
-                                            child: CircleAvatar(
-                                              backgroundColor: primary200,
-                                              radius: 50,
-
-                                              // backgroundImage: NetworkImage(imageUrl),
-                                              child: Center(
-                                                child: Text(
-                                                  getInitials().toUpperCase(),
-                                                  style: heading1(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                      ),
+                                      MediaQuery.of(context).size.width,
+                                      primary500,
                                     ),
-                              SizedBox(height: size16),
-                              GestureDetector(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      isScrollControlled: true,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      logout(
+                                        widget.token,
+                                        identifier,
+                                        context,
+                                        LoginPage(),
+                                      );
+
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+                                      prefs.remove('token');
+                                      prefs.remove('deviceid');
+
+                                      selectedIndexSideBar = false;
+                                      showingMenuSidebar == true;
+
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => LoginPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: buttonXL(
+                                      Center(
+                                        child: Text(
+                                          'Iya, Keluar',
+                                          style: heading3(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
                                       ),
-                                      context: context,
-                                      builder: (context) => IntrinsicHeight(
-                                        child: Container(
-                                          padding: EdgeInsets.only(
-                                              bottom: MediaQuery.of(context)
-                                                  .viewInsets
-                                                  .bottom),
-                                          decoration: BoxDecoration(
-                                            color: bnw100,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(size8),
-                                              topLeft: Radius.circular(size8),
+                                      MediaQuery.of(context).size.width,
+                                      // primary500,
+                                      // primary500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: buttonXXLoutline(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              PhosphorIcons.sign_out_bold,
+                              color: bnw900,
+                              size: size32,
+                            ),
+                            SizedBox(width: size16),
+                            Text(
+                              'Keluar Akun',
+                              style:
+                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        0,
+                        bnw900),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: size16),
+            Expanded(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.all(size16),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  border: Border.all(color: bnw300),
+                  borderRadius: BorderRadius.circular(size16),
+                ),
+                child: RefreshIndicator(
+                  color: bnw100,
+                  backgroundColor: primary500,
+                  onRefresh: () async {
+                    initState();
+                    setState(() {});
+                  },
+                  child: ListView(
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                imageProfile == null
+                                    ? Container(
+                                        height: 227,
+                                        width: 227,
+                                        child: CircleAvatar(
+                                          backgroundColor: primary200,
+                                          radius: 50,
+
+                                          // backgroundImage: NetworkImage(imageUrl),
+                                          child: Center(
+                                            child: Text(
+                                              getInitials().toUpperCase(),
+                                              style: heading1(FontWeight.w600,
+                                                  bnw900, 'Outfit'),
                                             ),
                                           ),
-                                          child: ValueListenableBuilder(
-                                            valueListenable: myValue,
-                                            builder: (context, value, _) =>
-                                                Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  size32,
-                                                  size16,
-                                                  size32,
-                                                  size32),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Container(
-                                                    margin:
-                                                        EdgeInsets.all(size8),
-                                                    height: 4,
-                                                    width: 140,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              size8),
-                                                      color: bnw300,
-                                                    ),
+                                        ),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(120),
+                                          // border: Border.all(),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(120),
+                                          child: Image.network(imageProfile,
+                                              height: 227,
+                                              width: 227,
+                                              fit: BoxFit.cover, loadingBuilder:
+                                                  (context, child,
+                                                      loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+
+                                            return Center(child: loading());
+                                          }, errorBuilder:
+                                                  (context, error, stackTrace) {
+                                            imageError = 'true';
+                                            return SizedBox(
+                                              height: 227,
+                                              width: 227,
+                                              child: CircleAvatar(
+                                                backgroundColor: primary200,
+                                                radius: 50,
+
+                                                // backgroundImage: NetworkImage(imageUrl),
+                                                child: Center(
+                                                  child: Text(
+                                                    getInitials().toUpperCase(),
+                                                    style: heading1(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit'),
                                                   ),
-                                                  myValue.value != 'getImage'
-                                                      ? Column(
-                                                          children: [
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Text(
-                                                                  'Foto Profil',
-                                                                  style: heading1(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw900,
-                                                                      'Outfit'),
-                                                                ),
-                                                                GestureDetector(
-                                                                  onTap: () =>
-                                                                      Navigator.pop(
-                                                                          context),
-                                                                  child: Icon(
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ),
+                                      ),
+                                SizedBox(height: size16),
+                                GestureDetector(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                        ),
+                                        context: context,
+                                        builder: (context) => IntrinsicHeight(
+                                          child: Container(
+                                            padding: EdgeInsets.only(
+                                                bottom: MediaQuery.of(context)
+                                                    .viewInsets
+                                                    .bottom),
+                                            decoration: BoxDecoration(
+                                              color: bnw100,
+                                              borderRadius: BorderRadius.only(
+                                                topRight:
+                                                    Radius.circular(size8),
+                                                topLeft: Radius.circular(size8),
+                                              ),
+                                            ),
+                                            child: ValueListenableBuilder(
+                                              valueListenable: myValue,
+                                              builder: (context, value, _) =>
+                                                  Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    size32,
+                                                    size16,
+                                                    size32,
+                                                    size32),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Container(
+                                                      margin:
+                                                          EdgeInsets.all(size8),
+                                                      height: 4,
+                                                      width: 140,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    size8),
+                                                        color: bnw300,
+                                                      ),
+                                                    ),
+                                                    myValue.value != 'getImage'
+                                                        ? Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                  height:
+                                                                      size8),
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Text(
+                                                                    'Foto Profil',
+                                                                    style: heading1(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                  GestureDetector(
+                                                                    onTap: () =>
+                                                                        Navigator.pop(
+                                                                            context),
+                                                                    child: Icon(
+                                                                        PhosphorIcons
+                                                                            .x_fill,
+                                                                        size:
+                                                                            size32,
+                                                                        color:
+                                                                            bnw900),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              imageProfile ==
+                                                                      null
+                                                                  ? Container(
+                                                                      margin: EdgeInsets
+                                                                          .only(
+                                                                              top: size12),
+                                                                      height:
+                                                                          180,
+                                                                      width:
+                                                                          180,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(120),
+                                                                        color:
+                                                                            bnw300,
+                                                                      ),
+                                                                      child: myValue.value !=
+                                                                              'getImage'
+                                                                          ? CircleAvatar(
+                                                                              backgroundColor: primary200,
+                                                                              radius: 50,
+                                                                              // backgroundImage: NetworkImage(imageUrl),
+                                                                              child: Center(
+                                                                                child: Text(
+                                                                                  getInitials().toUpperCase(),
+                                                                                  style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                ),
+                                                                              ),
+                                                                            )
+                                                                          : ClipRRect(
+                                                                              borderRadius: BorderRadius.circular(120),
+                                                                              child: Image.memory(
+                                                                                base64Decode(img64.toString()),
+                                                                                // myImage!,
+                                                                                fit: BoxFit.cover,
+                                                                              ),
+                                                                            ),
+                                                                    )
+                                                                  : Container(
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(120),
+                                                                        // border: Border.all(),
+                                                                      ),
+                                                                      child:
+                                                                          ClipRRect(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(120),
+                                                                        child: Image
+                                                                            .network(
+                                                                          imageProfile,
+                                                                          height:
+                                                                              227,
+                                                                          width:
+                                                                              227,
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                          loadingBuilder: (context,
+                                                                              child,
+                                                                              loadingProgress) {
+                                                                            if (loadingProgress ==
+                                                                                null) {
+                                                                              return child;
+                                                                            }
+
+                                                                            return Center(child: loading());
+                                                                          },
+                                                                          errorBuilder: (context, error, stackTrace) =>
+                                                                              Container(
+                                                                            margin:
+                                                                                EdgeInsets.only(top: 10),
+                                                                            height:
+                                                                                180,
+                                                                            width:
+                                                                                180,
+                                                                            decoration:
+                                                                                BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(120),
+                                                                              color: bnw300,
+                                                                            ),
+                                                                            child: myValue.value != 'getImage'
+                                                                                ? CircleAvatar(
+                                                                                    backgroundColor: primary200,
+                                                                                    radius: 50,
+                                                                                    // backgroundImage: NetworkImage(imageUrl),
+                                                                                    child: Center(
+                                                                                      child: Text(
+                                                                                        getInitials().toUpperCase(),
+                                                                                        style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                      ),
+                                                                                    ),
+                                                                                  )
+                                                                                : ClipRRect(
+                                                                                    borderRadius: BorderRadius.circular(120),
+                                                                                    child: Image.memory(
+                                                                                      base64Decode(img64.toString()),
+                                                                                      // myImage!,
+                                                                                      fit: BoxFit.cover,
+                                                                                    ),
+                                                                                  ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                            ],
+                                                          )
+                                                        : Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                  height:
+                                                                      size16),
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Text(
+                                                                    'Foto Profil',
+                                                                    style: heading1(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                  GestureDetector(
+                                                                    onTap: () =>
+                                                                        Navigator.pop(
+                                                                            context),
+                                                                    child: Icon(
                                                                       PhosphorIcons
                                                                           .x_fill,
                                                                       size:
                                                                           size32,
                                                                       color:
-                                                                          bnw900),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            imageProfile == null
-                                                                ? Container(
-                                                                    margin: EdgeInsets
-                                                                        .only(
-                                                                            top:
-                                                                                size12),
-                                                                    height: 180,
-                                                                    width: 180,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              120),
-                                                                      color:
-                                                                          bnw300,
-                                                                    ),
-                                                                    child: myValue.value !=
-                                                                            'getImage'
-                                                                        ? CircleAvatar(
-                                                                            backgroundColor:
-                                                                                primary200,
-                                                                            radius:
-                                                                                50,
-                                                                            // backgroundImage: NetworkImage(imageUrl),
-                                                                            child:
-                                                                                Center(
-                                                                              child: Text(
-                                                                                getInitials().toUpperCase(),
-                                                                                style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                                                                              ),
-                                                                            ),
-                                                                          )
-                                                                        : ClipRRect(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(120),
-                                                                            child:
-                                                                                Image.memory(
-                                                                              base64Decode(img64.toString()),
-                                                                              // myImage!,
-                                                                              fit: BoxFit.cover,
-                                                                            ),
-                                                                          ),
-                                                                  )
-                                                                : Container(
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              120),
-                                                                      // border: Border.all(),
-                                                                    ),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              120),
-                                                                      child: Image
-                                                                          .network(
-                                                                        imageProfile,
-                                                                        height:
-                                                                            227,
-                                                                        width:
-                                                                            227,
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                        loadingBuilder: (context,
-                                                                            child,
-                                                                            loadingProgress) {
-                                                                          if (loadingProgress ==
-                                                                              null) {
-                                                                            return child;
-                                                                          }
-
-                                                                          return Center(
-                                                                              child: loading());
-                                                                        },
-                                                                        errorBuilder: (context,
-                                                                                error,
-                                                                                stackTrace) =>
-                                                                            Container(
-                                                                          margin:
-                                                                              EdgeInsets.only(top: 10),
-                                                                          height:
-                                                                              180,
-                                                                          width:
-                                                                              180,
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(120),
-                                                                            color:
-                                                                                bnw300,
-                                                                          ),
-                                                                          child: myValue.value != 'getImage'
-                                                                              ? CircleAvatar(
-                                                                                  backgroundColor: primary200,
-                                                                                  radius: 50,
-                                                                                  // backgroundImage: NetworkImage(imageUrl),
-                                                                                  child: Center(
-                                                                                    child: Text(
-                                                                                      getInitials().toUpperCase(),
-                                                                                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                                                                                    ),
-                                                                                  ),
-                                                                                )
-                                                                              : ClipRRect(
-                                                                                  borderRadius: BorderRadius.circular(120),
-                                                                                  child: Image.memory(
-                                                                                    base64Decode(img64.toString()),
-                                                                                    // myImage!,
-                                                                                    fit: BoxFit.cover,
-                                                                                  ),
-                                                                                ),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                          ],
-                                                        )
-                                                      : Column(
-                                                          children: [
-                                                            SizedBox(
-                                                                height: size16),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Text(
-                                                                  'Foto Profil',
-                                                                  style: heading1(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw900,
-                                                                      'Outfit'),
-                                                                ),
-                                                                GestureDetector(
-                                                                  onTap: () =>
-                                                                      Navigator.pop(
-                                                                          context),
-                                                                  child: Icon(
-                                                                    PhosphorIcons
-                                                                        .x_fill,
-                                                                    size:
-                                                                        size32,
-                                                                    color:
-                                                                        bnw900,
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(
-                                                                      top:
-                                                                          size12),
-                                                              height: 180,
-                                                              width: 180,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            120),
-                                                                color: bnw300,
-                                                              ),
-                                                              child: myValue !=
-                                                                      'getImage'
-                                                                  ? CircleAvatar(
-                                                                      backgroundColor:
-                                                                          primary200,
-                                                                      radius:
-                                                                          50,
-                                                                      // backgroundImage: NetworkImage(imageUrl),
-                                                                      child:
-                                                                          Center(
-                                                                        child:
-                                                                            Text(
-                                                                          getInitials()
-                                                                              .toUpperCase(),
-                                                                          style: heading1(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                      ),
-                                                                    )
-                                                                  : ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              120),
-                                                                      child: Image
-                                                                          .memory(
-                                                                        base64Decode(
-                                                                            img64.toString()),
-                                                                        // myImage!,
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                      ),
-                                                                    ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                  SizedBox(height: size16),
-                                                  Column(
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () async {
-                                                          await getImage().then(
-                                                            (value) =>
-                                                                changePhoto(
-                                                              widget.token,
-                                                              identifier,
-                                                              context,
-                                                              img64,
-                                                              _reloadPage,
-                                                            ).then((value) {
-                                                              imageError =
-                                                                  'false';
-                                                              initState();
-                                                            }),
-                                                          );
-                                                        },
-                                                        child: SizedBox(
-                                                          child: TextFormField(
-                                                            enabled: false,
-                                                            style: heading3(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                            decoration:
-                                                                InputDecoration(
-                                                                    focusColor:
-                                                                        primary500,
-                                                                    prefixIcon:
-                                                                        Icon(
-                                                                      PhosphorIcons
-                                                                          .plus,
-                                                                      color:
                                                                           bnw900,
                                                                     ),
-                                                                    hintText:
-                                                                        'Tambah Foto',
-                                                                    hintStyle: heading3(
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Container(
+                                                                margin: EdgeInsets
+                                                                    .only(
+                                                                        top:
+                                                                            size12),
+                                                                height: 180,
+                                                                width: 180,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              120),
+                                                                  color: bnw300,
+                                                                ),
+                                                                child: myValue !=
+                                                                        'getImage'
+                                                                    ? CircleAvatar(
+                                                                        backgroundColor:
+                                                                            primary200,
+                                                                        radius:
+                                                                            50,
+                                                                        // backgroundImage: NetworkImage(imageUrl),
+                                                                        child:
+                                                                            Center(
+                                                                          child:
+                                                                              Text(
+                                                                            getInitials().toUpperCase(),
+                                                                            style: heading1(
+                                                                                FontWeight.w600,
+                                                                                bnw900,
+                                                                                'Outfit'),
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : ClipRRect(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(120),
+                                                                        child: Image
+                                                                            .memory(
+                                                                          base64Decode(
+                                                                              img64.toString()),
+                                                                          // myImage!,
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                        ),
+                                                                      ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                    SizedBox(height: size16),
+                                                    Column(
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () async {
+                                                            await getImage()
+                                                                .then(
+                                                              (value) =>
+                                                                  changePhoto(
+                                                                widget.token,
+                                                                identifier,
+                                                                context,
+                                                                img64,
+                                                                _reloadPage,
+                                                              ).then((value) {
+                                                                imageError =
+                                                                    'false';
+                                                                initState();
+                                                              }),
+                                                            );
+                                                          },
+                                                          child: SizedBox(
+                                                            child:
+                                                                TextFormField(
+                                                              enabled: false,
+                                                              style: heading3(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                      focusColor:
+                                                                          primary500,
+                                                                      prefixIcon:
+                                                                          Icon(
+                                                                        PhosphorIcons
+                                                                            .plus,
+                                                                        color:
+                                                                            bnw900,
+                                                                      ),
+                                                                      hintText:
+                                                                          'Tambah Foto',
+                                                                      hintStyle: heading3(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw900,
+                                                                          'Outfit')),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        imageError == 'false'
+                                                            ? GestureDetector(
+                                                                onTap:
+                                                                    () async {
+                                                                  changePhoto(
+                                                                    widget
+                                                                        .token,
+                                                                    identifier,
+                                                                    context,
+                                                                    '',
+                                                                    _reloadPage,
+                                                                  ).then(
+                                                                      (value) {
+                                                                    imageError =
+                                                                        'false';
+                                                                    initState();
+                                                                  });
+                                                                },
+                                                                child: SizedBox(
+                                                                  child:
+                                                                      TextFormField(
+                                                                    enabled:
+                                                                        false,
+                                                                    style: heading3(
                                                                         FontWeight
                                                                             .w400,
                                                                         bnw900,
-                                                                        'Outfit')),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      imageError == 'false'
-                                                          ? GestureDetector(
-                                                              onTap: () async {
-                                                                changePhoto(
-                                                                  widget.token,
-                                                                  identifier,
-                                                                  context,
-                                                                  '',
-                                                                  _reloadPage,
-                                                                ).then((value) {
-                                                                  imageError =
-                                                                      'false';
-                                                                  initState();
-                                                                });
-                                                              },
-                                                              child: SizedBox(
-                                                                child:
-                                                                    TextFormField(
-                                                                  enabled:
-                                                                      false,
-                                                                  style: heading3(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
-                                                                  decoration:
-                                                                      InputDecoration(
-                                                                    focusColor:
-                                                                        primary500,
-                                                                    prefixIcon:
-                                                                        Icon(
-                                                                      PhosphorIcons
-                                                                          .trash,
-                                                                      color:
-                                                                          bnw900,
-                                                                    ),
-                                                                    hintText:
-                                                                        'Hapus Foto',
-                                                                    hintStyle:
-                                                                        heading3(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit',
+                                                                        'Outfit'),
+                                                                    decoration:
+                                                                        InputDecoration(
+                                                                      focusColor:
+                                                                          primary500,
+                                                                      prefixIcon:
+                                                                          Icon(
+                                                                        PhosphorIcons
+                                                                            .trash,
+                                                                        color:
+                                                                            bnw900,
+                                                                      ),
+                                                                      hintText:
+                                                                          'Hapus Foto',
+                                                                      hintStyle:
+                                                                          heading3(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                            )
-                                                          : SizedBox(),
-                                                    ],
-                                                  ),
-                                                ],
+                                                              )
+                                                            : SizedBox(),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  child: imageError == 'true'
-                                      ? SizedBox(
-                                          width: double.infinity,
-                                          child: buttonXLoutline(
+                                      );
+                                    },
+                                    child: imageError == 'true'
+                                        ? SizedBox(
+                                            width: double.infinity,
+                                            child: buttonXLoutline(
+                                                Center(
+                                                  child: Text(
+                                                      'Tambah Foto Profil',
+                                                      style: heading3(
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit')),
+                                                ),
+                                                double.infinity,
+                                                primary500))
+                                        : SizedBox(
+                                            width: double.infinity,
+                                            child: buttonXL(
                                               Center(
-                                                child: Text(
-                                                    'Tambah Foto Profil',
+                                                child: Text('Ganti Foto Profil',
                                                     style: heading3(
                                                         FontWeight.w600,
-                                                        primary500,
+                                                        bnw100,
                                                         'Outfit')),
                                               ),
                                               double.infinity,
-                                              primary500))
-                                      : SizedBox(
-                                          width: double.infinity,
-                                          child: buttonXL(
-                                            Center(
-                                              child: Text('Ganti Foto Profil',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw100,
-                                                      'Outfit')),
                                             ),
-                                            double.infinity,
-                                          ),
-                                        )),
-                            ],
+                                          )),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(width: size16),
-                        Flexible(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            // mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Personal Info',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
-                              ),
-                              ubahNamaLengkapField(context),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width / 2.2,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(
-                                      width: 136,
-                                      child: Text(
-                                        'Status',
-                                        style: heading3(
-                                            FontWeight.w400, bnw900, 'Outfit'),
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      child: SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                3.3,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(
-                                              child: Text(
-                                                  statusProfile ==
-                                                          'Group_Merchant'
-                                                      ? 'Grup Toko'
-                                                      : 'Toko',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit')),
-                                            ),
-                                            // SizedBox(width: 40),
-                                            SizedBox(
-                                              child: Text('',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit')),
-                                            ),
-                                          ],
+                          SizedBox(width: size16),
+                          Flexible(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              // mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Personal Info',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit'),
+                                ),
+                                ubahNamaLengkapField(context),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.2,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SizedBox(
+                                        width: 136,
+                                        child: Text(
+                                          'Status',
+                                          style: heading3(FontWeight.w400,
+                                              bnw900, 'Outfit'),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              editPhoneField(context),
-                              editEmailField(context),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 40),
-                                  Text(
-                                    'Keamanan',
-                                    style: heading2(
-                                        FontWeight.w700, bnw900, 'Outfit'),
+                                      SizedBox(width: size16),
+                                      Expanded(
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              3.3,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                child: Text(
+                                                    statusProfile ==
+                                                            'Group_Merchant'
+                                                        ? 'Grup Toko'
+                                                        : 'Toko',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit')),
+                                              ),
+                                              // SizedBox(width: 40),
+                                              SizedBox(
+                                                child: Text('',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit')),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  editPasswordField(context),
-                                ],
-                              )
-                            ],
+                                ),
+                                editPhoneField(context),
+                                editEmailField(context),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 40),
+                                    Text(
+                                      'Keamanan',
+                                      style: heading2(
+                                          FontWeight.w700, bnw900, 'Outfit'),
+                                    ),
+                                    editPasswordField(context),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1085,7 +1094,6 @@ class ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             );
-                          
                           },
                           child: Text(
                             'Ubah',
@@ -2713,7 +2721,8 @@ class ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ],
                               ),
-                            ), stream: null,
+                            ),
+                            stream: null,
                           ),
                         ],
                       ),
