@@ -456,7 +456,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                     height: heightInformation,
                                     width: widthInformation,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius:
+                                          BorderRadius.circular(size8),
                                       border: Border.all(color: bnw300),
                                     ),
                                     child: Column(
@@ -546,7 +547,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -565,7 +566,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               'Nomor Tagihan',
                                                               style: heading4(
@@ -574,7 +576,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               'Kasir',
                                                               style: heading4(
@@ -583,7 +586,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               'Nama Pembeli',
                                                               style: heading4(
@@ -607,7 +611,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               data[
                                                                   'transactionid'],
@@ -617,7 +622,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               data['pic'],
                                                               style: heading4(
@@ -626,7 +632,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               data['customer'],
                                                               style: heading4(
@@ -692,9 +699,10 @@ class _SimpanPageState extends State<SimpanPage> {
                                                               Container(
                                                                 margin: EdgeInsets
                                                                     .only(
-                                                                        left: 8,
+                                                                        left:
+                                                                            size8,
                                                                         right:
-                                                                            8),
+                                                                            size8),
                                                                 height: 48,
                                                                 width: 48,
                                                                 child: Image
@@ -787,7 +795,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -806,9 +814,20 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               'PPN',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                              'Diskon',
                                                               style: heading4(
                                                                   FontWeight
                                                                       .w400,
@@ -834,12 +853,27 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            SizedBox(height: 8),
+                                                            SizedBox(
+                                                                height: size8),
                                                             Text(
                                                               FormatCurrency
                                                                       .convertToIdr(
                                                                           data[
                                                                               'ppn'])
+                                                                  .toString(),
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                              FormatCurrency
+                                                                      .convertToIdr(
+                                                                          data[
+                                                                              'discount'])
                                                                   .toString(),
                                                               style: heading4(
                                                                   FontWeight
@@ -853,8 +887,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     ),
                                                     Padding(
                                                       padding: EdgeInsets.only(
-                                                        top: 8,
-                                                        bottom: 8,
+                                                        top: size8,
+                                                        bottom: size8,
                                                       ),
                                                       child: Row(
                                                         children: List.generate(
@@ -1693,7 +1727,7 @@ class _SimpanPageState extends State<SimpanPage> {
 
   rincianText(String title, subtitle) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: size8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

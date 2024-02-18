@@ -762,6 +762,14 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                             bnw900,
                                                             'Outfit'),
                                                       ),
+                                                      SizedBox(height: size8),
+                                                      Text(
+                                                        'Diskon',
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
                                                     ],
                                                   ),
                                                   Column(
@@ -793,6 +801,17 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                                 .convertToIdr(
                                                                     data['ppn'] ??
                                                                         '-')
+                                                            .toString(),
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                      SizedBox(height: size8),
+                                                      Text(
+                                                        FormatCurrency.convertToIdr(
+                                                                data['discount'] ??
+                                                                    '-')
                                                             .toString(),
                                                         style: heading4(
                                                             FontWeight.w400,

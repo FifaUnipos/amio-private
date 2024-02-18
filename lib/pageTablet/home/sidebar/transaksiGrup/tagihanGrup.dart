@@ -424,7 +424,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                             height: heightInformation,
                             width: widthInformation,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(size8),
                               border: Border.all(color: bnw300),
                             ),
                             child: Column(
@@ -506,7 +506,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                               style: heading3(FontWeight.w600,
                                                   bnw900, 'Outfit'),
                                             ),
-                                            SizedBox(height: 8),
+                                            SizedBox(height: size8),
                                             Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
@@ -523,7 +523,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       'Nomor Tagihan',
                                                       style: heading4(
@@ -531,7 +531,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       'Kasir',
                                                       style: heading4(
@@ -539,7 +539,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       'Nama Pembeli',
                                                       style: heading4(
@@ -560,7 +560,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       data['transactionid'] ??
                                                           '',
@@ -569,7 +569,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       data['pic'] ?? '',
                                                       style: heading4(
@@ -577,7 +577,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       data['customer'] ?? '',
                                                       style: heading4(
@@ -620,10 +620,15 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                             'Outfit'),
                                                       ),
                                                       ClipRRect(
-                                                        borderRadius: BorderRadius.circular(size8),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    size8),
                                                         child: Container(
-                                                          margin: EdgeInsets.only(
-                                                              left: 8, right: 8),
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  left: size8,
+                                                                  right: size8),
                                                           height: 48,
                                                           width: 48,
                                                           child: Image.network(
@@ -631,14 +636,14 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                                     'product_image'] ??
                                                                 '',
                                                             fit: BoxFit.cover,
-                                                            loadingBuilder: (context,
-                                                                child,
-                                                                loadingProgress) {
+                                                            loadingBuilder:
+                                                                (context, child,
+                                                                    loadingProgress) {
                                                               if (loadingProgress ==
                                                                   null) {
                                                                 return child;
                                                               }
-                                                      
+
                                                               return Center(
                                                                   child:
                                                                       loading());
@@ -647,8 +652,9 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                                     error,
                                                                     stackTrace) =>
                                                                 SizedBox(
-                                                              child: SvgPicture.asset(
-                                                                  'assets/logoProduct.svg'),
+                                                              child: SvgPicture
+                                                                  .asset(
+                                                                      'assets/logoProduct.svg'),
                                                             ),
                                                           ),
                                                         ),
@@ -710,7 +716,7 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                               style: heading3(FontWeight.w600,
                                                   bnw900, 'Outfit'),
                                             ),
-                                            SizedBox(height: 8),
+                                            SizedBox(height: size8),
                                             Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
@@ -727,9 +733,17 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       'PPN',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                    SizedBox(height: size8),
+                                                    Text(
+                                                      'Diskon',
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -751,11 +765,22 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                           bnw900,
                                                           'Outfit'),
                                                     ),
-                                                    SizedBox(height: 8),
+                                                    SizedBox(height: size8),
                                                     Text(
                                                       FormatCurrency
                                                               .convertToIdr(
                                                                   data['ppn'])
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                    SizedBox(height: size8),
+                                                    Text(
+                                                      FormatCurrency
+                                                              .convertToIdr(data[
+                                                                  'discount'])
                                                           .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
@@ -768,8 +793,8 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                             ),
                                             Padding(
                                               padding: EdgeInsets.only(
-                                                top: 8,
-                                                bottom: 8,
+                                                top: size8,
+                                                bottom: size8,
                                               ),
                                               child: Row(
                                                 children: List.generate(
