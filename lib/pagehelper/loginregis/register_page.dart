@@ -141,16 +141,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                   child: GestureDetector(
                                     onTap: () {
                                       refreshText();
-                                      register(
-                                        context,
-                                        Otppage(
-                                          phoneController.text,
-                                          nameController.text,
-                                          // passController.text,
-                                          emailController.text,
-                                          'register_page',
-                                        ),
-                                      );
+                                      if (onOffButton == primary500) {
+                                        register(
+                                          context,
+                                          Otppage(
+                                            phoneController.text,
+                                            nameController.text,
+                                            // passController.text,
+                                            emailController.text,
+                                            'register_page',
+                                          ),
+                                        );
+                                      }
                                     },
                                     child: buttonXXLonOff(
                                       Center(
@@ -263,8 +265,10 @@ class _RegisterPageState extends State<RegisterPage> {
             refreshText();
             if (value.contains('@') || value.endsWith('.com')) {
               onOffButton = primary500;
-            } else if (value.startsWith('08') || value.length < 10) {
+            } else if (value.startsWith('08') && value.length >= 8) {
               onOffButton = primary500;
+            } else {
+              onOffButton = bnw300;
             }
           });
         },

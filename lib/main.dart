@@ -47,93 +47,141 @@ Future<void> main() async {
     ),
   );
 
-  if (Device.get().isTablet) {
-    SystemChrome.setPreferredOrientations(
-      [
-        DeviceOrientation.landscapeRight,
-        DeviceOrientation.landscapeLeft,
-        // DeviceOrientation.portraitUp,
-        // DeviceOrientation.portraitDown,
-      ],
-    ).then(
-      // (_) => runApp(MyApp()),
-
-      (_) => runApp(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => TimerProvider()),
-            ChangeNotifierProvider(create: (_) => RefreshTampilan()),
-            ChangeNotifierProvider(create: (_) => RefreshSelected()),
-            // ChangeNotifierProvider(create: (_) {
-            //   TimerProvider();
-            //   RefreshTampilan();
-            //   RefreshSelected();
-            // }),
-          ],
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              scaffoldBackgroundColor: bnw100,
-              errorColor: red500,
-              visualDensity: VisualDensity.adaptivePlatformDensity, 
-              primaryColor: Colors.blue,
-              focusColor: Colors.blue,
-              colorScheme:
-                  ThemeData().colorScheme.copyWith(primary: primary500),
-            ),
-            title: 'UniPOS',
-            home: mytokenGet == null
-                ? onBoard == null
-                    ? Scaffold(
-                        body: SplashScreen(isTab: true),
-                      )
-                    : Scaffold(
-                        body: SplashScreenBoard(isTab: true),
-                      )
-                : Scaffold(
-                    body: SplashChecker(isTab: true),
-                  ),
+  SystemChrome.setPreferredOrientations(
+    [
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      // DeviceOrientation.portraitUp,
+      // DeviceOrientation.portraitDown,
+    ],
+  ).then(
+    (value) => runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => TimerProvider()),
+          ChangeNotifierProvider(create: (_) => RefreshTampilan()),
+          ChangeNotifierProvider(create: (_) => RefreshSelected()),
+          // ChangeNotifierProvider(create: (_) {
+          //   TimerProvider();
+          //   RefreshTampilan();
+          //   RefreshSelected();
+          // }),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            scaffoldBackgroundColor: bnw100,
+            errorColor: red500,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            primaryColor: primary500,
+            focusColor: primary500,
+            colorScheme: ThemeData().colorScheme.copyWith(primary: primary500),
           ),
+          title: 'UniPOS',
+          home: mytokenGet == null
+              ? onBoard == null
+                  ? Scaffold( 
+                      body: SplashScreen(isTab: true),
+                    )
+                  : Scaffold(
+                      body: SplashScreenBoard(isTab: true),
+                    )
+              : Scaffold(
+                  body: SplashChecker(isTab: true),
+                ),
         ),
       ),
-    );
-  } else if (Device.get().isPhone) {
-    SystemChrome.setPreferredOrientations(
-      [
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ],
-    ).then(
-      (_) => runApp(
-        MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              scaffoldBackgroundColor: bnw100,
-              errorColor: red500,
-              primaryColor: Colors.blue,
-              focusColor: Colors.blue,
-              colorScheme:
-                  ThemeData().colorScheme.copyWith(primary: primary500),
-            ),
-            title: 'UniPOS',
-            home: Scaffold(
-              body: mytokenGet == null
-                  ? onBoard == null
-                      ? Scaffold(
-                          body: SplashScreen(isTab: false),
-                        )
-                      : Scaffold(
-                          body: SplashScreenBoard(isTab: false,),
-                        )
-                  : Scaffold(
-                      body: SplashChecker(isTab: false),
-                    ),
-            )),
-      ),
-    );
-  }
+    ),
+  );
+
+  // if (Device.get().isTablet) {
+  //   SystemChrome.setPreferredOrientations(
+  //     [
+  //       DeviceOrientation.landscapeRight,
+  //       DeviceOrientation.landscapeLeft,
+  //       // DeviceOrientation.portraitUp,
+  //       // DeviceOrientation.portraitDown,
+  //     ],
+  //   ).then(
+  //     // (_) => runApp(MyApp()),
+
+  //     (_) => runApp(
+  //       MultiProvider(
+  //         providers: [
+  //           ChangeNotifierProvider(create: (_) => TimerProvider()),
+  //           ChangeNotifierProvider(create: (_) => RefreshTampilan()),
+  //           ChangeNotifierProvider(create: (_) => RefreshSelected()),
+  //           // ChangeNotifierProvider(create: (_) {
+  //           //   TimerProvider();
+  //           //   RefreshTampilan();
+  //           //   RefreshSelected();
+  //           // }),
+  //         ],
+  //         child: MaterialApp(
+  //           debugShowCheckedModeBanner: false,
+  //           theme: ThemeData(
+  //             primarySwatch: Colors.blue,
+  //             scaffoldBackgroundColor: bnw100,
+  //             errorColor: red500,
+  //             visualDensity: VisualDensity.adaptivePlatformDensity,
+  //             primaryColor: Colors.blue,
+  //             focusColor: Colors.blue,
+  //             colorScheme:
+  //                 ThemeData().colorScheme.copyWith(primary: primary500),
+  //           ),
+  //           title: 'UniPOS',
+  //           home: mytokenGet == null
+  //               ? onBoard == null
+  //                   ? Scaffold(
+  //                       body: SplashScreen(isTab: true),
+  //                     )
+  //                   : Scaffold(
+  //                       body: SplashScreenBoard(isTab: true),
+  //                     )
+  //               : Scaffold(
+  //                   body: SplashChecker(isTab: true),
+  //                 ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // } else if (Device.get().isPhone) {
+  //   SystemChrome.setPreferredOrientations(
+  //     [
+  //       DeviceOrientation.portraitUp,
+  //       DeviceOrientation.portraitDown,
+  //     ],
+  //   ).then(
+  //     (_) => runApp(
+  //       MaterialApp(
+  //           debugShowCheckedModeBanner: false,
+  //           theme: ThemeData(
+  //             primarySwatch: Colors.blue,
+  //             scaffoldBackgroundColor: bnw100,
+  //             errorColor: red500,
+  //             primaryColor: Colors.blue,
+  //             focusColor: Colors.blue,
+  //             colorScheme:
+  //                 ThemeData().colorScheme.copyWith(primary: primary500),
+  //           ),
+  //           title: 'UniPOS',
+  //           home: Scaffold(
+  //             body: mytokenGet == null
+  //                 ? onBoard == null
+  //                     ? Scaffold(
+  //                         body: SplashScreen(isTab: false),
+  //                       )
+  //                     : Scaffold(
+  //                         body: SplashScreenBoard(isTab: false,),
+  //                       )
+  //                 : Scaffold(
+  //                     body: SplashChecker(isTab: false),
+  //                   ),
+  //           )),
+  //     ),
+  //   );
+  // }
 }
 
 var checkToken;

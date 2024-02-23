@@ -598,6 +598,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                               Expanded(
                                 child: RefreshIndicator(
                                   onRefresh: () async {
+                                    setState(() {});
                                     initState();
                                   },
                                   child: ListView(
@@ -608,7 +609,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                         onTap: () {
                                           Navigator.pop(context);
                                           tambahKategori(context,
-                                              isKeyboardActive, setState);
+                                              isKeyboardActive);
                                           _getProductList();
                                         },
                                         child: buttonXLoutline(
@@ -1038,7 +1039,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
   }
 
   Future<dynamic> tambahKategori(
-      BuildContext context, bool isKeyboardActive, StateSetter setState) {
+      BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(

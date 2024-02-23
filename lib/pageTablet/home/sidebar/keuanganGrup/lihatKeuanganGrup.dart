@@ -28,6 +28,7 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
     with TickerProviderStateMixin {
   List<PendapatanLainModel>? datasPendapatan;
   List<PengeluaranLainModel>? datasPengeluaran;
+  TextEditingController keteranganRekon = TextEditingController();
   TextEditingController conKeterangan = TextEditingController();
   TextEditingController conPemasukkan = TextEditingController();
   PageController pageController = PageController();
@@ -825,6 +826,7 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                                                                             },
                                                                             child:
                                                                                 TextFormField(
+                                                                                  controller: keteranganRekon,
                                                                               cursorColor: primary500,
                                                                               style: heading2(
                                                                                 FontWeight.w600,
@@ -881,7 +883,7 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                                                                                 child: GestureDetector(
                                                                                   onTap: () {
                                                                                     whenLoading(context);
-                                                                                    saveRekon(context, widget.token, detailItem['id'], tapTrue.toString());
+                                                                                    saveRekon(context, widget.token, detailItem['id'], tapTrue.toString(), keteranganRekon.text);
                                                                                     errorText = '';
 
                                                                                     setState(() {

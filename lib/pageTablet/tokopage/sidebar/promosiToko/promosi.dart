@@ -181,7 +181,8 @@ class _PromosiTokoState extends State<PromosiToko>
 
     return WillPopScope(
       onWillPop: () async {
-        if (_tabController!.index.round() == 0 && _pageController.page!.round() == 0) {
+        if (_tabController!.index.round() == 0 &&
+            _pageController.page!.round() == 0) {
           showModalBottomExit(context);
           return false;
         } else {
@@ -362,7 +363,7 @@ class _PromosiTokoState extends State<PromosiToko>
                       onswitchtampikan.toString(),
                       conHarga.text,
                       conPoint.text,
-                      [''],
+                      '',
                       _pageController,
                     );
                     refreshDataProduk();
@@ -384,6 +385,7 @@ class _PromosiTokoState extends State<PromosiToko>
                 child: GestureDetector(
                   onTap: () {
                     List<String> value = [""];
+                    print('himak');
                     createVoucher(
                       context,
                       widget.token,
@@ -391,7 +393,7 @@ class _PromosiTokoState extends State<PromosiToko>
                       onswitchtampikan.toString(),
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       conPoint.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                      value,
+                      '',
                       _pageController,
                     ).then((value) {
                       if (value == '00') {
@@ -399,8 +401,8 @@ class _PromosiTokoState extends State<PromosiToko>
                         _pageController.jumpToPage(0);
                       }
                     });
-                    initState();
                     setState(() {});
+                    initState();
                   },
                   child: buttonXL(
                     Center(
@@ -958,11 +960,12 @@ class _PromosiTokoState extends State<PromosiToko>
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(height: 20),
+                                              SizedBox(height: size24),
                                               GestureDetector(
                                                 behavior:
                                                     HitTestBehavior.translucent,
                                                 onTap: () {
+                                                  // whenLoading(context);
                                                   singleProductId =
                                                       dataProduk.productid;
                                                   getSinglePromosi(
@@ -1312,7 +1315,7 @@ class _PromosiTokoState extends State<PromosiToko>
                                   style: heading4(
                                       FontWeight.w400, bnw600, 'Outfit'),
                                 ),
-                                SizedBox(height: 20),
+                                SizedBox(height: size24),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(

@@ -2094,36 +2094,36 @@ Future createVoucher(
   merchid,
   PageController controller,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
-
-  var body = {
-    "deviceid": identifier,
-    "namavoucher": name,
-    "merchantid": merchid,
-    "price_online_shop": "0",
-    "isActive": isActive,
-    "harga": price,
-    "point": point,
-  };
 
   final response = await http.post(
     Uri.parse(createVoucherUrl),
     headers: {
       'token': token,
     },
-    body: body,
+    body: {
+      "deviceid": identifier,
+      "namavoucher": name,
+      "merchantid": merchid,
+      "price_online_shop": "0",
+      "isActive": isActive,
+      "harga": price,
+      "point": point,
+    },
   );
 
   var jsonResponse = jsonDecode(response.body);
   print(jsonResponse);
   if (response.statusCode == 200) {
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
-    // closeLoading(context);
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
   }
-  return jsonResponse;
 }
 
 Future updateVoucher(
@@ -2618,7 +2618,7 @@ Future getRekon(token, tahun, bulan, merchantid) async {
   }
 }
 
-Future saveRekon(context, token, id, status) async {
+Future saveRekon(context, token, id, status, keterangan) async {
   final response = await http.post(
     Uri.parse(saveRekonUrl),
     headers: {
@@ -2628,6 +2628,7 @@ Future saveRekon(context, token, id, status) async {
       "deviceid": identifier,
       "id": id,
       "isDone": status,
+      "keterangan": keterangan,
     },
   );
 
@@ -3246,6 +3247,7 @@ late String nameEditPromosi,
     statusPromosiUpdate;
 Future getSinglePromosi(
     BuildContext context, token, String merchid, voucherid, setState) async {
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(getSinglePromosiUrl),
     headers: {
@@ -3257,18 +3259,19 @@ Future getSinglePromosi(
       "voucherid": voucherid,
     },
   );
-  whenLoading(context);
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('succes get single promosi');
-    Navigator.of(context, rootNavigator: true).pop();
+    // Navigator.of(context, rootNavigator: true).pop();
+    closeLoading(context);
     nameEditPromosi = jsonResponse['data']['name'];
     poinEditPromosi = jsonResponse['data']['point'].toString();
     hargaProductPromosi = jsonResponse['data']['price'].toString();
     statusPromosiUpdate = jsonResponse['data']['isActive'].toString();
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     print(jsonResponse['message'].toString());
     // showSnackbar(context, jsonResponse);
     showSnackbar(context, jsonResponse);

@@ -778,9 +778,12 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                                     ),
                                                     SizedBox(height: size8),
                                                     Text(
-                                                      FormatCurrency
-                                                              .convertToIdr(data[
-                                                                  'discount'])
+                                                      FormatCurrency.convertToIdr(
+                                                              data['discount'] ==
+                                                                      ""
+                                                                  ? 0
+                                                                  : data[
+                                                                      'discount'])
                                                           .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,

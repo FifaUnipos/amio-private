@@ -1245,25 +1245,25 @@ class _UbahDiskonGrupPageState extends State<UbahDiskonGrupPage> {
 
   List? typeproductList;
   List<dynamic>? searchResultListProduct;
+  Map<String, dynamic>? dataMap;
 
   dynamic selectedProduct;
   bool isItemSelected = false;
 
   Future _getProductList() async {
-    List<String> merchid = [widget.merchid];
-    String merchidJson = json.encode(merchid);
     await http.post(Uri.parse(getProdukDiskonLink), body: {
       "deviceid": identifier,
-      "merchantid": merchidJson,
     }, headers: {
       "token": widget.token,
     }).then((response) {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
         if (data != null && data['data'] != null) {
           setState(() {
-            typeproductList = List<dynamic>.from(data['data']);
+            dataMap = data['data'];
+            List<dynamic> typeproductList =
+                List<dynamic>.from(dataMap!['products']);
+
             searchResultListProduct = typeproductList;
             productidDiskon.addAll(productIdDiskon);
             print(productidDiskon);
@@ -1275,12 +1275,17 @@ class _UbahDiskonGrupPageState extends State<UbahDiskonGrupPage> {
 
   void _runSearchProduct(String searchText) {
     setState(() {
-      searchResultListProduct = typeproductList
-          ?.where((product) => product
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()))
-          .toList();
+      if (typeproductList != null) {
+        searchResultListProduct = typeproductList!
+            .where((product) =>
+                product != null &&
+                product['name'] != null &&
+                product['name']
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchText.toLowerCase()))
+            .toList();
+      }
     });
   }
 

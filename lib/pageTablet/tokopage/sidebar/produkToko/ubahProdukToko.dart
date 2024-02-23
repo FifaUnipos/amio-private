@@ -714,6 +714,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                       Expanded(
                         child: RefreshIndicator(
                           onRefresh: () async {
+                            setState(() {});
                             initState();
                           },
                           child: ListView(
@@ -724,7 +725,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
                                 onTap: () {
                                   Navigator.pop(context);
                                   tambahKategori(
-                                      context, isKeyboardActive, setState);
+                                      context, isKeyboardActive);
                                   _getProductList();
                                 },
                                 child: buttonXLoutline(
@@ -1111,7 +1112,7 @@ class _UbahProdukTokoState extends State<UbahProdukToko> {
   }
 
   Future<dynamic> tambahKategori(
-      BuildContext context, bool isKeyboardActive, StateSetter setState) {
+      BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(

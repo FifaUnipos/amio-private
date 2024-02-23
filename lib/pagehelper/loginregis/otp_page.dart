@@ -66,6 +66,11 @@ class _OtppageState extends State<Otppage> {
   String hidePhoneNumber(String phoneNumber) {
     int visibleDigits = 4;
     int length = phoneNumber.length;
+
+    if (length <= visibleDigits) {
+      return '*' * length;
+    }
+
     String hiddenPart = phoneNumber
         .substring(0, length - visibleDigits)
         .replaceAll(RegExp(r'\d'), '*');
@@ -467,6 +472,7 @@ class _OtppageState extends State<Otppage> {
 
         myprofile(jsonResponse['token']);
 
+        // ignore: use_build_context_synchronously
         showDialog(
             barrierDismissible: true,
             useRootNavigator: true,

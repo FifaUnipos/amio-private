@@ -301,7 +301,8 @@ class _TransactionPageState extends State<TransactionPage>
     namaCustomerCalculate = '';
     conCatatan.clear();
     conCounterPreview.clear();
-
+    discountName = "";
+    discountId = "";
     refreshColor();
     cartProductIds.clear();
   }
@@ -323,18 +324,7 @@ class _TransactionPageState extends State<TransactionPage>
     dialog,
     discount,
   ) async {
-    showDialog(
-      barrierDismissible: true,
-      useRootNavigator: true,
-      context: context,
-      builder: (context) => Center(
-        child: SizedBox(
-          width: size48,
-          height: size48,
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
+    whenLoading(context);
 
     final String detail = json.encode(details);
 
@@ -360,6 +350,7 @@ class _TransactionPageState extends State<TransactionPage>
     // var data = jsonResponse['data'];
 
     if (response.statusCode == 200) {
+      closeLoading(context);
       var kembalian =
           int.parse(uangTunaiController.text.replaceAll(RegExp(r'[^0-9]'), ''));
       var tunaiText = int.parse(pinController.text);
@@ -369,151 +360,121 @@ class _TransactionPageState extends State<TransactionPage>
         print(jsonResponse['data']);
         printext = jsonResponse['data']['raw'];
 
-        Future.delayed(Duration(seconds: 1), () {
-          Navigator.of(context, rootNavigator: true).pop();
-          showDialog(
-            // barrierDismissible: false,
-            useRootNavigator: false,
-            context: context,
-            builder: (context) => WillPopScope(
-              onWillPop: () async {
-                return false;
-              },
-              child: Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 1.8,
-                  height: MediaQuery.of(context).size.height,
-                  margin: EdgeInsets.symmetric(vertical: size32),
-                  padding: EdgeInsets.all(size16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(size16),
-                    color: bnw100,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          'Transaksi Berhasil',
-                          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                        ),
+        showDialog(
+          // barrierDismissible: false,
+          useRootNavigator: false,
+          context: context,
+          builder: (context) => WillPopScope(
+            onWillPop: () async {
+              return false;
+            },
+            child: Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width / 1.8,
+                height: MediaQuery.of(context).size.height,
+                margin: EdgeInsets.symmetric(vertical: size32),
+                padding: EdgeInsets.all(size16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(size16),
+                  color: bnw100,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Transaksi Berhasil',
+                        style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                       ),
-                      SizedBox(height: size16),
-                      Expanded(
-                        child: ListView(
-                          padding: EdgeInsets.zero,
-                          physics: BouncingScrollPhysics(),
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                pesananStruk(
-                                    'Kasir', jsonResponse['data']['pic'] ?? ''),
-                                SizedBox(height: size16),
-                                dash(),
-                                SizedBox(height: size16),
-                                Text(
-                                  'Informasi Transaksi',
-                                  style: heading3(
-                                      FontWeight.w600, bnw900, 'Outfit'),
-                                ),
-                                SizedBox(height: size4),
-                                pesananStruk('Nama Pembeli',
-                                    jsonResponse['data']['customerName'] ?? ''),
-                                SizedBox(height: size4),
-                                pesananStruk('Waktu Transaksi',
-                                    jsonResponse['data']['entrydate'] ?? ''),
-                                SizedBox(height: size4),
-                                pesananStruk(
-                                    'Nomor Transaksi',
-                                    jsonResponse['data']['transactionid'] ??
-                                        ''),
-                                SizedBox(height: size16),
-                                dash(),
-                              ],
-                            ),
-                            SizedBox(height: size16),
-                            Text(
-                              'Rincian Produk',
-                              style:
-                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            SizedBox(height: size8),
-                            SizedBox(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                padding: EdgeInsets.zero,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: cart.length,
-                                itemBuilder: (context, i) {
-                                  return Container(
-                                    margin: EdgeInsets.only(bottom: size8),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          cart[i].name.toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
+                    ),
+                    SizedBox(height: size16),
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        physics: BouncingScrollPhysics(),
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              pesananStruk(
+                                  'Kasir', jsonResponse['data']['pic'] ?? ''),
+                              SizedBox(height: size16),
+                              dash(),
+                              SizedBox(height: size16),
+                              Text(
+                                'Informasi Transaksi',
+                                style:
+                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                              SizedBox(height: size4),
+                              pesananStruk('Nama Pembeli',
+                                  jsonResponse['data']['customerName'] ?? ''),
+                              SizedBox(height: size4),
+                              pesananStruk('Waktu Transaksi',
+                                  jsonResponse['data']['entrydate'] ?? ''),
+                              SizedBox(height: size4),
+                              pesananStruk('Nomor Transaksi',
+                                  jsonResponse['data']['transactionid'] ?? ''),
+                              SizedBox(height: size16),
+                              dash(),
+                            ],
+                          ),
+                          SizedBox(height: size16),
+                          Text(
+                            'Rincian Produk',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: size8),
+                          SizedBox(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: cart.length,
+                              itemBuilder: (context, i) {
+                                return Container(
+                                  margin: EdgeInsets.only(bottom: size8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        cart[i].name.toString(),
+                                        style: heading4(
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
                                         ),
-                                        SizedBox(height: size4),
-                                        SizedBox(
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                '${cart[i].quantity}x',
-                                                style: heading4(
-                                                  FontWeight.w400,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                              SizedBox(width: size24),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                        cart[i].price!)
-                                                    .toString(),
-                                                style: heading4(
-                                                  FontWeight.w400,
-                                                  bnw500,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                  cart[i].price! *
-                                                      cart[i].quantity,
-                                                ),
-                                                style: heading4(
-                                                  FontWeight.w400,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: size8),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                      ),
+                                      SizedBox(height: size4),
+                                      SizedBox(
+                                        child: Row(
                                           children: [
                                             Text(
                                               '${cart[i].quantity}x',
                                               style: heading4(
                                                 FontWeight.w400,
-                                                Colors.transparent,
+                                                bnw900,
                                                 'Outfit',
                                               ),
                                             ),
                                             SizedBox(width: size24),
                                             Text(
-                                              'Catatan : ${cart[i].desc}',
+                                              FormatCurrency.convertToIdr(
+                                                      cart[i].price!)
+                                                  .toString(),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw500,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              FormatCurrency.convertToIdr(
+                                                cart[i].price! *
+                                                    cart[i].quantity,
+                                              ),
                                               style: heading4(
                                                 FontWeight.w400,
                                                 bnw900,
@@ -522,182 +483,203 @@ class _TransactionPageState extends State<TransactionPage>
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            SizedBox(height: size16),
-                            dash(),
-                            SizedBox(height: size16),
-                            Text(
-                              'Rincian Pembayaran',
-                              style:
-                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            SizedBox(height: size16),
-                            pesananStruk(
-                                'Sub Total',
-                                FormatCurrency.convertToIdr(subTotal)
-                                    .toString()),
-                            SizedBox(height: size16),
-                            pesananStruk(
-                                'Diskon',
-                                FormatCurrency.convertToIdr(
-                                        jsonResponse['data']['discount'])
-                                    .toString()),
-                            SizedBox(height: size16),
-                            pesananStruk(
-                                'PPN',
-                                FormatCurrency.convertToIdr(ppnTransaksi)
-                                    .toString()),
-                            SizedBox(height: size16),
-                            dash(),
-                            SizedBox(height: size16),
-                            kembalianStruk(
-                              'Total',
-                              FormatCurrency.convertToIdr(
-                                int.parse(
-                                  jsonResponse['data']['amount'].toString(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: size16),
-                            pesananStruk(
-                              jsonResponse['data']['payment_name'],
-                              FormatCurrency.convertToIdr(
-                                int.parse(
-                                  jsonResponse['data']['money_paid'].toString(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: size16),
-                            jsonResponse['data']['payment_name'] == 'Cash'
-                                ? Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Kembalian',
-                                        style: heading4(FontWeight.w400,
-                                            primary500, 'Outfit'),
                                       ),
-                                      Text(
-                                        FormatCurrency.convertToIdr(int.parse(
-                                                jsonResponse['data']
-                                                    ['change_money']))
-                                            .toString(),
-                                        style: heading4(FontWeight.w400,
-                                            primary500, 'Outfit'),
+                                      SizedBox(height: size8),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${cart[i].quantity}x',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              Colors.transparent,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          SizedBox(width: size24),
+                                          Text(
+                                            'Catatan : ${cart[i].desc}',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  )
-                                : SizedBox()
-                          ],
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(height: size16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(size8),
-                              child: Material(
-                                child: ButtonPrint(
-                                  bluetooth: bluetooth,
-                                  printtext: printext,
-                                  widgetku: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(height: size16),
-                                      Text(
-                                        'Cetak Struk',
-                                        style: heading3(
-                                            FontWeight.w600, bnw100, 'Outfit'),
-                                      ),
-                                      SizedBox(width: size12),
-                                      Icon(PhosphorIcons.printer_fill,
-                                          color: bnw100),
                                     ],
                                   ),
-                                ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: size16),
+                          dash(),
+                          SizedBox(height: size16),
+                          Text(
+                            'Rincian Pembayaran',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: size16),
+                          pesananStruk('Sub Total',
+                              FormatCurrency.convertToIdr(subTotal).toString()),
+                          SizedBox(height: size16),
+                          pesananStruk(
+                              'Diskon',
+                              FormatCurrency.convertToIdr(
+                                      jsonResponse['data']['discount'])
+                                  .toString()),
+                          SizedBox(height: size16),
+                          pesananStruk(
+                              'PPN',
+                              FormatCurrency.convertToIdr(ppnTransaksi)
+                                  .toString()),
+                          SizedBox(height: size16),
+                          dash(),
+                          SizedBox(height: size16),
+                          kembalianStruk(
+                            'Total',
+                            FormatCurrency.convertToIdr(
+                              int.parse(
+                                jsonResponse['data']['amount'].toString(),
                               ),
                             ),
                           ),
                           SizedBox(height: size16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                log(printext.toString());
-                                cart.clear();
-                                cartMap.clear();
-                                _pageController.jumpTo(0);
-
-                                int newtotal = 0;
-                                for (var element in cartMap) {
-                                  var myelement = int.parse(element['amount']!);
-
-                                  newtotal = newtotal + myelement;
-                                }
-
-                                sumTotal = newtotal;
-                                total = [];
-                                subTotal = 0;
-                                sumTotal = 0;
-                                transactionidValue = "";
-                                printext = '';
-                                pelangganName = '';
-                                pelangganId = '';
-                                namaCustomerCalculate = '';
-                                uangTunaiController.text = '0';
-                                isItemAdded = false;
-                                isExpand = false;
-                                conCatatan.clear();
-
-                                selectedIndex = 0;
-                                selectedIndexDompetDigital = 0;
-                                refreshTampilan();
-                                refreshColor();
-                                Navigator.pop(context);
-                                setState(() {});
-                              },
-                              child: buttonXLoutline(
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Kembali Ke Kasir',
-                                      style: heading3(FontWeight.w600,
-                                          primary500, 'Outfit'),
-                                    ),
-                                    SizedBox(width: size12),
-                                    Icon(PhosphorIcons.notebook_fill,
-                                        color: primary500),
-                                  ],
-                                ),
-                                double.infinity,
-                                primary500,
+                          pesananStruk(
+                            jsonResponse['data']['payment_name'],
+                            FormatCurrency.convertToIdr(
+                              int.parse(
+                                jsonResponse['data']['money_paid'].toString(),
                               ),
                             ),
                           ),
+                          SizedBox(height: size16),
+                          jsonResponse['data']['payment_name'] == 'Cash'
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Kembalian',
+                                      style: heading4(FontWeight.w400,
+                                          primary500, 'Outfit'),
+                                    ),
+                                    Text(
+                                      FormatCurrency.convertToIdr(int.parse(
+                                              jsonResponse['data']
+                                                  ['change_money']))
+                                          .toString(),
+                                      style: heading4(FontWeight.w400,
+                                          primary500, 'Outfit'),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox()
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(height: size16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(size8),
+                            child: Material(
+                              child: ButtonPrint(
+                                bluetooth: bluetooth,
+                                printtext: printext,
+                                widgetku: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(height: size16),
+                                    Text(
+                                      'Cetak Struk',
+                                      style: heading3(
+                                          FontWeight.w600, bnw100, 'Outfit'),
+                                    ),
+                                    SizedBox(width: size12),
+                                    Icon(PhosphorIcons.printer_fill,
+                                        color: bnw100),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: size16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: GestureDetector(
+                            onTap: () {
+                              log(printext.toString());
+                              cart.clear();
+                              cartMap.clear();
+                              _pageController.jumpTo(0);
+
+                              int newtotal = 0;
+                              for (var element in cartMap) {
+                                var myelement = int.parse(element['amount']!);
+
+                                newtotal = newtotal + myelement;
+                              }
+
+                              sumTotal = newtotal;
+                              total = [];
+                              subTotal = 0;
+                              sumTotal = 0;
+                              transactionidValue = "";
+                              printext = '';
+                              pelangganName = '';
+                              pelangganId = '';
+                              namaCustomerCalculate = '';
+                              uangTunaiController.text = '0';
+                              isItemAdded = false;
+                              isExpand = false;
+                              conCatatan.clear();
+
+                              selectedIndex = 0;
+                              selectedIndexDompetDigital = 0;
+                              refreshTampilan();
+                              refreshColor();
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: buttonXLoutline(
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Kembali Ke Kasir',
+                                    style: heading3(
+                                        FontWeight.w600, primary500, 'Outfit'),
+                                  ),
+                                  SizedBox(width: size12),
+                                  Icon(PhosphorIcons.notebook_fill,
+                                      color: primary500),
+                                ],
+                              ),
+                              double.infinity,
+                              primary500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        });
+          ),
+        );
 
         // cart.clear();
       });
     } else {
       log(jsonResponse.toString());
-      Navigator.of(context, rootNavigator: true).pop();
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
     }
   }
@@ -5553,6 +5535,8 @@ class _TransactionPageState extends State<TransactionPage>
                                             '')
                                         .then((value) {
                                       if (cartMap.isNotEmpty && value == '00') {
+                                        discountName = "";
+                                        discountId = "";
                                         _pageController.nextPage(
                                             duration:
                                                 Duration(milliseconds: 10),

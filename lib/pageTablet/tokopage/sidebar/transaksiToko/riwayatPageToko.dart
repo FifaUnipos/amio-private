@@ -883,10 +883,12 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           SizedBox(
                                                               height: size8),
                                                           Text(
-                                                            FormatCurrency
-                                                                    .convertToIdr(
-                                                                        data['discount'] ??
-                                                                            '-')
+                                                            FormatCurrency.convertToIdr(
+                                                                    data['discount'] ==
+                                                                            ""
+                                                                        ? 0
+                                                                        : data[
+                                                                            'discount'])
                                                                 .toString(),
                                                             style: heading4(
                                                                 FontWeight.w400,
@@ -1026,6 +1028,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                 widget.bluetooth.isConnected
                                                     .then((isConnected) {
                                                   if (isConnected == true) {
+                                                    showSnackBarComponent(
+                                                        context,
+                                                        'Berhasil cetak struk',
+                                                        '00');
                                                     widget.bluetooth
                                                         .printNewLine();
                                                     logoStrukPrinter == null

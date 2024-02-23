@@ -810,8 +810,11 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                       SizedBox(height: size8),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                                data['discount'] ??
-                                                                    '-')
+                                                                data['discount'] ==
+                                                                        ""
+                                                                    ? 0
+                                                                    : data[
+                                                                        'discount'])
                                                             .toString(),
                                                         style: heading4(
                                                             FontWeight.w400,

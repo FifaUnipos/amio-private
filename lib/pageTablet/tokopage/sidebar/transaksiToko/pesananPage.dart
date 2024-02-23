@@ -871,10 +871,12 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                 height: size8),
                                                             Text(
                                                               FormatCurrency
-                                                                      .convertToIdr(
-                                                                          data[
-                                                                              'discount'])
-                                                                  .toString(),
+                                                                  .convertToIdr(
+                                                                      data['discount'] ==
+                                                                              ""
+                                                                          ? 0
+                                                                          : data[
+                                                                              'discount']),
                                                               style: heading4(
                                                                   FontWeight
                                                                       .w400,

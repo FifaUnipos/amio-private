@@ -28,9 +28,9 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
   late TextEditingController conNameProdukEdit =
       TextEditingController(text: nameEditPromosi);
   late TextEditingController conHargaEdit =
-      TextEditingController(text: poinEditPromosi);
-  late TextEditingController conPointEdit =
       TextEditingController(text: hargaProductPromosi);
+  late TextEditingController conPointEdit =
+      TextEditingController(text: poinEditPromosi);
 
   void formatInputRpHargaEdit() {
     String text = conHargaEdit.text.replaceAll('.', '');
@@ -57,12 +57,12 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
   @override
   void initState() {
     super.initState();
-    
+
     conHargaEdit.addListener(formatInputRpHargaEdit);
     conPointEdit.addListener(formatInputRpPoinEdit);
   }
 
-  void initial(){
+  void initial() {
     // if(){}
   }
 
@@ -119,7 +119,7 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
               ),
               SizedBox(height: size16),
               fieldEditProduk(
-                'Point Voucher',
+                'Poin Voucher',
                 conPointEdit,
                 TextInputType.number,
               ),

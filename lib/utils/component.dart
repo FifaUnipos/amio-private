@@ -1279,13 +1279,11 @@ showModalBottomExit(context) {
 }
 
 sessionPage(BuildContext context, String token) {
-  return Navigator.pushReplacement(
-    context,
+  return Navigator.of(context).pushAndRemoveUntil(
     MaterialPageRoute(
       builder: (context) => statusProfile == 'Group_Merchant'
           ? SidebarXExampleApp(
               id: identifier.toString(),
-              // token: jsonResponse['token'],
               token: token,
             )
           : SidebarXExampleAppToko(
@@ -1293,6 +1291,7 @@ sessionPage(BuildContext context, String token) {
               id: identifier.toString(),
             ),
     ),
+    (Route<dynamic> route) => false,
   );
 }
 

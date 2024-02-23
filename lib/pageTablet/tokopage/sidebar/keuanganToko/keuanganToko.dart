@@ -24,6 +24,7 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
     with TickerProviderStateMixin {
   List<PendapatanLainModel>? datasPendapatan;
   List<PengeluaranLainModel>? datasPengeluaran;
+  TextEditingController keteranganRekon = TextEditingController();
   TextEditingController conKeterangan = TextEditingController();
   TextEditingController conPemasukkan = TextEditingController();
   PageController pageController = PageController();
@@ -836,6 +837,7 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                                                 setState(() {});
                                                                               },
                                                                               child: TextFormField(
+                                                                                controller: keteranganRekon,
                                                                                 cursorColor: primary500,
                                                                                 style: heading2(
                                                                                   FontWeight.w600,
@@ -892,7 +894,7 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                                                   child: GestureDetector(
                                                                                     onTap: () {
                                                                                       whenLoading(context);
-                                                                                      saveRekon(context, widget.token, detailItem['id'], tapTrue.toString());
+                                                                                      saveRekon(context, widget.token, detailItem['id'], tapTrue.toString(), keteranganRekon.text);
                                                                                       errorText = '';
 
                                                                                       setState(() {

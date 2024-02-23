@@ -570,6 +570,7 @@ class _ButtonPrintState extends State<ButtonPrint> {
 
         widget.bluetooth.isConnected.then((isConnected) {
           if (isConnected == true) {
+            showSnackBarComponent(context, 'Berhasil cetak struk', '00');
             widget.bluetooth.printNewLine();
             logoStrukPrinter == ''
                 ? widget.bluetooth.printNewLine()

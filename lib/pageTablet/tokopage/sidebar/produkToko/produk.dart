@@ -45,6 +45,9 @@ class _ProdukTokoState extends State<ProdukToko> {
   Map<int, bool> selectedFlag = {};
   List<String> listProduct = List.empty(growable: true);
 
+  List<String>? productIdCheckAll;
+  String checkFill = 'kosong';
+
   String textOrderBy = 'Nama Produk A ke Z';
   String textvalueOrderBy = 'upDownNama';
 
@@ -842,15 +845,17 @@ class _ProdukTokoState extends State<ProdukToko> {
                         children: [
                           SizedBox(
                             child: GestureDetector(
-                              // onTap: _selectAll,
+                              onTap: () {
+                                _selectAll(productIdCheckAll);
+                              },
                               child: SizedBox(
                                 width: 50,
-                                // child: Icon(
-                                //   isFalseAvailable
-                                //       ? PhosphorIcons.square
-                                //       : PhosphorIcons.check_square_fill,
-                                //   color: bnw100,
-                                // ),
+                                child: Icon(
+                                  isSelectionMode
+                                      ? PhosphorIcons.check
+                                      : PhosphorIcons.square,
+                                  color: bnw100,
+                                ),
                               ),
                             ),
                           ),
@@ -932,7 +937,22 @@ class _ProdukTokoState extends State<ProdukToko> {
                     : Row(
                         children: [
                           SizedBox(
-                            width: 50,
+                            child: GestureDetector(
+                              onTap: () {
+                                _selectAll(productIdCheckAll);
+                              },
+                              child: SizedBox(
+                                width: 50,
+                                child: Icon(
+                                  checkFill == 'penuh'
+                                      ? PhosphorIcons.check_square_fill
+                                      : isSelectionMode
+                                          ? PhosphorIcons.minus_circle_fill
+                                          : PhosphorIcons.square,
+                                  color: bnw100,
+                                ),
+                              ),
+                            ),
                           ),
                           Text(
                             '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
@@ -1114,8 +1134,8 @@ class _ProdukTokoState extends State<ProdukToko> {
                           color: bnw100,
                           backgroundColor: primary500,
                           onRefresh: () async {
-                            initState();
                             setState(() {});
+                            initState();
                           },
                           child: ListView.builder(
                             // physics: BouncingScrollPhysics(),
@@ -1127,6 +1147,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                                   selectedFlag[index] ?? false;
                               bool? isSelected = selectedFlag[index];
                               final dataProduk = datasProduk![index];
+                              productIdCheckAll = datasProduk!
+                                  .map((data) => data.productid!)
+                                  .toList();
 
                               return Column(
                                 children: [
@@ -2096,14 +2119,25 @@ class _ProdukTokoState extends State<ProdukToko> {
     // }
   }
 
-  void _selectAll() {
+  void _selectAll(productId) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    // If false will be available then it will select all the checkbox
-    // If there will be no false then it will de-select all
+
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(() {
-      isSelectionMode = selectedFlag.containsValue(true);
-    });
+    setState(
+      () {
+        if (selectedFlag.containsValue(false)) {
+          checkFill = 'kosong';
+          listProduct.clear();
+          isSelectionMode = selectedFlag.containsValue(false);
+          isSelectionMode = selectedFlag.containsValue(true);
+        } else {
+          checkFill = 'penuh';
+          listProduct.clear();
+          listProduct.addAll(productId);
+          isSelectionMode = selectedFlag.containsValue(true);
+        }
+      },
+    );
   }
 
   kategoriList(BuildContext context) {
@@ -2174,6 +2208,7 @@ class _ProdukTokoState extends State<ProdukToko> {
 
   Future<dynamic> kategoriListForm(
       BuildContext context, bool isKeyboardActive) {
+    setState(() {});
     return showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -2270,6 +2305,8 @@ class _ProdukTokoState extends State<ProdukToko> {
                       Expanded(
                         child: RefreshIndicator(
                           onRefresh: () async {
+                            _getProductList();
+                            setState(() {});
                             initState();
                           },
                           child: ListView(
@@ -2278,8 +2315,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                               GestureDetector(
                                 onTap: () {
                                   Navigator.pop(context);
-                                  tambahKategori(
-                                      context, isKeyboardActive, setState);
+                                  tambahKategori(context, isKeyboardActive);
                                   _getProductList();
                                 },
                                 child: buttonXLoutline(
@@ -2356,8 +2392,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                 product['jenisproduct'];
                                             controllerNameEdit.text =
                                                 product['jenisproduct'];
-                                            ubahHapusKategori(
-                                                product, setState);
+                                            ubahHapusKategori(product);
                                           },
                                         ),
                                       ),
@@ -2398,7 +2433,7 @@ class _ProdukTokoState extends State<ProdukToko> {
     );
   }
 
-  ubahHapusKategori(product, StateSetter setState) {
+  ubahHapusKategori(product) {
     showModalBottom(
       context,
       MediaQuery.of(context).size.height,
@@ -2618,20 +2653,20 @@ class _ProdukTokoState extends State<ProdukToko> {
                               child: GestureDetector(
                                 onTap: () {
                                   whenLoading(context);
-                                  hapusKategoriForm(context, widget.token,
-                                          product['kodeproduct'])
-                                      .then((value) {
-                                    if (value == '00') {
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                      kategoriListForm(context, false);
-                                      showSnackBarComponent(context,
-                                          'Berhasil hapus kategori', '00');
-                                    }
+                                  setState(() {
+                                    hapusKategoriForm(context, widget.token,
+                                            product['kodeproduct'])
+                                        .then((value) {
+                                      if (value == '00') {
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        kategoriListForm(context, false);
+                                        showSnackBarComponent(context,
+                                            'Berhasil hapus kategori', '00');
+                                      }
+                                    });
                                   });
-
                                   initState();
-                                  setState(() {});
                                 },
                                 child: buttonXLoutline(
                                   Center(
@@ -2683,8 +2718,7 @@ class _ProdukTokoState extends State<ProdukToko> {
     );
   }
 
-  Future<dynamic> tambahKategori(
-      BuildContext context, bool isKeyboardActive, StateSetter setState) {
+  Future<dynamic> tambahKategori(BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
