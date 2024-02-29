@@ -455,6 +455,7 @@ Future changePasswordVerify(context, id, otp) async {
 
 Future changePasswordChange(context, id, pass, conPass) async {
   try {
+    whenLoading(context);
     final response = await http.post(
       Uri.parse(forgotPassChangeLink),
       body: {
@@ -467,10 +468,13 @@ Future changePasswordChange(context, id, pass, conPass) async {
     print(jsonResponse);
     if (response.statusCode == 200) {
       errorText = '';
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
-      errorText = jsonResponse['message'];
+      // errorText = jsonResponse['message'];
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
     }
     return null;
   } catch (e) {
@@ -596,6 +600,7 @@ Future checkEmail(token, setState) async {
 
 Future valOtpEmail(context, token, typeotp) async {
   try {
+    whenLoading(context);
     var response = await Dio().post(
       valOtpEmailLink,
       data: {
@@ -611,9 +616,11 @@ Future valOtpEmail(context, token, typeotp) async {
 
     if (response.statusCode == 200) {
       print("succes aman tentram kirim otp : $typeotp");
-
+      closeLoading(context);
       print(response.data["data"]);
-    } else {}
+    } else {
+      closeLoading(context);
+    }
     return null;
   } catch (e) {
     throw Exception(e.toString());
@@ -1104,6 +1111,7 @@ Future updateProduk(
   }
 
   try {
+    whenLoading(context);
     final response = await http.post(
       Uri.parse(updateProdukUrl),
       body: {
@@ -1128,10 +1136,12 @@ Future updateProduk(
 
     if (response.statusCode == 200) {
       print("succes aman tentram");
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
       print(jsonResponse['data']);
       pageController.jumpTo(0);
     } else {
+      closeLoading(context);
       print(jsonResponse['rc']);
       showSnackbar(context, jsonResponse);
     }
@@ -1178,6 +1188,7 @@ Future deleteAkun(
   token,
   List userid,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(userid);
 
   final response = await http.post(
@@ -1196,10 +1207,12 @@ Future deleteAkun(
     // print('Sukses Delete Data');
     print(jsonResponse['data'].toString());
     Navigator.pop(context);
+    closeLoading(context);
     return jsonResponse['rc'];
   } else {
     print(jsonResponse['message'].toString());
     Navigator.pop(context);
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1227,10 +1240,12 @@ Future deleteProduk(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
     print('Sukses Delete Data');
     closeLoading(context);
     showSnackbar(context, jsonResponse);
     // print(jsonResponse['data'].toString());
+    return jsonResponse['rc'];
   } else {
     closeLoading(context);
     // print(jsonResponse['message'].toString());
@@ -1273,6 +1288,7 @@ Future changeActiveAkun(
   userid,
 ) async {
   whenLoading(context);
+  final String jsonTest = json.encode(userid);
   final response = await http.put(
     Uri.parse('$url/api/user/changeStatus'),
     headers: {
@@ -1280,7 +1296,7 @@ Future changeActiveAkun(
     },
     body: {
       "deviceid": identifier,
-      "userid": userid,
+      "userid": jsonTest,
       "status": status,
     },
   );
@@ -1858,6 +1874,7 @@ Future deleteDiskon(
   token,
   id,
 ) async {
+  whenLoading(context);
   final String productidList = json.encode(id);
   final response = await http.post(
     Uri.parse(deleteDiskonLink),
@@ -1874,9 +1891,11 @@ Future deleteDiskon(
   if (response.statusCode == 200) {
     print('Sukses Delete Data');
     // Navigator.pop(context);
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['data'].toString());
   } else {
+    closeLoading(context);
     print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
@@ -3035,6 +3054,7 @@ Future getLaporanMerchantExport(
   List merchid,
   export,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
     Uri.parse(laporanMerchUrl),
@@ -3043,26 +3063,26 @@ Future getLaporanMerchantExport(
     },
     body: {
       "deviceid": identifier,
-      "keyword": keyword.toString(),
-      "orderby": orderby.toString(),
+      "keyword": keyword,
+      "orderby": orderby,
       "merchantid": jsonTest,
       "export": export,
     },
   );
 
-  // print(keyword + orderby);
-
   var jsonResponse = jsonDecode(response.body);
+  print(jsonResponse.toString());
   if (response.statusCode == 200) {
     print('succes');
 
     print(jsonResponse.toString());
-
+    closeLoading(context);
     Map<String, dynamic> data = jsonDecode(response.body);
     // print(data['data']['detail']['tanggal']);
     return data;
   } else {
-    print(jsonResponse['message'].toString() + jsonResponse['rc'].toString());
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -3152,6 +3172,7 @@ late String nameEditProduk,
     imageEdit;
 Future getSingleProduct(
     BuildContext context, token, String merchid, productid, setState) async {
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(getSingleProductUrl),
     headers: {
@@ -3178,10 +3199,12 @@ Future getSingleProduct(
     ppnEdit = dataku['isPPN'].toString();
     tampilEdit = dataku['isActive'].toString();
     imageEdit = dataku['product_image'].toString();
+    closeLoading(context);
     // setState(() {});
     return jsonResponse['data'];
   } else {
     // print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -3325,6 +3348,7 @@ Future getSinglePromosi(
 }
 
 Future getOtpSandi(BuildContext context, token, typeotp) async {
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(getOtpSandiLink),
     headers: {
@@ -3339,8 +3363,10 @@ Future getOtpSandi(BuildContext context, token, typeotp) async {
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print(jsonResponse);
+    closeLoading(context);
   } else {
     print(jsonResponse['message'].toString());
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
   return jsonResponse['rc'];

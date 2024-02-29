@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
+import 'package:amio/pagehelper/masukakun.dart';
 import 'package:amio/utils/component.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -261,11 +262,11 @@ class ProfilePageState extends State<ProfilePage> {
                                       selectedIndexSideBar = false;
                                       showingMenuSidebar == true;
 
-                                      Navigator.pushReplacement(
-                                        context,
+                                      Navigator.of(context).pushAndRemoveUntil(
                                         MaterialPageRoute(
-                                          builder: (context) => LoginPage(),
+                                          builder: (context) => MasukAkunPage(),
                                         ),
+                                        (Route<dynamic> route) => false,
                                       );
                                     },
                                     child: buttonXL(

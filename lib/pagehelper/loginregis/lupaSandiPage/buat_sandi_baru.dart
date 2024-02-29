@@ -65,7 +65,11 @@ class _BuatSandiBaruPageState extends State<BuatSandiBaruPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage(),)),
+                          onTap: () => Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginPage(),
+                              )),
                           child: Icon(
                             PhosphorIcons.arrow_left,
                             size: size40,
@@ -276,22 +280,35 @@ class _BuatSandiBaruPageState extends State<BuatSandiBaruPage> {
                                         onTap: () async {
                                           setState(() {
                                             if (onOffButton == primary500) {
-                                              errorText = '';
-                                              changePasswordChange(
-                                                      context,
-                                                      widget.userid,
-                                                      phoneEmailController.text,
-                                                      phoneEmailController.text)
-                                                  .then((value) {
-                                                if (value == '00') {
-                                                  Navigator.pushReplacement(
-                                                      context,
+                                              if (phoneEmailController.text ==
+                                                  phoneEmailController2.text) {
+                                                errorText = '';
+                                                changePasswordChange(
+                                                        context,
+                                                        widget.userid,
+                                                        phoneEmailController
+                                                            .text,
+                                                        phoneEmailController
+                                                            .text)
+                                                    .then((value) {
+                                                  if (value == '00') {
+                                                    Navigator.of(context)
+                                                        .pushAndRemoveUntil(
                                                       MaterialPageRoute(
                                                         builder: (context) =>
                                                             LoginPage(),
-                                                      ));
-                                                }
-                                              });
+                                                      ),
+                                                      (Route<dynamic> route) =>
+                                                          false,
+                                                    );
+                                                  }
+                                                });
+                                              } else {
+                                                showSnackBarComponent(
+                                                    context,
+                                                    'Kata sandi harus sama',
+                                                    '30');
+                                              }
                                             }
                                           });
                                         },

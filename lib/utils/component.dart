@@ -304,11 +304,13 @@ void whenLoading(context) {
       child: Builder(
         builder: (BuildContext context) {
           loadingCompleter = Completer<void>();
-          return const Center(
+          return Center(
             child: SizedBox(
               width: 40,
               height: 40,
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: primary500,
+              ),
             ),
           );
         },

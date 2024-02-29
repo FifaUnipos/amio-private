@@ -151,8 +151,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                           cursorColor: primary500,
                                           controller: phoneEmailController,
                                           decoration: InputDecoration(
-                                            errorText:
-                                                errorText.isNotEmpty ? errorText : null,
+                                            errorText: errorText.isNotEmpty
+                                                ? errorText
+                                                : null,
                                             errorStyle: body1(FontWeight.w500,
                                                 red500, 'Outfit'),
                                             focusedBorder: UnderlineInputBorder(
@@ -185,7 +186,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       child: GestureDetector(
                                         onTap: () async {
                                           setState(() {
-                                            
                                             errorText = '';
                                             _focusScopeNode.unfocus();
                                             changePasswordRequest(
@@ -194,6 +194,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                                     phoneEmailController.text)
                                                 .then((value) {
                                               if (value == '00') {
+                                                errorText = '';
                                                 Navigator.pop(context);
                                                 Navigator.push(
                                                   context,

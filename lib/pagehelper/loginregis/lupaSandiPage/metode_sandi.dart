@@ -87,7 +87,7 @@ class _MetodeSandiPageState extends State<MetodeSandiPage> {
                           'Email',
                           userEmail,
                           PhosphorIcons.envelope_open_fill,
-                          Otppage(userPhone, userEmail, '', 'forgotPass')
+                          Otppage(userPhone, userEmail, userEmail, 'forgotPass')
                           // RegisterPage(),
                           ),
                     ),

@@ -280,7 +280,7 @@ class _PromosiGrupState extends State<PromosiGrup>
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
-                  'Poin Voucher',
+                  'Coin',
                   'Rp. 12.000',
                   conPoint,
                   TextInputType.number,
@@ -591,17 +591,16 @@ class _PromosiGrupState extends State<PromosiGrup>
             child: isSelectionMode == false
                 ? Row(
                     children: [
-                      Opacity(
-                        opacity: 0,
+                      SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            // selectAll(1, datasProduk);
+                            selectAll(productIdCheckAll);
                           },
                           child: SizedBox(
                             child: Icon(
-                              isFalseAvailable
-                                  ? PhosphorIcons.square
-                                  : PhosphorIcons.check_square_fill,
+                              isSelectionMode
+                                  ? PhosphorIcons.check
+                                  : PhosphorIcons.square,
                               color: bnw100,
                             ),
                           ),
@@ -631,8 +630,8 @@ class _PromosiGrupState extends State<PromosiGrup>
                       SizedBox(width: size16),
                       Container(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width / 12,
-                          minWidth: MediaQuery.of(context).size.width / 12,
+                          maxWidth: MediaQuery.of(context).size.width / 8,
+                          minWidth: MediaQuery.of(context).size.width / 8,
                         ),
                         child: Text(
                           'Tampil Kasir',
@@ -668,8 +667,23 @@ class _PromosiGrupState extends State<PromosiGrup>
                 : Row(
                     children: [
                       SizedBox(
-                        width: 50,
+                        child: GestureDetector(
+                          onTap: () {
+                            selectAll(productIdCheckAll);
+                          },
+                          child: SizedBox(
+                            child: Icon(
+                              checkFill == 'penuh'
+                                  ? PhosphorIcons.check_square_fill
+                                  : isSelectionMode
+                                      ? PhosphorIcons.minus_circle_fill
+                                      : PhosphorIcons.square,
+                              color: bnw100,
+                            ),
+                          ),
+                        ),
                       ),
+                      SizedBox(width: size16),
                       Text(
                         '${listProduct.length}/${datasProduk!.length} Voucher Terpilih',
                         style: heading4(FontWeight.w600, bnw100, 'Outfit'),
@@ -829,6 +843,9 @@ class _PromosiGrupState extends State<PromosiGrup>
                           selectedFlag[index] = selectedFlag[index] ?? false;
                           bool? isSelected = selectedFlag[index];
                           final dataProduk = datasProduk![index];
+                          productIdCheckAll = datasProduk!
+                              .map((data) => data.productid!)
+                              .toList();
 
                           return Container(
                             padding: EdgeInsets.symmetric(
@@ -1265,21 +1282,28 @@ class _PromosiGrupState extends State<PromosiGrup>
     // }
   }
 
-  void selectAll(index, productId) {
+  List<String>? productIdCheckAll;
+  String checkFill = 'kosong';
+
+  void selectAll(productId) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    // If false will be available then it will select all the checkbox
-    // If there will be no false then it will de-select all
-    if (index >= 0 && index < selectedFlag.length) {
-      selectedFlag.updateAll((key, value) => isFalseAvailable);
-      isSelectionMode = selectedFlag.containsValue(true);
-      if (selectedFlag[index] == true) {
-        if (!listProduct.contains(productId)) {
-          listProduct.add(productId);
+
+    selectedFlag.updateAll((key, value) => isFalseAvailable);
+    setState(
+      () {
+        if (selectedFlag.containsValue(false)) {
+          checkFill = 'kosong';
+          listProduct.clear();
+          isSelectionMode = selectedFlag.containsValue(false);
+          isSelectionMode = selectedFlag.containsValue(true);
+        } else {
+          checkFill = 'penuh';
+          listProduct.clear();
+          listProduct.addAll(productId);
+          isSelectionMode = selectedFlag.containsValue(true);
         }
-      }
-      print(listProduct);
-      setState(() {});
-    }
+      },
+    );
   }
 
   List? typeproductList;

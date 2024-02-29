@@ -397,7 +397,7 @@ class _TransactionPageState extends State<TransactionPage>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               pesananStruk(
-                                  'Kasir', jsonResponse['data']['pic'] ?? ''),
+                                  'Kasir', jsonResponse['data']['pic_name'] ?? ''),
                               SizedBox(height: size16),
                               dash(),
                               SizedBox(height: size16),

@@ -1164,7 +1164,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                 child: buttonXL(
                   Center(
                     child: Text(
-                      'Simpan',
+                      'Tambah',
                       style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                     ),
                   ),

@@ -76,6 +76,9 @@ class _PromosiTokoState extends State<PromosiToko>
     );
   }
 
+  List<String>? productIdCheckAll;
+  String checkFill = 'kosong';
+
   @override
   void initState() {
     checkConnection(context);
@@ -554,7 +557,7 @@ class _PromosiTokoState extends State<PromosiToko>
           Container(
             // width: double.infinity,
             // height: 50,
-            padding: EdgeInsets.symmetric(horizontal: size16, vertical: size12),
+            padding: EdgeInsets.symmetric(vertical: size12),
             decoration: BoxDecoration(
               color: primary500,
               borderRadius: BorderRadius.only(
@@ -565,23 +568,22 @@ class _PromosiTokoState extends State<PromosiToko>
             child: isSelectionMode == false
                 ? Row(
                     children: [
-                      Opacity(
-                        opacity: 0,
+                      SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            // selectAll(1, datasProduk);
+                            selectAll(productIdCheckAll);
                           },
                           child: SizedBox(
+                            width: 50,
                             child: Icon(
-                              isFalseAvailable
-                                  ? PhosphorIcons.square
-                                  : PhosphorIcons.check_square_fill,
+                              isSelectionMode
+                                  ? PhosphorIcons.check
+                                  : PhosphorIcons.square,
                               color: bnw100,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: size16),
                       Expanded(
                         child: Text(
                           'Info Voucher',
@@ -605,8 +607,8 @@ class _PromosiTokoState extends State<PromosiToko>
                       SizedBox(width: size16),
                       Container(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width / 12,
-                          minWidth: MediaQuery.of(context).size.width / 12,
+                          maxWidth: MediaQuery.of(context).size.width / 8,
+                          minWidth: MediaQuery.of(context).size.width / 8,
                         ),
                         child: Text(
                           'Tampil Kasir',
@@ -642,7 +644,22 @@ class _PromosiTokoState extends State<PromosiToko>
                 : Row(
                     children: [
                       SizedBox(
-                        width: 50,
+                        child: GestureDetector(
+                          onTap: () {
+                            selectAll(productIdCheckAll);
+                          },
+                          child: SizedBox(
+                            width: 50,
+                            child: Icon(
+                              checkFill == 'penuh'
+                                  ? PhosphorIcons.check_square_fill
+                                  : isSelectionMode
+                                      ? PhosphorIcons.minus_circle_fill
+                                      : PhosphorIcons.square,
+                              color: bnw100,
+                            ),
+                          ),
+                        ),
                       ),
                       Text(
                         '${listProduct.length}/${datasProduk!.length} Voucher Terpilih',
@@ -803,6 +820,9 @@ class _PromosiTokoState extends State<PromosiToko>
                           selectedFlag[index] = selectedFlag[index] ?? false;
                           bool? isSelected = selectedFlag[index];
                           final dataProduk = datasProduk![index];
+                          productIdCheckAll = datasProduk!
+                              .map((data) => data.productid!)
+                              .toList();
 
                           return Container(
                             padding: EdgeInsets.symmetric(
@@ -867,9 +887,9 @@ class _PromosiTokoState extends State<PromosiToko>
                                 Container(
                                   constraints: BoxConstraints(
                                     maxWidth:
-                                        MediaQuery.of(context).size.width / 12,
+                                        MediaQuery.of(context).size.width / 9,
                                     minWidth:
-                                        MediaQuery.of(context).size.width / 12,
+                                        MediaQuery.of(context).size.width / 9,
                                   ),
                                   child: FlutterSwitch(
                                     value:
@@ -1239,21 +1259,25 @@ class _PromosiTokoState extends State<PromosiToko>
     // }
   }
 
-  void selectAll(index, productId) {
+  void selectAll(productId) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    // If false will be available then it will select all the checkbox
-    // If there will be no false then it will de-select all
-    if (index >= 0 && index < selectedFlag.length) {
-      selectedFlag.updateAll((key, value) => isFalseAvailable);
-      isSelectionMode = selectedFlag.containsValue(true);
-      if (selectedFlag[index] == true) {
-        if (!listProduct.contains(productId)) {
-          listProduct.add(productId);
+
+    selectedFlag.updateAll((key, value) => isFalseAvailable);
+    setState(
+      () {
+        if (selectedFlag.containsValue(false)) {
+          checkFill = 'kosong';
+          listProduct.clear();
+          isSelectionMode = selectedFlag.containsValue(false);
+          isSelectionMode = selectedFlag.containsValue(true);
+        } else {
+          checkFill = 'penuh';
+          listProduct.clear();
+          listProduct.addAll(productId);
+          isSelectionMode = selectedFlag.containsValue(true);
         }
-      }
-      print(listProduct);
-      setState(() {});
-    }
+      },
+    );
   }
 
   List? typeproductList;

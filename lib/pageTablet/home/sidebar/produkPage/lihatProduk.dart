@@ -61,6 +61,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   String textOrderBy = 'Nama Produk A ke Z';
   String textvalueOrderBy = 'upDownNama';
 
+  List<String>? productIdCheckAll;
+  String checkFill = 'kosong';
+
   void formatInputRp() {
     String text = conHarga.text.replaceAll('.', '');
 
@@ -773,18 +776,21 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                   ),
                   child: isSelectionMode == false
                       ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             SizedBox(
                               child: GestureDetector(
-                                // onTap: _selectAll,
+                                onTap: () {
+                                  _selectAll(productIdCheckAll);
+                                },
                                 child: SizedBox(
                                   width: 50,
-                                  // child: Icon(
-                                  //   isFalseAvailable
-                                  //       ? PhosphorIcons.square
-                                  //       : PhosphorIcons.check_square_fill,
-                                  //   color: bnw100,
-                                  // ),
+                                  child: Icon(
+                                    isSelectionMode
+                                        ? PhosphorIcons.check
+                                        : PhosphorIcons.square,
+                                    color: bnw100,
+                                  ),
                                 ),
                               ),
                             ),
@@ -801,10 +807,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size16),
                             Expanded(
                               flex: 2,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width / 10,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width / size8,
+                                  minWidth:
+                                      MediaQuery.of(context).size.width / size8,
+                                ),
                                 child: Text(
-                                  'Kategori',
+                                  'Harga Normal',
                                   style: heading4(
                                       FontWeight.w600, bnw100, 'Outfit'),
                                 ),
@@ -813,10 +824,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size16),
                             Expanded(
                               flex: 2,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width / 8,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width / size8,
+                                  minWidth:
+                                      MediaQuery.of(context).size.width / size8,
+                                ),
                                 child: Text(
-                                  'Harga',
+                                  'Harga Online',
                                   style: heading4(
                                       FontWeight.w600, bnw100, 'Outfit'),
                                 ),
@@ -841,9 +857,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             Container(
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width / size12,
+                                    MediaQuery.of(context).size.width / 12,
                                 minWidth:
-                                    MediaQuery.of(context).size.width / size12,
+                                    MediaQuery.of(context).size.width / 12,
                               ),
                               child: Text(
                                 'Tampil Kasir',
@@ -860,14 +876,29 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       : Row(
                           children: [
                             SizedBox(
-                              width: 50,
+                              child: GestureDetector(
+                                onTap: () {
+                                  _selectAll(productIdCheckAll);
+                                },
+                                child: SizedBox(
+                                  width: 50,
+                                  child: Icon(
+                                    checkFill == 'penuh'
+                                        ? PhosphorIcons.check_square_fill
+                                        : isSelectionMode
+                                            ? PhosphorIcons.minus_circle_fill
+                                            : PhosphorIcons.square,
+                                    color: bnw100,
+                                  ),
+                                ),
+                              ),
                             ),
                             Text(
                               '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
                               style:
                                   heading4(FontWeight.w600, bnw100, 'Outfit'),
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: size8),
                             GestureDetector(
                               onTap: () {
                                 showBottomPilihan(
@@ -889,9 +920,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                             style: heading2(FontWeight.w400,
                                                 bnw900, 'Outfit'),
                                           ),
-                                          SizedBox(height: size16),
                                         ],
                                       ),
+                                      SizedBox(height: size16),
                                       Row(
                                         children: [
                                           Expanded(
@@ -903,13 +934,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   listProduct,
                                                   widget.merchId,
                                                 );
-                                                selectedFlag.clear();
-                                                listProduct.clear();
-                                                isSelectionMode = false;
-                                                listProduct = [];
+                                                refreshDataProduk();
 
-                                                initState();
                                                 setState(() {});
+                                                initState();
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -928,7 +956,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(width: size12),
+                                          SizedBox(width: 12),
                                           Expanded(
                                             child: GestureDetector(
                                               onTap: () {
@@ -982,8 +1010,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   widget.token,
                                   'false',
                                   listProduct,
-                                  "",
+                                  widget.merchId,
                                 );
+                                refreshDataProduk();
 
                                 setState(() {});
                                 initState();
@@ -1009,10 +1038,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 changeActive(
                                   context,
                                   widget.token,
-                                  value.toString(),
+                                  'true',
                                   listProduct,
-                                  "",
+                                  widget.merchId,
                                 );
+                                refreshDataProduk();
                                 initState();
                                 setState(() {});
                               },
@@ -1062,9 +1092,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     selectedFlag[index] ?? false;
                                 bool? isSelected = selectedFlag[index];
                                 final dataProduk = datasProduk![index];
-                                // productIdCheckAll = datasProduk!
-                                //     .map((data) => data.productid!)
-                                //     .toList();
+                                productIdCheckAll = datasProduk!
+                                    .map((data) => data.productid!)
+                                    .toList();
 
                                 return Column(
                                   children: [
@@ -1991,14 +2021,26 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     // }
   }
 
-  void _selectAll() {
+  void _selectAll(productId) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    // If false will be available then it will select all the checkbox
-    // If there will be no false then it will de-select all
+
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(() {
-      isSelectionMode = selectedFlag.containsValue(true);
-    });
+    log(productId.toString());
+    setState(
+      () {
+        if (selectedFlag.containsValue(false)) {
+          checkFill = 'kosong';
+          listProduct.clear();
+          isSelectionMode = selectedFlag.containsValue(false);
+          isSelectionMode = selectedFlag.containsValue(true);
+        } else {
+          checkFill = 'penuh';
+          listProduct.clear();
+          listProduct.addAll(productId);
+          isSelectionMode = selectedFlag.containsValue(true);
+        }
+      },
+    );
   }
 
   kategoriList(BuildContext context) {

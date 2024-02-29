@@ -437,17 +437,16 @@ class _DiskonGrupState extends State<DiskonGrup> {
                 child: isSelectionMode == false
                     ? Row(
                         children: [
-                          Opacity(
-                            opacity: 0,
+                          SizedBox(
                             child: GestureDetector(
                               onTap: () {
-                                // selectAll(1, datasProduk);
+                                selectAll(productIdCheckAll);
                               },
-                              child: SizedBox(
+                              child: Container(
                                 child: Icon(
-                                  isFalseAvailable
-                                      ? PhosphorIcons.square
-                                      : PhosphorIcons.check_square_fill,
+                                  isSelectionMode
+                                      ? PhosphorIcons.check
+                                      : PhosphorIcons.square,
                                   color: bnw100,
                                 ),
                               ),
@@ -512,8 +511,23 @@ class _DiskonGrupState extends State<DiskonGrup> {
                     : Row(
                         children: [
                           SizedBox(
-                            width: 50,
+                            child: GestureDetector(
+                              onTap: () {
+                                selectAll(productIdCheckAll);
+                              },
+                              child: SizedBox(
+                                child: Icon(
+                                  checkFill == 'penuh'
+                                      ? PhosphorIcons.check_square_fill
+                                      : isSelectionMode
+                                          ? PhosphorIcons.minus_circle_fill
+                                          : PhosphorIcons.square,
+                                  color: bnw100,
+                                ),
+                              ),
+                            ),
                           ),
+                          SizedBox(width: size16),
                           Text(
                             '${listProduct.length}/${datasProduk!.length} Diskon Terpilih',
                             style: heading4(FontWeight.w600, bnw100, 'Outfit'),
@@ -621,12 +635,12 @@ class _DiskonGrupState extends State<DiskonGrup> {
                           SizedBox(width: size16),
                           GestureDetector(
                             onTap: () {
-                              changeActive(
+                              changeActiveDiskon(
                                 context,
                                 widget.token,
                                 'true',
                                 listProduct,
-                                widget.merchid,
+                                "",
                               );
                               refreshDataProduk();
                               setState(() {});
@@ -677,7 +691,9 @@ class _DiskonGrupState extends State<DiskonGrup> {
                                   selectedFlag[index] ?? false;
                               bool? isSelected = selectedFlag[index];
                               final dataProduk = datasProduk![index];
-
+                              productIdCheckAll =
+                                  datasProduk!.map((data) => data.id!).toList();
+                                  
                               return Container(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: size16, vertical: size12),
@@ -1152,21 +1168,28 @@ class _DiskonGrupState extends State<DiskonGrup> {
     // }
   }
 
-  void selectAll(index, id) {
+  List<String>? productIdCheckAll;
+  String checkFill = 'kosong';
+
+  void selectAll(productId) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
-    // If false will be available then it will select all the checkbox
-    // If there will be no false then it will de-select all
-    if (index >= 0 && index < selectedFlag.length) {
-      selectedFlag.updateAll((key, value) => isFalseAvailable);
-      isSelectionMode = selectedFlag.containsValue(true);
-      if (selectedFlag[index] == true) {
-        if (!listProduct.contains(id)) {
-          listProduct.add(id);
+
+    selectedFlag.updateAll((key, value) => isFalseAvailable);
+    setState(
+      () {
+        if (selectedFlag.containsValue(false)) {
+          checkFill = 'kosong';
+          listProduct.clear();
+          isSelectionMode = selectedFlag.containsValue(false);
+          isSelectionMode = selectedFlag.containsValue(true);
+        } else {
+          checkFill = 'penuh';
+          listProduct.clear();
+          listProduct.addAll(productId);
+          isSelectionMode = selectedFlag.containsValue(true);
         }
-      }
-      print(listProduct);
-      setState(() {});
-    }
+      },
+    );
   }
 
   List? typeproductList;

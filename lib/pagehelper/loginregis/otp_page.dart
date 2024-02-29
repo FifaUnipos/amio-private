@@ -81,6 +81,7 @@ class _OtppageState extends State<Otppage> {
 
   @override
   void initState() {
+    // log(widget.email);
     startTimeout();
     super.initState();
   }
@@ -94,6 +95,11 @@ class _OtppageState extends State<Otppage> {
   @override
   Widget build(BuildContext context) {
     String phoneNumber = hidePhoneNumber(widget.phone);
+    if (widget.email.isNotEmpty) {
+      phoneNumber = widget.email;
+    } else {
+      phoneNumber = hidePhoneNumber(widget.phone);
+    }
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,

@@ -128,7 +128,7 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
               ),
               SizedBox(height: size16),
               fieldEditProduk(
-                'Poin Voucher',
+                'Coin',
                 conPointEdit,
                 TextInputType.number,
               ),
