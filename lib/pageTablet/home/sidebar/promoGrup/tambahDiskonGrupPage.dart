@@ -70,6 +70,26 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
     );
   }
 
+  refreshTampilan() {
+    setState(() {
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      conNameDiskon.text = '';
+      conHarga.text = '';
+      tipeUmumAktif = 0;
+      tipeProdukAktif = 0;
+      hargaRupiahAktif = 0;
+      hargaPersenAktif = 0;
+      masaSelamanya = 0;
+      masaKustom = 0;
+      txtFieldAktif = 0;
+      kasirAktif = "Aktif";
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      productidDiskon.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -103,16 +123,21 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
               ),
             ),
             SizedBox(width: size12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                Text(
-                  'Tambah Diskon',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  'Diskon akan ditambahkan kedalam Toko yang telah dipilih',
-                  style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tambah Diskon',
+                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      'Diskon akan ditambahkan kedalam Toko yang telah dipilih',
+                      style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                    ),
+                  ],
                 ),
               ],
             )
@@ -757,8 +782,8 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                             onTap: () {
                               masaKustom = 0;
                               masaSelamanya = 1;
-                              tanggalAwal = 'null';
-                              tanggalAkhir = 'null';
+                              // tanggalAwal = 'null';
+                              // tanggalAkhir = 'null';
                               setState(() {});
                             },
                             child: buttonActive(
@@ -1062,8 +1087,12 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
-                    masaSelamanya == 1 ? 'forever' : 'custom',
-                  );
+                    masaSelamanya == 1 ? 'forever' : 'range',
+                  ).then((value) {
+                    if (value == '00') {
+                      refreshTampilan();
+                    }
+                  });
 
                   setState(() {});
                 },
@@ -1115,9 +1144,10 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
-                    masaSelamanya == 1 ? 'forever' : 'custom',
+                    masaSelamanya == 1 ? 'forever' : 'range',
                   ).then((value) {
                     if (value == '00') {
+                      refreshTampilan();
                       widget.pageController.jumpToPage(0);
                     }
                   });
@@ -1232,9 +1262,11 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
   Future _getProductList() async {
     await http.post(Uri.parse(getProdukDiskonLink), body: {
       "deviceid": identifier,
+      "merchantid": widget.merchid,
     }, headers: {
       "token": widget.token,
     }).then((response) {
+      log(response.body.toString());
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data != null && data['data'] != null) {

@@ -29,9 +29,9 @@ class _UbahPromosiGrupPageState extends State<UbahPromosiGrupPage> {
   late TextEditingController conNameProdukEdit =
       TextEditingController(text: nameEditPromosi);
   late TextEditingController conHargaEdit =
-      TextEditingController(text: poinEditPromosi);
-  late TextEditingController conPointEdit =
       TextEditingController(text: hargaProductPromosi);
+  late TextEditingController conPointEdit =
+      TextEditingController(text: poinEditPromosi);
 
   void formatInputRpHargaEdit() {
     String text = conHargaEdit.text.replaceAll('.', '');
@@ -53,6 +53,14 @@ class _UbahPromosiGrupPageState extends State<UbahPromosiGrupPage> {
       text: formattedAmount,
       selection: TextSelection.collapsed(offset: formattedAmount.length),
     );
+  }
+
+  refreshTampilan() {
+    conNameProdukEdit.clear();
+    conHargaEdit.clear();
+    conPointEdit.clear();
+    onswitchtampikan = true;
+    setState(() {});
   }
 
   @override
@@ -208,6 +216,7 @@ class _UbahPromosiGrupPageState extends State<UbahPromosiGrupPage> {
               ).then((value) {
                 if (value == '00') {
                   widget.pageController.jumpToPage(0);
+                  refreshTampilan();
                 }
               });
 

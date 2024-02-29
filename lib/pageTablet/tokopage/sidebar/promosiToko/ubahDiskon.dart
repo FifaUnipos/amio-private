@@ -113,6 +113,26 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
     }
   }
 
+  refreshTampilan() {
+    setState(() {
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      conNameDiskon.text = '';
+      conHarga.text = '';
+      tipeUmumAktif = 0;
+      tipeProdukAktif = 0;
+      hargaRupiahAktif = 0;
+      hargaPersenAktif = 0;
+      masaSelamanya = 0;
+      masaKustom = 0;
+      txtFieldAktif = 0;
+      kasirAktif = "Aktif";
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      productidDiskon.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -469,6 +489,11 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                       return const SizedBox(); // atau Widget lain sesuai kebutuhan
                                                                     }
 
+                                                                    final bool
+                                                                        isSelected =
+                                                                        productidDiskon
+                                                                            .contains(product['productid']);
+
                                                                     final bool isMatchingSearch = product[
                                                                             'name']
                                                                         .toString()
@@ -476,11 +501,6 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                         .contains(searchController
                                                                             .text
                                                                             .toLowerCase());
-
-                                                                    final bool
-                                                                        isSelected =
-                                                                        productidDiskon
-                                                                            .contains(product['productid']);
 
                                                                     if (isMatchingSearch) {
                                                                       return GestureDetector(
@@ -1097,42 +1117,6 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
               child: GestureDetector(
                 onTap: () {
                   bool statusDiskon = true;
-                  kasirAktif == 'Aktif'
-                      ? statusDiskon = true
-                      : statusDiskon = false;
-                  ubahDiskon(
-                    context,
-                    widget.token,
-                    idDiskonUpdate,
-                    '',
-                    productidDiskon,
-                    conNameDiskon.text,
-                    conHarga.text,
-                    hargaRupiahAktif == 1 ? 'price' : 'percentage',
-                    masaSelamanya == 1 ? '' : tanggalAwal,
-                    masaSelamanya == 1 ? '' : tanggalAkhir,
-                    statusDiskon.toString(),
-                  );
-
-                  setState(() {});
-                },
-                child: buttonXLoutline(
-                  Center(
-                    child: Text(
-                      'Simpan & Tambah Baru',
-                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                  ),
-                  MediaQuery.of(context).size.width,
-                  bnw900,
-                ),
-              ),
-            ),
-            SizedBox(width: size16),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  bool statusDiskon = true;
                   if (tipeUmumAktif == 1) {
                     productidDiskon.clear();
                   }
@@ -1151,9 +1135,11 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
+                    masaSelamanya == 1 ? 'forever' : 'range',
                   ).then((value) {
                     if (value == '00') {
                       widget.pageController.jumpToPage(0);
+                      refreshTampilan();
                     }
                   });
 

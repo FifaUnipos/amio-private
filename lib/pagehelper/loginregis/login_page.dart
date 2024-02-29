@@ -590,7 +590,6 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        Navigator.of(context, rootNavigator: true).pop();
         print("succes login with email");
 
         myprofile(jsonResponse['token']);
@@ -608,8 +607,8 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         Future.delayed(
           const Duration(seconds: 3),
           () {
-            Navigator.pushReplacement(
-              context,
+            closeLoading(context);
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (context) => statusProfile == 'Group_Merchant'
                     ? SidebarXExampleApp(
@@ -621,6 +620,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                         id: identifier.toString(),
                       ),
               ),
+              (Route<dynamic> route) => false,
             );
           },
         );
@@ -631,7 +631,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         errorText = '';
       } else {
         setState(() {
-          Navigator.of(context, rootNavigator: true).pop();
+          closeLoading(context);
           errorText = jsonResponse['message'];
           _validate = true;
         });

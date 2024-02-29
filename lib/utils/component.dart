@@ -297,17 +297,22 @@ void whenLoading(context) {
     barrierDismissible: false,
     useRootNavigator: true,
     context: context,
-    builder: (context) => Builder(
-      builder: (BuildContext context) {
-        loadingCompleter = Completer<void>();
-        return const Center(
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(),
-          ),
-        );
+    builder: (context) => WillPopScope(
+      onWillPop: () async {
+        return false;
       },
+      child: Builder(
+        builder: (BuildContext context) {
+          loadingCompleter = Completer<void>();
+          return const Center(
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
+      ),
     ),
   );
 }
@@ -1562,11 +1567,18 @@ void showSnackbar(BuildContext context, jsonResponse) async {
     prefs.remove('token');
     prefs.remove('deviceid');
 
-    Navigator.pushReplacement(
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => LoginPage(),
+    //   ),
+    // );
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (context) => LoginPage(),
       ),
+      (Route<dynamic> route) => false,
     );
   }
 }

@@ -228,7 +228,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   // String? imageEdit, nameEdit, kategoriEdit, hargaEdit;
 
-  String? singleProductId;
+  String singleProductId = '', singleImage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +237,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        
         if (_pageController.page!.round() == 0) {
           widget.pageController.jumpToPage(0);
           return false;
@@ -551,8 +550,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       img64.toString(),
                       value,
                       _pageController,
-                    );
-                    refreshDataProduk();
+                    ).then((value) {
+                      if (value == '00') {
+                        refreshDataProduk();
+                      }
+                    });
                   },
                   child: buttonXLoutline(
                     Center(
@@ -1039,19 +1041,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           decoration: BoxDecoration(
                             color: primary100,
                             borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(size12),
-                              bottomRight: Radius.circular(size12),
+                              bottomLeft: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
                             ),
                           ),
                           child: RefreshIndicator(
                             color: bnw100,
                             backgroundColor: primary500,
                             onRefresh: () async {
-                              initState();
                               setState(() {});
+                              initState();
                             },
                             child: ListView.builder(
-                              padding: EdgeInsets.only(top: size8),
+                              // physics: BouncingScrollPhysics(),
+                              padding: EdgeInsets.zero,
                               itemCount: datasProduk!.length,
                               itemBuilder: (builder, index) {
                                 ModelDataProdukGrup data = datasProduk![index];
@@ -1059,542 +1062,752 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     selectedFlag[index] ?? false;
                                 bool? isSelected = selectedFlag[index];
                                 final dataProduk = datasProduk![index];
+                                // productIdCheckAll = datasProduk!
+                                //     .map((data) => data.productid!)
+                                //     .toList();
 
                                 return Column(
                                   children: [
-                                    Row(
-                                      children: [
-                                        InkWell(
-                                          // onTap: () => onTap(isSelected, index),
-                                          onTap: () {
-                                            onTap(
-                                              isSelected,
-                                              index,
-                                              dataProduk.productid,
-                                            );
-                                            // log(data.name.toString());
-                                            // print(dataProduk.isActive);
-
-                                            print(dataProduk.productid);
-                                          },
-                                          child: SizedBox(
-                                            width: 50,
-                                            child: _buildSelectIcon(
-                                                isSelected!, data),
-                                          ),
+                                    Container(
+                                      // padding: EdgeInsets.symmetric(
+                                      //     horizontal: size16, vertical: size12),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                              color: bnw300, width: width1),
                                         ),
-                                        Expanded(
-                                          flex: 4,
-                                          child: Container(
-                                            child: Row(
-                                              children: [
-                                                SizedBox(
-                                                  width: 60,
-                                                  height: 60,
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    child: datasProduk![index]
-                                                                .productImage !=
-                                                            null
-                                                        ? Image.network(
-                                                            datasProduk![index]
-                                                                .productImage
-                                                                .toString(),
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder: (context,
-                                                                    error,
-                                                                    stackTrace) =>
-                                                                SizedBox(
-                                                              child: SvgPicture
-                                                                  .asset(
-                                                                      'assets/logoProduct.svg'),
-                                                            ),
-                                                          )
-                                                        : Icon(
-                                                            PhosphorIcons
-                                                                .storefront_fill,
-                                                            size: 60,
-                                                          ),
-                                                  ),
-                                                ),
-                                                SizedBox(width: size16),
-                                                Flexible(
-                                                  child: Text(
-                                                    datasProduk![index].name ??
-                                                        '',
-                                                    style: heading4(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                    maxLines: 3,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  10,
-                                              minWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  10,
-                                            ),
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                10,
-                                            child: Text(
-                                              '${datasProduk![index].typeproducts}',
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  size8,
-                                              minWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  size8,
-                                            ),
-                                            child: Text(
-                                              FormatCurrency.convertToIdr(
-                                                      datasProduk![index].price)
-                                                  .toString(),
-                                              // '${datasProduk![index].price}',
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                18,
-                                            minWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                18,
-                                          ),
-                                          child: FlutterSwitch(
-                                            padding: 1,
-                                            value: dataProduk.isPPN == 1
-                                                ? true
-                                                : false,
-                                            activeIcon: Icon(
-                                                PhosphorIcons.check,
-                                                color: primary500),
-                                            inactiveIcon: Icon(PhosphorIcons.x,
-                                                color: bnw100),
-                                            activeColor: primary500,
-                                            inactiveColor: bnw100,
-                                            borderRadius: 30,
-                                            width: 50,
-                                            height: 27,
-                                            inactiveToggleColor: bnw900,
-                                            activeToggleColor: primary200,
-                                            activeSwitchBorder:
-                                                Border.all(color: primary500),
-                                            inactiveSwitchBorder: Border.all(
-                                                color: bnw300, width: 2),
-                                            onToggle: (bool value) {
-                                              // print('hello');
-                                              List<String> listProduct = [
-                                                dataProduk.productid!
-                                              ];
-                                              changePpn(
-                                                context,
-                                                widget.token,
-                                                value.toString(),
-                                                listProduct,
-                                                widget.merchId,
-                                              );
-                                              initState();
-                                              setState(() {});
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                size12,
-                                            minWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                size12,
-                                          ),
-                                          child: FlutterSwitch(
-                                            value: dataProduk.isActive == 1
-                                                ? true
-                                                : false,
-                                            padding: 1,
-                                            width: 50,
-                                            height: 27,
-                                            activeIcon: Icon(
-                                                PhosphorIcons.check,
-                                                color: primary500),
-                                            inactiveIcon: Icon(PhosphorIcons.x,
-                                                color: bnw100),
-                                            activeColor: primary500,
-                                            inactiveColor: bnw100,
-                                            borderRadius: 30,
-                                            inactiveToggleColor: bnw900,
-                                            activeToggleColor: primary200,
-                                            activeSwitchBorder:
-                                                Border.all(color: primary500),
-                                            inactiveSwitchBorder: Border.all(
-                                                color: bnw300, width: 2),
-                                            onToggle: (bool value) {
-                                              // print('hello');
-                                              List<String> listProduct = [
-                                                dataProduk.productid!
-                                              ];
-                                              changeActive(
-                                                context,
-                                                widget.token,
-                                                value.toString(),
-                                                listProduct,
-                                                widget.merchId,
-                                              );
-                                              initState();
-                                              setState(() {});
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        SizedBox(
-                                          width: 96,
-                                          child: GestureDetector(
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          InkWell(
+                                            // onTap: () => onTap(isSelected, index),
                                             onTap: () {
-                                              setState(() {
-                                                showModalBottomDropdownAtur(
-                                                  context,
-                                                  MediaQuery.of(context)
-                                                          .size
-                                                          .height /
-                                                      2.8,
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.all(size32),
+                                              onTap(
+                                                isSelected,
+                                                index,
+                                                dataProduk.productid,
+                                              );
+                                              // log(data.name.toString());
+                                              // print(dataProduk.isActive);
+
+                                              print(listProduct);
+                                            },
+                                            child: SizedBox(
+                                              width: 50,
+                                              child: _buildSelectIcon(
+                                                isSelected!,
+                                                data,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 4,
+                                            child: Container(
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 60,
+                                                    height: 60,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              size8),
+                                                      child: datasProduk![index]
+                                                                  .productImage !=
+                                                              null
+                                                          ? Padding(
+                                                              padding:
+                                                                  EdgeInsets.all(
+                                                                      size8),
+                                                              child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            size8),
+                                                                child: Image
+                                                                    .network(
+                                                                  datasProduk![
+                                                                          index]
+                                                                      .productImage
+                                                                      .toString(),
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                  errorBuilder: (context,
+                                                                          error,
+                                                                          stackTrace) =>
+                                                                      SizedBox(
+                                                                    child: SvgPicture
+                                                                        .asset(
+                                                                            'assets/logoProduct.svg'),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : Icon(
+                                                              Icons.person,
+                                                              size: 60,
+                                                            ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: size16),
+                                                  Flexible(
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
-                                                              .center,
+                                                              .start,
                                                       children: [
-                                                        Container(
-                                                          child: Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    dataProduk
-                                                                        .name!,
-                                                                    style: heading2(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        bnw900,
-                                                                        'Outfit'),
-                                                                  ),
-                                                                  Text(
-                                                                    dataProduk
-                                                                        .typeproducts!,
-                                                                    style: heading4(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw900,
-                                                                        'Outfit'),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              GestureDetector(
-                                                                onTap: () =>
-                                                                    Navigator.pop(
-                                                                        context),
-                                                                child: Icon(
-                                                                  PhosphorIcons
-                                                                      .x_fill,
-                                                                  color: bnw900,
-                                                                  size: size32,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                        Text(
+                                                          datasProduk![index]
+                                                                  .name ??
+                                                              '',
+                                                          style: heading4(
+                                                              FontWeight.w600,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
-                                                        SizedBox(
-                                                            height: size16),
-                                                        GestureDetector(
-                                                          behavior:
-                                                              HitTestBehavior
-                                                                  .translucent,
-                                                          onTap: () {
-                                                            setState(() {
-                                                              img64 = null;
-                                                              myImage = null;
-                                                              imageEdit = '';
-
-                                                              getSingleProduct(
-                                                                context,
-                                                                widget.token,
-                                                                widget.merchId,
-                                                                dataProduk
-                                                                    .productid,
-                                                                setState,
-                                                              ).then((value) {
-                                                                _pageController
-                                                                    .jumpToPage(
-                                                                        2);
-                                                                Navigator.pop(
-                                                                    context);
-                                                              });
-
-                                                              singleProductId =
-                                                                  dataProduk
-                                                                      .productid;
-
-                                                              conHargaEdit
-                                                                      .text =
-                                                                  dataProduk
-                                                                      .price
-                                                                      .toString();
-
-                                                              jenisProductEdit =
-                                                                  dataProduk
-                                                                      .kodeProduct!;
-
-                                                              onswitchtampikan =
-                                                                  dataProduk.isActive ==
-                                                                          1
-                                                                      ? true
-                                                                      : false;
-
-                                                              onswitchppn =
-                                                                  dataProduk.isPPN ==
-                                                                          1
-                                                                      ? true
-                                                                      : false;
-
-                                                              idProduct =
-                                                                  jenisProductEdit;
-
-                                                              print(
-                                                                  singleProductId);
-                                                            });
-                                                          },
-                                                          child:
-                                                              modalBottomValue(
-                                                            'Ubah Produk',
-                                                            PhosphorIcons
-                                                                .pencil_line,
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          behavior:
-                                                              HitTestBehavior
-                                                                  .translucent,
-                                                          onTap: () {
-                                                            // List<String>
-                                                            //     listProduct = [
-                                                            //   dataProduk.productid!
-                                                            // ];
-                                                            // List<String> value = [
-                                                            //   ''
-                                                            // ];
-                                                            // deleteProduk(
-                                                            //   context,
-                                                            //   widget.token,
-                                                            //   listProduct,
-                                                            //   widget.merchId,
-                                                            // );
-
-                                                            Navigator.pop(
-                                                                context);
-                                                            showBottomPilihan(
-                                                              context,
-                                                              Column(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceAround,
-                                                                children: [
-                                                                  Column(
-                                                                    children: [
-                                                                      Text(
-                                                                        'Yakin Ingin Menghapus Produk',
-                                                                        style: heading1(
-                                                                            FontWeight.w600,
-                                                                            bnw900,
-                                                                            'Outfit'),
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              size16),
-                                                                      Text(
-                                                                        'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                                                        style: heading2(
-                                                                            FontWeight.w400,
-                                                                            bnw900,
-                                                                            'Outfit'),
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              size16),
-                                                                    ],
-                                                                  ),
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      Expanded(
-                                                                        child:
-                                                                            GestureDetector(
-                                                                          onTap:
-                                                                              () {
-                                                                            List<String>
-                                                                                listProduct =
-                                                                                [
-                                                                              dataProduk.productid!
-                                                                            ];
-                                                                            List<String>
-                                                                                value =
-                                                                                [
-                                                                              ''
-                                                                            ];
-                                                                            deleteProduk(
-                                                                              context,
-                                                                              widget.token,
-                                                                              listProduct,
-                                                                              widget.merchId,
-                                                                            );
-
-                                                                            initState();
-                                                                            setState(() {});
-                                                                          },
-                                                                          child:
-                                                                              buttonXLoutline(
-                                                                            Center(
-                                                                              child: Text(
-                                                                                'Iya, Hapus',
-                                                                                style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                                                                              ),
-                                                                            ),
-                                                                            MediaQuery.of(context).size.width /
-                                                                                36,
-                                                                            primary500,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                          width:
-                                                                              size16),
-                                                                      Expanded(
-                                                                        child:
-                                                                            GestureDetector(
-                                                                          onTap:
-                                                                              () {
-                                                                            Navigator.pop(context);
-                                                                          },
-                                                                          child:
-                                                                              buttonXL(
-                                                                            Center(
-                                                                              child: Text(
-                                                                                'Batalkan',
-                                                                                style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                                                                              ),
-                                                                            ),
-                                                                            MediaQuery.of(context).size.width /
-                                                                                36,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            );
-
-                                                            // initState();
-                                                            // Navigator.pop(context);
-                                                            setState(() {});
-                                                          },
-                                                          child:
-                                                              modalBottomValue(
-                                                            'Hapus Produk',
-                                                            PhosphorIcons.trash,
-                                                          ),
+                                                        Text(
+                                                          datasProduk![index]
+                                                                  .typeproducts ??
+                                                              '',
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                );
-                                              });
-                                            },
-                                            child: buttonL(
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    PhosphorIcons
-                                                        .pencil_line_fill,
-                                                    size: 24,
-                                                  ),
-                                                  SizedBox(width: size12),
-                                                  Text(
-                                                    'Atur',
-                                                    style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
                                                 ],
                                               ),
-                                              bnw100,
-                                              bnw300,
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(width: size16),
-                                      ],
+                                          SizedBox(width: size16),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    size8,
+                                                minWidth: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    size8,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  datasProduk![index]
+                                                              .discount ==
+                                                          0
+                                                      ? Text(
+                                                          FormatCurrency.convertToIdr(
+                                                                  datasProduk![
+                                                                          index]
+                                                                      .price_after)
+                                                              .toString(),
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        )
+                                                      : Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      datasProduk![
+                                                                              index]
+                                                                          .price_after)
+                                                                  .toString(),
+                                                              maxLines: 3,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size4),
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      datasProduk![
+                                                                              index]
+                                                                          .price)
+                                                                  .toString(),
+                                                              maxLines: 3,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style:
+                                                                  body3lineThrough(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size4),
+                                                            datasProduk![index]
+                                                                        .discount_type ==
+                                                                    'price'
+                                                                ? Text(
+                                                                    FormatCurrency.convertToIdr(
+                                                                            datasProduk![index].discount)
+                                                                        .toString(),
+                                                                    maxLines: 3,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: body2(
+                                                                        FontWeight
+                                                                            .w700,
+                                                                        danger500,
+                                                                        'Outfit'),
+                                                                  )
+                                                                : Text(
+                                                                    '${datasProduk![index].discount}%',
+                                                                    maxLines: 3,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: body2(
+                                                                        FontWeight
+                                                                            .w700,
+                                                                        danger500,
+                                                                        'Outfit'),
+                                                                  ),
+                                                          ],
+                                                        ),
+                                                  // datasProduk![index]
+                                                  //             .discount_type ==
+                                                  //         'percentage'
+                                                  //     ? Text(
+                                                  //         '${datasProduk![index].discount}%',
+                                                  //         style: body3(
+                                                  //           FontWeight.w700,
+                                                  //           danger500,
+                                                  //           'Outfit',
+                                                  //         ),
+                                                  //       )
+                                                  //     : Text(
+                                                  //         FormatCurrency
+                                                  //             .convertToIdr(
+                                                  //           datasProduk![index]
+                                                  //               .discount,
+                                                  //         ),
+                                                  //         style: body3(
+                                                  //           FontWeight.w700,
+                                                  //           danger500,
+                                                  //           'Outfit',
+                                                  //         ),
+                                                  //       ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: size16),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    size8,
+                                                minWidth: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    size8,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  datasProduk![index]
+                                                              .discount ==
+                                                          0
+                                                      ? Text(
+                                                          FormatCurrency.convertToIdr(
+                                                                  datasProduk![
+                                                                          index]
+                                                                      .price_online_shop_after)
+                                                              .toString(),
+                                                          maxLines: 3,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        )
+                                                      : Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      datasProduk![
+                                                                              index]
+                                                                          .price_online_shop_after)
+                                                                  .toString(),
+                                                              maxLines: 3,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size4),
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      datasProduk![
+                                                                              index]
+                                                                          .price_online_shop)
+                                                                  .toString(),
+                                                              maxLines: 3,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style:
+                                                                  body3lineThrough(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size4),
+                                                            datasProduk![index]
+                                                                        .discount_type ==
+                                                                    'price'
+                                                                ? Text(
+                                                                    FormatCurrency.convertToIdr(
+                                                                            datasProduk![index].discount)
+                                                                        .toString(),
+                                                                    maxLines: 3,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: body2(
+                                                                        FontWeight
+                                                                            .w700,
+                                                                        danger500,
+                                                                        'Outfit'),
+                                                                  )
+                                                                : Text(
+                                                                    '${datasProduk![index].discount}%',
+                                                                    maxLines: 3,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: body2(
+                                                                        FontWeight
+                                                                            .w700,
+                                                                        danger500,
+                                                                        'Outfit'),
+                                                                  ),
+                                                          ],
+                                                        ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: size16),
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  18,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  18,
+                                            ),
+                                            child: FlutterSwitch(
+                                              padding: 1,
+                                              value: dataProduk.isPPN == 1
+                                                  ? true
+                                                  : false,
+                                              activeIcon: Icon(
+                                                  PhosphorIcons.check,
+                                                  color: primary500),
+                                              inactiveIcon: Icon(
+                                                  PhosphorIcons.x,
+                                                  color: bnw100),
+                                              activeColor: primary500,
+                                              inactiveColor: bnw100,
+                                              borderRadius: 30.0,
+                                              width: 50.0,
+                                              height: 27.0,
+                                              inactiveToggleColor: bnw900,
+                                              activeToggleColor: primary200,
+                                              activeSwitchBorder:
+                                                  Border.all(color: primary500),
+                                              inactiveSwitchBorder: Border.all(
+                                                  color: bnw300, width: 2),
+                                              onToggle: (bool value) {
+                                                // print('hello');
+                                                List<String> listProduct = [
+                                                  dataProduk.productid!
+                                                ];
+                                                changePpn(
+                                                  context,
+                                                  widget.token,
+                                                  value.toString(),
+                                                  listProduct,
+                                                  widget.merchId,
+                                                );
+                                                initState();
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(width: size16),
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  12,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  12,
+                                            ),
+                                            child: FlutterSwitch(
+                                              value: dataProduk.isActive == 1
+                                                  ? true
+                                                  : false,
+                                              padding: 1,
+                                              width: 50.0,
+                                              height: 27.0,
+                                              activeIcon: Icon(
+                                                  PhosphorIcons.check,
+                                                  color: primary500),
+                                              inactiveIcon: Icon(
+                                                  PhosphorIcons.x,
+                                                  color: bnw100),
+                                              activeColor: primary500,
+                                              inactiveColor: bnw100,
+                                              borderRadius: 30.0,
+                                              inactiveToggleColor: bnw900,
+                                              activeToggleColor: primary200,
+                                              activeSwitchBorder:
+                                                  Border.all(color: primary500),
+                                              inactiveSwitchBorder: Border.all(
+                                                  color: bnw300, width: 2),
+                                              onToggle: (bool value) {
+                                                // print('hello');
+                                                List<String> listProduct = [
+                                                  dataProduk.productid!
+                                                ];
+                                                changeActive(
+                                                  context,
+                                                  widget.token,
+                                                  value.toString(),
+                                                  listProduct,
+                                                  widget.merchId,
+                                                );
+                                                initState();
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(width: size16),
+                                          SizedBox(
+                                            width: 96,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  showModalBottom(
+                                                    context,
+                                                    MediaQuery.of(context)
+                                                        .size
+                                                        .height,
+                                                    IntrinsicHeight(
+                                                      child: Padding(
+                                                        padding: EdgeInsets.all(
+                                                            28.0),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      dataProduk
+                                                                          .name!,
+                                                                      style: heading2(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw900,
+                                                                          'Outfit'),
+                                                                    ),
+                                                                    Text(
+                                                                      dataProduk
+                                                                          .typeproducts!,
+                                                                      style: heading4(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw900,
+                                                                          'Outfit'),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                GestureDetector(
+                                                                  onTap: () =>
+                                                                      Navigator.pop(
+                                                                          context),
+                                                                  child: Icon(
+                                                                    PhosphorIcons
+                                                                        .x_fill,
+                                                                    color:
+                                                                        bnw900,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                                height: 20),
+                                                            GestureDetector(
+                                                              behavior:
+                                                                  HitTestBehavior
+                                                                      .translucent,
+                                                              onTap: () async {
+                                                                img64 = null;
+                                                                myImage = null;
+                                                                imageEdit = '';
+
+                                                                getSingleProduct(
+                                                                  context,
+                                                                  widget.token,
+                                                                  widget
+                                                                      .merchId,
+                                                                  dataProduk
+                                                                      .productid,
+                                                                  setState,
+                                                                ).then((value) {
+                                                                  _pageController
+                                                                      .jumpToPage(
+                                                                          2);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                });
+
+                                                                singleProductId =
+                                                                    dataProduk
+                                                                        .productid!;
+
+                                                                conHargaEdit
+                                                                        .text =
+                                                                    dataProduk
+                                                                        .price
+                                                                        .toString();
+
+                                                                jenisProductEdit =
+                                                                    dataProduk
+                                                                        .kodeProduct!;
+
+                                                                onswitchtampikan =
+                                                                    dataProduk.isActive ==
+                                                                            1
+                                                                        ? true
+                                                                        : false;
+
+                                                                onswitchppn =
+                                                                    dataProduk.isPPN ==
+                                                                            1
+                                                                        ? true
+                                                                        : false;
+
+                                                                idProduct =
+                                                                    jenisProductEdit;
+
+                                                                print(
+                                                                    singleProductId);
+
+                                                                setState(() {});
+                                                              },
+                                                              child:
+                                                                  modalBottomValue(
+                                                                'Ubah Produk',
+                                                                PhosphorIcons
+                                                                    .pencil_line,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                height: 10),
+                                                            GestureDetector(
+                                                              behavior:
+                                                                  HitTestBehavior
+                                                                      .translucent,
+                                                              onTap: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                showBottomPilihan(
+                                                                  context,
+                                                                  Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                    children: [
+                                                                      Column(
+                                                                        children: [
+                                                                          Text(
+                                                                            'Yakin Ingin Menghapus Produk?',
+                                                                            style: heading1(
+                                                                                FontWeight.w600,
+                                                                                bnw900,
+                                                                                'Outfit'),
+                                                                          ),
+                                                                          SizedBox(
+                                                                              height: size16),
+                                                                          Text(
+                                                                            'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                                                            style: heading2(
+                                                                                FontWeight.w400,
+                                                                                bnw900,
+                                                                                'Outfit'),
+                                                                          ),
+                                                                          SizedBox(
+                                                                              height: size16),
+                                                                        ],
+                                                                      ),
+                                                                      Row(
+                                                                        children: [
+                                                                          Expanded(
+                                                                            child:
+                                                                                GestureDetector(
+                                                                              onTap: () {
+                                                                                List<String> listProduct = [
+                                                                                  dataProduk.productid!
+                                                                                ];
+
+                                                                                deleteProduk(
+                                                                                  context,
+                                                                                  widget.token,
+                                                                                  listProduct,
+                                                                                  widget.merchId,
+                                                                                );
+                                                                                refreshDataProduk();
+
+                                                                                initState();
+                                                                                setState(() {});
+                                                                              },
+                                                                              child: buttonXLoutline(
+                                                                                Center(
+                                                                                  child: Text(
+                                                                                    'Iya, Hapus',
+                                                                                    style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                  ),
+                                                                                ),
+                                                                                MediaQuery.of(context).size.width,
+                                                                                primary500,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                              width: 12),
+                                                                          Expanded(
+                                                                            child:
+                                                                                GestureDetector(
+                                                                              onTap: () {
+                                                                                Navigator.pop(context);
+                                                                              },
+                                                                              child: buttonXL(
+                                                                                Center(
+                                                                                  child: Text(
+                                                                                    'Batalkan',
+                                                                                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                  ),
+                                                                                ),
+                                                                                MediaQuery.of(context).size.width,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              },
+                                                              child:
+                                                                  modalBottomValue(
+                                                                'Hapus Produk',
+                                                                PhosphorIcons
+                                                                    .trash,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                });
+                                              },
+                                              child: buttonL(
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(PhosphorIcons
+                                                        .pencil_line),
+                                                    SizedBox(width: 6),
+                                                    Text(
+                                                      'Atur',
+                                                      style: heading3(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit'),
+                                                    ),
+                                                  ],
+                                                ),
+                                                bnw100,
+                                                bnw900,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: size16),
+                                        ],
+                                      ),
                                     ),
-                                    Divider(thickness: 1.2)
                                   ],
                                 );
                               },

@@ -51,6 +51,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     loginentryotp = '$url/api/user/loginentryotp',
     checkpass = '$url/api/user/checkPassword',
     forgotPassRequestLink = '$url/api/forgot-password/request',
+    forgotPassRequestOtpLink = '$url/api/forgot-password/request/otp',
     forgotPassVerifyLink = '$url/api/forgot-password/verify',
     forgotPassChangeLink = '$url/api/forgot-password/change',
     myaccout = '$url/api/profile/myaccount',
@@ -366,6 +367,7 @@ Future changeName(token, id, context, mycontroller) async {
 
 String userPhone = '', userEmail = '', userId = '';
 Future changePasswordRequest(context, type, id) async {
+  whenLoading(context);
   try {
     final response = await http.post(
       Uri.parse(forgotPassRequestLink),
@@ -381,9 +383,41 @@ Future changePasswordRequest(context, type, id) async {
       userEmail = jsonResponse['user']['email'];
       userId = jsonResponse['data']['id'];
       errorText = '';
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
+      closeLoading(context);
+      errorText = '';
+      showSnackbar(context, jsonResponse);
       errorText = jsonResponse['message'];
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changePasswordRequestOtp(context, type, id) async {
+  try {
+    final response = await http.post(
+      Uri.parse(forgotPassRequestOtpLink),
+      body: {
+        'type': type,
+        'id': id,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    // log(jsonResponse.toString());
+    if (response.statusCode == 200) {
+      errorText = '';
+      // closeLoading(context);
+      // showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      errorText = '';
+      // closeLoading(context);
+      // showSnackbar(context, jsonResponse);
     }
     return null;
   } catch (e) {
@@ -626,9 +660,9 @@ Future changeEmail(context, token, email, typeotp) async {
         },
       ),
     );
-
+    print(email);
+    print(response.data["data"]);
     if (response.statusCode == 200) {
-      print(response.data["data"]);
     } else {}
     return response.data['rc'];
   } catch (e) {
@@ -957,6 +991,7 @@ Future updateAkun(
   String image,
   isactive,
 ) async {
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(updateAkunUrl),
     body: {
@@ -979,6 +1014,8 @@ Future updateAkun(
   print(jsonResponse['data']);
   if (response.statusCode == 200) {
     print("succes aman tentram");
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
     closeLoading(context);
@@ -1174,7 +1211,7 @@ Future deleteProduk(
   merchid,
 ) async {
   String jsonData = jsonEncode(productid);
-
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(deleteProdukUrl),
     headers: {
@@ -1191,11 +1228,12 @@ Future deleteProduk(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('Sukses Delete Data');
-    Navigator.pop(context);
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
-    print(jsonResponse['data'].toString());
+    // print(jsonResponse['data'].toString());
   } else {
-    print(jsonResponse['message'].toString());
+    closeLoading(context);
+    // print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1775,7 +1813,9 @@ Future ubahDiskon(
   start_date,
   end_date,
   is_active,
+  active_period,
 ) async {
+  whenLoading(context);
   final String merchantidList = json.encode(merchantid);
   final String productidList = json.encode(productid);
   final response = await http.post(
@@ -1793,18 +1833,20 @@ Future ubahDiskon(
       'discount_type': discount_type,
       'start_date': start_date,
       'end_date': end_date,
-      'is_active': is_active
+      'is_active': is_active,
+      "active_period": active_period,
     },
   );
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('Sukses Tambah Diskon $jsonResponse');
-
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     print(jsonResponse['data'].toString());
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
@@ -1899,6 +1941,7 @@ Future getProductGrup(
   );
 
   var jsonResponse = jsonDecode(response.body);
+  print(jsonResponse);
   if (response.statusCode == 200) {
     print('succes');
 
@@ -2137,11 +2180,12 @@ Future updateVoucher(
   PageController controller,
   productid,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
   var body = {
     "deviceid": identifier,
     "namavoucher": name,
-    "merchantid": merchid,
+    "merchantid": jsonTest,
     "voucherid": productid,
     "isActive": isActive,
     "price": price,
@@ -2159,9 +2203,11 @@ Future updateVoucher(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     // print('succes');
+    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
+    closeLoading(context);
     // closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
@@ -2212,8 +2258,8 @@ Future createProduct(
   } else {
     closeLoading(context);
     showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
   }
-  return jsonResponse['message'];
 }
 
 var subTotal,

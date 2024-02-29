@@ -71,6 +71,26 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
     );
   }
 
+  refreshTampilan() {
+    setState(() {
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      conNameDiskon.text = '';
+      conHarga.text = '';
+      tipeUmumAktif = 0;
+      tipeProdukAktif = 0;
+      hargaRupiahAktif = 0;
+      hargaPersenAktif = 0;
+      masaSelamanya = 0;
+      masaKustom = 0;
+      txtFieldAktif = 0;
+      kasirAktif = "Aktif";
+      tanggalAwal = '';
+      tanggalAkhir = '';
+      productidDiskon.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -758,8 +778,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                             onTap: () {
                               masaKustom = 0;
                               masaSelamanya = 1;
-                              tanggalAwal = 'null';
-                              tanggalAkhir = 'null';
+                              // tanggalAwal = 'null';
+                              // tanggalAkhir = 'null';
                               setState(() {});
                             },
                             child: buttonActive(
@@ -1073,8 +1093,12 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                     masaSelamanya == 1 ? '' : tanggalAwal,
                     masaSelamanya == 1 ? '' : tanggalAkhir,
                     statusDiskon.toString(),
-                    masaSelamanya == 1 ? 'forever' : 'custom',
-                  );
+                    masaSelamanya == 1 ? 'forever' : 'range',
+                  ).then((value) {
+                    if (value == '00') {
+                      refreshTampilan();
+                    }
+                  });
 
                   setState(() {});
                 },
@@ -1130,6 +1154,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                     masaSelamanya == 1 ? 'forever' : 'range',
                   ).then((value) {
                     if (value == '00') {
+                      refreshTampilan();
                       widget.pageController.jumpToPage(0);
                     }
                   });

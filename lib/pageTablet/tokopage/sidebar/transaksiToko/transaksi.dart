@@ -3824,6 +3824,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                               //     .trim();
 
                                                               //int? price = ( datasTransaksi![i].price!);
+                                                              cartProductIds
+                                                                  .add(
+                                                                      'custom');
                                                               int? price = int.parse(
                                                                   customProdukPrice
                                                                       .text
@@ -5265,6 +5268,10 @@ class _TransactionPageState extends State<TransactionPage>
                                                     ),
                                                     onTap: () {
                                                       cart[i].quantity--;
+                                                      String productId =
+                                                          datasTransaksi![i]
+                                                              .productid
+                                                              .toString();
 
                                                       num newquantity =
                                                           cart[i].quantity;
@@ -5282,12 +5289,14 @@ class _TransactionPageState extends State<TransactionPage>
                                                       // Recalculate sumTotal
                                                       sumTotal = total.reduce(
                                                           (a, b) => a + b);
+                                                      // log(i.toString());
+                                                      // log(productId.toString());
 
                                                       if (cart[i].quantity <
                                                           1) {
                                                         // Remove the item from the lists
-                                                        // cart.removeAt(i);
-                                                        cart.remove(cart[i]);
+                                                        cart.removeAt(i);
+                                                        // cart.remove(cart[i]);
                                                         cartMap.removeAt(i);
                                                         total.removeAt(i);
                                                         conCatatan.removeAt(i);
@@ -5298,8 +5307,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                         conCatatanPreview.text =
                                                             '';
 
-                                                        // conCatatan.removeAt(i);
+                                                        // conCatatan.remo  veAt(i);
                                                         // Remove the product ID
+
                                                         cartProductIds
                                                             .removeAt(i);
 
@@ -5311,7 +5321,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                       refreshColor();
 
                                                       setState(() {});
-                                                      initState();
+                                                      // initState();j
                                                     },
                                                   ),
                                                   SizedBox(width: size8),

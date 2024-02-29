@@ -233,8 +233,15 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                   onTap: () => tambahGambar(context),
                   child: IntrinsicHeight(
                     child: TextFormField(
+                      cursorColor: primary500,
                       style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       decoration: InputDecoration(
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 2,
+                            color: primary500,
+                          ),
+                        ),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
                             width: 1.5,
@@ -267,8 +274,8 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                   TextInputType.number,
                 ),
                 SizedBox(height: size16),
-                fieldEditProduk(
-                  'Harga Online Gojek/Grab',
+                fieldEditProdukTanpaBintang(
+                  'Harga Online',
                   conHargaOnlineEdit,
                   TextInputType.number,
                 ),
@@ -425,7 +432,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                   onswitchppn.toString(),
                   img64.toString(),
                 );
-
+                print(img64.toString());
                 // Provider.of<RefreshTampilan>(context, listen: false)
                 //     .getDataProduk(widget.datasProduk!, context, widget.token);
               },
@@ -464,6 +471,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
           ),
           IntrinsicHeight(
             child: TextFormField(
+              cursorColor: primary500,
               keyboardType: numberNo,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
@@ -472,6 +480,59 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                 setState(() {});
               },
               decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
+                isDense: true,
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: bnw500,
+                  ),
+                ),
+                hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  fieldEditProdukTanpaBintang(title, mycontroller, TextInputType numberNo) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: TextFormField(
+              cursorColor: primary500,
+              keyboardType: numberNo,
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              controller: mycontroller,
+              onSaved: (value) {
+                mycontroller.text = value;
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
@@ -497,231 +558,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
         setState(
           () {
             // log(jenisProduct.toString());
-            showModalBottomSheet(
-              isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) =>
-                      FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                    child: GestureDetector(
-                      onTap: () => textFieldFocusNode.unfocus(),
-                      child: Container(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        // height: MediaQuery.of(context).size.height / 1,
-                        decoration: BoxDecoration(
-                          color: bnw100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            topLeft: Radius.circular(12),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size32, size16, size32, size32),
-                          child: Column(
-                            children: [
-                              dividerShowdialog(),
-                              SizedBox(height: size16),
-                              FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
-                                    setState(() {});
-                                  },
-                                  child: TextField(
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: (value) {
-                                      //   isKeyboardActive = value.isNotEmpty;
-                                      _runSearchTypeProduct(value);
-                                      setState(() {});
-                                    },
-                                    decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(
-                                            vertical: size12),
-                                        isDense: true,
-                                        filled: true,
-                                        fillColor: bnw200,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            width: 2,
-                                            color: primary500,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        suffixIcon: searchController
-                                                .text.isNotEmpty
-                                            ? GestureDetector(
-                                                onTap: () {
-                                                  searchController.text = '';
-                                                  _runSearchTypeProduct('');
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  PhosphorIcons.x_fill,
-                                                  size: 20,
-                                                  color: bnw900,
-                                                ),
-                                              )
-                                            : null,
-                                        prefixIcon: Icon(
-                                          PhosphorIcons.magnifying_glass,
-                                          color: bnw500,
-                                        ),
-                                        hintText: 'Cari',
-                                        hintStyle: heading3(
-                                            FontWeight.w500, bnw500, 'Outfit')),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: RefreshIndicator(
-                                  onRefresh: () async {
-                                    setState(() {});
-                                    initState();
-                                  },
-                                  child: ListView(
-                                    padding: EdgeInsets.zero,
-                                    children: [
-                                      SizedBox(height: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          tambahKategori(context,
-                                              isKeyboardActive);
-                                          _getProductList();
-                                        },
-                                        child: buttonXLoutline(
-                                            Center(
-                                                child: Text(
-                                              'Tambah Kategori',
-                                              style: heading2(FontWeight.w600,
-                                                  primary500, 'Outfit'),
-                                            )),
-                                            double.infinity,
-                                            primary500),
-                                      ),
-                                      SizedBox(height: size16),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        padding: EdgeInsets.zero,
-                                        physics: BouncingScrollPhysics(),
-                                        keyboardDismissBehavior:
-                                            ScrollViewKeyboardDismissBehavior
-                                                .onDrag,
-                                        itemCount:
-                                            searchResultListProduct?.length,
-                                        itemBuilder: (context, index) {
-                                          final product =
-                                              searchResultListProduct?[index];
-                                          final isSelected =
-                                              product == selectedProduct;
-
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                title: Text(
-                                                  product['jenisproduct'] !=
-                                                          null
-                                                      ? capitalizeEachWord(
-                                                          product['jenisproduct']
-                                                              .toString())
-                                                      : '',
-                                                ),
-                                                trailing: Icon(
-                                                  isSelected
-                                                      ? PhosphorIcons
-                                                          .radio_button_fill
-                                                      : PhosphorIcons
-                                                          .radio_button,
-                                                  color: isSelected
-                                                      ? primary500
-                                                      : bnw900,
-                                                ),
-                                                onTap: () {
-                                                  setState(() {
-                                                    textFieldFocusNode
-                                                        .unfocus();
-                                                    jenisProductEdit =
-                                                        product['jenisproduct'];
-
-                                                    jenisProduct =
-                                                        product['jenisproduct'];
-
-                                                    idProduct =
-                                                        product['kodeproduct'];
-
-                                                    _selectTypeProduct(product);
-
-                                                    print(product[
-                                                        'jenisproduct']);
-                                                  });
-                                                },
-                                                onLongPress: () {
-                                                  Navigator.pop(context);
-                                                  nameKategoriEdit =
-                                                      product['jenisproduct'];
-                                                  ubahHapusKategori(
-                                                      product, setState);
-                                                },
-                                              ),
-                                              Divider(color: bnw300),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                      SizedBox(height: size16),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  autoReload();
-                                  Navigator.pop(context);
-                                },
-                                child: buttonXXL(
-                                  Center(
-                                    child: Text(
-                                      'Selesai',
-                                      style: heading2(
-                                          FontWeight.w600, bnw100, 'Outfit'),
-                                    ),
-                                  ),
-                                  double.infinity,
-                                ),
-                              ),
-                              SizedBox(height: size8)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
+            kategoriListForm(context, isKeyboardActive);
           },
         );
       },
@@ -776,6 +613,218 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> kategoriListForm(
+      BuildContext context, bool isKeyboardActive) {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) => FractionallySizedBox(
+            heightFactor: isKeyboardActive ? 0.9 : 0.80,
+            child: GestureDetector(
+              onTap: () => textFieldFocusNode.unfocus(),
+              child: Container(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                // height: MediaQuery.of(context).size.height / 1,
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(12),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                  child: Column(
+                    children: [
+                      dividerShowdialog(),
+                      SizedBox(height: size16),
+                      FocusScope(
+                        child: Focus(
+                          onFocusChange: (value) {
+                            isKeyboardActive = value;
+                            setState(() {});
+                          },
+                          child: TextField(
+                            cursorColor: primary500,
+                            controller: searchController,
+                            focusNode: textFieldFocusNode,
+                            onChanged: (value) {
+                              //   isKeyboardActive = value.isNotEmpty;
+                              _runSearchProduct(value);
+                              setState(() {});
+                            },
+                            decoration: InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: size12),
+                                isDense: true,
+                                filled: true,
+                                fillColor: bnw200,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    color: bnw300,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    width: 2,
+                                    color: primary500,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(
+                                    color: bnw300,
+                                  ),
+                                ),
+                                suffixIcon: searchController.text.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: () {
+                                          searchController.text = '';
+                                          _runSearchProduct('');
+                                          setState(() {});
+                                        },
+                                        child: Icon(
+                                          PhosphorIcons.x_fill,
+                                          size: 20,
+                                          color: bnw900,
+                                        ),
+                                      )
+                                    : null,
+                                prefixIcon: Icon(
+                                  PhosphorIcons.magnifying_glass,
+                                  color: bnw500,
+                                ),
+                                hintText: 'Cari',
+                                hintStyle: heading3(
+                                    FontWeight.w500, bnw500, 'Outfit')),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            setState(() {});
+                            initState();
+                          },
+                          child: ListView(
+                            padding: EdgeInsets.zero,
+                            children: [
+                              SizedBox(height: size16),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  tambahKategori(context, isKeyboardActive);
+                                  _getProductList();
+                                },
+                                child: buttonXLoutline(
+                                    Center(
+                                        child: Text(
+                                      'Tambah Kategori',
+                                      style: heading2(FontWeight.w600,
+                                          primary500, 'Outfit'),
+                                    )),
+                                    double.infinity,
+                                    primary500),
+                              ),
+                              SizedBox(height: size16),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: BouncingScrollPhysics(),
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                itemCount: searchResultListProduct?.length,
+                                itemBuilder: (context, index) {
+                                  final product =
+                                      searchResultListProduct?[index];
+                                  final isSelected = product == selectedProduct;
+
+                                  return Column(
+                                    children: [
+                                      ListTile(
+                                        title: Text(
+                                          product['jenisproduct'] != null
+                                              ? capitalizeEachWord(
+                                                  product['jenisproduct']
+                                                      .toString())
+                                              : '',
+                                        ),
+                                        trailing: Icon(
+                                          isSelected
+                                              ? PhosphorIcons.radio_button_fill
+                                              : PhosphorIcons.radio_button,
+                                          color:
+                                              isSelected ? primary500 : bnw900,
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            textFieldFocusNode.unfocus();
+                                            jenisProductEdit =
+                                                product['jenisproduct'];
+
+                                            jenisProduct =
+                                                product['jenisproduct'];
+
+                                            idProduct = product['kodeproduct'];
+
+                                            _selectTypeProduct(product);
+
+                                            print(product['jenisproduct']);
+                                          });
+                                        },
+                                        onLongPress: () {
+                                          Navigator.pop(context);
+                                          nameKategoriEdit =
+                                              product['jenisproduct'];
+                                          ubahHapusKategori(product, setState);
+                                        },
+                                      ),
+                                      Divider(color: bnw300),
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(height: size16),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          autoReload();
+                          Navigator.pop(context);
+                        },
+                        child: buttonXXL(
+                          Center(
+                            child: Text(
+                              'Selesai',
+                              style:
+                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                          ),
+                          double.infinity,
+                        ),
+                      ),
+                      SizedBox(height: size8)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -866,13 +915,20 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                   ),
                                   FocusScope(
                                     child: TextFormField(
+                                      cursorColor: primary500,
                                       style: heading2(
                                         FontWeight.w600,
                                         bnw900,
                                         'Outfit',
                                       ),
-                                      controller: controllerNameEdit,
+                                      controller: controllerName,
                                       decoration: InputDecoration(
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              width: 2,
+                                              color: primary500,
+                                            ),
+                                          ),
                                           focusColor: primary500,
                                           hintText: 'Cth : Rental Mobil',
                                           hintStyle: heading2(
@@ -893,6 +949,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                     child: GestureDetector(
                                       onTap: () {
                                         Navigator.pop(context);
+                                        kategoriListForm(context, false);
                                       },
                                       child: buttonXLoutline(
                                         Center(
@@ -911,15 +968,20 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
+                                        whenLoading(context);
                                         ubahKategoriForm(
                                           context,
                                           widget.token,
                                           product['kodeproduct'],
-                                          controllerNameEdit.text,
+                                          controllerName.text,
                                         ).then((value) {
                                           if (value == '00') {
+                                            Navigator.pop(context);
+                                            kategoriListForm(context, false);
+                                            showSnackBarComponent(context,
+                                                'Berhasil ubah kategori', '00');
                                             errorText = '';
-                                            controllerNameEdit.text = '';
+                                            controllerName.text = '';
                                           }
                                         });
                                         _getProductList();
@@ -984,7 +1046,16 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   hapusKategoriForm(context, widget.token,
-                                      product['kodeproduct']);
+                                          product['kodeproduct'])
+                                      .then((value) {
+                                    if (value == '00') {
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      kategoriListForm(context, false);
+                                      showSnackBarComponent(context,
+                                          'Berhasil hapus kategori', '00');
+                                    }
+                                  });
 
                                   initState();
                                   setState(() {});
@@ -1007,6 +1078,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.pop(context);
+                                  kategoriListForm(context, false);
                                 },
                                 child: buttonXL(
                                   Center(
@@ -1038,8 +1110,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
     );
   }
 
-  Future<dynamic> tambahKategori(
-      BuildContext context, bool isKeyboardActive) {
+  Future<dynamic> tambahKategori(BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -1091,6 +1162,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                           setState(() {});
                         },
                         child: TextFormField(
+                          cursorColor: primary500,
                           style: heading2(
                             FontWeight.w600,
                             bnw900,
@@ -1098,6 +1170,12 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                           ),
                           controller: controllerName,
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               hintText: 'Cth : Rental Mobil',
                               hintStyle: heading2(
@@ -1118,6 +1196,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                       child: GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
+                          kategoriListForm(context, isKeyboardActive);
                         },
                         child: buttonXLoutline(
                           Center(
@@ -1142,13 +1221,14 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                               .then((value) {
                             if (value == '00') {
                               Navigator.pop(context);
-
+                              kategoriListForm(context, isKeyboardActive);
+                              showSnackBarComponent(
+                                  context, 'Berhasil tambah kategori', '00');
                               errorText = '';
                               controllerName.text = '';
                             }
                           });
                           _getProductList();
-
                           setState(() {});
                           initState();
                         },
@@ -1251,9 +1331,16 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                       },
                       child: SizedBox(
                         child: TextFormField(
+                          cursorColor: primary500,
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
                               focusColor: primary500,
                               prefixIcon: Icon(
                                 PhosphorIcons.plus,
@@ -1268,7 +1355,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                     (myImage != null || imageEdit != '')
                         ? GestureDetector(
                             onTap: () async {
-                              img64 = null;
+                              img64 = 'hapus';
                               myImage = null;
                               imageEdit = '';
                               Navigator.pop(context);
@@ -1276,10 +1363,17 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                             },
                             child: SizedBox(
                               child: TextFormField(
+                                cursorColor: primary500,
                                 enabled: false,
                                 style:
                                     heading3(FontWeight.w400, bnw900, 'Outfit'),
                                 decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
                                   focusColor: primary500,
                                   prefixIcon: Icon(
                                     PhosphorIcons.trash,
@@ -1329,7 +1423,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
     });
   }
 
-  void _runSearchTypeProduct(String searchText) {
+  void _runSearchProduct(String searchText) {
     setState(() {
       searchResultListProduct = typeproductList
           ?.where((tipeUsaha) => tipeUsaha

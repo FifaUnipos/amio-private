@@ -69,8 +69,8 @@ class ModelDataProdukGrup {
   String? typeproducts;
   String? productImage;
   String? discount_type;
-  String? kodeProduct;
   int? discount;
+  String? kodeProduct;
 
   ModelDataProdukGrup({
     this.productid,
@@ -80,7 +80,6 @@ class ModelDataProdukGrup {
     this.isPPN,
     this.typeproducts,
     this.productImage,
-    this.kodeProduct,
     required this.discount_type,
     required this.discount,
   });
@@ -102,28 +101,21 @@ class ModelDataProdukGrup {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> ModelDataProduk = new Map<String, dynamic>();
-    ModelDataProduk['productid'] = this.productid;
-    ModelDataProduk['name'] = this.name;
-    ModelDataProduk['price'] = this.price;
-    ModelDataProduk['price_after'] = this.price_after;
-    ModelDataProduk['price_online_shop'] = this.price_online_shop;
-    ModelDataProduk['price_online_shop_after'] = this.price_online_shop_after;
-    ModelDataProduk['isActive'] = this.isActive;
-    ModelDataProduk['isPPN'] = this.isPPN;
-    ModelDataProduk['typeproducts'] = this.typeproducts;
-    ModelDataProduk['product_image'] = this.productImage;
-    ModelDataProduk['discount_type'] = this.discount_type;
-    ModelDataProduk['discount'] = this.discount_type;
-    ModelDataProduk['kodeProduct'] = this.kodeProduct;
-    return ModelDataProduk;
+    final Map<String, dynamic> ModelDataProdukGrup = new Map<String, dynamic>();
+    ModelDataProdukGrup['productid'] = this.productid;
+    ModelDataProdukGrup['name'] = this.name;
+    ModelDataProdukGrup['price'] = this.price;
+    ModelDataProdukGrup['price_after'] = this.price_after;
+    ModelDataProdukGrup['price_online_shop'] = this.price_online_shop;
+    ModelDataProdukGrup['price_online_shop_after'] =
+        this.price_online_shop_after;
+    ModelDataProdukGrup['isActive'] = this.isActive;
+    ModelDataProdukGrup['isPPN'] = this.isPPN;
+    ModelDataProdukGrup['typeproducts'] = this.typeproducts;
+    ModelDataProdukGrup['product_image'] = this.productImage;
+    ModelDataProdukGrup['discount_type'] = this.discount_type;
+    ModelDataProdukGrup['discount'] = this.discount_type;
+    ModelDataProdukGrup['kodeproduct'] = this.kodeProduct;
+    return ModelDataProdukGrup;
   }
-
-  // void setEnabled(bool value) {
-  //   ppn = value;
-  // }
-
-  // bool? isEnabled() {
-  //   return isActive;
-  // }
 }

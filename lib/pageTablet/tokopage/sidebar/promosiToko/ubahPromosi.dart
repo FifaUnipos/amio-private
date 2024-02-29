@@ -54,6 +54,15 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
     );
   }
 
+  refreshTampilan() {
+    setState(() {
+      conNameProdukEdit.clear();
+      conHargaEdit.clear();
+      conPointEdit.clear();
+      onswitchtampikan = true;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -207,11 +216,12 @@ class _UbahPromosiPageState extends State<UbahPromosiPage> {
               ).then((value) {
                 if (value == '00') {
                   widget.pageController.jumpToPage(0);
+                  refreshTampilan();
                 }
               });
 
-              initState();
               setState(() {});
+              // initState();
             },
             child: buttonXL(
               Center(

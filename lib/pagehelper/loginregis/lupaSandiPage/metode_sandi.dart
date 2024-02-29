@@ -83,13 +83,13 @@ class _MetodeSandiPageState extends State<MetodeSandiPage> {
                   children: [
                     Expanded(
                       child: cardDaftarAkun(
-                        context,
-                        'Email',
-                        userEmail,
-                        PhosphorIcons.envelope_open_fill,
-                        Otppage(userPhone, userEmail, '', 'forgotPass')
-                        // RegisterPage(),
-                      ),
+                          context,
+                          'Email',
+                          userEmail,
+                          PhosphorIcons.envelope_open_fill,
+                          Otppage(userPhone, userEmail, '', 'forgotPass')
+                          // RegisterPage(),
+                          ),
                     ),
                     SizedBox(width: size16),
                     Expanded(
@@ -122,6 +122,11 @@ class _MetodeSandiPageState extends State<MetodeSandiPage> {
   ) {
     return GestureDetector(
         onTap: () {
+          if (title == 'Email') {
+            changePasswordRequestOtp(context, 'email', userId);
+          } else {
+            changePasswordRequestOtp(context, 'whatsapp', userId);
+          }
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => widgetKu));
         },

@@ -664,8 +664,13 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                     img64.toString(),
                     listToko,
                     widget.pageController,
-                  );
-                  refreshDataProduk();
+                  ).then((value) {
+                    if (value == '00') {
+                      // widget.pageController.jumpToPage(0);
+                      refreshDataProduk();
+                    }
+                  });
+                  // refreshDataProduk();
                 },
                 child: buttonXLoutline(
                   Center(

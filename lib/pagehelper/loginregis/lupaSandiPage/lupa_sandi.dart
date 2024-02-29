@@ -185,7 +185,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       child: GestureDetector(
                                         onTap: () async {
                                           setState(() {
-                                            whenLoading(context);
+                                            
                                             errorText = '';
                                             _focusScopeNode.unfocus();
                                             changePasswordRequest(

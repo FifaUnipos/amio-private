@@ -1344,6 +1344,8 @@ class ProfilePageState extends State<ProfilePage> {
                             statusVerified == '1'
                                 ? verifikasiDiriKamuShowdialog(context)
                                 : verifEmailField(context);
+                            setState(() {});
+                            initState();
                           },
                           child: Text(
                             statusVerified.toString() == '1'
@@ -2871,7 +2873,7 @@ class ProfilePageState extends State<ProfilePage> {
                             controllerEmail.text,
                             phone ? 'whatsapp' : 'email',
                           ).then((value) {
-                            log(value);
+                            print(value);
                             if (value == '00') {
                               timerProvider.startTimeout();
                               // otpBuatSandi(context);

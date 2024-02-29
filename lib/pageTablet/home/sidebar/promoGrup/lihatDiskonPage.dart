@@ -439,8 +439,19 @@ class _PromosiGrupState extends State<PromosiGrup>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              GestureDetector(
+                onTap: () {
+                  widget.pageController.jumpToPage(0);
+                },
+                child: Icon(
+                  PhosphorIcons.arrow_left,
+                  size: size48,
+                  color: bnw900,
+                ),
+              ),
+              SizedBox(width: size12),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,11 +461,12 @@ class _PromosiGrupState extends State<PromosiGrup>
                     style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                   ),
                   Text(
-                    nameToko ?? '',
+                    widget.name,
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
               ),
+              Spacer(),
               Row(
                 children: [
                   GestureDetector(
