@@ -2316,6 +2316,7 @@ Future calculateTransaction(
   var jsonResponse = jsonDecode(response.body);
   var data = jsonResponse['data'];
   if (response.statusCode == 200) {
+    closeLoading(context);
     print('succes');
     // log(jsonResponse.toString());
     // print(jsonResponse['data']['subTotal'].toString());
@@ -2327,7 +2328,6 @@ Future calculateTransaction(
     discountProduct = data['discount'];
     discountProductUmum = data['discount_umum'];
     setState(() {});
-    closeLoading(context);
     return jsonResponse['rc'];
   } else {
     closeLoading(context);

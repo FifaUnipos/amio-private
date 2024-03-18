@@ -1065,6 +1065,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () async {
+                                                  whenLoading(context);
                                                   cart.clear();
                                                   cartMap.clear();
 
@@ -1172,7 +1173,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                             cartMap,
                                                             setState,
                                                             pelangganId,
-                                                            "",
+                                                            data['discountid'] ??
+                                                                '',
                                                             "")
                                                         .then((value) {
                                                       if (value == '00') {
@@ -1203,6 +1205,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                       transaksiPesanan;
                                                       transaksiKasir;
                                                     });
+                                                  } else {
+                                                    closeLoading(context);
                                                   }
 
                                                   total;
