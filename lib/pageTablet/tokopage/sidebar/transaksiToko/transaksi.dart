@@ -349,6 +349,7 @@ class _TransactionPageState extends State<TransactionPage>
     // var data = jsonResponse;
     // var data = jsonResponse['data'];
 
+    log(jsonResponse.toString());
     if (response.statusCode == 200) {
       closeLoading(context);
       var kembalian =
@@ -356,8 +357,8 @@ class _TransactionPageState extends State<TransactionPage>
       var tunaiText = int.parse(pinController.text);
 
       setState(() {
-        print(jsonResponse['data']['raw']);
-        print(jsonResponse['data']);
+        // print(jsonResponse['data']['raw']);
+        // print(jsonResponse['data']);
         printext = jsonResponse['data']['raw'];
 
         showDialog(
@@ -396,8 +397,8 @@ class _TransactionPageState extends State<TransactionPage>
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              pesananStruk(
-                                  'Kasir', jsonResponse['data']['pic_name'] ?? ''),
+                              pesananStruk('Kasir',
+                                  jsonResponse['data']['pic_name'] ?? ''),
                               SizedBox(height: size16),
                               dash(),
                               SizedBox(height: size16),
@@ -676,11 +677,13 @@ class _TransactionPageState extends State<TransactionPage>
         );
 
         // cart.clear();
+        return jsonResponse['rc'];
       });
     } else {
-      log(jsonResponse.toString());
       closeLoading(context);
       showSnackbar(context, jsonResponse);
+      // print(jsonResponse.toString());
+      return jsonResponse['rc'];
     }
   }
 
@@ -2809,11 +2812,13 @@ class _TransactionPageState extends State<TransactionPage>
   }
 
   keypad(bool? displayCode, TextEditingController pinCon) {
-    return Container(
+    return Expanded(
       // height: MediaQuery.of(context).size.he,
       // color: bnw300,
 
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        physics: BouncingScrollPhysics(),
         children: [
           dividerTransaksi(),
           SizedBox(height: size16),
@@ -2907,121 +2912,124 @@ class _TransactionPageState extends State<TransactionPage>
   rincianPembayaran(BuildContext context, pinValue, payMethod, payReference) {
     return WillPopScope(
       onWillPop: () async => true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Divider(),
-          Text(
-            'Rincian Pembayaran',
-            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: size8),
-          rincianText('Nama Pembeli', namaCustomerCalculate.toString()),
-          SizedBox(height: size8),
-          rincianText(
-            'Sub Total',
-            FormatCurrency.convertToIdr(subTotal ?? 0),
-          ),
-          SizedBox(height: size8),
-          rincianText('PPN', FormatCurrency.convertToIdr(ppnTransaksi ?? 0)),
-          SizedBox(height: size8),
-          rincianText(
-              'Diskon', FormatCurrency.convertToIdr(discountProduct ?? 0)),
-          SizedBox(height: size16),
-          dash(),
-          SizedBox(height: size16),
-          uangTunaiController.text != '0'
-              ? uangTunaiController.text != 'Rp 0'
-                  ? Column(
-                      children: [
-                        rincianText(
-                          'Tunai',
-                          FormatCurrency.convertToIdr((int.parse(
-                              uangTunaiController.text
-                                  .replaceAll(RegExp(r'[^0-9]'), '')))),
-                        ),
-                        SizedBox(height: size16),
-                        rincianBlueText(
-                          'Kembalian',
-                          FormatCurrency.convertToIdr((int.parse(
-                                  uangTunaiController.text
-                                      .replaceAll(RegExp(r'[^0-9]'), ''))) -
-                              totalTransaksi),
-                        ),
-                        SizedBox(height: size16),
-                        dash(),
-                        SizedBox(height: size16),
-                      ],
-                    )
-                  : SizedBox()
-              : SizedBox(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total',
-                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              Text(
-                FormatCurrency.convertToIdr(totalTransaksi ?? 0),
-                // FormatCurrency.convertToIdr(
-                //     cart[0].price ?? 0),
-
-                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-            ],
-          ),
-          SizedBox(height: size16),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: GestureDetector(
-              onTap: () {
-                if (uangTunaiController.text != 'Rp 0') {
-                  if (uangTunaiController.text != '0') {
-                    createTransactionBayar(
-                      context,
-                      widget.token,
-                      pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
-                      cartMap,
-                      _pageController,
-                      cart,
-                      setState,
-                      payMethod,
-                      payReference,
-                      transactionidValue ?? '',
-                      pelangganId,
-                      '',
-                      discountId,
-                    );
-                  }
-                }
-
-                setState(() {});
-              },
-              child: buttonXXLonOff(
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      PhosphorIcons.wallet_fill,
-                      color: bnw100,
-                    ),
-                    SizedBox(width: size16),
-                    Text(
-                      'Bayar',
-                      style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                    )
-                  ],
+      child: Expanded(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          physics: BouncingScrollPhysics(),
+          children: [
+            Divider(),
+            Text(
+              'Rincian Pembayaran',
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+            ),
+            SizedBox(height: size8),
+            rincianText('Nama Pembeli', namaCustomerCalculate.toString()),
+            SizedBox(height: size8),
+            rincianText(
+              'Sub Total',
+              FormatCurrency.convertToIdr(subTotal ?? 0),
+            ),
+            SizedBox(height: size8),
+            rincianText('PPN', FormatCurrency.convertToIdr(ppnTransaksi ?? 0)),
+            SizedBox(height: size8),
+            rincianText(
+                'Diskon', FormatCurrency.convertToIdr(discountProduct ?? 0)),
+            SizedBox(height: size16),
+            dash(),
+            SizedBox(height: size16),
+            uangTunaiController.text != '0'
+                ? uangTunaiController.text != 'Rp 0'
+                    ? Column(
+                        children: [
+                          rincianText(
+                            'Tunai',
+                            FormatCurrency.convertToIdr((int.parse(
+                                uangTunaiController.text
+                                    .replaceAll(RegExp(r'[^0-9]'), '')))),
+                          ),
+                          SizedBox(height: size16),
+                          rincianBlueText(
+                            'Kembalian',
+                            FormatCurrency.convertToIdr((int.parse(
+                                    uangTunaiController.text
+                                        .replaceAll(RegExp(r'[^0-9]'), ''))) -
+                                totalTransaksi),
+                          ),
+                          SizedBox(height: size16),
+                          dash(),
+                          SizedBox(height: size16),
+                        ],
+                      )
+                    : SizedBox()
+                : SizedBox(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total',
+                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                double.infinity,
-                (uangTunaiController.text == 'Rp 0' ||
-                        uangTunaiController.text == '0')
-                    ? bnw300
-                    : primary500,
+                Text(
+                  FormatCurrency.convertToIdr(totalTransaksi ?? 0),
+                  // FormatCurrency.convertToIdr(
+                  //     cart[0].price ?? 0),
+
+                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+              ],
+            ),
+            SizedBox(height: size16),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: GestureDetector(
+                onTap: () {
+                  if (uangTunaiController.text != 'Rp 0') {
+                    if (uangTunaiController.text != '0') {
+                      createTransactionBayar(
+                        context,
+                        widget.token,
+                        pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
+                        cartMap,
+                        _pageController,
+                        cart,
+                        setState,
+                        payMethod,
+                        payReference,
+                        transactionidValue ?? '',
+                        pelangganId,
+                        '',
+                        discountId,
+                      );
+                    }
+                  }
+
+                  setState(() {});
+                },
+                child: buttonXXLonOff(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        PhosphorIcons.wallet_fill,
+                        color: bnw100,
+                      ),
+                      SizedBox(width: size16),
+                      Text(
+                        'Bayar',
+                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                      )
+                    ],
+                  ),
+                  double.infinity,
+                  (uangTunaiController.text == 'Rp 0' ||
+                          uangTunaiController.text == '0')
+                      ? bnw300
+                      : primary500,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

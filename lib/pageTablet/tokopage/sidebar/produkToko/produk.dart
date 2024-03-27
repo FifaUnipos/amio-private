@@ -1702,40 +1702,10 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                               getSingle(dataProduk
                                                                   .productid);
 
-                                                              showDialog(
-                                                                context:
-                                                                    context,
-                                                                barrierDismissible:
-                                                                    false,
-                                                                builder:
-                                                                    (BuildContext
-                                                                        context) {
-                                                                  Future.delayed(
-                                                                      Duration(
-                                                                          seconds:
-                                                                              2),
-                                                                      () {
-                                                                    Navigator.pop(
-                                                                        context); // Close the dialog after 2 seconds
-                                                                  });
-
-                                                                  return Center(
-                                                                    child:
-                                                                        SizedBox(
-                                                                      width: 40,
-                                                                      height:
-                                                                          40,
-                                                                      child:
-                                                                          CircularProgressIndicator(),
-                                                                    ),
-                                                                  );
-                                                                },
-                                                              );
-
                                                               await Future.delayed(
                                                                   Duration(
                                                                       seconds:
-                                                                          2));
+                                                                          1));
 
                                                               _pageController
                                                                   .jumpToPage(

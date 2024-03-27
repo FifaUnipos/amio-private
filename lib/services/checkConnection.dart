@@ -8,7 +8,7 @@ class ConnectionChecker {
   Future<bool> checkInternet() async {
     try {
       var response = await Dio().head(
-        'https://www.google.com',
+        'https://api.prod.amio.my.id/api/test',
       );
       return response.statusCode == 200;
     } catch (e) {
