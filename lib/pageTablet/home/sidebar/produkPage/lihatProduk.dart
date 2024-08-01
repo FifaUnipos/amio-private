@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as Io;
@@ -5,6 +6,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:amio/pageTablet/home/sidebar/produkPage/lihatProdukPage/lihatUbahProdukPage.dart';
+import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
 import 'package:amio/utils/skeletons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -14,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletons/skeletons.dart';
 
 import '../../../../main.dart';
@@ -43,6 +46,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   List<ModelDataProdukGrup>? datasProduk;
 
   PageController _pageController = PageController();
+
   bool isSelectionMode = false;
   Map<int, bool> selectedFlag = {};
   List<String> listProduct = List.empty(growable: true);
@@ -116,11 +120,57 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     );
   }
 
+  // Edit page
+  File? myImageEdit;
+  Uint8List? bytesEdit;
+  String? img64Edit;
+  List<String> imagesEdit = [];
+
+  Future<void> getImageEdit() async {
+    var picker = ImagePicker();
+    PickedFile? imageFile;
+
+    imageFile = await picker.getImage(source: ImageSource.gallery);
+    if (imageFile!.path.isEmpty == false) {
+      myImageEdit = File(imageFile.path);
+
+      bytesEdit = await Io.File(myImageEdit!.path).readAsBytes();
+      setState(() {
+        img64Edit = base64Encode(bytesEdit!);
+        imagesEdit.add(img64Edit!);
+        imageEdit = '';
+      });
+      // Clipboard.setData(ClipboardData(text: img64Edit));
+    } else {
+      print('Error Image');
+    }
+  }
+
+  late TextEditingController conNameProdukEdit = TextEditingController();
+  late TextEditingController conHargaEdit = TextEditingController();
+  late TextEditingController conHargaOnlineEdit = TextEditingController();
+
+  late bool onswitchppnEdit = ppnEdit == '0' ? false : true;
+  late bool onswitchtampikanEdit = tampilEdit == '0' ? false : true;
+  late String ppnAktifEdit = ppnEdit == '0' ? "Tidak Aktif" : 'Aktif';
+  late String kasirAktifEdit = tampilEdit == '0' ? "Tidak Aktif" : 'Aktif';
+
+  Timer? _debounce;
+
+  void _onChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(Duration(seconds: 2), () async {
+      datasProduk = await getProductGrup(
+          context, widget.token, value, widget.merchId, textvalueOrderBy);
+      setState(() {});
+    });
+  }
+
   @override
   void initState() {
     checkConnection(context);
     conHarga.addListener(formatInputRp);
-    conHargaOnline.addListener(formatInputRp);
+    conHargaOnline.addListener(formatOnlineInputRp);
 
     conHargaEdit.addListener(formatInputRpEdit);
     conHargaOnlineEdit.addListener(formatOnlineInputRpEdit);
@@ -161,7 +211,27 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   refreshDataProduk() {
     datasProduk;
+    idProduct = '';
+
     conNameProduk.text = '';
+    conNameProdukEdit.text = '';
+    conHarga.text = '';
+    conHargaEdit.text = '';
+    jenisProduct = '';
+    jenisProductEdit = '';
+    jenisProductEdit = '';
+    conHargaOnline.text = '';
+    conHargaOnlineEdit.text = '';
+
+    onswitchppn = false;
+    onswitchtampikan = true;
+
+    isSelectionMode = false;
+    myImage = null;
+    listProduct = [];
+    listProduct.clear();
+    selectedFlag.clear();
+    datasProduk;
     conHarga.text = '';
     idProduct = null;
     img64 = null;
@@ -174,6 +244,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   @override
   dispose() {
+    _debounce!.cancel();
     productPrice;
     _pageController.dispose();
     conNameProduk.dispose();
@@ -182,13 +253,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     conHarga.dispose();
     super.dispose();
   }
-
-  late TextEditingController conNameProdukEdit =
-      TextEditingController(text: nameEditProduk);
-  late TextEditingController conHargaEdit =
-      TextEditingController(text: hargaEditProduk);
-  late TextEditingController conHargaOnlineEdit =
-      TextEditingController(text: hargaEditProduk);
 
   File? myImage;
   Uint8List? bytes;
@@ -216,10 +280,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   }
 
   refreshTampilan() {
+    conNameProdukEdit.text = '';
     nameEditProduk = '';
     hargaEditProduk = '';
     jenisProductEdit = '';
     kodejenisProductEdit = '';
+    conHarga.text = '';
+    conHargaOnline.text = '';
+    conHargaEdit.text = '';
+    conHargaOnlineEdit.text = '';
   }
 
   String? jenisProduct, idProduct;
@@ -260,13 +329,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
             children: [
               pageProdukToko(isFalseAvailable),
               tambahProdukToko(setState, context),
+              editProdukToko(),
               // ubahProdukGrupToko(setState, context, singleProductId),
-              LihatProdukUbahPage(
-                token: widget.token,
-                productid: singleProductId ?? '',
-                pageController: _pageController,
-                merchId: widget.merchId,
-              )
+              // LihatProdukUbahPage(
+              //   token: widget.token,
+              //   productid: singleProductId ?? '',
+              //   pageController: _pageController,
+              //   merchId: widget.merchId,
+              // )
             ],
           ),
         ),
@@ -274,6 +344,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     );
   }
 
+//! page
   tambahProdukToko(StateSetter setState, BuildContext context) {
     return StatefulBuilder(
       builder: (context, setState) => Column(
@@ -545,7 +616,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       context,
                       widget.token,
                       conNameProduk.text,
-                      idProduct,
+                      idProduct.toString(),
                       onswitchppn.toString(),
                       onswitchtampikan.toString(),
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -556,6 +627,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     ).then((value) {
                       if (value == '00') {
                         refreshDataProduk();
+                        setState(() {});
+                        initState();
                       }
                     });
                   },
@@ -590,13 +663,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       img64.toString(),
                       value,
                       _pageController,
-                    ).then((value) {
+                    ).then((value) async {
                       if (value == '00') {
-                        _pageController.jumpToPage(0);
+                        refreshDataProduk();
+                        await Future.delayed(Duration(seconds: 1));
                         conNameProduk.text = '';
                         conHarga.text = '';
+                        conHargaOnline.text = '';
                         idProduct = null;
-                        refreshDataProduk();
+                        _pageController.jumpToPage(0);
+                        setState(() {});
+                        initState();
                       }
                     });
                     initState();
@@ -624,7 +701,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     List<String> value = [widget.merchId];
     return FutureBuilder(
       future: getProductGrup(
-          context, widget.token, '', widget.merchId, textvalueOrderBy),
+        context,
+        widget.token,
+        '',
+        widget.merchId,
+        textvalueOrderBy,
+      ),
       builder: (context, snapshot) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -669,15 +751,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       child: TextField(
                         cursorColor: primary500,
                         controller: searchController,
-                        onChanged: (value) async {
-                          datasProduk = await getProductGrup(
-                              context,
-                              widget.token,
-                              value,
-                              widget.merchId,
-                              textvalueOrderBy);
-                          setState(() {});
-                        },
+                        onChanged: _onChanged,
                         decoration: InputDecoration(
                           contentPadding:
                               EdgeInsets.symmetric(vertical: size12),
@@ -933,6 +1007,21 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   widget.token,
                                                   listProduct,
                                                   widget.merchId,
+                                                ).then(
+                                                  (value) async {
+                                                    if (value == '00') {
+                                                      refreshDataProduk();
+                                                      await Future.delayed(
+                                                          Duration(seconds: 1));
+                                                      conNameProduk.text = '';
+                                                      conHarga.text = '';
+                                                      idProduct = null;
+                                                      _pageController
+                                                          .jumpToPage(0);
+                                                      setState(() {});
+                                                      initState();
+                                                    }
+                                                  },
                                                 );
                                                 refreshDataProduk();
 
@@ -1005,13 +1094,42 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size8),
                             GestureDetector(
                               onTap: () {
+                                listProduct.forEach((element) {
+                                  datasProduk!.forEach((element2) {
+                                    if (element == element2.productid) {
+                                      element2.isPPN = 0;
+                                    }
+                                  });
+                                });
                                 changePpn(
                                   context,
                                   widget.token,
                                   'false',
                                   listProduct,
                                   widget.merchId,
-                                );
+                                ).then((value) {
+                                  if (value == '00') {
+                                    listProduct.forEach((element) {
+                                      datasProduk!.forEach((element2) {
+                                        if (element == element2.productid) {
+                                          element2.isPPN = 0;
+                                        }
+                                      });
+                                    });
+                                  } else {
+                                    listProduct.forEach((element) {
+                                      datasProduk!.forEach((element2) {
+                                        if (element == element2.productid) {
+                                          element2.isPPN = 1;
+                                        }
+                                      });
+                                    });
+                                  }
+                                  setState(() {});
+                                  initState();
+                                });
+
+                                // log("ini adalah ${widget.merchId}");
                                 refreshDataProduk();
 
                                 setState(() {});
@@ -1035,13 +1153,40 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size8),
                             GestureDetector(
                               onTap: () {
+                                listProduct.forEach((element) {
+                                  datasProduk!.forEach((element2) {
+                                    if (element == element2.productid) {
+                                      element2.isActive = 1;
+                                    }
+                                  });
+                                });
                                 changeActive(
                                   context,
                                   widget.token,
                                   'true',
                                   listProduct,
                                   widget.merchId,
-                                );
+                                ).then((value) {
+                                  if (value == '00') {
+                                    listProduct.forEach((element) {
+                                      datasProduk!.forEach((element2) {
+                                        if (element == element2.productid) {
+                                          element2.isActive = 1;
+                                        }
+                                      });
+                                    });
+                                  } else {
+                                    listProduct.forEach((element) {
+                                      datasProduk!.forEach((element2) {
+                                        if (element == element2.productid) {
+                                          element2.isActive = 0;
+                                        }
+                                      });
+                                    });
+                                  }
+                                  setState(() {});
+                                  initState();
+                                });
                                 refreshDataProduk();
                                 initState();
                                 setState(() {});
@@ -1501,6 +1646,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                               inactiveSwitchBorder: Border.all(
                                                   color: bnw300, width: 2),
                                               onToggle: (bool value) {
+                                                dataProduk.isPPN = 1;
                                                 // print('hello');
                                                 List<String> listProduct = [
                                                   dataProduk.productid!
@@ -1511,7 +1657,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   value.toString(),
                                                   listProduct,
                                                   widget.merchId,
-                                                );
+                                                ).then((value) {
+                                                  if (value != '00') {
+                                                    dataProduk.isPPN = 0;
+                                                  } else {
+                                                    dataProduk.isPPN = 1;
+                                                  }
+                                                  setState(() {});
+                                                  initState();
+                                                });
                                                 initState();
                                                 setState(() {});
                                               },
@@ -1562,7 +1716,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   value.toString(),
                                                   listProduct,
                                                   widget.merchId,
-                                                );
+                                                ).then((value) {
+                                                  if (value != '00') {
+                                                    dataProduk.isActive = 0;
+                                                  } else {
+                                                    dataProduk.isActive = 1;
+                                                  }
+                                                  setState(() {});
+                                                  initState();
+                                                });
                                                 initState();
                                                 setState(() {});
                                               },
@@ -1653,47 +1815,87 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   dataProduk
                                                                       .productid,
                                                                   setState,
-                                                                ).then((value) {
-                                                                  _pageController
-                                                                      .jumpToPage(
-                                                                          2);
-                                                                  Navigator.pop(
-                                                                      context);
+                                                                ).then(
+                                                                    (value) async {
+                                                                  if (value ==
+                                                                      '00') {
+                                                                    conNameProdukEdit
+                                                                            .text =
+                                                                        nameEditProduk!;
+
+                                                                    conHargaEdit
+                                                                            .text =
+                                                                        hargaEditProduk!;
+
+                                                                    conHargaOnlineEdit
+                                                                            .text =
+                                                                        hargaEditOnlineProduk!;
+
+                                                                    singleProductId =
+                                                                        dataProduk
+                                                                            .productid!;
+
+                                                                    onswitchppnEdit = ppnEdit ==
+                                                                            '0'
+                                                                        ? false
+                                                                        : true;
+
+                                                                    onswitchtampikanEdit = tampilEdit ==
+                                                                            '0'
+                                                                        ? false
+                                                                        : true;
+
+                                                                    ppnAktifEdit = ppnEdit ==
+                                                                            '0'
+                                                                        ? "Tidak Aktif"
+                                                                        : 'Aktif';
+
+                                                                    kasirAktifEdit = tampilEdit ==
+                                                                            '0'
+                                                                        ? "Tidak Aktif"
+                                                                        : 'Aktif';
+
+                                                                    conHargaEdit
+                                                                            .text =
+                                                                        dataProduk
+                                                                            .price
+                                                                            .toString();
+
+                                                                    jenisProductEdit =
+                                                                        dataProduk
+                                                                            .typeproducts!;
+
+                                                                    onswitchtampikan =
+                                                                        dataProduk.isActive ==
+                                                                                1
+                                                                            ? true
+                                                                            : false;
+
+                                                                    onswitchppn =
+                                                                        dataProduk.isPPN ==
+                                                                                1
+                                                                            ? true
+                                                                            : false;
+
+                                                                    idProduct =
+                                                                        jenisProductEdit;
+                                                                    await Future.delayed(Duration(
+                                                                        seconds:
+                                                                            1));
+
+                                                                    _pageController
+                                                                        .jumpToPage(
+                                                                            2);
+                                                                    Navigator.pop(
+                                                                        context);
+
+                                                                    setState(
+                                                                        () {});
+                                                                  }
                                                                 });
 
-                                                                singleProductId =
-                                                                    dataProduk
-                                                                        .productid!;
-
-                                                                conHargaEdit
-                                                                        .text =
-                                                                    dataProduk
-                                                                        .price
-                                                                        .toString();
-
-                                                                jenisProductEdit =
-                                                                    dataProduk
-                                                                        .kodeProduct!;
-
-                                                                onswitchtampikan =
-                                                                    dataProduk.isActive ==
-                                                                            1
-                                                                        ? true
-                                                                        : false;
-
-                                                                onswitchppn =
-                                                                    dataProduk.isPPN ==
-                                                                            1
-                                                                        ? true
-                                                                        : false;
-
-                                                                idProduct =
-                                                                    jenisProductEdit;
-
-                                                                print(
-                                                                    singleProductId);
-
-                                                                setState(() {});
+                                                                // print(
+                                                                //     singleProductId);
                                                               },
                                                               child:
                                                                   modalBottomValue(
@@ -1755,7 +1957,21 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                                   widget.token,
                                                                                   listProduct,
                                                                                   widget.merchId,
+                                                                                ).then(
+                                                                                  (value) async {
+                                                                                    if (value == '00') {
+                                                                                      refreshDataProduk();
+                                                                                      await Future.delayed(Duration(seconds: 1));
+                                                                                      conNameProduk.text = '';
+                                                                                      conHarga.text = '';
+                                                                                      idProduct = '';
+                                                                                      _pageController.jumpToPage(0);
+                                                                                      setState(() {});
+                                                                                      initState();
+                                                                                    }
+                                                                                  },
                                                                                 );
+                                                                                ;
                                                                                 refreshDataProduk();
 
                                                                                 initState();
@@ -1854,6 +2070,346 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     );
   }
 
+  editProdukToko() {
+    return Consumer<RefreshTampilan>(
+      builder: (context, provider, _) => Column(
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  _pageController.jumpToPage(0);
+                  refreshDataProduk();
+                  refreshTampilan();
+                  getDataProduk(['']);
+                },
+                child: Icon(
+                  PhosphorIcons.arrow_left,
+                  size: size48,
+                  color: bnw900,
+                ),
+              ),
+              SizedBox(width: size12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ubah Produk',
+                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    'Produk akan ditambahkan kedalam Toko yang telah dipilih',
+                    style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                  ),
+                ],
+              )
+            ],
+          ),
+          Expanded(
+            child: ListView(
+              // padding: EdgeInsets.zero,
+              physics: BouncingScrollPhysics(),
+              children: [
+                Text(
+                  'Foto Produk',
+                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size16),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => tambahGambar(context),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: bnw900),
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                        height: 80,
+                        width: 80,
+                        child: myImageEdit != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(size8),
+                                child: Image.file(
+                                  myImageEdit!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : imageEdit!.isEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(size8),
+                                    child: Image.network(
+                                      imageEdit!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              SizedBox(
+                                        child: SvgPicture.asset(
+                                            'assets/logoProduct.svg'),
+                                      ),
+                                    ),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(size8),
+                                    child: Image.network(
+                                      imageEdit!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              GestureDetector(
+                                        onTap: () {
+                                          tambahGambar(context);
+                                        },
+                                        child: SizedBox(
+                                          child: Icon(
+                                            PhosphorIcons.plus,
+                                            color: bnw900,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                      ),
+                    ),
+                    SizedBox(width: size16),
+                    Text(
+                      'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                      style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () => tambahGambarEdit(context),
+                  child: IntrinsicHeight(
+                    child: TextFormField(
+                      cursorColor: primary500,
+                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      decoration: InputDecoration(
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 2,
+                            color: primary500,
+                          ),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 1.5,
+                            color: bnw500,
+                          ),
+                        ),
+                        enabled: false,
+                        suffixIcon: Icon(
+                          PhosphorIcons.plus,
+                          color: bnw900,
+                        ),
+                        hintText: 'Tambah Gambar',
+                        hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+                fieldEditProduk(
+                  'Nama Produk',
+                  conNameProdukEdit,
+                  TextInputType.text,
+                ),
+                SizedBox(height: size16),
+                kategoriList(context),
+                SizedBox(height: size16),
+                fieldEditProduk(
+                  'Harga',
+                  conHargaEdit,
+                  TextInputType.number,
+                ),
+                SizedBox(height: size16),
+                fieldEditProdukTanpaBintang(
+                  'Harga Online',
+                  conHargaOnlineEdit,
+                  TextInputType.number,
+                ),
+                SizedBox(height: size16),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(() {
+                      onswitchppnEdit = !onswitchppnEdit;
+                      onswitchppnEdit
+                          ? ppnAktifEdit = "Aktif"
+                          : ppnAktifEdit = "Tidak Aktif";
+                    });
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'PPN',
+                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          Text(
+                            ppnAktifEdit,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                      FlutterSwitch(
+                        width: 52,
+                        height: 28,
+                        // value: snapshot.data['isActive'] == 1 ? true : false,
+                        value: onswitchppnEdit,
+                        padding: 0,
+                        activeIcon:
+                            Icon(PhosphorIcons.check, color: primary500),
+                        inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                        activeColor: primary500,
+                        inactiveColor: bnw100,
+                        borderRadius: 30,
+                        inactiveToggleColor: bnw900,
+                        activeToggleColor: primary200,
+                        activeSwitchBorder: Border.all(color: primary500),
+                        inactiveSwitchBorder:
+                            Border.all(color: bnw300, width: 2),
+                        onToggle: (val) {
+                          setState(
+                            () {
+                              onswitchppnEdit = val;
+                              onswitchppnEdit
+                                  ? ppnAktifEdit = "Aktif"
+                                  : ppnAktifEdit = "Tidak Aktif";
+                              log(onswitchppnEdit.toString());
+                              log(ppnAktifEdit);
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: size16),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(
+                      () {
+                        onswitchtampikanEdit = !onswitchtampikanEdit;
+                        onswitchtampikanEdit
+                            ? kasirAktifEdit = "Aktif"
+                            : kasirAktifEdit = "Tidak Aktif";
+                      },
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tampilkan Di Kasir',
+                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          Text(
+                            kasirAktifEdit,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                      FlutterSwitch(
+                        width: 52,
+                        height: 28,
+                        // value: snapshot.data['isPPN'] == 1 ? true : false,
+
+                        value: onswitchtampikanEdit,
+                        padding: 0,
+                        activeIcon:
+                            Icon(PhosphorIcons.check, color: primary500),
+                        inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                        activeColor: primary500,
+                        inactiveColor: bnw100,
+                        borderRadius: 30,
+                        inactiveToggleColor: bnw900,
+                        activeToggleColor: primary200,
+                        activeSwitchBorder: Border.all(color: primary500),
+                        inactiveSwitchBorder:
+                            Border.all(color: bnw300, width: 2),
+                        onToggle: (val) {
+                          onswitchtampikanEdit = val;
+                          onswitchtampikanEdit
+                              ? kasirAktifEdit = "Aktif"
+                              : kasirAktifEdit = "Tidak Aktif";
+                          log(onswitchtampikanEdit.toString());
+                          // log(kasirAktifEdit);
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: size16),
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: GestureDetector(
+              onTap: () async {
+                // print(idProduct);
+                // print(singleProductId);
+                if (img64Edit == 'hapus') {
+                  img64Edit = null;
+                } else if (imageEdit!.isNotEmpty) {
+                  img64Edit = '';
+                } else {
+                  img64Edit = img64Edit;
+                }
+
+                List<String> value = [""];
+                updateProduk(
+                  context,
+                  widget.token,
+                  conNameProdukEdit.text,
+                  widget.merchId,
+                  singleProductId,
+                  idProduct,
+                  conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                  conHargaOnlineEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                  _pageController,
+                  onswitchtampikanEdit.toString(),
+                  onswitchppnEdit.toString(),
+                  img64Edit.toString(),
+                ).then((value) async {
+                  if (value == '00') {
+                    refreshDataProduk();
+                    await Future.delayed(Duration(seconds: 1));
+                    refreshTampilan();
+                    _pageController.jumpToPage(0);
+                    getDataProduk(['']);
+                    setState(() {});
+                    initState();
+                  }
+                });
+                initState();
+                setState(() {});
+              },
+              child: buttonXL(
+                Center(
+                  child: Text(
+                    'Simpan',
+                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                  ),
+                ),
+                MediaQuery.of(context).size.width,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+//! widget
   modalBottomValue(String title, icon) {
     return Column(
       children: [
@@ -1881,6 +2437,202 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         ),
         // Divider(color: bnw300)
       ],
+    );
+  }
+
+  tambahGambarEdit(BuildContext context) async {
+    showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      context: context,
+      builder: (context) => IntrinsicHeight(
+        child: Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(size8),
+              topLeft: Radius.circular(size8),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                imageEdit!.isNotEmpty
+                    ? Container(
+                        height: 200,
+                        width: 200,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(120),
+                          child: Image.network(
+                            imageEdit!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                SizedBox(
+                              child: SvgPicture.asset('assets/logoProduct.svg'),
+                            ),
+                          ),
+                        ),
+                      )
+                    : myImageEdit != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(120),
+                            child: Container(
+                                height: 200,
+                                width: 200,
+                                color: bnw400,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  child: Image.file(
+                                    myImageEdit!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )),
+                          )
+                        : Container(
+                            height: 200,
+                            width: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(120),
+                            ),
+                            child: SvgPicture.asset(
+                              'assets/logoProduct.svg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                SizedBox(height: size16),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await getImageEdit();
+                        Navigator.pop(context);
+                      },
+                      child: SizedBox(
+                        child: TextFormField(
+                          cursorColor: primary500,
+                          enabled: false,
+                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
+                              focusColor: primary500,
+                              prefixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Foto',
+                              hintStyle:
+                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                        ),
+                      ),
+                    ),
+                    (myImageEdit != null || imageEdit != '')
+                        ? GestureDetector(
+                            onTap: () async {
+                              img64Edit = 'hapus';
+                              myImageEdit = null;
+                              imageEdit = '';
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: SizedBox(
+                              child: TextFormField(
+                                cursorColor: primary500,
+                                enabled: false,
+                                style:
+                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
+                                  focusColor: primary500,
+                                  prefixIcon: Icon(
+                                    PhosphorIcons.trash,
+                                    color: bnw900,
+                                  ),
+                                  hintText: 'Hapus Foto',
+                                  hintStyle: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  fieldEditProdukTanpaBintang(title, mycontroller, TextInputType numberNo) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: TextFormField(
+              cursorColor: primary500,
+              keyboardType: numberNo,
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              controller: mycontroller,
+              onSaved: (value) {
+                mycontroller.text = value;
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
+                isDense: true,
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: bnw500,
+                  ),
+                ),
+                hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2052,6 +2804,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
           () {
             // log(jenisProduct.toString());
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -2371,6 +3126,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -2605,6 +3363,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   Future<dynamic> tambahKategori(
       BuildContext context, bool isKeyboardActive, StateSetter setState) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2712,7 +3473,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
 
                               errorText = '';
                               controllerName.text = '';
@@ -2754,6 +3515,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProductList() async {
+    await Future.delayed(Duration(seconds: 2));
     await http.post(Uri.parse(provinceInfoUrl), body: {
       "deviceid": identifier,
     }, headers: {
@@ -2795,6 +3557,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -2957,6 +3722,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

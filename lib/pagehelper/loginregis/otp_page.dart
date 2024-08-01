@@ -79,9 +79,11 @@ class _OtppageState extends State<Otppage> {
     return '$hiddenPart$visiblePart';
   }
 
+  late String phoneNumber;
+
   @override
   void initState() {
-    // log(widget.email);
+    phoneNumber = hidePhoneNumber(widget.phone);
     startTimeout();
     super.initState();
   }
@@ -94,12 +96,7 @@ class _OtppageState extends State<Otppage> {
 
   @override
   Widget build(BuildContext context) {
-    String phoneNumber = hidePhoneNumber(widget.phone);
-    if (widget.email.isNotEmpty) {
-      phoneNumber = widget.email;
-    } else {
-      phoneNumber = hidePhoneNumber(widget.phone);
-    }
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -141,7 +138,7 @@ class _OtppageState extends State<Otppage> {
                                       FontWeight.w700, bnw900, 'Outfit'),
                                 ),
                                 Text(
-                                  'Kode Verifikasi (OTP) sudah dikirim ke nomor telepon anda ${phoneNumber}',
+                                  'Kode Verifikasi (OTP) sudah dikirim ke nomor telepon anda $phoneNumber',
                                   textAlign: TextAlign.center,
                                   style: heading3(
                                       FontWeight.w400, bnw500, 'Outfit'),

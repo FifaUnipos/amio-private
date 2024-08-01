@@ -14,8 +14,8 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # Read more about Android versioning at https://developer.android.com/studio/publish/versioning
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.4.7+61
+# https://developer.apple .com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.4.8+62
 
 environment:
   sdk: ">=2.18.0-165.1.beta <3.0.0"
@@ -34,21 +34,19 @@ dependencies:
   dio: ^4.0.6
   firebase_core: ^2.4.1
   firebase_messaging: ^14.2.1
+  fl_chart: ^0.68.0
   flutter:
     sdk: flutter
   flutter_device_type: ^0.4.0
   flutter_downloader: ^1.10.2
   flutter_launcher_icons: ^0.11.0
   flutter_phosphor_icons: ^0.0.1+6
-  
   flutter_screenutil: ^5.5.4
   flutter_svg: ^1.1.6
   flutter_switch: ^0.3.2
   flutter_tabler_icons: ^1.1.2
   fluttertoast: ^8.1.2
-  hash_password: ^0.0.3
   http: ^0.13.5
-  image_gallery_saver: ^1.7.1
   image_picker: ^0.8.5+3
   intl: ^0.17.0
   otp_text_field: ^1.1.3

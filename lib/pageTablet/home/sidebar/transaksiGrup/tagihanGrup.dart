@@ -969,6 +969,9 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

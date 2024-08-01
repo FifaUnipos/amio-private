@@ -755,7 +755,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                   Text(
                                                                     FormatCurrency.convertToIdr(detail[index]
                                                                             [
-                                                                            'amount'])
+                                                                            'price'])
                                                                         .toString(),
                                                                     style: body1(
                                                                         FontWeight
@@ -1088,11 +1088,15 @@ class _SimpanPageState extends State<SimpanPage> {
                                                   pelangganId = '';
                                                   namaCustomerCalculate = '';
 
+                                                  log('data $detail');
+
                                                   int i;
                                                   for (i = 0;
                                                       i < detail.length;
                                                       i++) {
                                                     // print(detail[i]['name']);
+
+                                                    // log("hello im detail $detail");
 
                                                     Map<String, String> map1 =
                                                         {};
@@ -1108,9 +1112,17 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     map1['image'] = detail[i]
                                                             ['product_image']
                                                         .toString();
+
+                                                    // map1['amount_display'] =
+                                                    //     detail[i]['original_price']
+                                                    //         .toString();
+
                                                     map1['amount'] = detail[i]
-                                                            ['amount']
+                                                            // ['original_price']
+                                                            ['price']
                                                         .toString();
+
+                                                    //ini yang diubah
                                                     map1['description'] =
                                                         detail[i]
                                                             ['description'];
@@ -1130,7 +1142,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                         .toString()
                                                         .trim();
                                                     int? price =
-                                                        detail[i]['amount'];
+                                                        detail[i]['price'];
+                                                    // detail[i]['amount'];
                                                     int quantity =
                                                         detail[i]['quantity'];
 
@@ -1166,6 +1179,10 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     // initState();
 
                                                     isTagihan = true;
+
+                                                    // log("hello world $cartMap");
+
+                                                    // log(pelangganId.toString());
 
                                                     await calculateTransaction(
                                                             context,
@@ -1441,6 +1458,9 @@ class _SimpanPageState extends State<SimpanPage> {
     final refreshSelectedProvider =
         Provider.of<RefreshSelected>(context, listen: false);
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       barrierColor: Colors.transparent,
       shape: RoundedRectangleBorder(
@@ -1690,14 +1710,28 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     transactionidValue)
                                                 .then((value) {
                                               if (value != '00') {
-                                                setState(() {
+                                                setState(() async {
+                                                  datasRiwayat =
+                                                      await getRiwayatTransaksi(
+                                                    context,
+                                                    widget.token,
+                                                    '0',
+                                                    '',
+                                                    textvalueOrderBy,
+                                                  );
+                                                  Future.delayed(
+                                                      Duration(seconds: 1));
                                                   WidgetsBinding.instance
                                                       .addPostFrameCallback(
                                                           (_) {
                                                     scrollToTextField();
+                                                    closeLoading(context);
                                                   });
+                                                  initState();
+                                                  setState(() {});
                                                 });
                                               }
+                                              closeLoading(context);
                                             });
                                             setState(() {});
                                             initState();
@@ -1756,6 +1790,9 @@ class _SimpanPageState extends State<SimpanPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

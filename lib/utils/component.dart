@@ -304,6 +304,11 @@ void whenLoading(context) {
       child: Builder(
         builder: (BuildContext context) {
           loadingCompleter = Completer<void>();
+          Future.delayed(Duration(seconds: 5), () {
+            if (!loadingCompleter.isCompleted) {
+              closeLoading(context);
+            }
+          });
           return Center(
             child: SizedBox(
               width: 40,
@@ -1106,6 +1111,9 @@ showHelpSheet(BuildContext context, Widget widget) {
 
 Future<dynamic> showBottomPilihan(BuildContext context, Widget child) {
   return showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     useRootNavigator: false,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
@@ -1143,6 +1151,9 @@ Future<dynamic> showBottomPilihan(BuildContext context, Widget child) {
 
 showModalBottom(BuildContext context, height, child) {
   showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
@@ -1154,6 +1165,7 @@ showModalBottom(BuildContext context, height, child) {
         builder: (context, setState) => IntrinsicHeight(
           child: Container(
             // height: height,
+            // width: double.infinity,
             decoration: BoxDecoration(
               color: bnw100,
               borderRadius: const BorderRadius.only(
@@ -1171,6 +1183,9 @@ showModalBottom(BuildContext context, height, child) {
 
 showModalBottomDropdownAtur(BuildContext context, height, child) {
   showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
@@ -1181,6 +1196,7 @@ showModalBottomDropdownAtur(BuildContext context, height, child) {
         // dipakein IntrinsicHeight dan height dihapus
         builder: (context, setState) => IntrinsicHeight(
           child: Container(
+            // width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: bnw100,
               borderRadius: const BorderRadius.only(
@@ -1198,6 +1214,9 @@ showModalBottomDropdownAtur(BuildContext context, height, child) {
 
 showModalBottomProfile(BuildContext context, height, child) {
   showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
@@ -1406,6 +1425,9 @@ appbarMobile(BuildContext context, bool login) {
 
 helpQuestionShow(BuildContext context) {
   return showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
@@ -1505,41 +1527,70 @@ helpQuestionShow(BuildContext context) {
 }
 
 void showSnackBarComponent(BuildContext context, String text, String rc) {
-  showModalBottomSheet(
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.transparent,
-    isDismissible: false,
-    enableDrag: false,
-    context: context,
-    builder: (BuildContext context) {
-      return WillPopScope(
-        onWillPop: () async => false,
-        child: FutureBuilder(
-          future: Future.delayed(Duration(seconds: 2)),
-          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              Navigator.pop(context);
-            }
-            return Container(
-              margin: const EdgeInsets.all(20),
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(size8),
-                color: rc == '00' ? succes600 : red500,
-              ),
-              child: Center(
-                child: Text(
-                  text,
-                  style: heading2(FontWeight.w700, bnw100, 'Outfit'),
-                ),
-              ),
-            );
-          },
+  final snackBar = SnackBar(
+    content: Container(
+      margin: const EdgeInsets.all(20),
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size8), // Adjust radius as needed
+        color: rc == '00' ? succes600 : red500,
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: heading2(FontWeight.w700, bnw100, 'Outfit'),
         ),
-      );
-    },
+      ),
+    ),
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    behavior: SnackBarBehavior.floating,
+    duration:
+        Duration(seconds: 2), // Duration for which the SnackBar is visible
   );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
+
+// void showSnackBarComponent(BuildContext context, String text, String rc) {
+//   showModalBottomSheet(
+// constraints: const BoxConstraints(
+//       maxWidth: double.infinity,
+//     ),
+//     backgroundColor: Colors.transparent,
+//     barrierColor: Colors.transparent,
+//     isDismissible: false,
+//     enableDrag: false,
+//     context: context,
+//     builder: (BuildContext context) {
+//       return WillPopScope(
+//         onWillPop: () async => false,
+//         child: FutureBuilder(
+//           future: Future.delayed(Duration(seconds: 2)),
+//           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+//             if (snapshot.connectionState == ConnectionState.done) {
+//               Navigator.pop(context);
+//             }
+//             return Container(
+//               margin: const EdgeInsets.all(20),
+//               height: 60,
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(size8),
+//                 color: rc == '00' ? succes600 : red500,
+//               ),
+//               child: Center(
+//                 child: Text(
+//                   text,
+//                   style: heading2(FontWeight.w700, bnw100, 'Outfit'),
+//                 ),
+//               ),
+//             );
+//           },
+//         ),
+//       );
+//     },
+//   );
+// }
 
 dash() {
   return Row(

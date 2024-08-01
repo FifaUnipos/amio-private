@@ -5,7 +5,7 @@ import 'package:amio/services/apimethod.dart';
 import 'package:amio/utils/component.dart';
 import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_device_type/flutter_device_type.dart';
@@ -15,6 +15,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'pagehelper/onboard/onboard.dart';
 import 'pagehelper/splashscreen.dart';
+import 'services/modelBloc.dart';
 import 'utils/providerModel/timerModel.dart';
 
 Future<void> main() async {
@@ -23,7 +24,7 @@ Future<void> main() async {
   var mytokenGet = prefs.getString('token');
   var onBoard = prefs.getString('onboard');
 
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
   await FlutterDownloader.initialize(
     debug: true,
@@ -61,6 +62,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (_) => TimerProvider()),
           ChangeNotifierProvider(create: (_) => RefreshTampilan()),
           ChangeNotifierProvider(create: (_) => RefreshSelected()),
+          // ChangeNotifierProvider(create: (_) => ProductProvider()),
           // ChangeNotifierProvider(create: (_) {
           //   TimerProvider();
           //   RefreshTampilan();
@@ -70,18 +72,31 @@ Future<void> main() async {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
+            progressIndicatorTheme: ProgressIndicatorThemeData(
+              color: primary500,
+            ),
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: bnw100,
-            errorColor: red500,
+            // errorColor: red500,
             visualDensity: VisualDensity.adaptivePlatformDensity,
             primaryColor: primary500,
             focusColor: primary500,
+            primaryColorDark: primary500,
+            primaryColorLight: primary500,
+            indicatorColor: primary500,
+            // inputDecorationTheme: InputDecorationTheme(
+            //   focusedBorder: OutlineInputBorder(
+            //     borderSide: BorderSide(color: primary500),
+            //   ),
+            //   filled: true,
+            //   fillColor: primary500,
+            // ),
             colorScheme: ThemeData().colorScheme.copyWith(primary: primary500),
           ),
           title: 'UniPOS',
           home: mytokenGet == null
               ? onBoard == null
-                  ? Scaffold( 
+                  ? Scaffold(
                       body: SplashScreen(isTab: true),
                     )
                   : Scaffold(

@@ -17,16 +17,21 @@ class ConnectionChecker {
   }
 }
 
-Future<void> checkConnection(context) async {
+Future<void> checkConnection(BuildContext context) async {
   final connectionStatus = await ConnectionChecker().checkInternet();
 
-  if (connectionStatus == false) {
-    dialogNoConnection(context);
+  if (!connectionStatus) {
+    dialogNoConnection(context, () {
+      checkConnection(context);
+    });
   }
 }
 
-Future<dynamic> dialogNoConnection(context) {
+Future<dynamic> dialogNoConnection(context, VoidCallback retryCallback) {
   return showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
@@ -64,16 +69,20 @@ Future<dynamic> dialogNoConnection(context) {
               SizedBox(
                 width: double.infinity,
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(context);
+                    await Future.delayed(Duration(seconds: 2));
+                    retryCallback();
                   },
                   child: buttonXL(
-                      Center(
-                          child: Text(
+                    Center(
+                      child: Text(
                         'Oke',
                         style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      )),
-                      double.infinity),
+                      ),
+                    ),
+                    double.infinity,
+                  ),
                 ),
               ),
             ],
@@ -86,6 +95,9 @@ Future<dynamic> dialogNoConnection(context) {
 
 Future<dynamic> dialogNoPrinter(context) {
   return showModalBottomSheet(
+    constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),

@@ -932,8 +932,8 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                             widget.bluetooth.isConnected
                                                 .then((isConnected) {
                                               if (isConnected == true) {
-                                                widget.bluetooth.printNewLine();
-                                                widget.bluetooth.printNewLine();
+                                                // widget.bluetooth.printNewLine();
+                                                // widget.bluetooth.printNewLine();
                                                 // widget.bluetooth.printImage(file.path);
                                                 // bluetooth.printImageBytes(
                                                 //     img); //image from Network
@@ -951,7 +951,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                 widget.bluetooth.printNewLine();
                                                 // widget.bluetooth.printNewLine();
                                                 widget.bluetooth.paperCut();
-                                              } else {}
+                                              } else {
+                                                dialogNoPrinter(context);
+                                              }
                                             });
                                             setState(() {});
                                           },
@@ -1027,6 +1029,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
   Future<dynamic> showBottomRiwayatPerubahan(
       BuildContext context, Map<String, dynamic> data) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         shape: RoundedRectangleBorder(
@@ -1573,6 +1578,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

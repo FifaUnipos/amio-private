@@ -109,8 +109,9 @@ class _LaporanTokoState extends State<LaporanToko> {
     List<ObjectLaporan> objects = [
       ObjectLaporan('Pendapatan Harian', 'Laporan Pendapatan Harian Toko',
           PhosphorIcons.calendar_fill),
-      ObjectLaporan('Pendapatan Toko', 'Laporan Pendapatan Keseluruhan Toko',
-          PhosphorIcons.storefront_fill),
+      if (statusProfile == 'Group_Merchant')
+        ObjectLaporan('Pendapatan Toko', 'Laporan Pendapatan Keseluruhan Toko',
+            PhosphorIcons.storefront_fill),
       ObjectLaporan('Pendapatan Per Produk', 'Laporan Pendapatan Per Produk',
           PhosphorIcons.shopping_bag_open_fill),
       // ObjectLaporan('Profit Harian', 'Laporan Profit Harian Toko',
@@ -150,9 +151,9 @@ class _LaporanTokoState extends State<LaporanToko> {
               lihatLaporanPage(objects),
               LaporanPendapatanHarianPage(
                   pageController: pageController, token: widget.token),
-
-              LaporanPendapatanTokoPage(
-                  pageController: pageController, token: widget.token),
+              if (statusProfile == 'Group_Merchant')
+                LaporanPendapatanTokoPage(
+                    pageController: pageController, token: widget.token),
               LaporanPendapatanPerProduk(
                   pageController: pageController, token: widget.token),
               // profitHarian(context),
@@ -679,6 +680,9 @@ class _LaporanTokoState extends State<LaporanToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -830,6 +834,9 @@ class _LaporanTokoState extends State<LaporanToko> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -983,6 +990,9 @@ class _LaporanTokoState extends State<LaporanToko> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -1149,6 +1159,9 @@ class _LaporanTokoState extends State<LaporanToko> {
 
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),

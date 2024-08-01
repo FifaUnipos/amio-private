@@ -1616,6 +1616,9 @@ class _LaporanGrupState extends State<LaporanGrup> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -1771,6 +1774,9 @@ class _LaporanGrupState extends State<LaporanGrup> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -1924,6 +1930,9 @@ class _LaporanGrupState extends State<LaporanGrup> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -2090,6 +2099,9 @@ class _LaporanGrupState extends State<LaporanGrup> {
 
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),

@@ -333,6 +333,7 @@ class ProfilePageState extends State<ProfilePage> {
                   },
                   child: ListView(
                     // mainAxisAlignment: MainAxisAlignment.center,
+                    padding: EdgeInsets.zero,
                     children: [
                       Row(
                         children: [
@@ -406,6 +407,9 @@ class ProfilePageState extends State<ProfilePage> {
                                 GestureDetector(
                                     onTap: () {
                                       showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -949,6 +953,9 @@ class ProfilePageState extends State<ProfilePage> {
                         GestureDetector(
                           onTap: () {
                             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                               isScrollControlled: true,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
@@ -1061,11 +1068,25 @@ class ProfilePageState extends State<ProfilePage> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () {
+                                                  whenLoading(context);
                                                   changeName(
                                                     widget.token,
                                                     identifier,
                                                     context,
                                                     controllerName.text,
+                                                  ).then(
+                                                    (value) async {
+                                                      if (value == '00') {
+                                                        setState(() {});
+                                                        await Future.delayed(
+                                                            Duration(
+                                                                seconds: 1));
+                                                        Navigator.of(context)
+                                                            .popUntil((route) =>
+                                                                route.isFirst);
+                                                        initState();
+                                                      }
+                                                    },
                                                   );
                                                   errorText = '';
                                                   setState(() {});
@@ -1163,6 +1184,9 @@ class ProfilePageState extends State<ProfilePage> {
 
   Future<dynamic> showError(BuildContext context, bool checkShow, sandi, ubah) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1420,6 +1444,9 @@ class ProfilePageState extends State<ProfilePage> {
 
   Future<dynamic> verifEmailField(BuildContext context) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1544,6 +1571,9 @@ class ProfilePageState extends State<ProfilePage> {
 
   Future<dynamic> verifEmailFieldTanpaError(BuildContext context) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1667,6 +1697,9 @@ class ProfilePageState extends State<ProfilePage> {
 
   Future<dynamic> verifikasiDiriKamuShowdialog(BuildContext context) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1800,6 +1833,9 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
 
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2047,6 +2083,9 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
     clearForm();
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2143,11 +2182,20 @@ class ProfilePageState extends State<ProfilePage> {
                                                   widget.token,
                                                   phone ? 'whatsapp' : 'email',
                                                   pin,
-                                                ).then((value) {
+                                                ).then((value) async {
                                                   // value == '00'
                                                   //     ? Navigator.of(context).popUntil(
                                                   //         (route) => route.isFirst)
                                                   //     : null;
+                                                  if (value == '00') {
+                                                    setState(() {});
+                                                    await Future.delayed(
+                                                        Duration(seconds: 1));
+                                                    Navigator.of(context)
+                                                        .popUntil((route) =>
+                                                            route.isFirst);
+                                                    initState();
+                                                  }
                                                 });
                                               });
 
@@ -2287,6 +2335,9 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
 
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2523,6 +2574,9 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
 
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2768,6 +2822,9 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
     errorText = '';
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2917,6 +2974,9 @@ class ProfilePageState extends State<ProfilePage> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     isKeyboardActive = false;
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3044,6 +3104,9 @@ class ProfilePageState extends State<ProfilePage> {
 
   Future<dynamic> verifikasiDiriKamuSandiShowdialog(BuildContext context) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3176,6 +3239,9 @@ class ProfilePageState extends State<ProfilePage> {
     errorText = '';
     Navigator.of(context).popUntil((route) => route.isFirst);
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3396,6 +3462,9 @@ class ProfilePageState extends State<ProfilePage> {
     // Navigator.of(context).popUntil((route) => route.isFirst);
     Navigator.popUntil(context, (route) => route.isFirst);
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       // barrierColor: Colors.transparent,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -3578,6 +3647,9 @@ class ProfilePageState extends State<ProfilePage> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     isKeyboardActive = false;
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3708,6 +3780,9 @@ class ProfilePageState extends State<ProfilePage> {
     // Navigator.of(context).popUntil((route) => route.isFirst);
     Navigator.popUntil(context, (route) => route.isFirst);
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       // barrierColor: Colors.transparent,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(

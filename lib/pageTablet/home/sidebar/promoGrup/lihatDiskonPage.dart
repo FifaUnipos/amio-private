@@ -471,11 +471,12 @@ class _PromosiGrupState extends State<PromosiGrup>
                 children: [
                   GestureDetector(
                     onTap: () {
-                      _tabController!.index == 0
-                          ? _pageController.nextPage(
-                              duration: Duration(milliseconds: 10),
-                              curve: Curves.ease)
-                          : _pageController.jumpToPage(3);
+                      // _tabController!.index == 0
+                      //     ? _pageController.nextPage(
+                      //         duration: Duration(milliseconds: 10),
+                      //         curve: Curves.ease)
+                      //     : _pageController.jumpToPage(3);
+                      _pageController.jumpToPage(3);
                     },
                     child: buttonXL(
                       Row(
@@ -484,7 +485,8 @@ class _PromosiGrupState extends State<PromosiGrup>
                           Icon(PhosphorIcons.plus, color: bnw100),
                           SizedBox(width: size12),
                           Text(
-                            _tabController!.index == 0 ? 'Voucher' : 'Diskon',
+                            'Voucher',
+                            // _tabController!.index == 0 ? 'Voucher' : 'Diskon',
                             style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                           ),
                         ],
@@ -527,9 +529,9 @@ class _PromosiGrupState extends State<PromosiGrup>
                       setState(() {});
                     },
                     tabs: [
-                      Tab(
-                        text: 'Voucher',
-                      ),
+                      // Tab(
+                      //   text: 'Voucher',
+                      // ),
                       Tab(
                         text: 'Diskon',
                       ),
@@ -543,18 +545,19 @@ class _PromosiGrupState extends State<PromosiGrup>
                       physics: NeverScrollableScrollPhysics(),
                       controller: _tabController,
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: size16),
-                              orderBy(context),
-                              SizedBox(height: size16),
-                              VoucherPage(isFalseAvailable)
-                            ],
-                          ),
-                        ),
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height,
+                        //   child: Column(
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: [
+                        //       SizedBox(height: size16),
+                        //       orderBy(context),
+                        //       SizedBox(height: size16),
+                        //       VoucherPage(isFalseAvailable)
+                        //     ],
+                        //   ),
+                        // ),
+
                         DiskonGrup(
                           token: widget.token,
                           merchid: widget.merchid,
@@ -1328,6 +1331,9 @@ class _PromosiGrupState extends State<PromosiGrup>
         onTap: () {
           setState(() {
             showModalBottomSheet(
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

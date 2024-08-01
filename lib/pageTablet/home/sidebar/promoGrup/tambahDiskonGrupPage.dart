@@ -236,6 +236,9 @@ class _TambahDiskonGrupPageState extends State<TambahDiskonGrupPage> {
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
                                       showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:

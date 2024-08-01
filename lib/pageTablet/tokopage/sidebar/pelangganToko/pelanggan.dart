@@ -1005,6 +1005,9 @@ class _PelangganTokoState extends State<PelangganToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

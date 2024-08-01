@@ -740,7 +740,7 @@ class _ScreensExampleState extends State<_ScreensExample> {
             default:
               return Text(
                 'Not found page',
-                style: theme.textTheme.headline5,
+                // style: theme.textTheme.headlzine5,
               );
           }
         },

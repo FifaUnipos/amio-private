@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hash_password/password_hasher.dart';
+// import 'package:hash_password/password_hasher.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -593,17 +593,17 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         print("succes login with email");
 
         myprofile(jsonResponse['token']);
-        late FirebaseMessaging messaging;
-        messaging = FirebaseMessaging.instance;
-        messaging.getToken().then((value) {
-          setState(() {
-            print("firebase token : $value");
-            firebaseToken(value, jsonResponse['token']);
-          });
-        });
-        final NotifFCM = FCM();
+        // late FirebaseMessaging messaging;
+        // messaging = FirebaseMessaging.instance;
+        // messaging.getToken().then((value) {
+        //   setState(() {
+        //     print("firebase token : $value");
+        //     firebaseToken(value, jsonResponse['token']);
+        //   });
+        // });
+        // final NotifFCM = FCM();
 
-        NotifFCM.setNotifiications();
+        // NotifFCM.setNotifiications();
         Future.delayed(
           const Duration(seconds: 3),
           () {

@@ -275,6 +275,9 @@ class _UbahDiskonGrupPageState extends State<UbahDiskonGrupPage> {
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
                                       showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:

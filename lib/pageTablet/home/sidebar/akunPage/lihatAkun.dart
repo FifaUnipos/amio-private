@@ -322,36 +322,40 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                             SizedBox(width: size16),
                             Expanded(
                               child: Text(
-                                'Info Voucher',
+                                'Profile',
                                 style:
                                     heading4(FontWeight.w700, bnw100, 'Outfit'),
-                              ),
-                            ),
-                            SizedBox(width: size16),
-                            Expanded(
-                              child: Text(
-                                'Harga Jual',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
-                              ),
-                            ),
-                            SizedBox(width: size16),
-                            Expanded(
-                              child: Text(
-                                'Coin',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
-                              ),
-                            ),
-                            SizedBox(width: size16),
-                            Container(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width / 8,
-                                minWidth: MediaQuery.of(context).size.width / 8,
-                              ),
-                              child: Text(
-                                'Tampil Kasir',
                                 textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: Text(
+                                'Nama',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: Text(
+                                'Email',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: Text(
+                                'Telepon',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: Text(
+                                'Tipe Akun',
                                 style:
                                     heading4(FontWeight.w600, bnw100, 'Outfit'),
                               ),
@@ -405,7 +409,7 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                             ),
                             SizedBox(width: size16),
                             Text(
-                              '${listProduct.length}/${datasAkun!.length} Voucher Terpilih',
+                              '${listProduct.length}/${datasAkun!.length} Akun Terpilih',
                               style:
                                   heading4(FontWeight.w600, bnw100, 'Outfit'),
                             ),
@@ -521,34 +525,34 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                 bnw300,
                               ),
                             ),
-                            SizedBox(width: size16),
-                            GestureDetector(
-                              onTap: () {
-                                changeActiveAkun(
-                                  context,
-                                  widget.token,
-                                  '1',
-                                  listProduct,
-                                );
+                            // SizedBox(width: size16),
+                            // GestureDetector(
+                            //   onTap: () {
+                            //     changeActiveAkun(
+                            //       context,
+                            //       widget.token,
+                            //       '1',
+                            //       listProduct,
+                            //     );
 
-                                setState(() {});
-                                initState();
-                              },
-                              child: buttonL(
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Aktifkan Tampilkan dikasir',
-                                      style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
-                                    ),
-                                  ],
-                                ),
-                                bnw100,
-                                bnw300,
-                              ),
-                            ),
+                            //     setState(() {});
+                            //     initState();
+                            //   },
+                            //   child: buttonL(
+                            //     Row(
+                            //       mainAxisAlignment: MainAxisAlignment.center,
+                            //       children: [
+                            //         Text(
+                            //           'Aktifkan Tampilkan dikasir',
+                            //           style: heading3(
+                            //               FontWeight.w600, bnw900, 'Outfit'),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //     bnw100,
+                            //     bnw300,
+                            //   ),
+                            // ),
                           ],
                         ),
                 ),
@@ -594,58 +598,52 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          InkWell(
-                                            // onTap: () => onTap(isSelected, index),
-                                            onTap: () {
-                                              onTap(isSelected, index);
-                                              log(data.fullname.toString());
-                                              log(data.userid.toString());
-                                              log(data.phonenumber.toString());
-                                            },
-                                            child: SizedBox(
-                                              width: 50,
-                                              child: _buildSelectIcon(
-                                                  isSelected!, data),
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.symmetric(
-                                                vertical: size8),
-                                            width: width,
-                                            child: SizedBox(
-                                              height: 60,
-                                              width: 60,
-                                              child: Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            size8),
-                                                    child: Image.network(
-                                                      height: 60,
-                                                      width: 60,
-                                                      datasAkun![index]
-                                                          .account_image
-                                                          .toString(),
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                              error,
-                                                              stackTrace) =>
-                                                          SizedBox(
-                                                        child: SvgPicture.asset(
-                                                            height: 60,
-                                                            width: 60,
-                                                            'assets/logoProduct.svg'),
-                                                      ),
-                                                    )),
+                                      InkWell(
+                                        // onTap: () => onTap(isSelected, index),
+                                        onTap: () {
+                                          onTap(isSelected, index);
+                                          log(data.fullname.toString());
+                                          log(data.userid.toString());
+                                          log(data.phonenumber.toString());
+                                        },
+                                        child: SizedBox(
+                                          width: 50,
+                                          child: _buildSelectIcon(
+                                              isSelected!, data),
+                                        ),
+                                      ),
+                                      // Spacer(),
+                                      SizedBox(width: size12),
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                              child: Image.network(
+                                                height: size56,
+                                                width: size56,
+                                                datasAkun![index]
+                                                    .account_image
+                                                    .toString(),
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                        stackTrace) =>
+                                                    SizedBox(
+                                                  child: Icon(
+                                                    PhosphorIcons
+                                                        .user_circle_fill,
+                                                    color: bnw900,
+                                                    size: size56,
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                            Spacer()
+                                          ],
+                                        ),
                                       ),
-                                      SizedBox(width: size16),
+                                      // SizedBox(width: size16),
                                       Expanded(
                                         child: Container(
                                           child: Text(
@@ -684,58 +682,61 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                         ),
                                       ),
                                       SizedBox(width: size16),
-                                      Container(
-                                        width: width,
-                                        child: Text(
-                                          datasAkun![index].usertype ==
-                                                  'Merchant'
-                                              ? 'Toko'
-                                              : 'Grup Toko',
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: heading4(FontWeight.w400,
-                                              bnw900, 'Outfit'),
+                                      Expanded(
+                                        child: SizedBox(
+                                          width: width,
+                                          child: Text(
+                                            datasAkun![index].usertype ==
+                                                    'Merchant'
+                                                ? 'Toko'
+                                                : 'Grup Toko',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: heading4(FontWeight.w400,
+                                                bnw900, 'Outfit'),
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(width: size16),
-                                      Container(
-                                        width: width,
-                                        height: 30,
-                                        child: FlutterSwitch(
-                                          padding: 1,
-                                          value: datasAkun![index].status == '1'
-                                              ? true
-                                              : false,
-                                          activeIcon: Icon(PhosphorIcons.check,
-                                              color: primary500),
-                                          width: 50.0,
-                                          height: 27.0,
-                                          inactiveIcon: Icon(PhosphorIcons.x,
-                                              color: bnw100),
-                                          activeColor: primary500,
-                                          inactiveColor: bnw100,
-                                          borderRadius: 30.0,
-                                          inactiveToggleColor: bnw900,
-                                          activeToggleColor: primary200,
-                                          activeSwitchBorder:
-                                              Border.all(color: primary500),
-                                          inactiveSwitchBorder: Border.all(
-                                              color: bnw300, width: 2),
-                                          onToggle: (bool value) {
-                                            // print('hello');
+                                      // SizedBox(width: size16),
+                                      // Container(
+                                      //   width: width,
+                                      //   height: 30,
+                                      //   child: FlutterSwitch(
+                                      //     padding: 1,
+                                      //     value: datasAkun![index].status == '1'
+                                      //         ? true
+                                      //         : false,
+                                      //     activeIcon: Icon(PhosphorIcons.check,
+                                      //         color: primary500),
+                                      //     width: 50.0,
+                                      //     height: 27.0,
+                                      //     inactiveIcon: Icon(PhosphorIcons.x,
+                                      //         color: bnw100),
+                                      //     activeColor: primary500,
+                                      //     inactiveColor: bnw100,
+                                      //     borderRadius: 30.0,
+                                      //     inactiveToggleColor: bnw900,
+                                      //     activeToggleColor: primary200,
+                                      //     activeSwitchBorder:
+                                      //         Border.all(color: primary500),
+                                      //     inactiveSwitchBorder: Border.all(
+                                      //         color: bnw300, width: 2),
+                                      //     onToggle: (bool value) {
+                                      //       // print('hello');
 
-                                            changeActiveAkun(
-                                              context,
-                                              widget.token,
-                                              value == true ? '1' : '0',
-                                              [datasAkun![index].userid],
-                                            );
+                                      //       changeActiveAkun(
+                                      //         context,
+                                      //         widget.token,
+                                      //         value == true ? '1' : '0',
+                                      //         [datasAkun![index].userid],
+                                      //       );
 
-                                            setState(() {});
-                                            initState();
-                                          },
-                                        ),
-                                      ),
+                                      //       setState(() {});
+                                      //       initState();
+                                      //     },
+                                      //   ),
+                                      // ),
+
                                       SizedBox(width: size16),
                                       GestureDetector(
                                           onTap: () {

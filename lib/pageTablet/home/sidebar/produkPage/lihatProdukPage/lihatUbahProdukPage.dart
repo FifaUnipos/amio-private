@@ -77,7 +77,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
 
   TextEditingController searchController = TextEditingController();
 
-  late String jenisProduct = jenisProductEdit, idProduct = kodejenisProductEdit;
+  late String jenisProduct = jenisProductEdit!, idProduct = kodejenisProductEdit!;
 
   late bool onswitchppn = ppnEdit == '0' ? false : true;
   late bool onswitchtampikan = tampilEdit == '0' ? false : true;
@@ -186,11 +186,11 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : imageEdit.isEmpty
+                            : imageEdit!.isEmpty
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(size8),
                                     child: Image.network(
-                                      imageEdit,
+                                      imageEdit!,
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) =>
@@ -203,7 +203,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                 : ClipRRect(
                                     borderRadius: BorderRadius.circular(size8),
                                     child: Image.network(
-                                      imageEdit,
+                                      imageEdit!,
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) =>
@@ -411,7 +411,7 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                 // print(singleProductId);
                 if (img64 == 'hapus') {
                   img64 = null;
-                } else if (imageEdit.isNotEmpty) {
+                } else if (imageEdit!.isNotEmpty) {
                   img64 = '';
                 } else {
                   img64 = img64;
@@ -431,8 +431,19 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                   onswitchtampikan.toString(),
                   onswitchppn.toString(),
                   img64.toString(),
-                );
-                print(img64.toString());
+                ).then((value) async {
+                  if (value == '00') {
+                    await getProductGrup(
+                      context,
+                      widget.token,
+                      '',
+                      widget.merchId,
+                      textvalueOrderBy,
+                    );
+                    setState(() {});
+                  }
+                });
+                // print(img64.toString());
                 // Provider.of<RefreshTampilan>(context, listen: false)
                 //     .getDataProduk(widget.datasProduk!, context, widget.token);
               },
@@ -619,6 +630,9 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
   Future<dynamic> kategoriListForm(
       BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -866,6 +880,9 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -976,8 +993,8 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                           controllerName.text,
                                         ).then((value) {
                                           if (value == '00') {
-                                            Navigator.pop(context);
                                             kategoriListForm(context, false);
+                                            Navigator.pop(context);
                                             showSnackBarComponent(context,
                                                 'Berhasil ubah kategori', '00');
                                             errorText = '';
@@ -1112,6 +1129,9 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
 
   Future<dynamic> tambahKategori(BuildContext context, bool isKeyboardActive) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1220,8 +1240,9 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              Navigator.pop(context);
                               kategoriListForm(context, isKeyboardActive);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
                               showSnackBarComponent(
                                   context, 'Berhasil tambah kategori', '00');
                               errorText = '';
@@ -1256,6 +1277,9 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1279,14 +1303,14 @@ class _LihatProdukUbahPageState extends State<LihatProdukUbahPage> {
               children: [
                 dividerShowdialog(),
                 SizedBox(height: size16),
-                imageEdit.isNotEmpty
+                imageEdit!.isNotEmpty
                     ? Container(
                         height: 200,
                         width: 200,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(120),
                           child: Image.network(
-                            imageEdit,
+                            imageEdit!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 SizedBox(

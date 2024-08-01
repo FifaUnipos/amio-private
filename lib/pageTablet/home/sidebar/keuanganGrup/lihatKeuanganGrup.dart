@@ -651,6 +651,9 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                                                       }
 
                                                       showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                                         isScrollControlled:
                                                             true,
                                                         shape:
@@ -937,6 +940,9 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
                                   onTap: () {
                                     setState(() {
                                       showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -2548,6 +2554,9 @@ class _LihatKeuanganGrupState extends State<LihatKeuanganGrup>
         setState(
           () {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

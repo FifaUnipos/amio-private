@@ -870,8 +870,12 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                                       index]
                                                                   .id)
                                                           .then(
-                                                        (value) {
+                                                        (value) async {
                                                           if (value == '00') {
+                                                            Future.delayed(
+                                                                Duration(
+                                                                    milliseconds:
+                                                                        500)); 
                                                             widget
                                                                 .pageController
                                                                 .jumpToPage(4);
@@ -1196,6 +1200,9 @@ class _DiskonTokoState extends State<DiskonToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

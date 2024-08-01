@@ -460,6 +460,9 @@ class _UbahAkunPageState extends State<UbahAkunPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

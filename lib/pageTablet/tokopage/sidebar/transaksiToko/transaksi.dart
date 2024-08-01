@@ -40,6 +40,8 @@ import 'pilihPelangganPage.dart';
 
 List<CartTransaksi> cart = List.empty(growable: true);
 List<Map<String, String>> cartMap = List.empty(growable: true);
+List<Map<String, String>> cartMapBayar = List.empty(growable: true);
+
 List<num> total = List.empty(growable: true);
 List<TextEditingController> conCatatan = List.empty(growable: true);
 List<String> cartProductIds = [];
@@ -191,6 +193,24 @@ class _TransactionPageState extends State<TransactionPage>
     getQris(context, widget.token, '');
     getStruk(context, widget.token, '');
 
+    if (isTagihan == true) {
+      isTagihan = false;
+      cart.clear();
+      cartMap.clear();
+      cartMapBayar.clear();
+
+      isItemAdded = false;
+
+      total = [];
+      subTotal = 0;
+      sumTotal = 0;
+
+      refreshColor();
+      cartProductIds.clear();
+      conCatatan.clear();
+      conCounterPreview.clear();
+    }
+
     _tabController = TabController(length: 3, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback(
@@ -261,8 +281,25 @@ class _TransactionPageState extends State<TransactionPage>
     );
   }
 
+  Timer? _debounce;
+
+  void _onChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(Duration(seconds: 2), () async {
+      datasTransaksi = await getProductTransaksi(
+        context,
+        widget.token,
+        value,
+        [''],
+        textvalueOrderBy,
+      );
+      setState(() {});
+    });
+  }
+
   @override
   dispose() {
+    _debounce?.cancel();
     sumTotal;
     productPrice;
     pinController.dispose();
@@ -288,6 +325,7 @@ class _TransactionPageState extends State<TransactionPage>
 
     cart.clear();
     cartMap.clear();
+    cartMapBayar.clear();
     conCatatan.clear();
     _pageController.jumpTo(0);
     isItemAdded = false;
@@ -324,9 +362,28 @@ class _TransactionPageState extends State<TransactionPage>
     dialog,
     discount,
   ) async {
+    // log("aku detail $details");
     whenLoading(context);
 
-    final String detail = json.encode(details);
+    // log("ini adalah $details");
+
+    List<Map<String, String>> mapCalculate = List.empty(growable: true);
+
+    for (var detail in details) {
+      Map<String, String> map1 = {};
+      map1['name'] = detail['name']!;
+      map1['productid'] = detail['productid']!;
+      map1['quantity'] = detail['quantity']!;
+      map1['image'] = detail['image']!;
+      map1['amount'] = detail['amount_display'] ?? detail['amount']!;
+      map1['description'] = detail['description']!;
+
+      mapCalculate.add(map1);
+    }
+
+    final String detailBaru = json.encode(mapCalculate);
+
+    // final String detail = json.encode(details);
 
     final response = await http.post(
       Uri.parse(createTransaksiUrl),
@@ -341,9 +398,22 @@ class _TransactionPageState extends State<TransactionPage>
         "value": value,
         "payment_method": method,
         "payment_reference": reference,
-        "detail": detail,
+        "detail": detailBaru,
       },
     );
+
+    final body = {
+      "deviceid": identifier,
+      "discount": discount ?? "",
+      "memberid": memberid,
+      "transactionid": transactionid,
+      "value": value,
+      "payment_method": method,
+      "payment_reference": reference,
+      "detail": detailBaru,
+    };
+
+    log(body.toString());
     var jsonResponse = json.decode(response.body);
 
     // var data = jsonResponse;
@@ -352,9 +422,9 @@ class _TransactionPageState extends State<TransactionPage>
     log(jsonResponse.toString());
     if (response.statusCode == 200) {
       closeLoading(context);
-      var kembalian =
-          int.parse(uangTunaiController.text.replaceAll(RegExp(r'[^0-9]'), ''));
-      var tunaiText = int.parse(pinController.text);
+      // var kembalian =
+      //     int.parse(uangTunaiController.text.replaceAll(RegExp(r'[^0-9]'), ''));
+      // var tunaiText = int.parse(pinController.text);
 
       setState(() {
         // print(jsonResponse['data']['raw']);
@@ -618,6 +688,7 @@ class _TransactionPageState extends State<TransactionPage>
                               log(printext.toString());
                               cart.clear();
                               cartMap.clear();
+                              cartMapBayar.clear();
                               _pageController.jumpTo(0);
 
                               int newtotal = 0;
@@ -640,6 +711,8 @@ class _TransactionPageState extends State<TransactionPage>
                               isItemAdded = false;
                               isExpand = false;
                               conCatatan.clear();
+                              debitpinController.clear();
+                              kreditpinController.clear();
 
                               selectedIndex = 0;
                               selectedIndexDompetDigital = 0;
@@ -791,6 +864,7 @@ class _TransactionPageState extends State<TransactionPage>
               automaticIndicatorColorAdjustment: false,
               indicatorColor: primary500,
               labelColor: primary500,
+              indicatorSize: TabBarIndicatorSize.tab,
               labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
               unselectedLabelColor: bnw600,
               physics: NeverScrollableScrollPhysics(),
@@ -1405,19 +1479,22 @@ class _TransactionPageState extends State<TransactionPage>
                               subTotal = 0;
                               sumTotal = 0;
 
-                              refreshColor();
                               cartProductIds.clear();
                               conCatatan.clear();
                               conCounterPreview.clear();
+                              refreshColor();
+                              setState(() {});
                             }
+
+                            selectedIndex = 0;
+                            selectedIndexDompetDigital = 0;
+                            uangTunaiController.text = '0';
 
                             _pageController.previousPage(
                                 duration: Duration(microseconds: 1),
                                 curve: Curves.ease);
 
-                            selectedIndex = 0;
-                            selectedIndexDompetDigital = 0;
-                            uangTunaiController.text = '0';
+                            setState(() {});
                           },
                           child: Icon(
                             PhosphorIcons.arrow_left,
@@ -1572,6 +1649,9 @@ class _TransactionPageState extends State<TransactionPage>
                       onTap: () {
                         bool isKeyboardActive = false;
                         showModalBottomSheet(
+                          constraints: const BoxConstraints(
+                            maxWidth: double.infinity,
+                          ),
                           isScrollControlled: true,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
@@ -2415,8 +2495,9 @@ class _TransactionPageState extends State<TransactionPage>
             ),
           ),
           Spacer(),
+          Divider(),
           displayCode != true
-              ? rincianPembayaran(
+              ? rincianPembayaranDebitKredit(
                   context,
                   (uangTunaiController.text = totalTransaksi.toString()),
                   '005',
@@ -2481,7 +2562,7 @@ class _TransactionPageState extends State<TransactionPage>
           Spacer(),
           Divider(),
           displayCode != true
-              ? rincianPembayaran(
+              ? rincianPembayaranDebitKredit(
                   context,
                   (uangTunaiController.text = totalTransaksi.toString()),
                   '004',
@@ -2659,7 +2740,9 @@ class _TransactionPageState extends State<TransactionPage>
                           bnw300),
                     )),
                 Spacer(),
-                rincianPembayaran(context, totalTransaksi.toString(), '003', '')
+                Divider(),
+                rincianPembayaranDebitKredit(
+                    context, totalTransaksi.toString(), '003', '')
               ],
             ),
           ),
@@ -2732,79 +2815,80 @@ class _TransactionPageState extends State<TransactionPage>
             ),
           ),
 
-          Expanded(
-            child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  SizedBox(height: size16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              uangTunaiController.text = '20000';
-                            });
-                          },
-                          child: buttonLoutline(
-                            Center(
-                              child: Text(
-                                'Rp 20,000',
-                                style:
-                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
+          SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                SizedBox(height: size16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            uangTunaiController.text = '20000';
+                          });
+                        },
+                        child: buttonLoutline(
+                          Center(
+                            child: Text(
+                              'Rp 20,000',
+                              style:
+                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
                             ),
-                            bnw300,
                           ),
+                          bnw300,
                         ),
                       ),
-                      SizedBox(width: size16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              uangTunaiController.text = '50000';
-                            });
-                          },
-                          child: buttonLoutline(
-                            Center(
-                              child: Text(
-                                'Rp 50,000',
-                                style:
-                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
-                            ),
-                            bnw300,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: size16),
-                  GestureDetector(
-                    onTap: () {
-                      uangTunaiController.text = totalTransaksi.toString();
-                      setState(() {});
-                    },
-                    child: buttonLoutline(
-                      Center(
-                        child: Text(
-                          'Uang Pas',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                      ),
-                      bnw300,
                     ),
+                    SizedBox(width: size16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            uangTunaiController.text = '50000';
+                          });
+                        },
+                        child: buttonLoutline(
+                          Center(
+                            child: Text(
+                              'Rp 50,000',
+                              style:
+                                  heading3(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                          ),
+                          bnw300,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: size16),
+                GestureDetector(
+                  onTap: () {
+                    uangTunaiController.text = totalTransaksi.toString();
+                    setState(() {});
+                  },
+                  child: buttonLoutline(
+                    Center(
+                      child: Text(
+                        'Uang Pas',
+                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ),
+                    bnw300,
                   ),
-                  SizedBox(height: size16),
-                ],
-              ),
+                ),
+                SizedBox(height: size16),
+              ],
             ),
           ),
           // displayCode != true ? SizedBox() : Spacer(),
+          // Text('hello'),
+          Spacer(),
           displayCode != true
-              ? rincianPembayaran(context, uangTunaiController.text, '001', '')
+              ? rincianPembayaran(
+                  context, uangTunaiController.text, '001', 'false')
               : keypad(displayCode, uangTunaiController),
         ],
       ),
@@ -2914,6 +2998,7 @@ class _TransactionPageState extends State<TransactionPage>
       onWillPop: () async => true,
       child: Expanded(
         child: ListView(
+          shrinkWrap: true,
           padding: EdgeInsets.zero,
           physics: BouncingScrollPhysics(),
           children: [
@@ -2973,7 +3058,7 @@ class _TransactionPageState extends State<TransactionPage>
                   FormatCurrency.convertToIdr(totalTransaksi ?? 0),
                   // FormatCurrency.convertToIdr(
                   //     cart[0].price ?? 0),
-
+        
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
               ],
@@ -2981,52 +3066,71 @@ class _TransactionPageState extends State<TransactionPage>
             SizedBox(height: size16),
             SizedBox(
               width: MediaQuery.of(context).size.width,
-              child: GestureDetector(
-                onTap: () {
-                  if (uangTunaiController.text != 'Rp 0') {
-                    if (uangTunaiController.text != '0') {
-                      createTransactionBayar(
-                        context,
-                        widget.token,
-                        pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
-                        cartMap,
-                        _pageController,
-                        cart,
-                        setState,
-                        payMethod,
-                        payReference,
-                        transactionidValue ?? '',
-                        pelangganId,
-                        '',
-                        discountId,
-                      );
-                    }
-                  }
-
-                  setState(() {});
-                },
-                child: buttonXXLonOff(
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        PhosphorIcons.wallet_fill,
-                        color: bnw100,
+              child: totalTransaksi < 0
+                  ? buttonXXLonOff(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            PhosphorIcons.wallet_fill,
+                            color: bnw100,
+                          ),
+                          SizedBox(width: size16),
+                          Text(
+                            'Bayar',
+                            style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                          )
+                        ],
                       ),
-                      SizedBox(width: size16),
-                      Text(
-                        'Bayar',
-                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                      )
-                    ],
-                  ),
-                  double.infinity,
-                  (uangTunaiController.text == 'Rp 0' ||
-                          uangTunaiController.text == '0')
-                      ? bnw300
-                      : primary500,
-                ),
-              ),
+                      double.infinity,
+                      bnw300)
+                  : GestureDetector(
+                      onTap: () {
+                        if (uangTunaiController.text != 'Rp 0') {
+                          if (uangTunaiController.text != '0') {
+                            createTransactionBayar(
+                              context,
+                              widget.token,
+                              pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
+                              cartMap,
+                              _pageController,
+                              cart,
+                              setState,
+                              payMethod,
+                              payReference,
+                              transactionidValue ?? '',
+                              pelangganId,
+                              '',
+                              discountId,
+                            );
+                          }
+                        }
+        
+                        setState(() {});
+                      },
+                      child: buttonXXLonOff(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              PhosphorIcons.wallet_fill,
+                              color: bnw100,
+                            ),
+                            SizedBox(width: size16),
+                            Text(
+                              'Bayar',
+                              style:
+                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                            )
+                          ],
+                        ),
+                        double.infinity,
+                        (uangTunaiController.text == 'Rp 0' ||
+                                uangTunaiController.text == '0')
+                            ? bnw300
+                            : primary500,
+                      ),
+                    ),
             ),
           ],
         ),
@@ -3107,6 +3211,122 @@ class _TransactionPageState extends State<TransactionPage>
                 double.infinity,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  rincianPembayaranDebitKredit(
+    BuildContext context,
+    pinValue,
+    payMethod,
+    payReference,
+  ) {
+    return WillPopScope(
+      onWillPop: () async => true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Rincian Pembayaran',
+            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+          ),
+          SizedBox(height: size8),
+          rincianText('Nama Pembeli', namaCustomerCalculate.toString()),
+          SizedBox(height: size8),
+          rincianText(
+            'Sub Total',
+            FormatCurrency.convertToIdr(subTotal ?? 0),
+          ),
+          SizedBox(height: size8),
+          rincianText('PPN', FormatCurrency.convertToIdr(ppnTransaksi ?? 0)),
+          SizedBox(height: size16),
+          dash(),
+          SizedBox(height: size16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total',
+                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+              Text(
+                FormatCurrency.convertToIdr(totalTransaksi ?? 0),
+                // FormatCurrency.convertToIdr(
+                //     cart[0].price ?? 0),
+
+                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+            ],
+          ),
+          SizedBox(height: size16),
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: totalTransaksi < 0
+                ? buttonXXLonOff(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          PhosphorIcons.wallet_fill,
+                          color: bnw100,
+                        ),
+                        SizedBox(width: size16),
+                        Text(
+                          'Bayar',
+                          style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                        )
+                      ],
+                    ),
+                    double.infinity,
+                    bnw300)
+                : GestureDetector(
+                    onTap: () {
+                      if (uangTunaiController.text != 'Rp 0') {
+                        if (uangTunaiController.text != '0') {
+                          createTransactionBayar(
+                            context,
+                            widget.token,
+                            pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
+                            cartMap,
+                            _pageController,
+                            cart,
+                            setState,
+                            payMethod,
+                            payReference,
+                            transactionidValue ?? '',
+                            pelangganId,
+                            '',
+                            discountId,
+                          );
+                        }
+                      }
+
+                      setState(() {});
+                    },
+                    child: buttonXXLonOff(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            PhosphorIcons.wallet_fill,
+                            color: bnw100,
+                          ),
+                          SizedBox(width: size16),
+                          Text(
+                            'Bayar',
+                            style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                          )
+                        ],
+                      ),
+                      double.infinity,
+                      (uangTunaiController.text == 'Rp 0' ||
+                              uangTunaiController.text == '0')
+                          ? bnw300
+                          : primary500,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -3216,16 +3436,7 @@ class _TransactionPageState extends State<TransactionPage>
                                   style: heading2(
                                       FontWeight.w500, bnw900, 'Outfit'),
                                   controller: searchController,
-                                  onChanged: (value) async {
-                                    datasTransaksi = await getProductTransaksi(
-                                      context,
-                                      widget.token,
-                                      value,
-                                      [''],
-                                      textvalueOrderBy,
-                                    );
-                                    setState(() {});
-                                  },
+                                  onChanged: _onChanged,
                                   decoration: InputDecoration(
                                     contentPadding:
                                         EdgeInsets.symmetric(vertical: size16),
@@ -3299,6 +3510,9 @@ class _TransactionPageState extends State<TransactionPage>
                                 conCatatanPreview.text = '';
                                 errorText = "";
                                 showModalBottomSheet(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: double.infinity,
+                                  ),
                                   backgroundColor: Colors.transparent,
                                   useRootNavigator: false,
                                   isScrollControlled: true,
@@ -3811,6 +4025,13 @@ class _TransactionPageState extends State<TransactionPage>
                                                                           RegExp(
                                                                               r'[^0-9]'),
                                                                           '');
+                                                              map1['amount_display'] =
+                                                                  customProdukPrice
+                                                                      .text
+                                                                      .replaceAll(
+                                                                          RegExp(
+                                                                              r'[^0-9]'),
+                                                                          '');
                                                               map1['description'] =
                                                                   conCatatanPreview
                                                                       .text;
@@ -3988,6 +4209,7 @@ class _TransactionPageState extends State<TransactionPage>
                                 controller: _tabController,
                                 automaticIndicatorColorAdjustment: false,
                                 indicatorColor: primary500,
+                                indicatorSize: TabBarIndicatorSize.tab,
                                 unselectedLabelColor: bnw600,
                                 labelColor: primary500,
                                 labelStyle:
@@ -4399,6 +4621,10 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               true;
                                                                         } else {
                                                                           showModalBottomSheet(
+                                                                            constraints:
+                                                                                const BoxConstraints(
+                                                                              maxWidth: double.infinity,
+                                                                            ),
                                                                             useRootNavigator:
                                                                                 false,
                                                                             isScrollControlled:
@@ -5482,6 +5708,15 @@ class _TransactionPageState extends State<TransactionPage>
                                   ? SizedBox()
                                   : GestureDetector(
                                       onTap: () {
+                                        String typePrice = "price";
+                                        if (tapTrue == 1) {
+                                          typePrice = "price";
+                                        } else if (typePrice == 2) {
+                                          typePrice = "price_online_shop    ";
+                                        }
+                                        print(tapTrue);
+                                        print("aku adalah data $cartMap");
+
                                         createTransaction(
                                           context,
                                           widget.token,
@@ -5533,15 +5768,17 @@ class _TransactionPageState extends State<TransactionPage>
                               ? GestureDetector(
                                   onTap: () async {
                                     // log(conCatatan.toList().toString());
+                                    // log(cartMap.toString());
+
                                     whenLoading(context);
-                                    String typePrice = "price";
-                                    if (tapTrue == 1) {
-                                      typePrice = "price";
-                                    } else if (typePrice == 2) {
-                                      typePrice = "price_online_shop    ";
-                                    }
-                                    print(tapTrue);
-                                    print(cartMap.toString());
+                                    // String typePrice = "price";
+                                    // if (tapTrue == 1) {
+                                    //   typePrice = "price";
+                                    // } else if (typePrice == 2) {
+                                    //   typePrice = "price_online_shop    ";
+                                    // }
+                                    // print(tapTrue);
+                                    // print(cartMap.toString());
 
                                     await calculateTransaction(
                                             context,
@@ -5549,7 +5786,7 @@ class _TransactionPageState extends State<TransactionPage>
                                             cartMap,
                                             setState,
                                             pelangganId,
-                                            typePrice,
+                                            '',
                                             '')
                                         .then((value) {
                                       if (cartMap.isNotEmpty && value == '00') {
@@ -5607,6 +5844,9 @@ class _TransactionPageState extends State<TransactionPage>
     tapTrue = 1;
 
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+        maxWidth: double.infinity,
+      ),
       useRootNavigator: false,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -6046,13 +6286,29 @@ class _TransactionPageState extends State<TransactionPage>
 
                               map1['image'] =
                                   datasTransaksi![i].product_image.toString();
-                              map1['amount'] =
+
+                              // log("${datasTransaksi![i]
+                              //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
+                              map1['amount_display'] =
 //                                  (datasTransaksi![i].price! * counterCart)
+                                  (tapTrue == 2
+                                          ? datasTransaksi![i].price_online_shop
+                                          : datasTransaksi![i].price!)
+                                      .toString();
+
+                              //ubah transaksi
+                              // datasTransaksi![i].price.toString();
+                              map1['amount'] =
+                                  // datasTransaksi![i].price.toString();
+
                                   (tapTrue == 2
                                           ? datasTransaksi![i]
                                               .price_online_shop_after
                                           : datasTransaksi![i].price_after!)
                                       .toString();
+
+                              // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
+
                               map1['description'] = conCatatanPreview.text;
 
                               cartMap.add(map1);
@@ -6168,6 +6424,9 @@ class _TransactionPageState extends State<TransactionPage>
 
   Future<dynamic> pilihPembeliShowBottom(BuildContext context, index) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(size24),
@@ -6250,6 +6509,9 @@ class _TransactionPageState extends State<TransactionPage>
                           controllerPelangganName.text = '';
                           pelangganId = '';
                           showModalBottomSheet(
+                            constraints: const BoxConstraints(
+                              maxWidth: double.infinity,
+                            ),
                             isScrollControlled: true,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
@@ -6541,6 +6803,9 @@ class _TransactionPageState extends State<TransactionPage>
         onTap: () {
           setState(() {
             showModalBottomSheet(
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -6709,6 +6974,7 @@ class _TransactionPageState extends State<TransactionPage>
   bool isItemSelected = false;
 
   Future _getProductList() async {
+    await Future.delayed(Duration(seconds: 2));
     await http.post(Uri.parse(diskonTransaksiLink), body: {
       "deviceid": identifier,
     }, headers: {

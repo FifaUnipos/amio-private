@@ -87,7 +87,7 @@ class _PromosiTokoState extends State<PromosiToko>
     poinEditPromosi = '';
     hargaProductPromosi = '';
 
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         List<String> value = [''];
@@ -451,11 +451,12 @@ class _PromosiTokoState extends State<PromosiToko>
               children: [
                 GestureDetector(
                   onTap: () {
-                    _tabController!.index == 0
-                        ? _pageController.nextPage(
-                            duration: Duration(milliseconds: 10),
-                            curve: Curves.ease)
-                        : _pageController.jumpToPage(3);
+                    // _tabController!.index == 0
+                    //     ? _pageController.nextPage(
+                    //         duration: Duration(milliseconds: 10),
+                    //         curve: Curves.ease)
+                    //     : _pageController.jumpToPage(3);
+                    _pageController.jumpToPage(3);
                   },
                   child: buttonXL(
                     Row(
@@ -464,7 +465,8 @@ class _PromosiTokoState extends State<PromosiToko>
                         Icon(PhosphorIcons.plus, color: bnw100),
                         SizedBox(width: size12),
                         Text(
-                          _tabController!.index == 0 ? 'Voucher' : 'Diskon',
+                          // _tabController!.index == 0 ? 'Voucher' : 'Diskon',
+                          'Diskon',
                           style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ],
@@ -483,6 +485,7 @@ class _PromosiTokoState extends State<PromosiToko>
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: TabBar(
+                  indicatorSize: TabBarIndicatorSize.tab,
                   controller: _tabController,
                   automaticIndicatorColorAdjustment: false,
                   indicatorColor: primary500,
@@ -507,9 +510,9 @@ class _PromosiTokoState extends State<PromosiToko>
                     setState(() {});
                   },
                   tabs: [
-                    Tab(
-                      text: 'Voucher',
-                    ),
+                    // Tab(
+                    //   text: 'Voucher',
+                    // ),
                     Tab(
                       text: 'Diskon',
                     ),
@@ -523,18 +526,18 @@ class _PromosiTokoState extends State<PromosiToko>
                     physics: NeverScrollableScrollPhysics(),
                     controller: _tabController,
                     children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: size16),
-                            orderBy(context),
-                            SizedBox(height: size16),
-                            VoucherPage(isFalseAvailable)
-                          ],
-                        ),
-                      ),
+                      // SizedBox(
+                      //   height: MediaQuery.of(context).size.height,
+                      //   child: Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.start,
+                      //     children: [
+                      //       SizedBox(height: size16),
+                      //       orderBy(context),
+                      //       SizedBox(height: size16),
+                      //       VoucherPage(isFalseAvailable)
+                      //     ],
+                      //   ),
+                      // ),
                       DiskonToko(
                         token: widget.token,
                         pageController: _pageController,
@@ -1302,6 +1305,9 @@ class _PromosiTokoState extends State<PromosiToko>
         onTap: () {
           setState(() {
             showModalBottomSheet(
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

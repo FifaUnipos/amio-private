@@ -143,7 +143,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                 controller: tabController,
                 automaticIndicatorColorAdjustment: false,
                 indicatorColor: primary500,
-                unselectedLabelColor: bnw600,
+                unselectedLabelColor: bnw600,indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: primary500,
                 labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
                 physics: NeverScrollableScrollPhysics(),
@@ -754,7 +754,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                 Text(
                                                                   FormatCurrency.convertToIdr(int.parse(detail[index]
                                                                               [
-                                                                              'amount']
+                                                                              'price']
                                                                           .toString()))
                                                                       .toString(),
                                                                   style: body1(
@@ -1021,9 +1021,11 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                           Expanded(
                                             child: GestureDetector(
                                               onTap: () {
-                                                if (logoStrukPrinter != '') {
-                                                  getStrukPhoto();
-                                                }
+                                                // if (logoStrukPrinter != '') {
+                                                //   getStrukPhoto();
+                                                // }
+
+                                                // log("ini adalah struk ${printext}");
 
                                                 widget.bluetooth.isConnected
                                                     .then((isConnected) {
@@ -1032,14 +1034,14 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         context,
                                                         'Berhasil cetak struk',
                                                         '00');
-                                                    widget.bluetooth
-                                                        .printNewLine();
-                                                    logoStrukPrinter == null
-                                                        ? widget.bluetooth
-                                                            .printNewLine()
-                                                        : bluetooth
-                                                            .printImageBytes(
-                                                                imageStruk);
+                                                    // widget.bluetooth
+                                                    //     .printNewLine();
+                                                    // logoStrukPrinter == null
+                                                    //     ? widget.bluetooth
+                                                    //         .printNewLine()
+                                                    //     : bluetooth
+                                                    //         .printImageBytes(
+                                                    //             imageStruk);
                                                     widget.bluetooth
                                                         .printNewLine();
                                                     widget.bluetooth
@@ -1155,6 +1157,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
   Future<dynamic> showBottomRiwayatPerubahan(
       BuildContext context, Map<String, dynamic> data) {
     return showModalBottomSheet(
+                          constraints: const BoxConstraints(
+                            maxWidth: double.infinity,
+                          ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         shape: RoundedRectangleBorder(
@@ -1639,6 +1644,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+                          constraints: const BoxConstraints(
+                            maxWidth: double.infinity,
+                          ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1806,6 +1814,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
     final refreshSelectedProvider =
         Provider.of<RefreshSelected>(context, listen: false);
     return showModalBottomSheet(
+                          constraints: const BoxConstraints(
+                            maxWidth: double.infinity,
+                          ),
       isScrollControlled: true,
       // barrierColor: Colors.transparent,
       shape: RoundedRectangleBorder(
@@ -2056,16 +2067,18 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                 .then((value) {
                                               if (value != '00') {
                                                 setState(() {
+                                                  // Navigator.of(context,
+                                                  //         rootNavigator: true)
+                                                  //     .pop();
                                                   WidgetsBinding.instance
                                                       .addPostFrameCallback(
                                                           (_) {
                                                     scrollToTextField();
                                                   });
+                                                  closeLoading(context);
                                                 });
                                               } else {
-                                                Navigator.of(context,
-                                                        rootNavigator: true)
-                                                    .pop();
+                                                closeLoading(context);
                                               }
                                             });
                                             setState(() {});

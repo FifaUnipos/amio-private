@@ -501,6 +501,9 @@ class LaporanPendapatanTokoPageState extends State<LaporanPendapatanTokoPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -675,6 +678,9 @@ class LaporanPendapatanTokoPageState extends State<LaporanPendapatanTokoPage> {
 
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -831,6 +837,9 @@ class LaporanPendapatanTokoPageState extends State<LaporanPendapatanTokoPage> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             isScrollControlled: true,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),

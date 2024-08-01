@@ -135,12 +135,12 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
 
   @override
   void initState() {
-    super.initState();
     productidDiskon.clear();
-    initial();
     _getProductList();
+    initial();
     conHarga.addListener(formatInputRpHargaEdit);
     conPointEdit.addListener(formatInputRpPoinEdit);
+    super.initState();
   }
 
   @override
@@ -276,6 +276,9 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
                                       showModalBottomSheet(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: double.infinity,
+                                        ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -449,8 +452,8 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                       .infinity,
                                                                   child: buttonL(
                                                                       Text(
-                                                                        dataMap![
-                                                                            'name'],
+                                                                        dataMap?[
+                                                                            'name'] ?? '',
                                                                         style: heading2(
                                                                             FontWeight.w400,
                                                                             bnw100,
@@ -492,7 +495,8 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                     final bool
                                                                         isSelected =
                                                                         productidDiskon
-                                                                            .contains(product['productid']);
+                                                                            .contains(product['productid'] as String);
+                                                                            
 
                                                                     final bool isMatchingSearch = product[
                                                                             'name']
@@ -1264,9 +1268,8 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
             List<dynamic> typeproductList =
                 List<dynamic>.from(dataMap!['products']);
 
-            searchResultListProduct = typeproductList;
+            searchResultListProduct = List<dynamic>.from(dataMap!['products']);
             productidDiskon.addAll(productIdDiskon);
-            print(productidDiskon);
           });
         }
       }

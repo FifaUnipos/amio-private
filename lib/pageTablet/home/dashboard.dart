@@ -13,7 +13,7 @@ import 'package:amio/pageTablet/test/inventori.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 import 'package:amio/utils/component.dart';
 import 'package:amio/utils/printer/printerPage.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -44,22 +44,22 @@ class SidebarXExampleApp extends StatefulWidget {
 
 class _SidebarXExampleAppState extends State<SidebarXExampleApp> {
   final _controller = SidebarXController(selectedIndex: 0, extended: true);
-  late FirebaseMessaging messaging;
+  // late FirebaseMessaging messaging;
 
   PageController _pageController = PageController();
   final _key = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    messaging = FirebaseMessaging.instance;
-    messaging.getToken().then((value) {
-      setState(() {
-        log("firebase token : $value");
-        firebaseToken(value.toString(), widget.token);
-      });
-    });
-    final NotifFCM = FCM();
-    NotifFCM.setNotifiications();
+    // messaging = FirebaseMessaging.instance;
+    // messaging.getToken().then((value) {
+    //   setState(() {
+    //     log("firebase token : $value");
+    //     firebaseToken(value.toString(), widget.token);
+    //   });
+    // });
+    // final NotifFCM = FCM();
+    // NotifFCM.setNotifiications();
 
     deviceDetails();
 
@@ -99,8 +99,7 @@ class _SidebarXExampleAppState extends State<SidebarXExampleApp> {
               appBar: isSmallScreen
                   ? AppBar(
                       backgroundColor: canvasColor,
-                      title:
-                          Text(_getTitleByIndex(_controller.selectedIndex)),
+                      title: Text(_getTitleByIndex(_controller.selectedIndex)),
                       leading: IconButton(
                         onPressed: () {
                           _controller.setExtended(true);
@@ -736,7 +735,7 @@ class _ScreensExampleState extends State<_ScreensExample> {
           default:
             return Text(
               'Not found page',
-              style: theme.textTheme.headline5,
+              // style: theme.textTheme.headline5,
             );
         }
       },

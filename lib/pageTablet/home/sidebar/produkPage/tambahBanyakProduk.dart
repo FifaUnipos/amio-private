@@ -52,7 +52,7 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
 
   TextEditingController searchController = TextEditingController();
 
-  late String jenisProduct = jenisProductEdit, idProduct = kodejenisProductEdit;
+  late String jenisProduct = jenisProductEdit!, idProduct = kodejenisProductEdit!;
 
   bool onswitchppn = false;
   bool onswitchtampikan = true;
@@ -841,6 +841,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
           () {
             // log(jenisProduct.toString());
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -1160,6 +1163,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1269,6 +1275,10 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                           controllerNameEdit.text,
                                         ).then((value) {
                                           if (value == '00') {
+                                            showSnackBarComponent(
+                                                context,
+                                                'Berhasil ubah kategori',
+                                                '00');
                                             errorText = '';
                                             controllerNameEdit.text = '';
                                           }
@@ -1393,6 +1403,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
   Future<dynamic> tambahKategori(
       BuildContext context, bool isKeyboardActive, StateSetter setState) {
     return showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1495,12 +1508,14 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
+                          whenLoading(context);
                           tambahKategoriForm(
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              Navigator.pop(context);
-
+                              // Navigator.pop(context);
+                              showSnackBarComponent(
+                                  context, 'Berhasil tambah kategori', '00');
                               errorText = '';
                               controllerName.text = '';
                             }
@@ -1577,6 +1592,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

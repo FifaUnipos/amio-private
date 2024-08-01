@@ -417,6 +417,9 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
         () {
           log(hakValue.toString());
           showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -683,6 +686,9 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

@@ -563,6 +563,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                             ),
                             Expanded(
                               child: ListView.builder(
+                                padding: EdgeInsets.zero,
                                 keyboardDismissBehavior:
                                     ScrollViewKeyboardDismissBehavior.onDrag,
                                 physics: BouncingScrollPhysics(),
@@ -1123,6 +1124,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                           ],
                                         )
                                       : ListView.builder(
+                                          padding: EdgeInsets.zero,
                                           keyboardDismissBehavior:
                                               ScrollViewKeyboardDismissBehavior
                                                   .onDrag,
@@ -1349,6 +1351,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                           ],
                                         )
                                       : ListView.builder(
+                                          padding: EdgeInsets.zero,
                                           keyboardDismissBehavior:
                                               ScrollViewKeyboardDismissBehavior
                                                   .onDrag,
@@ -1574,6 +1577,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                                           ],
                                         )
                                       : ListView.builder(
+                                          padding: EdgeInsets.zero,
                                           keyboardDismissBehavior:
                                               ScrollViewKeyboardDismissBehavior
                                                   .onDrag,

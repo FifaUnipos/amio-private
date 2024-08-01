@@ -668,6 +668,9 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                         }
 
                                                         showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                                           isScrollControlled:
                                                               true,
                                                           shape:
@@ -949,6 +952,9 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                     onTap: () {
                                       setState(() {
                                         showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
                                           isScrollControlled: true,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
@@ -2558,6 +2564,9 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
         setState(
           () {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

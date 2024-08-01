@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
@@ -39,6 +40,16 @@ class _KeuanganGrupState extends State<KeuanganGrup>
 
   List<ModelDataToko>? datas;
 
+  Timer? _debounce;
+
+  void _onChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(Duration(seconds: 2), () async {
+      datas = await getAllToko(context, widget.token, value, '');
+      setState(() {});
+    });
+  }
+
   @override
   void initState() {
     checkConnection(context);
@@ -62,6 +73,7 @@ class _KeuanganGrupState extends State<KeuanganGrup>
 
   @override
   void dispose() {
+    _debounce!.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -132,10 +144,7 @@ class _KeuanganGrupState extends State<KeuanganGrup>
             Expanded(
               child: TextField(
                 controller: searchController,
-                onChanged: (value) async {
-                  datas = await getAllToko(context, widget.token, value, '');
-                  setState(() {});
-                },
+                onChanged: _onChanged,
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: size12),
                   isDense: true,
@@ -332,6 +341,9 @@ class _KeuanganGrupState extends State<KeuanganGrup>
         onTap: () {
           setState(() {
             showModalBottomSheet(
+      constraints: const BoxConstraints(
+      maxWidth: double.infinity,
+    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
