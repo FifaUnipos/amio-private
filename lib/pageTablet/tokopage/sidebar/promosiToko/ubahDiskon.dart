@@ -26,7 +26,8 @@ class UbahDiskonPage extends StatefulWidget {
 }
 
 class _UbahDiskonPageState extends State<UbahDiskonPage> {
-  List<dynamic> productidDiskon = List.empty(growable: true);
+  // List<dynamic> productIdDiskon = List.empty(growable: true);
+  String productIdDiskonTampilan = productIdDiskon.length.toString();
   bool onswitchtampikan = true;
 
   int tipeUmumAktif = 0, tipeProdukAktif = 0;
@@ -129,13 +130,14 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
       kasirAktif = "Aktif";
       tanggalAwal = '';
       tanggalAkhir = '';
-      productidDiskon.clear();
+      productIdDiskon.clear();
     });
   }
 
   @override
   void initState() {
-    productidDiskon.clear();
+    // productIdDiskon.clear();
+
     _getProductList();
     initial();
     conHarga.addListener(formatInputRpHargaEdit);
@@ -452,8 +454,8 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                       .infinity,
                                                                   child: buttonL(
                                                                       Text(
-                                                                        dataMap?[
-                                                                            'name'] ?? '',
+                                                                        dataMap?['name'] ??
+                                                                            '',
                                                                         style: heading2(
                                                                             FontWeight.w400,
                                                                             bnw100,
@@ -487,16 +489,10 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                     final product =
                                                                         searchResultListProduct?[
                                                                             index];
-                                                                    if (product ==
-                                                                        null) {
-                                                                      return const SizedBox(); // atau Widget lain sesuai kebutuhan
-                                                                    }
-
-                                                                    final bool
+                                                                    bool
                                                                         isSelected =
-                                                                        productidDiskon
-                                                                            .contains(product['productid'] as String);
-                                                                            
+                                                                        productIdDiskon.contains(product['productid']
+                                                                            as String);
 
                                                                     final bool isMatchingSearch = product[
                                                                             'name']
@@ -510,21 +506,21 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                       return GestureDetector(
                                                                         onTap:
                                                                             () {
-                                                                          // print('Selected product: ${product['name']}');
+                                                                          // log("meki meii $searchResultListProduct");
+                                                                          print(
+                                                                              productIdDiskon);
                                                                           textFieldFocusNode
                                                                               .unfocus();
 
-                                                                          if (product['discount_status'] ==
-                                                                              '') {
+                                                                          if (product['discount_status'] == '' ||
+                                                                              product['discount_id'] == idDiskonUpdate) {
                                                                             if (isSelected) {
-                                                                              productidDiskon.remove(product['productid']);
+                                                                              productIdDiskon.remove(product['productid']);
                                                                             } else {
-                                                                              productidDiskon.add(product['productid']);
+                                                                              productIdDiskon.add(product['productid']);
                                                                             }
                                                                           }
-                                                                          print(
-                                                                              productidDiskon);
-                                                                          // Panggil fungsi _selectProduct dengan produk yang dipilih
+
                                                                           idProduct =
                                                                               product['productid'];
                                                                           _selectProduct(
@@ -532,103 +528,126 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                                           setState(
                                                                               () {});
                                                                         },
-                                                                        child: Container(
-                                                                            padding: EdgeInsets.all(size8),
-                                                                            margin: EdgeInsets.only(bottom: size16),
-                                                                            decoration: BoxDecoration(
+                                                                        child:
+                                                                            Container(
+                                                                          padding:
+                                                                              EdgeInsets.all(size8),
+                                                                          margin:
+                                                                              EdgeInsets.only(bottom: size16),
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color: product['discount_status'] == ''
+                                                                                ? isSelected
+                                                                                    ? primary100
+                                                                                    : bnw100
+                                                                                : product['discount_id'] == idDiskonUpdate
+                                                                                    ? isSelected
+                                                                                        ? primary100
+                                                                                        : bnw100
+                                                                                    : bnw200,
+                                                                            border:
+                                                                                Border.all(
                                                                               color: product['discount_status'] == ''
                                                                                   ? isSelected
-                                                                                      ? primary100
-                                                                                      : bnw100
-                                                                                  : bnw200,
-                                                                              border: Border.all(
-                                                                                color: product['discount_status'] == ''
-                                                                                    ? isSelected
-                                                                                        ? primary500
-                                                                                        : bnw300
-                                                                                    : bnw200,
-                                                                              ),
-                                                                              borderRadius: BorderRadius.circular(size16),
+                                                                                      ? primary500
+                                                                                      : bnw300
+                                                                                  : product['discount_id'] == idDiskonUpdate
+                                                                                      ? isSelected
+                                                                                          ? primary500
+                                                                                          : bnw300
+                                                                                      : bnw200,
                                                                             ),
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                Row(
-                                                                                  children: [
-                                                                                    ClipRRect(
-                                                                                      borderRadius: BorderRadius.circular(size8),
-                                                                                      child: Image.network(
-                                                                                        product['product_image'],
-                                                                                        fit: BoxFit.cover,
-                                                                                        width: size48,
-                                                                                        height: size48,
-                                                                                        loadingBuilder: (context, child, loadingProgress) {
-                                                                                          if (loadingProgress == null) {
-                                                                                            return child;
-                                                                                          }
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(size16),
+                                                                          ),
+                                                                          child:
+                                                                              Column(
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              Row(
+                                                                                children: [
+                                                                                  ClipRRect(
+                                                                                    borderRadius: BorderRadius.circular(size8),
+                                                                                    child: Image.network(
+                                                                                      product['product_image'],
+                                                                                      fit: BoxFit.cover,
+                                                                                      width: size48,
+                                                                                      height: size48,
+                                                                                      loadingBuilder: (context, child, loadingProgress) {
+                                                                                        if (loadingProgress == null) {
+                                                                                          return child;
+                                                                                        }
 
-                                                                                          return Center(child: loading());
-                                                                                        },
-                                                                                        errorBuilder: (context, error, stackTrace) => SizedBox(
-                                                                                          // height: 227,
-                                                                                          // width: 227,
-                                                                                          child: SvgPicture.asset('assets/logoProduct.svg'),
-                                                                                        ),
+                                                                                        return Center(child: loading());
+                                                                                      },
+                                                                                      errorBuilder: (context, error, stackTrace) => SizedBox(
+                                                                                        child: SvgPicture.asset('assets/logoProduct.svg'),
                                                                                       ),
                                                                                     ),
-                                                                                    SizedBox(width: size16),
-                                                                                    Column(
-                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                      children: [
-                                                                                        Text(
-                                                                                          product['name'],
-                                                                                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                        ),
-                                                                                        Text(
-                                                                                          FormatCurrency.convertToIdr(product['price']),
-                                                                                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                    Spacer(),
-                                                                                    Icon(
-                                                                                      product['discount_status'] == ''
-                                                                                          ? isSelected
-                                                                                              ? PhosphorIcons.check_square_fill
-                                                                                              : PhosphorIcons.square
-                                                                                          : PhosphorIcons.square,
-                                                                                      color: product['discount_status'] == ''
-                                                                                          ? isSelected
-                                                                                              ? primary500
-                                                                                              : bnw900
-                                                                                          : bnw400,
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                SizedBox(height: size8),
-                                                                                product['discount_status'] != ''
-                                                                                    ? Container(
-                                                                                        padding: EdgeInsets.symmetric(vertical: size8, horizontal: size16),
-                                                                                        height: size32,
-                                                                                        decoration: BoxDecoration(
-                                                                                          color: danger100,
-                                                                                          borderRadius: BorderRadius.circular(size8),
-                                                                                        ),
-                                                                                        child: Row(
-                                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                                          children: [
-                                                                                            Text(
-                                                                                              product['discount_status'],
-                                                                                              style: body3(FontWeight.w400, danger500, 'Outfit'),
-                                                                                            ),
-                                                                                            Spacer(),
-                                                                                            Icon(PhosphorIcons.clock, color: danger500, size: size16),
-                                                                                          ],
-                                                                                        ),
-                                                                                      )
-                                                                                    : SizedBox(),
-                                                                              ],
-                                                                            )),
+                                                                                  ),
+                                                                                  SizedBox(width: size16),
+                                                                                  Column(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        product['name'],
+                                                                                        style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                      ),
+                                                                                      Text(
+                                                                                        FormatCurrency.convertToIdr(product['price']),
+                                                                                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  Spacer(),
+                                                                                  Icon(
+                                                                                    product['discount_status'] == ''
+                                                                                        ? isSelected
+                                                                                            ? PhosphorIcons.check_square_fill
+                                                                                            : PhosphorIcons.square
+                                                                                        : product['discount_id'] == idDiskonUpdate
+                                                                                            ? isSelected
+                                                                                                ? PhosphorIcons.check_square_fill
+                                                                                                : PhosphorIcons.square
+                                                                                            : PhosphorIcons.square,
+                                                                                    color: product['discount_status'] == ''
+                                                                                        ? isSelected
+                                                                                            ? primary500
+                                                                                            : bnw900
+                                                                                        : product['discount_id'] == idDiskonUpdate
+                                                                                            ? isSelected
+                                                                                                ? primary500
+                                                                                                : bnw900
+                                                                                            : bnw900,
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(height: size8),
+                                                                              (product['discount_id'] != idDiskonUpdate && product['discount_status'] != '')
+                                                                                  ? Container(
+                                                                                      padding: EdgeInsets.symmetric(vertical: size8, horizontal: size16),
+                                                                                      height: size32,
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: danger100,
+                                                                                        borderRadius: BorderRadius.circular(size8),
+                                                                                      ),
+                                                                                      child: Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                                        children: [
+                                                                                          Text(
+                                                                                            product['discount_status'],
+                                                                                            style: body3(FontWeight.w400, danger500, 'Outfit'),
+                                                                                          ),
+                                                                                          Spacer(),
+                                                                                          Icon(PhosphorIcons.clock, color: danger500, size: size16),
+                                                                                        ],
+                                                                                      ),
+                                                                                    )
+                                                                                  : SizedBox(),
+                                                                            ],
+                                                                          ),
+                                                                        ),
                                                                       );
                                                                     } else {
                                                                       return const SizedBox();
@@ -644,8 +663,12 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                                         ),
                                                         GestureDetector(
                                                           onTap: () {
+                                                            log("hei $productIdDiskonTampilan");
+                                                            setState(() {});
                                                             Navigator.pop(
                                                                 context);
+
+                                                            log("$productIdDiskon");
                                                           },
                                                           child: buttonXXL(
                                                             Center(
@@ -680,15 +703,13 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            totalProdukDiskon == '0'
-                                                ? productidDiskon.isEmpty
-                                                    ? 'Pilih Produk'
-                                                    : '${productidDiskon.length} Produk Terpilih'
-                                                : '${totalProdukDiskon} Produk Terpilih',
+                                            productIdDiskon.isEmpty
+                                                ? 'Pilih Produk'
+                                                : '${productIdDiskon.length} Produk Terpilih',
                                             style: heading2(
                                                 FontWeight.w600,
                                                 totalProdukDiskon == '0'
-                                                    ? productidDiskon.isEmpty
+                                                    ? productIdDiskon.isEmpty
                                                         ? bnw500
                                                         : bnw900
                                                     : bnw900,
@@ -1122,7 +1143,7 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                 onTap: () {
                   bool statusDiskon = true;
                   if (tipeUmumAktif == 1) {
-                    productidDiskon.clear();
+                    productIdDiskon.clear();
                   }
                   kasirAktif == 'Aktif'
                       ? statusDiskon = true
@@ -1132,7 +1153,7 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
                     widget.token,
                     idDiskonUpdate,
                     '',
-                    productidDiskon,
+                    productIdDiskon,
                     conNameDiskon.text,
                     conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                     hargaRupiahAktif == 1 ? 'price' : 'percentage',
@@ -1254,41 +1275,56 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
   dynamic selectedProduct;
   bool isItemSelected = false;
 
-  Future _getProductList() async {
-    await http.post(Uri.parse(getProdukDiskonLink), body: {
-      "deviceid": identifier,
-    }, headers: {
-      "token": widget.token,
-    }).then((response) {
+  Future<void> _getProductList() async {
+    try {
+      final response = await http.post(
+        Uri.parse(getProdukDiskonLink),
+        body: {"deviceid": identifier},
+        headers: {"token": widget.token},
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data != null && data['data'] != null) {
+        if (data != null && data['status'] == '00' && data['data'] != null) {
           setState(() {
             dataMap = data['data'];
-            List<dynamic> typeproductList =
-                List<dynamic>.from(dataMap!['products']);
-
             searchResultListProduct = List<dynamic>.from(dataMap!['products']);
-            productidDiskon.addAll(productIdDiskon);
+
+            // Memilih produk yang sesuai dengan idDiskonUpdate
+            for (var product in searchResultListProduct!) {
+              if (product['discount_id'] == idDiskonUpdate) {
+                String productId = product['productid'];
+                if (!productIdDiskon.contains(productId)) {
+                  productIdDiskon.add(productId);
+                }
+              }
+            }
           });
+        } else {
+          // Penanganan jika status bukan '00' atau data null
+          print('Failed to load products: ${data['status']}');
         }
+      } else {
+        // Penanganan kesalahan jika status kode bukan 200
+        print('Failed to load products, status code: ${response.statusCode}');
       }
-    });
+    } catch (e) {
+      // Penanganan kesalahan umum
+      print('Error: $e');
+    }
   }
 
   void _runSearchProduct(String searchText) {
     setState(() {
-      if (typeproductList != null) {
-        searchResultListProduct = typeproductList!
-            .where((product) =>
-                product != null &&
-                product['name'] != null &&
-                product['name']
-                    .toString()
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase()))
-            .toList();
-      }
+      searchResultListProduct = typeproductList
+          ?.where((product) =>
+              product != null &&
+              product['name'] != null &&
+              product['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchText.toLowerCase()))
+          .toList();
     });
   }
 

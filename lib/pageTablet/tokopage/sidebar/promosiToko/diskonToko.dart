@@ -872,10 +872,12 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                           .then(
                                                         (value) async {
                                                           if (value == '00') {
+                                                            productIdDiskon
+                                                                .clear();
                                                             Future.delayed(
                                                                 Duration(
                                                                     milliseconds:
-                                                                        500)); 
+                                                                        500));
                                                             widget
                                                                 .pageController
                                                                 .jumpToPage(4);

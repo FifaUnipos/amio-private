@@ -3323,13 +3323,13 @@ Future getSingleDiskon(context, token, id) async {
     tanggalAkhirDiskon = dataku['end_date'] ?? '';
 
     // log(productIdDiskon.toString());
-    productIdDiskon.clear();
+    // productIdDiskon.clear();
 
     List<dynamic> products = dataku['products'];
-    for (var product in products) {
-      String productId = product['productid'].toString();
-      productIdDiskon.add(productId);
-    }
+    // for (var product in products) {
+    //   String productId = product['productid'].toString();
+    //   productIdDiskon.add(productId);
+    // }
 
     totalProdukDiskon = products.length.toString();
 
