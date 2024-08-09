@@ -285,59 +285,59 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                               ),
                             ),
 
-                            // FutureBuilder(
-                            //   future: getDataChart(context, widget.token),
-                            //   builder: (context, snapshot) {
-                            //     // log(data.toString());
+                            FutureBuilder(
+                              future: getDataChart(context, widget.token),
+                              builder: (context, snapshot) {
+                                // log(data.toString());
 
-                            //     if (snapshot.hasData) {
-                            //       var data = snapshot.data!['data']['banner'];
-                            //       return SizedBox(
-                            //         width: MediaQuery.of(context).size.width,
-                            //         child: ListView.builder(
-                            //           padding: EdgeInsets.zero,
-                            //           shrinkWrap: true,
-                            //           physics: NeverScrollableScrollPhysics(),
-                            //           itemCount: data.length,
-                            //           itemBuilder: (context, index) =>
-                            //               Container(
-                            //             decoration: BoxDecoration(
-                            //               // border: Border.all(color: bnw300),
-                            //               borderRadius:
-                            //                   BorderRadius.circular(size8),
-                            //             ),
-                            //             child: Container(
-                            //               margin: EdgeInsets.only(top: size16),
-                            //               decoration: BoxDecoration(
-                            //                 borderRadius:
-                            //                     BorderRadius.circular(size16),
-                            //                 border: Border.all(color: bnw300),
-                            //               ),
-                            //               child: ClipRRect(
-                            //                 borderRadius:
-                            //                     BorderRadius.circular(size16),
-                            //                 child: Image.network(
-                            //                   data[index]['banner'],
-                            //                   fit: BoxFit.cover,
-                            //                   errorBuilder: (context, error,
-                            //                           stackTrace) =>
-                            //                       const SkeletonLine(
-                            //                           style: SkeletonLineStyle(
-                            //                               height: 200)),
-                            //                 ),
-                            //               ),
-                            //             ),
-                            //           ),
-                            //         ),
-                            //       );
-                            //     }
-                            //     return SkeletonLine(
-                            //         style: SkeletonLineStyle(height: 200));
-                            //   },
-                            // ),
+                                if (snapshot.hasData) {
+                                  var data = snapshot.data!['data']['banner'];
+                                  return SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero,
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: data.length,
+                                      itemBuilder: (context, index) =>
+                                          Container(
+                                        decoration: BoxDecoration(
+                                          // border: Border.all(color: bnw300),
+                                          borderRadius:
+                                              BorderRadius.circular(size8),
+                                        ),
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: size16),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(size16),
+                                            border: Border.all(color: bnw300),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(size16),
+                                            child: Image.network(
+                                              data[index]['banner'],
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error,
+                                                      stackTrace) =>
+                                                  const SkeletonLine(
+                                                      style: SkeletonLineStyle(
+                                                          height: 200)),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return SkeletonLine(
+                                    style: SkeletonLineStyle(height: 200));
+                              },
+                            ),
                             // LineChartExample(),
-                            
-                            LineChartSample2(),
+
+                            // LineChartSample2(),
 
                             // Container(
                             //   height: 200,

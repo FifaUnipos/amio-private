@@ -23,7 +23,7 @@ import '../pageTablet/tokopage/dashboardtoko.dart';
 import '../services/apimethod.dart';
 
 String linkCSwa =
-    'https://api.whatsapp.com/send?phone=6285947737725&text=Hallo%20saya%20ingin%20menanyakan%20tentang%20UniPOS';
+    'https://api.whatsapp.com/send?phone=628115514168&text=Hallo%20saya%20ingin%20menanyakan%20tentang%20UniPOS';
 
 //? sp to double px
 double sp32 = 22;
