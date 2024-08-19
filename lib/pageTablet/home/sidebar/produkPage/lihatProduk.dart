@@ -130,7 +130,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     var picker = ImagePicker();
     PickedFile? imageFile;
 
-    imageFile = await picker.getImage(source: ImageSource.gallery);
+    imageFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
+      maxWidth: 900,);
     if (imageFile!.path.isEmpty == false) {
       myImageEdit = File(imageFile.path);
 
@@ -263,7 +264,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery);
+    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
+      maxWidth: 900,);
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 

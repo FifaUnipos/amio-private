@@ -60,7 +60,10 @@
 //     var picker = ImagePicker();
 //     PickedFile? imageFile;
 
-//     imageFile = await picker.getImageEdit(source: ImageSource.gallery);
+//     imageFile = await picker.getImageEdit(source: ImageSource.gallery,
+// maxHeight: 900,
+      // maxWidth: 900,
+// );
 //     if (imageFile!.path.isEmpty == false) {
 //       myImageEdit = File(imageFile.path);
 

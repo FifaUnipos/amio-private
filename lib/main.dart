@@ -94,6 +94,7 @@ Future<void> main() async {
             colorScheme: ThemeData().colorScheme.copyWith(primary: primary500),
           ),
           title: 'UniPOS',
+         
           home: mytokenGet == null
               ? onBoard == null
                   ? Scaffold(

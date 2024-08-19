@@ -72,7 +72,8 @@ class _TransactionPageState extends State<TransactionPage>
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery);
+    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
+      maxWidth: 900,);
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -200,7 +201,7 @@ class _TransactionPageState extends State<TransactionPage>
       cartMapBayar.clear();
 
       isItemAdded = false;
-
+      transactionidValue = "";
       total = [];
       subTotal = 0;
       sumTotal = 0;
@@ -1482,6 +1483,9 @@ class _TransactionPageState extends State<TransactionPage>
                               cartProductIds.clear();
                               conCatatan.clear();
                               conCounterPreview.clear();
+                              refreshTampilan();
+                              transactionidValue = "";
+
                               refreshColor();
                               setState(() {});
                             }
@@ -3058,7 +3062,7 @@ class _TransactionPageState extends State<TransactionPage>
                   FormatCurrency.convertToIdr(totalTransaksi ?? 0),
                   // FormatCurrency.convertToIdr(
                   //     cart[0].price ?? 0),
-        
+
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
               ],
@@ -3105,7 +3109,7 @@ class _TransactionPageState extends State<TransactionPage>
                             );
                           }
                         }
-        
+
                         setState(() {});
                       },
                       child: buttonXXLonOff(

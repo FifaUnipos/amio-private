@@ -335,6 +335,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                     style: SkeletonLineStyle(height: 200));
                               },
                             ),
+
                             // LineChartExample(),
 
                             // LineChartSample2(),

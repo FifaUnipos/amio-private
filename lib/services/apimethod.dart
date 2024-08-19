@@ -40,9 +40,8 @@ import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 import '../utils/component.dart';
 import '../utils/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url =
-// 'https://0e15-2001-448a-2011-3535-9503-78da-1cfb-3a79.ngrok-free.app';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',

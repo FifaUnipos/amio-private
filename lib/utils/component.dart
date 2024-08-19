@@ -304,7 +304,7 @@ void whenLoading(context) {
       child: Builder(
         builder: (BuildContext context) {
           loadingCompleter = Completer<void>();
-          Future.delayed(Duration(seconds: 5), () {
+          Future.delayed(Duration(seconds: 5  ), () {
             if (!loadingCompleter.isCompleted) {
               closeLoading(context);
             }

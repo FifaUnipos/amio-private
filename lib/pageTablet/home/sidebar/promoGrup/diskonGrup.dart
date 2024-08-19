@@ -147,7 +147,8 @@ class _DiskonGrupState extends State<DiskonGrup> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery);
+    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
+      maxWidth: 900,);
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
