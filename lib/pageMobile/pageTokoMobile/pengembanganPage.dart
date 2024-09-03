@@ -1,11 +1,11 @@
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import 'package:amio/utils/component.dart';
-import 'package:flutter/material.dart';
+import '../pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
+
+import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../utils/component/component_color.dart';
 import '../../main.dart';
-import '../../services/apimethod.dart';
+import '../../services/apimethod.dart';import '../../../../../utils/component/component_button.dart';
 
 class TahapPengembanganPage extends StatefulWidget {
   const TahapPengembanganPage({super.key});

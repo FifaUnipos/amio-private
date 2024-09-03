@@ -1,15 +1,16 @@
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/registerTokoPageMobile.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/regiterGrupPageMobile.dart';
-import 'package:amio/pagehelper/loginregis/login_page.dart';
-import 'package:amio/pagehelper/loginregis/register_page.dart';
-import 'package:flutter/material.dart';
+import 'loginRegisMobile/registerTokoPageMobile.dart';
+import 'loginRegisMobile/regiterGrupPageMobile.dart';
+import '../../pagehelper/loginregis/login_page.dart';
+import '../../pagehelper/loginregis/register_page.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../utils/component/component_color.dart';
 
-import '../../utils/component.dart';
+import '../../utils/component/component_appbar.dart';
 
 class DaftarAkunPageMobile extends StatefulWidget {
   const DaftarAkunPageMobile({super.key});

@@ -2,20 +2,21 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as Io;
 
-import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
-import 'package:flutter/material.dart';
+import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-
+import '../../../../utils/component/component_orderBy.dart';
 import '../../../../models/pelangganDataModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
-import 'pilihPelangganPage.dart';
-import 'transaksi.dart';
 
+import 'pilihPelangganPage.dart';
+import 'transaksi.dart';import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_loading.dart';
 class PilihPelangganTokoFifaKoin extends StatefulWidget {
   String token;
   PageController pageController;

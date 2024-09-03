@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:amio/models/tokoModel/keuanganModel.dart';
-import 'package:flutter/material.dart';
+import '../../../../models/tokoModel/keuanganModel.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-
+import '../../../../utils/component/component_showModalBottom.dart';
 import '../../../../../services/apimethod.dart';
-import '../../../../../utils/component.dart';
+
+import '../../../../../utils/component/component_button.dart';
 import '../../../../main.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_loading.dart';
 
 class LihatKeuanganToko extends StatefulWidget {
   String token;
@@ -668,9 +671,11 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                         }
 
                                                         showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                                                          constraints:
+                                                              const BoxConstraints(
+                                                            maxWidth:
+                                                                double.infinity,
+                                                          ),
                                                           isScrollControlled:
                                                               true,
                                                           shape:
@@ -952,9 +957,9 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                     onTap: () {
                                       setState(() {
                                         showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                                          constraints: const BoxConstraints(
+                                            maxWidth: double.infinity,
+                                          ),
                                           isScrollControlled: true,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
@@ -2564,9 +2569,9 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
         setState(
           () {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

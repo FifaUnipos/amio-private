@@ -1,21 +1,27 @@
 import 'dart:convert';
 import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/pendapatanHarian.dart';
-import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/pendapatanPerProduk.dart';
+import 'pendapatanHarian.dart';
+import 'pendapatanPerProduk.dart';
 import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../../../services/checkConnection.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
+import '../../../../utils/component/component_orderBy.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../utils/component/component_loading.dart';
 
-import 'package:amio/utils/component.dart';
+import '../../../../utils/component/component_button.dart';
 import 'package:sidebarx/sidebarx.dart';
-
+import '../../../../utils/component/component_color.dart';
 import '../../../../../main.dart';
 import '../../../../../models/tokoModel/singletokomodel.dart';
 import '../../../../../models/tokomodel.dart';
@@ -680,9 +686,9 @@ class _LaporanTokoState extends State<LaporanToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -834,9 +840,9 @@ class _LaporanTokoState extends State<LaporanToko> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(
+              maxWidth: double.infinity,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -990,9 +996,9 @@ class _LaporanTokoState extends State<LaporanToko> {
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(
+              maxWidth: double.infinity,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -1159,9 +1165,9 @@ class _LaporanTokoState extends State<LaporanToko> {
 
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(
+              maxWidth: double.infinity,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),

@@ -8,30 +8,38 @@ import 'dart:typed_data';
 
 import 'package:amio/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:amio/pagehelper/loginregis/daftar_akun_toko.dart';
-import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
+import 'package:amio/utils/component/providerModel/refreshTampilanModel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
+import '../../../../utils/component/component_loading.dart';
 import 'package:amio/models/keranjangModel.dart';
 import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/riwayatPageToko.dart';
 import 'package:amio/utils/printer/printerPage.dart';
-import 'package:amio/utils/skeletons.dart';
+import 'package:amio/utils/component/skeletons.dart';
 import 'package:provider/provider.dart';
+import '../../../../utils/component/component_button.dart';
 
 import '../../../../main.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
+
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_orderBy.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
+import '../../../../utils/component/component_size.dart';
 import 'classKeypad.dart';
 import 'classMetode.dart';
 import 'pesananPage.dart';
@@ -72,8 +80,11 @@ class _TransactionPageState extends State<TransactionPage>
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -221,7 +232,7 @@ class _TransactionPageState extends State<TransactionPage>
         datasTransaksi = await getProductTransaksi(
           context,
           widget.token,
-          '',
+          searchController.text,
           value,
           textvalueOrderBy,
         );
@@ -968,8 +979,8 @@ class _TransactionPageState extends State<TransactionPage>
                                           ),
                                           SizedBox(height: size16),
                                           Container(
-                                            height: 260,
-                                            width: 260,
+                                            height: 200,
+                                            width: 200,
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(size8),
@@ -1196,8 +1207,8 @@ class _TransactionPageState extends State<TransactionPage>
                                               ),
                                               SizedBox(height: size16),
                                               Container(
-                                                height: 260,
-                                                width: 260,
+                                                height: 200,
+                                                width: 200,
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -6385,7 +6396,7 @@ class _TransactionPageState extends State<TransactionPage>
                               //   //initState();
                               // }
 
-                              refreshColor();
+                              // refreshColor();
 
                               // int totalku = 0;
                               // cartMap.forEach((element) {

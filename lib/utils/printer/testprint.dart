@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:amio/utils/printer/printerenum.dart';
+import 'printerenum.dart';
 
 ///Test printing
 class TestPrint {

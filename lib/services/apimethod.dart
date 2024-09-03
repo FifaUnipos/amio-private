@@ -2,22 +2,24 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:amio/main.dart';
-import 'package:amio/models/diskonModel.dart';
-import 'package:amio/models/lihatakunmodel.dart';
-import 'package:amio/models/produkmodel.dart';
-import 'package:amio/models/tokoModel/calculateCart.dart';
-import 'package:amio/models/tokoModel/riwayatTransaksiTokoModel.dart';
-import 'package:amio/models/tokoModel/singletokomodel.dart';
-import 'package:amio/models/tokoModel/tokomodel.dart';
-import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
-import 'package:amio/pagehelper/loginregis/lupaSandiPage/buat_sandi_baru.dart';
-import 'package:amio/services/modelBloc.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
+
+import '../main.dart';
+import '../models/diskonModel.dart';
+import '../models/lihatakunmodel.dart';
+import '../models/produkmodel.dart';
+import '../models/tokoModel/calculateCart.dart';
+import '../models/tokoModel/riwayatTransaksiTokoModel.dart';
+import '../models/tokoModel/singletokomodel.dart';
+import '../models/tokoModel/tokomodel.dart';
+import '../models/tokoModel/transaksiTokoModel.dart';
+import '../pagehelper/loginregis/lupaSandiPage/buat_sandi_baru.dart';
+import 'modelBloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,11 +39,13 @@ import '../models/tokomodel.dart';
 import '../pageTablet/home/sidebar/profile_page.dart';
 import '../pageTablet/tokopage/dashboardtoko.dart';
 import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
-import '../utils/component.dart';
-import '../utils/providerModel/refreshTampilanModel.dart';
 
-// String url = 'https://api.prod.amio.my.id';
-String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+import '../utils/component/component_color.dart';
+import '../utils/component/component_loading.dart';
+import '../utils/component/providerModel/refreshTampilanModel.dart';
+
+String url = 'https://api.prod.amio.my.id';
+// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',

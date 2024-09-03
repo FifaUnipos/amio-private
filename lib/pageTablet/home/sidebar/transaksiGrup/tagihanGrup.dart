@@ -1,16 +1,28 @@
 import 'dart:developer';
 
-import 'package:amio/utils/skeletons.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import 'package:amio/utils/printer/printerPage.dart';
+import 'package:flutter/services.dart';
+
+import '../../../../utils/component/component_loading.dart';
+import '../../../../utils/component/skeletons.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:amio/utils/printer/printerenum.dart';
+import '../../../../utils/printer/printerenum.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../models/tokoModel/singleRiwayatModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
+import 'package:http/http.dart' as http;
+
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_orderBy.dart';
 
 class TagihanPageGrup extends StatefulWidget {
   String token, merchid, namemerch;
@@ -36,8 +48,23 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
   String textOrderBy = 'Tagihan Terbaru';
   String textvalueOrderBy = 'upDownCreate';
 
+  late Uint8List imageStruk;
+
+  getStrukPhoto() async {
+    var response = await http.get(Uri.parse(logoStrukPrinter!));
+    Uint8List bytesNetwork = response.bodyBytes;
+    Uint8List imageBytesFromNetwork = bytesNetwork.buffer
+        .asUint8List(bytesNetwork.offsetInBytes, bytesNetwork.lengthInBytes);
+
+    imageStruk = imageBytesFromNetwork;
+    setState(() {});
+  }
+
   @override
   void initState() {
+    if (logoStrukPrinter != '') {
+      getStrukPhoto();
+    }
     checkConnection(context);
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
@@ -898,10 +925,15 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                                               .then((isConnected) {
                                             if (isConnected == true) {
                                               widget.bluetooth.printNewLine();
-                                              widget.bluetooth.printNewLine();
+                                              // widget.bluetooth.printNewLine();
                                               // widget.bluetooth.printImage(file.path);
                                               // bluetooth.printImageBytes(
                                               //     img); //image from Network
+                                              logoStrukPrinter!.isEmpty
+                                                  ? widget.bluetooth
+                                                      .printNewLine()
+                                                  : bluetooth.printImageBytes(
+                                                      imageStruk);
                                               widget.bluetooth.printNewLine();
                                               widget.bluetooth.printNewLine();
                                               widget.bluetooth.printCustom(
@@ -969,9 +1001,9 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

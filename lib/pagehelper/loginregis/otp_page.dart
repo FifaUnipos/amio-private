@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:amio/main.dart';
-import 'package:amio/pageTablet/tokopage/dashboardtoko.dart';
-import 'package:amio/utils/component.dart';
+import '../../main.dart';
+import '../../pageTablet/tokopage/dashboardtoko.dart';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
@@ -11,18 +11,19 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-
+import '../../../../utils/component/component_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../services/apimethod.dart';
 import '../../services/notification.dart';
 
+import '../../utils/component/component_appbar.dart';
 import 'login_page.dart';
 import 'register_page.dart';
 

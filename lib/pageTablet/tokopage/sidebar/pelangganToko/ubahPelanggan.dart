@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import '../../../../services/apimethod.dart';
-import '../../../../utils/component.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_button.dart';
 
 class UbahPelangganPage extends StatefulWidget {
   String token, memberid, nameEdit, nomorEdit, emailEdit, instagramEdit;
@@ -170,12 +171,13 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
-            decoration: InputDecoration(focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 2,
-                                  color: primary500,
-                                ),
-                              ),
+            decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: primary500,
+                ),
+              ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(

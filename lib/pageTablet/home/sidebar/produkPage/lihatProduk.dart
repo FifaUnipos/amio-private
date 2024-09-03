@@ -1,31 +1,31 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:amio/pageTablet/home/sidebar/produkPage/lihatProdukPage/lihatUbahProdukPage.dart';
-import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
-import 'package:amio/utils/skeletons.dart';
-import 'package:flutter/material.dart';
+import 'lihatProdukPage/lihatUbahProdukPage.dart';
+import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
+import '../../../../utils/component/skeletons.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-
-import 'package:amio/models/tokoModel/transaksiTokoModel.dart';
+import 'package:image_picker/image_picker.dart';import '../../../../utils/component/component_orderBy.dart';
+import '../../../../utils/component/component_loading.dart';
+import '../../../../models/tokoModel/transaksiTokoModel.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletons/skeletons.dart';
-
+import '../../../../utils/component/component_button.dart';
 import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import '../../../../services/apimethod.dart';
-import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
-import '../../../tokopage/sidebar/produkToko/produk.dart';
+import '../../../../services/checkConnection.dart';import '../../../../utils/component/component_orderBy.dart';
+
+import '../../../tokopage/sidebar/produkToko/produk.dart';import '../../../../utils/component/component_color.dart';
 
 class LihatProdukPage extends StatefulWidget {
   String token, name, merchId;

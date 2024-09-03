@@ -1,23 +1,31 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
-import 'package:amio/utils/skeletons.dart';
+import '../../../../utils/component/component_orderBy.dart';
+import '../../../../utils/component/component_size.dart';
+import 'transaksi.dart';
+import '../../../../utils/component/skeletons.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:amio/utils/printer/printerenum.dart';
+import '../../../../utils/printer/printerenum.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../models/tokoModel/singleRiwayatModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
-import 'package:http/http.dart' as http;
 
+import 'package:http/http.dart' as http;
+import '../../../../utils/component/component_button.dart';
 import '../../../../utils/printer/printerPage.dart';
-import '../../../../utils/providerModel/refreshTampilanModel.dart';
+import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_loading.dart';
 
 class RiwayatPage extends StatefulWidget {
   RiwayatPage({
@@ -51,10 +59,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
   bool isDropdownOpen = false;
 
-  late Uint8List imageStruk;
-
   TextEditingController textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  late Uint8List imageStruk;
 
   getStrukPhoto() async {
     var response = await http.get(Uri.parse(logoStrukPrinter!));
@@ -143,7 +151,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                 controller: tabController,
                 automaticIndicatorColorAdjustment: false,
                 indicatorColor: primary500,
-                unselectedLabelColor: bnw600,indicatorSize: TabBarIndicatorSize.tab,
+                unselectedLabelColor: bnw600,
+                indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: primary500,
                 labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
                 physics: NeverScrollableScrollPhysics(),
@@ -1036,12 +1045,12 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         '00');
                                                     // widget.bluetooth
                                                     //     .printNewLine();
-                                                    // logoStrukPrinter == null
-                                                    //     ? widget.bluetooth
-                                                    //         .printNewLine()
-                                                    //     : bluetooth
-                                                    //         .printImageBytes(
-                                                    //             imageStruk);
+                                                    logoStrukPrinter!.isEmpty
+                                                        ? widget.bluetooth
+                                                            .printNewLine()
+                                                        : bluetooth
+                                                            .printImageBytes(
+                                                                imageStruk);
                                                     widget.bluetooth
                                                         .printNewLine();
                                                     widget.bluetooth
@@ -1055,8 +1064,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     //     widget.printtext.replaceAll(RegExp('[|]'), '\n'),
                                                     //     Size.bold.val,
                                                     //     0);
-                                                    widget.bluetooth
-                                                        .printNewLine();
+                                                    // widget.bluetooth
+                                                    //     .printNewLine();
+                                                    widget.bluetooth.printNewLine();
                                                     widget.bluetooth.paperCut();
                                                   } else {
                                                     dialogNoPrinter(context);
@@ -1157,9 +1167,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
   Future<dynamic> showBottomRiwayatPerubahan(
       BuildContext context, Map<String, dynamic> data) {
     return showModalBottomSheet(
-                          constraints: const BoxConstraints(
-                            maxWidth: double.infinity,
-                          ),
+        constraints: const BoxConstraints(
+          maxWidth: double.infinity,
+        ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         shape: RoundedRectangleBorder(
@@ -1644,9 +1654,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-                          constraints: const BoxConstraints(
-                            maxWidth: double.infinity,
-                          ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1814,9 +1824,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
     final refreshSelectedProvider =
         Provider.of<RefreshSelected>(context, listen: false);
     return showModalBottomSheet(
-                          constraints: const BoxConstraints(
-                            maxWidth: double.infinity,
-                          ),
+      constraints: const BoxConstraints(
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       // barrierColor: Colors.transparent,
       shape: RoundedRectangleBorder(

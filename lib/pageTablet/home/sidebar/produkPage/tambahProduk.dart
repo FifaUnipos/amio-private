@@ -1,12 +1,12 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import '../../../../models/tokomodel.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
-import '../../../tokopage/sidebar/produkToko/produk.dart';
+
+import '../../../tokopage/sidebar/produkToko/produk.dart';import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
 
 class TambahProdukPage extends StatefulWidget {
   String name;

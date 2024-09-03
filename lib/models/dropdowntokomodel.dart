@@ -23,37 +23,6 @@ class DataProvince {
   }
 }
 
-Future getProvince(token, id) async {
-  final response = await http.post(
-    Uri.parse('http://103.155.26.20:8000/api/province'),
-    // Uri.parse('http://103.155.26.20:8000/api/groupmerchant/user'),
-    headers: {
-      'token': token,
-    },
-    body: {
-      "deviceid": id,
-    },
-  );
-
-  if (response.statusCode == 200) {
-    print('succes');
-
-    final List<DataProvince> result = [];
-
-    final Map<String, dynamic> decoded = jsonDecode(response.body);
-    for (Map<String, dynamic> item in decoded['data']) {
-      // print(item);
-
-      final model = DataProvince.fromJson(item);
-      result.add(model);
-
-      // print(model.toJson());
-    }
-
-    return result;
-  }
-}
-
 class DataTipeUsaha {
   String? id;
   String? name;

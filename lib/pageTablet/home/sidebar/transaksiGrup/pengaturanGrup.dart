@@ -4,13 +4,18 @@ import 'dart:io' as Io;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../services/apimethod.dart';
-import '../../../../utils/component.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
+
 import '../../../tokopage/sidebar/transaksiToko/transaksi.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 
 class PengaturanGrup extends StatefulWidget {
   String token, namemerch, merchid;
@@ -39,8 +44,11 @@ class _PengaturanGrupState extends State<PengaturanGrup> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -480,7 +488,7 @@ class _PengaturanGrupState extends State<PengaturanGrup> {
                                                           widget.token,
                                                           widget.merchid,
                                                         );
-                                                        
+
                                                         setState(() {});
                                                         initState();
                                                       },

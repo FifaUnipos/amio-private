@@ -1,17 +1,11 @@
-import 'package:amio/pagehelper/loginregis/login_page.dart';
-import 'package:amio/pagehelper/loginregis/otp_page.dart';
-import 'package:amio/pagehelper/loginregis/register_page.dart';
-import 'package:amio/services/apimethod.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../utils/component.dart';
-import '../../masukakun.dart';
-import '../daftar_akun_toko.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../services/apimethod.dart';
+
+import '../otp_page.dart';
 
 class MetodeSandiPage extends StatefulWidget {
   const MetodeSandiPage({super.key});

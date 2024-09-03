@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
 
-import 'package:amio/models/dropdowntokomodel.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/otpPageMobile.dart';
-import 'package:flutter/material.dart';
+import '../../../models/dropdowntokomodel.dart';
+import 'loginPageMobile.dart';
+import 'otpPageMobile.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,11 +15,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
+import '../../../../utils/component/component_color.dart';
 import '../../../main.dart';
 import '../../../pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import '../../../services/apimethod.dart';
-import '../../../utils/component.dart';
+
+import '../../../utils/component/component_appbar.dart';import '../../../../../utils/component/component_button.dart';
 
 class DaftarAkunTokoPageMobile extends StatefulWidget {
   DaftarAkunTokoPageMobile({super.key});

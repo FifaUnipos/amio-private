@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:amio/pagehelper/masukakun.dart';
-import 'package:amio/utils/component.dart';
+import '../masukakun.dart';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,9 +14,9 @@ import 'package:flutter_svg/svg.dart';
 // import 'package:hash_password/password_hasher.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../utils/component/component_loading.dart';
 import 'package:amio/main.dart';
-
+import '../../../../utils/component/component_color.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
 import '../../services/apimethod.dart';
@@ -24,7 +24,7 @@ import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
-import 'register_page.dart';
+import 'register_page.dart';import '../../../../../utils/component/component_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

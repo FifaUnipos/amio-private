@@ -1,8 +1,11 @@
-import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:amio/utils/component.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../utils/component/component_size.dart';
 import 'package:flutter_svg/svg.dart';
+
+
+import '../utils/component/component_button.dart';
+import '../utils/component/component_color.dart';
+import '../utils/component/component_size.dart';
 
 class ConnectionChecker {
   Future<bool> checkInternet() async {

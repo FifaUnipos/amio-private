@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 
-import 'package:amio/pageTablet/home/sidebar/produkPage/lihatProduk.dart';
-import 'package:amio/pageTablet/home/sidebar/produkPage/tambahBanyakProduk.dart';
+import 'lihatProduk.dart';
+import 'tambahBanyakProduk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 
-import 'package:amio/utils/component.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
@@ -16,8 +16,11 @@ import '../../../../main.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/skeletons.dart';
+import '../../../../utils/component/skeletons.dart';
 import 'tambahProduk.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_orderBy.dart';
 
 Color maainColor = Color(0xFF1363DF);
 
@@ -387,9 +390,9 @@ class _ProdukGrupState extends State<ProdukGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

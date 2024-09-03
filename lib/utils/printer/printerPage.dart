@@ -2,20 +2,27 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:amio/main.dart';
-import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
-import 'package:amio/services/apimethod.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+
+import '../../main.dart';
+import '../../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import '../../services/apimethod.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:amio/utils/printer/printerenum.dart';
+import '../component/component_showModalBottom.dart';
+import '../component/component_size.dart';
+import '../component/component_snackbar.dart';
+import 'printerenum.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../services/checkConnection.dart';
-import '../component.dart';
+
+import '../component/component_button.dart';
+import '../component/component_color.dart';
 import 'testprint.dart';
 
 BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
@@ -544,6 +551,7 @@ class _ButtonPrintState extends State<ButtonPrint> {
         .asUint8List(bytesNetwork.offsetInBytes, bytesNetwork.lengthInBytes);
 
     imageStruk = imageBytesFromNetwork;
+
     setState(() {});
   }
 
@@ -571,8 +579,8 @@ class _ButtonPrintState extends State<ButtonPrint> {
         widget.bluetooth.isConnected.then((isConnected) {
           if (isConnected == true) {
             showSnackBarComponent(context, 'Berhasil cetak struk', '00');
-            widget.bluetooth.printNewLine();
-            logoStrukPrinter == ''
+            // widget.bluetooth.printNewLine();
+            logoStrukPrinter!.isEmpty
                 ? widget.bluetooth.printNewLine()
                 : bluetooth.printImageBytes(imageStruk);
             widget.bluetooth.printNewLine();

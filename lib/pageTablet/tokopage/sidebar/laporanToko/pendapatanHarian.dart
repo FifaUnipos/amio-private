@@ -4,21 +4,21 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/svg.dart';import '../../../../utils/component/component_showModalBottom.dart';
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletons/skeletons.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:amio/utils/component/component_button.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
-import '../../../../utils/component.dart';
-
+import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_loading.dart';
 class LaporanPendapatanHarianPage extends StatefulWidget {
   String token;
   PageController pageController = PageController();

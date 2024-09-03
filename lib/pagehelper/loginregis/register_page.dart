@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:amio/utils/component.dart';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../main.dart';
 import 'package:http/http.dart' as http;
 import '../../services/apimethod.dart';
+import '../../utils/component/component_appbar.dart';
 import 'login_page.dart';
+import '../../../../utils/component/component_loading.dart';
 import 'otp_page.dart';
+import '../../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPage({super.key});

@@ -5,27 +5,27 @@ import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:amio/pagehelper/loginregis/daftar_akun_toko.dart';
-import 'package:flutter/material.dart';
+import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
-
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import '../../../../utils/component/component_orderBy.dart';
 
-import 'package:amio/utils/component.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import '../../../../utils/component/component_loading.dart';
 import '../../../../main.dart';
 import '../../../../models/tokoModel/singletokomodel.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/skeletons.dart';
+import '../../../../utils/component/skeletons.dart';
 import '../../../tokopage/sidebar/produkToko/produk.dart';
-import 'tambahToko.dart';
-import 'ubahToko.dart';
+import 'tambahToko.dart';import '../../../../utils/component/component_color.dart';
+import 'ubahToko.dart';import '../../../../utils/component/component_button.dart';
 
 Color maainColor = Color(0xFF1363DF);
 

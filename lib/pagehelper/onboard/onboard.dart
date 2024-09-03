@@ -1,13 +1,13 @@
-import 'package:amio/pageMobile/pageHelperMobile/masukAkunMobile.dart';
-import 'package:flutter/material.dart';
+import '../../pageMobile/pageHelperMobile/masukAkunMobile.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:amio/pagehelper/onboard/content_model.dart';
-import 'package:amio/utils/component.dart';
+import 'content_model.dart';
 
+import '../../../../utils/component/component_color.dart';
 import '../../pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import '../masukakun.dart';
+import '../masukakun.dart';import '../../../../../utils/component/component_button.dart';
 
 class Onbording extends StatefulWidget {
   bool isTablet;

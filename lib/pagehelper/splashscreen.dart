@@ -1,12 +1,12 @@
 import 'dart:developer';
 
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import 'package:amio/pageMobile/pageHelperMobile/masukAkunMobile.dart';
-import 'package:amio/utils/component.dart';
-import 'package:flutter/material.dart';
+import '../pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
+import '../pageMobile/pageHelperMobile/masukAkunMobile.dart';
 
-import 'package:amio/pagehelper/masukakun.dart';
-import 'package:amio/pagehelper/onboard/onboard.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';
+
+import 'masukakun.dart';
+import 'onboard/onboard.dart';
 
 import '../main.dart';
 import '../pageTablet/home/dashboard.dart';

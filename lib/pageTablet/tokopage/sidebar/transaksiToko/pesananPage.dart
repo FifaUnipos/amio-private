@@ -1,22 +1,32 @@
 import 'dart:developer';
+import 'dart:typed_data';
 
-import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
+import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-
+import '../../../../utils/component/component_orderBy.dart';
 import '../../../../models/keranjangModel.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../models/tokoModel/singleRiwayatModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
-import 'package:amio/utils/printer/printerenum.dart';
+
+import '../../../../utils/printer/printerPage.dart';
+import '../../../../utils/printer/printerenum.dart';
+import '../../../../utils/component/component_color.dart';
 import '../produkToko/produk.dart';
 import 'pilihPelangganPage.dart';
 import 'transaksi.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_loading.dart';
+import 'package:http/http.dart' as http;
 
 String? transactionidValue;
 bool isTagihan = false;
@@ -62,9 +72,26 @@ class _SimpanPageState extends State<SimpanPage> {
   String textOrderBy = 'Tagihan Terbaru';
   String textvalueOrderBy = 'upDownCreate';
 
+  late Uint8List imageStruk;
+
+  getStrukPhoto() async {
+    var response = await http.get(Uri.parse(logoStrukPrinter!));
+    Uint8List bytesNetwork = response.bodyBytes;
+    Uint8List imageBytesFromNetwork = bytesNetwork.buffer
+        .asUint8List(bytesNetwork.offsetInBytes, bytesNetwork.lengthInBytes);
+
+    imageStruk = imageBytesFromNetwork;
+    setState(() {});
+  }
+
   @override
   void initState() {
     checkConnection(context);
+
+    isTagihan = true;
+    if (logoStrukPrinter != '') {
+      getStrukPhoto();
+    }
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         datasRiwayat = await getRiwayatTransaksi(
@@ -993,20 +1020,29 @@ class _SimpanPageState extends State<SimpanPage> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () {
+                                                  log(logoStrukPrinter
+                                                      .toString());
+
                                                   widget.bluetooth.isConnected
                                                       .then((isConnected) {
                                                     if (isConnected == true) {
-                                                      widget.bluetooth
-                                                          .printNewLine();
-                                                      widget.bluetooth
-                                                          .printNewLine();
+                                                      // widget.bluetooth
+                                                      //     .printNewLine();
+                                                      // widget.bluetooth
+                                                      //     .printNewLine();
                                                       // widget.bluetooth.printImage(file.path);
                                                       // bluetooth.printImageBytes(
                                                       //     img); //image from Network
+                                                      logoStrukPrinter!.isEmpty
+                                                          ? widget.bluetooth
+                                                              .printNewLine()
+                                                          : bluetooth
+                                                              .printImageBytes(
+                                                                  imageStruk);
                                                       widget.bluetooth
                                                           .printNewLine();
-                                                      widget.bluetooth
-                                                          .printNewLine();
+                                                      // widget.bluetooth
+                                                      //     .printNewLine();
                                                       widget.bluetooth
                                                           .printCustom(
                                                               printext
@@ -1020,9 +1056,10 @@ class _SimpanPageState extends State<SimpanPage> {
                                                       //     widget.printtext.replaceAll(RegExp('[|]'), '\n'),
                                                       //     Size.bold.val,
                                                       //     0);
-                                                      widget.bluetooth
-                                                          .printNewLine();
+                                                      // widget.bluetooth
+                                                      //     .printNewLine();
                                                       // widget.bluetooth.printNewLine();
+                                                      widget.bluetooth.printNewLine();
                                                       widget.bluetooth
                                                           .paperCut();
                                                     } else {
@@ -1503,6 +1540,26 @@ class _SimpanPageState extends State<SimpanPage> {
                               GestureDetector(
                                 onTap: () {
                                   Navigator.pop(context);
+                                  if (isTagihan == true) {
+                                    isTagihan = false;
+                                    cart.clear();
+                                    cartMap.clear();
+
+                                    // isItemAdded = false;
+
+                                    total = [];
+                                    subTotal = 0;
+                                    sumTotal = 0;
+
+                                    cartProductIds.clear();
+                                    conCatatan.clear();
+                                    // conCounterPreview.clear();
+                                    // refreshTampilan();
+                                    transactionidValue = "";
+
+                                    // refreshColor();
+                                    setState(() {});
+                                  }
                                   refreshSelectedProvider.valueSelected = null;
                                 },
                                 child: Icon(PhosphorIcons.arrow_left,

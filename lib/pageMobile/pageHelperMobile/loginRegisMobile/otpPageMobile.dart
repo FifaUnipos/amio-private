@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:amio/pageMobile/dashboardMobile.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../utils/component/component_color.dart';
 import '../../../main.dart';
 import '../../../services/apimethod.dart';
 import '../../../services/notification.dart';
-import '../../../utils/component.dart';
+
+import '../../../utils/component/component_appbar.dart';
 
 class OtpPageMobile extends StatefulWidget {
   String phone, name, email, pageidentify;

@@ -1,24 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:developer';
+import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
 
-import 'package:amio/utils/skeletons.dart';
-import 'package:flutter/material.dart';
+import '../../../../utils/component/skeletons.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../main.dart';
-
+import '../../../../utils/component/component_loading.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component.dart';
+
 import '../../../tokopage/sidebar/produkToko/produk.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 
 class TambahBanyakProdukPagPage extends StatefulWidget {
   PageController pageController;
@@ -52,7 +54,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
 
   TextEditingController searchController = TextEditingController();
 
-  late String jenisProduct = jenisProductEdit!, idProduct = kodejenisProductEdit!;
+  late String jenisProduct = jenisProductEdit!,
+      idProduct = kodejenisProductEdit!;
 
   bool onswitchppn = false;
   bool onswitchtampikan = true;
@@ -68,8 +71,11 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -842,9 +848,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
           () {
             // log(jenisProduct.toString());
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -1164,9 +1170,9 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                    constraints: const BoxConstraints(
+                      maxWidth: double.infinity,
+                    ),
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1276,10 +1282,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                           controllerNameEdit.text,
                                         ).then((value) {
                                           if (value == '00') {
-                                            showSnackBarComponent(
-                                                context,
-                                                'Berhasil ubah kategori',
-                                                '00');
+                                            showSnackBarComponent(context,
+                                                'Berhasil ubah kategori', '00');
                                             errorText = '';
                                             controllerNameEdit.text = '';
                                           }
@@ -1405,8 +1409,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
       BuildContext context, bool isKeyboardActive, StateSetter setState) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1594,8 +1598,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

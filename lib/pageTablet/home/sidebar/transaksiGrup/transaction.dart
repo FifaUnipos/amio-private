@@ -2,22 +2,25 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:amio/pageTablet/home/sidebar/transaksiGrup/pengaturanGrup.dart';
-import 'package:amio/pageTablet/home/sidebar/transaksiGrup/riwayatGrup.dart';
-import 'package:amio/pageTablet/home/sidebar/transaksiGrup/tagihanGrup.dart';
-import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/pesananPage.dart';
-import 'package:amio/utils/printer/printerPage.dart';
+import 'pengaturanGrup.dart';
+import 'riwayatGrup.dart';
+import 'tagihanGrup.dart';
+import '../../../tokopage/sidebar/transaksiToko/pesananPage.dart';
+import '../../../../utils/printer/printerPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import '../../../../services/checkConnection.dart';
-import 'package:amio/utils/component.dart';
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../../main.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
-import '../../../../utils/skeletons.dart';
+import '../../../../utils/component/component_orderBy.dart';
+import '../../../../utils/component/skeletons.dart';
+import '../../../../utils/component/component_button.dart';
 
 Color maainColor = Color(0xFF1363DF);
 
@@ -361,9 +364,9 @@ class _TransaksiGrupState extends State<TransaksiGrup>
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

@@ -1,22 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:amio/services/apimethod.dart';
-import 'package:amio/utils/component.dart';
-import 'package:amio/utils/providerModel/refreshTampilanModel.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_device_type/flutter_device_type.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 
-import 'pagehelper/onboard/onboard.dart';
+import '../utils/component/component_color.dart';
 import 'pagehelper/splashscreen.dart';
-import 'services/modelBloc.dart';
-import 'utils/providerModel/timerModel.dart';
+import 'services/apimethod.dart';
+import 'utils/component/providerModel/refreshTampilanModel.dart';
+import 'utils/component/providerModel/timerModel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,6 +69,8 @@ Future<void> main() async {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
+            useMaterial3: false,
+            
             progressIndicatorTheme: ProgressIndicatorThemeData(
               color: primary500,
             ),

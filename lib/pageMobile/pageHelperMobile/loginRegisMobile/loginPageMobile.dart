@@ -1,16 +1,17 @@
 import 'dart:convert';
 
-import 'package:amio/main.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/otpPageMobile.dart';
+import '../../../main.dart';
+import 'otpPageMobile.dart';
 import 'package:http/http.dart' as http;
-import 'package:amio/pageMobile/dashboardMobile.dart';
-import 'package:amio/utils/component.dart';
+import '../../dashboardMobile.dart';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
-
+import '../../../../utils/component/component_color.dart';
 import '../../../services/apimethod.dart';
+import '../../../utils/component/component_appbar.dart';import '../../../../../utils/component/component_button.dart';
 
 class LoginPageMobile extends StatefulWidget {
   const LoginPageMobile({super.key});

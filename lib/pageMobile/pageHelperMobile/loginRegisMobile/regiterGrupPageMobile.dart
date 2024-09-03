@@ -1,19 +1,17 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:amio/main.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import 'package:amio/pageMobile/pageHelperMobile/loginRegisMobile/otpPageMobile.dart';
-import 'package:amio/utils/component.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:flutter_svg/svg.dart';
-
 import 'package:http/http.dart' as http;
 
+import '../../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
+import '../../../main.dart';
 import '../../../services/apimethod.dart';
+
+import '../../../utils/component/component_appbar.dart';
+import 'otpPageMobile.dart';
 
 class RegisterGrupPageMobile extends StatefulWidget {
   RegisterGrupPageMobile({super.key});

@@ -1,7 +1,7 @@
-import 'package:amio/utils/component.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';import '../../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 class DashboardPageMobile extends StatefulWidget {
   const DashboardPageMobile({super.key});
 

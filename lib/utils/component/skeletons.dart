@@ -1,4 +1,3 @@
-import 'package:amio/utils/component.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletons/skeletons.dart';
 

@@ -4,17 +4,19 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
-import 'package:amio/pagehelper/masukakun.dart';
-import 'package:amio/utils/component.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
+
+import '../../../pagehelper/masukakun.dart';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:otp_text_field/otp_text_field.dart';
-import 'package:otp_text_field/style.dart';
+import 'package:otp_text_field/style.dart';import '../../../../utils/component/component_showModalBottom.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,8 +24,9 @@ import '../../../main.dart';
 import '../../../pagehelper/loginregis/login_page.dart';
 import '../../../services/apimethod.dart';
 import '../../../services/checkConnection.dart';
-import '../../../utils/providerModel/timerModel.dart';
-import '../../tokopage/dashboardtoko.dart';
+import '../../../utils/component/component_loading.dart';
+import '../../../utils/component/providerModel/timerModel.dart';
+import '../../tokopage/dashboardtoko.dart';import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
 
 class ProfilePage extends StatefulWidget {
   String token;
