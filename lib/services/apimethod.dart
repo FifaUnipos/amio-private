@@ -44,14 +44,14 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
     registerLink = '$url/api/register',
     loginEmailLink = '$url/api/login',
-    loginbyotp = '$url/api/user/loginbyotp',
+    loginbyotp = '$url/api/user/logjinbyotp',
     loginentryotp = '$url/api/user/loginentryotp',
     checkpass = '$url/api/user/checkPassword',
     forgotPassRequestLink = '$url/api/forgot-password/request',
