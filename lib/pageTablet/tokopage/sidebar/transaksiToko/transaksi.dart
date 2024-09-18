@@ -4452,7 +4452,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                       width:
                                                                           size16),
                                                                   Expanded(
-                                                                    flex: 3,
+                                                                    flex: 2,
                                                                     child:
                                                                         Container(
                                                                       constraints:
@@ -4476,9 +4476,12 @@ class _TransactionPageState extends State<TransactionPage>
                                                                       ),
                                                                     ),
                                                                   ),
-                                                                  const SizedBox(
-                                                                    width: 96,
-                                                                  ),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          size16),
+                                                                  // const SizedBox(
+                                                                  //   width: 96,
+                                                                  // ),
                                                                 ],
                                                               ),
                                                             ),
@@ -4588,49 +4591,171 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     maxWidth: MediaQuery.of(context).size.width / size8,
                                                                                     minWidth: MediaQuery.of(context).size.width / size8,
                                                                                   ),
-                                                                                  child: Column(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                    children: [
-                                                                                      datasTransaksi![index].discount == 0
-                                                                                          ? Text(
-                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
-                                                                                              maxLines: 3,
-                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                            )
-                                                                                          : Column(
-                                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                              children: [
-                                                                                                Text(
-                                                                                                  FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
-                                                                                                  maxLines: 3,
-                                                                                                  overflow: TextOverflow.ellipsis,
-                                                                                                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                ),
-                                                                                                SizedBox(height: size4),
-                                                                                                Text(
-                                                                                                  FormatCurrency.convertToIdr(datasTransaksi![index].price).toString(),
-                                                                                                  maxLines: 3,
-                                                                                                  overflow: TextOverflow.ellipsis,
-                                                                                                  style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                ),
-                                                                                                SizedBox(height: size4),
-                                                                                                datasTransaksi![index].discount_type == 'price'
-                                                                                                    ? Text(
-                                                                                                        FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
-                                                                                                        maxLines: 3,
-                                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                                        style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                      )
-                                                                                                    : Text(
-                                                                                                        '${datasTransaksi![index].discount}%',
-                                                                                                        maxLines: 3,
-                                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                                        style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                      ),
-                                                                                              ],
-                                                                                            ),
-                                                                                    ],
+                                                                                  child: GestureDetector(
+                                                                                    onTap: () async {
+                                                                                      String productId = datasTransaksi![index].productid.toString();
+
+                                                                                      if (cartProductIds.contains(productId)) {
+                                                                                        cartProductIds.remove(productId);
+
+                                                                                        for (int index = 0; index < cart.length; index++) {
+                                                                                          if (cart[index].productid == productId) {
+                                                                                            total.removeAt(index);
+                                                                                            cart.removeAt(index);
+                                                                                            cartMap.removeAt(index);
+
+                                                                                            if (cart.isEmpty) {
+                                                                                              sumTotal = 0;
+                                                                                            }
+                                                                                            break;
+                                                                                          }
+                                                                                        }
+
+                                                                                        isItemAdded = true;
+                                                                                      } else {
+                                                                                        cartProductIds.add(productId);
+                                                                                        isItemAdded = false;
+                                                                                      }
+
+                                                                                      if (!isItemAdded) {
+                                                                                        // Navigator.pop(context);
+                                                                                        Map<String, String> map1 = {};
+                                                                                        map1['name'] = datasTransaksi![index].name.toString();
+                                                                                        map1['productid'] = datasTransaksi![index].productid.toString();
+                                                                                        // map1['quantity'] = '1';
+                                                                                        map1['quantity'] = counterCart.toString();
+
+                                                                                        map1['image'] = datasTransaksi![index].product_image.toString();
+
+                                                                                        // log("${datasTransaksi![i]
+                                                                                        //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
+                                                                                        map1['amount_display'] = datasTransaksi![index].price!.toString();
+                                                                                        //                                  (datasTransaksi![i].price! * counterCart)
+                                                                                        // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
+
+                                                                                        //ubah transaksi
+                                                                                        // datasTransaksi![i].price.toString();
+                                                                                        map1['amount'] = datasTransaksi![index].price_after!.toString();
+                                                                                        // datasTransaksi![i].price.toString();
+
+                                                                                        // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
+
+                                                                                        // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
+
+                                                                                        map1['description'] = conCatatanPreview.text;
+
+                                                                                        cartMap.add(map1);
+
+                                                                                        // log(datasTransaksi![i].product_image.toString());
+
+                                                                                        String name = datasTransaksi![index].name.toString().trim();
+                                                                                        String productid = datasTransaksi![index].productid.toString().trim();
+                                                                                        String image = datasTransaksi![index].product_image.toString().trim();
+                                                                                        // String desc = conCatatan[i]
+                                                                                        //     .text
+                                                                                        //     .toString()
+                                                                                        //     .trim();
+
+                                                                                        //int? price = ( datasTransaksi![i].price!);
+                                                                                        num? price = datasTransaksi![index].price_after!;
+                                                                                        // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
+
+                                                                                        int i = 0;
+                                                                                        for (i; i < cart.length; i++) {}
+
+                                                                                        // int? quantity = cart[i];
+
+                                                                                        // log(name.toString());
+                                                                                        // log(price.toString());
+                                                                                        // log(productid.toString());
+                                                                                        // log(image.toString());
+
+                                                                                        sumTotal = sumTotal + (price * counterCart);
+                                                                                        // subTotal =
+                                                                                        //     subTotal + price.toInt();
+                                                                                        total.add(price * counterCart);
+
+                                                                                        conCatatan.add(
+                                                                                          TextEditingController(
+                                                                                            text: conCatatanPreview.text,
+                                                                                          ),
+                                                                                        );
+
+                                                                                        cart.add(
+                                                                                          CartTransaksi(
+                                                                                            name: name,
+                                                                                            productid: productid,
+                                                                                            image: image,
+                                                                                            price: price,
+                                                                                            quantity: counterCart,
+                                                                                            desc: conCatatanPreview.text,
+                                                                                            // quantity: cart[i]
+                                                                                            //     .quantity
+                                                                                            //     .toInt(),
+                                                                                          ),
+                                                                                        );
+
+                                                                                        // selectedIndexTransaksi[index];
+                                                                                      }
+                                                                                      // refreshColor();
+                                                                                      setState(() {});
+                                                                                      initState();
+                                                                                    },
+                                                                                    child: buttonL(
+                                                                                      Center(
+                                                                                        child: cartProductIds.contains(datasTransaksi![index].productid.toString())
+                                                                                            ? Text(
+                                                                                                'Hapus',
+                                                                                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                              )
+                                                                                            : Column(
+                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                children: [
+                                                                                                  datasTransaksi![index].discount == 0
+                                                                                                      ? Text(
+                                                                                                          FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                        )
+                                                                                                      : Column(
+                                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                          children: [
+                                                                                                            Text(
+                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
+                                                                                                              maxLines: 3,
+                                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                            ),
+                                                                                                            SizedBox(height: size4),
+                                                                                                            Text(
+                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price).toString(),
+                                                                                                              maxLines: 3,
+                                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                                              style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                            ),
+                                                                                                            SizedBox(height: size4),
+                                                                                                            datasTransaksi![index].discount_type == 'price'
+                                                                                                                ? Text(
+                                                                                                                    FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
+                                                                                                                    maxLines: 3,
+                                                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
+                                                                                                                  )
+                                                                                                                : Text(
+                                                                                                                    '${datasTransaksi![index].discount}%',
+                                                                                                                    maxLines: 3,
+                                                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
+                                                                                                                  ),
+                                                                                                          ],
+                                                                                                        ),
+                                                                                                ],
+                                                                                              ),
+                                                                                      ),
+                                                                                      bnw100,
+                                                                                      bnw900,
+                                                                                    ),
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -4642,173 +4767,171 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     maxWidth: MediaQuery.of(context).size.width / size8,
                                                                                     minWidth: MediaQuery.of(context).size.width / size8,
                                                                                   ),
-                                                                                  child: Column(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                    children: [
-                                                                                      datasTransaksi![index].discount == 0
-                                                                                          ? Text(
-                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
-                                                                                              maxLines: 3,
-                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                            )
-                                                                                          : Column(
-                                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                              children: [
-                                                                                                Text(
-                                                                                                  FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
-                                                                                                  maxLines: 3,
-                                                                                                  overflow: TextOverflow.ellipsis,
-                                                                                                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                ),
-                                                                                                SizedBox(height: size4),
-                                                                                                Text(
-                                                                                                  FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop).toString(),
-                                                                                                  maxLines: 3,
-                                                                                                  overflow: TextOverflow.ellipsis,
-                                                                                                  style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                ),
-                                                                                                SizedBox(height: size4),
-                                                                                                datasTransaksi![index].discount_type == 'price'
-                                                                                                    ? Text(
-                                                                                                        FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
-                                                                                                        maxLines: 3,
-                                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                                        style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                      )
-                                                                                                    : Text(
-                                                                                                        '${datasTransaksi![index].discount}%',
-                                                                                                        maxLines: 3,
-                                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                                        style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                      ),
-                                                                                              ],
-                                                                                            ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                              SizedBox(width: size16),
-                                                                              SizedBox(
-                                                                                width: 96,
-                                                                                child: GestureDetector(
-                                                                                  onTap: () async {
-                                                                                    String productId = datasTransaksi![index].productid.toString();
+                                                                                  child: GestureDetector(
+                                                                                    onTap: () async {
+                                                                                      String productId = datasTransaksi![index].productid.toString();
 
-                                                                                    if (cartProductIds.contains(productId)) {
-                                                                                      cartProductIds.remove(productId);
+                                                                                      if (cartProductIds.contains(productId)) {
+                                                                                        cartProductIds.remove(productId);
 
-                                                                                      for (int index = 0; index < cart.length; index++) {
-                                                                                        if (cart[index].productid == productId) {
-                                                                                          total.removeAt(index);
-                                                                                          cart.removeAt(index);
-                                                                                          cartMap.removeAt(index);
+                                                                                        for (int index = 0; index < cart.length; index++) {
+                                                                                          if (cart[index].productid == productId) {
+                                                                                            total.removeAt(index);
+                                                                                            cart.removeAt(index);
+                                                                                            cartMap.removeAt(index);
 
-                                                                                          if (cart.isEmpty) {
-                                                                                            sumTotal = 0;
+                                                                                            if (cart.isEmpty) {
+                                                                                              sumTotal = 0;
+                                                                                            }
+                                                                                            break;
                                                                                           }
-                                                                                          break;
                                                                                         }
+
+                                                                                        isItemAdded = true;
+                                                                                      } else {
+                                                                                        cartProductIds.add(productId);
+                                                                                        isItemAdded = false;
                                                                                       }
 
-                                                                                      isItemAdded = true;
-                                                                                    } else {
-                                                                                      cartProductIds.add(productId);
-                                                                                      isItemAdded = false;
-                                                                                    }
+                                                                                      if (!isItemAdded) {
+                                                                                        // Navigator.pop(context);
+                                                                                        Map<String, String> map1 = {};
+                                                                                        map1['name'] = datasTransaksi![index].name.toString();
+                                                                                        map1['productid'] = datasTransaksi![index].productid.toString();
+                                                                                        // map1['quantity'] = '1';
+                                                                                        map1['quantity'] = counterCart.toString();
 
-                                                                                    if (!isItemAdded) {
-                                                                                      // Navigator.pop(context);
-                                                                                      Map<String, String> map1 = {};
-                                                                                      map1['name'] = datasTransaksi![index].name.toString();
-                                                                                      map1['productid'] = datasTransaksi![index].productid.toString();
-                                                                                      // map1['quantity'] = '1';
-                                                                                      map1['quantity'] = counterCart.toString();
+                                                                                        map1['image'] = datasTransaksi![index].product_image.toString();
 
-                                                                                      map1['image'] = datasTransaksi![index].product_image.toString();
+                                                                                        // log("${datasTransaksi![i]
+                                                                                        //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
+                                                                                        map1['amount_display'] = datasTransaksi![index].price_online_shop.toString();
+                                                                                        //                                  (datasTransaksi![i].price! * counterCart)
+                                                                                        // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
 
-                                                                                      // log("${datasTransaksi![i]
-                                                                                      //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
-                                                                                      map1['amount_display'] =
-                                                                                          //                                  (datasTransaksi![i].price! * counterCart)
-                                                                                          (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
+                                                                                        //ubah transaksi
+                                                                                        // datasTransaksi![i].price.toString();
+                                                                                        map1['amount'] = datasTransaksi![index].price_online_shop.toString();
+                                                                                        // datasTransaksi![i].price.toString();
 
-                                                                                      //ubah transaksi
-                                                                                      // datasTransaksi![i].price.toString();
-                                                                                      map1['amount'] =
-                                                                                          // datasTransaksi![i].price.toString();
+                                                                                        // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
 
-                                                                                          (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
+                                                                                        // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
 
-                                                                                      // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
+                                                                                        map1['description'] = conCatatanPreview.text;
 
-                                                                                      map1['description'] = conCatatanPreview.text;
+                                                                                        cartMap.add(map1);
 
-                                                                                      cartMap.add(map1);
+                                                                                        // log(datasTransaksi![i].product_image.toString());
 
-                                                                                      // log(datasTransaksi![i].product_image.toString());
+                                                                                        String name = datasTransaksi![index].name.toString().trim();
+                                                                                        String productid = datasTransaksi![index].productid.toString().trim();
+                                                                                        String image = datasTransaksi![index].product_image.toString().trim();
+                                                                                        // String desc = conCatatan[i]
+                                                                                        //     .text
+                                                                                        //     .toString()
+                                                                                        //     .trim();
 
-                                                                                      String name = datasTransaksi![index].name.toString().trim();
-                                                                                      String productid = datasTransaksi![index].productid.toString().trim();
-                                                                                      String image = datasTransaksi![index].product_image.toString().trim();
-                                                                                      // String desc = conCatatan[i]
-                                                                                      //     .text
-                                                                                      //     .toString()
-                                                                                      //     .trim();
+                                                                                        //int? price = ( datasTransaksi![i].price!);
+                                                                                        num? price = datasTransaksi![index].price_online_shop_after!;
+                                                                                        // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
 
-                                                                                      //int? price = ( datasTransaksi![i].price!);
-                                                                                      num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
+                                                                                        int i = 0;
+                                                                                        for (i; i < cart.length; i++) {}
 
-                                                                                      int i = 0;
-                                                                                      for (i; i < cart.length; i++) {}
+                                                                                        // int? quantity = cart[i];
 
-                                                                                      // int? quantity = cart[i];
+                                                                                        // log(name.toString());
+                                                                                        // log(price.toString());
+                                                                                        // log(productid.toString());
+                                                                                        // log(image.toString());
 
-                                                                                      // log(name.toString());
-                                                                                      // log(price.toString());
-                                                                                      // log(productid.toString());
-                                                                                      // log(image.toString());
+                                                                                        sumTotal = sumTotal + (price * counterCart);
+                                                                                        // subTotal =
+                                                                                        //     subTotal + price.toInt();
+                                                                                        total.add(price * counterCart);
 
-                                                                                      sumTotal = sumTotal + (price * counterCart);
-                                                                                      // subTotal =
-                                                                                      //     subTotal + price.toInt();
-                                                                                      total.add(price * counterCart);
+                                                                                        conCatatan.add(
+                                                                                          TextEditingController(
+                                                                                            text: conCatatanPreview.text,
+                                                                                          ),
+                                                                                        );
 
-                                                                                      conCatatan.add(
-                                                                                        TextEditingController(
-                                                                                          text: conCatatanPreview.text,
-                                                                                        ),
-                                                                                      );
+                                                                                        cart.add(
+                                                                                          CartTransaksi(
+                                                                                            name: name,
+                                                                                            productid: productid,
+                                                                                            image: image,
+                                                                                            price: price,
+                                                                                            quantity: counterCart,
+                                                                                            desc: conCatatanPreview.text,
+                                                                                            // quantity: cart[i]
+                                                                                            //     .quantity
+                                                                                            //     .toInt(),
+                                                                                          ),
+                                                                                        );
 
-                                                                                      cart.add(
-                                                                                        CartTransaksi(
-                                                                                          name: name,
-                                                                                          productid: productid,
-                                                                                          image: image,
-                                                                                          price: price,
-                                                                                          quantity: counterCart,
-                                                                                          desc: conCatatanPreview.text,
-                                                                                          // quantity: cart[i]
-                                                                                          //     .quantity
-                                                                                          //     .toInt(),
-                                                                                        ),
-                                                                                      );
-
-                                                                                      // selectedIndexTransaksi[index];
-                                                                                    }
-                                                                                    // refreshColor();
-                                                                                    setState(() {});
-                                                                                    initState();
-                                                                                  },
-                                                                                  child: buttonL(
-                                                                                    Center(
-                                                                                      child: Text(
-                                                                                        cartProductIds.contains(datasTransaksi![index].productid.toString()) ? 'Hapus' : 'Tambah',
-                                                                                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                        // selectedIndexTransaksi[index];
+                                                                                      }
+                                                                                      // refreshColor();
+                                                                                      setState(() {});
+                                                                                      initState();
+                                                                                    },
+                                                                                    child: buttonL(
+                                                                                      Center(
+                                                                                        child: cartProductIds.contains(datasTransaksi![index].productid.toString())
+                                                                                            ? Text(
+                                                                                                'Hapus',
+                                                                                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                                                                              )
+                                                                                            : Column(
+                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                children: [
+                                                                                                  datasTransaksi![index].discount == 0
+                                                                                                      ? Text(
+                                                                                                          FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                        )
+                                                                                                      : Column(
+                                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                          children: [
+                                                                                                            Text(
+                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
+                                                                                                              maxLines: 3,
+                                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                            ),
+                                                                                                            SizedBox(height: size4),
+                                                                                                            Text(
+                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop).toString(),
+                                                                                                              maxLines: 3,
+                                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                                              style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
+                                                                                                            ),
+                                                                                                            SizedBox(height: size4),
+                                                                                                            datasTransaksi![index].discount_type == 'price'
+                                                                                                                ? Text(
+                                                                                                                    FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
+                                                                                                                    maxLines: 3,
+                                                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
+                                                                                                                  )
+                                                                                                                : Text(
+                                                                                                                    '${datasTransaksi![index].discount}%',
+                                                                                                                    maxLines: 3,
+                                                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
+                                                                                                                  ),
+                                                                                                          ],
+                                                                                                        ),
+                                                                                                ],
+                                                                                              ),
                                                                                       ),
+                                                                                      bnw100,
+                                                                                      bnw900,
                                                                                     ),
-                                                                                    bnw100,
-                                                                                    bnw900,
                                                                                   ),
                                                                                 ),
                                                                               ),

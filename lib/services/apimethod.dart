@@ -19,7 +19,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:path_provider/path_provider.dart';
@@ -51,7 +52,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
     registerLink = '$url/api/register',
     loginEmailLink = '$url/api/login',
-    loginbyotp = '$url/api/user/logjinbyotp',
+    loginbyotp = '$url/api/user/loginbyotp',
     loginentryotp = '$url/api/user/loginentryotp',
     checkpass = '$url/api/user/checkPassword',
     forgotPassRequestLink = '$url/api/forgot-password/request',
@@ -139,6 +140,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getSingleDiskonLink = '$url/api/discount/show',
     getProdukDiskonLink = '$url/api/discount/get-products',
     aktifDiskonLink = '$url/api/discount/change-is-active',
+    getSinglePendapatanHarianLink = '$url/api/report/income/daily/full',
     diskonTransaksiLink = '$url/api/discount/transaction';
 
 String out = '$url/api/logout';
@@ -369,7 +371,6 @@ Future changeName(token, id, context, mycontroller) async {
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
-    return null;
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -2900,6 +2901,39 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
   if (response.statusCode == 200) {
     log("ini data $data");
     printext = data['data']['rawstruk'];
+
+    return data;
+  } else {
+    throw Exception('Failed to load data ${data}');
+  }
+}
+
+Future<Map<String, dynamic>> getSinglePendapatanHarian(
+  token,
+  date,
+  orderby,
+  export,
+  merchantid,
+) async {
+  final body = {
+    "deviceid": identifier,
+    "date": date,
+    "orderby": orderby,
+    "export": export,
+    "merchantid": merchantid,
+  };
+
+  final response = await http.post(
+    Uri.parse(getSinglePendapatanHarianLink),
+    body: body,
+    headers: {
+      'token': token,
+    },
+  );
+
+  Map<String, dynamic> data = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    log("ini data $data");
 
     return data;
   } else {

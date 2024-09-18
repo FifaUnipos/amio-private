@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 //? sp to double px
 double sp32 = 22;
 double sp24 = 17.4;
@@ -28,6 +26,3 @@ double size4 = 3;
 double width1 = 1;
 double width2 = 2;
 double width4 = 3;
-
-
-

@@ -1,14 +1,19 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:flutter_svg/svg.dart';import '../../../../utils/component/component_showModalBottom.dart';
+import 'package:flutter_svg/svg.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -19,6 +24,7 @@ import '../../../../models/tokomodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
+
 class LaporanPendapatanHarianPage extends StatefulWidget {
   String token;
   PageController pageController = PageController();
@@ -62,15 +68,22 @@ class LaporanPendapatanHarianPageState
       _textvalueKeyword = '1B',
       _textKeyword = '30 Hari Terakhir';
 
+  String tanggalSelect = '';
+
   int _valueOrder = 0, _valueKeyword = 0;
 
   GlobalKey _globalKey = GlobalKey();
-
 
   bool isTokoSelected = false;
   bool isSelectionMode = false;
   Map<int, bool> selectedFlag = {};
   List<String> listToko = List.empty(growable: true);
+
+  double _leftWidthFactor = 1.0;
+  bool _isSecondContainerVisible = false;
+
+  double heightInformation = 0;
+  double widthInformation = 0;
 
   void refresh() {
     setState(() {});
@@ -81,425 +94,1014 @@ class LaporanPendapatanHarianPageState
     double width = 100;
     return RepaintBoundary(
       key: _globalKey,
-      child:   Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        widget.pageController.jumpToPage(0);
-                      },
-                      child: Icon(
-                        PhosphorIcons.arrow_left,
-                        size: size40,
-                        color: bnw900,
-                      ),
-                    ),
-                    SizedBox(width: size8),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pendapatan Harian',
-                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                        ),
-                        Text(
-                          'Laporan',
-                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Spacer(),
-                orderBy(context),
-                SizedBox(width: size16),
-                keyword(context),
-                SizedBox(width: size16),
-                sortToko(context),
-                SizedBox(width: size16),
-                GestureDetector(
-                  onTap: () {
-                    showBottomPilihan(
-                      context,
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                'Bagikan Laporan',
-                                style:
-                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
-                              Text(
-                                'Pilih format berbagi laporan',
-                                style:
-                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: size20),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2.6,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      getLaporanDailyExport(
-                                              context,
-                                              widget.token,
-                                              _textvalueOrderBy,
-                                              _textvalueKeyword,
-                                              listToko,
-                                              'pdf')
-                                          .then((value) {
-                                        try {
-                                          launch(value['data']);
-                                          downloadFile(value['data']);
-                                        } catch (e) {}
-                                      });
-                                    },
-                                    child: buttonXXLoutline(
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            PhosphorIcons.file_text_fill,
-                                            color: primary500,
-                                          ),
-                                          Text(
-                                            'Pdf',
-                                            style: heading2(FontWeight.w600,
-                                                primary500, 'Outfit'),
-                                          ),
-                                        ],
-                                      ),
-                                      110,
-                                      primary500,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      getLaporanDailyExport(
-                                              context,
-                                              widget.token,
-                                              _textvalueOrderBy,
-                                              _textvalueKeyword,
-                                              listToko,
-                                              'excel')
-                                          .then((value) {
-                                        try {
-                                          launch(value['data']);
-                                          downloadFile(value['data']);
-                                        } catch (e) {}
-                                      });
-                                    },
-                                    child: buttonXXLoutline(
-                                      Column(
-                                        children: [
-                                          Icon(
-                                            PhosphorIcons
-                                                .microsoft_excel_logo_fill,
-                                            color: primary500,
-                                          ),
-                                          Text(
-                                            'Excel',
-                                            style: heading2(FontWeight.w600,
-                                                primary500, 'Outfit'),
-                                          ),
-                                        ],
-                                      ),
-                                      120,
-                                      primary500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  child: buttonXLoutline(
-                    Center(
-                      child: Icon(
-                        PhosphorIcons.share_network_fill,
-                        color: primary500,
-                      ),
-                    ),
-                    0,
-                    primary500,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: size16),
-            Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                color: primary500,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(size16),
-                  topRight: Radius.circular(size16),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  SizedBox(
-                    width: width + size20,
-                    child: Row(
-                      children: [
-                        Text(
-                          'Tanggal',
-                          style: heading4(FontWeight.w700, bnw100, 'Outfit'),
-                        ),
-                      ],
+                  GestureDetector(
+                    onTap: () {
+                      widget.pageController.jumpToPage(0);
+                    },
+                    child: Icon(
+                      PhosphorIcons.arrow_left,
+                      size: size40,
+                      color: bnw900,
                     ),
                   ),
-                  SizedBox(
-                    width: width + 10,
-                    child: Text(
-                      'Jumlah Transaksi',
-                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
-                  ),
-                  SizedBox(
-                    width: width,
-                    child: Text(
-                      'Nilai Transaksi',
-                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
-                  ),
-                  SizedBox(
-                    width: width,
-                    child: Text(
-                      'Total PPN',
-                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
-                  ),
-                  SizedBox(
-                    width: width,
-                    child: Text(
-                      'Total',
-                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
+                  SizedBox(width: size8),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pendapatan Harian',
+                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                      ),
+                      Text(
+                        'Laporan',
+                        style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.only(top: size16),
-                decoration: BoxDecoration(
-                  color: primary100,
+              Spacer(),
+              orderBy(context),
+              SizedBox(width: size16),
+              keyword(context),
+              SizedBox(width: size16),
+              sortToko(context),
+              SizedBox(width: size16),
+              GestureDetector(
+                onTap: () {
+                  showBottomPilihan(
+                    context,
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              'Bagikan Laporan',
+                              style:
+                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              'Pilih format berbagi laporan',
+                              style:
+                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: size20),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 2.6,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    getLaporanDailyExport(
+                                            context,
+                                            widget.token,
+                                            _textvalueOrderBy,
+                                            _textvalueKeyword,
+                                            listToko,
+                                            'pdf')
+                                        .then((value) {
+                                      try {
+                                        launch(value['data']);
+                                        downloadFile(value['data']);
+                                      } catch (e) {}
+                                    });
+                                  },
+                                  child: buttonXXLoutline(
+                                    Column(
+                                      children: [
+                                        Icon(
+                                          PhosphorIcons.file_text_fill,
+                                          color: primary500,
+                                        ),
+                                        Text(
+                                          'Pdf',
+                                          style: heading2(FontWeight.w600,
+                                              primary500, 'Outfit'),
+                                        ),
+                                      ],
+                                    ),
+                                    110,
+                                    primary500,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: size16),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    getLaporanDailyExport(
+                                            context,
+                                            widget.token,
+                                            _textvalueOrderBy,
+                                            _textvalueKeyword,
+                                            listToko,
+                                            'excel')
+                                        .then((value) {
+                                      try {
+                                        launch(value['data']);
+                                        downloadFile(value['data']);
+                                      } catch (e) {}
+                                    });
+                                  },
+                                  child: buttonXXLoutline(
+                                    Column(
+                                      children: [
+                                        Icon(
+                                          PhosphorIcons
+                                              .microsoft_excel_logo_fill,
+                                          color: primary500,
+                                        ),
+                                        Text(
+                                          'Excel',
+                                          style: heading2(FontWeight.w600,
+                                              primary500, 'Outfit'),
+                                        ),
+                                      ],
+                                    ),
+                                    120,
+                                    primary500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                },
+                child: buttonXLoutline(
+                  Center(
+                    child: Icon(
+                      PhosphorIcons.share_network_fill,
+                      color: primary500,
+                    ),
+                  ),
+                  0,
+                  primary500,
                 ),
-                child: FutureBuilder(
-                  future: getLaporanDaily(context, widget.token,
-                      _textvalueOrderBy, _textvalueKeyword, listToko, ''),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      Map<String, dynamic>? data = snapshot.data!['data'];
-                      var detail = data!['detail'];
-                      var header = data['header'];
-                      // print(snapshot.data['data']);
-                      return RefreshIndicator(
-                        color: bnw100,
-                        onRefresh: () async {
-                          getLaporanDaily(
-                            context,
-                            widget.token,
-                            _textvalueOrderBy,
-                            _textvalueKeyword,
-                            listToko,
-                            '',
-                          );
-                          setState(() {});
-                        },
-                        child: ListView.builder(
-                          // physics: BouncingScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          itemCount: detail.length,
-                          itemBuilder: (builder, index) {
-                            return Column(
-                              children: [
-                                Row(
+              ),
+            ],
+          ),
+          SizedBox(height: size16),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stack(
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          flex: (_leftWidthFactor * 100).toInt(),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: primary500,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(size16),
+                                    topRight: Radius.circular(size16),
+                                  ),
+                                ),
+                                child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    SizedBox(
-                                      width: width + size20,
-                                      child: Text(
-                                        detail[index]['tanggal'].toString(),
-                                        style: heading4(
-                                            FontWeight.w600, bnw900, 'Outfit'),
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: width + size20,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Tanggal',
+                                              style: heading4(FontWeight.w700,
+                                                  bnw100, 'Outfit'),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: width + 10,
-                                      child: Text(
-                                        detail[index]['totalTransaksi']
-                                            .toString(),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: width + 10,
+                                        child: Text(
+                                          'Jumlah Transaksi',
+                                          style: heading4(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: width,
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                                detail[index]['nilaiTransaksi'])
-                                            .toString(),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: width,
+                                        child: Text(
+                                          'Nilai Transaksi',
+                                          style: heading4(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: width,
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                                detail[index]['totalPPN'])
-                                            .toString(),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: width,
+                                        child: Text(
+                                          'Total PPN',
+                                          style: heading4(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: width,
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                                detail[index]['total'])
-                                            .toString(),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: width,
+                                        child: Text(
+                                          'Total',
+                                          style: heading4(FontWeight.w600,
+                                              bnw100, 'Outfit'),
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                Divider(thickness: 1.2)
-                              ],
-                            );
+                              ),
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.only(top: size16),
+                                  decoration: BoxDecoration(
+                                    color: primary100,
+                                  ),
+                                  child: FutureBuilder(
+                                    future: getLaporanDaily(
+                                        context,
+                                        widget.token,
+                                        _textvalueOrderBy,
+                                        _textvalueKeyword,
+                                        listToko,
+                                        ''),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        Map<String, dynamic>? data =
+                                            snapshot.data!['data'];
+                                        var detail = data!['detail'];
+                                        var header = data['header'];
+                                        // print(snapshot.data['data']);
+                                        return RefreshIndicator(
+                                          color: bnw100,
+                                          onRefresh: () async {
+                                            getLaporanDaily(
+                                              context,
+                                              widget.token,
+                                              _textvalueOrderBy,
+                                              _textvalueKeyword,
+                                              listToko,
+                                              '',
+                                            );
+                                            setState(() {});
+                                          },
+                                          child: ListView.builder(
+                                            // physics: BouncingScrollPhysics(),
+                                            shrinkWrap: true,
+                                            padding: EdgeInsets.zero,
+                                            itemCount: detail.length,
+                                            itemBuilder: (builder, index) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    tanggalSelect =
+                                                        detail[index]
+                                                            ['tanggal'];
+                                                    widthInformation =
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .width;
+                                                    heightInformation =
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .height;
+                                                    // When left container is tapped, show the right container
+                                                    _isSecondContainerVisible =
+                                                        true;
+                                                    _leftWidthFactor =
+                                                        0.5; // Adjust initial width factor
+                                                  });
+                                                },
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        Flexible(
+                                                          child: SizedBox(
+                                                            width:
+                                                                width + size20,
+                                                            child: Text(
+                                                              detail[index][
+                                                                      'tanggal']
+                                                                  .toString(),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Flexible(
+                                                          child: SizedBox(
+                                                            width: width + 10,
+                                                            child: Text(
+                                                              detail[index][
+                                                                      'totalTransaksi']
+                                                                  .toString(),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Flexible(
+                                                          child: SizedBox(
+                                                            width: width,
+                                                            child: Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      detail[index]
+                                                                          [
+                                                                          'nilaiTransaksi'])
+                                                                  .toString(),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Flexible(
+                                                          child: SizedBox(
+                                                            width: width,
+                                                            child: Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      detail[index]
+                                                                          [
+                                                                          'totalPPN'])
+                                                                  .toString(),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Flexible(
+                                                          child: SizedBox(
+                                                            width: width,
+                                                            child: Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                      detail[index]
+                                                                          [
+                                                                          'total'])
+                                                                  .toString(),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Divider(thickness: 1.2)
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            // itemCount: staticData!.length,
+                                          ),
+                                        );
+                                      }
+                                      return SkeletonListView(
+                                        padding: EdgeInsets.only(
+                                            left: size16, right: size16),
+                                        itemCount: 5,
+                                        itemBuilder: (p0, p1) => SkeletonLine(
+                                          style: SkeletonLineStyle(
+                                            height: 40,
+                                            padding:
+                                                EdgeInsets.only(bottom: size16),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              FutureBuilder(
+                                  future: getLaporanDaily(
+                                      context,
+                                      widget.token,
+                                      _textvalueOrderBy,
+                                      _textvalueKeyword,
+                                      listToko,
+                                      ''),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      Map<String, dynamic>? data =
+                                          snapshot.data!['data'];
+
+                                      var header = data!['header'];
+                                      return Container(
+                                        padding: EdgeInsets.only(
+                                            top: size16, bottom: size16),
+                                        decoration: BoxDecoration(
+                                          color: primary200,
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(size16),
+                                            bottomRight:
+                                                Radius.circular(size16),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: width + size20,
+                                                child: Text(
+                                                  'Total',
+                                                  style: heading4(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: width + 10,
+                                                child: Text(
+                                                  header['count'].toString(),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: width,
+                                                child: Text(
+                                                  FormatCurrency.convertToIdr(
+                                                          header[
+                                                              'nilaiTransaksi'])
+                                                      .toString(),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: width,
+                                                child: Text(
+                                                  FormatCurrency.convertToIdr(
+                                                          header['totalPPN'])
+                                                      .toString(),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: width,
+                                                child: Text(
+                                                  FormatCurrency.convertToIdr(
+                                                          header['total'])
+                                                      .toString(),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    return loading();
+                                  }),
+                            ],
+                          ),
+                        ),
+                        // Right container is shown only if _isSecondContainerVisible is true
+                        if (_isSecondContainerVisible)
+                          Expanded(
+                            flex: ((1 - _leftWidthFactor) * 100).toInt(),
+                            child: FutureBuilder<Map<String, dynamic>>(
+                              future: getSinglePendapatanHarian(
+                                widget.token,
+                                tanggalSelect,
+                                "totalTertinggi",
+                                "",
+                                "",
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(child: loading());
+                                }
+
+                                if (snapshot.hasError) {
+                                  return Center(child: loading());
+                                }
+
+                                if (!snapshot.hasData ||
+                                    snapshot.data!['rc'] != '00') {
+                                  return Center(child: Text('Tidak Ada Data!'));
+                                }
+
+                                Map<String, dynamic> data =
+                                    snapshot.data!['data'];
+                                Map<String, dynamic> header = data['header'];
+                                List<dynamic> detailList = data['detail'];
+                                Map<String, dynamic> merchant = detailList[0];
+                                List<dynamic> products =
+                                    merchant['detail']['product'];
+                                Map<String, dynamic> paymentMethod =
+                                    merchant['detail']['paymentMethod'];
+
+                                return Container(
+                                  margin: EdgeInsets.only(
+                                    left: size8,
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: size16, horizontal: size20),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(size8),
+                                    border: Border.all(color: bnw300),
+                                  ),
+                                  child: ListView(
+                                    children: [
+                                      Text(
+                                        'Informasi Pendapatan ${header['tanggal']}',
+                                        style: heading2(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      ),
+                                      SizedBox(height: size16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Jumlah Transaksi',
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                'Nilai Transaksi',
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                'Total PPN',
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                'Total Diskon',
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                'Total Keseluruhan',
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                header['count'].toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                FormatCurrency.convertToIdr(
+                                                        header[
+                                                            'nilaiTransaksi'])
+                                                    .toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                FormatCurrency.convertToIdr(
+                                                        header['totalPPN'])
+                                                    .toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                FormatCurrency.convertToIdr(
+                                                        merchant[
+                                                            'totalDiscount'])
+                                                    .toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                FormatCurrency.convertToIdr(
+                                                        header['total'])
+                                                    .toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: size16),
+                                      Text('Rincian Pembayaran',
+                                          style: heading2(FontWeight.w600,
+                                              bnw900, 'Outfit')),
+                                      SizedBox(height: size8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Cash',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text('Fifapay',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text('QRIS',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text('Credit',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text('Debit',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text('Coin',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                            ],
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                  '${FormatCurrency.convertToIdr(paymentMethod['Cash']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                  '${FormatCurrency.convertToIdr(paymentMethod['fifapay']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                  '${FormatCurrency.convertToIdr(paymentMethod['qris']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                  ' ${FormatCurrency.convertToIdr(paymentMethod['credit']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                  '${FormatCurrency.convertToIdr(paymentMethod['debit']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                  ' ${FormatCurrency.convertToIdr(paymentMethod['coin']).toString()}',
+                                                  style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit')),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: size16),
+                                      Text('Rincian Produk',
+                                          style: heading2(FontWeight.w600,
+                                              bnw900, 'Outfit')),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: products.length,
+                                        itemBuilder: (context, index) {
+                                          Map<String, dynamic> product =
+                                              products[index];
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 4),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                            merchant[
+                                                                'nameToko'],
+                                                            style: heading3(
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        Text(
+                                                          '${product['nameProduk']}',
+                                                          style: heading3(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Text(
+                                                          "total Per Produk",
+                                                          style: heading3(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        Text(FormatCurrency
+                                                                .convertToIdr(
+                                                                    product[
+                                                                        'total'])
+                                                            .toString()),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                                Divider(
+                                                  thickness: width1,
+                                                  color: bnw900,
+                                                ),
+                                                SizedBox(height: size8),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Total Transaksi',
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text('Nilai Transaksi',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        SizedBox(height: size8),
+                                                        Text('Total PPN',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        SizedBox(height: size8),
+                                                        Text('Total Diskon',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                      ],
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Text(
+                                                            '${product['totalTransaksi']}',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit')),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: size16),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    // Draggable handle appears only if the right container is visible
+                    if (_isSecondContainerVisible)
+                      Positioned(
+                        left: _leftWidthFactor * constraints.maxWidth + 2,
+                        top: 0,
+                        bottom: 0,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            setState(() {
+                              // Update left container width based on drag
+                              _leftWidthFactor +=
+                                  details.delta.dx / constraints.maxWidth;
+
+                              // Ensure the width stays within bounds: 10% to 50%
+                              _leftWidthFactor =
+                                  _leftWidthFactor.clamp(0.1, 0.5);
+
+                              // If dragging to the right and reaching max width, hide the right container
+                              if (_leftWidthFactor >= 0.5 &&
+                                  details.delta.dx > 0) {
+                                _isSecondContainerVisible = false;
+                                _leftWidthFactor = 1.0; // Reset to full width
+                              }
+                            });
                           },
-                          // itemCount: staticData!.length,
-                        ),
-                      );
-                    }
-                    return SkeletonListView(
-                      padding: EdgeInsets.only(left: size16, right: size16),
-                      itemCount: 5,
-                      itemBuilder: (p0, p1) => SkeletonLine(
-                        style: SkeletonLineStyle(
-                          height: 40,
-                          padding: EdgeInsets.only(bottom: size16),
+                          child: Container(
+                            width: 40,
+                            height: 64,
+                            color: Colors.grey.withOpacity(0),
+                            child: Center(
+                              child: Container(
+                                margin: EdgeInsets.only(right: size16),
+                                height: 80,
+                                width: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
+                  ],
+                );
+              },
             ),
-            FutureBuilder(
-                future: getLaporanDaily(context, widget.token,
-                    _textvalueOrderBy, _textvalueKeyword, listToko, ''),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    Map<String, dynamic>? data = snapshot.data!['data'];
-
-                    var header = data!['header'];
-                    return Container(
-                      padding: EdgeInsets.only(top: size16, bottom: size16),
-                      decoration: BoxDecoration(
-                        color: primary200,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(size16),
-                          bottomRight: Radius.circular(size16),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          SizedBox(
-                            width: width + size20,
-                            child: Text(
-                              'Total',
-                              style:
-                                  heading4(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width + 10,
-                            child: Text(
-                              header['count'].toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(
-                                      header['nilaiTransaksi'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['total'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return loading();
-                }),
-          ],
-        ),
-      
+          ),
+        ],
+      ),
     );
   }
 
@@ -509,9 +1111,9 @@ class LaporanPendapatanHarianPageState
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -675,9 +1277,9 @@ class LaporanPendapatanHarianPageState
           ];
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -831,9 +1433,9 @@ class LaporanPendapatanHarianPageState
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(
+              maxWidth: double.infinity,
+            ),
             isScrollControlled: true,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),

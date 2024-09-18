@@ -6,7 +6,10 @@ import '../masukakun.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,7 +27,8 @@ import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
-import 'register_page.dart';import '../../../../../utils/component/component_button.dart';
+import 'register_page.dart';
+import '../../../../../utils/component/component_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -290,39 +294,35 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future getOtp(page) async {
-    try {
-      whenLoading(context);
-      final response = await http.post(
-        Uri.parse(loginbyotp),
-        body: {
-          // 'phonenumber': '085947737725',
-          'phonenumber': phoneEmailController.text,
-          'deviceid': identifier.toString(),
-        },
-      );
-      var jsonResponse = jsonDecode(response.body);
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(loginbyotp),
+      body: {
+        // 'phonenumber': '085947737725',
+        'phonenumber': phoneEmailController.text,
+        'deviceid': identifier.toString(),
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        Navigator.of(context, rootNavigator: true).pop();
-        print(jsonResponse['data']);
-        print("succes");
-        _validate = false;
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
-      } else {
-        setState(() {
-          Navigator.of(context, rootNavigator: true).pop();
-          errorText = jsonResponse['message'];
-          _validate = true;
-        });
-      }
-    } catch (e) {
-      throw Exception(e.toString());
+    if (response.statusCode == 200) {
+      Navigator.of(context, rootNavigator: true).pop();
+      print(jsonResponse['data']);
+      print("succes");
+      _validate = false;
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => page,
+        ),
+      );
+    } else {
+      setState(() {
+        closeLoading(context);
+        errorText = jsonResponse['message'];
+        _validate = true;
+      });
     }
   }
 

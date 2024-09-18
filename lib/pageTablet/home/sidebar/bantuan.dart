@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../services/checkConnection.dart';
@@ -152,6 +155,7 @@ class _BantuanGrupState extends State<BantuanGrup> {
           ],
         ),
         SizedBox(height: size16),
+        // Expanded(child: SlidableWidget()),
         Expanded(
           child: Column(
             children: [
@@ -283,3 +287,4 @@ List<Step> getSteps() {
     //     'Change your terminal directory to the project directory, enter `flutter run`.'),
   ];
 }
+

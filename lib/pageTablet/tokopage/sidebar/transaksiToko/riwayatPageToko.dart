@@ -47,12 +47,12 @@ class RiwayatPage extends StatefulWidget {
 
 class _RiwayatPageState extends State<RiwayatPage> {
   List<TokoDataRiwayatModel>? datasRiwayat;
-  double heightInformation = 0;
   String? transactionidValue;
   double widtValue = 120;
   // double width = MediaQuery.of(context).size.width;
   double? width;
 
+  double heightInformation = 0;
   double widthInformation = 0;
   List<String> cartProductIds = [];
   String? nameSingle, transaksiReference, idKategori;
