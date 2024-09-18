@@ -45,8 +45,8 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-// String url = 'https://api.prod.amio.my.id';
-String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+String url = 'https://api.prod.amio.my.id';
+// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',

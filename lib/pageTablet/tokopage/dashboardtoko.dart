@@ -725,6 +725,7 @@ class _ScreensExampleState extends State<_ScreensExample> {
             case 3:
               //   return InventoriPage();
               // case 5:
+              // return TransactionPage(token: widget.token);
               return TransactionPage(token: widget.token);
             case 4:
               return LihatKeuanganToko(token: widget.token);

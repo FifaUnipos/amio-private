@@ -2484,6 +2484,7 @@ class _TransactionPageState extends State<TransactionPage>
                 style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 controller: debitpinController,
                 inputFormatters: [
+                  LengthLimitingTextInputFormatter(20),
                   NumericTextFormatter(),
                 ],
                 keyboardType: TextInputType.number,
@@ -2562,6 +2563,10 @@ class _TransactionPageState extends State<TransactionPage>
             keyboardType: TextInputType.number,
             controller: kreditpinController,
             readOnly: true,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(20),
+              NumericTextFormatter(),
+            ],
             onChanged: (value) {},
             decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: size8),
@@ -3417,6 +3422,7 @@ class _TransactionPageState extends State<TransactionPage>
   getAllProduct(BuildContext context, PageController pageController) {
     int newquantity = 1;
     getStruk(context, widget.token, '');
+    var edgeInsets = EdgeInsets;
     return Row(
       children: [
         !isExpand
@@ -3519,45 +3525,6 @@ class _TransactionPageState extends State<TransactionPage>
                                 ),
                               ),
                             ),
-                            SizedBox(width: size16),
-                            buttonXLoutline(
-                                Row(
-                                  children: [
-                                    Icon(
-                                      PhosphorIcons.caret_down_fill,
-                                      size: size24,
-                                      color: primary500,
-                                    ),
-                                    SizedBox(width: size12),
-                                    DropdownButtonHideUnderline(
-                                      child: DropdownButton<String>(
-                                        dropdownColor: bnw100,
-                                        elevation: 1,
-                                        borderRadius:
-                                            BorderRadius.circular(size8),
-                                        value: _selectedOption,
-                                        items: <String>['Grid', 'Tabel']
-                                            .map((String value) {
-                                          return DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(value),
-                                          );
-                                        }).toList(),
-                                        onChanged: (String? newValue) {
-                                          setState(() {
-                                            _selectedOption = newValue!;
-                                          });
-                                        },
-                                        style: heading2(FontWeight.w600,
-                                            primary500, 'Outfit'),
-                                        iconEnabledColor: Colors.transparent,
-                                        iconSize: 0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                double.infinity,
-                                primary500),
                             SizedBox(width: size16),
                             GestureDetector(
                               onTap: () {
@@ -4325,7 +4292,78 @@ class _TransactionPageState extends State<TransactionPage>
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              orderBy(context),
+                                              Row(
+                                                children: [
+                                                  orderBy(context),
+                                                  SizedBox(width: size12),
+                                                  buttonL(
+                                                    Row(
+                                                      children: [
+                                                        DropdownButtonHideUnderline(
+                                                          child: DropdownButton<
+                                                              String>(
+                                                            isDense: true,
+                                                            dropdownColor:
+                                                                bnw100,
+                                                            elevation: 1,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        size8),
+                                                            value:
+                                                                _selectedOption,
+                                                            items: <String>[
+                                                              'Grid',
+                                                              'Tabel'
+                                                            ].map(
+                                                                (String value) {
+                                                              return DropdownMenuItem<
+                                                                  String>(
+                                                                value: value,
+                                                                child:
+                                                                    Text(value),
+                                                              );
+                                                            }).toList(),
+                                                            onChanged: (String?
+                                                                newValue) {
+                                                              setState(() {
+                                                                _selectedOption =
+                                                                    newValue!;
+                                                              });
+                                                            },
+                                                            style: heading2(
+                                                                FontWeight.w600,
+                                                                primary500,
+                                                                'Outfit'),
+                                                            iconEnabledColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            iconSize: 0,
+                                                          ),
+                                                        ),
+                                                        _selectedOption ==
+                                                                'Grid'
+                                                            ? Icon(
+                                                                PhosphorIcons
+                                                                    .squares_four_fill,
+                                                                size: size24,
+                                                                color:
+                                                                    primary500,
+                                                              )
+                                                            : Icon(
+                                                                PhosphorIcons
+                                                                    .rows,
+                                                                size: size24,
+                                                                color:
+                                                                    primary500,
+                                                              ),
+                                                      ],
+                                                    ),
+                                                    bnw100,
+                                                    primary500,
+                                                  ),
+                                                ],
+                                              ),
                                               buttonLoutlineColor(
                                                   Row(
                                                     children: [
@@ -4718,37 +4756,11 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                           overflow: TextOverflow.ellipsis,
                                                                                                           style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                                                                                                         )
-                                                                                                      : Column(
-                                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                          children: [
-                                                                                                            Text(
-                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
-                                                                                                              maxLines: 3,
-                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                            ),
-                                                                                                            SizedBox(height: size4),
-                                                                                                            Text(
-                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price).toString(),
-                                                                                                              maxLines: 3,
-                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                              style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                            ),
-                                                                                                            SizedBox(height: size4),
-                                                                                                            datasTransaksi![index].discount_type == 'price'
-                                                                                                                ? Text(
-                                                                                                                    FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
-                                                                                                                    maxLines: 3,
-                                                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                                  )
-                                                                                                                : Text(
-                                                                                                                    '${datasTransaksi![index].discount}%',
-                                                                                                                    maxLines: 3,
-                                                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                                  ),
-                                                                                                          ],
+                                                                                                      : Text(
+                                                                                                          FormatCurrency.convertToIdr(datasTransaksi![index].price_after).toString(),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                          style: heading4(FontWeight.w400, danger500, 'Outfit'),
                                                                                                         ),
                                                                                                 ],
                                                                                               ),
@@ -4759,7 +4771,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                   ),
                                                                                 ),
                                                                               ),
-                                                                              SizedBox(width: size16),
+                                                                              Spacer(),
                                                                               Expanded(
                                                                                 flex: 2,
                                                                                 child: Container(
@@ -4877,14 +4889,11 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                       setState(() {});
                                                                                       initState();
                                                                                     },
-                                                                                    child: buttonL(
-                                                                                      Center(
-                                                                                        child: cartProductIds.contains(datasTransaksi![index].productid.toString())
-                                                                                            ? Text(
-                                                                                                'Hapus',
-                                                                                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                                                                              )
-                                                                                            : Column(
+                                                                                    child: cartProductIds.contains(datasTransaksi![index].productid.toString())
+                                                                                        ? SizedBox()
+                                                                                        : buttonL(
+                                                                                            Center(
+                                                                                              child: Column(
                                                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                                                 children: [
                                                                                                   datasTransaksi![index].discount == 0
@@ -4894,44 +4903,18 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                           overflow: TextOverflow.ellipsis,
                                                                                                           style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                                                                                                         )
-                                                                                                      : Column(
-                                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                          children: [
-                                                                                                            Text(
-                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
-                                                                                                              maxLines: 3,
-                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                            ),
-                                                                                                            SizedBox(height: size4),
-                                                                                                            Text(
-                                                                                                              FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop).toString(),
-                                                                                                              maxLines: 3,
-                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                              style: body3lineThrough(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                                            ),
-                                                                                                            SizedBox(height: size4),
-                                                                                                            datasTransaksi![index].discount_type == 'price'
-                                                                                                                ? Text(
-                                                                                                                    FormatCurrency.convertToIdr(datasTransaksi![index].discount).toString(),
-                                                                                                                    maxLines: 3,
-                                                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                                  )
-                                                                                                                : Text(
-                                                                                                                    '${datasTransaksi![index].discount}%',
-                                                                                                                    maxLines: 3,
-                                                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                                                    style: body2(FontWeight.w700, danger500, 'Outfit'),
-                                                                                                                  ),
-                                                                                                          ],
+                                                                                                      : Text(
+                                                                                                          FormatCurrency.convertToIdr(datasTransaksi![index].price_online_shop_after).toString(),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                          style: heading4(FontWeight.w400, danger500, 'Outfit'),
                                                                                                         ),
                                                                                                 ],
                                                                                               ),
-                                                                                      ),
-                                                                                      bnw100,
-                                                                                      bnw900,
-                                                                                    ),
+                                                                                            ),
+                                                                                            bnw100,
+                                                                                            bnw900,
+                                                                                          ),
                                                                                   ),
                                                                                 ),
                                                                               ),
