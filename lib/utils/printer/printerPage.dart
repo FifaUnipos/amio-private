@@ -585,7 +585,9 @@ class _ButtonPrintState extends State<ButtonPrint> {
                 : bluetooth.printImageBytes(imageStruk);
             widget.bluetooth.printNewLine();
             widget.bluetooth.printCustom(
-                printext.replaceAll(RegExp('[|]'), '\n'), Size.medium.val, 0);
+                widget.printtext.replaceAll(RegExp('[|]'), '\n'),
+                Size.medium.val,
+                0);
             // widget.bluetooth.printCustom(
             //     widget.printtext.replaceAll(RegExp('[|]'), '\n'),
             //     Size.bold.val,

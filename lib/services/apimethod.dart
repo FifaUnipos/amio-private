@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:amio/models/coaModel.dart';
 import 'package:amio/utils/component/component_snackbar.dart';
 
 import '../main.dart';
@@ -45,8 +46,8 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -141,7 +142,12 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getProdukDiskonLink = '$url/api/discount/get-products',
     aktifDiskonLink = '$url/api/discount/change-is-active',
     getSinglePendapatanHarianLink = '$url/api/report/income/daily/full',
-    diskonTransaksiLink = '$url/api/discount/transaction';
+    diskonTransaksiLink = '$url/api/discount/transaction',
+    getCoaRefLink = '$url/api/type/payment/references',
+    getCoaMethodLink = '$url/api/type/payment',
+    addCoaLink = '$url/api/type/payment/create',
+    updateCoaLink = '$url/api/type/payment/update',
+    deleteCoaLink = '$url/api/type/payment/delete';
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
@@ -3722,5 +3728,124 @@ Future<void> downloadFile(String link) async {
     }
   } catch (e) {
     print('Error: $e');
+  }
+}
+
+Future getCOAPayment(
+  BuildContext context,
+  token,
+  category,
+  orderby,
+) async {
+  final response = await http.post(
+    Uri.parse(getCoaMethodLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "category": category,
+      // "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // print(jsonResponse.toString());
+
+    final List<PaymentMethod> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      // print(item);
+
+      final model = PaymentMethod.fromJson(item);
+      result.add(model);
+
+      // print(model.toJson());
+    }
+
+    return result;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future createCOA(
+    BuildContext context, token, paymentMethod, accountNumber) async {
+  whenLoading(context);
+  final response = await http.post(
+    Uri.parse(addCoaLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "paymentMethod": paymentMethod,
+      "accountNumber": accountNumber,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse.toString());
+
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
+  whenLoading(context);
+  final response = await http.post(
+    Uri.parse(deleteCoaLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "idPaymentMethod": idPaymentMethod,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse.toString());
+
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
+  final response = await http.post(
+    Uri.parse(getCoaMethodLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "category": category,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+    List<dynamic> jsonData = jsonResponse['data'];
+    return jsonData.map((data) => PaymentMethod.fromJson(data)).toList();
+  } else {
+    throw Exception('Failed to load payment methods');
   }
 }

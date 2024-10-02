@@ -6,6 +6,7 @@ import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:amio/models/coaModel.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:amio/pagehelper/loginregis/daftar_akun_toko.dart';
 import 'package:amio/utils/component/providerModel/refreshTampilanModel.dart';
@@ -200,12 +201,20 @@ class _TransactionPageState extends State<TransactionPage>
   String textOrderBy = 'Nama Produk A ke Z';
   String textvalueOrderBy = 'tanggalTerkini';
 
+  late Future<List<PaymentMethod>> futurePaymentMethodsDebit;
+  late Future<List<PaymentMethod>> futurePaymentMethodsKredit;
+  late Future<List<PaymentMethod>> futurePaymentMethodsEWallet;
+  String idpaymentmethode = '';
+
   @override
   void initState() {
     checkConnection(context);
     _getProductList();
     getQris(context, widget.token, '');
     getStruk(context, widget.token, '');
+    futurePaymentMethodsDebit = fetchPaymentMethods(widget.token, 'Debit');
+    futurePaymentMethodsKredit = fetchPaymentMethods(widget.token, 'Kredit');
+    futurePaymentMethodsEWallet = fetchPaymentMethods(widget.token, 'EWallet');
 
     if (isTagihan == true) {
       isTagihan = false;
@@ -2309,6 +2318,177 @@ class _TransactionPageState extends State<TransactionPage>
                                         ],
                                       ),
                                     ),
+                                    Material(
+                                      color: bnw100,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.fromLTRB(
+                                                size12, 0, size12, size12),
+                                            decoration: BoxDecoration(
+                                              color: primary100,
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                              border: Border.all(
+                                                  color: primary500,
+                                                  width: 1.6),
+                                            ),
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
+                                                3.6,
+                                            width: double.infinity,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  PhosphorIcons
+                                                      .credit_card_fill,
+                                                  color: bnw900,
+                                                  size: 46,
+                                                ),
+                                                Text(
+                                                  'Kartu Kredit',
+                                                  style: heading3(
+                                                      FontWeight.w700,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                                Text(
+                                                  'Masukkan nomor kartu Kredit untuk membayar.',
+                                                  textAlign: TextAlign.center,
+                                                  style: body1(FontWeight.w400,
+                                                      bnw900, 'Outfit'),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              dompetDigitalPageCon
+                                                  .jumpToPage(0);
+                                              _pageMetodeSwap.jumpToPage(0);
+                                              uangTunaiController.text = '0';
+                                            },
+                                            child: Container(
+                                              width: double.infinity,
+                                              margin: EdgeInsets.fromLTRB(
+                                                  size12, 0, size12, size12),
+                                              child: buttonXLoutline(
+                                                Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Icon(
+                                                        PhosphorIcons
+                                                            .arrow_left,
+                                                        size: size32,
+                                                        color: bnw900,
+                                                      ),
+                                                      SizedBox(width: size16),
+                                                      Text(
+                                                        'Kembali',
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                    ]),
+                                                0,
+                                                bnw300,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Material(
+                                      color: bnw100,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.fromLTRB(
+                                                size12, 0, size12, size12),
+                                            decoration: BoxDecoration(
+                                              color: primary100,
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                              border: Border.all(
+                                                  color: primary500,
+                                                  width: 1.6),
+                                            ),
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
+                                                3.6,
+                                            width: double.infinity,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  PhosphorIcons.qr_code_fill,
+                                                  color: bnw900,
+                                                  size: 46,
+                                                ),
+                                                Text(
+                                                  'Kartu Debit',
+                                                  style: heading3(
+                                                      FontWeight.w700,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                                Text(
+                                                  'Masukkan nomor kartu Debit untuk membayar.',
+                                                  textAlign: TextAlign.center,
+                                                  style: body1(FontWeight.w400,
+                                                      bnw900, 'Outfit'),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              dompetDigitalPageCon
+                                                  .jumpToPage(0);
+                                              _pageMetodeSwap.jumpToPage(0);
+                                              uangTunaiController.text = '0';
+                                            },
+                                            child: Container(
+                                              width: double.infinity,
+                                              margin: EdgeInsets.fromLTRB(
+                                                  size12, 0, size12, size12),
+                                              child: buttonXLoutline(
+                                                Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Icon(
+                                                        PhosphorIcons
+                                                            .arrow_left,
+                                                        size: size32,
+                                                        color: bnw900,
+                                                      ),
+                                                      SizedBox(width: size16),
+                                                      Text(
+                                                        'Kembali',
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      ),
+                                                    ]),
+                                                0,
+                                                bnw300,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -2452,76 +2632,198 @@ class _TransactionPageState extends State<TransactionPage>
     bool displayCode = false;
 
     return StatefulBuilder(
-      builder: (context, setState) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, setState) => PageView(
+        controller: dompetDigitalPageCon,
+        scrollDirection: Axis.vertical,
+        pageSnapping: true,
+        reverse: false,
+        physics: NeverScrollableScrollPhysics(),
         children: [
-          Text(
-            'Masukkan Nomor Kartu Debit',
-            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: size16),
-          Row(
-            children: [
-              Text(
-                'Nomor Kartu',
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading3(FontWeight.w400, red500, 'Outfit'),
-              ),
-            ],
-          ),
-          IntrinsicHeight(
-            child: Container(
-              child: TextField(
-                cursorColor: primary500,
-                onTap: () {
-                  displayCode = true;
-                  print(displayCode);
-                  setState(() {});
-                },
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                controller: debitpinController,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(20),
-                  NumericTextFormatter(),
-                ],
-                keyboardType: TextInputType.number,
-                readOnly: true,
-                onChanged: (value) {},
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      width: 2,
-                      color: primary500,
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: size8),
-                  isDense: true,
-                  focusColor: primary500,
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      width: 1.5,
-                      color: bnw500,
-                    ),
-                  ),
-                  hintText: 'Cth : 0000-0000-0000-0000',
-                  hintStyle: heading2(FontWeight.w700, bnw500, 'Outfit'),
+          SizedBox(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pilih Kartu Debit',
+                  style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                 ),
-              ),
+                SizedBox(height: size16),
+                Expanded(
+                    child: FutureBuilder<List<PaymentMethod>>(
+                  future: futurePaymentMethodsDebit,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(
+                          child: Text(
+                              'Payment tidak ditemukan.\n Buat Terlebih dahulu.'));
+                    }
+
+                    final paymentMethods = snapshot.data!;
+
+                    return ListView.builder(
+                      itemCount: paymentMethods.length,
+                      itemBuilder: (context, index) {
+                        final payment = paymentMethods[index];
+                        return GestureDetector(
+                          onTap: () {
+                            selectedIndexDompetDigital = index;
+                            print(totalTransaksi);
+                            // dompetDigitalPageCon.jumpToPage(index + 1);
+                            // _pageMetodeSwap.animateToPage(
+                            //   1,
+                            //   duration:  Duration(milliseconds: 10),
+                            //   curve: Curves.easeIn,
+                            // );
+
+                            setState(() {});
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: size16),
+                            padding: EdgeInsets.all(size12),
+                            width: double.infinity,
+                            height: 98,
+                            decoration: BoxDecoration(
+                              color: selectedIndexDompetDigital == index
+                                  ? primary200
+                                  : bnw100,
+                              borderRadius: BorderRadius.circular(size8),
+                              border: Border.all(
+                                color: selectedIndexDompetDigital == index
+                                    ? primary500
+                                    : bnw300,
+                                width: 1.6,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  PhosphorIcons.wallet_fill,
+                                  size: size64,
+                                ),
+                                // Image.asset(
+                                //   "assets/${metodePembayaranObjects[index].image}",
+                                // ),
+                                SizedBox(width: size16),
+                                Flexible(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        payment.paymentMethod ?? '',
+                                        style: heading3(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      ),
+                                      Text(
+                                        payment.accountNumber ?? '-',
+                                        style: heading4(
+                                            FontWeight.w400, bnw900, 'Outfit'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+
+                        // ListTile(
+                        //   title: Text(payment.paymentMethod ?? '-'),
+                        //   subtitle:
+                        //       Text('Account Number: ${payment.accountNumber}'),
+                        // );
+                      },
+                    );
+                  },
+                )),
+                Divider(),
+                rincianPembayaranSelanjutnya(
+                  context,
+                  dompetDigitalPageCon,
+                  _pageMetodeSwap,
+                  selectedIndexDompetDigital,
+                  3,
+                )
+              ],
             ),
           ),
-          Spacer(),
-          Divider(),
-          displayCode != true
-              ? rincianPembayaranDebitKredit(
-                  context,
-                  (uangTunaiController.text = totalTransaksi.toString()),
-                  '005',
-                  debitpinController.text,
-                )
-              : keypad(displayCode, debitpinController),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Masukkan Nomor Kartu Debit',
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Row(
+                children: [
+                  Text(
+                    'Nomor Kartu',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    ' *',
+                    style: heading3(FontWeight.w400, red500, 'Outfit'),
+                  ),
+                ],
+              ),
+              IntrinsicHeight(
+                child: Container(
+                  child: TextField(
+                    cursorColor: primary500,
+                    onTap: () {
+                      displayCode = true;
+                      print(displayCode);
+                      setState(() {});
+                    },
+                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    controller: debitpinController,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(20),
+                      NumericTextFormatter(),
+                    ],
+                    keyboardType: TextInputType.number,
+                    readOnly: true,
+                    onChanged: (value) {},
+                    decoration: InputDecoration(
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: primary500,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: size8),
+                      isDense: true,
+                      focusColor: primary500,
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 1.5,
+                          color: bnw500,
+                        ),
+                      ),
+                      hintText: 'Cth : 0000-0000-0000-0000',
+                      hintStyle: heading2(FontWeight.w700, bnw500, 'Outfit'),
+                    ),
+                  ),
+                ),
+              ),
+              Spacer(),
+              Divider(),
+              displayCode != true
+                  ? rincianPembayaranDebitKredit(
+                      context,
+                      (uangTunaiController.text = totalTransaksi.toString()),
+                      idpaymentmethode,
+                      debitpinController.text,
+                    )
+                  : keypad(displayCode, debitpinController),
+            ],
+          ),
         ],
       ),
     );
@@ -2532,82 +2834,193 @@ class _TransactionPageState extends State<TransactionPage>
     // TextEditingController pinController = TextEditingController();
 
     return StatefulBuilder(
-      builder: (context, setState) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, setState) => PageView(
+        controller: dompetDigitalPageCon,
+        scrollDirection: Axis.vertical,
+        pageSnapping: true,
+        reverse: false,
+        physics: NeverScrollableScrollPhysics(),
         children: [
-          Text(
-            'Masukkan Nomor Kartu Kredit',
-            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: size16),
-          Row(
-            children: [
-              Text(
-                'Nomor Kartu',
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading3(FontWeight.w400, red500, 'Outfit'),
-              ),
-            ],
-          ),
-          TextFormField(
-            cursorColor: primary500,
-            onTap: () {
-              displayCode = true;
-              print(displayCode);
-              setState(() {});
-            },
-            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-            keyboardType: TextInputType.number,
-            controller: kreditpinController,
-            readOnly: true,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(20),
-              NumericTextFormatter(),
-            ],
-            onChanged: (value) {},
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: size8),
-              isDense: true,
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
+          SizedBox(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pilih Kartu Kredit',
+                  style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                 ),
-              ),
-              hintText: 'Cth : 0000-0000-0000-0000',
-              hintStyle: heading2(FontWeight.w700, bnw500, 'Outfit'),
+                SizedBox(height: size16),
+                Expanded(
+                    child: FutureBuilder<List<PaymentMethod>>(
+                  future: futurePaymentMethodsKredit,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(
+                          child: Text(
+                              'Payment tidak ditemukan.\n Buat Terlebih dahulu.'));
+                    }
+
+                    final paymentMethods = snapshot.data!;
+
+                    return ListView.builder(
+                      itemCount: paymentMethods.length,
+                      itemBuilder: (context, index) {
+                        final payment = paymentMethods[index];
+                        return GestureDetector(
+                          onTap: () {
+                            selectedIndexDompetDigital = index;
+                            print(totalTransaksi);
+                            // dompetDigitalPageCon.jumpToPage(index + 1);
+                            // _pageMetodeSwap.animateToPage(
+                            //   1,
+                            //   duration:  Duration(milliseconds: 10),
+                            //   curve: Curves.easeIn,
+                            // );
+                            setState(() {});
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: size16),
+                            padding: EdgeInsets.all(size12),
+                            width: double.infinity,
+                            height: 98,
+                            decoration: BoxDecoration(
+                              color: selectedIndexDompetDigital == index
+                                  ? primary200
+                                  : bnw100,
+                              borderRadius: BorderRadius.circular(size8),
+                              border: Border.all(
+                                color: selectedIndexDompetDigital == index
+                                    ? primary500
+                                    : bnw300,
+                                width: 1.6,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  PhosphorIcons.wallet_fill,
+                                  size: size64,
+                                ),
+                                // Image.asset(
+                                //   "assets/${metodePembayaranObjects[index].image}",
+                                // ),
+                                SizedBox(width: size16),
+                                Flexible(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        payment.paymentMethod ?? '',
+                                        style: heading3(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      ),
+                                      Text(
+                                        payment.accountNumber ?? '-',
+                                        style: heading4(
+                                            FontWeight.w400, bnw900, 'Outfit'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+
+                        // ListTile(
+                        //   title: Text(payment.paymentMethod ?? '-'),
+                        //   subtitle:
+                        //       Text('Account Number: ${payment.accountNumber}'),
+                        // );
+                      },
+                    );
+                  },
+                )),
+                Divider(),
+                rincianPembayaranSelanjutnya(
+                  context,
+                  dompetDigitalPageCon,
+                  _pageMetodeSwap,
+                  selectedIndexDompetDigital,
+                  2,
+                )
+              ],
             ),
           ),
-          Spacer(),
-          Divider(),
-          displayCode != true
-              ? rincianPembayaranDebitKredit(
-                  context,
-                  (uangTunaiController.text = totalTransaksi.toString()),
-                  '004',
-                  kreditpinController.text,
-                )
-              : keypad(displayCode, kreditpinController),
-          // : NumPad(displayCode: displayCode, pinCon: kreditpinController,)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Masukkan Nomor Kartu Kredit',
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Row(
+                children: [
+                  Text(
+                    'Nomor Kartu',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    ' *',
+                    style: heading3(FontWeight.w400, red500, 'Outfit'),
+                  ),
+                ],
+              ),
+              TextFormField(
+                cursorColor: primary500,
+                onTap: () {
+                  displayCode = true;
+                  print(displayCode);
+                  setState(() {});
+                },
+                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                keyboardType: TextInputType.number,
+                controller: kreditpinController,
+                readOnly: true,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(20),
+                  NumericTextFormatter(),
+                ],
+                onChanged: (value) {},
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(vertical: size8),
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 1.5,
+                      color: bnw500,
+                    ),
+                  ),
+                  hintText: 'Cth : 0000-0000-0000-0000',
+                  hintStyle: heading2(FontWeight.w700, bnw500, 'Outfit'),
+                ),
+              ),
+              Spacer(),
+              Divider(),
+              displayCode != true
+                  ? rincianPembayaranDebitKredit(
+                      context,
+                      (uangTunaiController.text = totalTransaksi.toString()),
+                      idpaymentmethode,
+                      kreditpinController.text,
+                    )
+                  : keypad(displayCode, kreditpinController),
+              // : NumPad(displayCode: displayCode, pinCon: kreditpinController,)
+            ],
+          ),
         ],
       ),
     );
   }
 
   dompetDigital(BuildContext context) {
-    TextEditingController kodeManualPembayaran = TextEditingController();
-
-    List<MetodePembayaranObject> metodePembayaranObjects = [
-      // MetodePembayaranObject(
-      //     'Gunakan pembayaran dengan kode batang (QR) FifaPay',
-      //     'fifapaylogolong.png'),
-      MetodePembayaranObject(
-          'Pembayaran dengan dompet digital yang mendukung', 'qrislogo.png'),
-    ];
-
     return StatefulBuilder(
       builder: (context, setState) => PageView(
         controller: dompetDigitalPageCon,
@@ -2626,61 +3039,102 @@ class _TransactionPageState extends State<TransactionPage>
                 ),
                 SizedBox(height: size16),
                 Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: BouncingScrollPhysics(),
-                    itemCount: metodePembayaranObjects.length,
-                    itemBuilder: (context, index) => GestureDetector(
-                      onTap: () {
-                        selectedIndexDompetDigital = index;
-                        print(totalTransaksi);
-                        // dompetDigitalPageCon.jumpToPage(index + 1);
-                        // _pageMetodeSwap.animateToPage(
-                        //   1,
-                        //   duration:  Duration(milliseconds: 10),
-                        //   curve: Curves.easeIn,
-                        // );
-                        setState(() {});
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: size16),
-                        padding: EdgeInsets.all(size12),
-                        width: double.infinity,
-                        height: 98,
-                        decoration: BoxDecoration(
-                          color: selectedIndexDompetDigital == index
-                              ? primary200
-                              : bnw100,
-                          borderRadius: BorderRadius.circular(size8),
-                          border: Border.all(
-                            color: selectedIndexDompetDigital == index
-                                ? primary500
-                                : bnw300,
-                            width: 1.6,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              "assets/${metodePembayaranObjects[index].image}",
-                            ),
-                            SizedBox(width: size12),
-                            Flexible(
-                              child: Text(
-                                metodePembayaranObjects[index].title,
-                                style:
-                                    heading4(FontWeight.w400, bnw900, 'Outfit'),
+                    child: FutureBuilder<List<PaymentMethod>>(
+                  future: futurePaymentMethodsEWallet,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(
+                          child: Text(
+                              'Payment tidak ditemukan.\n Buat Terlebih dahulu.'));
+                    }
+
+                    final paymentMethods = snapshot.data!;
+
+                    return ListView.builder(
+                      itemCount: paymentMethods.length,
+                      itemBuilder: (context, index) {
+                        final payment = paymentMethods[index];
+                        return GestureDetector(
+                          onTap: () {
+                            selectedIndexDompetDigital = index;
+                            print(totalTransaksi);
+                            idpaymentmethode = payment.idpaymentmethode!;
+                            // log(payment.idpaymentmethode.toString());
+                            // dompetDigitalPageCon.jumpToPage(index + 1);
+                            // _pageMetodeSwap.animateToPage(
+                            //   1,
+                            //   duration:  Duration(milliseconds: 10),
+                            //   curve: Curves.easeIn,
+                            // );
+                            setState(() {});
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: size16),
+                            padding: EdgeInsets.all(size12),
+                            width: double.infinity,
+                            height: 98,
+                            decoration: BoxDecoration(
+                              color: selectedIndexDompetDigital == index
+                                  ? primary200
+                                  : bnw100,
+                              borderRadius: BorderRadius.circular(size8),
+                              border: Border.all(
+                                color: selectedIndexDompetDigital == index
+                                    ? primary500
+                                    : bnw300,
+                                width: 1.6,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  PhosphorIcons.wallet_fill,
+                                  size: size64,
+                                ),
+                                // Image.asset(
+                                //   "assets/${metodePembayaranObjects[index].image}",
+                                // ),
+                                SizedBox(width: size16),
+                                Flexible(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        payment.paymentMethod ?? '',
+                                        style: heading3(
+                                            FontWeight.w600, bnw900, 'Outfit'),
+                                      ),
+                                      Text(
+                                        payment.accountNumber ?? '-',
+                                        style: heading4(
+                                            FontWeight.w400, bnw900, 'Outfit'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+
+                        // ListTile(
+                        //   title: Text(payment.paymentMethod ?? '-'),
+                        //   subtitle:
+                        //       Text('Account Number: ${payment.accountNumber}'),
+                        // );
+                      },
+                    );
+                  },
+                )),
                 Divider(),
                 rincianPembayaranSelanjutnya(context, dompetDigitalPageCon,
-                    _pageMetodeSwap, selectedIndexDompetDigital)
+                    _pageMetodeSwap, selectedIndexDompetDigital, 1)
               ],
             ),
           ),
@@ -2764,7 +3218,7 @@ class _TransactionPageState extends State<TransactionPage>
                 Spacer(),
                 Divider(),
                 rincianPembayaranDebitKredit(
-                    context, totalTransaksi.toString(), '003', '')
+                    context, totalTransaksi.toString(), idpaymentmethode, '')
               ],
             ),
           ),
@@ -3165,6 +3619,7 @@ class _TransactionPageState extends State<TransactionPage>
     dompetDigitalPageCon,
     pageMetodeSwap,
     index,
+    pagePembayaran,
   ) {
     return WillPopScope(
       onWillPop: () async => true,
@@ -3208,7 +3663,7 @@ class _TransactionPageState extends State<TransactionPage>
             child: GestureDetector(
               onTap: () async {
                 dompetDigitalPageCon.jumpToPage(index + 1);
-                pageMetodeSwap.jumpToPage(1);
+                pageMetodeSwap.jumpToPage(pagePembayaran);
 
                 uangTunaiController.text = totalTransaksi.toString();
 
@@ -3304,7 +3759,8 @@ class _TransactionPageState extends State<TransactionPage>
                     double.infinity,
                     bnw300)
                 : GestureDetector(
-                    onTap: () {
+                    onTap: () { 
+                      log(payMethod.toString());
                       if (uangTunaiController.text != 'Rp 0') {
                         if (uangTunaiController.text != '0') {
                           createTransactionBayar(

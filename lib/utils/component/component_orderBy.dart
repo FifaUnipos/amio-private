@@ -1,6 +1,6 @@
-
 String textOrderBy = 'Nama Toko A ke Z ';
 String textvalueOrderBy = 'upDownNama';
+String textOrderByCOA = 'Debit';
 
 List alasanTagihanText = [
   "Salah Input Produk",
@@ -111,6 +111,11 @@ List orderByRiwayatTagihan = [
   "downUpNama",
   "downUpAmount",
   "upDownAmount",
+];
+List orderByCOAText = [
+  "Debit",
+  "Kredit",
+  "EWallet",
 ];
 
 int valueOrderByProduct = 0;
