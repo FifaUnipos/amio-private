@@ -1,11 +1,16 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'dart:typed_data';
 
 import '../../models/dropdowntokomodel.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
@@ -45,7 +50,6 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
   bool bttnValidated = false;
 
   TextEditingController searchController = TextEditingController();
-
   File? myImage;
   Uint8List? bytes;
   String? img64;
@@ -55,7 +59,12 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      // imageQuality: 50,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 

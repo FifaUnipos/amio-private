@@ -575,6 +575,7 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                       children: [
                                                         Text(
                                                           '${detailItem['payment_method']['payment_method']}',
+                                                        //  'cakep',
                                                           style: heading4(
                                                               FontWeight.w600,
                                                               bnw900,

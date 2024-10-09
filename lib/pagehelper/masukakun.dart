@@ -2,10 +2,14 @@ import 'daftarAkun.dart';
 import 'loginregis/login_page.dart';
 import 'loginregis/register_page.dart';
 
-import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';import '../../../../../utils/component/component_button.dart';
+import 'package:flutter_svg/svg.dart';
+import '../../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';
+
 class MasukAkunPage extends StatelessWidget {
   const MasukAkunPage({super.key});
 

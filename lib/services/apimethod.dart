@@ -3828,6 +3828,7 @@ Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
   }
 }
 
+String coaValueKredit = '', coaValueDebit = '', coaValueEWallet = '';
 Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
   final response = await http.post(
     Uri.parse(getCoaMethodLink),
@@ -3844,6 +3845,14 @@ Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
     List<dynamic> jsonData = jsonResponse['data'];
+
+    if (category == 'Kredit') {
+      jsonData.isEmpty ? coaValueKredit= 'null' : '';
+    } else if (category == 'Debit') {
+      jsonData.isEmpty ? coaValueDebit = 'null' : '';
+    } else if (category == 'EWallet') {
+      jsonData.isEmpty ? coaValueEWallet = 'null' : '';
+    }
     return jsonData.map((data) => PaymentMethod.fromJson(data)).toList();
   } else {
     throw Exception('Failed to load payment methods');

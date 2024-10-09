@@ -1,5 +1,7 @@
-
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'component_size.dart';
 
 import 'package:flutter/services.dart';
 import '../component/component_color.dart';
@@ -29,10 +31,9 @@ Future<dynamic> showBottomPilihan(BuildContext context, Widget child) {
     constraints: const BoxConstraints(
       maxWidth: double.infinity,
     ),
-    useRootNavigator: false,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(size16),
+      borderRadius: BorderRadius.circular(25),
     ),
     context: context,
     builder: (context) {
@@ -172,7 +173,7 @@ showModalBottomExit(context) {
         ),
         SizedBox(height: size8),
         Text(
-          'Jika kamu keluar, kamu data akan tetap tersimpan.',
+          'Jika kamu keluar, semua data kamu akan tetap tersimpan.',
           style: heading2(FontWeight.w400, bnw900, 'Outfit'),
         ),
         SizedBox(height: size32),

@@ -740,8 +740,8 @@ class _ScreensExampleState extends State<_ScreensExample> {
             case 2:
               return ProdukToko(token: widget.token);
             case 3:
-              //   return InventoriPage();
-              return COAPage(token: widget.token);
+              // return InventoriPage(token: widget.token);
+            return COAPage(token: widget.token);
             case 4:
               //   return InventoriPage();
               return TransactionPage(token: widget.token);

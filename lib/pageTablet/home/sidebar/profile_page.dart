@@ -251,6 +251,9 @@ class ProfilePageState extends State<ProfilePage> {
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: () async {
+                                      // Isolate.current.kill(priority: Isolate.immediate);
+                                      // runApp();
+                                      
                                       logout(
                                         widget.token,
                                         identifier,

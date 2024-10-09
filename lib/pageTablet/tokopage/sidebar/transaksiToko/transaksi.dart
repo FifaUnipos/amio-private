@@ -2672,6 +2672,7 @@ class _TransactionPageState extends State<TransactionPage>
                           onTap: () {
                             selectedIndexDompetDigital = index;
                             print(totalTransaksi);
+                            idpaymentmethode = payment.idpaymentmethode!;
                             // dompetDigitalPageCon.jumpToPage(index + 1);
                             // _pageMetodeSwap.animateToPage(
                             //   1,
@@ -2748,6 +2749,7 @@ class _TransactionPageState extends State<TransactionPage>
                   _pageMetodeSwap,
                   selectedIndexDompetDigital,
                   3,
+                  coaValueDebit == '' ? true : false,
                 )
               ],
             ),
@@ -2874,6 +2876,7 @@ class _TransactionPageState extends State<TransactionPage>
                           onTap: () {
                             selectedIndexDompetDigital = index;
                             print(totalTransaksi);
+                            idpaymentmethode = payment.idpaymentmethode!;
                             // dompetDigitalPageCon.jumpToPage(index + 1);
                             // _pageMetodeSwap.animateToPage(
                             //   1,
@@ -2944,12 +2947,12 @@ class _TransactionPageState extends State<TransactionPage>
                 )),
                 Divider(),
                 rincianPembayaranSelanjutnya(
-                  context,
-                  dompetDigitalPageCon,
-                  _pageMetodeSwap,
-                  selectedIndexDompetDigital,
-                  2,
-                )
+                    context,
+                    dompetDigitalPageCon,
+                    _pageMetodeSwap,
+                    selectedIndexDompetDigital,
+                    2,
+                    coaValueKredit == '' ? true : false)
               ],
             ),
           ),
@@ -3061,8 +3064,9 @@ class _TransactionPageState extends State<TransactionPage>
                         return GestureDetector(
                           onTap: () {
                             selectedIndexDompetDigital = index;
-                            print(totalTransaksi);
+                            // print(totalTransaksi);
                             idpaymentmethode = payment.idpaymentmethode!;
+                            // log(idpaymentmethode.toString());
                             // log(payment.idpaymentmethode.toString());
                             // dompetDigitalPageCon.jumpToPage(index + 1);
                             // _pageMetodeSwap.animateToPage(
@@ -3133,8 +3137,13 @@ class _TransactionPageState extends State<TransactionPage>
                   },
                 )),
                 Divider(),
-                rincianPembayaranSelanjutnya(context, dompetDigitalPageCon,
-                    _pageMetodeSwap, selectedIndexDompetDigital, 1)
+                rincianPembayaranSelanjutnya(
+                    context,
+                    dompetDigitalPageCon,
+                    _pageMetodeSwap,
+                    selectedIndexDompetDigital,
+                    1,
+                    coaValueEWallet == '' ? true : false)
               ],
             ),
           ),
@@ -3620,6 +3629,7 @@ class _TransactionPageState extends State<TransactionPage>
     pageMetodeSwap,
     index,
     pagePembayaran,
+    onoff,
   ) {
     return WillPopScope(
       onWillPop: () async => true,
@@ -3661,33 +3671,37 @@ class _TransactionPageState extends State<TransactionPage>
           SizedBox(height: size16),
           SizedBox(
             child: GestureDetector(
-              onTap: () async {
-                dompetDigitalPageCon.jumpToPage(index + 1);
-                pageMetodeSwap.jumpToPage(pagePembayaran);
+                onTap: () async {
+                  onoff == true
+                      ? setState(() {
+                          dompetDigitalPageCon.jumpToPage(index + 1);
+                          pageMetodeSwap.jumpToPage(pagePembayaran);
 
-                uangTunaiController.text = totalTransaksi.toString();
-
-                setState(() {});
-              },
-              child: buttonXXL(
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Selanjutnya',
-                      style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
-                    SizedBox(width: size16),
-                    Icon(
-                      PhosphorIcons.arrow_right,
-                      color: bnw100,
-                      size: size32,
-                    ),
-                  ],
-                ),
-                double.infinity,
-              ),
-            ),
+                          uangTunaiController.text = totalTransaksi.toString();
+                        })
+                      : setState(() {});
+                },
+                child: onoff == true
+                    ? buttonXXL(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Selanjutnya',
+                              style:
+                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                            SizedBox(width: size16),
+                            Icon(
+                              PhosphorIcons.arrow_right,
+                              color: bnw100,
+                              size: size32,
+                            ),
+                          ],
+                        ),
+                        double.infinity,
+                      )
+                    : SizedBox()),
           ),
         ],
       ),
@@ -3759,7 +3773,7 @@ class _TransactionPageState extends State<TransactionPage>
                     double.infinity,
                     bnw300)
                 : GestureDetector(
-                    onTap: () { 
+                    onTap: () {
                       log(payMethod.toString());
                       if (uangTunaiController.text != 'Rp 0') {
                         if (uangTunaiController.text != '0') {

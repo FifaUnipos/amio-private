@@ -2,8 +2,8 @@
 
 //! XXL Button
 
-
-import 'package:flutter/material.dart';import 'component_size.dart';
+import 'package:flutter/material.dart';
+import 'component_size.dart';
 import '../component/component_color.dart';
 
 buttonXXL(Widget mywidget, double width) {
@@ -39,8 +39,9 @@ buttonXXLoutline(Widget mywidget, double width, Color colorBorder) {
 }
 
 buttonXXLonOff(Widget mywidget, double width, Color color) {
-  return IntrinsicWidth(
+  return IntrinsicHeight(
     child: Container(
+      width: width,
       padding: EdgeInsets.symmetric(horizontal: size24, vertical: size16),
       decoration: BoxDecoration(
         color: color,
