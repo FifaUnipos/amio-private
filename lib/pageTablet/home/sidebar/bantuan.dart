@@ -16,10 +16,14 @@ class BantuanGrup extends StatefulWidget {
 
 class _BantuanGrupState extends State<BantuanGrup> {
   PageController pageController = PageController();
+  List<Step> _steps = [];
+  List<bool> _isExpandedList = [];
 
   @override
   void initState() {
     checkConnection(context);
+    _steps = getSteps();
+    _isExpandedList = List.generate(_steps.length, (index) => false);
     super.initState();
     pageController = PageController(
       initialPage: 0,
@@ -28,7 +32,7 @@ class _BantuanGrupState extends State<BantuanGrup> {
     );
   }
 
-  final List<Step> _steps = getSteps();
+  // Use List of steps initialized once in initState
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +54,6 @@ class _BantuanGrupState extends State<BantuanGrup> {
             ListView(
               padding: EdgeInsets.zero,
               physics: BouncingScrollPhysics(),
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -101,30 +104,50 @@ class _BantuanGrupState extends State<BantuanGrup> {
                     ),
                     Text('Pertanyaan',
                         style: heading3(FontWeight.w600, bnw900, 'Outfit')),
-                    Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(size20)),
-                      child: ExpansionPanelList(
-                        expansionCallback: (int index, bool isExpanded) {
-                          setState(() {
-                            _steps[index].isExpanded = !isExpanded;
-                          });
-                        },
-                        children: _steps.map<ExpansionPanel>((Step step) {
-                          return ExpansionPanel(
-                            canTapOnHeader: true,
-                            headerBuilder:
-                                (BuildContext context, bool isExpanded) {
-                              return ListTile(
-                                title: Text(step.title),
-                              );
-                            },
-                            body: ListTile(
-                              title: Text(step.body),
-                            ),
-                            isExpanded: step.isExpanded,
-                          );
-                        }).toList(),
+                    SizedBox(height: size12),
+                    SingleChildScrollView(
+                      padding: EdgeInsets.zero,
+                      child: Container(
+                        padding: EdgeInsets.only(bottom: size12),
+                        child: ExpansionPanelList(
+                          elevation: 1,
+                          expansionCallback: (int index, bool isExpanded) {
+                            setState(() {
+                              _isExpandedList[index] = !_isExpandedList[
+                                  index]; // Ubah status ekspansi
+                            });
+                          },
+                          children: _steps
+                              .asMap()
+                              .entries
+                              .map<ExpansionPanel>((entry) {
+                            int index = entry.key;
+                            Step step = entry.value;
+                            return ExpansionPanel(
+                              backgroundColor: primary100,
+                              canTapOnHeader: true,
+                              headerBuilder:
+                                  (BuildContext context, bool isExpanded) {
+                                return ListTile(
+                                  title: Text(
+                                    step.title,
+                                    style: heading3(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                );
+                              },
+                              body: ListTile(
+                                title: Text(
+                                  step.body,
+                                  style: heading4(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ),
+                              isExpanded: _isExpandedList[
+                                  index], // Status ekspansi berdasarkan index
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   ],
@@ -155,7 +178,6 @@ class _BantuanGrupState extends State<BantuanGrup> {
           ],
         ),
         SizedBox(height: size16),
-        // Expanded(child: SlidableWidget()),
         Expanded(
           child: Column(
             children: [
@@ -239,10 +261,8 @@ Container frameDash(String title, IconData icon) {
     margin: EdgeInsets.fromLTRB(0, size8, size8, 0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(size8),
-      // color: primary200,
     ),
     child: Column(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           margin: EdgeInsets.only(bottom: size8, right: size8),
@@ -268,23 +288,18 @@ Container frameDash(String title, IconData icon) {
 }
 
 class Step {
-  Step(
-    this.title,
-    this.body, [
-    this.isExpanded = false,
-  ]);
+  Step(this.title, this.body);
   String title;
   String body;
-  bool isExpanded;
 }
 
 List<Step> getSteps() {
   return [
-    Step('Apasih UniPOS itu?', 'Itu aplikasi kasir atau Point Of Sell ya :)'),
-    // Step('Step 1: Create a project',
-    //     'Open your terminal, run `flutter create <project_name>` to create a new project.'),
-    // Step('Step 2: Run the app',
-    //     'Change your terminal directory to the project directory, enter `flutter run`.'),
+    Step('Apa yang harus saya lakukan setelah berhasil masuk ke aplikasi?',
+        'Jika Anda daftar sebagai akun toko, maka Anda harus mendaftar akun toko terlebih dahulu. Jika Anda mendaftar sebagai grup toko, langkahnya adalah membuat toko, membuat akun, dan menambahkan produk.'),
+    Step('Ada paket lisensi apa saja untuk berlangganan aplikasi UniPOS?',
+        'Paket Basic, Paket Pro, dan Paket Pro+ tersedia.'),
+    Step('Apakah bisa upgrade tipe akun di UniPOS?',
+        'Bisa, Anda dapat mendaftar sebagai toko, lalu meng-upgrade ke grup toko.'),
   ];
 }
-

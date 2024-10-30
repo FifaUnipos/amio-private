@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../models/tokoModel/keuanganModel.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
 import '../../../../../services/apimethod.dart';
@@ -575,7 +578,6 @@ class _LihatKeuanganTokoState extends State<LihatKeuanganToko>
                                                       children: [
                                                         Text(
                                                           '${detailItem['payment_method']['payment_method']}',
-                                                        //  'cakep',
                                                           style: heading4(
                                                               FontWeight.w600,
                                                               bnw900,

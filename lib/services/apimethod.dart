@@ -46,8 +46,8 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-// String url = 'https://api.prod.amio.my.id';
-String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+String url = 'https://api.prod.amio.my.id';
+// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -3802,8 +3802,38 @@ Future createCOA(
   }
 }
 
+Future updateCOA(BuildContext context, token, idPaymentMethod, paymentMethod,
+    accountNumber) async {
+  whenLoading(context);
+  final response = await http.post(
+    Uri.parse(updateCoaLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "idPaymentMethod": idPaymentMethod,
+      "paymentMethod": paymentMethod,
+      "accountNumber": accountNumber,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    print(jsonResponse.toString());
+
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
 Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
   whenLoading(context);
+  String jsonData = jsonEncode(idPaymentMethod);
   final response = await http.post(
     Uri.parse(deleteCoaLink),
     headers: {
@@ -3811,7 +3841,7 @@ Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
     },
     body: {
       "deviceid": identifier,
-      "idPaymentMethod": idPaymentMethod,
+      "idPaymentMethod": jsonData,
     },
   );
 
@@ -3847,7 +3877,7 @@ Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
     List<dynamic> jsonData = jsonResponse['data'];
 
     if (category == 'Kredit') {
-      jsonData.isEmpty ? coaValueKredit= 'null' : '';
+      jsonData.isEmpty ? coaValueKredit = 'null' : '';
     } else if (category == 'Debit') {
       jsonData.isEmpty ? coaValueDebit = 'null' : '';
     } else if (category == 'EWallet') {

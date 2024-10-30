@@ -1,5 +1,8 @@
 import 'dart:developer';
 
+import 'package:amio/pageTablet/home/sidebar/coaPageGrup/coaPageGrup.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/coaToko/coaPage.dart';
+
 import '../../main.dart';
 import '../../utils/component/component_loading.dart';
 import 'sidebar/bantuan.dart';
@@ -15,14 +18,18 @@ import '../tokopage/sidebar/transaksiToko/transaksi.dart';
 
 import '../../utils/printer/printerPage.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sidebarx/sidebarx.dart';
 import '../../pagehelper/loginregis/login_page.dart';
 import '../../services/apimethod.dart';
-import '../../services/notification.dart';import '../../../../utils/component/component_orderBy.dart';
+import '../../services/notification.dart';
+import '../../../../utils/component/component_orderBy.dart';
 import '../test/akun.dart';
 import '../test/dashboardnew.dart';
 import '../tokopage/dashboardtoko.dart';
@@ -32,7 +39,8 @@ import '../tokopage/sidebar/tokoToko/toko.dart';
 import 'sidebar/akunPage/akungrup.dart';
 import 'sidebar/inventorigrup.dart';
 import 'sidebar/keuanganGrup/keuanganGrup.dart';
-import 'sidebar/profile_page.dart';import '../../../../utils/component/component_color.dart';
+import 'sidebar/profile_page.dart';
+import '../../../../utils/component/component_color.dart';
 
 class SidebarXExampleApp extends StatefulWidget {
   final String token, id;
@@ -547,6 +555,21 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 3
+              ? PhosphorIcons.cardholder_fill
+              : PhosphorIcons.cardholder,
+          label: 'COA',
+          onTap: () {
+            widget.pageController.jumpToPage(0);
+            widget.controller.selectedIndex;
+            setState(() {
+              selectedIndexSideBar = false;
+              iconSelectedSidebar = 3;
+              valueOrderByProduct = 0;
+            });
+          },
+        ),
+        SidebarXItem(
+          icon: iconSelectedSidebar == 4
               ? PhosphorIcons.tag_fill
               : PhosphorIcons.tag,
           label: 'Promo',
@@ -555,7 +578,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 3;
+              iconSelectedSidebar = 4;
               valueOrderByProduct = 0;
             });
           },
@@ -572,25 +595,10 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         //   },
         // ),
         SidebarXItem(
-          icon: iconSelectedSidebar == 4
+          icon: iconSelectedSidebar == 5
               ? PhosphorIcons.users_three_fill
               : PhosphorIcons.users_three,
           label: 'Akun',
-          onTap: () {
-            widget.pageController.jumpToPage(0);
-            widget.controller.selectedIndex;
-            setState(() {
-              selectedIndexSideBar = false;
-              iconSelectedSidebar = 4;
-              valueOrderByProduct = 0;
-            });
-          },
-        ),
-        SidebarXItem(
-          icon: iconSelectedSidebar == 5
-              ? PhosphorIcons.shopping_cart_fill
-              : PhosphorIcons.shopping_cart,
-          label: 'Transaksi',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -603,9 +611,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 6
-              ? PhosphorIcons.money_fill
-              : PhosphorIcons.money,
-          label: 'Keuangan',
+              ? PhosphorIcons.shopping_cart_fill
+              : PhosphorIcons.shopping_cart,
+          label: 'Transaksi',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -616,12 +624,11 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             });
           },
         ),
-
         SidebarXItem(
           icon: iconSelectedSidebar == 7
-              ? PhosphorIcons.file_text_fill
-              : PhosphorIcons.file_text,
-          label: 'Laporan',
+              ? PhosphorIcons.money_fill
+              : PhosphorIcons.money,
+          label: 'Keuangan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -632,11 +639,12 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             });
           },
         ),
+
         SidebarXItem(
           icon: iconSelectedSidebar == 8
-              ? PhosphorIcons.question_fill
-              : PhosphorIcons.question,
-          label: 'Bantuan',
+              ? PhosphorIcons.file_text_fill
+              : PhosphorIcons.file_text,
+          label: 'Laporan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -649,6 +657,21 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 9
+              ? PhosphorIcons.question_fill
+              : PhosphorIcons.question,
+          label: 'Bantuan',
+          onTap: () {
+            widget.pageController.jumpToPage(0);
+            widget.controller.selectedIndex;
+            setState(() {
+              selectedIndexSideBar = false;
+              iconSelectedSidebar = 9;
+              valueOrderByProduct = 0;
+            });
+          },
+        ),
+        SidebarXItem(
+          icon: iconSelectedSidebar == 10
               ? PhosphorIcons.printer_fill
               : PhosphorIcons.printer,
           label: 'Printer',
@@ -657,7 +680,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 9;
+              iconSelectedSidebar = 10;
               valueOrderByProduct = 0;
             });
           },
@@ -699,18 +722,19 @@ class _ScreensExampleState extends State<_ScreensExample> {
           case 2:
             return ProdukGrup(token: widget.token);
           case 3:
-            // return ProdukGrup(token: widget.token);
-            return PromoGrup(token: widget.token);
+            return COAPageGrup(token: widget.token);
           case 4:
+            return PromoGrup(token: widget.token);
+          case 5:
             // return ProdukGrup(token: widget.token);
             return AkunGrup(token: widget.token);
-          case 5:
-            // return InventoriGrup(token: widget.token);
-            return TransaksiGrup(token: widget.token);
           case 6:
             // return InventoriGrup(token: widget.token);
-            return KeuanganGrup(token: widget.token);
+            return TransaksiGrup(token: widget.token);
           case 7:
+            // return InventoriGrup(token: widget.token);
+            return KeuanganGrup(token: widget.token);
+          case 8:
             // return AkunGrup(token: widget.token);
             return LaporanToko(
               token: widget.token,
@@ -720,10 +744,10 @@ class _ScreensExampleState extends State<_ScreensExample> {
           //   token: widget.token,
           //   controller: widget.controller,
           // );
-          case 8:
+          case 9:
             return BantuanGrup();
           // return TransaksiGrup(token: widget.token);
-          case 9:
+          case 10:
             return BluetoothPage();
           // return KeuanganGrup(token: widget.token);
           // case size8:

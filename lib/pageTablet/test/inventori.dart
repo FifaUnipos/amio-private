@@ -40,6 +40,7 @@ class _InventoriPageState extends State<InventoriPage>
   List<ModelDataProduk>? datasProduk;
   Map<int, bool> selectedFlag = {};
 
+  int _selectedIndex = -1;
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
@@ -95,6 +96,7 @@ class _InventoriPageState extends State<InventoriPage>
       body: SafeArea(
         child: Container(
           margin: EdgeInsets.all(size16),
+          padding: EdgeInsets.all(size16),
           decoration: BoxDecoration(
             color: bnw100,
             borderRadius: BorderRadius.circular(size16),
@@ -107,6 +109,7 @@ class _InventoriPageState extends State<InventoriPage>
             physics: NeverScrollableScrollPhysics(),
             children: [
               getAllProduct(context, _pageController),
+              tambahInventori(),
             ],
           ),
         ),
@@ -120,173 +123,169 @@ class _InventoriPageState extends State<InventoriPage>
       children: [
         Expanded(
           flex: 2,
-          child: Padding(
-            padding: EdgeInsets.all(size16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Transaksi',
-                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            nameToko ?? '',
-                            style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      SizedBox(width: size16),
-                      Expanded(
-                        child: SizedBox(
-                          child: TextField(
-                            cursorColor: primary500,
-                            textAlignVertical: TextAlignVertical.center,
-                            controller: searchController,
-                            onChanged: _onChanged,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: size12),
-                              isDense: true,
-                              filled: true,
-                              fillColor: bnw200,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                                borderSide: BorderSide(
-                                  color: bnw300,
-                                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Transaksi',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          nameToko ?? '',
+                          style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: size16),
+                    Expanded(
+                      child: SizedBox(
+                        child: TextField(
+                          cursorColor: primary500,
+                          textAlignVertical: TextAlignVertical.center,
+                          controller: searchController,
+                          onChanged: _onChanged,
+                          decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: size12),
+                            isDense: true,
+                            filled: true,
+                            fillColor: bnw200,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(size8),
+                              borderSide: BorderSide(
+                                color: bnw300,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                                borderSide: BorderSide(
-                                  width: 2,
-                                  color: primary500,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                                borderSide: BorderSide(
-                                  color: bnw300,
-                                ),
-                              ),
-                              prefixIcon: Container(
-                                margin: EdgeInsets.only(
-                                    left: size20, right: size12),
-                                child: Icon(
-                                  PhosphorIcons.magnifying_glass,
-                                  color: bnw900,
-                                  size: size20,
-                                ),
-                              ),
-                              suffixIcon: searchController.text.isNotEmpty
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        searchController.text = '';
-                                        initState();
-                                      },
-                                      child: Icon(
-                                        PhosphorIcons.x_fill,
-                                        size: size20,
-                                        color: bnw900,
-                                      ),
-                                    )
-                                  : null,
-                              hintText: 'Cari nama persediaan',
-                              hintStyle:
-                                  heading3(FontWeight.w500, bnw400, 'Outfit'),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(size8),
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: primary500,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(size8),
+                              borderSide: BorderSide(
+                                color: bnw300,
+                              ),
+                            ),
+                            prefixIcon: Container(
+                              margin:
+                                  EdgeInsets.only(left: size20, right: size12),
+                              child: Icon(
+                                PhosphorIcons.magnifying_glass,
+                                color: bnw900,
+                                size: size20,
+                              ),
+                            ),
+                            suffixIcon: searchController.text.isNotEmpty
+                                ? GestureDetector(
+                                    onTap: () {
+                                      searchController.text = '';
+                                      initState();
+                                    },
+                                    child: Icon(
+                                      PhosphorIcons.x_fill,
+                                      size: size20,
+                                      color: bnw900,
+                                    ),
+                                  )
+                                : null,
+                            hintText: 'Cari nama persediaan',
+                            hintStyle:
+                                heading3(FontWeight.w500, bnw400, 'Outfit'),
                           ),
                         ),
                       ),
-                      SizedBox(width: size16),
-                      GestureDetector(
-                        onTap: () {
-                          // refreshDataProduk();
-                          // _pageController.jumpToPage(1);
-                        },
-                        child: buttonXL(
-                          Row(
-                            children: [
-                              Icon(PhosphorIcons.plus, color: bnw100),
-                              SizedBox(width: size16),
-                              Text(
-                                'Persediaan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
-                              ),
-                            ],
-                          ),
-                          0,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: TabBar(
-                          controller: _tabController,
-                          automaticIndicatorColorAdjustment: false,
-                          indicatorColor: primary500,
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          unselectedLabelColor: bnw600,
-                          labelColor: primary500,
-                          labelStyle:
-                              heading2(FontWeight.w400, bnw900, 'Outfit'),
-                          physics: NeverScrollableScrollPhysics(),
-                          onTap: (value) {
-                            if (value == 0) {
-                              _pageController.animateToPage(
-                                0,
-                                duration: Duration(milliseconds: 10),
-                                curve: Curves.ease,
-                              );
-                            } else if (value == 1) {
-                              _pageController.animateToPage(
-                                2,
-                                duration: Duration(milliseconds: 10),
-                                curve: Curves.ease,
-                              );
-                            }
-                            setState(() {});
-                          },
-                          tabs: [
-                            Tab(
-                              text: 'Persediaan',
-                            ),
-                            Tab(
-                              text: 'Pemesanan',
+                    ),
+                    SizedBox(width: size16),
+                    GestureDetector(
+                      onTap: () {
+                        // refreshDataProduk();
+                        _pageController.jumpToPage(1);
+                      },
+                      child: buttonXL(
+                        Row(
+                          children: [
+                            Icon(PhosphorIcons.plus, color: bnw100),
+                            SizedBox(width: size16),
+                            Text(
+                              'Persediaan',
+                              style:
+                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
                             ),
                           ],
                         ),
+                        0,
                       ),
-                      Expanded(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: TabBarView(
-                            physics: NeverScrollableScrollPhysics(),
-                            controller: _tabController,
-                            children: [
-                              persediaan(context),
-                              persediaan(context),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
+                    )
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: TabBar(
+                        controller: _tabController,
+                        automaticIndicatorColorAdjustment: false,
+                        indicatorColor: primary500,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        unselectedLabelColor: bnw600,
+                        labelColor: primary500,
+                        labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
+                        physics: NeverScrollableScrollPhysics(),
+                        onTap: (value) {
+                          if (value == 0) {
+                            _pageController.animateToPage(
+                              0,
+                              duration: Duration(milliseconds: 10),
+                              curve: Curves.ease,
+                            );
+                          } else if (value == 1) {
+                            _pageController.animateToPage(
+                              2,
+                              duration: Duration(milliseconds: 10),
+                              curve: Curves.ease,
+                            );
+                          }
+                          setState(() {});
+                        },
+                        tabs: [
+                          Tab(
+                            text: 'Persediaan',
+                          ),
+                          Tab(
+                            text: 'Pemesanan',
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: TabBarView(
+                          physics: NeverScrollableScrollPhysics(),
+                          controller: _tabController,
+                          children: [
+                            persediaan(context),
+                            persediaan(context),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
           ),
         )
       ],
@@ -1263,6 +1262,1110 @@ class _InventoriPageState extends State<InventoriPage>
           ),
         ],
       ),
+    );
+  }
+
+  tambahInventori() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                getDataProduk(['']);
+
+                _pageController.jumpToPage(0);
+              },
+              child: Icon(
+                PhosphorIcons.arrow_left,
+                size: size48,
+                color: bnw900,
+              ),
+            ),
+            SizedBox(width: size16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pemakaian Tersedia',
+                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                Text(
+                  'Produk akan ditambahkan kedalam Toko yang telah dipilih',
+                  style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(height: size16),
+        Expanded(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: primary500,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(size16),
+                    topRight: Radius.circular(size16),
+                  ),
+                ),
+                child: isSelectionMode == false
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          SizedBox(
+                            child: GestureDetector(
+                              onTap: () {
+                                _selectAll(productIdCheckAll);
+                              },
+                              child: SizedBox(
+                                width: 50,
+                                child: Icon(
+                                  isSelectionMode
+                                      ? PhosphorIcons.check
+                                      : PhosphorIcons.square,
+                                  color: bnw100,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 4,
+                            child: Text(
+                              'Nama Produk',
+                              style:
+                                  heading4(FontWeight.w700, bnw100, 'Outfit'),
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width / size8,
+                                minWidth:
+                                    MediaQuery.of(context).size.width / size8,
+                              ),
+                              child: Text(
+                                'Harga Normal',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width / size8,
+                                minWidth:
+                                    MediaQuery.of(context).size.width / size8,
+                              ),
+                              child: Text(
+                                'Harga Online',
+                                style:
+                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width / 18,
+                              minWidth: MediaQuery.of(context).size.width / 18,
+                            ),
+                            child: Text(
+                              'PPN',
+                              style:
+                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width / size12,
+                              minWidth:
+                                  MediaQuery.of(context).size.width / size12,
+                            ),
+                            child: Text(
+                              'Tampil Kasir',
+                              style:
+                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Container(width: 96),
+                          SizedBox(width: size16),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          SizedBox(
+                            child: GestureDetector(
+                              onTap: () {
+                                _selectAll(productIdCheckAll);
+                              },
+                              child: SizedBox(
+                                width: 50,
+                                child: Icon(
+                                  checkFill == 'penuh'
+                                      ? PhosphorIcons.check_square_fill
+                                      : isSelectionMode
+                                          ? PhosphorIcons.minus_circle_fill
+                                          : PhosphorIcons.square,
+                                  color: bnw100,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
+                            // 'produk terpilih',
+                            style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                          SizedBox(width: size8),
+                          GestureDetector(
+                            onTap: () {
+                              showBottomPilihan(
+                                context,
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          'Yakin Ingin Menghapus Produk?',
+                                          style: heading1(FontWeight.w600,
+                                              bnw900, 'Outfit'),
+                                        ),
+                                        SizedBox(height: size16),
+                                        Text(
+                                          'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                          style: heading2(FontWeight.w400,
+                                              bnw900, 'Outfit'),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: size16),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              // deleteProduk(
+                                              //   context,
+                                              //   widget.token,
+                                              //   listProduct,
+                                              //   "",
+                                              // ).then(
+                                              //   (value) async {
+                                              //     if (value == '00') {
+                                              //       refreshDataProduk();
+                                              //       await Future.delayed(Duration(seconds: 1));
+                                              //       conNameProduk.text = '';
+                                              //       conHarga.text = '';
+                                              //       idProduct = '';
+                                              //       _pageController.jumpToPage(0);
+                                              //       setState(() {});
+                                              //       initState();
+                                              //     }
+                                              //   },
+                                              // );
+                                              // refreshDataProduk();
+
+                                              setState(() {});
+                                              initState();
+                                            },
+                                            child: buttonXLoutline(
+                                              Center(
+                                                child: Text(
+                                                  'Iya, Hapus',
+                                                  style: heading3(
+                                                      FontWeight.w600,
+                                                      primary500,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                              MediaQuery.of(context).size.width,
+                                              primary500,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size12),
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: buttonXL(
+                                              Center(
+                                                child: Text(
+                                                  'Batalkan',
+                                                  style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw100,
+                                                      'Outfit'),
+                                                ),
+                                              ),
+                                              MediaQuery.of(context).size.width,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: buttonL(
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Icon(PhosphorIcons.trash_fill, color: bnw900),
+                                  Text(
+                                    'Hapus Semua',
+                                    style: heading3(
+                                        FontWeight.w600, bnw900, 'Outfit'),
+                                  ),
+                                ],
+                              ),
+                              bnw100,
+                              bnw300,
+                            ),
+                          ),
+                          SizedBox(width: size8),
+                        ],
+                      ),
+              ),
+              datasProduk == null
+                  ? SkeletonCardLine()
+                  : Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: primary100,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(size12),
+                            bottomRight: Radius.circular(size12),
+                          ),
+                        ),
+                        child: RefreshIndicator(
+                          color: bnw100,
+                          backgroundColor: primary500,
+                          onRefresh: () async {
+                            setState(() {});
+                            initState();
+                          },
+                          child: ListView.builder(
+                            // physics: BouncingScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            itemCount: datasProduk!.length,
+                            itemBuilder: (builder, index) {
+                              ModelDataProduk data = datasProduk![index];
+                              selectedFlag[index] =
+                                  selectedFlag[index] ?? false;
+                              bool? isSelected = selectedFlag[index];
+                              final dataProduk = datasProduk![index];
+                              productIdCheckAll = datasProduk!
+                                  .map((data) => data.productid!)
+                                  .toList();
+
+                              return Column(
+                                children: [
+                                  Container(
+                                    // padding: EdgeInsets.symmetric(
+                                    //     horizontal: size16, vertical: size12),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                            color: bnw300, width: width1),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        InkWell(
+                                          // onTap: () => onTap(isSelected, index),
+                                          onTap: () {
+                                            onTap(
+                                              isSelected,
+                                              index,
+                                              dataProduk.productid,
+                                            );
+                                            // log(data.name.toString());
+                                            // print(dataProduk.isActive);
+
+                                            print(listProduct);
+                                          },
+                                          child: SizedBox(
+                                            width: 50,
+                                            child: _buildSelectIcon(
+                                              isSelected!,
+                                              data,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Container(
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 60,
+                                                  height: 60,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            size8),
+                                                    child: datasProduk![index]
+                                                                .productImage !=
+                                                            null
+                                                        ? Padding(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    size8),
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          size8),
+                                                              child:
+                                                                  Image.network(
+                                                                datasProduk![
+                                                                        index]
+                                                                    .productImage
+                                                                    .toString(),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorBuilder: (context,
+                                                                        error,
+                                                                        stackTrace) =>
+                                                                    SizedBox(
+                                                                  child: SvgPicture
+                                                                      .asset(
+                                                                          'assets/logoProduct.svg'),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Icon(
+                                                            Icons.person,
+                                                            size: 60,
+                                                          ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: size16),
+                                                Flexible(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        datasProduk![index]
+                                                                .name ??
+                                                            '',
+                                                        style: heading4(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      Text(
+                                                        datasProduk![index]
+                                                                .typeproducts ??
+                                                            '',
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                datasProduk![index].discount ==
+                                                        0
+                                                    ? Text(
+                                                        FormatCurrency.convertToIdr(
+                                                                datasProduk![
+                                                                        index]
+                                                                    .price_after)
+                                                            .toString(),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      )
+                                                    : Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                                    datasProduk![
+                                                                            index]
+                                                                        .price_after)
+                                                                .toString(),
+                                                            maxLines: 3,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit'),
+                                                          ),
+                                                          SizedBox(
+                                                              height: size4),
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                                    datasProduk![
+                                                                            index]
+                                                                        .price)
+                                                                .toString(),
+                                                            maxLines: 3,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style:
+                                                                body3lineThrough(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit'),
+                                                          ),
+                                                          SizedBox(
+                                                              height: size4),
+                                                          datasProduk![index]
+                                                                      .discount_type ==
+                                                                  'price'
+                                                              ? Text(
+                                                                  FormatCurrency.convertToIdr(
+                                                                          datasProduk![index]
+                                                                              .discount)
+                                                                      .toString(),
+                                                                  maxLines: 3,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: body2(
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit'),
+                                                                )
+                                                              : Text(
+                                                                  '${datasProduk![index].discount}%',
+                                                                  maxLines: 3,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: body2(
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit'),
+                                                                ),
+                                                        ],
+                                                      ),
+                                                // datasProduk![index]
+                                                //             .discount_type ==
+                                                //         'percentage'
+                                                //     ? Text(
+                                                //         '${datasProduk![index].discount}%',
+                                                //         style: body3(
+                                                //           FontWeight.w700,
+                                                //           danger500,
+                                                //           'Outfit',
+                                                //         ),
+                                                //       )
+                                                //     : Text(
+                                                //         FormatCurrency
+                                                //             .convertToIdr(
+                                                //           datasProduk![index]
+                                                //               .discount,
+                                                //         ),
+                                                //         style: body3(
+                                                //           FontWeight.w700,
+                                                //           danger500,
+                                                //           'Outfit',
+                                                //         ),
+                                                //       ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                              minWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  size8,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                datasProduk![index].discount ==
+                                                        0
+                                                    ? Text(
+                                                        FormatCurrency.convertToIdr(
+                                                                datasProduk![
+                                                                        index]
+                                                                    .price_online_shop_after)
+                                                            .toString(),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      )
+                                                    : Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                                    datasProduk![
+                                                                            index]
+                                                                        .price_online_shop_after)
+                                                                .toString(),
+                                                            maxLines: 3,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit'),
+                                                          ),
+                                                          SizedBox(
+                                                              height: size4),
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                                    datasProduk![
+                                                                            index]
+                                                                        .price_online_shop)
+                                                                .toString(),
+                                                            maxLines: 3,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style:
+                                                                body3lineThrough(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit'),
+                                                          ),
+                                                          SizedBox(
+                                                              height: size4),
+                                                          datasProduk![index]
+                                                                      .discount_type ==
+                                                                  'price'
+                                                              ? Text(
+                                                                  FormatCurrency.convertToIdr(
+                                                                          datasProduk![index]
+                                                                              .discount)
+                                                                      .toString(),
+                                                                  maxLines: 3,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: body2(
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit'),
+                                                                )
+                                                              : Text(
+                                                                  '${datasProduk![index].discount}%',
+                                                                  maxLines: 3,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: body2(
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit'),
+                                                                ),
+                                                        ],
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        SizedBox(width: size16),
+                                        SizedBox(
+                                          width: 96,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                showModalBottom(
+                                                  context,
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .height,
+                                                  IntrinsicHeight(
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(28.0),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    dataProduk
+                                                                        .name!,
+                                                                    style: heading2(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                  Text(
+                                                                    dataProduk
+                                                                        .typeproducts!,
+                                                                    style: heading4(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit'),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () =>
+                                                                    Navigator.pop(
+                                                                        context),
+                                                                child: Icon(
+                                                                  PhosphorIcons
+                                                                      .x_fill,
+                                                                  color: bnw900,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                              height: size20),
+                                                          GestureDetector(
+                                                            behavior:
+                                                                HitTestBehavior
+                                                                    .translucent,
+                                                            onTap: () async {
+                                                              // singleProductId = dataProduk.productid;
+                                                              // singleImage = dataProduk.productImage;
+
+                                                              // print(singleProductId);
+                                                              // // getSingle(dataProduk
+                                                              // //     .productid);
+                                                              // getSingleProduct(context, widget.token, '', dataProduk.productid, setState).then(
+                                                              //   (value) async {
+                                                              //     if (value == '00') {
+                                                              //       conNameProdukEdit.text = nameEditProduk ?? '';
+                                                              //       conHargaEdit.text = hargaEditProduk ?? '';
+                                                              //       conHargaOnlineEdit.text = hargaEditOnlineProduk ?? '';
+
+                                                              //       dynamic selectableProduct = {
+                                                              //         'kodeproduct': kodejenisProductEdit,
+                                                              //         'jenisproduct': jenisProductEdit,
+                                                              //         'created_by': 'null',
+                                                              //         'created_at': 'null',
+                                                              //         'updated_at': 'null',
+                                                              //         'deleted_at': 'null',
+                                                              //       };
+
+                                                              //       _selectProduct(selectableProduct);
+
+                                                              //       onswitchppnEdit = ppnEdit == '0' ? false : true;
+
+                                                              //       onswitchtampikanEdit = tampilEdit == '0' ? false : true;
+
+                                                              //       ppnAktifEdit = ppnEdit == '0' ? "Tidak Aktif" : 'Aktif';
+
+                                                              //       kasirAktifEdit = tampilEdit == '0' ? "Tidak Aktif" : 'Aktif';
+
+                                                              //       onswitchtampikan = dataProduk.isActive == 1 ? true : false;
+
+                                                              //       onswitchppn = dataProduk.isPPN == 1 ? true : false;
+
+                                                              //       await Future.delayed(Duration(seconds: 1));
+
+                                                              //       _pageController.jumpToPage(2);
+                                                              //       Navigator.pop(context);
+
+                                                              //       setState(() {});
+                                                              //     }
+                                                              //   },
+                                                              // );
+                                                            },
+                                                            child:
+                                                                modalBottomValue(
+                                                              'Ubah Produk',
+                                                              PhosphorIcons
+                                                                  .pencil_line,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 10),
+                                                          GestureDetector(
+                                                            behavior:
+                                                                HitTestBehavior
+                                                                    .translucent,
+                                                            onTap: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              showBottomPilihan(
+                                                                context,
+                                                                Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: [
+                                                                    Column(
+                                                                      children: [
+                                                                        Text(
+                                                                          'Yakin Ingin Menghapus Produk?',
+                                                                          style: heading1(
+                                                                              FontWeight.w600,
+                                                                              bnw900,
+                                                                              'Outfit'),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                size16),
+                                                                        Text(
+                                                                          'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                                                          style: heading2(
+                                                                              FontWeight.w400,
+                                                                              bnw900,
+                                                                              'Outfit'),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                size16),
+                                                                      ],
+                                                                    ),
+                                                                    Row(
+                                                                      children: [
+                                                                        Expanded(
+                                                                          child:
+                                                                              GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              List<String> listProduct = [
+                                                                                dataProduk.productid!
+                                                                              ];
+
+                                                                              initState();
+                                                                              setState(() {});
+                                                                            },
+                                                                            child:
+                                                                                buttonXLoutline(
+                                                                              Center(
+                                                                                child: Text(
+                                                                                  'Iya, Hapus',
+                                                                                  style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                ),
+                                                                              ),
+                                                                              MediaQuery.of(context).size.width,
+                                                                              primary500,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            width:
+                                                                                size12),
+                                                                        Expanded(
+                                                                          child:
+                                                                              GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              Navigator.pop(context);
+                                                                            },
+                                                                            child:
+                                                                                buttonXL(
+                                                                              Center(
+                                                                                child: Text(
+                                                                                  'Batalkan',
+                                                                                  style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                ),
+                                                                              ),
+                                                                              MediaQuery.of(context).size.width,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
+                                                            child:
+                                                                modalBottomValue(
+                                                              'Hapus Produk',
+                                                              PhosphorIcons
+                                                                  .trash,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              });
+                                            },
+                                            child: buttonL(
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(PhosphorIcons
+                                                      .pencil_line),
+                                                  SizedBox(width: 6),
+                                                  Text(
+                                                    'Atur',
+                                                    style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                ],
+                                              ),
+                                              bnw100,
+                                              bnw900,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            // itemCount: staticData!.length,
+                          ),
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+        SizedBox(height: size16),
+        GestureDetector(
+          onTap: () {
+            showModalBottom(
+              context,
+              double.infinity,
+              StatefulBuilder(
+                builder: (context, setState) => IntrinsicHeight(
+                  child: Container(
+                      margin: EdgeInsets.all(size16),
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(  
+                            'Tambah Pemakaian',
+                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                          Text(
+                            'Pilih bahan yang sudah terpakai.',
+                            style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          SizedBox(height: size16),
+                          Container(
+                            height: MediaQuery.sizeOf(context).height / 2,
+                            child: ListView.builder(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              shrinkWrap: true,
+                              itemCount: 2, // Jumlah item
+                              itemBuilder: (context, index) {
+                                return Column(
+                                  children: [
+                                    GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () {
+                                        setState(() {
+                                          if (_selectedIndex == index) {
+                                            _selectedIndex =
+                                                -1; // Jika item yang sama diklik lagi, sembunyikan TextField
+                                          } else {
+                                            _selectedIndex =
+                                                index; // Simpan index item yang diklik
+                                          }
+                                        });
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(bottom: size16),
+                                        child: Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                print('hello world');
+                                              },
+                                              child: Icon(
+                                                isSelectionMode
+                                                    ? PhosphorIcons.check
+                                                    : PhosphorIcons.square,
+                                                color: bnw900,
+                                              ),
+                                            ),
+                                            SizedBox(width: size12),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Matcha',
+                                                    style: heading2(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit')),
+                                                Text('Kilogram',
+                                                    style: heading4(
+                                                        FontWeight.w600,
+                                                        bnw700,
+                                                        'Outfit')),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // Jika index yang di klik sama dengan index item, tampilkan TextField
+                                    if (_selectedIndex == index)
+                                      Container(
+                                        margin: EdgeInsets.only(bottom: size12),
+                                        child: TextField(
+                                          decoration: InputDecoration(
+                                            fillColor: primary100,
+                                            labelText: 'Input something here',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          )
+                        ],
+                      )),
+                ),
+              ),
+            );
+          },
+          child: SizedBox(
+            width: double.infinity,
+            child: buttonXLoutline(
+              Center(
+                child: Text(
+                  'Tambah Pemakaian',
+                  style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                ),
+              ),
+              double.infinity,
+              primary500,
+            ),
+          ),
+        ),
+        SizedBox(height: size16),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  // print(idProduct);
+
+                  List<String> value = [""];
+
+                  initState();
+                  setState(() {});
+                },
+                child: buttonXL(
+                  Center(
+                    child: Text(
+                      'Simpan Pemakaian',
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+                  double.infinity,
+                ),
+              ),
+            ),
+          ],
+        )
+      ],
     );
   }
 

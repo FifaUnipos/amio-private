@@ -22,18 +22,22 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_switch/flutter_switch.dart';
 
-class COAPage extends StatefulWidget {
-  String token;
-  COAPage({
+class LihatCOAPageGrup extends StatefulWidget {
+  String token, nameMerch, merchID;
+  PageController pageController;
+  LihatCOAPageGrup({
     Key? key,
     required this.token,
+    required this.nameMerch,
+    required this.merchID,
+    required this.pageController,
   }) : super(key: key);
 
   @override
-  State<COAPage> createState() => _COAPageState();
+  State<LihatCOAPageGrup> createState() => _LihatCOAPageGrupState();
 }
 
-class _COAPageState extends State<COAPage> {
+class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
   List<PaymentMethod>? datasCOA;
   PageController _pageController = PageController();
   TextEditingController conNumberCOA = TextEditingController();
@@ -116,26 +120,14 @@ class _COAPageState extends State<COAPage> {
           return false;
         }
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(size16),
-            margin: EdgeInsets.all(size16),
-            decoration: BoxDecoration(
-              color: bnw100,
-              borderRadius: BorderRadius.circular(size16),
-            ),
-            child: PageView(
-              physics: NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: [
-                pageCOA(isFalseAvailable),
-                tambahCOAToko(),
-                updateCOAToko(),
-              ],
-            ),
-          ),
-        ),
+      child: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children: [
+          pageCOA(isFalseAvailable),
+          tambahCOAToko(),
+          updateCOAToko(),
+        ],
       ),
     );
   }
@@ -148,17 +140,32 @@ class _COAPageState extends State<COAPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                Text(
-                  'COA',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                GestureDetector(
+                  onTap: () {
+                    widget.pageController.jumpToPage(0);
+                  },
+                  child: Icon(
+                    PhosphorIcons.arrow_left,
+                    size: size48,
+                    color: bnw900,
+                  ),
                 ),
-                Text(
-                  nameToko ?? '',
-                  style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                SizedBox(width: size16),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'COA',
+                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      widget.nameMerch,
+                      style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                    ),
+                  ],
                 ),
               ],
             ),
