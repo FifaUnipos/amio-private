@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:amio/pageTablet/test/dashboardnew.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var mytokenGet = prefs.getString('token');
   var onBoard = prefs.getString('onboard');
+  var role = prefs.getString('roleAccount');
+  var type = prefs.getString('typeAccount');
 
   // await Firebase.initializeApp();
 
@@ -29,12 +32,16 @@ Future<void> main() async {
   );
 
   checkToken = mytokenGet;
+  roleAccount = role;
+  typeAccount = type;
 
   log('myToken ' + mytokenGet.toString());
   log(onBoard.toString());
-
+  log(role.toString());
+  sessCode = generateSessCode(16);
   myprofile(checkToken);
   dashboard(identifier, checkToken);
+  dashboardKulasedaya(checkToken);
   deviceDetails();
   statusProfile;
 
@@ -70,7 +77,7 @@ Future<void> main() async {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: false,
-            
+
             progressIndicatorTheme: ProgressIndicatorThemeData(
               color: primary500,
             ),
@@ -93,7 +100,6 @@ Future<void> main() async {
             colorScheme: ThemeData().colorScheme.copyWith(primary: primary500),
           ),
           title: 'UniPOS',
-         
           home: mytokenGet == null
               ? onBoard == null
                   ? Scaffold(
@@ -103,6 +109,7 @@ Future<void> main() async {
                       body: SplashScreenBoard(isTab: true),
                     )
               : Scaffold(
+                      // body: SplashScreen(isTab: true),
                   body: SplashChecker(isTab: true),
                 ),
         ),
@@ -204,7 +211,7 @@ var checkToken;
 //! GET Device ID
 String? deviceName;
 //String? deviceVersion;
-String? identifier;
+String? identifier, roleAccount, typeAccount;
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 AndroidDeviceInfo? buildAnd;
 

@@ -9,14 +9,18 @@ import 'package:amio/utils/component/component_snackbar.dart';
 import '../../../pagehelper/masukakun.dart';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:otp_text_field/otp_text_field.dart';
-import 'package:otp_text_field/style.dart';import '../../../../utils/component/component_showModalBottom.dart';
+import 'package:otp_text_field/style.dart';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,7 +30,9 @@ import '../../../services/apimethod.dart';
 import '../../../services/checkConnection.dart';
 import '../../../utils/component/component_loading.dart';
 import '../../../utils/component/providerModel/timerModel.dart';
-import '../../tokopage/dashboardtoko.dart';import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
+import '../../tokopage/dashboardtoko.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 
 class ProfilePage extends StatefulWidget {
   String token;
@@ -78,8 +84,11 @@ class ProfilePageState extends State<ProfilePage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -253,7 +262,7 @@ class ProfilePageState extends State<ProfilePage> {
                                     onTap: () async {
                                       // Isolate.current.kill(priority: Isolate.immediate);
                                       // runApp();
-                                      
+
                                       logout(
                                         widget.token,
                                         identifier,
@@ -265,6 +274,10 @@ class ProfilePageState extends State<ProfilePage> {
                                           await SharedPreferences.getInstance();
                                       prefs.remove('token');
                                       prefs.remove('deviceid');
+                                      prefs.remove('notifications');
+                                      prefs.remove('roleAccount');
+                                      prefs.remove('typeAccount');
+                                      prefs.clear();
 
                                       selectedIndexSideBar = false;
                                       showingMenuSidebar == true;
@@ -414,9 +427,9 @@ class ProfilePageState extends State<ProfilePage> {
                                 GestureDetector(
                                     onTap: () {
                                       showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                                        constraints: const BoxConstraints(
+                                          maxWidth: double.infinity,
+                                        ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -960,9 +973,9 @@ class ProfilePageState extends State<ProfilePage> {
                         GestureDetector(
                           onTap: () {
                             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                              constraints: const BoxConstraints(
+                                maxWidth: double.infinity,
+                              ),
                               isScrollControlled: true,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
@@ -1192,8 +1205,8 @@ class ProfilePageState extends State<ProfilePage> {
   Future<dynamic> showError(BuildContext context, bool checkShow, sandi, ubah) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1452,8 +1465,8 @@ class ProfilePageState extends State<ProfilePage> {
   Future<dynamic> verifEmailField(BuildContext context) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1579,8 +1592,8 @@ class ProfilePageState extends State<ProfilePage> {
   Future<dynamic> verifEmailFieldTanpaError(BuildContext context) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1705,8 +1718,8 @@ class ProfilePageState extends State<ProfilePage> {
   Future<dynamic> verifikasiDiriKamuShowdialog(BuildContext context) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -1841,8 +1854,8 @@ class ProfilePageState extends State<ProfilePage> {
 
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2091,8 +2104,8 @@ class ProfilePageState extends State<ProfilePage> {
     clearForm();
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2343,8 +2356,8 @@ class ProfilePageState extends State<ProfilePage> {
 
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2582,8 +2595,8 @@ class ProfilePageState extends State<ProfilePage> {
 
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2830,8 +2843,8 @@ class ProfilePageState extends State<ProfilePage> {
     errorText = '';
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2982,8 +2995,8 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3112,8 +3125,8 @@ class ProfilePageState extends State<ProfilePage> {
   Future<dynamic> verifikasiDiriKamuSandiShowdialog(BuildContext context) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3247,8 +3260,8 @@ class ProfilePageState extends State<ProfilePage> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3470,8 +3483,8 @@ class ProfilePageState extends State<ProfilePage> {
     Navigator.popUntil(context, (route) => route.isFirst);
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       // barrierColor: Colors.transparent,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -3655,8 +3668,8 @@ class ProfilePageState extends State<ProfilePage> {
     isKeyboardActive = false;
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3788,8 +3801,8 @@ class ProfilePageState extends State<ProfilePage> {
     Navigator.popUntil(context, (route) => route.isFirst);
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       // barrierColor: Colors.transparent,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(

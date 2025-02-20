@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'ubahPelanggan.dart';
@@ -7,7 +8,10 @@ import '../../../../utils/component/skeletons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,7 +21,8 @@ import '../../../../models/pelangganDataModel.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 
 class PelangganToko extends StatefulWidget {
   String token;
@@ -76,7 +81,7 @@ class _PelangganTokoState extends State<PelangganToko> {
   }
 
   Future<dynamic> getDataPelanggan(List<String> value) async {
-    return datasPelanggan = await getPelanggan(context, widget.token, '');
+    return datasPelanggan = await getPelanggan(context, widget.token, textvalueOrderBy);
   }
 
   refreshDataProduk() {
@@ -1005,9 +1010,9 @@ class _PelangganTokoState extends State<PelangganToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

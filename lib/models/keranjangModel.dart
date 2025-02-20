@@ -3,6 +3,7 @@ class CartTransaksi {
   String? productid;
   String? image;
   String? desc;
+  String idRequest = "";
   num? price;
   num quantity = 1;
   CartTransaksi({
@@ -12,5 +13,5 @@ class CartTransaksi {
     required this.desc,
     required this.price,
     required this.quantity,
-  });
-}
+    required this.idRequest,
+  });}

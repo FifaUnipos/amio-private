@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:amio/models/coaModel.dart';
+import 'package:amio/models/inventoriModel/inventoriModel.dart';
+import 'package:amio/models/inventoriModel/pembelianInventoriModel.dart';
 import 'package:amio/utils/component/component_snackbar.dart';
 
 import '../main.dart';
@@ -46,8 +48,8 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -116,6 +118,9 @@ String registerbyotp = '$url/api/user/registerbyotp',
     laporanDailyUrl = '$url/api/report/income/daily',
     laporanMerchUrl = '$url/api/report/income/merchant',
     laporanProdukUrl = '$url/api/report/income/product',
+    laporanProdukExportUrl = '$url/api/export/report/income/product',
+    laporanTokoExportUrl = '$url/api/export/report/income/merchant',
+    laporanPendapatanHarianExportUrl = '$url/api/export/report/income/daily',
     transaksiViewReferenceLink = '$url/api/transaction/view/reference',
     uploadQrisLink = '$url/api/merchant/qris/save',
     deleteQrisLink = '$url/api/merchant/qris/delete',
@@ -147,7 +152,27 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getCoaMethodLink = '$url/api/type/payment',
     addCoaLink = '$url/api/type/payment/create',
     updateCoaLink = '$url/api/type/payment/update',
-    deleteCoaLink = '$url/api/type/payment/delete';
+    deleteCoaLink = '$url/api/type/payment/delete',
+    getAdjustmentLink = '$url/api/inventory/adjustment',
+    getDetailAdjustmentLink = '$url/api/inventory/adjustment/detail',
+    createAdjustmentLink = '$url/api/inventory/adjustment/create',
+    getPurchaseLink = '$url/api/inventory/purchase',
+    getDetailPurchaseLink = '$url/api/inventory/purchase/detail',
+    createDetailPurchaseLink = '$url/api/inventory/purchase/create',
+    deleteDetailPurchaseLink = '$url/api/inventory/purchase/delete',
+    getMasterDataLink = '$url/api/inventory/master',
+    createMasterDataLink = '$url/api/inventory/master/create',
+    getMasterDataSingleLink = '$url/api/inventory/master/single',
+    getMasterDataSingleDetailLink = '$url/api/inventory/master/detail',
+    getUnitMasterDataLink = '$url/api/unit',
+    copyMasterDataLink = '$url/api/inventory/master/copy',
+    updateMasterDataLink = '$url/api/inventory/master/update',
+    deleteMasterDataLink = '$url/api/inventory/master/delete',
+    getkulasedayaLink = '$url/api/merchant/binding/kulasedaya',
+    bindingKulasedayaLink = '$url/api/binding/kulasedaya',
+    getkulasedayaMerchantLink = '$url/api/merchant/binding/kulasedaya',
+    deletekulasedayaTagihanLink =
+        '$url/api/transaction/delete/reference/tagihan/kulasedaya';
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
@@ -965,6 +990,7 @@ Future createAkun(
   zipcode,
   String image,
   isactive,
+  role,
 ) async {
   try {
     final response = await http.post(
@@ -986,7 +1012,8 @@ Future createAkun(
         "zipcode": zipcode,
         "businesstype": "",
         "status": isactive,
-        "image": "data:image/png;base64,$image"
+        "image": "data:image/png;base64,$image",
+        "role": role,
       },
       headers: {
         "token": "$token",
@@ -1018,6 +1045,7 @@ Future updateAkun(
   phonenumber,
   String image,
   isactive,
+  iscashier,
 ) async {
   whenLoading(context);
   final response = await http.post(
@@ -1030,6 +1058,7 @@ Future updateAkun(
       "phonenumber": phonenumber,
       "image": "data:image/png;base64,$image",
       "status": isactive,
+      "role": iscashier,
     },
     headers: {
       "token": "$token",
@@ -1244,6 +1273,39 @@ Future deleteAkun(
     print(jsonResponse['message'].toString());
     Navigator.pop(context);
     closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future deletePurchase(
+  BuildContext context,
+  var token,
+  List group_id,
+) async {
+  String jsonData = jsonEncode(group_id);
+  whenLoading(context);
+  final response = await http.post(
+    Uri.parse(deleteDetailPurchaseLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "group_id": jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    print('Sukses Delete Data');
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    // print(jsonResponse['data'].toString());
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    // print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
 }
@@ -1633,6 +1695,41 @@ Future dashboard(id, token) async {
       rataTransaksiDas = responseValue['averageTransaction'];
     }
     return response.data['data'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+String? saldoKulasedaya, statusKulasedaya, messageKulasedaya = '';
+dashboardKulasedaya(token) async {
+  try {
+    var response = await Dio().post(
+      bindingKulasedayaLink,
+      // dashboardValue,
+      data: {
+        'deviceid': identifier,
+      },
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+
+    log(response.data['data'].toString());
+
+    if (response.statusCode == 200 &&
+        response.data != null &&
+        response.data['data'] != null) {
+      var data = response.data['data'];
+      saldoKulasedaya = data['saldo']?.toString();
+      statusKulasedaya = data['status']?.toString() ?? 'false';
+      messageKulasedaya = data['message'] ?? '';
+      return data;
+    } else {
+      throw Exception("Failed to load data: ${response.statusCode}");
+    }
+    // return response.data['data'];
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -2333,10 +2430,11 @@ Future calculateTransaction(
   typePrice,
   discount,
 ) async {
+  whenLoading(context);
   final String detail = json.encode(details);
 
   // log(details.toString());
-  log('hehe $details');
+  print('detail cart: $details');
 
   // log(details[0]['name'].toString());
 
@@ -2344,19 +2442,23 @@ Future calculateTransaction(
 
   for (var detail in details) {
     Map<String, String> map1 = {};
+
     map1['name'] = detail['name']!;
     map1['productid'] = detail['productid']!;
     map1['quantity'] = detail['quantity']!;
     map1['image'] = detail['image']!;
     map1['amount'] = detail['amount_display'] ?? detail['amount']!;
     map1['description'] = detail['description']!;
+    map1['id_request'] = detail['id_request']!;
 
     mapCalculate.add(map1);
   }
 
+  log("mapCalculate baru $mapCalculate");
+
   final String detailBaru = json.encode(mapCalculate);
 
-  log(detailBaru.toString());
+  print("detail baru $detailBaru");
 
   final response = await http.post(
     Uri.parse(calculateTransaksiUrl),
@@ -2391,9 +2493,9 @@ Future calculateTransaction(
     setState(() {});
     return jsonResponse['rc'];
   } else {
-    log(jsonResponse.toString());
     closeLoading(context);
     showSnackbar(context, jsonResponse);
+    log(jsonResponse.toString());
     return jsonResponse['rc'];
   }
 }
@@ -2921,12 +3023,13 @@ Future<Map<String, dynamic>> getSinglePendapatanHarian(
   export,
   merchantid,
 ) async {
+  final String jsonTest = json.encode(merchantid);
   final body = {
     "deviceid": identifier,
     "date": date,
     "orderby": orderby,
     "export": export,
-    "merchantid": merchantid,
+    "merchantid": jsonTest
   };
 
   final response = await http.post(
@@ -3170,7 +3273,7 @@ Future getLaporanMerchantExport(
   whenLoading(context);
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanMerchUrl),
+    Uri.parse(laporanTokoExportUrl),
     headers: {
       'token': token,
     },
@@ -3179,7 +3282,7 @@ Future getLaporanMerchantExport(
       "keyword": keyword,
       "orderby": orderby,
       "merchantid": jsonTest,
-      "export": export,
+      "export": "pdf"
     },
   );
 
@@ -3244,9 +3347,10 @@ Future getLaporanPerProdukExport(
   List merchid,
   export,
 ) async {
+  whenLoading(context);
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanProdukUrl),
+    Uri.parse(laporanProdukExportUrl),
     headers: {
       'token': token,
     },
@@ -3255,11 +3359,13 @@ Future getLaporanPerProdukExport(
       "keyword": keyword.toString(),
       "orderby": orderby.toString(),
       "merchantid": jsonTest,
+      "export": export,
     },
   );
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
+    closeLoading(context);
     print('succes');
 
     // print(jsonResponse.toString());
@@ -3268,6 +3374,7 @@ Future getLaporanPerProdukExport(
     // print(data['data']['detail']['tanggal']);
     return data;
   } else {
+    closeLoading(context);
     print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }
@@ -3389,6 +3496,7 @@ late String namaEditAkun,
     emailEditAkun,
     nomorEditAkun,
     statusEditAkun,
+    statusEditAkunKasir,
     useridEditAkun,
     imageEditAkun;
 Future getSingleAkun(BuildContext context, token, String userid) async {
@@ -3418,6 +3526,8 @@ Future getSingleAkun(BuildContext context, token, String userid) async {
     imageEditAkun = dataku['account_image'] ?? '';
     useridEditAkun = dataku['userid'];
     statusEditAkun = dataku['status'];
+    statusEditAkunKasir = dataku['role'];
+
     return response.statusCode.toString();
   } else {
     Navigator.of(context, rootNavigator: true).pop();
@@ -3705,7 +3815,7 @@ Future getQris(BuildContext context, token, merchantid) async {
 
     return jsonResponse['rc'];
   } else {
-    closeLoading(context);
+    // closeLoading(context);
     showSnackbar(context, jsonResponse);
   }
 }
@@ -3886,5 +3996,456 @@ Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
     return jsonData.map((data) => PaymentMethod.fromJson(data)).toList();
   } else {
     throw Exception('Failed to load payment methods');
+  }
+}
+
+Future getAdjustment(
+  token,
+  merchid,
+  String name,
+  orderby,
+) async {
+  final response = await http.post(
+    Uri.parse(getAdjustmentLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchant_id": merchid,
+      // "name": name,
+      // "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  log(jsonResponse.toString());
+  if (response.statusCode == 200) {
+    // print('kuontol');
+
+    final List<PembelianModel> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = PembelianModel.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getMasterData(
+  token,
+  merchid,
+  String name,
+  orderby,
+) async {
+  final response = await http.post(
+    Uri.parse(getMasterDataLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchant_id": merchid,
+      // "name": name,
+      // "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<ModelDataInventori> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = ModelDataInventori.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
+  }
+}
+
+Future createMasterData(
+  context,
+  token,
+  merchid,
+  nameItem,
+  unit,
+) async {
+  final response = await http.post(
+    Uri.parse(createMasterDataLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "name_item": nameItem,
+      "unit": unit,
+      // "merchant_id": "913eb0b0-f8ac-4639-b520-7ee012fe0618"
+      "merchant_id": merchid
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future updateMasterData(
+  context,
+  token,
+  id,
+  nameItem,
+) async {
+  final response = await http.post(
+    Uri.parse(updateMasterDataLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "inventory_master_id": id,
+      "name_item": nameItem,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future deleteMasterData(
+  context,
+  token,
+  productid,
+) async {
+  String jsonData = jsonEncode(productid);
+  final response = await http.post(
+    Uri.parse(deleteMasterDataLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      'inventory_master_id': jsonData,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  // log(jsonData);
+  if (response.statusCode == 200) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+late String idBahan, name_itemBahan, unit_idBahan, unit_nameBahan;
+
+Future getSingleMasterData(
+  context,
+  token,
+  productid,
+) async {
+  final response = await http.post(
+    Uri.parse(getMasterDataSingleLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      'inventory_master_id': productid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  var data = jsonResponse['data'];
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    idBahan = data['id'];
+    name_itemBahan = data['name_item'];
+    unit_idBahan = data['unit_id'];
+    unit_nameBahan = data['unit_name'];
+
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getSingleDetailMasterData(
+  context,
+  token,
+  productid,
+) async {
+  // whenLoading(context);
+  final response = await http.post(
+    Uri.parse(getMasterDataSingleDetailLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      'item_id': productid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    // closeLoading(context);
+
+    return jsonResponse;
+  } else {
+    print(jsonResponse['message'].toString());
+    // closeLoading(context);
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getPembelian(
+  token,
+  merchid,
+  name,
+  orderby,
+) async {
+  final response = await http.post(
+    Uri.parse(getPurchaseLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchant_id": merchid,
+      // "name": name,
+      // "orderby": orderby,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    final List<PembelianModel> result = [];
+
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
+    for (Map<String, dynamic> item in decoded['data']) {
+      final model = PembelianModel.fromJson(item);
+      result.add(model);
+    }
+
+    return result;
+  } else {
+    print(jsonResponse['message'].toString());
+    // showSnackbar(context, jsonResponse);
+  }
+}
+
+Future<List<Map<String, dynamic>>> getMasterDataToko(
+  BuildContext context,
+  String token,
+  String merchid,
+) async {
+  final response = await http.post(
+    Uri.parse(getMasterDataLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "merchant_id": merchid,
+      // "isMinimize": false,
+    },
+  );
+
+  final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print("Success: Data fetched");
+
+    // Parse JSON response
+
+    if (jsonResponse.containsKey('data') && jsonResponse['data'] is List) {
+      final List<Map<String, dynamic>> inventoryData =
+          List<Map<String, dynamic>>.from(jsonResponse['data']);
+      return inventoryData;
+    } else {
+      throw Exception("Invalid data format");
+    }
+  } else {
+    print("Error: ${response.statusCode} - ${response.body}");
+    showSnackbar(context, jsonResponse);
+    return [];
+  }
+}
+
+Future createPembelian(
+  context,
+  token,
+  date,
+  orderInventory,
+) async {
+  // Tampilkan loading
+  whenLoading(context);
+
+  // Data yang akan dikirim
+  final requestData = {
+    "deviceid": identifier,
+    "date": date,
+    "order_inventory": orderInventory,
+  };
+
+  // Debugging: Lihat data yang dikirim
+  print(orderInventory);
+  print('Request Data: ${jsonEncode(requestData)}');
+
+  // Kirim POST request
+  final response = await http.post(
+    Uri.parse(createDetailPurchaseLink),
+    headers: {
+      'Content-Type': 'application/json', // Wajib untuk JSON
+      'token': token,
+    },
+    body: jsonEncode(requestData), // Encode seluruh map
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  // Handle responsenya
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    print('Success');
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future createPenyesuaian(
+  context,
+  token,
+  date,
+  usage_inventory,
+) async {
+  // Tampilkan loading
+  whenLoading(context);
+
+  // Data yang akan dikirim
+  final requestData = {
+    "deviceid": identifier,
+    "date": date,
+    "usage_inventory": usage_inventory,
+  };
+
+  // Debugging: Lihat data yang dikirim
+  print(usage_inventory);
+  print('Request Data: ${jsonEncode(requestData)}');
+
+  // Kirim POST request
+  final response = await http.post(
+    Uri.parse(createDetailPurchaseLink),
+    headers: {
+      'Content-Type': 'application/json', // Wajib untuk JSON
+      'token': token,
+    },
+    body: jsonEncode(requestData), // Encode seluruh map
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  // Handle responsenya
+  if (response.statusCode == 200) {
+    closeLoading(context);
+    print('Success');
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } else {
+    closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+late String bindingUrl = '';
+Future getKulasedaya(
+  context,
+  token,
+  merchid,
+) async {
+  final response = await http.post(
+    Uri.parse(getkulasedayaLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchant_id": merchid,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    bindingUrl = jsonResponse['data']['binding_url'];
+
+    return jsonResponse;
+  }
+}
+
+Future deleteTagihanKulasedaya(
+  context,
+  token,
+  idRequest,
+) async {
+  final String jsonTest = json.encode(idRequest);
+  final response = await http.post(
+    Uri.parse(deletekulasedayaTagihanLink),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "idRequest": jsonTest,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print("berhasil menghapus!");
+    return jsonResponse;
   }
 }

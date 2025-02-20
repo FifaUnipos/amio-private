@@ -1059,7 +1059,8 @@ class _SimpanPageState extends State<SimpanPage> {
                                                       // widget.bluetooth
                                                       //     .printNewLine();
                                                       // widget.bluetooth.printNewLine();
-                                                      widget.bluetooth.printNewLine();
+                                                      widget.bluetooth
+                                                          .printNewLine();
                                                       widget.bluetooth
                                                           .paperCut();
                                                     } else {
@@ -1197,15 +1198,16 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                                     cart.add(
                                                       CartTransaksi(
-                                                        name: name,
-                                                        productid: productid,
-                                                        image: image,
-                                                        price: price,
-                                                        quantity: quantity,
-                                                        desc: desc,
-                                                        // quantity:
-                                                        //     cart[i].quantity,
-                                                      ),
+                                                          name: name,
+                                                          productid: productid,
+                                                          image: image,
+                                                          price: price,
+                                                          quantity: quantity,
+                                                          desc: desc,
+                                                          idRequest: ""
+                                                          // quantity:
+                                                          //     cart[i].quantity,
+                                                          ),
                                                     );
                                                   }
 

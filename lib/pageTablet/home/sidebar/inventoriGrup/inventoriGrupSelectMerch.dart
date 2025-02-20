@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:amio/pageTablet/home/sidebar/coaPageGrup/lihatCoaPage.dart';
+import 'package:amio/pageTablet/home/sidebar/inventoriGrup/lihatInventoriGrupPage.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 
-import 'lihatKeuanganGrup.dart';
 import '../transaksiGrup/pengaturanGrup.dart';
 import '../transaksiGrup/riwayatGrup.dart';
 import '../transaksiGrup/tagihanGrup.dart';
@@ -26,18 +28,18 @@ import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/skeletons.dart';
 import '../../../../../utils/component/component_button.dart';
 
-class KeuanganGrup extends StatefulWidget {
+class InventoriPageGrup extends StatefulWidget {
   String token;
-  KeuanganGrup({
+  InventoriPageGrup({
     Key? key,
     required this.token,
   }) : super(key: key);
 
   @override
-  State<KeuanganGrup> createState() => _KeuanganGrupState();
+  State<InventoriPageGrup> createState() => _COAPageGrupState();
 }
 
-class _KeuanganGrupState extends State<KeuanganGrup>
+class _COAPageGrupState extends State<InventoriPageGrup>
     with TickerProviderStateMixin {
   PageController _pageController = PageController();
   TabController? _tabController;
@@ -110,11 +112,11 @@ class _KeuanganGrupState extends State<KeuanganGrup>
               physics: NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: [
-                homePageKeuanganGrup(context),
-                LihatKeuanganGrup(
+                homePageCOAGrup(context),
+                LihatInventoryPageGrup(
                   token: widget.token,
-                  namemerch: namemerch,
-                  merchid: merchid,
+                  nameMerch: namemerch,
+                  merchID: merchid,
                   pageController: _pageController,
                 )
               ],
@@ -125,7 +127,7 @@ class _KeuanganGrupState extends State<KeuanganGrup>
     );
   }
 
-  homePageKeuanganGrup(BuildContext context) {
+  homePageCOAGrup(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,11 +139,11 @@ class _KeuanganGrupState extends State<KeuanganGrup>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Keuangan',
+                  'Inventori',
                   style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 Text(
-                  'Atur keuangan tokomu dengan lengkap',
+                  'Penyimanan bahan - bahan dari sebuah Produk',
                   style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                 ),
               ],
@@ -316,7 +318,7 @@ class _KeuanganGrupState extends State<KeuanganGrup>
                                     child: buttonLoutline(
                                       Center(
                                         child: Text(
-                                          'Lihat Keuangan',
+                                          'Lihat Inventori',
                                           style: heading4(
                                             FontWeight.w600,
                                             primary500,

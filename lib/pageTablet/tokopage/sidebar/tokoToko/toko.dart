@@ -234,7 +234,8 @@ class _TokoPageTokoState extends State<TokoPageToko> {
                           initState();
                           setState(() {});
                         },
-                        child: GridView.builder(
+                        child: 
+                        GridView.builder(
                           padding: EdgeInsets.zero,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(

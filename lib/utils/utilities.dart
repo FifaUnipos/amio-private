@@ -2,6 +2,7 @@ import 'package:amio/main.dart';
 import 'package:amio/pageMobile/pageTokoMobile/pengembanganPage.dart';
 import 'package:amio/pageTablet/home/dashboard.dart';
 import 'package:amio/pageTablet/tokopage/dashboardtoko.dart';
+import 'package:amio/pagehelper/loginregis/login_page.dart';
 import 'package:amio/services/apimethod.dart';
 import 'package:amio/utils/component/component_button.dart';
 import 'package:amio/utils/component/component_color.dart';
@@ -12,6 +13,8 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../pageTablet/kasirPage/dashboardKasir.dart';
 
 String linkCSwa =
     'https://api.whatsapp.com/send?phone=628115514168&text=Hallo%20saya%20ingin%20menanyakan%20tentang%20UniPOS';
@@ -186,19 +189,45 @@ imagefieldXL(
   );
 }
 
-sessionPage(BuildContext context, String token) {
+sessionPage(BuildContext context, String token, typeAccount, roleAccount) {
   return Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(
-      builder: (context) => statusProfile == 'Group_Merchant'
-          ? SidebarXExampleApp(
-              id: identifier.toString(),
-              token: token,
-            )
-          : SidebarXExampleAppToko(
-              token: token,
-              id: identifier.toString(),
-            ),
-    ),
+    MaterialPageRoute(builder: (context) {
+      if (typeAccount == 'Group_Merchant') {
+        return SidebarXExampleApp(
+          id: identifier.toString(),
+          token: token,
+        );
+      } else if (typeAccount == 'Merchant_Only') {
+        return SidebarXExampleAppToko(
+          token: token,
+          id: identifier.toString(),
+        );
+      } else if (typeAccount == 'Merchant' && roleAccount == 'cashier') {
+        return SidebarXKasirPage(
+          token: token,
+          id: identifier.toString(),
+        );
+      } else if (typeAccount == 'Merchant') {
+        return SidebarXExampleAppToko(
+          token: token,
+          id: identifier.toString(),
+        );
+        // return Container(child: Text('HEllo cashier'));
+      }
+      return LoginPage();
+    }
+
+        // =>
+        // statusProfile == 'Group_Merchant'
+        //     ? SidebarXExampleApp(
+        //         id: identifier.toString(),
+        //         token: token,
+        //       )
+        //     : SidebarXExampleAppToko(
+        //         token: token,
+        //         id: identifier.toString(),
+        //       ),
+        ),
     (Route<dynamic> route) => false,
   );
 }

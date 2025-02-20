@@ -12,6 +12,7 @@
 
 
     <application
+        android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         android:label="UniPOS"
         android:name="${applicationName}"

@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -124,108 +127,111 @@ class LaporanPendapatanPerProdukState
                 onTap: () {
                   showBottomPilihan(
                     context,
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              'Bagikan Laporan',
-                              style:
-                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            Text(
-                              'Pilih format berbagi laporan',
-                              style:
-                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: size20),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 2.6,
-                          child: Row(
+                    Container(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
                             children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    getLaporanPerProdukExport(
-                                            context,
-                                            widget.token,
-                                            _textvalueOrderBy,
-                                            _textvalueKeyword,
-                                            listToko,
-                                            'pdf')
-                                        .then((value) {
-                                      try {
-                                        launch(value['data']);
-                                        downloadFile(value['data']);
-                                      } catch (e) {}
-                                    });
-                                  },
-                                  child: buttonXXLoutline(
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons.file_text_fill,
-                                          color: primary500,
-                                        ),
-                                        Text(
-                                          'Pdf',
-                                          style: heading2(FontWeight.w600,
-                                              primary500, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    110,
-                                    primary500,
-                                  ),
-                                ),
+                              Text(
+                                'Bagikan Laporan',
+                                style:
+                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
                               ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    getLaporanPerProdukExport(
-                                            context,
-                                            widget.token,
-                                            _textvalueOrderBy,
-                                            _textvalueKeyword,
-                                            listToko,
-                                            'excel')
-                                        .then((value) {
-                                      try {
-                                        launch(value['data']);
-                                        downloadFile(value['data']);
-                                      } catch (e) {}
-                                    });
-                                  },
-                                  child: buttonXXLoutline(
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons
-                                              .microsoft_excel_logo_fill,
-                                          color: primary500,
-                                        ),
-                                        Text(
-                                          'Excel',
-                                          style: heading2(FontWeight.w600,
-                                              primary500, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    120,
-                                    primary500,
-                                  ),
-                                ),
+                              Text(
+                                'Pilih format berbagi laporan',
+                                style:
+                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
                               ),
                             ],
                           ),
-                        )
-                      ],
+                          SizedBox(height: size20),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.6,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      getLaporanPerProdukExport(
+                                              context,
+                                              widget.token,
+                                              _textvalueKeyword,
+                                              _textvalueOrderBy,
+                                              listToko,
+                                              'pdf')
+                                          .then((value) {
+                                        try {
+                                          launch(value['data']);
+                                          downloadFile(value['data']);
+                                        } catch (e) {}
+                                      });
+                                    },
+                                    child: buttonXXLoutline(
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            PhosphorIcons.file_text_fill,
+                                            color: primary500,
+                                          ),
+                                          Text(
+                                            'Pdf',
+                                            style: heading2(FontWeight.w600,
+                                                primary500, 'Outfit'),
+                                          ),
+                                        ],
+                                      ),
+                                      110,
+                                      primary500,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      getLaporanPerProdukExport(
+                                              context,
+                                              widget.token,
+                                              _textvalueKeyword,
+                                              _textvalueOrderBy,
+                                              listToko,
+                                              'excel')
+                                          .then((value) {
+                                        try {
+                                          launch(value['data']);
+                                          downloadFile(value['data']);
+                                        } catch (e) {}
+                                      });
+                                    },
+                                    child: buttonXXLoutline(
+                                      Column(
+                                        children: [
+                                          Icon(
+                                            PhosphorIcons
+                                                .microsoft_excel_logo_fill,
+                                            color: primary500,
+                                          ),
+                                          Text(
+                                            'Excel',
+                                            style: heading2(FontWeight.w600,
+                                                primary500, 'Outfit'),
+                                          ),
+                                        ],
+                                      ),
+                                      120,
+                                      primary500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   );
                 },

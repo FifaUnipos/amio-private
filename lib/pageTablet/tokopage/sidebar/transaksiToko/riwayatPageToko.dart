@@ -2092,7 +2092,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                               }
                                             });
                                             setState(() {});
-                                            initState();
+                                            // initState();
                                           });
                                         },
                                         child: buttonXL(

@@ -11,7 +11,10 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_text_field.dart';
@@ -97,7 +100,6 @@ class _OtppageState extends State<Otppage> {
 
   @override
   Widget build(BuildContext context) {
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -318,6 +320,14 @@ class _OtppageState extends State<Otppage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', jsonResponse['token']);
         prefs.setString('deviceid', identifier.toString());
+        prefs.setString('roleAccount', jsonResponse['type_role'].toString());
+        prefs.setString('typeAccount', jsonResponse['type_account'].toString());
+        // prefs.setString('typeAccount', 'Merchant');
+
+        dashboardKulasedaya(jsonResponse['token']);
+
+        roleAccount = prefs.getString('roleAccount');
+        typeAccount = prefs.getString('typeAccount');
 
         myprofile(jsonResponse['token']);
 
@@ -330,8 +340,12 @@ class _OtppageState extends State<Otppage> {
                 Future.delayed(
                   const Duration(seconds: 3),
                   () {
-                    // Navigator.of(context).pop(true);
-                    sessionPage(context, jsonResponse['token']);
+                    sessionPage(
+                      context,
+                      jsonResponse['token'].toString(),
+                      jsonResponse['type_account'],
+                      jsonResponse['type_role'],
+                    );
                   },
                 );
               }
@@ -410,8 +424,18 @@ class _OtppageState extends State<Otppage> {
       if (response.statusCode == 200) {
         print("succes aman tentram login");
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('token', jsonResponse['token'].toString());
         prefs.setString('deviceid', identifier.toString());
+        prefs.setString('roleAccount', jsonResponse['type_role'].toString());
+        prefs.setString('typeAccount', jsonResponse['type_account'].toString());
+        // prefs.setString('typeAccount', 'Merchant');
+
+        dashboardKulasedaya(jsonResponse['token']);
+
+        roleAccount = prefs.getString('roleAccount');
+        typeAccount = prefs.getString('typeAccount');
+
+        //log(jsonResponse);
 
         myprofile(jsonResponse['token']);
 
@@ -420,7 +444,12 @@ class _OtppageState extends State<Otppage> {
             const Duration(seconds: 3),
             () {
               Navigator.of(context, rootNavigator: true).pop();
-              sessionPage(context, jsonResponse['token']);
+              sessionPage(
+                context,
+                jsonResponse['token'].toString(),
+                jsonResponse['type_account'],
+                jsonResponse['type_role'],
+              );
             },
           );
         }
@@ -473,7 +502,14 @@ class _OtppageState extends State<Otppage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', jsonResponse['token']);
         prefs.setString('deviceid', identifier.toString());
+        prefs.setString('roleAccount', jsonResponse['type_role'].toString());
+        prefs.setString('typeAccount', jsonResponse['type_account'].toString());
+        // prefs.setString('typeAccount', 'Merchant');
 
+        dashboardKulasedaya(jsonResponse['token']);
+
+        roleAccount = prefs.getString('roleAccount');
+        typeAccount = prefs.getString('typeAccount');
         myprofile(jsonResponse['token']);
 
         // ignore: use_build_context_synchronously
@@ -487,7 +523,12 @@ class _OtppageState extends State<Otppage> {
                   const Duration(seconds: 3),
                   () {
                     // Navigator.of(context).pop(true);
-                    sessionPage(context, jsonResponse['token']);
+                    sessionPage(
+                      context,
+                      jsonResponse['token'].toString(),
+                      jsonResponse['type_account'],
+                      jsonResponse['type_role'],
+                    );
                   },
                 );
               }

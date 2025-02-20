@@ -1074,7 +1074,7 @@ class _COAPageState extends State<COAPage> {
                     widget.token,
                     idCOAUpdate,
                     kodeProduct,
-                    conNumberCOA.text,
+                    conNumberCOAUpdate.text,
                   ).then((value) async {
                     if (value == '00') {
                       await Future.delayed(Duration(seconds: 1));

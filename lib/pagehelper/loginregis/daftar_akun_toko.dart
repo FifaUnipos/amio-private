@@ -89,21 +89,21 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
 
   @override
   void initState() {
+    super.initState();
+    _getProvinceList();
+    _getTipeList();
     conCodePos.addListener(() {
       setState(() {
         bttnValidated = conNameMerch.text.isNotEmpty;
       });
     });
-    _getProvinceList();
-    _getTipeList();
-    super.initState();
   }
 
-  @override
-  void dispose() {
-    conNameMerch.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   conNameMerch.dispose();
+  //   super.dispose();
+  // }
 
   void autoReload() {
     setState(() {
@@ -1879,6 +1879,7 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
       "deviceid": identifier,
     }).then((response) {
       final data = json.decode(response.body);
+      log(data.toString());
       if (data != null && data['data'] != null) {
         setState(() {
           tipeList = List<dynamic>.from(data['data']);

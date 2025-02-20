@@ -1,10 +1,14 @@
 import 'dart:developer';
 
+import 'package:amio/pagehelper/loginregis/login_page.dart';
+
 import '../pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
 import '../pageMobile/pageHelperMobile/masukAkunMobile.dart';
 
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
 
+import '../pageTablet/kasirPage/dashboardKasir.dart';
 import 'masukakun.dart';
 import 'onboard/onboard.dart';
 
@@ -109,7 +113,9 @@ class _SplashCheckerState extends State<SplashChecker> {
   void initState() {
     myprofile(checkToken);
     dashboard(identifier, checkToken);
-    log("Statusku $statusProfile");
+    log("Statusku $checkToken");
+    saldoKulasedaya = '0';
+    dashboardKulasedaya(checkToken);
     super.initState();
     deviceDetails();
     Future.delayed(const Duration(seconds: 3)).then(
@@ -117,17 +123,42 @@ class _SplashCheckerState extends State<SplashChecker> {
         widget.isTab
             ? Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => statusProfile == 'Group_Merchant'
-                      ? SidebarXExampleApp(
-                          id: identifier.toString(),
-                          token: checkToken,
-                        )
-                      : SidebarXExampleAppToko(
-                          token: checkToken,
-                          id: identifier.toString(),
-                        ),
-                ),
+                MaterialPageRoute(builder: (context) {
+                  if (typeAccount == 'Group_Merchant') {
+                    return SidebarXExampleApp(
+                      id: identifier.toString(),
+                      token: checkToken ?? '',
+                    );
+                  } else if (typeAccount == 'Merchant_Only') {
+                    return SidebarXExampleAppToko(
+                      token: checkToken ?? '',
+                      id: identifier.toString(),
+                    );
+                  } else if (typeAccount == 'Merchant' &&
+                      roleAccount == 'cashier') {
+                    return SidebarXKasirPage(
+                      token: checkToken ?? '',
+                      id: identifier.toString(),
+                    );
+                  } else if (typeAccount == 'Merchant') {
+                    return SidebarXExampleAppToko(
+                      token: checkToken ?? '',
+                      id: identifier.toString(),
+                    );
+                    // return Container(child: Text('HEllo cashier'));
+                  }
+                  return LoginPage();
+                }
+                    // => statusProfile == 'Group_Merchant'
+                    //     ? SidebarXExampleApp(
+                    //         id: identifier.toString(),
+                    //         token: checkToken,
+                    //       )
+                    //     : SidebarXExampleAppToko(
+                    //         token: checkToken,
+                    //         id: identifier.toString(),
+                    //       ),
+                    ),
               )
             : sessionPageMobile(context, checkToken),
       },

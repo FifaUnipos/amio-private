@@ -1,10 +1,14 @@
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 
 import '../../../../utils/component/component_orderBy.dart';
 import 'akungrup.dart';
 import 'ubahAkun.dart';
 import '../../../../utils/component/skeletons.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -15,7 +19,7 @@ import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import '../../../../utils/component/component_color.dart';
-import '../inventorigrup.dart';
+import '../../../tokopage/sidebar/inventoriToko/inventoriTokoPage.dart';
 import '../../../../../utils/component/component_button.dart';
 
 late String nameAkun;
@@ -403,7 +407,7 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                     checkFill == 'penuh'
                                         ? PhosphorIcons.check_square_fill
                                         : isSelectionMode
-                                            ? PhosphorIcons.minus_circle_fill
+                                            ? PhosphorIcons.check_square_fill
                                             : PhosphorIcons.square,
                                     color: bnw100,
                                   ),
@@ -426,13 +430,13 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                       Column(
                                         children: [
                                           Text(
-                                            'Yakin Ingin Menghapus Voucher?',
+                                            'Yakin Ingin Menghapus Akun?',
                                             style: heading1(FontWeight.w600,
                                                 bnw900, 'Outfit'),
                                           ),
                                           SizedBox(height: size16),
                                           Text(
-                                            'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                            'Data Akun yang sudah dihapus tidak dapat dikembalikan lagi.',
                                             style: heading2(FontWeight.w400,
                                                 bnw900, 'Outfit'),
                                           ),
@@ -604,10 +608,10 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
                                       InkWell(
                                         // onTap: () => onTap(isSelected, index),
                                         onTap: () {
-                                          onTap(isSelected, index);
-                                          log(data.fullname.toString());
-                                          log(data.userid.toString());
-                                          log(data.phonenumber.toString());
+                                          onTap(isSelected, index, data.userid);
+                                          // log(data.fullname.toString());
+                                          // log(data.userid.toString());
+                                          // log(data.phonenumber.toString());
                                         },
                                         child: SizedBox(
                                           width: 50,
@@ -1199,15 +1203,23 @@ class _lihatAkunPageState extends State<lihatAkunPage> {
     );
   }
 
-  void onTap(bool isSelected, int index) {
-    setState(() {
+  void onTap(bool isSelected, int index, productId) {
+    if (index >= 0 && index < selectedFlag.length) {
       selectedFlag[index] = !isSelected;
       isSelectionMode = selectedFlag.containsValue(true);
-    });
-    // if (isSelectionMode) {
-    // } else {
-    //   // Open Detail Page
-    // }
+
+      if (selectedFlag[index] == true) {
+        // Periksa apakah productId sudah ada di dalam listProduct sebelum menambahkannya
+        if (!listProduct.contains(productId)) {
+          listProduct.add(productId);
+        }
+      } else {
+        // Hapus productId dari listProduct jika sudah ada
+        listProduct.remove(productId);
+      }
+
+      setState(() {});
+    }
   }
 
   void onLongPress(bool isSelected, int index) {

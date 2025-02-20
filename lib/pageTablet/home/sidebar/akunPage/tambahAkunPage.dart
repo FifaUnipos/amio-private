@@ -4,7 +4,10 @@ import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
@@ -14,7 +17,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../main.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';import '../../../../utils/component/component_color.dart';
+import '../../../../services/apimethod.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../../utils/component/component_button.dart';
 
@@ -62,6 +66,9 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
   bool onswitchAktif = true;
   String switchAktif = "Aktif";
 
+  bool onswitchAktifKasirTambah = false;
+  String switchAktifKasirTambah = 'Pengguna';
+
   @override
   void initState() {
     checkConnection(context);
@@ -77,8 +84,11 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -314,6 +324,65 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                         ),
                       ),
                       SizedBox(height: size16),
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          onswitchAktif = !onswitchAktif;
+                          onswitchAktif
+                              ? switchAktif = "Aktif"
+                              : switchAktif = "Tidak Aktif";
+                          setState(() {});
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Mode Kasir',
+                                  style: heading2(
+                                      FontWeight.w600, bnw900, 'Outfit'),
+                                ),
+                                Text(
+                                  switchAktifKasirTambah,
+                                  style: heading4(
+                                      FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ],
+                            ),
+                            FlutterSwitch(
+                              width: 52.0,
+                              height: 28.0,
+                              value: onswitchAktifKasirTambah,
+                              padding: 0,
+                              activeIcon:
+                                  Icon(PhosphorIcons.check, color: primary500),
+                              inactiveIcon:
+                                  Icon(PhosphorIcons.x, color: bnw100),
+                              activeColor: primary500,
+                              inactiveColor: bnw100,
+                              borderRadius: 30.0,
+                              inactiveToggleColor: bnw900,
+                              activeToggleColor: primary200,
+                              activeSwitchBorder: Border.all(color: primary500),
+                              inactiveSwitchBorder:
+                                  Border.all(color: bnw300, width: 2),
+                              onToggle: (val) {
+                                setState(
+                                  () {
+                                    onswitchAktifKasirTambah = val;
+                                    onswitchAktifKasirTambah
+                                        ? switchAktifKasirTambah = "Kasir"
+                                        : switchAktifKasirTambah = "Pengguna";
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: size16),
                     ],
                   ),
                 ),
@@ -340,6 +409,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                             widget.zipcode,
                             img64.toString(),
                             onswitchAktif ? '1' : '0',
+                            onswitchAktifKasirTambah ? 'cashier' : 'user',
                           );
 
                           conNameMerch.text = '';
@@ -382,6 +452,7 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
                                 widget.zipcode,
                                 img64.toString(),
                                 onswitchAktif ? '1' : '0',
+                                onswitchAktifKasirTambah ? 'cashier' : 'user',
                               ).then((value) {
                                 if (value == '00') {
                                   widget.pageController.jumpToPage(1);
@@ -418,9 +489,9 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
         () {
           log(hakValue.toString());
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(
+              maxWidth: double.infinity,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -688,8 +759,8 @@ class _TambahAkunPageState extends State<TambahAkunPage> {
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),

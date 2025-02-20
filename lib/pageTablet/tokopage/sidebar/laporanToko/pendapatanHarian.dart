@@ -144,19 +144,22 @@ class LaporanPendapatanHarianPageState
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            Text(
-                              'Bagikan Laporan',
-                              style:
-                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
-                            ),
-                            Text(
-                              'Pilih format berbagi laporan',
-                              style:
-                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ],
+                        Container(
+                          width: double.infinity,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Bagikan Laporan',
+                                style:
+                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                              Text(
+                                'Pilih format berbagi laporan',
+                                style:
+                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(height: size20),
                         SizedBox(
@@ -186,7 +189,7 @@ class LaporanPendapatanHarianPageState
                                             tanggalSelect,
                                             "totalTertinggi",
                                             "pdf",
-                                            "",
+                                            listToko,
                                           ).then((value) {
                                             try {
                                               launch(value['data']);
@@ -237,7 +240,7 @@ class LaporanPendapatanHarianPageState
                                             tanggalSelect,
                                             "totalTertinggi",
                                             "excel",
-                                            "",
+                                            listToko,
                                           ).then((value) {
                                             try {
                                               launch(value['data']);
@@ -683,7 +686,7 @@ class LaporanPendapatanHarianPageState
                                 tanggalSelect,
                                 "totalTertinggi",
                                 "",
-                                "",
+                                listToko,
                               ),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
@@ -704,400 +707,451 @@ class LaporanPendapatanHarianPageState
                                     snapshot.data!['data'];
                                 Map<String, dynamic> header = data['header'];
                                 List<dynamic> detailList = data['detail'];
-                                Map<String, dynamic> merchant = detailList[0];
-                                List<dynamic> products =
-                                    merchant['detail']['product'];
-                                Map<String, dynamic> paymentMethod =
-                                    merchant['detail']['paymentMethod'];
 
-                                return Container(
-                                  margin: EdgeInsets.only(
-                                    left: size8,
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: size16, horizontal: size20),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(size8),
-                                    border: Border.all(color: bnw300),
-                                  ),
-                                  child: ListView(
-                                    children: [
-                                      Text(
-                                        'Informasi Pendapatan ${header['tanggal']}',
-                                        style: heading2(
-                                            FontWeight.w600, bnw900, 'Outfit'),
+                                return ListView.builder(
+                                  itemBuilder: (context, index) {
+                                    Map<String, dynamic> merchant =
+                                        detailList[index];
+                                    List<dynamic> products =
+                                        merchant['detail']['product'];
+                                    Map<String, dynamic> paymentMethod =
+                                        merchant['detail']['paymentMethod'];
+
+                                    return Container(
+                                      margin: EdgeInsets.only(
+                                        left: size8,
                                       ),
-                                      SizedBox(height: size16),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: size16, horizontal: size20),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(size8),
+                                        border: Border.all(color: bnw300),
+                                      ),
+                                      child: ListView(
                                         children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                          Text(
+                                            'Informasi Pendapatan ${header['tanggal']}',
+                                            style: heading2(FontWeight.w600,
+                                                bnw900, 'Outfit'),
+                                          ),
+                                          SizedBox(height: size16),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                'Jumlah Transaksi',
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Jumlah Transaksi',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    'Nilai Transaksi',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    'Total PPN',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    'Total Diskon',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    'Total Keseluruhan',
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                ],
                                               ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                'Nilai Transaksi',
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                'Total PPN',
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                'Total Diskon',
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                'Total Keseluruhan',
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    header['count'].toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    FormatCurrency.convertToIdr(
+                                                            header[
+                                                                'nilaiTransaksi'])
+                                                        .toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    FormatCurrency.convertToIdr(
+                                                            header['totalPPN'])
+                                                        .toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    FormatCurrency.convertToIdr(
+                                                            detailList[index][
+                                                                'totalDiscount'])
+                                                        .toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                    FormatCurrency.convertToIdr(
+                                                            header['total'])
+                                                        .toString(),
+                                                    style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit'),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
+                                          SizedBox(height: size16),
+                                          Text('Rincian Pembayaran',
+                                              style: heading2(FontWeight.w600,
+                                                  bnw900, 'Outfit')),
+                                          SizedBox(height: size8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                header['count'].toString(),
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text('Cash',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text('Fifapay',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text('QRIS',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text('Credit',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text('Debit',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text('Coin',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                ],
                                               ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                        header[
-                                                            'nilaiTransaksi'])
-                                                    .toString(),
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                        header['totalPPN'])
-                                                    .toString(),
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                        merchant[
-                                                            'totalDiscount'])
-                                                    .toString(),
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
-                                              ),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                        header['total'])
-                                                    .toString(),
-                                                style: heading4(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                      '${FormatCurrency.convertToIdr(paymentMethod['Cash']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                      '${FormatCurrency.convertToIdr(paymentMethod['fifapay']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                      '${FormatCurrency.convertToIdr(paymentMethod['qris']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                      ' ${FormatCurrency.convertToIdr(paymentMethod['credit']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                      '${FormatCurrency.convertToIdr(paymentMethod['debit']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                  SizedBox(height: size8),
+                                                  Text(
+                                                      ' ${FormatCurrency.convertToIdr(paymentMethod['coin']).toString()}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
+                                                ],
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                      SizedBox(height: size16),
-                                      Text('Rincian Pembayaran',
-                                          style: heading2(FontWeight.w600,
-                                              bnw900, 'Outfit')),
-                                      SizedBox(height: size8),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Cash',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text('Fifapay',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text('QRIS',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text('Credit',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text('Debit',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text('Coin',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                            ],
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                  '${FormatCurrency.convertToIdr(paymentMethod['Cash']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                  '${FormatCurrency.convertToIdr(paymentMethod['fifapay']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                  '${FormatCurrency.convertToIdr(paymentMethod['qris']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                  ' ${FormatCurrency.convertToIdr(paymentMethod['credit']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                  '${FormatCurrency.convertToIdr(paymentMethod['debit']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                              SizedBox(height: size8),
-                                              Text(
-                                                  ' ${FormatCurrency.convertToIdr(paymentMethod['coin']).toString()}',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit')),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: size16),
-                                      Text('Rincian Produk',
-                                          style: heading2(FontWeight.w600,
-                                              bnw900, 'Outfit')),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: products.length,
-                                        itemBuilder: (context, index) {
-                                          Map<String, dynamic> product =
-                                              products[index];
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 4),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                          SizedBox(height: size16),
+                                          Text('Rincian Produk',
+                                              style: heading2(FontWeight.w600,
+                                                  bnw900, 'Outfit')),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            physics:
+                                                NeverScrollableScrollPhysics(),
+                                            itemCount: products.length,
+                                            itemBuilder: (context, index) {
+                                              Map<String, dynamic> product =
+                                                  products[index];
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 4),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                       children: [
-                                                        Text(
-                                                            merchant[
-                                                                'nameToko'],
-                                                            style: heading3(
-                                                                FontWeight.w600,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        Text(
-                                                          '${product['nameProduk']}',
-                                                          style: heading3(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                                detailList[
+                                                                        index][
+                                                                    'nameToko'],
+                                                                style: heading3(
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            Text(
+                                                              '${product['nameProduk']}',
+                                                              style: heading3(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            Text(
+                                                              "total Per Produk",
+                                                              style: heading3(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            Text(FormatCurrency
+                                                                    .convertToIdr(
+                                                                        product[
+                                                                            'total'])
+                                                                .toString()),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                    Divider(
+                                                      thickness: width1,
+                                                      color: bnw900,
+                                                    ),
+                                                    SizedBox(height: size8),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              'Total Transaksi',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                                'Nilai Transaksi',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text('Total PPN',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text('Total Diskon',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                          ],
+                                                        ),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            Text(
+                                                                '${product['totalTransaksi']}',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            SizedBox(
+                                                                height: size8),
+                                                            Text(
+                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                          ],
                                                         ),
                                                       ],
                                                     ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text(
-                                                          "total Per Produk",
-                                                          style: heading3(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
-                                                        ),
-                                                        Text(FormatCurrency
-                                                                .convertToIdr(
-                                                                    product[
-                                                                        'total'])
-                                                            .toString()),
-                                                      ],
-                                                    )
+                                                    SizedBox(height: size16),
                                                   ],
                                                 ),
-                                                Divider(
-                                                  thickness: width1,
-                                                  color: bnw900,
-                                                ),
-                                                SizedBox(height: size8),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Total Transaksi',
-                                                          style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text('Nilai Transaksi',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        SizedBox(height: size8),
-                                                        Text('Total PPN',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        SizedBox(height: size8),
-                                                        Text('Total Diskon',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                      ],
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text(
-                                                            '${product['totalTransaksi']}',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                            '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit')),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: size16),
-                                              ],
+                                              );
+                                            },
+                                          ),
+                                          SizedBox(height: size16),
+                                          GestureDetector(
+                                            onTap: () {
+                                              getSinglePendapatanHarian(
+                                                widget.token,
+                                                tanggalSelect,
+                                                "totalTertinggi",
+                                                "pdf",
+                                                listToko,
+                                              ).then((value) {
+                                                try {
+                                                  launch(value['data']);
+                                                  downloadFile(value['data']);
+                                                } catch (e) {}
+                                              });
+                                            },
+                                            child: buttonXXLoutline(
+                                              Column(
+                                                children: [
+                                                  Icon(
+                                                    PhosphorIcons
+                                                        .file_text_fill,
+                                                    color: primary500,
+                                                  ),
+                                                  Text(
+                                                    'Pdf',
+                                                    style: heading2(
+                                                        FontWeight.w600,
+                                                        primary500,
+                                                        'Outfit'),
+                                                  ),
+                                                ],
+                                              ),
+                                              110,
+                                              primary500,
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      SizedBox(height: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          getSinglePendapatanHarian(
-                                            widget.token,
-                                            tanggalSelect,
-                                            "totalTertinggi",
-                                            "pdf",
-                                            "",
-                                          ).then((value) {
-                                            try {
-                                              launch(value['data']);
-                                              downloadFile(value['data']);
-                                            } catch (e) {}
-                                          });
-                                        },
-                                        child: buttonXXLoutline(
-                                          Column(
-                                            children: [
-                                              Icon(
-                                                PhosphorIcons.file_text_fill,
-                                                color: primary500,
-                                              ),
-                                              Text(
-                                                'Pdf',
-                                                style: heading2(FontWeight.w600,
-                                                    primary500, 'Outfit'),
-                                              ),
-                                            ],
                                           ),
-                                          110,
-                                          primary500,
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -1673,15 +1727,15 @@ class LaporanPendapatanHarianPageState
                               width: double.infinity,
                               child: GestureDetector(
                                 onTap: () {
-                                  listToko;
-                                  getLaporanDaily(
-                                    context,
-                                    widget.token,
-                                    _textvalueOrderBy,
-                                    _textvalueKeyword,
-                                    listToko,
-                                    '',
-                                  );
+                                  print(listToko);
+                                  // getLaporanDaily(
+                                  //   context,
+                                  //   widget.token,
+                                  //   _textvalueOrderBy,
+                                  //   _textvalueKeyword,
+                                  //   listToko,
+                                  //   '',
+                                  // );
                                   Navigator.pop(context);
                                   initState();
                                   setState(() {});

@@ -968,7 +968,24 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  createCOA(
+                    context,
+                    widget.token,
+                    kodeProduct,
+                    conNumberCOA.text,
+                  ).then((value) async {
+                    if (value == '00') {
+                      conNumberCOA.clear();
+                      // kodeProduct = "";
+                      setState(() {});
+                      initState();
+                    }
+                  });
+
+                  initState();
+                  setState(() {});
+                },
                 child: buttonXLoutline(
                   Center(
                     child: Text(
@@ -1075,13 +1092,16 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
-                  // print(idProduct);
+                  // print(idCOAUpdate);
+                  // print(kodeProduct);
+                  // print(conNumberCOAUpdate.text);
+
                   updateCOA(
                     context,
                     widget.token,
                     idCOAUpdate,
                     kodeProduct,
-                    conNumberCOA.text,
+                    conNumberCOAUpdate.text,
                   ).then((value) async {
                     if (value == '00') {
                       await Future.delayed(Duration(seconds: 1));

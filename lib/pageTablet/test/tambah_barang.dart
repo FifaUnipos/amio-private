@@ -1,3 +1,4 @@
+import 'package:amio/utils/component/component_color.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/apimethod.dart';
@@ -15,7 +16,7 @@ class _TambahBarangInventoriState extends State<TambahBarangInventori> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bnw100,
       appBar: PreferredSize(
         preferredSize: const Size(double.infinity, 80.0),
         child: Container(
