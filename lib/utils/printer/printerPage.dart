@@ -150,224 +150,205 @@ class _BluetoothPageState extends State<BluetoothPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
-      padding: EdgeInsets.all(size16),
-      decoration: BoxDecoration(
-        color: bnw100,
-        borderRadius: BorderRadius.circular(size16),
-      ),
-      child: RefreshIndicator(
-        color: bnw100,
-        onRefresh: () async {
-          initPlatformState();
-          setState(() {});
-        },
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Printer',
-                        style: heading1(FontWeight.w700, bnw900, 'Outfit')),
-                    Text('Pengaturan printer',
-                        style: heading3(FontWeight.w300, bnw500, 'Outfit')),
-                  ],
-                ),
-                Row(
-                  children: [
-                    // buttonXLoutline(
-                    //   Row(
-                    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //     children: [
-                    //       Icon(
-                    //         PhosphorIcons.plus,
-                    //         color: primary500,
-                    //       ),
-                    //       Text(
-                    //         'Sambungkan perangkat baru',
-                    //         style:
-                    //             heading3(FontWeight.w600, primary500, 'Outfit'),
-                    //       )
-                    //     ],
-                    //   ),
-                    //   270,
-                    //   primary500,
-                    // ),
-                    SizedBox(width: size12),
-                    SizedBox(
-                      width: 200,
-                      child: ButtonPrint(
-                        bluetooth: bluetooth,
-                        printtext: 'Test Cetak Struk Berhasil!',
-                        widgetku: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(PhosphorIcons.printer_fill, color: bnw100),
-                            SizedBox(width: size12),
-                            Text(
-                              'Test Cetak Struk',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                )
-              ],
-            ),
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: BouncingScrollPhysics(),
-              itemCount: lihatSemua
-                  ? _devices.length + 1
-                  : min(_devices.length + 1, 6),
-              itemBuilder: (BuildContext context, int index) {
-                if (_devices.isEmpty) {
-                  return Text('NONE');
-                } else if (index == 0) {
-                  return Text("Daftar Perangkat Printer:");
-                } else {
-                  BluetoothDevice device = _devices[index - 1];
-                  return GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      _device = device;
-                      _devices.remove(device);
-                      _devices.insert(0, device);
-                      // ontap = true;
-                      setState(() {
-                        _connect();
-                        // connected ? _disconnect() : _connect();
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(top: size12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return WillPopScope(
+      onWillPop: () async {
+        showModalBottomExit(context);
+        return false;
+      },
+      child: Container(
+        margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
+        padding: EdgeInsets.all(size16),
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.circular(size16),
+        ),
+        child: RefreshIndicator(
+          color: bnw100,
+          onRefresh: () async {
+            initPlatformState();
+            setState(() {});
+          },
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Printer',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit')),
+                      Text('Pengaturan printer',
+                          style: heading3(FontWeight.w300, bnw500, 'Outfit')),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      // buttonXLoutline(
+                      //   Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //     children: [
+                      //       Icon(
+                      //         PhosphorIcons.plus,
+                      //         color: primary500,
+                      //       ),
+                      //       Text(
+                      //         'Sambungkan perangkat baru',
+                      //         style:
+                      //             heading3(FontWeight.w600, primary500, 'Outfit'),
+                      //       )
+                      //     ],
+                      //   ),
+                      //   270,
+                      //   primary500,
+                      // ),
+                      SizedBox(width: size12),
+                      SizedBox(
+                        width: 200,
+                        child: ButtonPrint(
+                          bluetooth: bluetooth,
+                          printtext: 'Test Cetak Struk Berhasil!',
+                          widgetku: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: primary200,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(PhosphorIcons.printer_fill,
-                                        color: primary500),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        device.name ?? "",
-                                        style: heading3(
-                                            FontWeight.w600, bnw900, 'Outfit'),
-                                      ),
-                                      if (_device == device)
-                                        if (connected)
-                                          Text(
-                                            "Terhubung",
-                                            style: body1(FontWeight.w400,
-                                                primary500, 'Outfit'),
-                                          )
-                                        else
-                                          Container(),
-                                    ],
-                                  ),
-                                ],
+                              Icon(PhosphorIcons.printer_fill, color: bnw100),
+                              SizedBox(width: size12),
+                              Text(
+                                'Test Cetak Struk',
+                                style:
+                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
                               ),
-                              _device == device
-                                  ? Row(
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+              ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: BouncingScrollPhysics(),
+                itemCount: lihatSemua
+                    ? _devices.length + 1
+                    : min(_devices.length + 1, 6),
+                itemBuilder: (BuildContext context, int index) {
+                  if (_devices.isEmpty) {
+                    return Text('NONE');
+                  } else if (index == 0) {
+                    return Text("Daftar Perangkat Printer:");
+                  } else {
+                    BluetoothDevice device = _devices[index - 1];
+                    return GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        _device = device;
+                        _devices.remove(device);
+                        _devices.insert(0, device);
+                        // ontap = true;
+                        setState(() {
+                          _connect();
+                          // connected ? _disconnect() : _connect();
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(top: size12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: primary200,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(PhosphorIcons.printer_fill,
+                                          color: primary500),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '|',
-                                          style: heading1(FontWeight.w400,
-                                              bnw300, 'Outfit'),
+                                          device.name ?? "",
+                                          style: heading3(FontWeight.w600,
+                                              bnw900, 'Outfit'),
                                         ),
-                                        SizedBox(width: size12),
-                                        InkWell(
-                                          onTap: () {
-                                            // connected ? _disconnect() : _connect();
-                                            showBottomPilihan(
-                                              context,
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    'Kamu Yakin Ingin Memutus Sambungan Perangkat Printer?',
-                                                    style: heading1(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: size16),
-                                                  Text(
-                                                    'Setelah sambungan diputus. printer tidak akan bisa mencetak struk',
-                                                    style: heading2(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: size16),
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: GestureDetector(
-                                                          onTap: () async {
-                                                            _disconnect();
-                                                            Navigator.pop(
-                                                                context);
-                                                            setState(() {});
-                                                          },
-                                                          child:
-                                                              buttonXLoutline(
-                                                            Center(
-                                                                child: Text(
-                                                              'Iya, Putuskan',
-                                                              style: heading3(
-                                                                FontWeight.w600,
-                                                                primary500,
-                                                                'Outfit',
-                                                              ),
-                                                            )),
-                                                            MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width /
-                                                                3,
-                                                            primary500,
-                                                          ),
-                                                        ),
+                                        if (_device == device)
+                                          if (connected)
+                                            Text(
+                                              "Terhubung",
+                                              style: body1(FontWeight.w400,
+                                                  primary500, 'Outfit'),
+                                            )
+                                          else
+                                            Container(),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                _device == device
+                                    ? Row(
+                                        children: [
+                                          Text(
+                                            '|',
+                                            style: heading1(FontWeight.w400,
+                                                bnw300, 'Outfit'),
+                                          ),
+                                          SizedBox(width: size12),
+                                          InkWell(
+                                            onTap: () {
+                                              // connected ? _disconnect() : _connect();
+                                              showBottomPilihan(
+                                                context,
+                                                Column(
+                                                  children: [
+                                                    Text(
+                                                      'Kamu Yakin Ingin Memutus Sambungan Perangkat Printer?',
+                                                      style: heading1(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit',
                                                       ),
-                                                      SizedBox(width: size16),
-                                                      Expanded(
-                                                        child: GestureDetector(
-                                                          onTap: () =>
+                                                    ),
+                                                    SizedBox(height: size16),
+                                                    Text(
+                                                      'Setelah sambungan diputus. printer tidak akan bisa mencetak struk',
+                                                      style: heading2(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: size16),
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () async {
+                                                              _disconnect();
                                                               Navigator.pop(
-                                                                  context),
-                                                          child: buttonXL(
+                                                                  context);
+                                                              setState(() {});
+                                                            },
+                                                            child:
+                                                                buttonXLoutline(
                                                               Center(
                                                                   child: Text(
-                                                                'Batalkan',
+                                                                'Iya, Putuskan',
                                                                 style: heading3(
                                                                   FontWeight
                                                                       .w600,
-                                                                  bnw100,
+                                                                  primary500,
                                                                   'Outfit',
                                                                 ),
                                                               )),
@@ -375,86 +356,115 @@ class _BluetoothPageState extends State<BluetoothPage> {
                                                                           context)
                                                                       .size
                                                                       .width /
-                                                                  3),
+                                                                  3,
+                                                              primary500,
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
+                                                        SizedBox(width: size16),
+                                                        Expanded(
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () =>
+                                                                Navigator.pop(
+                                                                    context),
+                                                            child: buttonXL(
+                                                                Center(
+                                                                    child: Text(
+                                                                  'Batalkan',
+                                                                  style:
+                                                                      heading3(
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw100,
+                                                                    'Outfit',
+                                                                  ),
+                                                                )),
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width /
+                                                                    3),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  EdgeInsets.only(right: size8),
+                                              child: Icon(
+                                                PhosphorIcons.plugs,
+                                                color: bnw900,
+                                                size: size32,
                                               ),
-                                            );
-                                          },
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsets.only(right: size8),
-                                            child: Icon(
-                                              PhosphorIcons.plugs,
-                                              color: bnw900,
-                                              size: size32,
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    )
-                                  : Container(),
-                            ],
-                          ),
-                        ],
+                                        ],
+                                      )
+                                    : Container(),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-            ),
-            SizedBox(height: size12),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  lihatSemua = !lihatSemua;
-                  print(lihatSemua);
-                });
-              },
-              child: SizedBox(
+                    );
+                  }
+                },
+              ),
+              SizedBox(height: size12),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    lihatSemua = !lihatSemua;
+                    print(lihatSemua);
+                  });
+                },
+                child: SizedBox(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(size8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                        child: Icon(
+                            lihatSemua != true
+                                ? PhosphorIcons.caret_right
+                                : PhosphorIcons.caret_up,
+                            color: bnw900),
+                      ),
+                      SizedBox(width: size12),
+                      Text(lihatSemua != true ? 'Lihat Semua' : 'Lihat Sedikit',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 42,
+                padding: EdgeInsets.only(left: size12),
+                width: double.infinity,
+                color: bnw200,
                 child: Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(size8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                      child: Icon(
-                          lihatSemua != true
-                              ? PhosphorIcons.caret_right
-                              : PhosphorIcons.caret_up,
-                          color: bnw900),
+                    Icon(
+                      PhosphorIcons.info_fill,
+                      color: bnw600,
                     ),
                     SizedBox(width: size12),
-                    Text(lihatSemua != true ? 'Lihat Semua' : 'Lihat Sedikit',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                    Text(
+                      'Jika perangkat tidak ada dalam daftar perangkat. Silahkan untuk hubungkan perangkat baru.',
+                      style: heading4(FontWeight.w400, bnw600, 'Outfit'),
+                    )
                   ],
                 ),
               ),
-            ),
-            Container(
-              height: 42,
-              padding: EdgeInsets.only(left: size12),
-              width: double.infinity,
-              color: bnw200,
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIcons.info_fill,
-                    color: bnw600,
-                  ),
-                  SizedBox(width: size12),
-                  Text(
-                    'Jika perangkat tidak ada dalam daftar perangkat. Silahkan untuk hubungkan perangkat baru.',
-                    style: heading4(FontWeight.w400, bnw600, 'Outfit'),
-                  )
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

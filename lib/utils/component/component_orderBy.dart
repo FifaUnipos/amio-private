@@ -1,5 +1,6 @@
 String textOrderBy = 'Nama Toko A ke Z ';
 String textvalueOrderBy = 'upDownNama';
+String textvalueOrderByBahan = 'upDownName';
 String textOrderByCOA = 'Debit';
 
 List alasanTagihanText = [
@@ -77,7 +78,21 @@ List orderByAkunText = [
   "Akun Terlama",
 ];
 
+List orderByBahanText = [
+  "Bahan Terbaru",
+  "Bahan Terlama",
+  "Nama Akun A ke Z",
+  "Nama Akun Z ke A",
+  "Aktifitas Terbaru",
+  "Aktifitas Terlama",
+];
+
 //! orderby
+List orderByBahanInventory = [
+  "upDownName",
+  "upDownCreated",
+  "downUpCreated",
+];
 List orderByProduct = [
   "upDownNama",
   "downUpNama",

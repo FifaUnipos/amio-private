@@ -943,11 +943,17 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             .spaceBetween,
                                                     children: [
                                                       Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           SizedBox(
                                                               height: size8),
                                                           Text(
-                                                            'Uang Tunai',
+                                                            data['payment_method_id'] ==
+                                                                    '001'
+                                                                ? 'Uang Tunai'
+                                                                : 'Non Tunai',
                                                             style: heading4(
                                                                 FontWeight.w400,
                                                                 bnw900,
@@ -1066,7 +1072,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     //     0);
                                                     // widget.bluetooth
                                                     //     .printNewLine();
-                                                    widget.bluetooth.printNewLine();
+                                                    widget.bluetooth
+                                                        .printNewLine();
                                                     widget.bluetooth.paperCut();
                                                   } else {
                                                     dialogNoPrinter(context);

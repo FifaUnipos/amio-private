@@ -405,6 +405,17 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                     flex: 2,
                                     child: Container(
                                       child: Text(
+                                        'Qty',
+                                        style: heading4(
+                                            FontWeight.w600, bnw100, 'Outfit'),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: Text(
                                         'Satuan',
                                         style: heading4(
                                             FontWeight.w600, bnw100, 'Outfit'),
@@ -464,6 +475,127 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                     style: heading4(
                                         FontWeight.w600, bnw100, 'Outfit'),
                                   ),
+                                  SizedBox(width: size8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showBottomPilihan(
+                                        context,
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  'Yakin Ingin Menghapus Produk?',
+                                                  style: heading1(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                                SizedBox(height: size16),
+                                                Text(
+                                                  'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
+                                                  style: heading2(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: size16),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        // log(dataProduk.id.toString());
+
+                                                        // print(" hell na ${listProduct}");
+                                                        deleteMasterData(
+                                                          context,
+                                                          widget.token,
+                                                          listProduct,
+                                                        ).then(
+                                                          (value) {
+                                                            isSelectionMode =
+                                                                false;
+                                                            listProduct = [];
+                                                            listProduct.clear();
+                                                            selectedFlag
+                                                                .clear();
+                                                            setState(() {});
+                                                            initState();
+                                                          },
+                                                        );
+                                                      });
+                                                      initState();
+                                                    },
+                                                    child: buttonXLoutline(
+                                                      Center(
+                                                        child: Text(
+                                                          'Iya, Hapus',
+                                                          style: heading3(
+                                                              FontWeight.w600,
+                                                              primary500,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .width,
+                                                      primary500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: size12),
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: buttonXL(
+                                                      Center(
+                                                        child: Text(
+                                                          'Batalkan',
+                                                          style: heading3(
+                                                              FontWeight.w600,
+                                                              bnw100,
+                                                              'Outfit'),
+                                                        ),
+                                                      ),
+                                                      MediaQuery.of(context)
+                                                          .size
+                                                          .width,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    child: buttonL(
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(PhosphorIcons.trash_fill,
+                                              color: bnw900),
+                                          Text(
+                                            'Hapus Semua',
+                                            style: heading3(FontWeight.w600,
+                                                bnw900, 'Outfit'),
+                                          ),
+                                        ],
+                                      ),
+                                      bnw100,
+                                      bnw300,
+                                    ),
+                                  ),
+                                  SizedBox(width: size8),
                                 ],
                               ),
                       ),
@@ -504,6 +636,7 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
                                           idproductDetail = dataProduk.id;
+                                          print(idproductDetail);
                                           expandedPage =
                                               MediaQuery.of(context).size.width;
 
@@ -576,6 +709,35 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                                               .ellipsis,
                                                         ),
                                                       ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: size16),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Container(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        double.parse(
+                                                                datasProduk![
+                                                                        index]
+                                                                    .qty
+                                                                    .toString())
+                                                            .toInt()
+                                                            .toString(),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit'),
+                                                      )
                                                     ],
                                                   ),
                                                 ),
@@ -763,21 +925,22 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                                                               onTap: () {
                                                                                 setState(() {
                                                                                   // log(dataProduk.id.toString());
-                                                                                  List dataBahan = [
-                                                                                    dataProduk.id
+                                                                                  List<String> dataBahan = [
+                                                                                    datasProduk![index].id.toString()
                                                                                   ];
 
-                                                                                  whenLoading(context);
-                                                                                  deleteMasterData(
-                                                                                    context,
-                                                                                    widget.token,
-                                                                                    dataBahan,
-                                                                                  ).then(
-                                                                                    (value) {
-                                                                                      setState(() {});
-                                                                                      initState();
-                                                                                    },
-                                                                                  );
+                                                                                  setState(() {
+                                                                                    deleteMasterData(
+                                                                                      context,
+                                                                                      widget.token,
+                                                                                      dataBahan,
+                                                                                    ).then(
+                                                                                      (value) {
+                                                                                        setState(() {});
+                                                                                        initState();
+                                                                                      },
+                                                                                    );
+                                                                                  });
                                                                                 });
                                                                               },
                                                                               child: buttonXLoutline(
@@ -864,7 +1027,6 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                 ),
                               ),
                             ),
-                
                     ],
                   ),
                 ),
@@ -876,13 +1038,18 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                           future: getSingleDetailMasterData(
                             context,
                             widget.token,
-                            idproductDetail,
+                            idproductDetail!,
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               Map<String, dynamic> data =
                                   snapshot.data!['data'];
                               List detail = data['detail'];
+
+                              if (detail.isEmpty) {
+                                return Center(
+                                    child: Text("Data tidak tersedia"));
+                              }
 
                               return Container(
                                 padding: EdgeInsets.all(size16),
@@ -985,7 +1152,10 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                                               'Outfit'),
                                                         ),
                                                         Text(
-                                                          detail[0]['qty']
+                                                          double.parse(detail[0]
+                                                                      ['qty']
+                                                                  .toString())
+                                                              .toInt()
                                                               .toString(),
                                                           style: heading4(
                                                               FontWeight.w600,
@@ -1011,8 +1181,10 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
                                                             'Outfit'),
                                                       ),
                                                       Text(
-                                                        detail[0][
-                                                                'qty_after_activity']
+                                                        double.parse(detail[0][
+                                                                    'qty_after_activity']
+                                                                .toString())
+                                                            .toInt()
                                                             .toString(),
                                                         style: heading4(
                                                             FontWeight.w600,

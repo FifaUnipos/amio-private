@@ -1,5 +1,6 @@
-
-import 'package:flutter/material.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'component_size.dart';
 
 import '../component/component_color.dart';
 

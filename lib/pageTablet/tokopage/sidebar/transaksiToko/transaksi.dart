@@ -404,7 +404,7 @@ class _TransactionPageState extends State<TransactionPage>
       map1['image'] = detail['image']!;
       map1['amount'] = detail['amount_display'] ?? detail['amount']!;
       map1['description'] = detail['description']!;
-      map1['id_request'] = detail['id_request']!;
+      map1['id_request'] = detail['id_request'] ?? '';
 
       mapCalculate.add(map1);
     }
@@ -2749,14 +2749,20 @@ class _TransactionPageState extends State<TransactionPage>
                   },
                 )),
                 Divider(),
-                rincianPembayaranSelanjutnya(
+                rincianPembayaranDebitKredit(
                   context,
-                  dompetDigitalPageCon,
-                  _pageMetodeSwap,
-                  selectedIndexDompetDigital,
-                  3,
-                  coaValueDebit == '' ? true : false,
+                  (uangTunaiController.text = totalTransaksi.toString()),
+                  idpaymentmethode,
+                  debitpinController.text,
                 )
+                // rincianPembayaranSelanjutnya(
+                //   context,
+                //   dompetDigitalPageCon,
+                //   _pageMetodeSwap,
+                //   selectedIndexDompetDigital,
+                //   3,
+                //   coaValueDebit == '' ? true : false,
+                // )
               ],
             ),
           ),
@@ -2952,13 +2958,19 @@ class _TransactionPageState extends State<TransactionPage>
                   },
                 )),
                 Divider(),
-                rincianPembayaranSelanjutnya(
-                    context,
-                    dompetDigitalPageCon,
-                    _pageMetodeSwap,
-                    selectedIndexDompetDigital,
-                    2,
-                    coaValueKredit == '' ? true : false)
+                rincianPembayaranDebitKredit(
+                  context,
+                  (uangTunaiController.text = totalTransaksi.toString()),
+                  idpaymentmethode,
+                  debitpinController.text,
+                )
+                // rincianPembayaranSelanjutnya(
+                //     context,
+                //     dompetDigitalPageCon,
+                //     _pageMetodeSwap,
+                //     selectedIndexDompetDigital,
+                //     2,
+                //     coaValueKredit == '' ? true : false)
               ],
             ),
           ),
@@ -3143,13 +3155,19 @@ class _TransactionPageState extends State<TransactionPage>
                   },
                 )),
                 Divider(),
-                rincianPembayaranSelanjutnya(
-                    context,
-                    dompetDigitalPageCon,
-                    _pageMetodeSwap,
-                    selectedIndexDompetDigital,
-                    1,
-                    coaValueEWallet == '' ? true : false)
+                rincianPembayaranDebitKredit(
+                  context,
+                  (uangTunaiController.text = totalTransaksi.toString()),
+                  idpaymentmethode,
+                  debitpinController.text,
+                )
+                // rincianPembayaranSelanjutnya(
+                //     context,
+                //     dompetDigitalPageCon,
+                //     _pageMetodeSwap,
+                //     selectedIndexDompetDigital,
+                //     1,
+                //     coaValueEWallet == '' ? true : false)
               ],
             ),
           ),
@@ -4010,6 +4028,7 @@ class _TransactionPageState extends State<TransactionPage>
                             SizedBox(width: size16),
                             GestureDetector(
                               onTap: () {
+                                print(widget.token);
                                 customProdukName.text = "";
                                 customProdukPrice.text = "";
                                 conCatatanPreview.text = '';
@@ -6512,7 +6531,10 @@ class _TransactionPageState extends State<TransactionPage>
                           : Expanded(
                               child: Center(
                                 child: ListView.builder(
-                                  padding: EdgeInsets.zero,
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
                                   // shrinkWrap: true,
                                   physics: BouncingScrollPhysics(),
                                   itemCount: cart.length,

@@ -17,7 +17,10 @@ class _TestPageAsoyState extends State<TestPageAsoy> {
     try {
       final result = await getMasterDataToko(
         context,
-        "OTU3ZjAyNjljNDg0ZTdkM2VmZjk3ZDY2NjQ0OThmOWI2ZGRjNWNjMzBiODM0YTczNDVmY2FjMTdkMDRlOTllYQ==",
+        // "OTU3ZjAyNjljNDg0ZTdkM2VmZjk3ZDY2NjQ0OThmOWI2ZGRjNWNjMzBiODM0YTczNDVmY2FjMTdkMDRlOTllYQ==",
+        "",
+        "",
+        "",
         "",
       );
       setState(() {

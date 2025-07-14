@@ -1,12 +1,11 @@
 import 'dart:async';
 
-
 import 'package:flutter/material.dart';
 import '../component/component_color.dart';
 
 Completer<void> loadingCompleter = Completer<void>();
 
-void whenLoading(context) {
+void whenLoading(BuildContext context) {
   showDialog(
     barrierDismissible: false,
     useRootNavigator: true,
@@ -38,9 +37,11 @@ void whenLoading(context) {
   );
 }
 
-Future<void> closeLoading(context) async {
+Future<void> closeLoading(BuildContext context) async {
   if (!loadingCompleter.isCompleted) {
-    Navigator.of(context, rootNavigator: true).pop();
+    if (Navigator.of(context, rootNavigator: true).canPop()) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
     loadingCompleter.complete();
   }
 }

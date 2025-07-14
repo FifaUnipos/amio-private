@@ -32,6 +32,19 @@ class FormatCurrency {
   }
 }
 
+int parseFlexibleNumber(dynamic value) {
+  if (value == null) return 0;
+
+  // Ubah ke string dulu, lalu bersihkan
+  String cleaned = value.toString().replaceAll(RegExp(r'[^0-9.,]'), '');
+
+  // Ganti koma jadi titik, untuk jaga-jaga input lokal (misal "10,5")
+  cleaned = cleaned.replaceAll(',', '.');
+
+  double? result = double.tryParse(cleaned);
+  return result?.round() ?? 0; // Bulatkan ke int
+}
+
 String formatCurrency(int amount) {
   final formatter = NumberFormat('#,###', 'id_ID');
 

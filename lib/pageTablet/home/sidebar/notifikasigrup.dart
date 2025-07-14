@@ -32,6 +32,7 @@ class _NotifikasiGrupState extends State<NotifikasiGrup> {
   @override
   void initState() {
     // TODO: implement initState
+
     super.initState();
     connectWebSocket();
   }
@@ -147,199 +148,209 @@ class _NotifikasiGrupState extends State<NotifikasiGrup> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        margin: EdgeInsets.all(size16),
-        padding: EdgeInsets.all(size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pemberitahuan',
-              style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-            ),
-            Text(
-              nameToko ?? '',
-              style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: size16),
-            Expanded(
-              child: Container(
-                // padding: EdgeInsets.all(size16),
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  border: Border.all(color: bnw300),
-                  borderRadius: BorderRadius.circular(size16),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          vertical: size24, horizontal: size16),
-                      // margin: EdgeInsets.symmetric(vertical: size16),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: bnw900,
-                            width: width1,
+    return WillPopScope(
+      onWillPop: () async {
+        showModalBottomExit(context);
+        return false;
+      },
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(size16),
+          padding: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Pemberitahuan',
+                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+              Text(
+                nameToko ?? '',
+                style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Expanded(
+                child: Container(
+                  // padding: EdgeInsets.all(size16),
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: bnw300),
+                    borderRadius: BorderRadius.circular(size16),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: size24, horizontal: size16),
+                        // margin: EdgeInsets.symmetric(vertical: size16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: bnw900,
+                              width: width1,
+                            ),
                           ),
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Notifikasi',
+                              style:
+                                  heading3(FontWeight.w600, bnw900, 'OUtfit'),
+                            ),
+                            // buttonLoutline(
+                            //     Row(
+                            //       children: [
+                            //         Icon(
+                            //           PhosphorIcons.trash_fill,
+                            //           color: danger500,
+                            //           size: size20,
+                            //         ),
+                            //         SizedBox(width: size12),
+                            //         Text(
+                            //           'Hapus Semua',
+                            //           style: heading4(
+                            //               FontWeight.w600, danger500, 'OUtfit'),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //     danger500)
+                          ],
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Notifikasi',
-                            style: heading3(FontWeight.w600, bnw900, 'OUtfit'),
-                          ),
-                          // buttonLoutline(
-                          //     Row(
-                          //       children: [
-                          //         Icon(
-                          //           PhosphorIcons.trash_fill,
-                          //           color: danger500,
-                          //           size: size20,
-                          //         ),
-                          //         SizedBox(width: size12),
-                          //         Text(
-                          //           'Hapus Semua',
-                          //           style: heading4(
-                          //               FontWeight.w600, danger500, 'OUtfit'),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //     danger500)
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: notifications.isEmpty
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  height: 120,
-                                  'assets/illustration/imageHelp.svg',
-                                  fit: BoxFit.cover,
-                                ),
-                                Text(
-                                  'Tidak ada Notifikasi baru',
-                                  style: heading3(
-                                      FontWeight.w600, bnw900, 'OUtfit'),
-                                )
-                              ],
-                            )
-                          : ListView.builder(
-                              itemCount: notifications.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: size16, horizontal: size16),
-                                  // margin: EdgeInsets.symmetric(vertical: size16),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      top: BorderSide(
-                                        color: bnw900,
-                                        width: width1 - 0.5,
+                      Expanded(
+                        child: notifications.isEmpty
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    height: 120,
+                                    'assets/illustration/imageHelp.svg',
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Text(
+                                    'Tidak ada Notifikasi baru',
+                                    style: heading3(
+                                        FontWeight.w600, bnw900, 'OUtfit'),
+                                  )
+                                ],
+                              )
+                            : ListView.builder(
+                                itemCount: notifications.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: size16, horizontal: size16),
+                                    // margin: EdgeInsets.symmetric(vertical: size16),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        top: BorderSide(
+                                          color: bnw900,
+                                          width: width1 - 0.5,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            notifications[index].title,
-                                            style: heading4(FontWeight.w600,
-                                                bnw900, 'Outfit'),
-                                          ),
-                                          Text(
-                                            notifications[index].type,
-                                            style: heading4(FontWeight.w400,
-                                                bnw900, 'Outfit'),
-                                          ),
-                                        ],
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          showModalBottom(
-                                            context,
-                                            MediaQuery.of(context).size.height,
-                                            IntrinsicHeight(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(28.0),
-                                                child: SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        notifications[index]
-                                                            .title,
-                                                        style: heading2(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              notifications[index].title,
+                                              style: heading4(FontWeight.w600,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                            Text(
+                                              notifications[index].type,
+                                              style: heading4(FontWeight.w400,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                          ],
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            showModalBottom(
+                                              context,
+                                              MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                              IntrinsicHeight(
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(28.0),
+                                                  child: SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .width,
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          notifications[index]
+                                                              .title,
+                                                          style: heading2(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         ),
-                                                      ),
-                                                      Text(
-                                                        notifications[index]
-                                                            .description,
-                                                        style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
-                                                      ),
-                                                      Text(
-                                                        notifications[index]
-                                                            .date,
-                                                        style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
-                                                      ),
-                                                    ],
+                                                        Text(
+                                                          notifications[index]
+                                                              .description,
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        Text(
+                                                          notifications[index]
+                                                              .date,
+                                                          style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),
+                                            );
+                                          },
+                                          child: buttonL(
+                                            Center(
+                                              child: Text(
+                                                'Lihat',
+                                                style: body1(FontWeight.w600,
+                                                    bnw100, 'Outfit'),
+                                              ),
                                             ),
-                                          );
-                                        },
-                                        child: buttonL(
-                                          Center(
-                                            child: Text(
-                                              'Lihat',
-                                              style: body1(FontWeight.w600,
-                                                  bnw100, 'Outfit'),
-                                            ),
+                                            primary500,
+                                            primary500,
                                           ),
-                                          primary500,
-                                          primary500,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

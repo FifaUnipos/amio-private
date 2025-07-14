@@ -1,3 +1,4 @@
+import 'package:amio/utils/component/component_showModalBottom.dart';
 import 'package:flutter/material.dart';
 import 'package:amio/utils/utilities.dart';
 import 'package:amio/utils/component/component_textHeading.dart';
@@ -36,125 +37,131 @@ class _BantuanGrupState extends State<BantuanGrup> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        margin: EdgeInsets.all(size16),
-        padding: EdgeInsets.all(size16),
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: pageController,
-          children: [
-            pagePertama(context),
-            ListView(
-              padding: EdgeInsets.zero,
-              physics: BouncingScrollPhysics(),
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        pageController.jumpToPage(0);
-                      },
-                      child: Icon(
-                        PhosphorIcons.arrow_left_bold,
-                        size: size48,
-                        color: bnw900,
-                      ),
-                    ),
-                    SizedBox(width: size12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pertanyaan yang sering diajukan',
-                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                        ),
-                        Text(
-                          'Panduan mengenai aplikasi',
-                          style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: size20),
-                    Text(
-                      'Kategori',
-                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(
-                      height: 160,
-                      width: MediaQuery.of(context).size.width,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 1,
-                        itemBuilder: (BuildContext context, int index) {
-                          return frameDash('Semua', PhosphorIcons.notebook);
+    return WillPopScope(
+      onWillPop: () async {
+        showModalBottomExit(context);
+        return false;
+      },
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(size16),
+          padding: EdgeInsets.all(size16),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: pageController,
+            children: [
+              pagePertama(context),
+              ListView(
+                padding: EdgeInsets.zero,
+                physics: BouncingScrollPhysics(),
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          pageController.jumpToPage(0);
                         },
-                      ),
-                    ),
-                    Text('Pertanyaan',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit')),
-                    SizedBox(height: size12),
-                    SingleChildScrollView(
-                      padding: EdgeInsets.zero,
-                      child: Container(
-                        padding: EdgeInsets.only(bottom: size12),
-                        child: ExpansionPanelList(
-                          elevation: 1,
-                          expansionCallback: (int index, bool isExpanded) {
-                            setState(() {
-                              _isExpandedList[index] = !_isExpandedList[
-                                  index]; // Ubah status ekspansi
-                            });
-                          },
-                          children: _steps
-                              .asMap()
-                              .entries
-                              .map<ExpansionPanel>((entry) {
-                            int index = entry.key;
-                            Step step = entry.value;
-                            return ExpansionPanel(
-                              backgroundColor: primary100,
-                              canTapOnHeader: true,
-                              headerBuilder:
-                                  (BuildContext context, bool isExpanded) {
-                                return ListTile(
-                                  title: Text(
-                                    step.title,
-                                    style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
-                                  ),
-                                );
-                              },
-                              body: ListTile(
-                                title: Text(
-                                  step.body,
-                                  style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                              ),
-                              isExpanded: _isExpandedList[
-                                  index], // Status ekspansi berdasarkan index
-                            );
-                          }).toList(),
+                        child: Icon(
+                          PhosphorIcons.arrow_left_bold,
+                          size: size48,
+                          color: bnw900,
                         ),
                       ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ],
+                      SizedBox(width: size12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pertanyaan yang sering diajukan',
+                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                          Text(
+                            'Panduan mengenai aplikasi',
+                            style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: size20),
+                      Text(
+                        'Kategori',
+                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                      SizedBox(
+                        height: 160,
+                        width: MediaQuery.of(context).size.width,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 1,
+                          itemBuilder: (BuildContext context, int index) {
+                            return frameDash('Semua', PhosphorIcons.notebook);
+                          },
+                        ),
+                      ),
+                      Text('Pertanyaan',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                      SizedBox(height: size12),
+                      SingleChildScrollView(
+                        padding: EdgeInsets.zero,
+                        child: Container(
+                          padding: EdgeInsets.only(bottom: size12),
+                          child: ExpansionPanelList(
+                            elevation: 1,
+                            expansionCallback: (int index, bool isExpanded) {
+                              setState(() {
+                                _isExpandedList[index] = !_isExpandedList[
+                                    index]; // Ubah status ekspansi
+                              });
+                            },
+                            children: _steps
+                                .asMap()
+                                .entries
+                                .map<ExpansionPanel>((entry) {
+                              int index = entry.key;
+                              Step step = entry.value;
+                              return ExpansionPanel(
+                                backgroundColor: primary100,
+                                canTapOnHeader: true,
+                                headerBuilder:
+                                    (BuildContext context, bool isExpanded) {
+                                  return ListTile(
+                                    title: Text(
+                                      step.title,
+                                      style: heading3(
+                                          FontWeight.w600, bnw900, 'Outfit'),
+                                    ),
+                                  );
+                                },
+                                body: ListTile(
+                                  title: Text(
+                                    step.body,
+                                    style: heading4(
+                                        FontWeight.w400, bnw900, 'Outfit'),
+                                  ),
+                                ),
+                                isExpanded: _isExpandedList[
+                                    index], // Status ekspansi berdasarkan index
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

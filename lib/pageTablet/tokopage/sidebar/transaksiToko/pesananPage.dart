@@ -1103,7 +1103,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                             Expanded(
                                               child: GestureDetector(
                                                 onTap: () async {
-                                                  whenLoading(context);
+                                                  // whenLoading(context);
                                                   cart.clear();
                                                   cartMap.clear();
 
@@ -1224,15 +1224,14 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     // log(pelangganId.toString());
 
                                                     await calculateTransaction(
-                                                            context,
-                                                            widget.token,
-                                                            cartMap,
-                                                            setState,
-                                                            pelangganId,
-                                                            data['discountid'] ??
-                                                                '',
-                                                            "")
-                                                        .then((value) {
+                                                      context,
+                                                      widget.token,
+                                                      cartMap,
+                                                      setState,
+                                                      pelangganId,
+                                                      data['discountid'] ?? '',
+                                                      "",
+                                                    ).then((value) {
                                                       if (value == '00') {
                                                         width = null;
                                                         widtValue = 120;

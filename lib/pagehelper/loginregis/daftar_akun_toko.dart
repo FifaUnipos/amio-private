@@ -2240,10 +2240,11 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
     );
     var jsonResponse = jsonDecode(response.body);
 
-    print(jsonResponse['data']);
+    log(jsonResponse.toString());
     if (response.statusCode == 200) {
+      closeLoading(context);
       print("succes");
-      Navigator.of(context, rootNavigator: true).pop();
+      // Navigator.of(context, rootNavigator: true).pop();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -2251,9 +2252,10 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
         ),
       );
     } else {
-      Navigator.of(context, rootNavigator: true).pop();
-      emailError = jsonResponse['data']['email'];
+      closeLoading(context);
       showSnackbar(context, jsonResponse);
+      // Navigator.of(context, rootNavigator: true).pop();
+      emailError = jsonResponse['data']['email'];
     }
     return null;
   }

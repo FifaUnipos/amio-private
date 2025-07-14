@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:amio/utils/component/component_loading.dart';
+
 import '../../main.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
 
@@ -304,6 +306,7 @@ class _OtppageState extends State<Otppage> {
 
   Future registErentryOtp(pin) async {
     try {
+      whenLoading(context);
       final response = await http.post(
         Uri.parse(registerentryotp),
         body: {
@@ -315,10 +318,9 @@ class _OtppageState extends State<Otppage> {
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print("succes");
-        errorText = '';
+        print("succes aman tentram register");
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('token', jsonResponse['token'].toString());
         prefs.setString('deviceid', identifier.toString());
         prefs.setString('roleAccount', jsonResponse['type_role'].toString());
         prefs.setString('typeAccount', jsonResponse['type_account'].toString());
@@ -330,39 +332,23 @@ class _OtppageState extends State<Otppage> {
         typeAccount = prefs.getString('typeAccount');
 
         myprofile(jsonResponse['token']);
-
-        showDialog(
-            barrierDismissible: true,
-            useRootNavigator: true,
-            context: context,
-            builder: (context) {
-              if (jsonResponse['token'] != null) {
-                Future.delayed(
-                  const Duration(seconds: 3),
-                  () {
-                    sessionPage(
-                      context,
-                      jsonResponse['token'].toString(),
-                      jsonResponse['type_account'],
-                      jsonResponse['type_role'],
-                    );
-                  },
-                );
-              }
-              return const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            });
+        if (jsonResponse['token'] != null) {
+          sessionPage(
+            context,
+            jsonResponse['token'].toString(),
+            'Group_Merchant',
+            jsonResponse['type_role'],
+          );
+        }
+        closeLoading(context);
       } else {
         // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
         errorText = jsonResponse['message'];
+        closeLoading(context);
       }
       return null;
     } catch (e) {
+      closeLoading(context);
       throw Exception(e.toString());
     }
   }
@@ -484,6 +470,7 @@ class _OtppageState extends State<Otppage> {
 
   Future globalRegisterEntry(pin) async {
     try {
+      whenLoading(context);
       final response = await http.post(
         Uri.parse(registerentryotp),
         body: {
@@ -494,13 +481,13 @@ class _OtppageState extends State<Otppage> {
       );
       var jsonResponse = jsonDecode(response.body);
 
+      log(jsonDecode(response.body).toString());
+
       if (response.statusCode == 200) {
         print("succes");
         errorText = '';
-        print("succes");
-        errorText = '';
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('token', jsonResponse['token'].toString());
         prefs.setString('deviceid', identifier.toString());
         prefs.setString('roleAccount', jsonResponse['type_role'].toString());
         prefs.setString('typeAccount', jsonResponse['type_account'].toString());
@@ -513,39 +500,23 @@ class _OtppageState extends State<Otppage> {
         myprofile(jsonResponse['token']);
 
         // ignore: use_build_context_synchronously
-        showDialog(
-            barrierDismissible: true,
-            useRootNavigator: true,
-            context: context,
-            builder: (context) {
-              if (jsonResponse['token'] != null) {
-                Future.delayed(
-                  const Duration(seconds: 3),
-                  () {
-                    // Navigator.of(context).pop(true);
-                    sessionPage(
-                      context,
-                      jsonResponse['token'].toString(),
-                      jsonResponse['type_account'],
-                      jsonResponse['type_role'],
-                    );
-                  },
-                );
-              }
-              return const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            });
+        if (jsonResponse['token'] != null) {
+          sessionPage(
+            context,
+            jsonResponse['token'].toString(),
+            'Merchant_Only',
+            jsonResponse['type_role'],
+          );
+        }
+        closeLoading(context);
       } else {
         // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+        closeLoading(context);
         errorText = jsonResponse['message'];
       }
       return null;
     } catch (e) {
+      closeLoading(context);
       throw Exception(e.toString());
     }
   }

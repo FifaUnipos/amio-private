@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:math';
 
 import 'package:amio/models/keranjangModel.dart';
+import 'package:amio/models/kulasedayaMemberModel.dart';
 import 'package:amio/models/tokomodel.dart';
 import 'package:amio/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 
@@ -52,12 +53,17 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
   List<ModelDataToko>? datas;
   late WebViewController webController;
 
+  late Future<List<KulasedayaMember>> futureMembers;
+
   @override
   void initState() {
+    print("token $checkToken");
     checkConnection(context);
     getKulasedaya(context, widget.token, '');
     // connectWeb();
     dashboardKulasedaya(widget.token);
+    futureMembers = dashboardKulasedaya(widget.token);
+
     // dashboard(identifier, widget.token);
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
@@ -164,120 +170,193 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                               ),
                             ),
                             SizedBox(height: size12),
-                            Container(
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: bnw300, width: width2),
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                vertical: size32,
-                                horizontal: 150,
-                              ),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    PhosphorIcons.user_circle_fill,
-                                    color: bnw900,
-                                    size: size64,
-                                  ),
-                                  Text(
-                                    phoneProfile ?? '',
-                                    style: heading2(
-                                        FontWeight.w600, bnw900, 'Outfit'),
-                                  ),
-                                  SizedBox(height: size12),
-                                  Text(
-                                    nameProfile ?? '',
-                                    style: heading2(
-                                        FontWeight.w400, bnw900, 'Outfit'),
-                                  ),
-                                  SizedBox(height: size12),
-                                  Text(
-                                    'Akun tidak terhubung',
-                                    style: heading2(
-                                        FontWeight.w400, orange500, 'Outfit'),
-                                  ),
-                                ],
-                              ),
+                            FutureBuilder<List<KulasedayaMember>>(
+                              future: futureMembers,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(child: Text(''));
+                                  // child: Text('Error: ${snapshot.error}'));
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Center(
+                                      child: Text('No data available'));
+                                } else {
+                                  List<KulasedayaMember> members =
+                                      snapshot.data!;
+                                  return ListView.builder(
+                                    physics: BouncingScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemCount: members.length,
+                                    itemBuilder: (context, index) {
+                                      KulasedayaMember member = members[index];
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: size12),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: bnw300, width: width2),
+                                          borderRadius:
+                                              BorderRadius.circular(size8),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: size32,
+                                          horizontal: 150,
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              PhosphorIcons.user_circle_fill,
+                                              color: bnw900,
+                                              size: size64,
+                                            ),
+                                            SizedBox(height: size12),
+                                            Text(
+                                              member.memberCode,
+                                              style: heading2(FontWeight.w600,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                            SizedBox(height: size12),
+                                            Text(
+                                              member.nama,
+                                              style: heading2(FontWeight.w400,
+                                                  bnw900, 'Outfit'),
+                                            ),
+                                            SizedBox(height: size12),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Saldo: ',
+                                                  style: heading2(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                                Text(
+                                                  FormatCurrency.convertToIdr(
+                                                    int.parse(member.saldo),
+                                                  ),
+                                                  style: heading2(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: size12),
+                                            Text(
+                                              member.isBinded == '1'
+                                                  ? 'Terhubung'
+                                                  : 'Tidak Terhubung',
+                                              style: heading2(FontWeight.w400,
+                                                  orange500, 'Outfit'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      // ListTile(
+                                      //   title: Text(member.nama),
+                                      //   subtitle:
+                                      //       Text('Saldo: ${member.saldo}'),
+                                      //   trailing: Text(member.isBinded == '1'
+                                      //       ? 'Binded'
+                                      //       : 'Not Binded'),
+                                      // );
+                                    },
+                                  );
+                                }
+                              },
                             ),
                           ],
                         ),
                         SizedBox(height: size12),
-                        GestureDetector(
-                          onTap: () {
-                            String sessCodeFix = "&sess_code=$sessCode";
-                            print("my code $bindingUrl$sessCodeFix");
-                            try {
-                              webController = WebViewController()
-                                ..setJavaScriptMode(JavaScriptMode.unrestricted)
-                                ..loadRequest(
-                                    Uri.parse(bindingUrl + sessCodeFix));
-                              print("WebController initialized successfully");
-                            } catch (e) {
-                              print("Error initializing WebController: $e");
-                            }
+                        typeAccount != 'Group_Merchant'
+                            ? GestureDetector(
+                                onTap: () {
+                                  String sessCodeFix = "&sess_code=$sessCode";
+                                  print("my code $bindingUrl$sessCodeFix");
+                                  try {
+                                    webController = WebViewController()
+                                      ..setJavaScriptMode(
+                                          JavaScriptMode.unrestricted)
+                                      ..loadRequest(
+                                          Uri.parse(bindingUrl + sessCodeFix));
+                                    print(
+                                        "WebController initialized successfully");
+                                  } catch (e) {
+                                    print(
+                                        "Error initializing WebController: $e");
+                                  }
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Scaffold(
-                                  appBar: AppBar(
-                                    title: Text(
-                                      'Hubungkan FifaPay',
-                                      style: heading2(
-                                          FontWeight.w600, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                  body: WebViewWidget(
-                                    controller: webController
-                                      ..setJavaScriptMode(JavaScriptMode
-                                          .unrestricted) // Aktifkan JavaScript
-                                      ..addJavaScriptChannel(
-                                        'flutterCallback', // Nama channel yang digunakan
-                                        onMessageReceived:
-                                            (JavaScriptMessage message) {
-                                          print(
-                                              "Message from web: ${message.message}");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Scaffold(
+                                        appBar: AppBar(
+                                          title: Text(
+                                            'Hubungkan FifaPay',
+                                            style: heading2(FontWeight.w600,
+                                                bnw900, 'Outfit'),
+                                          ),
+                                        ),
+                                        body: WebViewWidget(
+                                          controller: webController
+                                            ..setJavaScriptMode(JavaScriptMode
+                                                .unrestricted) // Aktifkan JavaScript
+                                            ..addJavaScriptChannel(
+                                              'flutterCallback', // Nama channel yang digunakan
+                                              onMessageReceived:
+                                                  (JavaScriptMessage message) {
+                                                print(
+                                                    "Message from web: ${message.message}");
 
-                                          setState(() {
-                                            dashboardKulasedaya(widget.token);
+                                                setState(() {
+                                                  dashboardKulasedaya(
+                                                      widget.token);
 
-                                            Navigator.of(context).popUntil(
-                                                (route) => route.isFirst);
-                                          });
-                                        },
-                                      )
-                                      ..setNavigationDelegate(
-                                        NavigationDelegate(
-                                          onPageFinished: (String url) {
-                                            // Pastikan halaman sudah selesai dimuat sebelum menjalankan kode JavaScript
-                                            webController.runJavaScript("""
+                                                  Navigator.of(context)
+                                                      .popUntil((route) =>
+                                                          route.isFirst);
+                                                });
+                                              },
+                                            )
+                                            ..setNavigationDelegate(
+                                              NavigationDelegate(
+                                                onPageFinished: (String url) {
+                                                  // Pastikan halaman sudah selesai dimuat sebelum menjalankan kode JavaScript
+                                                  webController
+                                                      .runJavaScript("""
                                               console.log('flutterCallback tersedia:', typeof flutterCallback !== 'undefined');
                                               console.log('Menguji pengiriman pesan');
                                               FlutterCallback.postMessage('Halo dari Web!');
                                             """);
-                                          },
+                                                },
+                                              ),
+                                            )
+                                            ..loadRequest(Uri.parse(
+                                                bindingUrl)), // Ganti dengan URL halaman web
                                         ),
-                                      )
-                                      ..loadRequest(Uri.parse(
-                                          bindingUrl)), // Ganti dengan URL halaman web
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: buttonXXL(
+                                  Center(
+                                    child: Text(
+                                      'Hubungkan FifaPay',
+                                      style: heading2(
+                                          FontWeight.w600, bnw100, 'Outfit'),
+                                    ),
                                   ),
+                                  double.infinity,
                                 ),
-                              ),
-                            );
-                          },
-                          child: buttonXXL(
-                            Center(
-                              child: Text(
-                                'Hubungkan FifaPay',
-                                style:
-                                    heading2(FontWeight.w600, bnw100, 'Outfit'),
-                              ),
-                            ),
-                            double.infinity,
-                          ),
-                        )
+                              )
+                            : SizedBox()
                       ],
                     ),
                   ),

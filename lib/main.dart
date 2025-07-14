@@ -41,7 +41,7 @@ Future<void> main() async {
   sessCode = generateSessCode(16);
   myprofile(checkToken);
   dashboard(identifier, checkToken);
-  dashboardKulasedaya(checkToken);
+  // dashboardKulasedaya(checkToken);
   deviceDetails();
   statusProfile;
 

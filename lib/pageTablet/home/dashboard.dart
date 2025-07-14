@@ -643,27 +643,44 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             });
           },
         ),
+        // SidebarXItem(
+        //   icon: iconSelectedSidebar == 9
+        //       ? PhosphorIcons.money_fill
+        //       : PhosphorIcons.money,
+        //   label: 'Keuangan',
+        //   onTap: () {
+        //     widget.pageController.jumpToPage(0);
+        //     widget.controller.selectedIndex;
+        //     setState(() {
+        //       selectedIndexSideBar = false;
+        //       iconSelectedSidebar = 9;
+        //       valueOrderByProduct = 0;
+        //     });
+        //   },
+        // ),
+
         SidebarXItem(
+          // icon: iconSelectedSidebar == 10
           icon: iconSelectedSidebar == 9
-              ? PhosphorIcons.money_fill
-              : PhosphorIcons.money,
-          label: 'Keuangan',
+              ? PhosphorIcons.file_text_fill
+              : PhosphorIcons.file_text,
+          label: 'Laporan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 9;
+              // iconSelectedSidebar = 10;
               valueOrderByProduct = 0;
             });
           },
         ),
-
         SidebarXItem(
           icon: iconSelectedSidebar == 10
-              ? PhosphorIcons.file_text_fill
-              : PhosphorIcons.file_text,
-          label: 'Laporan',
+              ? PhosphorIcons.question_fill
+              : PhosphorIcons.question,
+          label: 'Bantuan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -676,21 +693,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         ),
         SidebarXItem(
           icon: iconSelectedSidebar == 11
-              ? PhosphorIcons.question_fill
-              : PhosphorIcons.question,
-          label: 'Bantuan',
-          onTap: () {
-            widget.pageController.jumpToPage(0);
-            widget.controller.selectedIndex;
-            setState(() {
-              selectedIndexSideBar = false;
-              iconSelectedSidebar = 11;
-              valueOrderByProduct = 0;
-            });
-          },
-        ),
-        SidebarXItem(
-          icon: iconSelectedSidebar == 12
               ? PhosphorIcons.printer_fill
               : PhosphorIcons.printer,
           label: 'Printer',
@@ -699,7 +701,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 12;
+              iconSelectedSidebar = 11;
               valueOrderByProduct = 0;
             });
           },
@@ -754,20 +756,20 @@ class _ScreensExampleState extends State<_ScreensExample> {
           case 8:
             return TransaksiGrup(token: widget.token);
           // return InventoriGrup(token: widget.token);
-          case 9:
-            return KeuanganGrup(token: widget.token);
+          // case 9:
+          //   return KeuanganGrup(token: widget.token);
           // return AkunGrup(token: widget.token);
           // LaporanGrup(
           //   token: widget.token,
           //   controller: widget.controller,
           // );
-          case 10:
+          case 9:
             return LaporanToko(
               token: widget.token,
               controller: widget.controller,
             );
           // return TransaksiGrup(token: widget.token);
-          case 11:
+          case 10:
             return BantuanGrup();
           // return KeuanganGrup(token: widget.token);
           // case size8:
@@ -777,7 +779,7 @@ class _ScreensExampleState extends State<_ScreensExample> {
           //   );
           // case 9:
           //   return BantuanGrup();
-          case 12:
+          case 11:
             return BluetoothPage();
           default:
             return Text(

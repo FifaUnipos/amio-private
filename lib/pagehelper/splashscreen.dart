@@ -114,6 +114,8 @@ class _SplashCheckerState extends State<SplashChecker> {
     myprofile(checkToken);
     dashboard(identifier, checkToken);
     log("Statusku $checkToken");
+    log("Type Account $typeAccount");
+    log("Role Account $roleAccount");
     saldoKulasedaya = '0';
     dashboardKulasedaya(checkToken);
     super.initState();

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
@@ -9,7 +10,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import 'package:amio/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import 'package:amio/utils/component/component_snackbar.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,8 +30,10 @@ import '../../../../services/modelBloc.dart';
 
 import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
 import '../../../../utils/component/component_button.dart';
-import 'ubahProdukToko.dart';import '../../../../utils/component/component_color.dart';
+import 'ubahProdukToko.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
+
 FocusNode textFieldFocusNode = FocusNode();
 
 class ProdukToko extends StatefulWidget {
@@ -3637,11 +3644,11 @@ class _ProdukTokoState extends State<ProdukToko> {
                       child: GestureDetector(
                         onTap: () {
                           whenLoading(context);
+                          Navigator.pop(context);
                           tambahKategoriForm(
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              Navigator.pop(context);
                               kategoriListForm(context, isKeyboardActive);
                               showSnackBarComponent(
                                   context, 'Berhasil tambah kategori', '00');
@@ -3890,7 +3897,6 @@ class _ProdukTokoState extends State<ProdukToko> {
       ),
     );
   }
-
 }
 
 modalBottomValue(String title, icon) {

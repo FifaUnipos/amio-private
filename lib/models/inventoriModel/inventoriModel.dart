@@ -3,7 +3,8 @@ class ModelDataInventori {
   String? nameItem;
   String? unitId;
   String? merchantId;
-  num? qty;
+  String? qty;
+  // num? qty;
   String? lastestActivity;
   String? merchantName;
   String? unitName;
