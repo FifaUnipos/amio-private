@@ -12,10 +12,12 @@ import 'package:amio/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
-class UbahPenyesuaianToko extends StatefulWidget {
+import '../../../../models/inventoriModel/produkMaterialModel.dart';
+
+class UbahProdukMaterial extends StatefulWidget {
   String token, groupId;
   PageController pageController;
-  UbahPenyesuaianToko({
+  UbahProdukMaterial({
     Key? key,
     required this.token,
     required this.groupId,
@@ -23,10 +25,10 @@ class UbahPenyesuaianToko extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<UbahPenyesuaianToko> createState() => _UbahPenyesuaianTokoState();
+  State<UbahProdukMaterial> createState() => _UbahPenyesuaianTokoState();
 }
 
-class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
+class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
   String selectedValue = 'Urutkan';
   String checkFill = 'kosong';
   bool isSelectionMode = false;
@@ -43,15 +45,21 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
   UnitConvertionModel? selectedUnit;
   TextEditingController unitController = TextEditingController();
 
+  TextEditingController tambahProdukCon = TextEditingController();
+  TextEditingController searchProductID = TextEditingController();
+
   bool isNotEmpty = false;
   List<Map<String, dynamic>> dataPemakaian = [];
   // List<Map<String, dynamic>> orderInventoryPenyesuaian = [];
   // Map<String, Map<String, dynamic>> selectedDataPemakaianPenyesuaian = {};
 
-  List<DetailItem> detailListUbahFIX = [];
+  List<ProdukMaterialModel> detailListUbahFIX = [];
 
   TextEditingController judulPenyesuaian =
-      TextEditingController(text: titlePenyesuaianUbah);
+      TextEditingController(text: judulUbahBOM);
+
+  TextEditingController ubahJudulProdukBOM =
+      TextEditingController(text: produkNameBom);
 
   void getMasterDataTokoAndUpdateState() async {
     try {
@@ -86,9 +94,8 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
   }
 
   void getDetailData() async {
-    // print('getDetailData called');
     final detailList =
-        await getDetailPenyesuian(context, widget.token, widget.groupId);
+        await getDetailBom(context, widget.token, widget.groupId);
 
     // Clear previous
     qtyControllerMap.clear();
@@ -97,31 +104,29 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
     selectedDataPemakaian.clear();
 
     for (var item in detailList) {
-      print('item.qty = ${item.qty}, item.price = ${item.price}');
+      print('item.qty = ${item.quantityNeeded}');
 
-      final id = item.itemId;
+      final id = item.id;
 
       qtyControllerMap[id] = TextEditingController(
-        text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '',
+        text: double.tryParse(item.quantityNeeded)?.toStringAsFixed(0) ?? '',
       );
-      hargaControllerMap[id] = TextEditingController(
-        text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '',
-      );
+
       unitControllerMap[id] = TextEditingController(
         text: item.unitName ?? '-',
       );
 
       selectedDataPemakaian[id] = {
-        "inventory_master_id": id,
-        "unit": item.nameItem,
-        "name": item.nameItem,
+        "id": item.inventoryMasterId,
+        "inventory_master_id": item.inventoryMasterId,
+        "unit": item.unitName,
+        "name": item.itemName,
         "category": item.unitName ?? '',
-        "qty": item.qty,
-        "unit_conversion_id": item.unit_conversion_id ?? '',
-        "unit_name": item.unitName ?? '',
-        "price": item.price,
-        "unit_factor": item.conversion_factor,
-        "unit_id": item.unitId,
+        "qty": item.quantityNeeded,
+        "unit_conversion_id": item.unitConversionId ?? '',
+        "unit_name": item.unitConversionName ?? '',
+        "unit_factor": item.unitConversionFactor,
+        "unit_id": item.unitConversionId,
       };
     }
 
@@ -132,47 +137,47 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
 
   void getdetailSelected() async {
     final result =
-        await getSelectedDataPemakaian(context, widget.token, widget.groupId);
+        await getSingleBOM(context, widget.token, '', widget.groupId);
     setState(() {
       selectedDataPemakaian = result;
     });
   }
 
-  Future<void> isiControllerDariAPI(List<DetailItem> detailList) async {
-    // Kosongkan dulu list
-    hargaControllerMap.clear();
-    qtyControllerMap.clear();
-    unitControllerMap.clear();
-    selectedDataPemakaian.clear();
+  // Future<void> isiControllerDariAPI(List<ProdukMaterialModel> detailList) async {
+  //   // Kosongkan dulu list
+  //   hargaControllerMap.clear();
+  //   qtyControllerMap.clear();
+  //   unitControllerMap.clear();
+  //   selectedDataPemakaian.clear();
 
-    for (int i = 0; i < detailList.length; i++) {
-      final item = detailList[i];
+  //   for (int i = 0; i < detailList.length; i++) {
+  //     final item = detailList[i];
 
-      // Simpan ke selectedDataPemakaian
-      selectedDataPemakaian[item.itemId] = {
-        "inventory_master_id": item.itemId,
-        "name": item.nameItem,
-        "category": item.conversion_factor,
-        "unit": item.nameItem,
-        "qty": item.qty,
-        "unit_conversion_id": item.unit_conversion_id ?? '',
-        "unit_name": item.unitName ?? '',
-        "price": item.price,
-        "unit_factor": item.conversion_factor,
-        "unit_id": item.unitId,
-      };
+  //     // Simpan ke selectedDataPemakaian
+  //     selectedDataPemakaian[item.itemId] = {
+  //       "inventory_master_id": item.itemId,
+  //       "name": item.nameItem,
+  //       "category": item.conversion_factor,
+  //       "unit": item.nameItem,
+  //       "qty": item.qty,
+  //       "unit_conversion_id": item.unit_conversion_id ?? '',
+  //       "unit_name": item.unitName ?? '',
+  //       "price": item.price,
+  //       "unit_factor": item.conversion_factor,
+  //       "unit_id": item.unitId,
+  //     };
 
-      // Isi controller dari API (Postman)
-      hargaControllerMap['id'] = TextEditingController(
-          text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '');
+  //     // Isi controller dari API (Postman)
+  //     hargaControllerMap['id'] = TextEditingController(
+  //         text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '');
 
-      qtyControllerMap['id'] = TextEditingController(
-          text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '');
+  //     qtyControllerMap['id'] = TextEditingController(
+  //         text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '');
 
-      unitControllerMap['id'] =
-          TextEditingController(text: item.unitName ?? '-');
-    }
-  }
+  //     unitControllerMap['id'] =
+  //         TextEditingController(text: item.unitName ?? '-');
+  //   }
+  // }
 
   @override
   void initState() {
@@ -213,11 +218,11 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Ubah Penyesuaian',
+                        'Ubah Produk Material',
                         style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                       ),
                       Text(
-                        'Penyesuaian',
+                        'Produk Material yang digunakan untuk penyesuaian',
                         style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                       ),
                     ],
@@ -228,6 +233,22 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                 'Judul',
                 judulPenyesuaian,
                 'Penyesuaian Matcha',
+              ),
+              SizedBox(height: size16),
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  // print('hello');
+                  showProductSelector(
+                      context, widget.token, [], searchProductID);
+                },
+                child: Container(
+                  child: fieldTambahProductID(
+                    'Produk',
+                    ubahJudulProdukBOM,
+                    'Matcha',
+                  ),
+                ),
               ),
               SizedBox(height: size16),
               Container(
@@ -270,7 +291,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    'Nama Produk',
+                                    'Nama',
                                     style: heading4(
                                         FontWeight.w700, bnw100, 'Outfit'),
                                   ),
@@ -279,7 +300,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    'Satuan',
+                                    'Qty',
                                     style: heading4(
                                         FontWeight.w700, bnw100, 'Outfit'),
                                   ),
@@ -288,30 +309,30 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    'Jumlah',
+                                    'Unit Convertion',
                                     style: heading4(
                                         FontWeight.w700, bnw100, 'Outfit'),
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Harga Satuan',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Total Harga',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Harga Satuan',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Total Harga',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
                                 Icon(
                                   PhosphorIcons.x_fill,
                                   color: primary500,
@@ -503,13 +524,14 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                   child: InkWell(
                                     // onTap: () => onTap(isSelected, index),
                                     onTap: () {
-                                      onTap(
-                                        isSelected,
-                                        index,
-                                        productId,
-                                      );
+                                      // onTap(
+                                      //   isSelected,
+                                      //   index,
+                                      //   productId,
+                                      // );
                                       // log(data.name.toString());
                                       // print(dataProduk.isActive);
+                                      print('data selected: $data');
 
                                       print(listProduct);
                                     },
@@ -539,7 +561,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    data['category'] ?? '',
+                                    data['qty'] ?? '',
                                     style: heading4(
                                       FontWeight.w400,
                                       bnw900,
@@ -553,7 +575,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    parseFlexibleNumber(data['qty']).toString(),
+                                    data['unit_conversion_name'] ?? '',
                                     style: heading4(
                                       FontWeight.w400,
                                       bnw900,
@@ -563,39 +585,39 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    FormatCurrency.convertToIdr(
-                                      parseFlexibleNumber(data['price']),
-                                    ).toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    FormatCurrency.convertToIdr(
-                                      parseFlexibleNumber(data['price']) *
-                                          parseFlexibleNumber(data['qty']),
-                                    ).toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                                // SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     FormatCurrency.convertToIdr(
+                                //       parseFlexibleNumber(data['price']),
+                                //     ).toString(),
+                                //     style: heading4(
+                                //       FontWeight.w400,
+                                //       bnw900,
+                                //       'Outfit',
+                                //     ),
+                                //     maxLines: 3,
+                                //     overflow: TextOverflow.ellipsis,
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     FormatCurrency.convertToIdr(
+                                //       parseFlexibleNumber(data['price']) *
+                                //           parseFlexibleNumber(data['qty']),
+                                //     ).toString(),
+                                //     style: heading4(
+                                //       FontWeight.w400,
+                                //       bnw900,
+                                //       'Outfit',
+                                //     ),
+                                //     maxLines: 3,
+                                //     overflow: TextOverflow.ellipsis,
+                                //   ),
+                                // ),
                                 SizedBox(width: size16),
                                 GestureDetector(
                                   onTap: () {
@@ -616,7 +638,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                     color: red500,
                                   ),
                                 ),
-                                SizedBox(width: size16),
+                                // SizedBox(width: size16),
                                 SizedBox(width: size16),
                               ],
                             ),
@@ -634,6 +656,8 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
         SizedBox(height: size16),
         GestureDetector(
           onTap: () {
+            print("Selected Data Pemakaian: $selectedDataPemakaian");
+            print('dataPemakaian: $dataPemakaian');
             showModalBottom(
               context,
               double.infinity,
@@ -681,24 +705,28 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                               leading: Checkbox(
                                                 activeColor: primary500,
                                                 value: selectedDataPemakaian
-                                                    .containsKey(item['id']),
+                                                    .containsKey(item[
+                                                        'id']), // Update checkbox value here
                                                 onChanged: (bool? value) {
                                                   setState(() {
                                                     final id = item['id'];
 
                                                     if (value == true) {
-                                                      // Tambahkan item ke selectedDataPemakaian dengan data lengkap
+                                                      // Add item to selectedDataPemakaian with all necessary data
                                                       selectedDataPemakaian[
                                                           id] = {
-                                                        "inventory_master_id":
-                                                            id,
+                                                        "id": item[
+                                                            'inventory_master_id'],
+                                                        "inventory_master_id": item[
+                                                            'inventory_master_id'],
                                                         "name":
                                                             item['name_item'],
                                                         "category":
                                                             item['category'],
                                                         "unit":
                                                             item['name_item'],
-                                                        "qty": 0,
+                                                        "qty":
+                                                            0, // Default value, should be updated later
                                                         "unit_conversion_id": item[
                                                             'unit_conversion_id'],
                                                         "unit_name":
@@ -706,7 +734,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                         "price": item['price'],
                                                       };
                                                     } else {
-                                                      // Hapus dari selected dan order
+                                                      // Remove item from selectedDataPemakaian and orderInventory
                                                       selectedDataPemakaian
                                                           .remove(id);
                                                       orderInventory
@@ -714,8 +742,8 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                               inv['inventory_master_id'] ==
                                                               id);
                                                     }
-
-                                                    this.setState(() {});
+                                                    // This is important to refresh the state
+                                                    setState(() {});
                                                   });
                                                 },
                                               ),
@@ -755,7 +783,8 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                       "category":
                                                           item['category'],
                                                       "unit": item['name_item'],
-                                                      "qty": 0,
+                                                      "qty":
+                                                          0, // Default value for qty
                                                       "unit_conversion_id": item[
                                                           'unit_conversion_id'],
                                                       "unit_name":
@@ -764,10 +793,11 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                     };
                                                   }
 
-                                                  this.setState(() {});
+                                                  setState(() {});
                                                 });
                                               },
                                             ),
+                                            // Show details only if selectedDataPemakaian contains the item
                                             if (selectedDataPemakaian
                                                 .containsKey(item['id']))
                                               Container(
@@ -778,55 +808,40 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                       BorderRadius.circular(
                                                           size8),
                                                 ),
-
-                                                //ubah cu
                                                 child: Column(
                                                   children: [
+                                                    // Unit conversion and price
                                                     Row(
                                                       children: [
                                                         Row(
                                                           children: [
                                                             Text(
-                                                              'Harga Satuan      : ',
+                                                              'Harga Satuan : ',
                                                               style: heading4(
                                                                   FontWeight
                                                                       .w400,
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            // Text(
-                                                            //   '*',
-                                                            //   style: heading4(
-                                                            //       FontWeight.w400,
-                                                            //       danger500,
-                                                            //       'Outfit'),
-                                                            // ),
                                                           ],
                                                         ),
                                                         SizedBox(width: size12),
                                                         SizedBox(
-                                                          key: ValueKey(index),
                                                           width: 120,
                                                           child: TextField(
                                                             controller:
                                                                 hargaControllerMap[
                                                                     item['id']],
-                                                            // onTap: () {
-                                                            //   FocusScope.of(
-                                                            //           context)
-                                                            //       .requestFocus(
-                                                            //           focusNodeHarga);
-                                                            // },
                                                             decoration:
                                                                 InputDecoration(
                                                               focusedBorder:
                                                                   UnderlineInputBorder(
                                                                 borderSide:
                                                                     BorderSide(
-                                                                  width: 2,
-                                                                  color:
-                                                                      primary500,
-                                                                ),
+                                                                        width:
+                                                                            2,
+                                                                        color:
+                                                                            primary500),
                                                               ),
                                                               focusColor:
                                                                   primary500,
@@ -834,10 +849,10 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                   'Cth : 10.000',
                                                               hintStyle:
                                                                   heading2(
-                                                                FontWeight.w600,
-                                                                bnw400,
-                                                                'Outfit',
-                                                              ),
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw400,
+                                                                      'Outfit'),
                                                             ),
                                                             onChanged: (value) {
                                                               setState(() {});
@@ -859,20 +874,13 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                         Row(
                                                           children: [
                                                             Text(
-                                                              'Qty      : ',
+                                                              'Qty : ',
                                                               style: heading4(
                                                                   FontWeight
                                                                       .w400,
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            // Text(
-                                                            //   '*',
-                                                            //   style: heading4(
-                                                            //       FontWeight.w400,
-                                                            //       danger500,
-                                                            //       'Outfit'),
-                                                            // ),
                                                           ],
                                                         ),
                                                         SizedBox(width: size12),
@@ -888,10 +896,10 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                   UnderlineInputBorder(
                                                                 borderSide:
                                                                     BorderSide(
-                                                                  width: 2,
-                                                                  color:
-                                                                      primary500,
-                                                                ),
+                                                                        width:
+                                                                            2,
+                                                                        color:
+                                                                            primary500),
                                                               ),
                                                               focusColor:
                                                                   primary500,
@@ -899,17 +907,17 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                   'Cth : 10',
                                                               hintStyle:
                                                                   heading2(
-                                                                FontWeight.w600,
-                                                                bnw400,
-                                                                'Outfit',
-                                                              ),
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw400,
+                                                                      'Outfit'),
                                                             ),
                                                             onChanged: (value) {
+                                                              setState(() {});
                                                               selectedDataPemakaian[
                                                                       item[
                                                                           'id']]![
                                                                   'qty'] = value;
-                                                              setState(() {});
                                                             },
                                                             keyboardType:
                                                                 TextInputType
@@ -917,21 +925,14 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                           ),
                                                         ),
                                                         SizedBox(width: size12),
-                                                        Text(
-                                                          '|',
-                                                          style: heading3(
-                                                              FontWeight.w600,
-                                                              bnw900,
-                                                              'Outfit'),
-                                                        ),
+                                                        Text('|',
+                                                            style: heading3(
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit')),
                                                         SizedBox(width: size12),
                                                         Text(
-                                                          // 'Qty Total : ${qtyControllerMap.length}',
-                                                          // qtyControllerMap.text,
-                                                          // (selectedDataPemakaian[dataPemakaian[index]['id']]!['updated_at']) ?? "0",
-                                                          // '${selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']}',
-                                                          '1 qty = ${(double.tryParse(qtyControllerMap[item['id']]?.text ?? '0')) ?? 0 * (double.tryParse(selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']?.toString() ?? '0.0') ?? 0.0)} ${item['unit_name'] ?? '-'}',
-
+                                                          '1 qty = ${(double.tryParse(qtyControllerMap[item['id']]?.text ?? '0') ?? 0) * (double.tryParse(selectedDataPemakaian[item['id']]?['unit_factor']?.toString() ?? '0.0') ?? 0.0)} ${item['unit_name'] ?? '-'}',
                                                           style: heading4(
                                                               FontWeight.w400,
                                                               bnw900,
@@ -952,183 +953,45 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                   bnw900,
                                                                   'Outfit'),
                                                             ),
-                                                            // Text(
-                                                            //   '*',
-                                                            //   style: heading4(
-                                                            //       FontWeight
-                                                            //           .w400,
-                                                            //       danger500,
-                                                            //       'Outfit'),
-                                                            // ),
                                                           ],
                                                         ),
                                                         SizedBox(width: size12),
                                                         SizedBox(
                                                           width: 120,
                                                           child: TextField(
-                                                            // enabled: false,
                                                             controller:
                                                                 unitControllerMap[
                                                                     item['id']],
                                                             readOnly: true,
                                                             decoration:
                                                                 InputDecoration(
-                                                                    focusedBorder:
-                                                                        UnderlineInputBorder(
-                                                                      borderSide:
-                                                                          BorderSide(
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
                                                                         width:
                                                                             2,
                                                                         color:
-                                                                            primary500,
-                                                                      ),
-                                                                    ),
-                                                                    focusColor:
-                                                                        primary500,
-                                                                    hintText:
-                                                                        unitControllerMap[index]?.text ??
-                                                                            '',
-                                                                    hintStyle:
-                                                                        heading2(
+                                                                            primary500),
+                                                              ),
+                                                              focusColor:
+                                                                  primary500,
+                                                              hintText: unitControllerMap[
+                                                                          item[
+                                                                              'id']]
+                                                                      ?.text ??
+                                                                  '',
+                                                              hintStyle:
+                                                                  heading2(
                                                                       FontWeight
                                                                           .w600,
                                                                       bnw800,
-                                                                      'Outfit',
-                                                                    )),
+                                                                      'Outfit'),
+                                                            ),
                                                           ),
                                                         ),
-                                                        SizedBox(width: size12),
-                                                        GestureDetector(
-                                                          onTap: () async {
-                                                            // print(selectedDataPemakaian[
-                                                            //     dataPemakaian[
-                                                            //             index]
-                                                            //         [
-                                                            //         'id']]!['unit']);
-                                                            final selected =
-                                                                await showModalBottomSheet<
-                                                                    UnitConvertionModel>(
-                                                              context: context,
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .vertical(
-                                                                            top:
-                                                                                Radius.circular(size16)),
-                                                              ),
-                                                              builder:
-                                                                  (context) {
-                                                                return Column(
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child:
-                                                                          ListView(
-                                                                        padding:
-                                                                            EdgeInsets.all(size16),
-                                                                        children:
-                                                                            unitList.map((unit) {
-                                                                          return ListTile(
-                                                                            title:
-                                                                                Text(unit.name),
-                                                                            leading:
-                                                                                Icon(PhosphorIcons.radio_button),
-                                                                            onTap:
-                                                                                () {
-                                                                              final id = item['id']; // konsisten pakai id dari item
-                                                                              final unitName = unit.name;
-                                                                              final unitFactor = unit.conversionFactor;
-                                                                              final unitId = unit.id;
-
-                                                                              setState(() {
-                                                                                // Memastikan unitControllerMap memiliki key yang sesuai
-                                                                                if (!unitControllerMap.containsKey(id)) {
-                                                                                  unitControllerMap[id] = TextEditingController();
-                                                                                }
-
-                                                                                // Update teks controller dengan unitName yang dipilih
-                                                                                unitControllerMap[id]?.text = unitName;
-
-                                                                                // Update data yang disimpan dalam selectedDataPemakaian
-                                                                                selectedDataPemakaian[id] ??= {};
-                                                                                selectedDataPemakaian[id]!['unit'] = item['name_item'];
-                                                                                selectedDataPemakaian[id]!['name'] = item['name_item'];
-                                                                                selectedDataPemakaian[id]!['category'] = unitName;
-                                                                                selectedDataPemakaian[id]!['unit_name'] = unitName;
-                                                                                selectedDataPemakaian[id]!['unit_factor'] = unitFactor;
-                                                                                selectedDataPemakaian[id]!['unit_id'] = unitId;
-                                                                                selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
-                                                                              });
-
-                                                                              // Menutup modal dan memperbarui UI
-                                                                              this.setState(() {});
-                                                                              Navigator.pop(context, unit);
-                                                                            },
-                                                                          );
-                                                                        }).toList(),
-                                                                      ),
-                                                                    ),
-                                                                    Container(
-                                                                      width: double
-                                                                          .infinity,
-                                                                      padding:
-                                                                          EdgeInsets.all(
-                                                                              size12),
-                                                                      child:
-                                                                          GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          unitControllerMap[index]?.text =
-                                                                              '-';
-                                                                          // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit'] = '';
-                                                                          // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
-                                                                          selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] =
-                                                                              '';
-                                                                          selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] =
-                                                                              '';
-
-                                                                          setState(
-                                                                              () {});
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                        },
-                                                                        child:
-                                                                            buttonXL(
-                                                                          Center(
-                                                                            child:
-                                                                                Text(
-                                                                              'Hapus',
-                                                                              style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                                                                            ),
-                                                                          ),
-                                                                          double
-                                                                              .infinity,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            );
-
-                                                            if (selected !=
-                                                                null) {
-                                                              unitController
-                                                                      .text =
-                                                                  selected.name;
-                                                              selectedUnit =
-                                                                  selected;
-
-                                                              setState(() {});
-                                                            }
-                                                          },
-                                                          child: Icon(
-                                                              PhosphorIcons
-                                                                  .caret_down),
-                                                        )
                                                       ],
                                                     ),
-                                                    SizedBox(height: size12),
                                                   ],
                                                 ),
                                               ),
@@ -1348,7 +1211,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
     });
   }
 
-  Widget _buildSelectIcon(bool isSelected, DetailItem data) {
+  Widget _buildSelectIcon(bool isSelected, ProdukMaterialModel data) {
     return Icon(
       isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
       color: primary500,
@@ -1445,5 +1308,112 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
         ],
       ),
     );
+  }
+
+  fieldTambahProductID(title, mycontroller, hintText) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: body1(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+              Text(
+                ' *',
+                style: body1(FontWeight.w700, red500, 'Outfit'),
+              ),
+            ],
+          ),
+          IntrinsicHeight(
+            child: TextFormField(
+              readOnly: true,
+              enabled: false,
+              cursorColor: primary500,
+              // keyboardType: numberNo,
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              controller: mycontroller,
+              onSaved: (value) {
+                mycontroller.text = value;
+                produkNameBom = value ?? '';
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: primary500,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: size12),
+                isDense: true,
+                suffixIconConstraints: BoxConstraints(
+                  minHeight: 36,
+                  minWidth: 36,
+                ),
+                suffixIcon: Icon(PhosphorIcons.caret_down),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: bnw500,
+                  ),
+                ),
+                hintText: 'Cth : $hintText',
+                hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showProductSelector(BuildContext context, String token,
+      List<String> merchid, TextEditingController controller) async {
+    final products = await getProduct(context, token, '', merchid, 'asc');
+
+    if (products.isNotEmpty) {
+      showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) {
+          return SizedBox(
+            height: 400,
+            child: ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(product.productImage ?? ''),
+                    onBackgroundImageError: (_, __) {},
+                  ),
+                  title: Text(product.name ?? '-'),
+                  subtitle: Text(product.typeproducts?.toString() ?? ''),
+                  onTap: () {
+                    // Isi controller dan tutup sheet
+                    controller.text = product.productid ?? '';
+                    tambahProdukCon.text = product.name ?? '';
+
+                    ubahProdukBOM.text = product.name ?? '';
+                    ubahProdukBOMid = product.productid ?? '';
+                    ubahJudulProdukBOM.text = product.name ?? '';
+                    produkNameBom = product.name ?? '';
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          );
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Produk tidak ditemukan')));
+    }
   }
 }

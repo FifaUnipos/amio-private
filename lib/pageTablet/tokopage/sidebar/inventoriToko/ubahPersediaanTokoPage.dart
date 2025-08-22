@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
+import '../../../../models/inventoriModel/unitConvertionModel.dart';
 import '../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_size.dart';
 import '../../../../utils/component/component_textHeading.dart';
@@ -51,6 +52,18 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
 
   List<DetailItem> detailListUbahFIX = [];
 
+  List<UnitConvertionModel> unitList = [];
+  UnitConvertionModel? selectedUnit;
+  TextEditingController unitController = TextEditingController();
+
+  FocusNode focusNodeHarga = FocusNode();
+  FocusNode focusNodeQty = FocusNode();
+
+  Map<String, TextEditingController> qtyControllerMap = {};
+  Map<String, TextEditingController> hargaControllerMap = {};
+  Map<String, TextEditingController> unitControllerMap = {};
+  final _formKey = GlobalKey<FormState>();
+
   void getMasterDataTokoAndUpdateState() async {
     try {
       final result = await getMasterDataToko(
@@ -83,11 +96,56 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
     }
   }
 
-  void getDetailData() async {
-    final result =
-        await getDetailPembelian(context, widget.token, widget.groupId);
+  void fetchUnits() async {
+    List<UnitConvertionModel> units =
+        await getUnitConvertion(widget.token, '', '', '');
     setState(() {
-      detailListUbahFIX = result;
+      unitList = units;
+    });
+  }
+
+  void getDetailData() async {
+    // print('getDetailData called');
+    final detailList =
+        await getDetailPembelian(context, widget.token, widget.groupId);
+
+    // Clear previous
+    qtyControllerMap.clear();
+    hargaControllerMap.clear();
+    unitControllerMap.clear();
+    selectedDataPemakaian.clear();
+
+    for (var item in detailList) {
+      print('item.qty = ${item.qty}, item.price = ${item.price}');
+
+      final id = item.itemId;
+
+      qtyControllerMap[id] = TextEditingController(
+        text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '',
+      );
+      hargaControllerMap[id] = TextEditingController(
+        text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '',
+      );
+      unitControllerMap[id] = TextEditingController(
+        text: item.unitName ?? '-',
+      );
+
+      selectedDataPemakaian[id] = {
+        "inventory_master_id": id,
+        "unit": item.nameItem,
+        "name": item.nameItem,
+        "category": item.unitName ?? '',
+        "qty": item.qty,
+        "unit_conversion_id": item.unit_conversion_id ?? '',
+        "unit_name": item.unitName ?? '',
+        "price": item.price,
+        "unit_factor": item.conversion_factor,
+        "unit_id": item.unitId,
+      };
+    }
+
+    setState(() {
+      detailListUbahFIX = detailList;
     });
   }
 
@@ -99,6 +157,42 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
     });
   }
 
+  Future<void> isiControllerDariAPI(List<DetailItem> detailList) async {
+    // Kosongkan dulu list
+    hargaControllerMap.clear();
+    qtyControllerMap.clear();
+    unitControllerMap.clear();
+    selectedDataPemakaian.clear();
+
+    for (int i = 0; i < detailList.length; i++) {
+      final item = detailList[i];
+
+      // Simpan ke selectedDataPemakaian
+      selectedDataPemakaian[item.itemId] = {
+        "inventory_master_id": item.itemId,
+        "name": item.nameItem,
+        "category": item.conversion_factor,
+        "unit": item.nameItem,
+        "qty": item.qty,
+        "unit_conversion_id": item.unit_conversion_id ?? '',
+        "unit_name": item.unitName ?? '',
+        "price": item.price,
+        "unit_factor": item.conversion_factor,
+        "unit_id": item.unitId,
+      };
+
+      // Isi controller dari API (Postman)
+      hargaControllerMap['id'] = TextEditingController(
+          text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '');
+
+      qtyControllerMap['id'] = TextEditingController(
+          text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '');
+
+      unitControllerMap['id'] =
+          TextEditingController(text: item.unitName ?? '-');
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -107,6 +201,7 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
     getMasterDataTokoAndUpdateState();
     getDetailData();
     getdetailSelected();
+    fetchUnits();
   }
 
   @override
@@ -342,21 +437,24 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                             )
                           : Row(
                               children: [
-                                SizedBox(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _selectAll(productIdCheckAll);
-                                    },
-                                    child: SizedBox(
-                                      width: 50,
-                                      child: Icon(
-                                        checkFill == 'penuh'
-                                            ? PhosphorIcons.check_square_fill
-                                            : isSelectionMode
-                                                ? PhosphorIcons
-                                                    .minus_circle_fill
-                                                : PhosphorIcons.square,
-                                        color: bnw100,
+                                Opacity(
+                                  opacity: 0,
+                                  child: SizedBox(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        // _selectAll(productIdCheckAll);
+                                      },
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: Icon(
+                                          checkFill == 'penuh'
+                                              ? PhosphorIcons.check_square_fill
+                                              : isSelectionMode
+                                                  ? PhosphorIcons
+                                                      .minus_circle_fill
+                                                  : PhosphorIcons.square,
+                                          color: bnw100,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -497,288 +595,153 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                           bottomRight: Radius.circular(size12),
                         ),
                       ),
-                      child: orderInventory.isEmpty
-                          ? ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              padding: EdgeInsets.zero,
-                              itemCount: detailListUbahFIX.length,
-                              itemBuilder: (context, index) {
-                                // Mendapatkan data dari dataPemakaian
-                                final data = detailListUbahFIX[index];
-                                final productId = data.groupId;
-                                final isSelected = selectedDataPemakaian
-                                    .containsKey(productId);
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        itemCount: orderInventory.length,
+                        itemBuilder: (context, index) {
+                          // Mendapatkan data dari dataPemakaian
+                          final Map<String, dynamic> data =
+                              orderInventory[index];
+                          final productId = data['id'];
+                          final isSelected =
+                              selectedDataPemakaian.containsKey(productId);
 
-                                return Container(
-                                  margin:
-                                      EdgeInsets.symmetric(vertical: size12),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom:
-                                          BorderSide(color: bnw300, width: 1),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      InkWell(
-                                        // onTap: () => onTap(isSelected, index),
-                                        onTap: () {
-                                          onTap(
-                                            isSelected,
-                                            index,
-                                            productId,
-                                          );
-                                          // log(data.name.toString());
-                                          // print(dataProduk.isActive);
-
-                                          print(listProduct);
-                                        },
-                                        child: SizedBox(
-                                          width: 50,
-                                          child: _buildSelectIconInventori(
-                                            isSelected!,
-                                            data,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          data.nameItem,
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          data.unitName,
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          double.parse(data.qty)
-                                              .toInt()
-                                              .toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          double.parse(data.price)
-                                              .toInt()
-                                              .toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          FormatCurrency.convertToIdr(
-                                              (double.parse(data.price)
-                                                      .toInt() *
-                                                  double.parse(data.qty)
-                                                      .toInt())),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          detailListUbahFIX.removeAt(index);
-                                          setState(() {});
-                                        },
-                                        child: Icon(
-                                          PhosphorIcons.x_fill,
-                                          color: red500,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                    ],
-                                  ),
-                                );
-                              },
-                            )
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              padding: EdgeInsets.zero,
-                              itemCount: orderInventory.length,
-                              itemBuilder: (context, index) {
-                                // Mendapatkan data dari dataPemakaian
-                                final Map<String, dynamic> data =
-                                    orderInventory[index];
-                                final productId = data['id'];
-                                final isSelected = selectedDataPemakaian
-                                    .containsKey(productId);
-
-                                return Container(
-                                  margin:
-                                      EdgeInsets.symmetric(vertical: size12),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom:
-                                          BorderSide(color: bnw300, width: 1),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Opacity(
-                                        opacity: 0,
-                                        child: InkWell(
-                                          // onTap: () => onTap(isSelected, index),
-                                          onTap: () {
-                                            onTap(
-                                              isSelected,
-                                              index,
-                                              productId,
-                                            );
-                                            // log(data.name.toString());
-                                            // print(dataProduk.isActive);
-
-                                            print(listProduct);
-                                          },
-                                          child: SizedBox(
-                                            width: 50,
-                                            child: _buildSelectIconInventori(
-                                              isSelected!,
-                                              data,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          data['name'] ?? '',
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          data['category'] ?? '',
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          parseFlexibleNumber(data['qty'])
-                                              .toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          editHargaInventory[index]!
-                                                  .text
-                                                  .isNotEmpty
-                                              ? editHargaInventory[index]!.text
-                                              : data['price'].toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          FormatCurrency.convertToIdr(
-                                            parseFlexibleNumber(data['price']) *
-                                                parseFlexibleNumber(
-                                                    data['qty']),
-                                          ).toString(),
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          orderInventory.removeAt(index);
-                                          setState(() {});
-                                        },
-                                        child: Icon(
-                                          PhosphorIcons.x_fill,
-                                          color: red500,
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                    ],
-                                  ),
-                                );
-                              },
+                          return Container(
+                            margin: EdgeInsets.symmetric(vertical: size12),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: bnw300, width: 1),
+                              ),
                             ),
+                            child: Row(
+                              children: [
+                                Opacity(
+                                  opacity: 0,
+                                  child: InkWell(
+                                    // onTap: () => onTap(isSelected, index),
+                                    onTap: () {
+                                      onTap(
+                                        isSelected,
+                                        index,
+                                        productId,
+                                      );
+                                      // log(data.name.toString());
+                                      // print(dataProduk.isActive);
+
+                                      print(listProduct);
+                                    },
+                                    child: SizedBox(
+                                      width: 50,
+                                      child: _buildSelectIconInventori(
+                                        isSelected!,
+                                        data,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    data['name'] ?? '',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    data['category'] ?? '',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    parseFlexibleNumber(data['qty']).toString(),
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    FormatCurrency.convertToIdr(
+                                      parseFlexibleNumber(data['price']),
+                                    ).toString(),
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    FormatCurrency.convertToIdr(
+                                      parseFlexibleNumber(data['price']) *
+                                          parseFlexibleNumber(data['qty']),
+                                    ).toString(),
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                GestureDetector(
+                                  onTap: () {
+                                    var removedItem = orderInventory[index];
+                                    var itemId =
+                                        removedItem['inventory_master_id'];
+
+                                    selectedDataPemakaian.remove(itemId);
+                                    orderInventory.removeAt(index);
+
+                                    // Optional: hapus dari dataPemakaian kalau kamu ingin menghilangkan total
+                                    // dataPemakaian.removeWhere((item) => item['inventory_master_id'] == itemId);
+
+                                    setState(() {});
+                                  },
+                                  child: Icon(
+                                    PhosphorIcons.x_fill,
+                                    color: red500,
+                                  ),
+                                ),
+                                SizedBox(width: size16),
+                                SizedBox(width: size16),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -821,7 +784,10 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                   ),
                                 )
                               : ListView.builder(
-                                  padding: EdgeInsets.zero,
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
                                   itemCount: dataPemakaian.length,
                                   itemBuilder: (context, index) {
                                     final item = dataPemakaian[index];
@@ -837,26 +803,38 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                                     .containsKey(item['id']),
                                                 onChanged: (bool? value) {
                                                   setState(() {
-                                                    print(
-                                                        selectedDataPemakaian);
+                                                    final id = item['id'];
+
                                                     if (value == true) {
+                                                      // Tambahkan item ke selectedDataPemakaian dengan data lengkap
                                                       selectedDataPemakaian[
-                                                          item['id']] = {
+                                                          id] = {
                                                         "inventory_master_id":
-                                                            item['id'],
+                                                            id,
                                                         "name":
                                                             item['name_item'],
                                                         "category":
-                                                            item['unit_name'],
+                                                            item['category'],
+                                                        "unit":
+                                                            item['name_item'],
                                                         "qty": 0,
-                                                        "price": 0,
                                                         "unit_conversion_id": item[
                                                             'unit_conversion_id'],
+                                                        "unit_name":
+                                                            item['unit_name'],
+                                                        "price": item['price'],
                                                       };
                                                     } else {
+                                                      // Hapus dari selected dan order
                                                       selectedDataPemakaian
-                                                          .remove(item['id']);
+                                                          .remove(id);
+                                                      orderInventory
+                                                          .removeWhere((inv) =>
+                                                              inv['inventory_master_id'] ==
+                                                              id);
                                                     }
+
+                                                    this.setState(() {});
                                                   });
                                                 },
                                               ),
@@ -871,32 +849,41 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                                     bnw700, 'Outfit'),
                                               ),
                                               trailing: Icon(
-                                                  selectedDataPemakaian
-                                                          .containsKey(
-                                                              item['id'])
-                                                      ? Icons.expand_less
-                                                      : Icons.expand_more),
+                                                selectedDataPemakaian
+                                                        .containsKey(item['id'])
+                                                    ? Icons.expand_less
+                                                    : Icons.expand_more,
+                                              ),
                                               onTap: () {
                                                 setState(() {
+                                                  final id = item['id'];
+
                                                   if (selectedDataPemakaian
-                                                      .containsKey(
-                                                          item['id'])) {
+                                                      .containsKey(id)) {
                                                     selectedDataPemakaian
-                                                        .remove(item['id']);
+                                                        .remove(id);
+                                                    orderInventory.removeWhere(
+                                                        (inv) =>
+                                                            inv['inventory_master_id'] ==
+                                                            id);
                                                   } else {
-                                                    selectedDataPemakaian[
-                                                        item['id']] = {
-                                                      "inventory_master_id":
-                                                          item['id'],
+                                                    selectedDataPemakaian[id] =
+                                                        {
+                                                      "inventory_master_id": id,
                                                       "name": item['name_item'],
                                                       "category":
-                                                          item['unit_name'],
+                                                          item['category'],
+                                                      "unit": item['name_item'],
                                                       "qty": 0,
-                                                      "price": 0,
                                                       "unit_conversion_id": item[
                                                           'unit_conversion_id'],
+                                                      "unit_name":
+                                                          item['unit_name'],
+                                                      "price": item['price'],
                                                     };
                                                   }
+
+                                                  this.setState(() {});
                                                 });
                                               },
                                             ),
@@ -910,39 +897,112 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                                       BorderRadius.circular(
                                                           size8),
                                                 ),
+
+                                                //ubah cu
                                                 child: Column(
                                                   children: [
                                                     Row(
                                                       children: [
-                                                        Text(
-                                                          'Jumlah',
-                                                          style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Harga Satuan      : ',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            // Text(
+                                                            //   '*',
+                                                            //   style: heading4(
+                                                            //       FontWeight.w400,
+                                                            //       danger500,
+                                                            //       'Outfit'),
+                                                            // ),
+                                                          ],
                                                         ),
-                                                        Text(
-                                                          '*',
-                                                          style: heading4(
-                                                              FontWeight.w400,
-                                                              danger500,
-                                                              'Outfit'),
+                                                        SizedBox(width: size12),
+                                                        SizedBox(
+                                                          key: ValueKey(index),
+                                                          width: 120,
+                                                          child: TextField(
+                                                            controller:
+                                                                hargaControllerMap[
+                                                                    item['id']],
+                                                            // onTap: () {
+                                                            //   FocusScope.of(
+                                                            //           context)
+                                                            //       .requestFocus(
+                                                            //           focusNodeHarga);
+                                                            // },
+                                                            decoration:
+                                                                InputDecoration(
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide:
+                                                                    BorderSide(
+                                                                  width: 2,
+                                                                  color:
+                                                                      primary500,
+                                                                ),
+                                                              ),
+                                                              focusColor:
+                                                                  primary500,
+                                                              hintText:
+                                                                  'Cth : 10.000',
+                                                              hintStyle:
+                                                                  heading2(
+                                                                FontWeight.w600,
+                                                                bnw400,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                            onChanged: (value) {
+                                                              setState(() {});
+                                                              selectedDataPemakaian[
+                                                                      item[
+                                                                          'id']]![
+                                                                  'price'] = value;
+                                                            },
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .number,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
-                                                    TextField(
-                                                      controller: (editPesananInventory
-                                                                      .length >
-                                                                  index &&
-                                                              editPesananInventory[
-                                                                      index]!
-                                                                  .text
-                                                                  .isNotEmpty)
-                                                          ? editPesananInventory[
-                                                              index]
-                                                          : qtyEdit,
-                                                      decoration:
-                                                          InputDecoration(
+                                                    SizedBox(height: size12),
+                                                    Row(
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Qty      : ',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            // Text(
+                                                            //   '*',
+                                                            //   style: heading4(
+                                                            //       FontWeight.w400,
+                                                            //       danger500,
+                                                            //       'Outfit'),
+                                                            // ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(width: size12),
+                                                        SizedBox(
+                                                          width: 120,
+                                                          child: TextField(
+                                                            controller:
+                                                                qtyControllerMap[
+                                                                    item['id']],
+                                                            decoration:
+                                                                InputDecoration(
                                                               focusedBorder:
                                                                   UnderlineInputBorder(
                                                                 borderSide:
@@ -961,99 +1021,233 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                                                 FontWeight.w600,
                                                                 bnw400,
                                                                 'Outfit',
-                                                              )),
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      onChanged: (value) {
-                                                        selectedDataPemakaian[
-                                                                    item[
-                                                                        'id']]![
-                                                                'qty'] =
-                                                            parseFlexibleNumber(
-                                                                int.tryParse(
-                                                                    value));
-                                                      },
-                                                    ),
-                                                    SizedBox(height: size12),
-                                                    Row(
-                                                      children: [
+                                                              ),
+                                                            ),
+                                                            onChanged: (value) {
+                                                              selectedDataPemakaian[
+                                                                      item[
+                                                                          'id']]![
+                                                                  'qty'] = value;
+                                                              setState(() {});
+                                                            },
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .number,
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: size12),
                                                         Text(
-                                                          'Harga Satuan ',
+                                                          '|',
+                                                          style: heading3(
+                                                              FontWeight.w600,
+                                                              bnw900,
+                                                              'Outfit'),
+                                                        ),
+                                                        SizedBox(width: size12),
+                                                        Text(
+                                                          // 'Qty Total : ${qtyControllerMap.length}',
+                                                          // qtyControllerMap.text,
+                                                          // (selectedDataPemakaian[dataPemakaian[index]['id']]!['updated_at']) ?? "0",
+                                                          // '${selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']}',
+                                                          '1 qty = ${(double.tryParse(qtyControllerMap[item['id']]?.text ?? '0')) ?? 0 * (double.tryParse(selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']?.toString() ?? '0.0') ?? 0.0)} ${item['unit_name'] ?? '-'}',
+
                                                           style: heading4(
                                                               FontWeight.w400,
                                                               bnw900,
                                                               'Outfit'),
                                                         ),
-                                                        Text(
-                                                          '*',
-                                                          style: heading4(
-                                                              FontWeight.w400,
-                                                              danger500,
-                                                              'Outfit'),
-                                                        ),
                                                       ],
                                                     ),
-                                                    TextField(
-                                                      controller: (editHargaInventory
-                                                                      .length >
-                                                                  index &&
-                                                              editHargaInventory[
-                                                                      index]!
-                                                                  .text
-                                                                  .isNotEmpty)
-                                                          ? editHargaInventory[
-                                                              index]
-                                                          : hargaEdit,
-                                                      decoration:
-                                                          InputDecoration(
-                                                              focusedBorder:
-                                                                  UnderlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  width: 2,
-                                                                  color:
-                                                                      primary500,
-                                                                ),
+                                                    SizedBox(height: size12),
+                                                    Row(
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Unit Convertion : ',
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
+                                                            // Text(
+                                                            //   '*',
+                                                            //   style: heading4(
+                                                            //       FontWeight
+                                                            //           .w400,
+                                                            //       danger500,
+                                                            //       'Outfit'),
+                                                            // ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(width: size12),
+                                                        SizedBox(
+                                                          width: 120,
+                                                          child: TextField(
+                                                            // enabled: false,
+                                                            controller:
+                                                                unitControllerMap[
+                                                                    item['id']],
+                                                            readOnly: true,
+                                                            decoration:
+                                                                InputDecoration(
+                                                                    focusedBorder:
+                                                                        UnderlineInputBorder(
+                                                                      borderSide:
+                                                                          BorderSide(
+                                                                        width:
+                                                                            2,
+                                                                        color:
+                                                                            primary500,
+                                                                      ),
+                                                                    ),
+                                                                    focusColor:
+                                                                        primary500,
+                                                                    hintText:
+                                                                        unitControllerMap[index]?.text ??
+                                                                            '',
+                                                                    hintStyle:
+                                                                        heading2(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw800,
+                                                                      'Outfit',
+                                                                    )),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: size12),
+                                                        GestureDetector(
+                                                          onTap: () async {
+                                                            // print(selectedDataPemakaian[
+                                                            //     dataPemakaian[
+                                                            //             index]
+                                                            //         [
+                                                            //         'id']]!['unit']);
+                                                            final selected =
+                                                                await showModalBottomSheet<
+                                                                    UnitConvertionModel>(
+                                                              context: context,
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .vertical(
+                                                                            top:
+                                                                                Radius.circular(size16)),
                                                               ),
-                                                              focusColor:
-                                                                  primary500,
-                                                              hintText:
-                                                                  'Cth : Rp 10.000',
-                                                              errorText: isNotEmpty
-                                                                  ? null
-                                                                  : 'masukkan nominal',
-                                                              hintStyle:
-                                                                  heading2(
-                                                                FontWeight.w600,
-                                                                bnw400,
-                                                                'Outfit',
-                                                              )),
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      onChanged: (value) {
-                                                        if (value.isNotEmpty) {
-                                                          isNotEmpty = true;
-                                                          selectedDataPemakaian[
-                                                                      item[
-                                                                          'id']]![
-                                                                  'price'] =
-                                                              parseFlexibleNumber(
-                                                                  int.tryParse(
-                                                                      value));
-                                                        } else {
-                                                          isNotEmpty = false;
+                                                              builder:
+                                                                  (context) {
+                                                                return Column(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child:
+                                                                          ListView(
+                                                                        padding:
+                                                                            EdgeInsets.all(size16),
+                                                                        children:
+                                                                            unitList.map((unit) {
+                                                                          return ListTile(
+                                                                            title:
+                                                                                Text(unit.name),
+                                                                            leading:
+                                                                                Icon(PhosphorIcons.radio_button),
+                                                                            onTap:
+                                                                                () {
+                                                                              final id = item['id']; // konsisten pakai id dari item
+                                                                              final unitName = unit.name;
+                                                                              final unitFactor = unit.conversionFactor;
+                                                                              final unitId = unit.id;
 
-                                                          // selectedDataPemakaian[
-                                                          //             item[
-                                                          //                 'id']]![
-                                                          //         'qty'] =
-                                                          //     parseFlexibleNumber(
-                                                          //             value)
-                                                          //         .toDouble();
-                                                        }
-                                                        setState(() {});
-                                                      },
+                                                                              setState(() {
+                                                                                // Memastikan unitControllerMap memiliki key yang sesuai
+                                                                                if (!unitControllerMap.containsKey(id)) {
+                                                                                  unitControllerMap[id] = TextEditingController();
+                                                                                }
+
+                                                                                // Update teks controller dengan unitName yang dipilih
+                                                                                unitControllerMap[id]?.text = unitName;
+
+                                                                                // Update data yang disimpan dalam selectedDataPemakaian
+                                                                                selectedDataPemakaian[id] ??= {};
+                                                                                selectedDataPemakaian[id]!['unit'] = item['name_item'];
+                                                                                selectedDataPemakaian[id]!['name'] = item['name_item'];
+                                                                                selectedDataPemakaian[id]!['category'] = unitName;
+                                                                                selectedDataPemakaian[id]!['unit_name'] = unitName;
+                                                                                selectedDataPemakaian[id]!['unit_factor'] = unitFactor;
+                                                                                selectedDataPemakaian[id]!['unit_id'] = unitId;
+                                                                                selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
+                                                                              });
+
+                                                                              // Menutup modal dan memperbarui UI
+                                                                              this.setState(() {});
+                                                                              Navigator.pop(context, unit);
+                                                                            },
+                                                                          );
+                                                                        }).toList(),
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      width: double
+                                                                          .infinity,
+                                                                      padding:
+                                                                          EdgeInsets.all(
+                                                                              size12),
+                                                                      child:
+                                                                          GestureDetector(
+                                                                        onTap:
+                                                                            () {
+                                                                          unitControllerMap[index]?.text =
+                                                                              '-';
+                                                                          // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit'] = '';
+                                                                          // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
+                                                                          selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] =
+                                                                              '';
+                                                                          selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] =
+                                                                              '';
+
+                                                                          setState(
+                                                                              () {});
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                        child:
+                                                                            buttonXL(
+                                                                          Center(
+                                                                            child:
+                                                                                Text(
+                                                                              'Hapus',
+                                                                              style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                            ),
+                                                                          ),
+                                                                          double
+                                                                              .infinity,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+
+                                                            if (selected !=
+                                                                null) {
+                                                              unitController
+                                                                      .text =
+                                                                  selected.name;
+                                                              selectedUnit =
+                                                                  selected;
+
+                                                              setState(() {});
+                                                            }
+                                                          },
+                                                          child: Icon(
+                                                              PhosphorIcons
+                                                                  .caret_down),
+                                                        )
+                                                      ],
                                                     ),
+                                                    SizedBox(height: size12),
                                                   ],
                                                 ),
                                               ),
@@ -1071,7 +1265,6 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).pop();
-                                  // print(editPesananInventory[1]);
                                 },
                                 child: buttonXLoutline(
                                   Center(
@@ -1090,28 +1283,69 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  // orderInventory =
-                                  //     selectedDataPemakaian.values.toList();
-                                  // print(selectedDataPemakaian);
+                                  // 1. Simpan semua item yang dicentang ke orderInventory
+                                  for (var entry
+                                      in selectedDataPemakaian.entries) {
+                                    final newItem = entry.value;
+                                    final itemId =
+                                        newItem['inventory_master_id'];
 
-                                  if (isNotEmpty == true) {
-                                    selectedDataPemakaian.forEach((key, value) {
-                                      value['unit_conversion_id'] = '';
-                                    });
+                                    final existingIndex =
+                                        orderInventory.indexWhere(
+                                      (item) =>
+                                          item['inventory_master_id'] == itemId,
+                                    );
 
-                                    orderInventory =
-                                        selectedDataPemakaian.values.toList();
-
-                                    // dataPemakaian = orderInventory;
-                                    print(selectedDataPemakaian);
-                                    // print(dataPemakaian);
-                                    print("Saved Data: $orderInventory");
-
-                                    Navigator.pop(context);
-                                    isNotEmpty = true;
-                                    // initState();
+                                    if (existingIndex != -1) {
+                                      orderInventory[existingIndex] =
+                                          Map<String, dynamic>.from(newItem);
+                                    } else {
+                                      orderInventory.add(
+                                          Map<String, dynamic>.from(newItem));
+                                    }
                                   }
-                                  setState(() {});
+
+                                  for (var updatedItem in orderInventory) {
+                                    final id =
+                                        updatedItem['inventory_master_id'];
+
+                                    final index = dataPemakaian.indexWhere(
+                                      (item) =>
+                                          item['inventory_master_id'] == id,
+                                    );
+
+                                    final fromSelected =
+                                        selectedDataPemakaian[id] ?? {};
+                                    final fromExisting =
+                                        index != -1 ? dataPemakaian[index] : {};
+
+                                    final mergedItem = {
+                                      ...fromExisting,
+                                      ...fromSelected,
+                                      ...updatedItem,
+                                    };
+
+                                    if (index != -1) {
+                                      dataPemakaian[index] =
+                                          Map<String, dynamic>.from(mergedItem);
+                                    } else {
+                                      dataPemakaian.add(
+                                          Map<String, dynamic>.from(
+                                              mergedItem));
+                                    }
+                                  }
+
+                                  // 3. Trigger UI refresh dan cek hasil
+                                  setState(() {
+                                    dataPemakaian = List.from(dataPemakaian);
+                                    print("✅ Final dataPemakaian:");
+                                    for (var d in dataPemakaian) {
+                                      print(d);
+                                    }
+                                  });
+
+                                  // 4. Tutup modal atau form
+                                  Navigator.pop(context);
                                 },
                                 child: buttonXL(
                                   Center(
@@ -1152,13 +1386,21 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  print(selectedDataPemakaian);
                   List<Map<String, dynamic>> convertedOrderInventory =
                       selectedDataPemakaian.values.map((e) {
                     return {
                       ...e,
                       'unit_conversion_id': '',
+                      'qty':
+                          (double.tryParse(e['qty'].toString())?.toInt() ?? 0),
+                      'price':
+                          (double.tryParse(e['price'].toString())?.toInt() ??
+                              0),
                     };
                   }).toList();
+
+                  print("Converted Order Inventory: $convertedOrderInventory");
 
                   updatePembelian(
                     context,

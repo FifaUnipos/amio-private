@@ -15,6 +15,7 @@ import 'package:amio/utils/component/component_snackbar.dart';
 
 import '../main.dart';
 import '../models/diskonModel.dart';
+import '../models/inventoriModel/produkMaterialModel.dart';
 import '../models/lihatakunmodel.dart';
 import '../models/produkmodel.dart';
 import '../models/tokoModel/calculateCart.dart';
@@ -4338,64 +4339,99 @@ Future getBOM(
   }
 }
 
+String judulUbahBOM = '', produkNameBom = '';
 TextEditingController ubahJudulBOMController = TextEditingController();
 TextEditingController ubahProdukBOM = TextEditingController();
 String ubahProdukBOMid = '', productMaterialIdUbah = '';
 
 List<Map<String, dynamic>> orderBOMInventoryUbah = [];
 
-Future<List<Map<String, dynamic>>> getSingleBOM(
-    String token, String merchId, String materialId, context) async {
-  try {
-    whenLoading(context);
-    final Map<String, String> body = {
-      "deviceid": identifier!,
-      "merchant_id": merchId,
-      "product_material_id": materialId,
-      // "product_material_id": '575061905824026624',
-    };
+Future<Map<String, Map<String, dynamic>>> getSingleBOM(
+  BuildContext context,
+  String token,
+  String merchId,
+  String materialId,
+) async {
+  whenLoading(context);
 
-    log('Request Body: $body');
+  final Map<String, String> body = {
+    "deviceid": identifier!,
+    "merchant_id": merchId,
+    "product_material_id": materialId,
+  };
 
-    final response = await http.post(
-      Uri.parse(getSingleBOMLink),
-      headers: {
-        'token': token,
-      },
-      body: body,
-    );
+  log('Request Body: $body');
 
-    // log('Status Code: ${response.statusCode}');
-    // log('Response Body: ${response.body}');
+  final response = await http.post(
+    Uri.parse(getSingleBOMLink),
+    headers: {
+      'token': token,
+    },
+    body: body,
+  );
 
-    var jsonResponse = jsonDecode(response.body);
-    var data = jsonResponse['data'];
+  if (response.statusCode == 200) {
+    print('Success fetch bom' + response.body);
+    closeLoading(context);
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
 
-    ubahJudulBOMController.text = data['title'];
-    ubahProdukBOM.text = data['product_name'];
-    ubahProdukBOMid = data['product_id'];
+    // Mengambil data details, jika kosong gunakan list kosong
+    judulUbahBOM = decoded['data']['title'];
+    produkNameBom = decoded['data']['product_name'];
+    final List<dynamic> detailList = decoded['data']['details'] ?? [];
 
-    List<Map<String, dynamic>> detailsList = [];
+    // Clear isi controller sebelumnya
+    editPesananInventory.clear();
+    editHargaInventory.clear();
 
-    if (data['details'] != null && (data['details'] as List).isNotEmpty) {
-      detailsList = List<Map<String, dynamic>>.from(data['details']);
-      orderBOMInventoryUbah = detailsList;
-    } else {
-      log('Details kosong atau null');
-      orderBOMInventoryUbah = [];
+    print('Success fetch bom $detailList');
+    final Map<String, Map<String, dynamic>> selectedMap = {};
+
+    // Proses data 'details' dan konversi ke Map<String, dynamic>
+    for (var item in detailList) {
+      final String itemId =
+          item['id']; // Gunakan 'inventory_master_id' sebagai key
+      final String qty =
+          double.parse(item['quantity_needed'].toString()).toString();
+      final String price = double.parse(item['price']?.toString() ?? '0.0')
+          .toString(); // Gunakan harga jika ada
+
+      selectedMap[itemId] = {
+        "id": item['inventory_master_id'], // Gunakan 'id' sebagai key
+        "inventory_master_id": item['inventory_master_id'],
+        "unit": item['item_name'], // Dulu 'name', sekarang 'unit'
+        "name": item['item_name'], // Dulu 'name', sekarang 'unit'
+        "category": item['unit_name'],
+        "qty": qty,
+        "unit_conversion_id": item['unit_conversion_id'] ?? '',
+        "unit_name": item['unit_conversion_name'] ??
+            '', // Gunakan unit_conversion_name jika ada
+        "unit_factor": item['unit_conversion_factor'] ??
+            '', // Gunakan unit_conversion_factor jika ada
+        "unit_id": item['unit_conversion_id'] ??
+            '', // Gunakan unit_conversion_id sebagai unit_id
+      };
+
+      // Tambahkan TextEditingController untuk qty dan price jika diperlukan
+      editPesananInventory.add(TextEditingController(text: qty));
+      editHargaInventory.add(TextEditingController(text: price));
     }
 
-    if (response.statusCode == 200) {
-      closeLoading(context);
-      return detailsList;
-    } else {
-      closeLoading(context);
-      log('Error: ${response.statusCode} - ${response.body}');
-      return [];
-    }
-  } catch (e) {
-    log('Exception di getSingleBOM: $e');
-    return [];
+    selectedDataPemakaian =
+        selectedMap; // Update selectedDataPemakaian dengan selectedMap
+
+    // Update orderInventory dengan values dari selectedDataPemakaian
+    orderInventory = selectedDataPemakaian.values.toList();
+
+    print('Selected Map: $selectedMap');
+
+    return selectedMap;
+  } else {
+    closeLoading(context);
+    final jsonResponse = jsonDecode(response.body);
+    print('Error: ${jsonResponse['message']}');
+    showSnackbar(context, jsonResponse);
+    return {};
   }
 }
 
@@ -4456,8 +4492,10 @@ Future<List<UnitConvertionModel>> getSingleUnitConvertion(
   String token,
   String merchid,
   String unitId,
+  context,
 ) async {
   try {
+    whenLoading(context);
     final Map<String, String> body = {
       "deviceid": identifier!,
       "unit_conversion_id": unitId,
@@ -4483,9 +4521,11 @@ Future<List<UnitConvertionModel>> getSingleUnitConvertion(
     faktorConUnitUbah.text = double.parse(data['conversion_factor']).toString();
 
     if (response.statusCode == 200) {
+      closeLoading(context);
       return [];
     } else {
       log('Error: ${response.statusCode} - ${response.body}');
+      closeLoading(context);
       return [];
     }
   } catch (e) {
@@ -4871,17 +4911,12 @@ late String titlePenyesuaianUbah = '', groupIdInventoryPenyesuaianUbah = '';
 List<Map<String, dynamic>> orderInventoryPenyesuaian = [];
 Map<String, Map<String, dynamic>> selectedDataPemakaianPenyesuaian = {};
 
-// List<TextEditingController> editPesananInventory = List.empty(growable: true);
-// List<TextEditingController> editHargaInventory = List.empty(growable: true);
-
-// List<Map<String, dynamic>> orderInventory = [];
-// Map<String, Map<String, dynamic>> selectedDataPemakaian = {};
-
-getSelectedDataPenyesuaian(
+Future<Map<String, Map<String, dynamic>>> getSelectedDataPenyesuaian(
   BuildContext context,
   String token,
   String groupid,
 ) async {
+  whenLoading(context);
   final response = await http.post(
     Uri.parse(getDetailAdjustmentLink),
     headers: {
@@ -4896,11 +4931,12 @@ getSelectedDataPenyesuaian(
   );
 
   if (response.statusCode == 200) {
-    print('Success fetch selectedDataPemakaianPenyesuaian');
+    closeLoading(context);
+    print('Success fetch selectedDataPemakaian');
     final Map<String, dynamic> decoded = jsonDecode(response.body);
     final List<dynamic> detailList = decoded['data']['detail'];
 
-    // Clear controller jika dipakai
+    // Clear isi controller sebelumnya
     editPesananInventory.clear();
     editHargaInventory.clear();
 
@@ -4908,17 +4944,33 @@ getSelectedDataPenyesuaian(
 
     for (var item in detailList) {
       final String itemId = item['item_id'];
-      // Ubah ke Map<String, dynamic> dan simpan langsung semua isi detail
-      selectedMap[itemId] = Map<String, dynamic>.from(item);
+      final String qty =
+          double.parse(item['qty'].toString()).toInt().toString();
+      final String price =
+          double.parse(item['price'].toString()).toInt().toString();
+
+      selectedMap[itemId] = {
+        "inventory_master_id": itemId,
+        "name": item['name_item'],
+        "category": item['unit_name'],
+        "qty": qty,
+        "price": price,
+      };
+
+      // Tambahkan ke List controller
+      editPesananInventory.add(TextEditingController(text: qty));
+      editHargaInventory.add(TextEditingController(text: price));
     }
 
-    selectedDataPemakaianPenyesuaian = selectedMap;
+    selectedDataPemakaian =
+        selectedMap; // Update selectedDataPemakaian dengan selectedMap
 
-    // Jika ingin tetap membuat orderInventoryPenyesuaian dari values-nya
-    orderInventoryPenyesuaian = selectedMap.values.toList();
+    // Update orderInventory dengan values dari selectedDataPemakaian
+    orderInventory = selectedDataPemakaian.values.toList();
 
     return selectedMap;
   } else {
+    closeLoading(context);
     final jsonResponse = jsonDecode(response.body);
     print('Error: ${jsonResponse['message']}');
     showSnackbar(context, jsonResponse);
@@ -4948,24 +5000,15 @@ Future<List<DetailItem>> getDetailPenyesuian(
   log('hello ${response.body}');
 
   if (response.statusCode == 200) {
-    print('Success fetch detail penyesuaian');
+    log('Success fetch detail pembelian ${response.body}');
+    final decoded = jsonDecode(response.body);
 
-    final Map<String, dynamic> decoded = jsonDecode(response.body);
-
-    titlePenyesuaianUbah = decoded['data']['title'] ?? '';
-
+    titlePenyesuaianUbah = decoded['data']['title'];
+    tanggalAwalInventoryUbah = decoded['data']['date'];
     final List<dynamic> detailListUbah = decoded['data']['detail'];
-
-    for (var item in detailListUbah) {
-      item['unit_conversion_id'] = '';
-    }
 
     final List<DetailItem> result =
         detailListUbah.map((item) => DetailItem.fromJson(item)).toList();
-
-    // print(titlePenyesuaianUbah);
-    print('hello $detailListUbah');
-    // closeLoading(context);
 
     return result;
   } else {
@@ -4974,6 +5017,52 @@ Future<List<DetailItem>> getDetailPenyesuian(
     print('Error: ${jsonResponse['message']}');
     showSnackbar(context, jsonResponse);
     return []; // atau lempar error
+  }
+}
+
+Future<List<ProdukMaterialModel>> getDetailBom(
+  BuildContext context,
+  String token,
+  String productId,
+) async {
+  final response = await http.post(
+    Uri.parse(getSingleBOMLink),
+    headers: {
+      'token': token,
+      // 'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: {
+      "deviceid": identifier!,
+      "product_material_id": productId,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final decoded = jsonDecode(response.body);
+
+    if (decoded['rc'] == '00') {
+      log('Success fetch produk material: ${response.body}');
+      titlePenyesuaianUbah = decoded['data']['title'];
+      tanggalAwalInventoryUbah = decoded['data']['date'] ?? '';
+
+      // Parsing list details ke ProdukMaterialModel
+      final List<dynamic> detailListUbah = decoded['data']['details'];
+      final List<ProdukMaterialModel> result = detailListUbah
+          .map((item) => ProdukMaterialModel.fromJson(item))
+          .toList();
+
+      return result;
+    } else {
+      print('Error: ${decoded['message']}');
+      showSnackbar(context, {"message": decoded['message']});
+      return [];
+    }
+  } else {
+    final jsonResponse = jsonDecode(response.body);
+    print('Error: ${jsonResponse['message']}');
+    showSnackbar(context, jsonResponse);
+    return [];
   }
 }
 
@@ -5002,33 +5091,19 @@ Future<List<DetailItem>> getDetailPembelian(
   );
 
   if (response.statusCode == 200) {
-    print('Success fetch detail persediaan');
-
-    final Map<String, dynamic> decoded = jsonDecode(response.body);
-
-    titleInventoryUbah = decoded['data']['title'] ?? '';
-
-    tanggalAwalInventoryUbah = decoded['data']['date'] ?? '';
-    tanggalAkhirInventoryUbah = decoded['data']['date'] ?? '';
-
+    log('Success fetch detail pembelian ${response.body}');
+    final decoded = jsonDecode(response.body);
+    titleInventoryUbah = decoded['data']['title'];
+    tanggalAwalInventoryUbah = decoded['data']['date'];
     final List<dynamic> detailListUbah = decoded['data']['detail'];
-
-    for (var item in detailListUbah) {
-      item['unit_conversion_id'] = '';
-    }
 
     final List<DetailItem> result =
         detailListUbah.map((item) => DetailItem.fromJson(item)).toList();
 
-    print(titleInventoryUbah);
-    print(detailListUbah);
-
     return result;
   } else {
-    final jsonResponse = jsonDecode(response.body);
-    print('Error: ${jsonResponse['message']}');
-    showSnackbar(context, jsonResponse);
-    return []; // atau lempar error
+    showSnackbar(context, {"message": "Gagal mengambil data"});
+    return [];
   }
 }
 
@@ -5124,9 +5199,9 @@ Future<List<Map<String, dynamic>>> getMasterDataToko(
 
   final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
   // log('Request body: merchant_id: $merchid, name: $name, order_by: $orderby');
-  log('$jsonResponse');
+  // log('$jsonResponse');
   if (response.statusCode == 200) {
-    print("Success: Data fetched");
+    print("Success: Data fetched 1 ${response.body}");
 
     // Parse JSON response
 

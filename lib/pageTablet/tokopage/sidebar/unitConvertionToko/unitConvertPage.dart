@@ -146,7 +146,12 @@ class _InventoriPageTestState extends State<UnitConvertionPage>
   }
 
   void fetchBOMSingle(id) async {
-    final details = await getSingleBOM(widget.token, '', id, context).then(
+    final details = await getSingleBOM(
+      context,
+      widget.token,
+      '',
+      id,
+    ).then(
       (value) {
         Future.delayed(Duration(seconds: 1)).then((value) {
           _pageController.jumpToPage(4);
@@ -1568,6 +1573,7 @@ class _InventoriPageTestState extends State<UnitConvertionPage>
                                                                   index]
                                                               .id
                                                               .toString(),
+                                                          context,
                                                         ).then(
                                                           (value) {
                                                             Future.delayed(
