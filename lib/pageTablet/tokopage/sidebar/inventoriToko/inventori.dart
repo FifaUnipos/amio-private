@@ -885,6 +885,8 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             Map<String, dynamic> data = snapshot.data!['data'];
                             List detail = data['detail'];
 
+                            // print('Detail: $data');
+
                             if (detail.isEmpty) {
                               return Center(child: Text("Data tidak tersedia"));
                             }
@@ -937,13 +939,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text('Harga',
+                                            Text('Qty',
                                                 style: heading4(FontWeight.w600,
                                                     bnw900, 'Outfit')),
-                                            Text(
-                                                FormatCurrency.convertToIdr(
-                                                        data['price'])
-                                                    .toString(),
+                                            Text(data['total_qty'].toString(),
+                                                // FormatCurrency.convertToIdr(
+                                                //         data['price'])
+                                                //     .toString(),
                                                 style: heading4(FontWeight.w400,
                                                     bnw900, 'Outfit'))
                                           ],
@@ -1552,8 +1554,8 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                         print(
                                                             groupIdInventoryUbah);
 
-                                                        print(
-                                                            groupIdInventoryUbah);
+                                                        // print(
+                                                        //     groupIdInventoryUbah);
 
                                                         getSelectedDataPenyesuaian(
                                                                 context,
@@ -4014,9 +4016,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                                   selectedDataPemakaian[item['id']]!['unit'] = item['name_item'];
                                                                                   selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = unit.name;
                                                                                   selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = unit.conversionFactor;
-                                                                                  selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] = unit.id;
-                                                                                  // Jika ingin menyimpan id juga:
                                                                                   selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
+                                                                                  // Jika ingin menyimpan id juga:
+                                                                                  // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
 
                                                                                   Navigator.pop(context, unit);
                                                                                   setState(() {});
@@ -4038,7 +4040,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                               // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit'] = '';
                                                                               // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
                                                                               selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = '';
-                                                                              selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] = '';
+                                                                              selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = '';
 
                                                                               setState(() {});
                                                                               Navigator.pop(context);
@@ -4354,24 +4356,24 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Harga Satuan',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Total Harga',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Harga Satuan',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Total Harga',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
                                 Icon(
                                   PhosphorIcons.x_fill,
                                   color: primary500,
@@ -4527,150 +4529,153 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                               ],
                             ),
                     ),
-                    Container(
-                      // width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primary100,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(size12),
-                          bottomRight: Radius.circular(size12),
+                    Expanded(
+                      child: Container(
+                        // width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: primary100,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(size12),
+                            bottomRight: Radius.circular(size12),
+                          ),
                         ),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        itemCount: orderInventory.length,
-                        itemBuilder: (context, index) {
-                          // Mendapatkan data dari dataPemakaian
-                          final Map<String, dynamic> data =
-                              orderInventory[index];
-                          final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          // physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: orderInventory.length,
+                          itemBuilder: (context, index) {
+                            // Mendapatkan data dari dataPemakaian
+                            final Map<String, dynamic> data =
+                                orderInventory[index];
+                            final productId = data['id'];
+                            final isSelected =
+                                selectedDataPemakaian.containsKey(productId);
 
-                          // print('Dataku: $data');
+                            // print('Dataku: $data');
 
-                          return Container(
-                            margin: EdgeInsets.symmetric(vertical: size12),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: bnw300, width: 1),
+                            return Container(
+                              margin: EdgeInsets.symmetric(vertical: size12),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: bnw300, width: 1),
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Opacity(
-                                  opacity: 0,
-                                  child: InkWell(
-                                    // onTap: () => onTap(isSelected, index),
-                                    onTap: () {
-                                      onTap(
-                                        isSelected,
-                                        index,
-                                        productId,
-                                      );
-                                      // log(data.name.toString());
-                                      // print(dataProduk.isActive);
+                              child: Row(
+                                children: [
+                                  Opacity(
+                                    opacity: 0,
+                                    child: InkWell(
+                                      // onTap: () => onTap(isSelected, index),
+                                      onTap: () {
+                                        onTap(
+                                          isSelected,
+                                          index,
+                                          productId,
+                                        );
+                                        // log(data.name.toString());
+                                        // print(dataProduk.isActive);
 
-                                      print(listProduct);
-                                    },
-                                    child: SizedBox(
-                                      width: 50,
-                                      child: _buildSelectIconInventori(
-                                        isSelected!,
-                                        data,
+                                        print(listProduct);
+                                      },
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: _buildSelectIconInventori(
+                                          isSelected!,
+                                          data,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['unit'] ?? '',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['unit'] ?? '',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['unit_name'] ?? '',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['unit_name'] ?? '',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['qty'].toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['qty'].toString(),
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['price'].toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  // SizedBox(width: size16),
+                                  // Expanded(
+                                  //   flex: 4,
+                                  //   child: Text(
+                                  //     data['price'].toString(),
+                                  //     style: heading4(
+                                  //       FontWeight.w400,
+                                  //       bnw900,
+                                  //       'Outfit',
+                                  //     ),
+                                  //     maxLines: 3,
+                                  //     overflow: TextOverflow.ellipsis,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: size16),
+                                  // Expanded(
+                                  //   flex: 4,
+                                  //   child: Text(
+                                  //     FormatCurrency.convertToIdr(
+                                  //       (double.tryParse(
+                                  //                   data['price'].toString()) ??
+                                  //               0.0) *
+                                  //           (int.tryParse(
+                                  //                   data['qty'].toString()) ??
+                                  //               0),
+                                  //     ),
+                                  //     maxLines: 3,
+                                  //     overflow: TextOverflow.ellipsis,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: size16),
+
+                                  GestureDetector(
+                                    onTap: () {
+                                      orderInventory.removeAt(index);
+                                      setState(() {});
+                                    },
+                                    child: Icon(
+                                      PhosphorIcons.x_fill,
+                                      color: red500,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    FormatCurrency.convertToIdr(
-                                      (double.tryParse(
-                                                  data['price'].toString()) ??
-                                              0.0) *
-                                          (int.tryParse(
-                                                  data['qty'].toString()) ??
-                                              0),
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                GestureDetector(
-                                  onTap: () {
-                                    orderInventory.removeAt(index);
-                                    setState(() {});
-                                  },
-                                  child: Icon(
-                                    PhosphorIcons.x_fill,
-                                    color: red500,
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                              ],
-                            ),
-                          );
-                        },
+                                  SizedBox(width: size16),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -4835,82 +4840,82 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                   //ubah cu
                                                   child: Column(
                                                     children: [
-                                                      Row(
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'Harga Satuan      : ',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit'),
-                                                              ),
-                                                              // Text(
-                                                              //   '*',
-                                                              //   style: heading4(
-                                                              //       FontWeight.w400,
-                                                              //       danger500,
-                                                              //       'Outfit'),
-                                                              // ),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                              width: size12),
-                                                          SizedBox(
-                                                            key:
-                                                                ValueKey(index),
-                                                            width: 120,
-                                                            child: TextField(
-                                                              controller:
-                                                                  hargaSatuanControllers[
-                                                                      index],
-                                                              onTap: () {
-                                                                FocusScope.of(
-                                                                        context)
-                                                                    .requestFocus(
-                                                                        focusNodeHarga);
-                                                              },
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : 10.000',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              onChanged:
-                                                                  (value) {
-                                                                setState(() {});
-                                                                selectedDataPemakaian[
-                                                                        item[
-                                                                            'id']]![
-                                                                    'price'] = value;
-                                                              },
-                                                              keyboardType:
-                                                                  TextInputType
-                                                                      .number,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: size12),
+                                                      // Row(
+                                                      //   children: [
+                                                      //     Row(
+                                                      //       children: [
+                                                      //         Text(
+                                                      //           'Harga Satuan      : ',
+                                                      //           style: heading4(
+                                                      //               FontWeight
+                                                      //                   .w400,
+                                                      //               bnw900,
+                                                      //               'Outfit'),
+                                                      //         ),
+                                                      //         // Text(
+                                                      //         //   '*',
+                                                      //         //   style: heading4(
+                                                      //         //       FontWeight.w400,
+                                                      //         //       danger500,
+                                                      //         //       'Outfit'),
+                                                      //         // ),
+                                                      //       ],
+                                                      //     ),
+                                                      //     SizedBox(
+                                                      //         width: size12),
+                                                      //     SizedBox(
+                                                      //       key:
+                                                      //           ValueKey(index),
+                                                      //       width: 120,
+                                                      //       child: TextField(
+                                                      //         controller:
+                                                      //             hargaSatuanControllers[
+                                                      //                 index],
+                                                      //         onTap: () {
+                                                      //           FocusScope.of(
+                                                      //                   context)
+                                                      //               .requestFocus(
+                                                      //                   focusNodeHarga);
+                                                      //         },
+                                                      //         decoration:
+                                                      //             InputDecoration(
+                                                      //           focusedBorder:
+                                                      //               UnderlineInputBorder(
+                                                      //             borderSide:
+                                                      //                 BorderSide(
+                                                      //               width: 2,
+                                                      //               color:
+                                                      //                   primary500,
+                                                      //             ),
+                                                      //           ),
+                                                      //           focusColor:
+                                                      //               primary500,
+                                                      //           hintText:
+                                                      //               'Cth : 10.000',
+                                                      //           hintStyle:
+                                                      //               heading2(
+                                                      //             FontWeight
+                                                      //                 .w600,
+                                                      //             bnw400,
+                                                      //             'Outfit',
+                                                      //           ),
+                                                      //         ),
+                                                      //         onChanged:
+                                                      //             (value) {
+                                                      //           setState(() {});
+                                                      //           selectedDataPemakaian[
+                                                      //                   item[
+                                                      //                       'id']]![
+                                                      //               'price'] = value;
+                                                      //         },
+                                                      //         keyboardType:
+                                                      //             TextInputType
+                                                      //                 .number,
+                                                      //       ),
+                                                      //     ),
+                                                      //   ],
+                                                      // ),
+                                                      // SizedBox(height: size12),
                                                       Row(
                                                         children: [
                                                           Row(
@@ -5102,7 +5107,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                                 selectedDataPemakaian[item['id']]!['unit'] = item['name_item'];
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = unit.name;
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = unit.conversionFactor;
-                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] = unit.id;
+                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
                                                                                 // Jika ingin menyimpan id juga:
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
 
@@ -5128,7 +5133,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                             // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
                                                                             selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] =
                                                                                 '';
-                                                                            selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] =
+                                                                            selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] =
                                                                                 '';
 
                                                                             setState(() {});
@@ -5275,7 +5280,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                     },
                   );
 
-                  print(orderInventory);
+                  // print(orderInventory);
                   // print(dataPemakaian);
                 },
                 child: buttonXL(
@@ -6346,6 +6351,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                       Expanded(
                                         flex: 4,
                                         child: Text(
+                                          // 'hello',
                                           double.tryParse(
                                                   datasProdukUnit![index]
                                                       .conversionFactor)
@@ -7021,133 +7027,136 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                               ],
                             ),
                     ),
-                    Container(
-                      // width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primary100,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(size12),
-                          bottomRight: Radius.circular(size12),
+                    Expanded(
+                      child: Container(
+                        // width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: primary100,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(size12),
+                            bottomRight: Radius.circular(size12),
+                          ),
                         ),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        itemCount: orderInventory.length,
-                        itemBuilder: (context, index) {
-                          // Mendapatkan data dari dataPemakaian
-                          final Map<String, dynamic> data =
-                              orderInventory[index];
-                          final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          // physics: BouncingScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: orderInventory.length,
+                          itemBuilder: (context, index) {
+                            // Mendapatkan data dari dataPemakaian
+                            final Map<String, dynamic> data =
+                                orderInventory[index];
+                            final productId = data['id'];
+                            final isSelected =
+                                selectedDataPemakaian.containsKey(productId);
 
-                          return Container(
-                            margin: EdgeInsets.symmetric(vertical: size12),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: bnw300, width: 1),
+                            return Container(
+                              margin: EdgeInsets.symmetric(vertical: size12),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: bnw300, width: 1),
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Opacity(
-                                  opacity: 0,
-                                  child: InkWell(
-                                    // onTap: () => onTap(isSelected, index),
-                                    onTap: () {
-                                      // onTap(
-                                      //   isSelected,
-                                      //   index,
-                                      //   productId,
-                                      // );
-                                      // // log(data.name.toString());
-                                      // // print(dataProduk.isActive);
+                              child: Row(
+                                children: [
+                                  Opacity(
+                                    opacity: 0,
+                                    child: InkWell(
+                                      // onTap: () => onTap(isSelected, index),
+                                      onTap: () {
+                                        // onTap(
+                                        //   isSelected,
+                                        //   index,
+                                        //   productId,
+                                        // );
+                                        // // log(data.name.toString());
+                                        // // print(dataProduk.isActive);
 
-                                      // print(listProduct);
-                                    },
-                                    child: SizedBox(
-                                      width: 50,
-                                      child: _buildSelectIconInventori(
-                                        isSelected!,
-                                        data,
+                                        // print(listProduct);
+                                      },
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: _buildSelectIconInventori(
+                                          isSelected!,
+                                          data,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                // Expanded(
-                                //   flex: 4,
-                                //   child: Text(
-                                //     data['name'] ?? '',
-                                //     style: heading4(
-                                //       FontWeight.w400,
-                                //       bnw900,
-                                //       'Outfit',
-                                //     ),
-                                //     maxLines: 3,
-                                //     overflow: TextOverflow.ellipsis,
-                                //   ),
-                                // ),
-                                // SizedBox(width: size16),
+                                  // Expanded(
+                                  //   flex: 4,
+                                  //   child: Text(
+                                  //     data['name'] ?? '',
+                                  //     style: heading4(
+                                  //       FontWeight.w400,
+                                  //       bnw900,
+                                  //       'Outfit',
+                                  //     ),
+                                  //     maxLines: 3,
+                                  //     overflow: TextOverflow.ellipsis,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: size16),
 
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['unit'] ?? '',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['unit'] ?? '',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['qty'].toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['qty'].toString(),
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    '${((double.tryParse(data['unit_factor'].toString().replaceAll(',', '.')) ?? 0) * (num.tryParse(data['qty'].toString()) ?? 0)).toStringAsFixed(2)}',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      '${data['unit_name'] ?? ''}',
+                                      // '${((double.tryParse(data['unit_factor'].toString().replaceAll(',', '.')) ?? 0) * (num.tryParse(data['qty'].toString()) ?? 0)).toStringAsFixed(2)}',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                GestureDetector(
-                                  onTap: () {
-                                    orderInventory.removeAt(index);
-                                    setState(() {});
-                                  },
-                                  child: Icon(
-                                    PhosphorIcons.x_fill,
-                                    color: red500,
+                                  SizedBox(width: size16),
+                                  GestureDetector(
+                                    onTap: () {
+                                      orderInventory.removeAt(index);
+                                      setState(() {});
+                                    },
+                                    child: Icon(
+                                      PhosphorIcons.x_fill,
+                                      color: red500,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                              ],
-                            ),
-                          );
-                        },
+                                  SizedBox(width: size16),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -7312,82 +7321,82 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                   //ubah cu
                                                   child: Column(
                                                     children: [
-                                                      Row(
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'Harga Satuan      : ',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit'),
-                                                              ),
-                                                              // Text(
-                                                              //   '*',
-                                                              //   style: heading4(
-                                                              //       FontWeight.w400,
-                                                              //       danger500,
-                                                              //       'Outfit'),
-                                                              // ),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                              width: size12),
-                                                          SizedBox(
-                                                            key:
-                                                                ValueKey(index),
-                                                            width: 120,
-                                                            child: TextField(
-                                                              controller:
-                                                                  hargaSatuanControllers[
-                                                                      index],
-                                                              // onTap: () {
-                                                              //   FocusScope.of(
-                                                              //           context)
-                                                              //       .requestFocus(
-                                                              //           focusNodeHarga);
-                                                              // },
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : 10.000',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              onChanged:
-                                                                  (value) {
-                                                                setState(() {});
-                                                                selectedDataPemakaian[
-                                                                        item[
-                                                                            'id']]![
-                                                                    'price'] = value;
-                                                              },
-                                                              keyboardType:
-                                                                  TextInputType
-                                                                      .number,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: size12),
+                                                      // Row(
+                                                      //   children: [
+                                                      //     Row(
+                                                      //       children: [
+                                                      //         Text(
+                                                      //           'Harga Satuan      : ',
+                                                      //           style: heading4(
+                                                      //               FontWeight
+                                                      //                   .w400,
+                                                      //               bnw900,
+                                                      //               'Outfit'),
+                                                      //         ),
+                                                      //         // Text(
+                                                      //         //   '*',
+                                                      //         //   style: heading4(
+                                                      //         //       FontWeight.w400,
+                                                      //         //       danger500,
+                                                      //         //       'Outfit'),
+                                                      //         // ),
+                                                      //       ],
+                                                      //     ),
+                                                      //     SizedBox(
+                                                      //         width: size12),
+                                                      //     SizedBox(
+                                                      //       key:
+                                                      //           ValueKey(index),
+                                                      //       width: 120,
+                                                      //       child: TextField(
+                                                      //         controller:
+                                                      //             hargaSatuanControllers[
+                                                      //                 index],
+                                                      //         // onTap: () {
+                                                      //         //   FocusScope.of(
+                                                      //         //           context)
+                                                      //         //       .requestFocus(
+                                                      //         //           focusNodeHarga);
+                                                      //         // },
+                                                      //         decoration:
+                                                      //             InputDecoration(
+                                                      //           focusedBorder:
+                                                      //               UnderlineInputBorder(
+                                                      //             borderSide:
+                                                      //                 BorderSide(
+                                                      //               width: 2,
+                                                      //               color:
+                                                      //                   primary500,
+                                                      //             ),
+                                                      //           ),
+                                                      //           focusColor:
+                                                      //               primary500,
+                                                      //           hintText:
+                                                      //               'Cth : 10.000',
+                                                      //           hintStyle:
+                                                      //               heading2(
+                                                      //             FontWeight
+                                                      //                 .w600,
+                                                      //             bnw400,
+                                                      //             'Outfit',
+                                                      //           ),
+                                                      //         ),
+                                                      //         onChanged:
+                                                      //             (value) {
+                                                      //           setState(() {});
+                                                      //           selectedDataPemakaian[
+                                                      //                   item[
+                                                      //                       'id']]![
+                                                      //               'price'] = value;
+                                                      //         },
+                                                      //         keyboardType:
+                                                      //             TextInputType
+                                                      //                 .number,
+                                                      //       ),
+                                                      //     ),
+                                                      //   ],
+                                                      // ),
+                                                      // SizedBox(height: size12),
                                                       Row(
                                                         children: [
                                                           Row(
@@ -7580,7 +7589,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                                 selectedDataPemakaian[item['id']]!['unit'] = item['name_item'];
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = unit.name;
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = unit.conversionFactor;
-                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] = unit.id;
+                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
                                                                                 // Jika ingin menyimpan id juga:
                                                                                 selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
 
@@ -7606,7 +7615,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                             // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
                                                                             selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] =
                                                                                 '';
-                                                                            selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] =
+                                                                            selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] =
                                                                                 '';
 
                                                                             setState(() {});
@@ -7734,21 +7743,38 @@ class _InventoriPageTestState extends State<InventoriPageTest>
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<Map<String, dynamic>> convertedOrderInventory =
+                      selectedDataPemakaian.values.map((e) {
+                    return {
+                      ...e,
+                      // 'unit_conversion_id': '',
+                      'quantity_needed':
+                          (double.tryParse(e['qty'].toString())?.toInt() ?? 0),
+                    };
+                  }).toList();
                   createBOM(
                     context,
                     widget.token,
                     '',
                     judulPembelian.text,
                     searchProductID.text,
-                    orderInventory,
+                    convertedOrderInventory,
                   ).then(
                     (value) {
                       if (value == '00') {
+                        // _pageController.jumpToPage(0);
+                        convertedOrderInventory.clear();
+                        judulPembelian.clear();
+                        searchProductID.clear();
+                        listProduct.clear();
+                        tambahProdukCon.clear();
+
                         setState(() {});
                         initState();
                       }
                     },
                   );
+                  print(convertedOrderInventory);
                 },
                 child: buttonXLoutline(
                   Center(
@@ -7766,25 +7792,34 @@ class _InventoriPageTestState extends State<InventoriPageTest>
             Expanded(
               child: GestureDetector(
                 onTap: () {
+                  List<Map<String, dynamic>> convertedOrderInventory =
+                      selectedDataPemakaian.values.map((e) {
+                    return {
+                      ...e,
+                      // 'unit_conversion_id': '',
+                      'quantity_needed':
+                          (double.tryParse(e['qty'].toString())?.toInt() ?? 0),
+                    };
+                  }).toList();
                   createBOM(
                     context,
                     widget.token,
                     '',
                     judulPembelian.text,
                     searchProductID.text,
-                    orderInventory,
+                    convertedOrderInventory,
                   ).then(
                     (value) {
                       if (value == '00') {
                         _pageController.jumpToPage(0);
-                        orderInventory.clear();
+                        convertedOrderInventory.clear();
 
                         setState(() {});
                         initState();
                       }
                     },
                   );
-                  print(orderInventory);
+                  print(convertedOrderInventory);
                 },
                 child: buttonXL(
                   Center(
@@ -8441,7 +8476,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                 style: body1(FontWeight.w500, bnw900, 'Outfit'),
               ),
               Text(
-                ' *',
+                '',
                 style: body1(FontWeight.w700, red500, 'Outfit'),
               ),
             ],
@@ -8539,995 +8574,4 @@ class _InventoriPageTestState extends State<InventoriPageTest>
       ),
     );
   }
-
-  // ubahProdukMaterial() {
-  //   return Column(
-  //     children: [
-  //       Expanded(
-  //         child: ListView(
-  //           padding: EdgeInsets.only(
-  //               bottom: MediaQuery.of(context).viewInsets.bottom),
-  //           shrinkWrap: true,
-  //           children: [
-  //             Row(
-  //               children: [
-  //                 GestureDetector(
-  //                   onTap: () {
-  //                     getDataProduk(['']);
-  //                     orderBOMInventoryUbah.clear();
-  //                     pagesOn = 0;
-  //                     _pageController.jumpToPage(0);
-  //                   },
-  //                   child: Icon(
-  //                     PhosphorIcons.arrow_left,
-  //                     size: size48,
-  //                     color: bnw900,
-  //                   ),
-  //                 ),
-  //                 SizedBox(width: size16),
-  //                 Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       'Ubah Bill Of Material',
-  //                       style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-  //                     ),
-  //                     Text(
-  //                       'Produk Material',
-  //                       style: heading3(FontWeight.w300, bnw900, 'Outfit'),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //             SizedBox(height: size16),
-  //             Row(
-  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //               children: [
-  //                 Expanded(
-  //                   child: Container(
-  //                     decoration: BoxDecoration(
-  //                       color: bnw100,
-  //                       border: Border(
-  //                         bottom: BorderSide(
-  //                           width: 1.5,
-  //                           color: bnw500,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     child: Align(
-  //                       alignment: Alignment.centerLeft,
-  //                       child: Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: [
-  //                           fieldTambahBahan(
-  //                             'Judul',
-  //                             ubahJudulBOMController,
-  //                             'Pembelian Matcha',
-  //                           ),
-  //                           SizedBox(height: size16),
-  //                           GestureDetector(
-  //                             behavior: HitTestBehavior.translucent,
-  //                             onTap: () {
-  //                               // print('hello');
-  //                               showProductSelector(
-  //                                   context, widget.token, [], searchProductID);
-  //                             },
-  //                             child: Container(
-  //                               child: fieldTambahProductID(
-  //                                 'Produk',
-  //                                 ubahProdukBOM,
-  //                                 'Matcha',
-  //                               ),
-  //                             ),
-  //                           )
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             SizedBox(height: size16),
-  //             Container(
-  //               height: 200,
-  //               child: Column(
-  //                 children: [
-  //                   Container(
-  //                     width: double.infinity,
-  //                     height: 50,
-  //                     decoration: BoxDecoration(
-  //                       color: primary500,
-  //                       borderRadius: BorderRadius.only(
-  //                         topLeft: Radius.circular(size16),
-  //                         topRight: Radius.circular(size16),
-  //                       ),
-  //                     ),
-  //                     child: isSelectionMode == false
-  //                         ? Row(
-  //                             // mainAxisAlignment: MainAxisAlignment.start,
-  //                             children: [
-  //                               SizedBox(
-  //                                 child: GestureDetector(
-  //                                   onTap: () {
-  //                                     // _selectAll(productIdCheckAll);
-  //                                   },
-  //                                   child: SizedBox(
-  //                                     width: 50,
-  //                                     // child: Icon(
-  //                                     //   isSelectionMode
-  //                                     //       ? PhosphorIcons.check
-  //                                     //       : PhosphorIcons.square,
-  //                                     //   color: bnw100,
-  //                                     // ),
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                               // Expanded(
-  //                               //   flex: 4,
-  //                               //   child: Text(
-  //                               //     'No',
-  //                               //     style: heading4(
-  //                               //         FontWeight.w700, bnw100, 'Outfit'),
-  //                               //   ),
-  //                               // ),
-  //                               // SizedBox(width: size16),
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   'Nama',
-  //                                   style: heading4(
-  //                                       FontWeight.w700, bnw100, 'Outfit'),
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   'Qty',
-  //                                   style: heading4(
-  //                                       FontWeight.w700, bnw100, 'Outfit'),
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   'Unit Convertion',
-  //                                   style: heading4(
-  //                                       FontWeight.w700, bnw100, 'Outfit'),
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               Icon(
-  //                                 PhosphorIcons.x_fill,
-  //                                 color: primary500,
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                             ],
-  //                           )
-  //                         : Row(
-  //                             children: [
-  //                               SizedBox(
-  //                                 child: GestureDetector(
-  //                                   onTap: () {
-  //                                     _selectAll(productIdCheckAll);
-  //                                   },
-  //                                   child: SizedBox(
-  //                                     width: 50,
-  //                                     child: Icon(
-  //                                       checkFill == 'penuh'
-  //                                           ? PhosphorIcons.check_square_fill
-  //                                           : isSelectionMode
-  //                                               ? PhosphorIcons
-  //                                                   .minus_circle_fill
-  //                                               : PhosphorIcons.square,
-  //                                       color: bnw100,
-  //                                     ),
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                               Text(
-  //                                 '${listProduct.length}/${datasProdukBOM!.length} Produk Terpilih',
-  //                                 // 'produk terpilih',
-  //                                 style: heading4(
-  //                                     FontWeight.w600, bnw100, 'Outfit'),
-  //                               ),
-  //                               SizedBox(width: size8),
-  //                               GestureDetector(
-  //                                 onTap: () {
-  //                                   showBottomPilihan(
-  //                                     context,
-  //                                     Column(
-  //                                       mainAxisAlignment:
-  //                                           MainAxisAlignment.spaceBetween,
-  //                                       children: [
-  //                                         Column(
-  //                                           children: [
-  //                                             Text(
-  //                                               'Yakin Ingin Menghapus Produk?',
-  //                                               style: heading1(FontWeight.w600,
-  //                                                   bnw900, 'Outfit'),
-  //                                             ),
-  //                                             SizedBox(height: size16),
-  //                                             Text(
-  //                                               'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-  //                                               style: heading2(FontWeight.w400,
-  //                                                   bnw900, 'Outfit'),
-  //                                             ),
-  //                                           ],
-  //                                         ),
-  //                                         SizedBox(height: size16),
-  //                                         Row(
-  //                                           children: [
-  //                                             Expanded(
-  //                                               child: GestureDetector(
-  //                                                 onTap: () {
-  //                                                   // deleteProduk(
-  //                                                   //   context,
-  //                                                   //   widget.token,
-  //                                                   //   listProduct,
-  //                                                   //   "",
-  //                                                   // ).then(
-  //                                                   //   (value) async {
-  //                                                   //     if (value == '00') {
-  //                                                   //       refreshDataProduk();
-  //                                                   //       await Future.delayed(Duration(seconds: 1));
-  //                                                   //       conNameProduk.text = '';
-  //                                                   //       conHarga.text = '';
-  //                                                   //       idProduct = '';
-  //                                                   //       _pageController.jumpToPage(0);
-  //                                                   //       setState(() {});
-  //                                                   //       initState();
-  //                                                   //     }
-  //                                                   //   },
-  //                                                   // );
-  //                                                   // refreshDataProduk();
-
-  //                                                   setState(() {});
-  //                                                   initState();
-  //                                                 },
-  //                                                 child: buttonXLoutline(
-  //                                                   Center(
-  //                                                     child: Text(
-  //                                                       'Iya, Hapus',
-  //                                                       style: heading3(
-  //                                                           FontWeight.w600,
-  //                                                           primary500,
-  //                                                           'Outfit'),
-  //                                                     ),
-  //                                                   ),
-  //                                                   MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width,
-  //                                                   primary500,
-  //                                                 ),
-  //                                               ),
-  //                                             ),
-  //                                             SizedBox(width: size12),
-  //                                             Expanded(
-  //                                               child: GestureDetector(
-  //                                                 onTap: () {
-  //                                                   Navigator.pop(context);
-  //                                                 },
-  //                                                 child: buttonXL(
-  //                                                   Center(
-  //                                                     child: Text(
-  //                                                       'Batalkan',
-  //                                                       style: heading3(
-  //                                                           FontWeight.w600,
-  //                                                           bnw100,
-  //                                                           'Outfit'),
-  //                                                     ),
-  //                                                   ),
-  //                                                   MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width,
-  //                                                 ),
-  //                                               ),
-  //                                             ),
-  //                                           ],
-  //                                         ),
-  //                                       ],
-  //                                     ),
-  //                                   );
-  //                                 },
-  //                                 child: buttonL(
-  //                                   Row(
-  //                                     mainAxisAlignment:
-  //                                         MainAxisAlignment.spaceBetween,
-  //                                     children: [
-  //                                       Icon(PhosphorIcons.trash_fill,
-  //                                           color: bnw900),
-  //                                       Text(
-  //                                         'Hapus Semua',
-  //                                         style: heading3(FontWeight.w600,
-  //                                             bnw900, 'Outfit'),
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                   bnw100,
-  //                                   bnw300,
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size8),
-  //                             ],
-  //                           ),
-  //                   ),
-  //                   Container(
-  //                     // width: double.infinity,
-  //                     decoration: BoxDecoration(
-  //                       color: primary100,
-  //                       borderRadius: BorderRadius.only(
-  //                         bottomLeft: Radius.circular(size12),
-  //                         bottomRight: Radius.circular(size12),
-  //                       ),
-  //                     ),
-  //                     child: ListView.builder(
-  //                       shrinkWrap: true,
-  //                       physics: NeverScrollableScrollPhysics(),
-  //                       padding: EdgeInsets.only(
-  //                           bottom: MediaQuery.of(context).viewInsets.bottom),
-  //                       itemCount: orderBOMInventoryUbah.length,
-  //                       itemBuilder: (context, index) {
-  //                         // Mendapatkan data dari dataPemakaian
-  //                         final Map<String, dynamic> data =
-  //                             orderBOMInventoryUbah[index];
-  //                         final productId = data['id'];
-  //                         final isSelected =
-  //                             selectedDataPemakaian.containsKey(productId);
-
-  //                         return Container(
-  //                           margin: EdgeInsets.symmetric(vertical: size12),
-  //                           decoration: BoxDecoration(
-  //                             border: Border(
-  //                               bottom: BorderSide(color: bnw300, width: 1),
-  //                             ),
-  //                           ),
-  //                           child: Row(
-  //                             children: [
-  //                               InkWell(
-  //                                 // onTap: () => onTap(isSelected, index),
-  //                                 onTap: () {
-  //                                   onTap(
-  //                                     isSelected,
-  //                                     index,
-  //                                     productId,
-  //                                   );
-  //                                   // log(data.name.toString());
-  //                                   // print(dataProduk.isActive);
-
-  //                                   print(listProduct);
-  //                                 },
-  //                                 child: SizedBox(
-  //                                   width: 50,
-  //                                   // child: _buildSelectIconInventori(
-  //                                   //   isSelected!,
-  //                                   //   data,
-  //                                   // ),
-  //                                 ),
-  //                               ),
-  //                               // Expanded(
-  //                               //   flex: 4,
-  //                               //   child: Text(
-  //                               //     data['name'] ?? '',
-  //                               //     style: heading4(
-  //                               //       FontWeight.w400,
-  //                               //       bnw900,
-  //                               //       'Outfit',
-  //                               //     ),
-  //                               //     maxLines: 3,
-  //                               //     overflow: TextOverflow.ellipsis,
-  //                               //   ),
-  //                               // ),
-  //                               // SizedBox(width: size16),
-
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   data['item_name'] ?? '',
-  //                                   // 'hello',
-  //                                   style: heading4(
-  //                                     FontWeight.w400,
-  //                                     bnw900,
-  //                                     'Outfit',
-  //                                   ),
-  //                                   maxLines: 3,
-  //                                   overflow: TextOverflow.ellipsis,
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   double.parse(
-  //                                     data['qty'],
-  //                                   ).toString(),
-  //                                   // 'helo',
-  //                                   style: heading4(
-  //                                     FontWeight.w400,
-  //                                     bnw900,
-  //                                     'Outfit',
-  //                                   ),
-  //                                   maxLines: 3,
-  //                                   overflow: TextOverflow.ellipsis,
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               Expanded(
-  //                                 flex: 4,
-  //                                 child: Text(
-  //                                   data['unit_conversion_id'].toString(),
-  //                                   // 'hello',
-  //                                   style: heading4(
-  //                                     FontWeight.w400,
-  //                                     bnw900,
-  //                                     'Outfit',
-  //                                   ),
-  //                                   maxLines: 3,
-  //                                   overflow: TextOverflow.ellipsis,
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                               GestureDetector(
-  //                                 onTap: () {
-  //                                   orderBOMInventoryUbah.removeAt(index);
-  //                                   setState(() {});
-  //                                 },
-  //                                 child: Icon(
-  //                                   PhosphorIcons.x_fill,
-  //                                   color: red500,
-  //                                 ),
-  //                               ),
-  //                               SizedBox(width: size16),
-  //                             ],
-  //                           ),
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //             SizedBox(height: size16),
-  //           ],
-  //         ),
-  //       ),
-  //       SizedBox(height: size16),
-  //       GestureDetector(
-  //         onTap: () {
-  //           showModalBottom(
-  //             context,
-  //             double.infinity,
-  //             StatefulBuilder(
-  //               builder: (context, setState) => IntrinsicHeight(
-  //                 child: Container(
-  //                     margin: EdgeInsets.all(size16),
-  //                     padding: EdgeInsets.all(size12),
-  //                     width: double.infinity,
-  //                     child: Column(
-  //                       crossAxisAlignment: CrossAxisAlignment.start,
-  //                       children: [
-  //                         Text(
-  //                           'Tambah Pemakaian',
-  //                           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-  //                         ),
-  //                         Text(
-  //                           'Pilih bahan yang sudah terpakai.',
-  //                           style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-  //                         ),
-  //                         SizedBox(height: size16),
-  //                         Container(
-  //                           height: MediaQuery.sizeOf(context).height / 1.8,
-  //                           child: dataPemakaian.isEmpty
-  //                               ? Center(
-  //                                   child: Text(
-  //                                     'Bahan tidak ditemukan.',
-  //                                     style: heading3(
-  //                                         FontWeight.w400, bnw500, 'Outfit'),
-  //                                   ),
-  //                                 )
-  //                               : ListView.builder(
-  //                                   padding: EdgeInsets.only(
-  //                                       bottom: MediaQuery.of(context)
-  //                                           .viewInsets
-  //                                           .bottom),
-  //                                   itemCount: dataPemakaian.length,
-  //                                   itemBuilder: (context, index) {
-  //                                     final item = dataPemakaian[index];
-  //                                     return Column(
-  //                                       children: [
-  //                                         ListTile(
-  //                                           contentPadding: EdgeInsets.zero,
-  //                                           leading: Checkbox(
-  //                                             activeColor: primary500,
-  //                                             value: selectedDataPemakaian
-  //                                                 .containsKey(item['id']),
-  //                                             onChanged: (bool? value) {
-  //                                               setState(() {
-  //                                                 // print('loro $dataPemakaian');
-  //                                                 if (value == true) {
-  //                                                   selectedDataPemakaian[
-  //                                                       item['id']] = {
-  //                                                     "item_name":
-  //                                                         item['name_item'],
-  //                                                     "unit": item['name'],
-  //                                                     "qty": 0,
-  //                                                     "unit_conversion_id": item[
-  //                                                         'unit_abbreviation'],
-  //                                                   };
-  //                                                 } else {
-  //                                                   selectedDataPemakaian
-  //                                                       .remove(item['id']);
-  //                                                 }
-  //                                               });
-  //                                             },
-  //                                           ),
-  //                                           title: Text(
-  //                                             item['name_item'] ?? '',
-  //                                             style: heading2(FontWeight.w600,
-  //                                                 bnw900, 'Outfit'),
-  //                                           ),
-  //                                           subtitle: Text(
-  //                                             item['unit_name'] ?? '',
-  //                                             style: heading4(FontWeight.w400,
-  //                                                 bnw700, 'Outfit'),
-  //                                           ),
-  //                                           trailing: Icon(selectedDataPemakaian
-  //                                                   .containsKey(item['id'])
-  //                                               ? Icons.expand_less
-  //                                               : Icons.expand_more),
-  //                                           onTap: () {
-  //                                             setState(() {
-  //                                               if (selectedDataPemakaian
-  //                                                   .containsKey(item['id'])) {
-  //                                                 selectedDataPemakaian
-  //                                                     .remove(item['id']);
-  //                                               } else {
-  //                                                 selectedDataPemakaian[
-  //                                                     item['id']] = {
-  //                                                   "inventory_master_id":
-  //                                                       item['id'],
-  //                                                   "qty": 0,
-  //                                                   "unit": item['unit_name'],
-  //                                                   "unit_conversion_id":
-  //                                                       unitList[index].id,
-  //                                                 };
-  //                                               }
-  //                                             });
-  //                                           },
-  //                                         ),
-  //                                         if (selectedDataPemakaian
-  //                                             .containsKey(item['id']))
-  //                                           Container(
-  //                                             padding: EdgeInsets.all(size8),
-  //                                             decoration: BoxDecoration(
-  //                                               color: primary100,
-  //                                               borderRadius:
-  //                                                   BorderRadius.circular(
-  //                                                       size8),
-  //                                             ),
-  //                                             child: Column(
-  //                                               children: [
-  //                                                 SizedBox(height: size12),
-  //                                                 Row(
-  //                                                   children: [
-  //                                                     Row(
-  //                                                       children: [
-  //                                                         Text(
-  //                                                           'Qty      : ',
-  //                                                           style: heading4(
-  //                                                               FontWeight.w400,
-  //                                                               bnw900,
-  //                                                               'Outfit'),
-  //                                                         ),
-  //                                                         // Text(
-  //                                                         //   '*',
-  //                                                         //   style: heading4(
-  //                                                         //       FontWeight.w400,
-  //                                                         //       danger500,
-  //                                                         //       'Outfit'),
-  //                                                         // ),
-  //                                                       ],
-  //                                                     ),
-  //                                                     SizedBox(width: size12),
-  //                                                     SizedBox(
-  //                                                       width: 120,
-  //                                                       child: TextField(
-  //                                                         controller:
-  //                                                             qtyController[
-  //                                                                 index],
-  //                                                         decoration:
-  //                                                             InputDecoration(
-  //                                                           focusedBorder:
-  //                                                               UnderlineInputBorder(
-  //                                                             borderSide:
-  //                                                                 BorderSide(
-  //                                                               width: 2,
-  //                                                               color:
-  //                                                                   primary500,
-  //                                                             ),
-  //                                                           ),
-  //                                                           focusColor:
-  //                                                               primary500,
-  //                                                           hintText:
-  //                                                               'Cth : 10',
-  //                                                           hintStyle: heading2(
-  //                                                             FontWeight.w600,
-  //                                                             bnw400,
-  //                                                             'Outfit',
-  //                                                           ),
-  //                                                         ),
-  //                                                         onChanged: (value) {
-  //                                                           setState(() {});
-  //                                                           selectedDataPemakaian[
-  //                                                                   item[
-  //                                                                       'id']]![
-  //                                                               'qty'] = value;
-  //                                                         },
-  //                                                         keyboardType:
-  //                                                             TextInputType
-  //                                                                 .number,
-  //                                                       ),
-  //                                                     ),
-  //                                                     SizedBox(width: size12),
-  //                                                     Text(
-  //                                                       '|',
-  //                                                       style: heading3(
-  //                                                           FontWeight.w600,
-  //                                                           bnw900,
-  //                                                           'Outfit'),
-  //                                                     ),
-  //                                                     SizedBox(width: size12),
-  //                                                     Text(
-  //                                                       '1 qty = ${dataPemakaian.isNotEmpty && index < dataPemakaian.length && index < unitList.length ? ((int.tryParse(qtyController[index].text) ?? 0) * (double.tryParse(selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']?.replaceAll(',', '.') ?? "0") ?? 0)) : 0} ${index < unitList.length ? unitList[index].convertionName ?? '' : ''}',
-  //                                                       style: heading4(
-  //                                                           FontWeight.w400,
-  //                                                           bnw900,
-  //                                                           'Outfit'),
-  //                                                     ),
-  //                                                   ],
-  //                                                 ),
-  //                                                 SizedBox(height: size12),
-  //                                                 Row(
-  //                                                   children: [
-  //                                                     Row(
-  //                                                       children: [
-  //                                                         Text(
-  //                                                           'Unit Convertion : ',
-  //                                                           style: heading4(
-  //                                                               FontWeight.w400,
-  //                                                               bnw900,
-  //                                                               'Outfit'),
-  //                                                         ),
-  //                                                         // Text(
-  //                                                         //   '*',
-  //                                                         //   style: heading4(
-  //                                                         //       FontWeight
-  //                                                         //           .w400,
-  //                                                         //       danger500,
-  //                                                         //       'Outfit'),
-  //                                                         // ),
-  //                                                       ],
-  //                                                     ),
-  //                                                     SizedBox(width: size12),
-  //                                                     SizedBox(
-  //                                                       width: 120,
-  //                                                       child: TextField(
-  //                                                         // enabled: false,
-  //                                                         // controller:
-  //                                                         //     textController,
-  //                                                         readOnly: true,
-  //                                                         decoration:
-  //                                                             InputDecoration(
-  //                                                                 focusedBorder:
-  //                                                                     UnderlineInputBorder(
-  //                                                                   borderSide:
-  //                                                                       BorderSide(
-  //                                                                     width: 2,
-  //                                                                     color:
-  //                                                                         primary500,
-  //                                                                   ),
-  //                                                                 ),
-  //                                                                 focusColor:
-  //                                                                     primary500,
-  //                                                                 hintText:
-  //                                                                     textController[index]
-  //                                                                             .text ??
-  //                                                                         '',
-  //                                                                 hintStyle:
-  //                                                                     heading2(
-  //                                                                   FontWeight
-  //                                                                       .w600,
-  //                                                                   bnw800,
-  //                                                                   'Outfit',
-  //                                                                 )),
-  //                                                       ),
-  //                                                     ),
-  //                                                     SizedBox(width: size12),
-  //                                                     GestureDetector(
-  //                                                       onTap: () async {
-  //                                                         // print(selectedDataPemakaian[
-  //                                                         //     dataPemakaian[
-  //                                                         //             index]
-  //                                                         //         [
-  //                                                         //         'id']]!['unit']);
-  //                                                         final selected =
-  //                                                             await showModalBottomSheet<
-  //                                                                 UnitConvertionModel>(
-  //                                                           context: context,
-  //                                                           shape:
-  //                                                               RoundedRectangleBorder(
-  //                                                             borderRadius:
-  //                                                                 BorderRadius.vertical(
-  //                                                                     top: Radius
-  //                                                                         .circular(
-  //                                                                             size16)),
-  //                                                           ),
-  //                                                           builder: (context) {
-  //                                                             return Column(
-  //                                                               children: [
-  //                                                                 Expanded(
-  //                                                                   child:
-  //                                                                       ListView(
-  //                                                                     padding:
-  //                                                                         EdgeInsets.all(
-  //                                                                             size16),
-  //                                                                     children:
-  //                                                                         unitList
-  //                                                                             .map((unit) {
-  //                                                                       return ListTile(
-  //                                                                         title:
-  //                                                                             Text(unit.name),
-  //                                                                         leading:
-  //                                                                             Icon(PhosphorIcons.radio_button),
-  //                                                                         onTap:
-  //                                                                             () {
-  //                                                                           textController[index].text =
-  //                                                                               unit.name;
-  //                                                                           print(selectedDataPemakaian[item['id']]);
-
-  //                                                                           // Update hanya pada item yang sedang aktif (index)
-  //                                                                           selectedDataPemakaian[item['id']]!['unit'] =
-  //                                                                               item['name_item'];
-  //                                                                           selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] =
-  //                                                                               unit.name;
-  //                                                                           selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] =
-  //                                                                               unit.conversionFactor;
-  //                                                                           selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_id'] =
-  //                                                                               unit.id;
-  //                                                                           // Jika ingin menyimpan id juga:
-  //                                                                           // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
-
-  //                                                                           Navigator.pop(context,
-  //                                                                               unit);
-  //                                                                           setState(() {});
-  //                                                                         },
-  //                                                                       );
-  //                                                                     }).toList(),
-  //                                                                   ),
-  //                                                                 ),
-  //                                                                 Container(
-  //                                                                   width: double
-  //                                                                       .infinity,
-  //                                                                   padding:
-  //                                                                       EdgeInsets.all(
-  //                                                                           size12),
-  //                                                                   child:
-  //                                                                       GestureDetector(
-  //                                                                     onTap:
-  //                                                                         () {
-  //                                                                       textController[index].text =
-  //                                                                           '-';
-  //                                                                       selectedDataPemakaian[dataPemakaian[index]
-  //                                                                           [
-  //                                                                           'id']]!['unit'] = '';
-  //                                                                       selectedDataPemakaian[dataPemakaian[index]
-  //                                                                           [
-  //                                                                           'id']]!['unit_name'] = '';
-  //                                                                       selectedDataPemakaian[dataPemakaian[index]
-  //                                                                           [
-  //                                                                           'id']]!['unit_factor'] = '';
-  //                                                                       selectedDataPemakaian[dataPemakaian[index]
-  //                                                                           [
-  //                                                                           'id']]!['unit_id'] = '';
-
-  //                                                                       setState(
-  //                                                                           () {});
-  //                                                                       Navigator.pop(
-  //                                                                           context);
-  //                                                                     },
-  //                                                                     child:
-  //                                                                         buttonXL(
-  //                                                                       Center(
-  //                                                                         child:
-  //                                                                             Text(
-  //                                                                           'Hapus',
-  //                                                                           style: heading3(
-  //                                                                               FontWeight.w600,
-  //                                                                               bnw100,
-  //                                                                               'Outfit'),
-  //                                                                         ),
-  //                                                                       ),
-  //                                                                       double
-  //                                                                           .infinity,
-  //                                                                     ),
-  //                                                                   ),
-  //                                                                 ),
-  //                                                               ],
-  //                                                             );
-  //                                                           },
-  //                                                         );
-
-  //                                                         if (selected !=
-  //                                                             null) {
-  //                                                           unitController
-  //                                                                   .text =
-  //                                                               selected.name;
-  //                                                           selectedUnit =
-  //                                                               selected;
-
-  //                                                           setState(() {});
-  //                                                         }
-  //                                                       },
-  //                                                       child: Icon(
-  //                                                           PhosphorIcons
-  //                                                               .caret_down),
-  //                                                     )
-  //                                                   ],
-  //                                                 ),
-  //                                               ],
-  //                                             ),
-  //                                           ),
-  //                                       ],
-  //                                     );
-  //                                   },
-  //                                 ),
-  //                         ),
-  //                         SizedBox(height: size16),
-  //                         Row(
-  //                           children: [
-  //                             Expanded(
-  //                               child: GestureDetector(
-  //                                 onTap: () {
-  //                                   Navigator.of(context).pop();
-  //                                 },
-  //                                 child: buttonXLoutline(
-  //                                   Center(
-  //                                     child: Text(
-  //                                       'Batal',
-  //                                       style: heading3(FontWeight.w600,
-  //                                           primary500, 'Outfit'),
-  //                                     ),
-  //                                   ),
-  //                                   double.infinity,
-  //                                   primary500,
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                             SizedBox(width: size16),
-  //                             Expanded(
-  //                               child: GestureDetector(
-  //                                 onTap: () {
-  //                                   setState(() {
-  //                                     orderBOMInventoryUbah =
-  //                                         selectedDataPemakaian.values.toList();
-
-  //                                     dataPemakaian = orderBOMInventoryUbah;
-  //                                     print(
-  //                                         "Saved Data: $orderBOMInventoryUbah");
-  //                                     print(
-  //                                         "Saved Data: $selectedDataPemakaian");
-  //                                   });
-  //                                   Navigator.pop(context);
-  //                                   initState();
-  //                                 },
-  //                                 child: buttonXL(
-  //                                   Center(
-  //                                     child: Text(
-  //                                       'Simpan',
-  //                                       style: heading3(
-  //                                           FontWeight.w600, bnw100, 'Outfit'),
-  //                                     ),
-  //                                   ),
-  //                                   double.infinity,
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ],
-  //                         )
-  //                       ],
-  //                     )),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //         child: SizedBox(
-  //           width: double.infinity,
-  //           child: buttonXLoutline(
-  //             Center(
-  //               child: Text(
-  //                 'Ubah',
-  //                 style: heading3(FontWeight.w600, primary500, 'Outfit'),
-  //               ),
-  //             ),
-  //             double.infinity,
-  //             primary500,
-  //           ),
-  //         ),
-  //       ),
-  //       SizedBox(height: size16),
-  //       Row(
-  //         children: [
-  //           // Expanded(
-  //           //   child: GestureDetector(
-  //           //     onTap: () {
-  //           //       print(orderBOMInventoryUbah);
-  //           //       // setState(() {
-  //           //       //   createPembelian(
-  //           //       //     context,
-  //           //       //     widget.token,
-  //           //       //     tanggalAwal,
-  //           //       //     judulPembelian.text,
-  //           //       //     orderBOMInventoryUbah,
-  //           //       //   );
-  //           //       // });
-  //           //     },
-  //           //     child: buttonXLoutline(
-  //           //       Center(
-  //           //         child: Text(
-  //           //           'Simpan & Tambah Baru',
-  //           //           style: heading3(FontWeight.w600, primary500, 'Outfit'),
-  //           //         ),
-  //           //       ),
-  //           //       double.infinity,
-  //           //       primary500,
-  //           //     ),
-  //           //   ),
-  //           // ),
-  //           // SizedBox(width: size16),
-  //           Expanded(
-  //             child: GestureDetector(
-  //               onTap: () {
-  //                 updateBOM(
-  //                   context,
-  //                   widget.token,
-  //                   productMaterialIdUbah,
-  //                   ubahJudulBOMController.text,
-  //                   '',
-  //                   ubahProdukBOMid,
-  //                   orderBOMInventoryUbah,
-  //                 ).then(
-  //                   (value) {
-  //                     if (value == '00') {
-  //                       _pageController.jumpToPage(0);
-
-  //                       ubahJudulBOMController.clear();
-  //                       ubahProdukBOM.clear();
-  //                       ubahProdukBOMid = '';
-  //                       orderBOMInventoryUbah = [];
-
-  //                       setState(() {});
-  //                       initState();
-  //                     }
-  //                   },
-  //                 );
-  //                 print(orderBOMInventoryUbah);
-  //               },
-  //               child: buttonXL(
-  //                 Center(
-  //                   child: Text(
-  //                     'Simpan',
-  //                     style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-  //                   ),
-  //                 ),
-  //                 double.infinity,
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       )
-  //     ],
-  //   );
-  // }
 }

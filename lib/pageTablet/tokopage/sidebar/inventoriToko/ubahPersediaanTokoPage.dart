@@ -116,7 +116,8 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
     selectedDataPemakaian.clear();
 
     for (var item in detailList) {
-      print('item.qty = ${item.qty}, item.price = ${item.price}');
+      print('Processing item: ${item.unitName}');
+      // print('item.qty = ${item.qty}, item.price = ${item.price}');
 
       final id = item.itemId;
 
@@ -127,14 +128,14 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
         text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '',
       );
       unitControllerMap[id] = TextEditingController(
-        text: item.unitName ?? '-',
+        text: item.unit_conversion_name ?? '-',
       );
 
       selectedDataPemakaian[id] = {
         "inventory_master_id": id,
         "unit": item.nameItem,
         "name": item.nameItem,
-        "category": item.unitName ?? '',
+        "category": item.unit_conversion_name,
         "qty": item.qty,
         "unit_conversion_id": item.unit_conversion_id ?? '',
         "unit_name": item.unitName ?? '',
@@ -1391,7 +1392,7 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                       selectedDataPemakaian.values.map((e) {
                     return {
                       ...e,
-                      'unit_conversion_id': '',
+                      // 'unit_conversion_id': '',
                       'qty':
                           (double.tryParse(e['qty'].toString())?.toInt() ?? 0),
                       'price':

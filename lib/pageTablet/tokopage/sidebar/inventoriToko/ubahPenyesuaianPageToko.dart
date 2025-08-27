@@ -108,14 +108,14 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
         text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '',
       );
       unitControllerMap[id] = TextEditingController(
-        text: item.unitName ?? '-',
+        text: item.unit_conversion_name ?? '-',
       );
 
       selectedDataPemakaian[id] = {
         "inventory_master_id": id,
         "unit": item.nameItem,
         "name": item.nameItem,
-        "category": item.unitName ?? '',
+        "category": item.unit_conversion_name ?? '',
         "qty": item.qty,
         "unit_conversion_id": item.unit_conversion_id ?? '',
         "unit_name": item.unitName ?? '',
@@ -124,54 +124,21 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
         "unit_id": item.unitId,
       };
     }
+
+    print('selectedDataPemakaian: $selectedDataPemakaian');
+    // print('dataPemakaian: $dataPemakaian');
 
     setState(() {
       detailListUbahFIX = detailList;
     });
   }
 
-  void getdetailSelected() async {
-    final result =
-        await getSelectedDataPemakaian(context, widget.token, widget.groupId);
+  void fetchUnits() async {
+    List<UnitConvertionModel> units =
+        await getUnitConvertion(widget.token, '', '', '');
     setState(() {
-      selectedDataPemakaian = result;
+      unitList = units;
     });
-  }
-
-  Future<void> isiControllerDariAPI(List<DetailItem> detailList) async {
-    // Kosongkan dulu list
-    hargaControllerMap.clear();
-    qtyControllerMap.clear();
-    unitControllerMap.clear();
-    selectedDataPemakaian.clear();
-
-    for (int i = 0; i < detailList.length; i++) {
-      final item = detailList[i];
-
-      // Simpan ke selectedDataPemakaian
-      selectedDataPemakaian[item.itemId] = {
-        "inventory_master_id": item.itemId,
-        "name": item.nameItem,
-        "category": item.conversion_factor,
-        "unit": item.nameItem,
-        "qty": item.qty,
-        "unit_conversion_id": item.unit_conversion_id ?? '',
-        "unit_name": item.unitName ?? '',
-        "price": item.price,
-        "unit_factor": item.conversion_factor,
-        "unit_id": item.unitId,
-      };
-
-      // Isi controller dari API (Postman)
-      hargaControllerMap['id'] = TextEditingController(
-          text: double.tryParse(item.price)?.toStringAsFixed(0) ?? '');
-
-      qtyControllerMap['id'] = TextEditingController(
-          text: double.tryParse(item.qty)?.toStringAsFixed(0) ?? '');
-
-      unitControllerMap['id'] =
-          TextEditingController(text: item.unitName ?? '-');
-    }
   }
 
   @override
@@ -181,7 +148,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
     isNotEmpty = true;
     getMasterDataTokoAndUpdateState();
     getDetailData();
-    // getdetailSelected();
+    fetchUnits();
   }
 
   @override
@@ -467,161 +434,163 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                               ],
                             ),
                     ),
-                    Container(
-                      // width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primary100,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(size12),
-                          bottomRight: Radius.circular(size12),
+                    Expanded(
+                      child: Container(
+                        // width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: primary100,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(size12),
+                            bottomRight: Radius.circular(size12),
+                          ),
                         ),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        itemCount: orderInventory.length,
-                        itemBuilder: (context, index) {
-                          // Mendapatkan data dari dataPemakaian
-                          final Map<String, dynamic> data =
-                              orderInventory[index];
-                          final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
-
-                          return Container(
-                            margin: EdgeInsets.symmetric(vertical: size12),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: bnw300, width: 1),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: orderInventory.length,
+                          itemBuilder: (context, index) {
+                            // Mendapatkan data dari dataPemakaian
+                            final Map<String, dynamic> data =
+                                orderInventory[index];
+                            final productId = data['id'];
+                            final isSelected =
+                                selectedDataPemakaian.containsKey(productId);
+                      
+                            return Container(
+                              margin: EdgeInsets.symmetric(vertical: size12),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: bnw300, width: 1),
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Opacity(
-                                  opacity: 0,
-                                  child: InkWell(
-                                    // onTap: () => onTap(isSelected, index),
-                                    onTap: () {
-                                      onTap(
-                                        isSelected,
-                                        index,
-                                        productId,
-                                      );
-                                      // log(data.name.toString());
-                                      // print(dataProduk.isActive);
-
-                                      print(listProduct);
-                                    },
-                                    child: SizedBox(
-                                      width: 50,
-                                      child: _buildSelectIconInventori(
-                                        isSelected!,
-                                        data,
+                              child: Row(
+                                children: [
+                                  Opacity(
+                                    opacity: 0,
+                                    child: InkWell(
+                                      // onTap: () => onTap(isSelected, index),
+                                      onTap: () {
+                                        onTap(
+                                          isSelected,
+                                          index,
+                                          productId,
+                                        );
+                                        // log(data.name.toString());
+                                        // print(dataProduk.isActive);
+                      
+                                        print(listProduct);
+                                      },
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: _buildSelectIconInventori(
+                                          isSelected!,
+                                          data,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['name'] ?? '',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['name'] ?? '',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    data['category'] ?? '',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      data['category'] ?? '',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    parseFlexibleNumber(data['qty']).toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      parseFlexibleNumber(data['qty']).toString(),
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    FormatCurrency.convertToIdr(
-                                      parseFlexibleNumber(data['price']),
-                                    ).toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      FormatCurrency.convertToIdr(
+                                        parseFlexibleNumber(data['price']),
+                                      ).toString(),
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    FormatCurrency.convertToIdr(
-                                      parseFlexibleNumber(data['price']) *
-                                          parseFlexibleNumber(data['qty']),
-                                    ).toString(),
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      FormatCurrency.convertToIdr(
+                                        parseFlexibleNumber(data['price']) *
+                                            parseFlexibleNumber(data['qty']),
+                                      ).toString(),
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                GestureDetector(
-                                  onTap: () {
-                                    var removedItem = orderInventory[index];
-                                    var itemId =
-                                        removedItem['inventory_master_id'];
-
-                                    selectedDataPemakaian.remove(itemId);
-                                    orderInventory.removeAt(index);
-
-                                    // Optional: hapus dari dataPemakaian kalau kamu ingin menghilangkan total
-                                    // dataPemakaian.removeWhere((item) => item['inventory_master_id'] == itemId);
-
-                                    setState(() {});
-                                  },
-                                  child: Icon(
-                                    PhosphorIcons.x_fill,
-                                    color: red500,
+                                  SizedBox(width: size16),
+                                  GestureDetector(
+                                    onTap: () {
+                                      var removedItem = orderInventory[index];
+                                      var itemId =
+                                          removedItem['inventory_master_id'];
+                      
+                                      selectedDataPemakaian.remove(itemId);
+                                      orderInventory.removeAt(index);
+                      
+                                      // Optional: hapus dari dataPemakaian kalau kamu ingin menghilangkan total
+                                      // dataPemakaian.removeWhere((item) => item['inventory_master_id'] == itemId);
+                      
+                                      setState(() {});
+                                    },
+                                    child: Icon(
+                                      PhosphorIcons.x_fill,
+                                      color: red500,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: size16),
-                                SizedBox(width: size16),
-                              ],
-                            ),
-                          );
-                        },
+                                  SizedBox(width: size16),
+                                  SizedBox(width: size16),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -1272,7 +1241,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                       selectedDataPemakaian.values.map((e) {
                     return {
                       ...e,
-                      'unit_conversion_id': '',
+                      // 'unit_conversion_id': '',
                       'qty':
                           (double.tryParse(e['qty'].toString())?.toInt() ?? 0),
                       'price':

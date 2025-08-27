@@ -39,7 +39,9 @@ class DetailItem {
       unitId: json['unit_id'],
       unitName: json['unit_name'],
       unit_conversion_id: json['unit_conversion_id'].toString(),
-      unit_conversion_name: json['unit_conversion_name'].toString(),
+      unit_conversion_name: json['unit_conversion_name'] != null
+          ? json['unit_conversion_name'].toString()
+          : json['unit_name'].toString(),
       conversion_factor: json['conversion_factor'].toString(),
       unitAbbreviation: json['unit_abbreviation'].toString(),
       qty: json['qty'],

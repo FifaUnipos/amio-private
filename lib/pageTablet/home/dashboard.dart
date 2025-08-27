@@ -72,7 +72,7 @@ class _SidebarXExampleAppState extends State<SidebarXExampleApp> {
     // });
     // final NotifFCM = FCM();
     // NotifFCM.setNotifiications();
-    dashboardKulasedaya(checkToken);
+    dashboardKulasedaya(checkToken ?? widget.token);
     deviceDetails();
 
     setState(() {});

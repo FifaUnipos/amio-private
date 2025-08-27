@@ -3643,24 +3643,29 @@ class _ProdukTokoState extends State<ProdukToko> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          whenLoading(context);
                           Navigator.pop(context);
                           tambahKategoriForm(
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              kategoriListForm(context, isKeyboardActive);
                               showSnackBarComponent(
                                   context, 'Berhasil tambah kategori', '00');
+
+                              // Future.delayed(Duration(seconds: 1))
+                              //     .then((value) {
+                              //   autoReload();
+                              //   kategoriListForm(context, isKeyboardActive);
+                              // });
+
                               errorText = '';
                               controllerName.text = '';
                             }
                           });
-                          _getProductList();
-                          refreshDataProduk();
-                          getDataProduk(['']);
-                          setState(() {});
-                          initState();
+                          // _getProductList();
+                          // refreshDataProduk();
+                          // getDataProduk(['']);
+                          // setState(() {});
+                          // initState();
                         },
                         child: buttonXL(
                           Center(

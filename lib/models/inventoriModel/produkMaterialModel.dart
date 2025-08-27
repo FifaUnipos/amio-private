@@ -25,7 +25,7 @@ class ProdukMaterialModel {
 
   factory ProdukMaterialModel.fromJson(Map<String, dynamic> json) {
     return ProdukMaterialModel(
-      id: json['id'],
+      id: json['inventory_master_id'],
       inventoryMasterId: json['inventory_master_id'],
       quantityNeeded: json['quantity_needed'],
       unitConversionId: json['unit_conversion_id'] ?? '',
@@ -33,7 +33,7 @@ class ProdukMaterialModel {
       unit: json['unit'],
       unitName: json['unit_name'],
       unitAbbreviation: json['unit_abbreviation'],
-      unitConversionName: json['unit_conversion_name'] ?? '',
+      unitConversionName: json['unit_conversion_name'] ?? json['unit_name'],
       unitConversionFactor: json['unit_conversion_factor'] ?? '',
     );
   }

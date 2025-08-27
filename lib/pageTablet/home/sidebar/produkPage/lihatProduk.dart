@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import 'package:amio/utils/component/component_snackbar.dart';
+
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,12 +11,16 @@ import 'dart:typed_data';
 import 'lihatProdukPage/lihatUbahProdukPage.dart';
 import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
 import '../../../../utils/component/skeletons.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';import '../../../../utils/component/component_orderBy.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../utils/component/component_orderBy.dart';
 import '../../../../utils/component/component_loading.dart';
 import '../../../../models/tokoModel/transaksiTokoModel.dart';
 import 'package:provider/provider.dart';
@@ -23,9 +30,11 @@ import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import '../../../../services/apimethod.dart';
-import '../../../../services/checkConnection.dart';import '../../../../utils/component/component_orderBy.dart';
+import '../../../../services/checkConnection.dart';
+import '../../../../utils/component/component_orderBy.dart';
 
-import '../../../tokopage/sidebar/produkToko/produk.dart';import '../../../../utils/component/component_color.dart';
+import '../../../tokopage/sidebar/produkToko/produk.dart';
+import '../../../../utils/component/component_color.dart';
 
 class LihatProdukPage extends StatefulWidget {
   String token, name, merchId;
@@ -130,8 +139,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     var picker = ImagePicker();
     PickedFile? imageFile;
 
-    imageFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    imageFile = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (imageFile!.path.isEmpty == false) {
       myImageEdit = File(imageFile.path);
 
@@ -264,8 +276,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -2445,8 +2460,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   tambahGambarEdit(BuildContext context) async {
     showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -2806,9 +2821,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
           () {
             // log(jenisProduct.toString());
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -3128,9 +3143,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 onTap: () {
                   Navigator.pop(context);
                   showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+                    constraints: const BoxConstraints(
+                      maxWidth: double.infinity,
+                    ),
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -3366,8 +3381,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
       BuildContext context, bool isKeyboardActive, StateSetter setState) {
     return showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -3470,20 +3485,22 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          whenLoading(context);
                           tambahKategoriForm(
                                   context, controllerName.text, widget.token)
                               .then((value) {
                             if (value == '00') {
-                              // Navigator.pop(context);
+                              showSnackBarComponent(
+                                  context, 'Berhasil tambah kategori', '00');
 
                               errorText = '';
                               controllerName.text = '';
                             }
                           });
+
                           _getProductList();
                           refreshDataProduk();
                           getDataProduk(['']);
+
                           setState(() {});
                           initState();
                         },
@@ -3559,9 +3576,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+              constraints: const BoxConstraints(
+                maxWidth: double.infinity,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -3725,8 +3742,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
       constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+        maxWidth: double.infinity,
+      ),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
