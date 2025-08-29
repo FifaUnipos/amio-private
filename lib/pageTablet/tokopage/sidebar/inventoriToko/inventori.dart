@@ -7768,6 +7768,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                         searchProductID.clear();
                         listProduct.clear();
                         tambahProdukCon.clear();
+                        orderInventory.clear();
 
                         setState(() {});
                         initState();
@@ -7933,6 +7934,19 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       '',
                       nameConController.text,
                       faktorCon.text,
+                    ).then(
+                      (value) {
+                        if (value == '00') {
+                          // _pageController.jumpToPage(0);
+                          orderInventory.clear();
+
+                          nameConController.clear();
+                          faktorCon.clear();
+
+                          setState(() {});
+                          initState();
+                        }
+                      },
                     );
                   });
                 },

@@ -982,7 +982,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           Text(
                                                             FormatCurrency.convertToIdr(
                                                                     int.parse(data[
-                                                                            'amount']
+                                                                            'money_paid']
                                                                         .toString()))
                                                                 .toString(),
                                                             style: heading4(

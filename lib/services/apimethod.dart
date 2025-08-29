@@ -4936,7 +4936,7 @@ Future<Map<String, Map<String, dynamic>>> getSelectedDataPenyesuaian(
     final Map<String, dynamic> decoded = jsonDecode(response.body);
     print('Success fetch selectedDataPemakaian ${response.body}');
     final List<dynamic> detailList = decoded['data']['detail'];
-
+    titlePenyesuaianUbah = decoded['data']['title'];
     // Clear isi controller sebelumnya
     editPesananInventory.clear();
     editHargaInventory.clear();

@@ -840,7 +840,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                           PhosphorIcons.plus,
                           color: bnw900,
                         ),
-                        hintText: 'Tambah Gambar',
+                        hintText: 'Ubah Gambar',
                         hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       ),
                     ),
@@ -1005,13 +1005,19 @@ class _ProdukTokoState extends State<ProdukToko> {
                 }
 
                 List<String> value = [""];
+
+                // print(
+                //     'harga online ${conHargaOnlineEdit.text}, harga ${conHargaEdit.text}');
+
+                // print("test $jenisProductEdit $jenisProduct  $idProduct");
+
                 updateProduk(
                   context,
                   widget.token,
                   conNameProdukEdit.text,
                   "",
                   singleProductId,
-                  idProduct,
+                  kodejenisProductEdit,
                   conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   conHargaOnlineEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   _pageController,
@@ -2631,7 +2637,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                 PhosphorIcons.plus,
                                 color: bnw900,
                               ),
-                              hintText: 'Tambah Foto',
+                              hintText: 'Ubah Foto',
                               hintStyle:
                                   heading3(FontWeight.w400, bnw900, 'Outfit')),
                         ),
@@ -3193,6 +3199,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                   product['jenisproduct'];
 
                                               idProduct =
+                                                  product['kodeproduct'];
+
+                                              kodejenisProductEdit =
                                                   product['kodeproduct'];
 
                                               _selectProduct(product);

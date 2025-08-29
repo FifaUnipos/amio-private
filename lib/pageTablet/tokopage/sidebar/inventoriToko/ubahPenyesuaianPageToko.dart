@@ -39,6 +39,10 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
   Map<String, TextEditingController> hargaControllerMap = {};
   Map<String, TextEditingController> unitControllerMap = {};
 
+  List<TextEditingController> qtyController = [];
+  List<TextEditingController> hargaSatuanControllers = [];
+  List<TextEditingController> textController = [];
+
   List<UnitConvertionModel> unitList = [];
   UnitConvertionModel? selectedUnit;
   TextEditingController unitController = TextEditingController();
@@ -141,14 +145,39 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
     });
   }
 
+  void initializeControllers() {
+    for (int i = 0; i < dataPemakaian.length; i++) {
+      qtyController[i].text = dataPemakaian[i]['qty']?.toString() ?? '0';
+      hargaSatuanControllers[i].text =
+          dataPemakaian[i]['price']?.toString() ?? '0';
+      textController[i].text = dataPemakaian[i]['unit'] ?? '-';
+    }
+  }
+
+  void addNewItem() {
+    setState(() {
+      hargaSatuanControllers.add(TextEditingController());
+      qtyController.add(TextEditingController());
+      textController.add(TextEditingController(text: '-'));
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
     isNotEmpty = true;
     getMasterDataTokoAndUpdateState();
     getDetailData();
     fetchUnits();
+
+    qtyController =
+        List.generate(dataPemakaian.length, (index) => TextEditingController());
+    hargaSatuanControllers =
+        List.generate(dataPemakaian.length, (index) => TextEditingController());
+    textController = List.generate(
+        dataPemakaian.length, (index) => TextEditingController(text: '-'));
+
+    super.initState();
   }
 
   @override
@@ -261,24 +290,24 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Harga Satuan',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
-                                Expanded(
-                                  flex: 4,
-                                  child: Text(
-                                    'Total Harga',
-                                    style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Harga Satuan',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
+                                // Expanded(
+                                //   flex: 4,
+                                //   child: Text(
+                                //     'Total Harga',
+                                //     style: heading4(
+                                //         FontWeight.w700, bnw100, 'Outfit'),
+                                //   ),
+                                // ),
+                                // SizedBox(width: size16),
                                 Icon(
                                   PhosphorIcons.x_fill,
                                   color: primary500,
@@ -446,7 +475,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                         ),
                         child: ListView.builder(
                           shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
+                          // physics: NeverScrollableScrollPhysics(),
                           padding: EdgeInsets.zero,
                           itemCount: orderInventory.length,
                           itemBuilder: (context, index) {
@@ -456,7 +485,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                             final productId = data['id'];
                             final isSelected =
                                 selectedDataPemakaian.containsKey(productId);
-                      
+
                             return Container(
                               margin: EdgeInsets.symmetric(vertical: size12),
                               decoration: BoxDecoration(
@@ -478,7 +507,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                         );
                                         // log(data.name.toString());
                                         // print(dataProduk.isActive);
-                      
+
                                         print(listProduct);
                                       },
                                       child: SizedBox(
@@ -521,7 +550,8 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                   Expanded(
                                     flex: 4,
                                     child: Text(
-                                      parseFlexibleNumber(data['qty']).toString(),
+                                      parseFlexibleNumber(data['qty'])
+                                          .toString(),
                                       style: heading4(
                                         FontWeight.w400,
                                         bnw900,
@@ -531,52 +561,52 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  SizedBox(width: size16),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Text(
-                                      FormatCurrency.convertToIdr(
-                                        parseFlexibleNumber(data['price']),
-                                      ).toString(),
-                                      style: heading4(
-                                        FontWeight.w400,
-                                        bnw900,
-                                        'Outfit',
-                                      ),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  SizedBox(width: size16),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Text(
-                                      FormatCurrency.convertToIdr(
-                                        parseFlexibleNumber(data['price']) *
-                                            parseFlexibleNumber(data['qty']),
-                                      ).toString(),
-                                      style: heading4(
-                                        FontWeight.w400,
-                                        bnw900,
-                                        'Outfit',
-                                      ),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  SizedBox(width: size16),
+                                  // SizedBox(width: size16),
+                                  // Expanded(
+                                  //   flex: 4,
+                                  //   child: Text(
+                                  //     FormatCurrency.convertToIdr(
+                                  //       parseFlexibleNumber(data['price']),
+                                  //     ).toString(),
+                                  //     style: heading4(
+                                  //       FontWeight.w400,
+                                  //       bnw900,
+                                  //       'Outfit',
+                                  //     ),
+                                  //     maxLines: 3,
+                                  //     overflow: TextOverflow.ellipsis,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: size16),
+                                  // Expanded(
+                                  //   flex: 4,
+                                  //   child: Text(
+                                  //     FormatCurrency.convertToIdr(
+                                  //       parseFlexibleNumber(data['price']) *
+                                  //           parseFlexibleNumber(data['qty']),
+                                  //     ).toString(),
+                                  //     style: heading4(
+                                  //       FontWeight.w400,
+                                  //       bnw900,
+                                  //       'Outfit',
+                                  //     ),
+                                  //     maxLines: 3,
+                                  //     overflow: TextOverflow.ellipsis,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(width: size16),
                                   GestureDetector(
                                     onTap: () {
                                       var removedItem = orderInventory[index];
                                       var itemId =
                                           removedItem['inventory_master_id'];
-                      
+
                                       selectedDataPemakaian.remove(itemId);
                                       orderInventory.removeAt(index);
-                      
+
                                       // Optional: hapus dari dataPemakaian kalau kamu ingin menghilangkan total
                                       // dataPemakaian.removeWhere((item) => item['inventory_master_id'] == itemId);
-                      
+
                                       setState(() {});
                                     },
                                     child: Icon(
@@ -603,6 +633,16 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
         SizedBox(height: size16),
         GestureDetector(
           onTap: () {
+            if (selectedDataPemakaian.isEmpty) {
+              selectedDataPemakaian.clear();
+            }
+            qtyController = List.generate(
+                dataPemakaian.length, (index) => TextEditingController());
+            hargaSatuanControllers = List.generate(
+                dataPemakaian.length, (index) => TextEditingController());
+            textController = List.generate(dataPemakaian.length,
+                (index) => TextEditingController(text: '-'));
+
             showModalBottom(
               context,
               double.infinity,
@@ -706,6 +746,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                               ),
                                               onTap: () {
                                                 setState(() {
+                                                  addNewItem();
                                                   final id = item['id'];
 
                                                   if (selectedDataPemakaian
@@ -751,78 +792,79 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                 //ubah cu
                                                 child: Column(
                                                   children: [
-                                                    Row(
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Harga Satuan      : ',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            // Text(
-                                                            //   '*',
-                                                            //   style: heading4(
-                                                            //       FontWeight.w400,
-                                                            //       danger500,
-                                                            //       'Outfit'),
-                                                            // ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(width: size12),
-                                                        SizedBox(
-                                                          key: ValueKey(index),
-                                                          width: 120,
-                                                          child: TextField(
-                                                            controller:
-                                                                hargaControllerMap[
-                                                                    item['id']],
-                                                            // onTap: () {
-                                                            //   FocusScope.of(
-                                                            //           context)
-                                                            //       .requestFocus(
-                                                            //           focusNodeHarga);
-                                                            // },
-                                                            decoration:
-                                                                InputDecoration(
-                                                              focusedBorder:
-                                                                  UnderlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  width: 2,
-                                                                  color:
-                                                                      primary500,
-                                                                ),
-                                                              ),
-                                                              focusColor:
-                                                                  primary500,
-                                                              hintText:
-                                                                  'Cth : 10.000',
-                                                              hintStyle:
-                                                                  heading2(
-                                                                FontWeight.w600,
-                                                                bnw400,
-                                                                'Outfit',
-                                                              ),
-                                                            ),
-                                                            onChanged: (value) {
-                                                              setState(() {});
-                                                              selectedDataPemakaian[
-                                                                      item[
-                                                                          'id']]![
-                                                                  'price'] = value;
-                                                            },
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: size12),
+                                                    // Row(
+                                                    //   children: [
+                                                    //     Row(
+                                                    //       children: [
+                                                    //         Text(
+                                                    //           'Harga Satuan      : ',
+                                                    //           style: heading4(
+                                                    //               FontWeight
+                                                    //                   .w400,
+                                                    //               bnw900,
+                                                    //               'Outfit'),
+                                                    //         ),
+                                                    //         // Text(
+                                                    //         //   '*',
+                                                    //         //   style: heading4(
+                                                    //         //       FontWeight.w400,
+                                                    //         //       danger500,
+                                                    //         //       'Outfit'),
+                                                    //         // ),
+                                                    //       ],
+                                                    //     ),
+                                                    //     SizedBox(width: size12),
+                                                    //     SizedBox(
+                                                    //       key: ValueKey(index),
+                                                    //       width: 120,
+                                                    //       child: TextField(
+                                                    //         controller:
+                                                    //             hargaControllerMap[
+                                                    //                 item['id']],
+                                                    //         // onTap: () {
+                                                    //         //   FocusScope.of(
+                                                    //         //           context)
+                                                    //         //       .requestFocus(
+                                                    //         //           focusNodeHarga);
+                                                    //         // },
+                                                    //         decoration:
+                                                    //             InputDecoration(
+                                                    //           focusedBorder:
+                                                    //               UnderlineInputBorder(
+                                                    //             borderSide:
+                                                    //                 BorderSide(
+                                                    //               width: 2,
+                                                    //               color:
+                                                    //                   primary500,
+                                                    //             ),
+                                                    //           ),
+                                                    //           focusColor:
+                                                    //               primary500,
+                                                    //           hintText:
+                                                    //               'Cth : 10.000',
+                                                    //           hintStyle:
+                                                    //               heading2(
+                                                    //             FontWeight.w600,
+                                                    //             bnw400,
+                                                    //             'Outfit',
+                                                    //           ),
+                                                    //         ),
+                                                    //         onChanged: (value) {
+                                                    //           setState(() {});
+                                                    //           selectedDataPemakaian[
+                                                    //                   item[
+                                                    //                       'id']]![
+                                                    //               'price'] = value;
+                                                    //         },
+                                                    //         keyboardType:
+                                                    //             TextInputType
+                                                    //                 .number,
+                                                    //       ),
+                                                    //     ),
+                                                    //   ],
+                                                    // ),
+                                                    // SizedBox(height: size12),
+
                                                     Row(
                                                       children: [
                                                         Row(
@@ -998,42 +1040,30 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                         children:
                                                                             unitList.map((unit) {
                                                                           return ListTile(
-                                                                            title:
-                                                                                Text(unit.name),
-                                                                            leading:
-                                                                                Icon(PhosphorIcons.radio_button),
-                                                                            onTap:
-                                                                                () {
-                                                                              final id = item['id']; // konsisten pakai id dari item
-                                                                              final unitName = unit.name;
-                                                                              final unitFactor = unit.conversionFactor;
-                                                                              final unitId = unit.id;
+                                                                              title: Text(unit.name),
+                                                                              leading: Icon(PhosphorIcons.radio_button),
+                                                                              onTap: () {
+                                                                                final id = item['id'];
+                                                                                final unitName = unit.name;
+                                                                                final unitFactor = unit.conversionFactor; // pastikan ini num/double
+                                                                                final unitId = unit.id;
 
-                                                                              setState(() {
-                                                                                // Memastikan unitControllerMap memiliki key yang sesuai
-                                                                                if (!unitControllerMap.containsKey(id)) {
-                                                                                  unitControllerMap[id] = TextEditingController();
-                                                                                }
+                                                                                setState(() {
+                                                                                  unitControllerMap[id] ??= TextEditingController();
+                                                                                  unitControllerMap[id]!.text = unitName;
 
-                                                                                // Update teks controller dengan unitName yang dipilih
-                                                                                unitControllerMap[id]?.text = unitName;
+                                                                                  selectedDataPemakaian[id] ??= {};
+                                                                                  selectedDataPemakaian[id]!['unit'] = item['name_item'];
+                                                                                  selectedDataPemakaian[id]!['name'] = item['name_item'];
+                                                                                  selectedDataPemakaian[id]!['category'] = unitName;
+                                                                                  selectedDataPemakaian[id]!['unit_name'] = unitName;
+                                                                                  selectedDataPemakaian[id]!['unit_factor'] = unitFactor; // tipe num/double
+                                                                                  selectedDataPemakaian[id]!['unit_id'] = unitId;
+                                                                                  selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
+                                                                                });
 
-                                                                                // Update data yang disimpan dalam selectedDataPemakaian
-                                                                                selectedDataPemakaian[id] ??= {};
-                                                                                selectedDataPemakaian[id]!['unit'] = item['name_item'];
-                                                                                selectedDataPemakaian[id]!['name'] = item['name_item'];
-                                                                                selectedDataPemakaian[id]!['category'] = unitName;
-                                                                                selectedDataPemakaian[id]!['unit_name'] = unitName;
-                                                                                selectedDataPemakaian[id]!['unit_factor'] = unitFactor;
-                                                                                selectedDataPemakaian[id]!['unit_id'] = unitId;
-                                                                                selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
+                                                                                Navigator.pop(context, unit);
                                                                               });
-
-                                                                              // Menutup modal dan memperbarui UI
-                                                                              this.setState(() {});
-                                                                              Navigator.pop(context, unit);
-                                                                            },
-                                                                          );
                                                                         }).toList(),
                                                                       ),
                                                                     ),
