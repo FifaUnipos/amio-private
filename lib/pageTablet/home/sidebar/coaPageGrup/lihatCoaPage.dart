@@ -42,7 +42,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
   PageController _pageController = PageController();
   TextEditingController conNumberCOA = TextEditingController();
   TextEditingController searchController = TextEditingController();
-  String _selectedOptionCategory = "Debit";
+  String _selectedOptionCategory = "Semua";
   String jenisProduct = "Pilih Kategori", kodeProduct = '';
 
   List<String>? productIdCheckAll;
@@ -264,8 +264,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
         SizedBox(height: size16),
         Row(
           children: [
-            orderBy(context),
-            SizedBox(width: size16),
+            // orderBy(context),
+            // SizedBox(width: size16),
             orderByCOA(context),
           ],
         ),
@@ -458,7 +458,12 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                       ),
               ),
               datasCOA == null
-                  ? SkeletonCardLine()
+                  ? Center(
+                      child: Text(
+                        'Tidak ada data COA',
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                      ),
+                    )
                   : Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -1371,6 +1376,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                             BorderRadius.circular(size8),
                                         value: _selectedOptionCategory,
                                         items: <String>[
+                                          '',
                                           'Debit',
                                           'EWallet',
                                           'Credit'
@@ -1517,7 +1523,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
   Future _getProductList(category) async {
     await http.post(Uri.parse(getCoaRefLink), body: {
       "deviceid": identifier,
-      "category": category,
+      "category": category == 'Semua' ? '' : category,
     }, headers: {
       "token": widget.token,
     }).then((response) {
@@ -1848,7 +1854,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                             borderRadius:
                                                 BorderRadius.circular(size8),
                                           ),
-                                          label: Text(orderByCOAText[index],
+                                          label: Text(
+                                              orderByCOAText[index] == ''
+                                                  ? 'Semua'
+                                                  : orderByCOAText[index],
                                               style: heading4(
                                                   FontWeight.w400,
                                                   valueOrderByProduct == index
@@ -1883,9 +1892,13 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                 print(orderByCOAText[valueOrderByProduct]);
 
                                 textOrderByCOA =
-                                    orderByCOAText[valueOrderByProduct];
-                                textOrderByCOA =
-                                    orderByCOAText[valueOrderByProduct];
+                                    orderByCOAText[valueOrderByProduct] ==
+                                            'Semua'
+                                        ? ''
+                                        : orderByCOAText[valueOrderByProduct];
+                                // textOrderByCOA =
+                                //     orderByCOAText[valueOrderByProduct];
+
                                 Navigator.pop(context);
                                 initState();
                               },
@@ -1923,7 +1936,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                 ),
               ),
               Text(
-                ' dari $textOrderByCOA',
+                ' dari ${textOrderByCOA == '' ? 'Semua' : textOrderByCOA}',
                 style: heading3(
                   FontWeight.w400,
                   bnw900,

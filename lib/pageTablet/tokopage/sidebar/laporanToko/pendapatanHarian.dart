@@ -52,7 +52,7 @@ class LaporanPendapatanHarianPageState
     "Total Terendah"
   ];
 
-  List pendapatanHarianText = [
+  List pendapatanText = [
     "tanggalTerkini",
     "tanggalTerlama",
     "transaksiTertinggi",
@@ -99,7 +99,7 @@ class LaporanPendapatanHarianPageState
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
@@ -130,162 +130,175 @@ class LaporanPendapatanHarianPageState
                   ),
                 ],
               ),
-              Spacer(),
-              orderBy(context),
+              // Spacer(),
               SizedBox(width: size16),
-              keyword(context),
-              SizedBox(width: size16),
-              sortToko(context),
-              SizedBox(width: size16),
-              GestureDetector(
-                onTap: () {
-                  showBottomPilihan(
-                    context,
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Text(
-                                'Bagikan Laporan',
-                                style:
-                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
-                              Text(
-                                'Pilih format berbagi laporan',
-                                style:
-                                    heading2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ],
-                          ),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      orderBy(context),
+                      SizedBox(width: size16),
+                      keyword(context),
+                      SizedBox(width: size16),
+                      sortToko(context),
+                      SizedBox(width: size16),
+
+                      // Tombol share
+                      GestureDetector(
+                        onTap: () {
+                          showBottomPilihan(
+                            context,
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  child: Column(
+                                    children: [
+                                      Text('Bagikan Laporan',
+                                          style: heading1(FontWeight.w600,
+                                              bnw900, 'Outfit')),
+                                      Text('Pilih format berbagi laporan',
+                                          style: heading2(FontWeight.w400,
+                                              bnw900, 'Outfit')),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: size20),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.6,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            _selectedIndex == null
+                                                ? getLaporanDailyExport(
+                                                    context,
+                                                    widget.token,
+                                                    _textvalueOrderBy,
+                                                    _textvalueKeyword,
+                                                    listToko,
+                                                    'pdf',
+                                                  ).then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (_) {}
+                                                  })
+                                                : getSinglePendapatanHarian(
+                                                    widget.token,
+                                                    tanggalSelect,
+                                                    "totalTertinggi",
+                                                    "pdf",
+                                                    listToko,
+                                                  ).then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (_) {}
+                                                  });
+                                          },
+                                          child: buttonXXLoutline(
+                                            Column(
+                                              children: [
+                                                Icon(
+                                                    PhosphorIcons
+                                                        .file_text_fill,
+                                                    color: primary500),
+                                                Text('Pdf',
+                                                    style: heading2(
+                                                        FontWeight.w600,
+                                                        primary500,
+                                                        'Outfit')),
+                                              ],
+                                            ),
+                                            110,
+                                            primary500,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: size16),
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            _selectedIndex == null
+                                                ? getLaporanDailyExport(
+                                                    context,
+                                                    widget.token,
+                                                    _textvalueOrderBy,
+                                                    _textvalueKeyword,
+                                                    listToko,
+                                                    'excel',
+                                                  ).then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (_) {}
+                                                  })
+                                                : getSinglePendapatanHarian(
+                                                    widget.token,
+                                                    tanggalSelect,
+                                                    "totalTertinggi",
+                                                    "excel",
+                                                    listToko,
+                                                  ).then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (_) {}
+                                                  });
+                                          },
+                                          child: buttonXXLoutline(
+                                            Column(
+                                              children: [
+                                                Icon(
+                                                    PhosphorIcons
+                                                        .microsoft_excel_logo_fill,
+                                                    color: primary500),
+                                                Text('Excel',
+                                                    style: heading2(
+                                                        FontWeight.w600,
+                                                        primary500,
+                                                        'Outfit')),
+                                              ],
+                                            ),
+                                            120,
+                                            primary500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: buttonXLoutline(
+                          Center(
+                              child: Icon(PhosphorIcons.share_network_fill,
+                                  color: primary500)),
+                          0,
+                          primary500,
                         ),
-                        SizedBox(height: size20),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 2.6,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    _selectedIndex == null
-                                        ? getLaporanDailyExport(
-                                                context,
-                                                widget.token,
-                                                _textvalueOrderBy,
-                                                _textvalueKeyword,
-                                                listToko,
-                                                'pdf')
-                                            .then((value) {
-                                            try {
-                                              launch(value['data']);
-                                              downloadFile(value['data']);
-                                            } catch (e) {}
-                                          })
-                                        : getSinglePendapatanHarian(
-                                            widget.token,
-                                            tanggalSelect,
-                                            "totalTertinggi",
-                                            "pdf",
-                                            listToko,
-                                          ).then((value) {
-                                            try {
-                                              launch(value['data']);
-                                              downloadFile(value['data']);
-                                            } catch (e) {}
-                                          });
-                                  },
-                                  child: buttonXXLoutline(
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons.file_text_fill,
-                                          color: primary500,
-                                        ),
-                                        Text(
-                                          'Pdf',
-                                          style: heading2(FontWeight.w600,
-                                              primary500, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    110,
-                                    primary500,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    _selectedIndex == null
-                                        ? getLaporanDailyExport(
-                                                context,
-                                                widget.token,
-                                                _textvalueOrderBy,
-                                                _textvalueKeyword,
-                                                listToko,
-                                                'excel')
-                                            .then((value) {
-                                            try {
-                                              launch(value['data']);
-                                              downloadFile(value['data']);
-                                            } catch (e) {}
-                                          })
-                                        : getSinglePendapatanHarian(
-                                            widget.token,
-                                            tanggalSelect,
-                                            "totalTertinggi",
-                                            "excel",
-                                            listToko,
-                                          ).then((value) {
-                                            try {
-                                              launch(value['data']);
-                                              downloadFile(value['data']);
-                                            } catch (e) {}
-                                          });
-                                  },
-                                  child: buttonXXLoutline(
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons
-                                              .microsoft_excel_logo_fill,
-                                          color: primary500,
-                                        ),
-                                        Text(
-                                          'Excel',
-                                          style: heading2(FontWeight.w600,
-                                              primary500, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    120,
-                                    primary500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-                child: buttonXLoutline(
-                  Center(
-                    child: Icon(
-                      PhosphorIcons.share_network_fill,
-                      color: primary500,
-                    ),
+                      ),
+
+                      SizedBox(
+                          width:
+                              size16), // padding ujung kanan biar enak scroll
+                    ],
                   ),
-                  0,
-                  primary500,
                 ),
-              ),
+              )
             ],
           ),
           SizedBox(height: size16),
@@ -689,38 +702,54 @@ class LaporanPendapatanHarianPageState
                                 listToko,
                               ),
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
+                                if (snapshot.connectionState !=
+                                    ConnectionState.done) {
                                   return Center(child: loading());
                                 }
-
-                                if (snapshot.hasError) {
-                                  return Center(child: loading());
-                                }
-
                                 if (!snapshot.hasData ||
                                     snapshot.data!['rc'] != '00') {
-                                  return Center(child: Text('Tidak Ada Data!'));
+                                  return const Center(
+                                      child: Text('Tidak Ada Data!'));
                                 }
 
-                                Map<String, dynamic> data =
-                                    snapshot.data!['data'];
-                                Map<String, dynamic> header = data['header'];
-                                List<dynamic> detailList = data['detail'];
+                                final data = (snapshot.data!['data'] as Map)
+                                    .cast<String, dynamic>();
+                                final header = (data['header'] as Map)
+                                    .cast<String, dynamic>();
+                                final List<Map<String, dynamic>> detailList =
+                                    ((data['detail'] as List?) ?? [])
+                                        .map((e) =>
+                                            (e as Map).cast<String, dynamic>())
+                                        .toList();
 
                                 return ListView.builder(
-                                  itemBuilder: (context, index) {
-                                    Map<String, dynamic> merchant =
-                                        detailList[index];
-                                    List<dynamic> products =
-                                        merchant['detail']['product'];
-                                    Map<String, dynamic> paymentMethod =
-                                        merchant['detail']['paymentMethod'];
+                                  padding: EdgeInsets.only(
+                                      left: size8,
+                                      right: size8,
+                                      bottom: size16),
+                                  itemCount: detailList.length, // <-- WAJIB
+                                  itemBuilder: (context, idx) {
+                                    final merchant = detailList[idx];
+                                    final merchantName =
+                                        (merchant['nameToko'] ??
+                                                merchant['merchant_name'] ??
+                                                '')
+                                            .toString();
+
+                                    final products = ((merchant['detail']
+                                                ?['product'] as List?) ??
+                                            [])
+                                        .map((e) =>
+                                            (e as Map).cast<String, dynamic>())
+                                        .toList();
+
+                                    final paymentMethod = ((merchant['detail']
+                                                ?['paymentMethod'] as Map?) ??
+                                            {})
+                                        .cast<String, dynamic>();
 
                                     return Container(
-                                      margin: EdgeInsets.only(
-                                        left: size8,
-                                      ),
+                                      margin: EdgeInsets.only(top: size12),
                                       padding: EdgeInsets.symmetric(
                                           vertical: size16, horizontal: size20),
                                       decoration: BoxDecoration(
@@ -728,7 +757,10 @@ class LaporanPendapatanHarianPageState
                                             BorderRadius.circular(size8),
                                         border: Border.all(color: bnw300),
                                       ),
-                                      child: ListView(
+                                      // PENTING: Column (bukan ListView) di dalam item ListView
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Informasi Pendapatan ${header['tanggal']}',
@@ -744,100 +776,88 @@ class LaporanPendapatanHarianPageState
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    'Jumlah Transaksi',
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('Jumlah Transaksi',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
-                                                  Text(
-                                                    'Nilai Transaksi',
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('Nilai Transaksi',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
-                                                  Text(
-                                                    'Total PPN',
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('Total PPN',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
-                                                  Text(
-                                                    'Total Diskon',
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('Total Diskon',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
-                                                  Text(
-                                                    'Total Keseluruhan',
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('Total Keseluruhan',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                 ],
                                               ),
                                               Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.end,
                                                 children: [
-                                                  Text(
-                                                    header['count'].toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                  Text('${header['count']}',
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                    FormatCurrency.convertToIdr(
-                                                            header[
-                                                                'nilaiTransaksi'])
-                                                        .toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                      FormatCurrency.convertToIdr(
+                                                              header[
+                                                                  'nilaiTransaksi'])
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                    FormatCurrency.convertToIdr(
-                                                            header['totalPPN'])
-                                                        .toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                      FormatCurrency.convertToIdr(
+                                                              header[
+                                                                  'totalPPN'])
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                    FormatCurrency.convertToIdr(
-                                                            detailList[index][
-                                                                'totalDiscount'])
-                                                        .toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                      FormatCurrency.convertToIdr(
+                                                              merchant[
+                                                                      'totalDiscount'] ??
+                                                                  0)
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                    FormatCurrency.convertToIdr(
-                                                            header['total'])
-                                                        .toString(),
-                                                    style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
-                                                  ),
+                                                      FormatCurrency
+                                                              .convertToIdr(
+                                                                  header[
+                                                                      'total'])
+                                                          .toString(),
+                                                      style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit')),
                                                 ],
                                               ),
                                             ],
@@ -897,42 +917,66 @@ class LaporanPendapatanHarianPageState
                                                     CrossAxisAlignment.end,
                                                 children: [
                                                   Text(
-                                                      '${FormatCurrency.convertToIdr(paymentMethod['Cash']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'Cash'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
                                                           'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                      '${FormatCurrency.convertToIdr(paymentMethod['fifapay']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'fifapay'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
                                                           'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                      '${FormatCurrency.convertToIdr(paymentMethod['qris']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'qris'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
                                                           'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                      ' ${FormatCurrency.convertToIdr(paymentMethod['credit']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'credit'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
                                                           'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                      '${FormatCurrency.convertToIdr(paymentMethod['debit']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'debit'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
                                                           'Outfit')),
                                                   SizedBox(height: size8),
                                                   Text(
-                                                      ' ${FormatCurrency.convertToIdr(paymentMethod['coin']).toString()}',
+                                                      FormatCurrency.convertToIdr(
+                                                              paymentMethod[
+                                                                      'coin'] ??
+                                                                  0)
+                                                          .toString(),
                                                       style: heading4(
                                                           FontWeight.w400,
                                                           bnw900,
@@ -945,14 +989,15 @@ class LaporanPendapatanHarianPageState
                                           Text('Rincian Produk',
                                               style: heading2(FontWeight.w600,
                                                   bnw900, 'Outfit')),
+
+                                          // DAFTAR PRODUK: builder bersarang yang aman
                                           ListView.builder(
                                             shrinkWrap: true,
                                             physics:
-                                                NeverScrollableScrollPhysics(),
+                                                const NeverScrollableScrollPhysics(),
                                             itemCount: products.length,
-                                            itemBuilder: (context, index) {
-                                              Map<String, dynamic> product =
-                                                  products[index];
+                                            itemBuilder: (context, pIndex) {
+                                              final product = products[pIndex];
                                               return Padding(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -972,16 +1017,15 @@ class LaporanPendapatanHarianPageState
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                                detailList[
-                                                                        index][
-                                                                    'nameToko'],
-                                                                style: heading3(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw900,
-                                                                    'Outfit')),
+                                                              merchantName, // <-- pakai nama merchant yg bener
+                                                              style: heading3(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
                                                             Text(
-                                                              '${product['nameProduk']}',
+                                                              '${product['nameProduk'] ?? product['product_name'] ?? '-'}',
                                                               style: heading3(
                                                                   FontWeight
                                                                       .w400,
@@ -996,26 +1040,26 @@ class LaporanPendapatanHarianPageState
                                                                   .end,
                                                           children: [
                                                             Text(
-                                                              "total Per Produk",
-                                                              style: heading3(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                "Total Per Produk",
+                                                                style: heading3(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
+                                                            Text(
+                                                              FormatCurrency
+                                                                      .convertToIdr(
+                                                                          product['total'] ??
+                                                                              0)
+                                                                  .toString(),
                                                             ),
-                                                            Text(FormatCurrency
-                                                                    .convertToIdr(
-                                                                        product[
-                                                                            'total'])
-                                                                .toString()),
                                                           ],
                                                         )
                                                       ],
                                                     ),
                                                     Divider(
-                                                      thickness: width1,
-                                                      color: bnw900,
-                                                    ),
+                                                        thickness: 1,
+                                                        color: bnw900),
                                                     SizedBox(height: size8),
                                                     Row(
                                                       mainAxisAlignment:
@@ -1028,13 +1072,12 @@ class LaporanPendapatanHarianPageState
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              'Total Transaksi',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
+                                                                'Total Transaksi',
+                                                                style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit')),
                                                             SizedBox(
                                                                 height: size8),
                                                             Text(
@@ -1068,7 +1111,7 @@ class LaporanPendapatanHarianPageState
                                                                   .end,
                                                           children: [
                                                             Text(
-                                                                '${product['totalTransaksi']}',
+                                                                '${product['totalTransaksi'] ?? 0}',
                                                                 style: heading4(
                                                                     FontWeight
                                                                         .w400,
@@ -1077,30 +1120,45 @@ class LaporanPendapatanHarianPageState
                                                             SizedBox(
                                                                 height: size8),
                                                             Text(
-                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit')),
+                                                              FormatCurrency
+                                                                      .convertToIdr(
+                                                                          product['nilaiTransaksi'] ??
+                                                                              0)
+                                                                  .toString(),
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
                                                             SizedBox(
                                                                 height: size8),
                                                             Text(
-                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit')),
+                                                              FormatCurrency
+                                                                      .convertToIdr(
+                                                                          product['totalPPN'] ??
+                                                                              0)
+                                                                  .toString(),
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
                                                             SizedBox(
                                                                 height: size8),
                                                             Text(
-                                                                '${FormatCurrency.convertToIdr(product['nilaiTransaksi']).toString()}',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit')),
+                                                              FormatCurrency
+                                                                      .convertToIdr(
+                                                                          product['totalDiskon'] ??
+                                                                              0)
+                                                                  .toString(),
+                                                              style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit'),
+                                                            ),
                                                           ],
                                                         ),
                                                       ],
@@ -1111,6 +1169,7 @@ class LaporanPendapatanHarianPageState
                                               );
                                             },
                                           ),
+
                                           SizedBox(height: size16),
                                           GestureDetector(
                                             onTap: () {
@@ -1124,24 +1183,21 @@ class LaporanPendapatanHarianPageState
                                                 try {
                                                   launch(value['data']);
                                                   downloadFile(value['data']);
-                                                } catch (e) {}
+                                                } catch (_) {}
                                               });
                                             },
                                             child: buttonXXLoutline(
                                               Column(
                                                 children: [
                                                   Icon(
-                                                    PhosphorIcons
-                                                        .file_text_fill,
-                                                    color: primary500,
-                                                  ),
-                                                  Text(
-                                                    'Pdf',
-                                                    style: heading2(
-                                                        FontWeight.w600,
-                                                        primary500,
-                                                        'Outfit'),
-                                                  ),
+                                                      PhosphorIcons
+                                                          .file_text_fill,
+                                                      color: primary500),
+                                                  Text('Pdf',
+                                                      style: heading2(
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit')),
                                                 ],
                                               ),
                                               110,
@@ -1156,7 +1212,6 @@ class LaporanPendapatanHarianPageState
                               },
                             ),
                           ),
-                    
                       ],
                     ),
                     // Draggable handle appears only if the right container is visible
@@ -1213,129 +1268,124 @@ class LaporanPendapatanHarianPageState
   }
 
   orderBy(BuildContext context) {
-    return IntrinsicWidth(
+    return SizedBox(
+      // biar tinggi konsisten
+      height: 48,
       child: GestureDetector(
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
+              context: context,
+              isScrollControlled: true,
+              constraints: BoxConstraints(
+                maxWidth:
+                    MediaQuery.of(context).size.width, // ⟵ full lebar device
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
-              context: context,
               builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    // ⟵ anti overflow & keyboard
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: StatefulBuilder(
+                      builder: (context, setState) => IntrinsicHeight(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(
+                              size32, size16, size32, size32),
+                          decoration: BoxDecoration(
                             color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Rentang Waktu',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: size20),
-                                Text(
-                                  'Pilih Rentang Waktu',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    pilihUrutan.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: _valueOrder == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(pilihUrutan[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  _valueOrder == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected: _valueOrder == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              _valueOrder = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(size12),
+                              topLeft: Radius.circular(size12),
                             ),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                textOrderBy = pilihUrutan[_valueOrder];
-                                _textvalueOrderBy =
-                                    pendapatanHarianText[_valueOrder];
-                                pendapatanHarianText[_valueOrder];
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: size16),
+                              Center(
+                                child: dividerShowdialog(),
+                              ),
+                              SizedBox(height: size16),
+                              Text('Rentang Waktu',
+                                  style: heading2(
+                                      FontWeight.w700, bnw900, 'Outfit')),
+                              Text('Tentukan data yang akan tampil',
+                                  style: heading4(
+                                      FontWeight.w400, bnw600, 'Outfit')),
+                              SizedBox(height: size24),
+                              Text('Pilih Rentang Waktu',
+                                  style: heading3(
+                                      FontWeight.w400, bnw900, 'Outfit')),
 
-                                refresh();
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                              // Wrap sudah aman untuk sempit/lebarnya layar
+                              Wrap(
+                                spacing: size16,
+                                runSpacing: size12,
+                                children: List<Widget>.generate(
+                                  pilihUrutan.length,
+                                  (int index) {
+                                    final selected = _valueOrder == index;
+                                    return ChoiceChip(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: size12),
+                                      backgroundColor: bnw100,
+                                      selectedColor: primary100,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                          color: selected ? primary500 : bnw300,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(size8),
+                                      ),
+                                      label: Text(
+                                        pilihUrutan[index],
+                                        style: heading4(
+                                          FontWeight.w400,
+                                          selected ? primary500 : bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                      selected: selected,
+                                      onSelected: (_) {
+                                        setState(() => _valueOrder = index);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+
+                              SizedBox(height: size32),
+                              SizedBox(
+                                width: double.infinity,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    textOrderBy = pilihUrutan[_valueOrder];
+                                    _textvalueOrderBy =
+                                        pendapatanText[_valueOrder];
+                                    refresh();
+                                    Navigator.pop(context);
+                                    initState();
+                                  },
+                                  child: buttonXL(
+                                    Center(
+                                      child: Text(
+                                        'Tampilkan',
+                                        style: heading3(
+                                            FontWeight.w600, bnw100, 'Outfit'),
+                                      ),
+                                    ),
+                                    0, // ⟵ biar wrap ke konten
                                   ),
                                 ),
-                                0,
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -1344,162 +1394,182 @@ class LaporanPendapatanHarianPageState
             );
           });
         },
-        child: buttonXLoutline(
-          Row(
-            children: [
-              SvgPicture.asset('assets/minimize.svg'),
-              SizedBox(width: size12),
-              Text(
-                textOrderBy,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
+
+        // ==== TOMBOL ORDER BY (auto-width & anti overflow) ====
+        child: FittedBox(
+          // ⟵ skala turun kalau ruang sempit (opsional)
+          fit: BoxFit.scaleDown,
+          child: buttonXLoutline(
+            Row(
+              mainAxisSize: MainAxisSize.min, // ⟵ biar sekecil konten
+              children: [
+                SvgPicture.asset('assets/minimize.svg'),
+                SizedBox(width: size12),
+                Flexible(
+                  // ⟵ biar teks bisa ellipsis
+                  child: Text(
+                    textOrderBy,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: heading3(
+                      FontWeight.w600,
+                      bnw900,
+                      'Outfit',
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            0, // ⟵ JANGAN double.infinity, biar nggak overflow
+            bnw300,
           ),
-          double.infinity,
-          bnw300,
         ),
       ),
     );
   }
 
   keyword(BuildContext context) {
-    return IntrinsicWidth(
+    final List<String> pilihUrutan = [
+      '30 Hari Terakhir',
+      '3 Bulan Terakhir',
+      '6 Bulan Terakhir',
+      '1 Tahun Terakhir',
+    ];
+    final List<String> textvalueKeyword = [
+      '1B',
+      '3B',
+      '6B',
+      '1Y',
+    ];
+
+    return SizedBox(
+      height: 48, // tinggi konsisten seperti orderBy
       child: GestureDetector(
         onTap: () {
-          List pilihUrutan = [
-            '30 Hari Terakhir',
-            '3 Bulan Terakhir',
-            '6 Bulan Terakhir',
-            '1 Tahun Terakhir',
-          ];
-          List textvalueKeyword = [
-            '1B',
-            '3B',
-            '6B',
-            '1Y',
-          ];
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
               context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              barrierColor: Colors.black.withOpacity(0.35),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(size24),
+              ),
+              // full width device, tinggi wrap konten
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width,
+              ),
               builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Rentang Waktu',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: size20),
-                                Text(
-                                  'Pilih Rentang Waktu',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    pilihUrutan.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: _valueKeyword == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(pilihUrutan[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  _valueKeyword == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected: _valueKeyword == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              _valueKeyword = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                return SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: StatefulBuilder(
+                    builder: (context, setModalState) => IntrinsicHeight(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size16),
+                            topLeft: Radius.circular(size16),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                _textKeyword = pilihUrutan[_valueKeyword];
-                                _textvalueKeyword =
-                                    textvalueKeyword[_valueKeyword];
-                                refresh();
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: size16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize:
+                                MainAxisSize.min, // tinggi ikut konten
+                            children: [
+                              SizedBox(height: size16),
+                              Center(
+                                child: dividerShowdialog(),
+                              ),
+                              SizedBox(height: size16),
+                              Text(
+                                'Pilih Tanggal',
+                                style:
+                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                              ),
+                              Text(
+                                'Tentukan data yang akan tampil',
+                                style:
+                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                              ),
+                              SizedBox(height: size24),
+                              Text(
+                                'Pilih Urutan',
+                                style:
+                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                              SizedBox(height: size12),
+
+                              // Wrap aman untuk lebar sempit/luas
+                              Wrap(
+                                spacing: size12,
+                                runSpacing: size12,
+                                children: List<Widget>.generate(
+                                  pilihUrutan.length,
+                                  (int index) {
+                                    final selected = _valueKeyword == index;
+                                    return ChoiceChip(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 10),
+                                      backgroundColor: bnw100,
+                                      selectedColor: primary200,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                          color: selected ? primary500 : bnw300,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(size8),
+                                      ),
+                                      label: Text(
+                                        pilihUrutan[index],
+                                        style: heading4(
+                                          FontWeight.w400,
+                                          selected ? primary500 : bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                      selected: selected,
+                                      onSelected: (_) {
+                                        // update HANYA state modal
+                                        setModalState(
+                                            () => _valueKeyword = index);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+
+                              SizedBox(height: size24),
+                              SizedBox(
+                                width: double.infinity,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _textKeyword = pilihUrutan[_valueKeyword];
+                                    _textvalueKeyword =
+                                        textvalueKeyword[_valueKeyword];
+                                    refresh();
+                                    Navigator.pop(context);
+                                  },
+                                  child: buttonXL(
+                                    Center(
+                                      child: Text(
+                                        'Tampilkan',
+                                        style: heading3(
+                                            FontWeight.w600, bnw100, 'Outfit'),
+                                      ),
+                                    ),
+                                    0, // wrap konten
                                   ),
                                 ),
-                                0,
                               ),
-                            ),
+                              SizedBox(height: size16),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -1508,28 +1578,33 @@ class LaporanPendapatanHarianPageState
             );
           });
         },
-        child: buttonXLoutline(
-          Row(
-            children: [
-              Icon(
-                PhosphorIcons.calendar,
-                color: bnw900,
-              ),
-              SizedBox(width: size12),
-              Text(
-                _textKeyword,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
+
+        // Tombol pemicu: auto-width + anti overflow
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: buttonXLoutline(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(PhosphorIcons.calendar),
+                SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    _textKeyword,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: heading3(
+                      FontWeight.w600,
+                      bnw900,
+                      'Outfit',
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            0, // JANGAN double.infinity
+            bnw300,
           ),
-          double.infinity,
-          bnw300,
         ),
       ),
     );

@@ -1,11 +1,15 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import '../../../../models/tokoModel/singletokomodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import '../../../../utils/component/skeletons.dart';
-import 'package:flutter/material.dart';import 'package:amio/utils/utilities.dart';import 'package:amio/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:amio/utils/utilities.dart';
+import 'package:amio/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import 'package:flutter_svg/svg.dart';
@@ -20,8 +24,10 @@ import '../produkToko/produk.dart';
 import 'ubahTokoToko.dart';
 import 'dart:io' as Io;
 import 'package:http/http.dart' as http;
-import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
+
 class TokoPageToko extends StatefulWidget {
   String token;
   TokoPageToko({
@@ -59,8 +65,11 @@ class _TokoPageTokoState extends State<TokoPageToko> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -234,8 +243,7 @@ class _TokoPageTokoState extends State<TokoPageToko> {
                           initState();
                           setState(() {});
                         },
-                        child: 
-                        GridView.builder(
+                        child: GridView.builder(
                           padding: EdgeInsets.zero,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
@@ -336,6 +344,10 @@ class _TokoPageTokoState extends State<TokoPageToko> {
                                         idkab = kodeRegUbah;
                                         idkec = kodeDisUbah;
                                         iddesa = kodeVillageUbah;
+
+                                        _getRegenciesList(idprov);
+                                        _getDistrictList(idkab);
+                                        _getVillageList(idkec);
 
                                         closeLoading(context);
                                         _pageController.jumpToPage(2);

@@ -15,50 +15,50 @@ import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
 
-class LaporanPendapatanPerProduk extends StatefulWidget {
+class LaporanPergerakanInventarisPage extends StatefulWidget {
   String token;
   PageController pageController = PageController();
-  LaporanPendapatanPerProduk({
+  LaporanPergerakanInventarisPage({
     Key? key,
     required this.token,
     required this.pageController,
   }) : super(key: key);
 
   @override
-  State<LaporanPendapatanPerProduk> createState() =>
+  State<LaporanPergerakanInventarisPage> createState() =>
       LaporanPendapatanPerProdukState();
 }
 
 class LaporanPendapatanPerProdukState
-    extends State<LaporanPendapatanPerProduk> {
+    extends State<LaporanPergerakanInventarisPage> {
   List pilihUrutan = [
-    "Product Terbaru",
-    "Product Terlama",
-    "Transaksi Terbanyak",
-    "Transaksi Terendah",
-    "Nilai Transaksi Tertinggi",
-    "Nilai Transaksi Terendah",
-    "PPN Tertinggi",
-    "PPN Terendah",
-    "Total PerProduk Tertinggi",
-    "Total PerProduk Terendah"
+    "Stok Akhir A-Z", // endingStockAsc
+    "Stok Akhir Z-A", // endingStockDesc
+    "Stok Awal A-Z", // startingStockAsc
+    "Stok Awal Z-A", // startingStockDesc
+    "Nama Inventori A-Z", // inventoryNameAsc
+    "Nama Inventori Z-A", // inventoryNameDesc
+    "Inventori Keluar A-Z", // outgoingInventoryAsc
+    "Inventori Keluar Z-A", // outgoingInventoryDesc
+    "Inventori Masuk A-Z", // incomingInventoryAsc
+    "Inventori Masuk Z-A", // incomingInventoryDesc
   ];
 
   List pendapatanText = [
-    "productTerbaru",
-    "productTerlama",
-    "countTertinggi",
-    "countTerendah",
-    "transaksiTertinggi",
-    "transaksiTerendah",
-    "ppnTertinggi",
-    "ppnTerendah",
-    "totalTertinggi",
-    "totalTerendah"
+    "endingStockAsc",
+    "endingStockDesc",
+    "startingStockAsc",
+    "startingStockDesc",
+    "inventoryNameAsc",
+    "inventoryNameDesc",
+    "outgoingInventoryAsc",
+    "outgoingInventoryDesc",
+    "incomingInventoryAsc",
+    "incomingInventoryDesc",
   ];
 
-  String textOrderBy = 'Product Terbaru', textKeyword = '30 Hari Terakhir';
-  String _textvalueOrderBy = 'productTerbaru',
+  String textOrderBy = 'Stok Akhir A-Z', textKeyword = '30 Hari Terakhir';
+  String _textvalueOrderBy = 'endingStockAsc',
       _textvalueKeyword = '1B',
       _textKeyword = '30 Hari Terakhir';
 
@@ -103,7 +103,7 @@ class LaporanPendapatanPerProdukState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pendapatan Per Produk',
+                        'Pergerakan Inventaris',
                         style:
                             heading1(FontWeight.w700, Colors.black, 'Outfit'),
                       ),
@@ -120,146 +120,149 @@ class LaporanPendapatanPerProdukState
               SizedBox(width: size16),
               Expanded(
                   child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    orderBy(context),
-                    SizedBox(width: size16),
-                    keyword(context),
-                    SizedBox(width: size16),
-                    sortToko(context),
-                    SizedBox(width: size16),
-                    GestureDetector(
-                      onTap: () {
-                        showBottomPilihan(
-                          context,
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      'Bagikan Laporan',
-                                      style: heading1(
-                                          FontWeight.w600, bnw900, 'Outfit'),
-                                    ),
-                                    Text(
-                                      'Pilih format berbagi laporan',
-                                      style: heading2(
-                                          FontWeight.w400, bnw900, 'Outfit'),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: size20),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width / 2.6,
-                                  child: Row(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          orderBy(context),
+                          SizedBox(width: size16),
+                          keyword(context),
+                          SizedBox(width: size16),
+                          sortToko(context),
+                          SizedBox(width: size16),
+                          GestureDetector(
+                            onTap: () {
+                              showBottomPilihan(
+                                context,
+                                Container(
+                                  width: double.infinity,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            getLaporanPerProdukExport(
-                                                    context,
-                                                    widget.token,
-                                                    _textvalueKeyword,
-                                                    _textvalueOrderBy,
-                                                    listToko,
-                                                    'pdf')
-                                                .then((value) {
-                                              try {
-                                                launch(value['data']);
-                                                downloadFile(value['data']);
-                                              } catch (e) {}
-                                            });
-                                          },
-                                          child: buttonXXLoutline(
-                                            Column(
-                                              children: [
-                                                Icon(
-                                                  PhosphorIcons.file_text_fill,
-                                                  color: primary500,
-                                                ),
-                                                Text(
-                                                  'Pdf',
-                                                  style: heading2(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
-                                                ),
-                                              ],
-                                            ),
-                                            110,
-                                            primary500,
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Bagikan Laporan',
+                                            style: heading1(FontWeight.w600,
+                                                bnw900, 'Outfit'),
                                           ),
-                                        ),
-                                      ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            getLaporanPerProdukExport(
-                                                    context,
-                                                    widget.token,
-                                                    _textvalueKeyword,
-                                                    _textvalueOrderBy,
-                                                    listToko,
-                                                    'excel')
-                                                .then((value) {
-                                              try {
-                                                launch(value['data']);
-                                                downloadFile(value['data']);
-                                              } catch (e) {}
-                                            });
-                                          },
-                                          child: buttonXXLoutline(
-                                            Column(
-                                              children: [
-                                                Icon(
-                                                  PhosphorIcons
-                                                      .microsoft_excel_logo_fill,
-                                                  color: primary500,
-                                                ),
-                                                Text(
-                                                  'Excel',
-                                                  style: heading2(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
-                                                ),
-                                              ],
-                                            ),
-                                            120,
-                                            primary500,
+                                          Text(
+                                            'Pilih format berbagi laporan',
+                                            style: heading2(FontWeight.w400,
+                                                bnw900, 'Outfit'),
                                           ),
-                                        ),
+                                        ],
                                       ),
+                                      SizedBox(height: size20),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                2.6,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  getLaporanPergerakanInventori(
+                                                          context,
+                                                          widget.token,
+                                                          listToko,
+                                                          _textvalueKeyword,
+                                                          _textvalueOrderBy,
+                                                          "pdf")
+                                                      .then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (e) {}
+                                                  });
+                                                },
+                                                child: buttonXXLoutline(
+                                                  Column(
+                                                    children: [
+                                                      Icon(
+                                                        PhosphorIcons
+                                                            .file_text_fill,
+                                                        color: primary500,
+                                                      ),
+                                                      Text(
+                                                        'Pdf',
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            primary500,
+                                                            'Outfit'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  110,
+                                                  primary500,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: size16),
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  getLaporanPergerakanInventori(
+                                                          context,
+                                                          widget.token,
+                                                          listToko,
+                                                          _textvalueKeyword,
+                                                          _textvalueOrderBy,
+                                                          "excel")
+                                                      .then((value) {
+                                                    try {
+                                                      launch(value['data']);
+                                                      downloadFile(
+                                                          value['data']);
+                                                    } catch (e) {}
+                                                  });
+                                                },
+                                                child: buttonXXLoutline(
+                                                  Column(
+                                                    children: [
+                                                      Icon(
+                                                        PhosphorIcons
+                                                            .microsoft_excel_logo_fill,
+                                                        color: primary500,
+                                                      ),
+                                                      Text(
+                                                        'Excel',
+                                                        style: heading2(
+                                                            FontWeight.w600,
+                                                            primary500,
+                                                            'Outfit'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  120,
+                                                  primary500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
                                     ],
                                   ),
-                                )
-                              ],
+                                ),
+                              );
+                            },
+                            child: buttonXLoutline(
+                              Center(
+                                child: Icon(
+                                  PhosphorIcons.share_network_fill,
+                                  color: primary500,
+                                ),
+                              ),
+                              0,
+                              primary500,
                             ),
                           ),
-                        );
-                      },
-                      child: buttonXLoutline(
-                        Center(
-                          child: Icon(
-                            PhosphorIcons.share_network_fill,
-                            color: primary500,
-                          ),
-                        ),
-                        0,
-                        primary500,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+                        ],
+                      ))),
             ],
           ),
           SizedBox(height: size24),
@@ -276,43 +279,65 @@ class LaporanPendapatanPerProdukState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                SizedBox(
-                  width: width + 20,
-                  child: Row(
-                    children: [
-                      Text(
-                        'Produk',
-                        style: heading4(FontWeight.w700, bnw100, 'Outfit'),
-                      ),
-                    ],
+                SizedBox(width: size24),
+                Expanded(
+                  child: SizedBox(
+                    child: Row(
+                      children: [
+                        Text(
+                          'Nama Barang',
+                          style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: width + 10,
-                  child: Text(
-                    'Jumlah Transaksi',
-                    style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                Expanded(
+                  child: SizedBox(
+                    child: Row(
+                      children: [
+                        Text(
+                          'Tipe Aktifitas',
+                          style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: width,
-                  child: Text(
-                    'Nilai Transaksi',
-                    style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                Expanded(
+                  child: SizedBox(
+                    width: width,
+                    child: Text(
+                      'Stok Awal',
+                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: width,
-                  child: Text(
-                    'Total PPN',
-                    style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                Expanded(
+                  child: SizedBox(
+                    width: width,
+                    child: Text(
+                      'Masuk',
+                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: width,
-                  child: Text(
-                    'Total Per Toko',
-                    style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                Expanded(
+                  child: SizedBox(
+                    width: width,
+                    child: Text(
+                      'Keluar',
+                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SizedBox(
+                    width: width,
+                    child: Text(
+                      'Stok Akhir',
+                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
                   ),
                 ),
               ],
@@ -325,94 +350,180 @@ class LaporanPendapatanPerProdukState
                 color: primary100,
               ),
               child: FutureBuilder(
-                future: getLaporanPerProduk(context, widget.token,
-                    _textvalueKeyword, _textvalueOrderBy, listToko),
+                future: getLaporanPergerakanInventori(context, widget.token,
+                    listToko, _textvalueKeyword, _textvalueOrderBy, ""),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     Map<String, dynamic>? data = snapshot.data!['data'];
                     var detail = data!['detail'];
-                    var header = data['header'];
+                    // var header = data['header'];
                     // print(snapshot.data['data']);
                     return RefreshIndicator(
                       color: bnw100,
                       onRefresh: () async {
-                        getLaporanPerProduk(context, widget.token,
-                            _textvalueKeyword, _textvalueOrderBy, listToko);
+                        // panggil ulang future-mu dengan setState supaya FutureBuilder re-build
+                        getLaporanPergerakanInventori(context, widget.token,
+                            listToko, _textvalueKeyword, _textvalueOrderBy, "");
                         setState(() {});
                       },
                       child: ListView.builder(
-                        // physics: BouncingScrollPhysics(),
                         padding: EdgeInsets.zero,
-                        itemCount: detail.length,
-                        itemBuilder: (builder, index) {
+                        itemCount: (data['detail'] as List?)?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          // amanin casting
+                          final Map<String, dynamic> row =
+                              ((data['detail'] as List)[index] as Map)
+                                  .cast<String, dynamic>();
+
+                          final String merchant =
+                              (row['merchant_name'] ?? '').toString();
+                          final List<Map<String, dynamic>> stocks =
+                              ((row['inventory_movement'] as List?) ?? [])
+                                  .map(
+                                      (e) => (e as Map).cast<String, dynamic>())
+                                  .toList();
+
                           return Column(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  SizedBox(
-                                    width: width + 20,
-                                    child: Text(
-                                      detail[index]['nameProduk'].toString(),
-                                      style: heading4(
-                                          FontWeight.w600, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: width + 10,
-                                    child: Text(
-                                      detail[index]['totalTransaksi']
-                                          .toString(),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: heading4(
-                                          FontWeight.w400, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: width,
-                                    child: Text(
-                                      FormatCurrency.convertToIdr(
-                                              detail[index]['nilaiTransaksi'])
-                                          .toString(),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: heading4(
-                                          FontWeight.w400, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: width,
-                                    child: Text(
-                                      FormatCurrency.convertToIdr(
-                                              detail[index]['totalPPN'])
-                                          .toString(),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: heading4(
-                                          FontWeight.w400, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: width,
-                                    child: Text(
-                                      FormatCurrency.convertToIdr(
-                                              detail[index]['total'])
-                                          .toString(),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: heading4(
-                                          FontWeight.w400, bnw900, 'Outfit'),
-                                    ),
-                                  ),
-                                ],
+                              // header merchant (opsional)
+                              // Row(
+                              //   mainAxisAlignment:
+                              //       MainAxisAlignment.spaceAround,
+                              //   children: [
+                              //     SizedBox(
+                              //       width: width + 20,
+                              //       child: Text(
+                              //         merchant,
+                              //         style: heading4(
+                              //             FontWeight.w700, bnw900, 'Outfit'),
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
+                              // const SizedBox(height: 6),
+                              // daftar COA di bawah merchant
+
+                              ListView.separated(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: stocks.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 6),
+                                itemBuilder: (context, i) {
+                                  final stock = stocks[i];
+                                  final String stockNmae =
+                                      (stock['inventory_name'] ?? '')
+                                          .toString();
+                                  final stokAwal = double.tryParse(
+                                          stock['starting_stock'].toString()) ??
+                                      0;
+                                  final stokAkhir = double.tryParse(
+                                          stock['final_stock'].toString()) ??
+                                      0;
+                                  final stokMasuk = double.tryParse(
+                                          stock['total_entry_good']
+                                              .toString()) ??
+                                      0;
+                                  final stokKeluar = double.tryParse(
+                                          stock['total_outgoing_good']
+                                              .toString()) ??
+                                      0;
+                                  final String aktifitasTipe =
+                                      (stock['activity_type'] ?? '').toString();
+
+                                  return Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          SizedBox(width: size24),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                stockNmae,
+                                                style: heading4(FontWeight.w600,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                aktifitasTipe,
+                                                style: heading4(FontWeight.w600,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                // pakai formatter kamu kalau ada
+                                                stokAwal.toString(),
+                                                // amount.toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                // pakai formatter kamu kalau ada
+                                                stokMasuk.toString(),
+                                                // amount.toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                // pakai formatter kamu kalau ada
+                                                stokKeluar.toString(),
+                                                // amount.toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SizedBox(
+                                              child: Text(
+                                                // pakai formatter kamu kalau ada
+                                                stokAkhir.toString(),
+                                                // amount.toString(),
+                                                style: heading4(FontWeight.w400,
+                                                    bnw900, 'Outfit'),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Divider(thickness: 1.2),
+                                    ],
+                                  );
+                                },
                               ),
-                              Divider(thickness: 1.2)
                             ],
                           );
                         },
-                        // itemCount: staticData!.length,
                       ),
                     );
                   }
@@ -430,80 +541,53 @@ class LaporanPendapatanPerProdukState
               ),
             ),
           ),
-          FutureBuilder(
-              future: getLaporanPerProduk(context, widget.token,
-                  _textvalueKeyword, _textvalueOrderBy, listToko),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  Map<String, dynamic>? data = snapshot.data!['data'];
+          // FutureBuilder(
+          //     future: getLaporanPergerakanInventori(context, widget.token, listToko,
+          //         _textvalueKeyword, _textvalueOrderBy, ""),
+          //     builder: (context, snapshot) {
+          //       if (snapshot.hasData) {
+          //         Map<String, dynamic>? data = snapshot.data!['data'];
 
-                  var header = data!['header'];
-                  return Container(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    decoration: BoxDecoration(
-                      color: primary200,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(size16),
-                        bottomRight: Radius.circular(size16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        SizedBox(
-                          width: width + 20,
-                          child: Text(
-                            'Total Keseluruhan',
-                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: width + 10,
-                          child: Text(
-                            header['count'].toString(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: width,
-                          child: Text(
-                            FormatCurrency.convertToIdr(
-                                    header['nilaiTransaksi'])
-                                .toString(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: width,
-                          child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: width,
-                          child: Text(
-                            FormatCurrency.convertToIdr(header['total'])
-                                .toString(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+          //         var header = data!['header'];
+          //         return Container(
+          //           padding: EdgeInsets.only(top: 10, bottom: 10),
+          //           decoration: BoxDecoration(
+          //             color: primary200,
+          //             borderRadius: BorderRadius.only(
+          //               bottomLeft: Radius.circular(size16),
+          //               bottomRight: Radius.circular(size16),
+          //             ),
+          //           ),
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //             children: [
+          //               SizedBox(width: size24),
+          //               Expanded(
+          //                 child: SizedBox(
+          //                   child: Text(
+          //                     'Total Keseluruhan',
+          //                     style:
+          //                         heading4(FontWeight.w600, bnw900, 'Outfit'),
+          //                   ),
+          //                 ),
+          //               ),
+          //               // SizedBox(
+          //               //   width: width,
+          //               //   child: Text(
+          //               //     FormatCurrency.convertToIdr(header['total'])
+          //               //         .toString(),
+          //               //     maxLines: 2,
+          //               //     overflow: TextOverflow.ellipsis,
+          //               //     style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+          //               //   ),
+          //               // ),
+          //             ],
+          //           ),
+          //         );
+          //       }
 
-                return loading();
-              }),
+          //       return loading();
+          //     }),
         ],
       ),
     );

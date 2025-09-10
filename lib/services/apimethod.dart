@@ -125,6 +125,11 @@ String registerbyotp = '$url/api/user/registerbyotp',
     laporanDailyUrl = '$url/api/report/income/daily',
     laporanMerchUrl = '$url/api/report/income/merchant',
     laporanProdukUrl = '$url/api/report/income/product',
+    laporanPembayaranUrl = '$url/api/report/coa',
+    laporanStokUrl = '$url/api/report/inventory/stock',
+    laporanPergerakanInventoriUrl = '$url/api/report/inventory/movement',
+    laporanPenggunaanProdukUrl = '$url/api/report/bom',
+    laporanBOMUsageUrl = '$url/api/report/bom',
     laporanProdukExportUrl = '$url/api/export/report/income/product',
     laporanTokoExportUrl = '$url/api/export/report/income/merchant',
     laporanPendapatanHarianExportUrl = '$url/api/export/report/income/daily',
@@ -3399,6 +3404,155 @@ Future getLaporanPerProdukExport(
     return data;
   } else {
     closeLoading(context);
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanPembayaran(
+  BuildContext context,
+  token,
+  List merchid,
+  keyword,
+  orderby,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanPembayaranUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes');
+
+    // print(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanStok(
+  BuildContext context,
+  token,
+  List merchid,
+  keyword,
+  orderby,
+  export,
+) async {
+  print('export $export');
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanStokUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    print('succes get stok');
+
+    // print(jsonResponse.toString());
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getLaporanPergerakanInventori(
+  BuildContext context,
+  token,
+  List merchid,
+  keyword,
+  orderby,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanPergerakanInventoriUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "keyword": keyword.toString(),
+      "orderby": orderby.toString(),
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  // print('jsonResponse $jsonResponse');
+  if (response.statusCode == 200) {
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+  }
+}
+
+Future getPenggunaanProduk(
+  BuildContext context,
+  token,
+  List merchid,
+  keyword,
+  orderby,
+  inventory_master_id,
+  export,
+) async {
+  final String jsonTest = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(laporanPenggunaanProdukUrl),
+    headers: {
+      'token': token,
+    },
+    body: {
+      "deviceid": identifier,
+      "merchantid": jsonTest,
+      "keyword": keyword.toString(),
+      "inventory_master_id": "",
+      "order_by": orderby.toString(),
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+  print('response penggunaan produk');
+  if (response.statusCode == 200) {
+    Map<String, dynamic> data = jsonDecode(response.body);
+    // print(data['data']['detail']['tanggal']);
+    return data;
+  } else {
     print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
   }

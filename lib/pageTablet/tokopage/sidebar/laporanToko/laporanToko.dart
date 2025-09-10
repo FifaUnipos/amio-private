@@ -1,5 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/laporanMoveInvenPage.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/laporanPenggunaanProduk.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/pendapatanPembayaran.dart';
+import 'package:amio/pageTablet/tokopage/sidebar/laporanToko/stokInventarisPage.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
@@ -120,10 +125,18 @@ class _LaporanTokoState extends State<LaporanToko> {
             PhosphorIcons.storefront_fill),
       ObjectLaporan('Pendapatan Per Produk', 'Laporan Pendapatan Per Produk',
           PhosphorIcons.shopping_bag_open_fill),
-      // ObjectLaporan('Profit Harian', 'Laporan Profit Harian Toko',
-      //     PhosphorIcons.chart_line),
-      // ObjectLaporan(
-      //     'Profit Toko', 'Laporan Profit Toko', PhosphorIcons.chart_line),
+      ObjectLaporan(
+          'Pendapatan Per Metode Pembayaran',
+          'Laporan Pendapatan Per Metode Pembayaran',
+          PhosphorIcons.credit_card_fill),
+      ObjectLaporan('Stok Inventaris', 'Laporan Stok Inventaris',
+          PhosphorIcons.clipboard_fill),
+      ObjectLaporan('Pergerakan Inventaris', 'Laporan Pergerakan Inventaris',
+          PhosphorIcons.swap_fill),
+      ObjectLaporan(
+          'Penggunaan Bahan Produk',
+          'Laporan Penggunaan Bahan Produk',
+          PhosphorIcons.archive_box_fill),
     ];
 
     return WillPopScope(
@@ -162,7 +175,15 @@ class _LaporanTokoState extends State<LaporanToko> {
                     pageController: pageController, token: widget.token),
               LaporanPendapatanPerProduk(
                   pageController: pageController, token: widget.token),
-              // profitHarian(context),
+              LaporanPembayaranPage(
+                  pageController: pageController, token: widget.token),
+              LaporanStokInventarisPage(
+                  pageController: pageController, token: widget.token),
+              LaporanPergerakanInventarisPage(
+                  pageController: pageController, token: widget.token),
+              LaporanPenggunaanProdukPage(
+                  pageController: pageController, token: widget.token),
+              // profitHarian(context),5
             ],
           ),
         ),
@@ -594,57 +615,50 @@ class _LaporanTokoState extends State<LaporanToko> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: GridView.count(
+                child: GridView.builder(
                   padding: EdgeInsets.zero,
-                  crossAxisCount: 2,
-                  childAspectRatio: 3.275,
-                  crossAxisSpacing: size16,
-                  mainAxisSpacing: size16,
-                  shrinkWrap: true,
-                  children: List.generate(
-                    objects.length,
-                    (i) => GestureDetector(
+                  itemCount: objects.length >= 6 ? 6 : objects.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // 2 item per row
+                    crossAxisSpacing: size16,
+                    mainAxisSpacing: size16,
+                    childAspectRatio: 3, // sesuaikan ukuran kotak
+                  ),
+                  itemBuilder: (context, i) {
+                    final obj = objects[i];
+                    return GestureDetector(
                       onTap: () {
-                        // print(i);
-                        // widget.controller.5toggleExtendedTrue();
-                        // showingMenuSidebar = false;
                         pageController.jumpToPage(i + 1);
                         setState(() {});
                       },
                       child: Container(
                         padding: EdgeInsets.all(size16),
-                        height: 180,
-                        width: 30,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(size16),
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Column(
                           children: [
-                            SizedBox(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(objects[i].title,
-                                          style: heading2(FontWeight.w700,
-                                              bnw900, 'Outfit')),
-                                      Text(objects[i].description,
-                                          style: body1(FontWeight.w400, bnw800,
-                                              'Outfit')),
+                                      Text(obj.title,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.visible,
+                                          style: heading2(
+                                              FontWeight.w700, bnw900, 'Outfit')),
+                                      Text(obj.description,
+                                          style: body1(
+                                              FontWeight.w400, bnw800, 'Outfit')),
                                     ],
                                   ),
-                                  Icon(
-                                    objects[i].icon,
-                                    color: bnw900,
-                                    size: 36,
-                                  ),
-                                ],
-                              ),
+                                ),
+                                Icon(obj.icon, color: bnw900, size: 36),
+                              ],
                             ),
                             Spacer(),
                             Container(
@@ -659,18 +673,15 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 child: Text(
                                   'Lihat Laporan',
                                   style: heading4(
-                                    FontWeight.w600,
-                                    primary500,
-                                    'Outfit',
-                                  ),
+                                      FontWeight.w600, primary500, 'Outfit'),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               )
             ],

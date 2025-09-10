@@ -6743,7 +6743,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                         style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                       ),
                       Text(
-                        'Unit Convertion',
+                        'Produk Material',
                         style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                       ),
                     ],
