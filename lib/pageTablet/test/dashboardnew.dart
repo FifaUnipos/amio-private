@@ -116,6 +116,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
             physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
+              // ChartCard(),
               dashboardPage(context),
               Column(
                 children: [
@@ -1173,58 +1174,243 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
       ),
     );
   }
-
-  // Container sideCard(String numb) {
-  //   return Container(
-  //     margin:  EdgeInsets.only(top: 4, bottom: 4),
-  //     padding:  EdgeInsets.only(left: 10, right: 10),
-  //     height: 80,
-  //     width: 240,
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(8),
-  //       color: bnw100,
-  //       border: Border.all(color: bnw300, width: 1.4),
-  //     ),
-  //     child: Center(
-  //       child: Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //         children: [
-  //           Text(
-  //             numb,
-  //             style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-  //           ),
-  //           Padding(
-  //             padding:  EdgeInsets.only(left: 8, right: 8),
-  //             child: Image.asset('assets/product.png'),
-  //           ),
-  //           SizedBox(
-  //             width: 100,
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Flexible(
-  //                   child: Text(
-  //                     'Matcha Latte Cappuchino',
-  //                     style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-  //                   ),
-  //                 ),
-  //                 Text(
-  //                   'Makanan',
-  //                   style: body1(FontWeight.w400, bnw900, 'Outfit'),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Expanded(
-  //             child: Text(
-  //               '3.2 Jt',
-  //               style: heading2(FontWeight.w700, primary500, 'Outfit'),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }
+
+/// Kartu chart dengan border bulat & shadow
+// class ChartCard extends StatelessWidget {
+//   const ChartCard({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // contoh data (sesuai feel gambar)
+//     final data = <double>[
+//       100000,
+//       350000,
+//       150000,
+//       650000,
+//       380000,
+//       820000,
+//       520000
+//     ]; // Senin..Minggu
+//     final xLabels = const [
+//       'Senin',
+//       'Selasa',
+//       'Rabu',
+//       'Kamis',
+//       'Jumat',
+//       'Sabtu',
+//       'Minggu'
+//     ];
+
+//     return Container(
+//       margin: const EdgeInsets.all(16),
+//       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(18),
+//         boxShadow: const [
+//           BoxShadow(
+//               blurRadius: 20, color: Color(0x14000000), offset: Offset(0, 6))
+//         ],
+//       ),
+//       child: AspectRatio(
+//         aspectRatio: 2.9, // mirip contoh
+//         child: CustomPaint(
+//           painter: LineAreaChartPainter(
+//             data: data,
+//             xLabels: xLabels,
+//             ySteps: 5, // jumlah garis grid horizontal
+//             curveSmoothness: 0.25, // 0 = patah, 0.2–0.35 = halus
+//             lineColor: const Color(0xFF2A63FF),
+//             fillColor: const Color(0x332A63FF),
+//             gridColor: Colors.black,
+//             labelColor: const Color(0xFF6B7280),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class LineAreaChartPainter extends CustomPainter {
+//   LineAreaChartPainter({
+//     required this.data,
+//     required this.xLabels,
+//     this.ySteps = 5,
+//     this.curveSmoothness = .25,
+//     required this.lineColor,
+//     required this.fillColor,
+//     required this.gridColor,
+//     required this.labelColor,
+//   });
+
+//   final List<double> data;
+//   final List<String> xLabels;
+//   final int ySteps;
+//   final double curveSmoothness;
+//   final Color lineColor, fillColor, gridColor, labelColor;
+
+//   // padding dalam kanvas (biar ada ruang label kiri & bawah)
+//   final double leftPad = 88;
+//   final double rightPad = 12;
+//   final double topPad = 16;
+//   final double bottomPad = 36;
+
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     if (data.isEmpty) return;
+
+//     final chartRect = Rect.fromLTWH(leftPad, topPad,
+//         size.width - leftPad - rightPad, size.height - topPad - bottomPad);
+
+//     final maxY = _niceMax(data.reduce(max));
+//     final minY = 0.0;
+
+//     // ── Grid horizontal + label Y
+//     final gridPaint = Paint()
+//       ..color = gridColor
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = 1;
+
+//     for (int i = 0; i <= ySteps; i++) {
+//       final t = i / ySteps;
+//       final y = uiLerp(chartRect.bottom, chartRect.top, t);
+//       _drawDashedLine(canvas, Offset(chartRect.left, y),
+//           Offset(chartRect.right, y), gridPaint);
+//       // label
+//       final value = uiLerp(minY, maxY, t);
+//       final tp = _textPainter(
+//           _formatRupiahShort(value), 12, labelColor, FontWeight.w500);
+//       tp.layout(maxWidth: leftPad - 12);
+//       tp.paint(
+//           canvas, Offset(chartRect.left - tp.width - 8, y - tp.height / 2));
+//     }
+
+//     // ── Sumbu X (label hari)
+//     final count = data.length;
+//     for (int i = 0; i < count; i++) {
+//       final dx = chartRect.left + chartRect.width * (i / (count - 1));
+//       final tp = _textPainter(xLabels[i], 14, Colors.black87, FontWeight.w600);
+//       tp.layout();
+//       tp.paint(canvas, Offset(dx - tp.width / 2, chartRect.bottom + 8));
+//     }
+
+//     // ── Path garis & area
+//     final points = <Offset>[];
+//     for (int i = 0; i < count; i++) {
+//       final dx = chartRect.left + chartRect.width * (i / (count - 1));
+//       final norm = (data[i] - minY) / (maxY - minY);
+//       final dy = chartRect.bottom - chartRect.height * norm;
+//       points.add(Offset(dx, dy));
+//     }
+
+//     final linePath = _smoothPath(points, curveSmoothness);
+
+//     // Fill area
+//     final areaPath = Path.from(linePath)
+//       ..lineTo(points.last.dx, chartRect.bottom)
+//       ..lineTo(points.first.dx, chartRect.bottom)
+//       ..close();
+//     final fillPaint = Paint()..color = fillColor;
+//     canvas.drawPath(areaPath, fillPaint);
+
+//     // Garis utama
+//     final linePaint = Paint()
+//       ..color = lineColor
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = 3.2
+//       ..strokeCap = StrokeCap.round
+//       ..strokeJoin = StrokeJoin.round;
+//     canvas.drawPath(linePath, linePaint);
+//   }
+
+//   // Path halus (catmull-rom sederhana via kontrol quadratic)
+//   Path _smoothPath(List<Offset> pts, double smooth) {
+//     if (pts.length < 2) return Path();
+//     final p = Path()..moveTo(pts[0].dx, pts[0].dy);
+//     for (int i = 0; i < pts.length - 1; i++) {
+//       final p0 = i == 0 ? pts[i] : pts[i - 1];
+//       final p1 = pts[i];
+//       final p2 = pts[i + 1];
+//       final p3 = i + 2 < pts.length ? pts[i + 2] : p2;
+
+//       final cp1 = p1 + (p2 - p0) * smooth;
+//       final cp2 = p2 - (p3 - p1) * smooth;
+
+//       // gunakan dua quadratic agar tetap ringan & halus
+//       final mid = Offset(
+//         (cp1.dx + cp2.dx) / 2,
+//         (cp1.dy + cp2.dy) / 2,
+//       );
+//       p.quadraticBezierTo(cp1.dx, cp1.dy, mid.dx, mid.dy);
+//       p.quadraticBezierTo(cp2.dx, cp2.dy, p2.dx, p2.dy);
+//     }
+//     return p;
+//   }
+
+//   // gambar garis putus-putus manual (tanpa package)
+//   void _drawDashedLine(Canvas c, Offset a, Offset b, Paint paint,
+//       {double dash = 6, double gap = 6}) {
+//     final total = (b - a).distance;
+//     final dir = (b - a) / total;
+//     double covered = 0;
+//     while (covered < total) {
+//       final start = a + dir * covered;
+//       final end = a + dir * min(covered + dash, total);
+//       c.drawLine(start, end, paint);
+//       covered += dash + gap;
+//     }
+//   }
+
+//   String _formatRupiahShort(double v) {
+//     if (v >= 1e9)
+//       return 'Rp. ${(v / 1e9).toStringAsFixed(v % 1e9 == 0 ? 0 : 1)} M';
+//     if (v >= 1e6)
+//       return 'Rp. ${(v / 1e6).toStringAsFixed(v % 1e6 == 0 ? 0 : 1)} Juta';
+//     // ribuan/ratus ribu
+//     String s = v.round().toString();
+//     final buf = StringBuffer();
+//     for (int i = 0; i < s.length; i++) {
+//       buf.write(s[s.length - 1 - i]);
+//       if (i % 3 == 2 && i != s.length - 1) buf.write('.');
+//     }
+//     return 'Rp. ${buf.toString().split('').reversed.join()}';
+//   }
+
+//   double _niceMax(double raw) {
+//     // buat batas atas "rapi": bulatkan ke ratus ribu/ juta terdekat
+//     final steps = [100000, 200000, 250000, 500000, 750000, 1000000];
+//     for (final s in steps) {
+//       final m = (raw / s).ceil() * s;
+//       if (m >= raw && (m - raw) / max(1, m) < 0.4) return m.toDouble();
+//     }
+//     // fallback
+//     final pow10 = pow(10, raw.toStringAsFixed(0).length - 1).toDouble();
+//     return ((raw / pow10).ceil() * pow10).toDouble();
+//   }
+
+//   TextPainter _textPainter(
+//       String text, double size, Color color, FontWeight w) {
+//     return TextPainter(
+//       text: TextSpan(
+//           text: text,
+//           style: TextStyle(fontSize: size, color: color, fontWeight: w)),
+//       textDirection: TextDirection.ltr,
+//       maxLines: 1,
+//       ellipsis: '…',
+//     );
+//   }
+
+//   double uiLerp(double a, double b, double t) => a + (b - a) * t;
+
+//   @override
+//   bool shouldRepaint(covariant LineAreaChartPainter old) =>
+//       old.data != data ||
+//       old.xLabels != xLabels ||
+//       old.ySteps != ySteps ||
+//       old.lineColor != lineColor ||
+//       old.fillColor != fillColor ||
+//       old.gridColor != gridColor ||
+//       old.labelColor != labelColor ||
+//       old.curveSmoothness != curveSmoothness;
+// }

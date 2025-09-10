@@ -336,7 +336,7 @@ class _OtppageState extends State<Otppage> {
           sessionPage(
             context,
             jsonResponse['token'].toString(),
-            'Group_Merchant',
+            jsonResponse['type_account'],
             jsonResponse['type_role'],
           );
         }
@@ -504,7 +504,7 @@ class _OtppageState extends State<Otppage> {
           sessionPage(
             context,
             jsonResponse['token'].toString(),
-            'Merchant_Only',
+            jsonResponse['type_account'],
             jsonResponse['type_role'],
           );
         }

@@ -210,7 +210,7 @@ sessionPage(BuildContext context, String token, typeAccount, roleAccount) {
           id: identifier.toString(),
           token: token,
         );
-      } else if (typeAccount == 'Merchant_Only') {
+      } else if (typeAccount == 'Merchant_Only') {  
         return SidebarXExampleAppToko(
           token: token,
           id: identifier.toString(),
