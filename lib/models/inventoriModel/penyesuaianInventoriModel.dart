@@ -1,0 +1,29 @@
+class PenyesuaianModel {
+  String? groupId;
+  String? title;
+  String? activityDate;
+  double? totalPrice;
+
+  PenyesuaianModel({
+    this.groupId,
+    this.title,
+    this.activityDate,
+    this.totalPrice,
+  });
+
+  PenyesuaianModel.fromJson(Map<String, dynamic> json) {
+    groupId = json['group_id'];
+    title = json['title'];
+    activityDate = json['activity_date'];
+    totalPrice = double.tryParse(json['total_price'] ?? '0');
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['group_id'] = groupId;
+    data['title'] = title;
+    data['activity_date'] = activityDate;
+    data['total_price'] = totalPrice;
+    return data;
+  }
+}

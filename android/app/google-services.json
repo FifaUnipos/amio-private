@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "919719455964",
+    "project_id": "uniposamio-35f14",
+    "storage_bucket": "uniposamio-35f14.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919719455964:android:094f771f0be592065a9819",
+        "android_client_info": {
+          "package_name": "com.example.amio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "919719455964-ugbpa4ea2g0edc4nulk63f5s52outdvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBj4P4peotHq_DPPDTRrrYxDjNKnv-kbTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "919719455964-ugbpa4ea2g0edc4nulk63f5s52outdvh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919719455964:android:ae0b3c58bebdabf05a9819",
+        "android_client_info": {
+          "package_name": "com.fifapay.unipos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "919719455964-ugbpa4ea2g0edc4nulk63f5s52outdvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBj4P4peotHq_DPPDTRrrYxDjNKnv-kbTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "919719455964-ugbpa4ea2g0edc4nulk63f5s52outdvh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
