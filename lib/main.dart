@@ -17,7 +17,7 @@ import 'utils/component/providerModel/timerModel.dart';
 
 // ✅ Tambahkan ini untuk deteksi ukuran layar tanpa package tambahan
 bool isTabletLayout(BuildContext context) =>
-    MediaQuery.of(context).size.shortestSide >= 600;
+    MediaQuery.of(context).size.shortestSide >= 60;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

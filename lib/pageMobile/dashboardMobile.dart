@@ -9,8 +9,11 @@ import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
 import 'package:unipos_app_335/models/tokomodel.dart';
-import 'package:unipos_app_335/pageMobile/pageTokoMobile/pageTokoMobile.dart';
+import 'package:unipos_app_335/pageMobile/pageProductMobile/pageProductMobile.dart';
+import 'package:unipos_app_335/pageMobile/pageTokoMobile/pageTokoMobile.dart'
+    hide ProductMobilePage;
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/checkConnection.dart';
@@ -328,7 +331,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.shopping_bag_open_fill,
             'text': 'Produk',
-            // 'page': const ProdukPage(),
+            'page': ProductMobilePage(token: widget.token),
           },
           {
             'icon': PhosphorIcons.archive_box_fill,
@@ -338,7 +341,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.shopping_cart_simple_fill,
             'text': 'Transaksi',
-            // 'page': const TransaksiPage(),
+            'page': TransaksiMobilePage(token: widget.token),
           },
           {
             'icon': PhosphorIcons.users_three_fill,
@@ -392,12 +395,34 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                       IconButton(
                         onPressed: () {
                           Navigator.pop(context); // tutup modal
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => item['page'] as Widget,
-                            ),
-                          );
+                          // Ambil dulu halamannya ke variabel
+                          final dynamic pageWidget = item['page'];
+
+                          // Cek apakah variabel itu null atau tidak
+                          if (pageWidget != null) {
+                            // Jika TIDAK null, baru pindah halaman
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    pageWidget
+                                        as Widget, // Aman untuk di-cast di sini
+                              ),
+                            );
+                          } else {
+                            // Jika NULL, tangani errornya.
+                            // Misalnya, tampilkan pesan atau jangan lakukan apa-apa.
+                            print(
+                              'Error: Halaman tidak ditemukan untuk item: $item',
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Halaman sedang dalam pengembangan',
+                                ),
+                              ),
+                            );
+                          }
                         },
                         icon: Icon(
                           item['icon'] as IconData,
