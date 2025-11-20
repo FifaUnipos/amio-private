@@ -67,8 +67,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
   getStrukPhoto() async {
     var response = await http.get(Uri.parse(logoStrukPrinter!));
     Uint8List bytesNetwork = response.bodyBytes;
-    Uint8List imageBytesFromNetwork = bytesNetwork.buffer
-        .asUint8List(bytesNetwork.offsetInBytes, bytesNetwork.lengthInBytes);
+    Uint8List imageBytesFromNetwork = bytesNetwork.buffer.asUint8List(
+      bytesNetwork.offsetInBytes,
+      bytesNetwork.lengthInBytes,
+    );
 
     imageStruk = imageBytesFromNetwork;
     setState(() {});
@@ -101,18 +103,16 @@ class _RiwayatPageState extends State<RiwayatPage> {
     if (logoStrukPrinter != '') {
       getStrukPhoto();
     }
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        datasRiwayat = await getRiwayatTransaksi(
-          context,
-          widget.token,
-          '',
-          '',
-          textvalueOrderBy,
-        );
-        setState(() {});
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      datasRiwayat = await getRiwayatTransaksi(
+        context,
+        widget.token,
+        '',
+        '',
+        textvalueOrderBy,
+      );
+      setState(() {});
+    });
 
     setState(() {
       print(datasRiwayat.toString());
@@ -181,15 +181,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                   setState(() {});
                 },
                 tabs: [
-                  Tab(
-                    text: 'Kasir',
-                  ),
-                  Tab(
-                    text: 'Riwayat',
-                  ),
-                  Tab(
-                    text: 'Pengaturan',
-                  ),
+                  Tab(text: 'Kasir'),
+                  Tab(text: 'Riwayat'),
+                  Tab(text: 'Pengaturan'),
                 ],
               ),
             ),
@@ -233,7 +227,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                       children: [
                         Container(
                           padding: EdgeInsets.symmetric(
-                              horizontal: size16, vertical: size16),
+                            horizontal: size16,
+                            vertical: size16,
+                          ),
                           decoration: BoxDecoration(
                             color: primary500,
                             borderRadius: BorderRadius.only(
@@ -248,7 +244,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 child: Text(
                                   'Waktu Transaksi',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(width: size16),
@@ -256,7 +255,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 child: Text(
                                   'Nama Pemesan',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(width: size16),
@@ -264,7 +266,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 child: Text(
                                   'No Transaksi',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(width: size16),
@@ -272,7 +277,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 child: Text(
                                   'Total',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(width: size16),
@@ -280,7 +288,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 child: Text(
                                   'Status Transaksi',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
@@ -318,14 +329,12 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                             //     2.6;
                                             widtValue = 60;
 
-                                            widthInformation =
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width;
-                                            heightInformation =
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height;
+                                            widthInformation = MediaQuery.of(
+                                              context,
+                                            ).size.width;
+                                            heightInformation = MediaQuery.of(
+                                              context,
+                                            ).size.height;
 
                                             transactionidValue =
                                                 datasRiwayat![index]
@@ -336,8 +345,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                             String productId =
                                                 transactionidValue.toString();
 
-                                            if (cartProductIds
-                                                .contains(productId)) {
+                                            if (cartProductIds.contains(
+                                              productId,
+                                            )) {
                                               // cartProductIds.remove(productId);
                                               cartProductIds.clear();
                                               width = null;
@@ -357,17 +367,18 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                             children: [
                                               Container(
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: size12,
-                                                    vertical: size12),
+                                                  horizontal: size12,
+                                                  vertical: size12,
+                                                ),
                                                 decoration: BoxDecoration(
                                                   color:
                                                       cartProductIds.contains(
-                                                              datasRiwayat![
-                                                                      index]
-                                                                  .transactionid
-                                                                  .toString())
-                                                          ? primary200
-                                                          : null,
+                                                        datasRiwayat![index]
+                                                            .transactionid
+                                                            .toString(),
+                                                      )
+                                                      ? primary200
+                                                      : null,
                                                   border: Border(
                                                     bottom: BorderSide(
                                                       color: bnw300,
@@ -386,9 +397,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             .entrydate
                                                             .toString(),
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(width: size16),
@@ -398,9 +410,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             .customer
                                                             .toString(),
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(width: size16),
@@ -410,24 +423,27 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             .transactionid
                                                             .toString(),
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(width: size16),
                                                     Expanded(
                                                       child: Text(
                                                         FormatCurrency.convertToIdr(
-                                                                int.parse(datasRiwayat![
-                                                                        index]
-                                                                    .amount
-                                                                    .toString()))
-                                                            .toString(),
+                                                          double.parse(
+                                                            datasRiwayat![index]
+                                                                .amount
+                                                                .toString(),
+                                                          ),
+                                                        ).toString(),
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(width: size16),
@@ -437,17 +453,18 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             .status
                                                             .toString(),
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            datasRiwayat![index]
+                                                          FontWeight.w400,
+                                                          datasRiwayat![index]
+                                                                      .isColor ==
+                                                                  '1'
+                                                              ? succes600
+                                                              : datasRiwayat![index]
                                                                         .isColor ==
-                                                                    '1'
-                                                                ? succes600
-                                                                : datasRiwayat![index]
-                                                                            .isColor ==
-                                                                        '2'
-                                                                    ? danger500
-                                                                    : waring500,
-                                                            'Outfit'),
+                                                                    '2'
+                                                              ? danger500
+                                                              : waring500,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -470,7 +487,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                       : Expanded(
                           child: FutureBuilder(
                             future: getSingleRiwayatTransaksi(
-                                widget.token, transactionidValue, ''),
+                              widget.token,
+                              transactionidValue,
+                              '',
+                            ),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 Map<String, dynamic> data =
@@ -504,9 +524,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                 Text(
                                                   'Informasi Transaksi',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                                 SizedBox(height: size16),
                                                 Row(
@@ -514,63 +535,68 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     Expanded(
                                                       child:
                                                           buttonStatusTransaksi(
-                                                              data),
+                                                            data,
+                                                          ),
                                                     ),
                                                     data['is_color'] == '1'
                                                         ? SizedBox()
                                                         : Column(
                                                             children: [
                                                               SizedBox(
-                                                                  width:
-                                                                      size16),
+                                                                width: size16,
+                                                              ),
                                                               GestureDetector(
                                                                 onTap: () {
                                                                   whenLoading(
-                                                                      context);
+                                                                    context,
+                                                                  );
 
                                                                   transaksiViewReference(
                                                                     context,
                                                                     widget
                                                                         .token,
-                                                                    data[
-                                                                        'transactionid'],
-                                                                  ).then(
-                                                                      (value) {
-                                                                    if (value[
-                                                                            'rc'] ==
+                                                                    data['transactionid'],
+                                                                  ).then((
+                                                                    value,
+                                                                  ) {
+                                                                    if (value['rc'] ==
                                                                         '00') {
                                                                       Navigator.of(
-                                                                              context,
-                                                                              rootNavigator: true)
-                                                                          .pop();
+                                                                        context,
+                                                                        rootNavigator:
+                                                                            true,
+                                                                      ).pop();
                                                                       showBottomRiwayatPerubahan(
-                                                                          context,
-                                                                          data);
+                                                                        context,
+                                                                        data,
+                                                                      );
                                                                     } else {
                                                                       Navigator.of(
-                                                                              context,
-                                                                              rootNavigator: true)
-                                                                          .pop();
+                                                                        context,
+                                                                        rootNavigator:
+                                                                            true,
+                                                                      ).pop();
                                                                     }
                                                                   });
                                                                 },
-                                                                child:
-                                                                    Container(
+                                                                child: Container(
                                                                   padding: EdgeInsets.symmetric(
-                                                                      horizontal:
-                                                                          size12,
-                                                                      vertical:
-                                                                          size16),
+                                                                    horizontal:
+                                                                        size12,
+                                                                    vertical:
+                                                                        size16,
+                                                                  ),
                                                                   child: Text(
                                                                     'Lihat Riwayat',
                                                                     style: heading3(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        primary500,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      primary500,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              )
+                                                              ),
                                                             ],
                                                           ),
                                                   ],
@@ -590,36 +616,43 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           Text(
                                                             'Waktu Transaksi',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Nomor Transaksi',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Kasir',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Nama Pembeli',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ],
                                                       ),
@@ -632,42 +665,50 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             data['entrydate'] ??
                                                                 '-',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             data['transactionid'] ??
                                                                 '-',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             data['pic']
                                                                 .toString(),
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             data['customer'] ??
                                                                 '-',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size12),
+                                                            height: size12,
+                                                          ),
                                                         ],
                                                       ),
                                                     ],
@@ -681,9 +722,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                   child: Text(
                                                     'Rincian Produk',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
                                               ],
@@ -697,6 +739,25 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     NeverScrollableScrollPhysics(),
                                                 itemCount: detail.length,
                                                 itemBuilder: (context, index) {
+                                                  var variants =
+                                                      detail[index]['variants'];
+                                                  List<String> variantInfo = [];
+
+                                                  // Mengecek apakah variants ada dan bukan kosong
+                                                  if (variants != null &&
+                                                      variants.isNotEmpty) {
+                                                    for (var variant
+                                                        in variants) {
+                                                      // Menyusun nama kategori dan nama produk
+                                                      for (var product
+                                                          in variant['variant_products']) {
+                                                        variantInfo.add(
+                                                          '+ ${variant['variant_category_title']} (${product['variant_product_name']})',
+                                                        );
+                                                      }
+                                                    }
+                                                  }
+
                                                   return SizedBox(
                                                     child: Column(
                                                       children: [
@@ -705,43 +766,41 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             Text(
                                                               'x${detail[index]['quantity']}',
                                                               style: heading3(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             SizedBox(
-                                                                width: size8),
+                                                              width: size8,
+                                                            ),
                                                             SizedBox(
                                                               height: size48,
                                                               width: size48,
-                                                              child:
-                                                                  AspectRatio(
+                                                              child: AspectRatio(
                                                                 aspectRatio: 1,
-                                                                child:
-                                                                    Container(
-                                                                  child: Image
-                                                                      .network(
-                                                                    detail[index]
-                                                                        [
-                                                                        'product_image'],
+                                                                child: Container(
+                                                                  child: Image.network(
+                                                                    detail[index]['product_image'],
                                                                     fit: BoxFit
                                                                         .cover,
-                                                                    errorBuilder: (context,
-                                                                            error,
-                                                                            stackTrace) =>
-                                                                        SvgPicture
-                                                                            .asset(
-                                                                      'assets/logoProduct.svg',
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    ),
+                                                                    errorBuilder:
+                                                                        (
+                                                                          context,
+                                                                          error,
+                                                                          stackTrace,
+                                                                        ) => SvgPicture.asset(
+                                                                          'assets/logoProduct.svg',
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                        ),
                                                                   ),
                                                                 ),
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                                width: size8),
+                                                              width: size8,
+                                                            ),
                                                             Column(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
@@ -751,37 +810,49 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                       .start,
                                                               children: [
                                                                 Text(
-                                                                  detail[index][
-                                                                          'name'] ??
+                                                                  detail[index]['name'] ??
                                                                       '-',
                                                                   style: heading3(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                                 ),
                                                                 Text(
-                                                                  FormatCurrency.convertToIdr(int.parse(detail[index]
-                                                                              [
-                                                                              'price']
-                                                                          .toString()))
-                                                                      .toString(),
+                                                                  FormatCurrency.convertToIdr(
+                                                                    int.parse(
+                                                                      detail[index]['price']
+                                                                          .toString(),
+                                                                    ),
+                                                                  ).toString(),
                                                                   style: body1(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  'Varian:\n${variantInfo.join(', ')}',
+                                                                  style: body1(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                                 ),
                                                                 Text(
                                                                   'Catatan : ${detail[index]['description']}',
                                                                   style: body1(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                                 ),
                                                               ],
-                                                            )
+                                                            ),
                                                           ],
                                                         ),
                                                         Divider(),
@@ -799,9 +870,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                   Text(
                                                     'Rincian Pembayaran',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                   SizedBox(height: size8),
                                                   Row(
@@ -817,36 +889,43 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           Text(
                                                             'Metode Pembayaran',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Sub Total',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'PPN',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Diskon',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ],
                                                       ),
@@ -859,50 +938,54 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             data['payment_name'] ??
                                                                 '-',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
-                                                          Text(
-                                                            FormatCurrency
-                                                                    .convertToIdr(
-                                                                        data['total_before_dsc_tax'] ??
-                                                                            '-')
-                                                                .toString(),
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                            height: size8,
                                                           ),
-                                                          SizedBox(
-                                                              height: size8),
-                                                          Text(
-                                                            FormatCurrency
-                                                                    .convertToIdr(
-                                                                        data['ppn'] ??
-                                                                            '-')
-                                                                .toString(),
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          SizedBox(
-                                                              height: size8),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                                    data['discount'] ==
-                                                                            ""
-                                                                        ? 0
-                                                                        : data[
-                                                                            'discount'])
-                                                                .toString(),
+                                                              data['total_before_dsc_tax'] ??
+                                                                  '-',
+                                                            ).toString(),
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            height: size8,
+                                                          ),
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                              data['ppn'] ??
+                                                                  '-',
+                                                            ).toString(),
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            height: size8,
+                                                          ),
+                                                          Text(
+                                                            FormatCurrency.convertToIdr(
+                                                              data['discount'] ==
+                                                                      ""
+                                                                  ? 0
+                                                                  : data['discount'],
+                                                            ).toString(),
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ],
                                                       ),
@@ -919,20 +1002,23 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       Text(
                                                         'Total',
                                                         style: heading2(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                                int.parse(data[
-                                                                        'amount']
-                                                                    .toString()))
-                                                            .toString(),
+                                                          int.parse(
+                                                            data['amount']
+                                                                .toString(),
+                                                          ),
+                                                        ).toString(),
                                                         style: heading2(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
@@ -948,28 +1034,33 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                 .start,
                                                         children: [
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             data['payment_method_id'] ==
                                                                     '001'
                                                                 ? 'Uang Tunai'
                                                                 : 'Non Tunai',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             'Kembalian',
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                primary500,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              primary500,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                         ],
                                                       ),
                                                       Column(
@@ -978,33 +1069,41 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                 .end,
                                                         children: [
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                                    int.parse(data[
-                                                                            'money_paid']
-                                                                        .toString()))
-                                                                .toString(),
+                                                              int.parse(
+                                                                data['money_paid']
+                                                                    .toString(),
+                                                              ),
+                                                            ).toString(),
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                                    int.parse(
-                                                                        data['change_money'] ??
-                                                                            "-"))
-                                                                .toString(),
+                                                              int.parse(
+                                                                data['change_money']
+                                                                        .toString() ??
+                                                                    "-",
+                                                              ),
+                                                            ).toString(),
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                primary500,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              primary500,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           SizedBox(
-                                                              height: size8),
+                                                            height: size8,
+                                                          ),
                                                         ],
                                                       ),
                                                     ],
@@ -1026,9 +1125,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                   child: Text(
                                                     'Transaksi Tidak Sesuai',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        danger500,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      danger500,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 )
                                               : SizedBox(),
@@ -1042,30 +1142,35 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
                                                 // log("ini adalah struk ${printext}");
 
-                                                widget.bluetooth.isConnected
-                                                    .then((isConnected) {
+                                                widget.bluetooth.isConnected.then((
+                                                  isConnected,
+                                                ) {
                                                   if (isConnected == true) {
                                                     showSnackBarComponent(
-                                                        context,
-                                                        'Berhasil cetak struk',
-                                                        '00');
+                                                      context,
+                                                      'Berhasil cetak struk',
+                                                      '00',
+                                                    );
                                                     // widget.bluetooth
                                                     //     .printNewLine();
                                                     logoStrukPrinter!.isEmpty
                                                         ? widget.bluetooth
-                                                            .printNewLine()
+                                                              .printNewLine()
                                                         : bluetooth
-                                                            .printImageBytes(
-                                                                imageStruk);
+                                                              .printImageBytes(
+                                                                imageStruk,
+                                                              );
                                                     widget.bluetooth
                                                         .printNewLine();
                                                     widget.bluetooth
                                                         .printCustom(
-                                                            printext.replaceAll(
-                                                                RegExp('[|]'),
-                                                                '\n'),
-                                                            Size.bold.val,
-                                                            0);
+                                                          printext.replaceAll(
+                                                            RegExp('[|]'),
+                                                            '\n',
+                                                          ),
+                                                          Size.bold.val,
+                                                          0,
+                                                        );
                                                     // widget.bluetooth.printCustom(
                                                     //     widget.printtext.replaceAll(RegExp('[|]'), '\n'),
                                                     //     Size.bold.val,
@@ -1083,27 +1188,29 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                               },
                                               child: buttonXLoutline(
                                                 Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                          PhosphorIcons
-                                                              .printer_fill,
-                                                          color: primary500,
-                                                          size: size24),
-                                                      SizedBox(width: size12),
-                                                      Text(
-                                                        'Cetak Struk',
-                                                        style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit'),
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      PhosphorIcons
+                                                          .printer_fill,
+                                                      color: primary500,
+                                                      size: size24,
+                                                    ),
+                                                    SizedBox(width: size12),
+                                                    Text(
+                                                      'Cetak Struk',
+                                                      style: heading3(
+                                                        FontWeight.w600,
+                                                        primary500,
+                                                        'Outfit',
                                                       ),
-                                                    ]),
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
+                                                    ),
+                                                  ],
+                                                ),
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                                 primary500,
                                               ),
                                             ),
@@ -1130,18 +1237,19 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           },
                                                           child: buttonXL(
                                                             Center(
-                                                                child: Text(
-                                                              'Selesai',
-                                                              style: heading3(
+                                                              child: Text(
+                                                                'Selesai',
+                                                                style: heading3(
                                                                   FontWeight
                                                                       .w600,
                                                                   bnw100,
-                                                                  'Outfit'),
-                                                            )),
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                            ),
                                                             MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width,
+                                                              context,
+                                                            ).size.width,
                                                           ),
                                                         ),
                                                       ),
@@ -1172,459 +1280,471 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Future<dynamic> showBottomRiwayatPerubahan(
-      BuildContext context, Map<String, dynamic> data) {
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
     return showModalBottomSheet(
-        constraints: const BoxConstraints(
-          maxWidth: double.infinity,
-        ),
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        context: context,
-        builder: (BuildContext context) {
-          return FutureBuilder(
-            future: transaksiViewReference(
-              context,
-              widget.token,
-              data['transactionid'],
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var dataPerubahan = snapshot.data['data'];
-                var detail = dataPerubahan['detail'];
-                return StatefulBuilder(
-                  builder: (context, setState) => Container(
-                    margin: EdgeInsets.only(top: size32),
-                    padding:
-                        EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size12),
-                        topLeft: Radius.circular(size12),
-                      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      context: context,
+      builder: (BuildContext context) {
+        return FutureBuilder(
+          future: transaksiViewReference(
+            context,
+            widget.token,
+            data['transactionid'],
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              var dataPerubahan = snapshot.data['data'];
+              var detail = dataPerubahan['detail'];
+              return StatefulBuilder(
+                builder: (context, setState) => Container(
+                  margin: EdgeInsets.only(top: size32),
+                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                  decoration: BoxDecoration(
+                    color: bnw100,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(size12),
+                      topLeft: Radius.circular(size12),
                     ),
-                    child: Column(
-                      children: [
-                        dividerShowdialog(),
-                        SizedBox(height: size16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Riwayat Perubahan',
-                                style:
-                                    heading1(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  child: Column(
+                    children: [
+                      dividerShowdialog(),
+                      SizedBox(height: size16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Riwayat Perubahan',
+                              style: heading1(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
                               ),
-                              Text(
-                                'Rincian riwayat perubahan transaksi',
-                                style:
-                                    heading4(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                            Text(
+                              'Rincian riwayat perubahan transaksi',
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw500,
+                                'Outfit',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: size32),
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          isDropdownOpen = !isDropdownOpen;
+                          print(isDropdownOpen);
+                          setState(() {});
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: size16),
+                          padding: EdgeInsets.symmetric(
+                            vertical: size12,
+                            horizontal: size16,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(size16),
+                            border: Border.all(color: bnw300),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Pembatalan Transaksi',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      bnw700,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Container(
+                                    height: size40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
+                                      ),
+                                      color: danger100,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: size16,
+                                            vertical: size12,
+                                          ),
+                                          child: Text(
+                                            'Pengisian Terakhir',
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: size12,
+                                            vertical: size8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                            color: danger500,
+                                          ),
+                                          child: Text(
+                                            dataPerubahan['estimate'] ?? '-',
+                                            style: heading3(
+                                              FontWeight.w400,
+                                              bnw100,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: size16),
+                                  Icon(
+                                    PhosphorIcons.caret_down,
+                                    color: bnw900,
+                                    size: size24,
+                                  ),
+                                ],
+                              ),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                margin: EdgeInsets.only(
+                                  top: isDropdownOpen ? size16 : 0,
+                                ),
+                                child: isDropdownOpen
+                                    ? Container(
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                            2,
+                                        width: double.infinity,
+                                        padding: EdgeInsets.all(size16),
+                                        decoration: BoxDecoration(
+                                          color: bnw200,
+                                          borderRadius: BorderRadius.circular(
+                                            size16,
+                                          ),
+                                        ),
+                                        child: ListView(
+                                          padding: EdgeInsets.zero,
+                                          physics: BouncingScrollPhysics(),
+                                          children: [
+                                            Text(
+                                              'Status Transaksi',
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            SizedBox(height: size12),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: buttonStatusTransaksi(
+                                                data,
+                                              ),
+                                            ),
+                                            SizedBox(height: size16),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Informasi Transaksi',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                                SizedBox(height: size12),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Waktu Tagihan',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          'Nomor Tagihan',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          'Kasir',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          'Alasan Batal',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Text(
+                                                          dataPerubahan['entrydate'] ??
+                                                              '-',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          dataPerubahan['transactionid'] ??
+                                                              '-',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          dataPerubahan['pic'] ??
+                                                              '-',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Text(
+                                                          dataPerubahan['reference']['alasan_reference'] ??
+                                                              '-',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: size16),
+                                                Text(
+                                                  'Detail Alasan',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                                SizedBox(height: size8),
+                                                Wrap(
+                                                  children: [
+                                                    for (final paragraph
+                                                        in (dataPerubahan['reference']['detail_alasan_reference'] ??
+                                                                '')
+                                                            .split('\n'))
+                                                      Text(
+                                                        paragraph,
+                                                        style: heading4(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: size16),
+                                                Text(
+                                                  'Rincian Produk',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  child: ListView.builder(
+                                                    shrinkWrap: true,
+                                                    padding: EdgeInsets.zero,
+                                                    physics:
+                                                        NeverScrollableScrollPhysics(),
+                                                    itemCount: detail.length,
+                                                    itemBuilder: (context, index) {
+                                                      return SizedBox(
+                                                        child: Column(
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'x${detail[index]['quantity']}',
+                                                                  style: heading3(
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: size8,
+                                                                ),
+                                                                SizedBox(
+                                                                  height:
+                                                                      size48,
+                                                                  width: size48,
+                                                                  child: AspectRatio(
+                                                                    aspectRatio:
+                                                                        1,
+                                                                    child: Container(
+                                                                      child: Image.network(
+                                                                        detail[index]['product_image'],
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                        errorBuilder:
+                                                                            (
+                                                                              context,
+                                                                              error,
+                                                                              stackTrace,
+                                                                            ) => SvgPicture.asset(
+                                                                              'assets/logoProduct.svg',
+                                                                              fit: BoxFit.cover,
+                                                                            ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: size8,
+                                                                ),
+                                                                Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      detail[index]['name'] ??
+                                                                          '-',
+                                                                      style: heading3(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    Text(
+                                                                      FormatCurrency.convertToIdr(
+                                                                        int.parse(
+                                                                          detail[index]['amount']
+                                                                              .toString(),
+                                                                        ),
+                                                                      ).toString(),
+                                                                      style: body1(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    Text(
+                                                                      'Catatan : ${detail[index]['description']}',
+                                                                      style: body1(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Divider(),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : SizedBox(),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: size32),
-                        GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () {
-                            isDropdownOpen = !isDropdownOpen;
-                            print(isDropdownOpen);
-                            setState(() {});
-                          },
-                          child: Container(
-                              margin: EdgeInsets.only(bottom: size16),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: size12, horizontal: size16),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(size16),
-                                border: Border.all(color: bnw300),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Pembatalan Transaksi',
-                                        style: heading3(
-                                            FontWeight.w600, bnw700, 'Outfit'),
-                                      ),
-                                      Spacer(),
-                                      Container(
-                                          height: size40,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                            color: danger100,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: size16,
-                                                    vertical: size12),
-                                                child: Text(
-                                                  'Pengisian Terakhir',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                              ),
-                                              SizedBox(width: size16),
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: size12,
-                                                    vertical: size8),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          size8),
-                                                  color: danger500,
-                                                ),
-                                                child: Text(
-                                                  dataPerubahan['estimate'] ??
-                                                      '-',
-                                                  style: heading3(
-                                                      FontWeight.w400,
-                                                      bnw100,
-                                                      'Outfit'),
-                                                ),
-                                              ),
-                                            ],
-                                          )),
-                                      SizedBox(width: size16),
-                                      Icon(
-                                        PhosphorIcons.caret_down,
-                                        color: bnw900,
-                                        size: size24,
-                                      )
-                                    ],
-                                  ),
-                                  AnimatedContainer(
-                                    duration: Duration(milliseconds: 300),
-                                    margin: EdgeInsets.only(
-                                        top: isDropdownOpen ? size16 : 0),
-                                    child: isDropdownOpen
-                                        ? Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                2,
-                                            width: double.infinity,
-                                            padding: EdgeInsets.all(size16),
-                                            decoration: BoxDecoration(
-                                              color: bnw200,
-                                              borderRadius:
-                                                  BorderRadius.circular(size16),
-                                            ),
-                                            child: ListView(
-                                              padding: EdgeInsets.zero,
-                                              physics: BouncingScrollPhysics(),
-                                              children: [
-                                                Text(
-                                                  'Status Transaksi',
-                                                  style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                                SizedBox(height: size12),
-                                                SizedBox(
-                                                    width: double.infinity,
-                                                    child:
-                                                        buttonStatusTransaksi(
-                                                            data)),
-                                                SizedBox(height: size16),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      'Informasi Transaksi',
-                                                      style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
-                                                    ),
-                                                    SizedBox(height: size12),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                              'Waktu Tagihan',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              'Nomor Tagihan',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              'Kasir',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              'Alasan Batal',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            Text(
-                                                              dataPerubahan[
-                                                                      'entrydate'] ??
-                                                                  '-',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              dataPerubahan[
-                                                                      'transactionid'] ??
-                                                                  '-',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              dataPerubahan[
-                                                                      'pic'] ??
-                                                                  '-',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                            SizedBox(
-                                                                height: size8),
-                                                            Text(
-                                                              dataPerubahan[
-                                                                          'reference']
-                                                                      [
-                                                                      'alasan_reference'] ??
-                                                                  '-',
-                                                              style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: size16),
-                                                    Text(
-                                                      'Detail Alasan',
-                                                      style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
-                                                    ),
-                                                    SizedBox(height: size8),
-                                                    Wrap(
-                                                      children: [
-                                                        for (final paragraph
-                                                            in (dataPerubahan[
-                                                                            'reference']
-                                                                        [
-                                                                        'detail_alasan_reference'] ??
-                                                                    '')
-                                                                .split('\n'))
-                                                          Text(
-                                                            paragraph,
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: size16),
-                                                    Text(
-                                                      'Rincian Produk',
-                                                      style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
-                                                    ),
-                                                    SizedBox(
-                                                      child: ListView.builder(
-                                                        shrinkWrap: true,
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                        physics:
-                                                            NeverScrollableScrollPhysics(),
-                                                        itemCount:
-                                                            detail.length,
-                                                        itemBuilder:
-                                                            (context, index) {
-                                                          return SizedBox(
-                                                            child: Column(
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'x${detail[index]['quantity']}',
-                                                                      style: heading3(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit'),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        width:
-                                                                            size8),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          size48,
-                                                                      width:
-                                                                          size48,
-                                                                      child:
-                                                                          AspectRatio(
-                                                                        aspectRatio:
-                                                                            1,
-                                                                        child:
-                                                                            Container(
-                                                                          child:
-                                                                              Image.network(
-                                                                            detail[index]['product_image'],
-                                                                            fit:
-                                                                                BoxFit.cover,
-                                                                            errorBuilder: (context, error, stackTrace) =>
-                                                                                SvgPicture.asset(
-                                                                              'assets/logoProduct.svg',
-                                                                              fit: BoxFit.cover,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        width:
-                                                                            size8),
-                                                                    Column(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .start,
-                                                                      children: [
-                                                                        Text(
-                                                                          detail[index]['name'] ??
-                                                                              '-',
-                                                                          style: heading3(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                        Text(
-                                                                          FormatCurrency.convertToIdr(int.parse(detail[index]['amount'].toString()))
-                                                                              .toString(),
-                                                                          style: body1(
-                                                                              FontWeight.w400,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                        Text(
-                                                                          'Catatan : ${detail[index]['description']}',
-                                                                          style: body1(
-                                                                              FontWeight.w400,
-                                                                              bnw900,
-                                                                              'Outfit'),
-                                                                        ),
-                                                                      ],
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                                Divider(),
-                                                              ],
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : SizedBox(),
-                                  ),
-                                ],
-                              )),
-                        )
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }
-              return SizedBox();
-            },
-          );
-        });
+                ),
+              );
+            }
+            return SizedBox();
+          },
+        );
+      },
+    );
   }
 
   buttonStatusTransaksi(Map<String, dynamic> data) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: size12,
-        vertical: size16,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: size12, vertical: size16),
       decoration: BoxDecoration(
         color: data['is_color'] == '1'
             ? succes100
             : data['is_color'] == '2'
-                ? danger100
-                : waring100,
+            ? danger100
+            : waring100,
         borderRadius: BorderRadius.circular(size8),
       ),
       child: Row(
@@ -1633,21 +1753,22 @@ class _RiwayatPageState extends State<RiwayatPage> {
           Text(
             data['status_transactions'] ?? '-',
             style: body1(
-                FontWeight.w400,
-                data['is_color'] == '1'
-                    ? succes500
-                    : data['is_color'] == '2'
-                        ? danger500
-                        : waring500,
-                'Outfit'),
+              FontWeight.w400,
+              data['is_color'] == '1'
+                  ? succes500
+                  : data['is_color'] == '2'
+                  ? danger500
+                  : waring500,
+              'Outfit',
+            ),
           ),
           Icon(
             PhosphorIcons.info_fill,
             color: data['is_color'] == '1'
                 ? succes500
                 : data['is_color'] == '2'
-                    ? danger500
-                    : waring500,
+                ? danger500
+                : waring500,
             size: size24,
           ),
         ],
@@ -1661,9 +1782,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1672,8 +1791,12 @@ class _RiwayatPageState extends State<RiwayatPage> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -1694,18 +1817,27 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 Text(
                                   'Urutkan',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: 20),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -1715,26 +1847,31 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color:
                                                   valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
+                                                  ? primary500
+                                                  : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
-                                          label: Text(orderByRiwayatText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
+                                          label: Text(
+                                            orderByRiwayatText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByProduct == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           selected:
                                               valueOrderByProduct == index,
                                           onSelected: (bool selected) {
@@ -1775,7 +1912,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                   child: Text(
                                     'Tampilkan',
                                     style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 0,
@@ -1797,26 +1937,14 @@ class _RiwayatPageState extends State<RiwayatPage> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,
@@ -1828,17 +1956,15 @@ class _RiwayatPageState extends State<RiwayatPage> {
   hapusAlasan(BuildContext context) {
     errorText = '';
     textController.text = '';
-    final refreshSelectedProvider =
-        Provider.of<RefreshSelected>(context, listen: false);
+    final refreshSelectedProvider = Provider.of<RefreshSelected>(
+      context,
+      listen: false,
+    );
     return showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
       // barrierColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) {
         return FutureBuilder(
@@ -1850,278 +1976,330 @@ class _RiwayatPageState extends State<RiwayatPage> {
           ),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return StatefulBuilder(builder: (context, setState) {
-                transaksiReference = snapshot.data['transaksiid_reference'];
-                return IntrinsicHeight(
-                  child: Container(
-                    // padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size16),
-                        topLeft: Radius.circular(size16),
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  transaksiReference = snapshot.data['transaksiid_reference'];
+                  return IntrinsicHeight(
+                    child: Container(
+                      // padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
                       ),
-                    ),
-                    child: Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  refreshSelectedProvider.valueSelected = null;
-                                },
-                                child: Icon(PhosphorIcons.arrow_left,
-                                    color: bnw900, size: 28),
-                              ),
-                              SizedBox(width: size16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Batalkan Riwayat Pesanan',
-                                    style: heading2(
-                                        FontWeight.w700, bnw900, 'Outfit'),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size16),
+                          topLeft: Radius.circular(size16),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    refreshSelectedProvider.valueSelected =
+                                        null;
+                                  },
+                                  child: Icon(
+                                    PhosphorIcons.arrow_left,
+                                    color: bnw900,
+                                    size: 28,
                                   ),
-                                  Text(
-                                    'Pilih alasan yang sesuai',
-                                    style: heading4(
-                                        FontWeight.w400, bnw600, 'Outfit'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: size16),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              controller: _scrollController,
-                              keyboardDismissBehavior:
-                                  ScrollViewKeyboardDismissBehavior.onDrag,
-                              physics: BouncingScrollPhysics(),
-                              child: Container(
-                                width: double.infinity,
-                                color: bnw100,
-                                child: Column(
+                                ),
+                                SizedBox(width: size16),
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Alasan Tidak Sesuai',
-                                          style: heading3(FontWeight.w400,
-                                              bnw900, 'Outfit'),
-                                        ),
-                                        Text(
-                                          '*',
-                                          style: heading3(FontWeight.w400,
-                                              danger500, 'Outfit'),
-                                        ),
-                                      ],
+                                    Text(
+                                      'Batalkan Riwayat Pesanan',
+                                      style: heading2(
+                                        FontWeight.w700,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
-                                    SizedBox(height: size16),
-                                    Consumer<RefreshSelected>(
-                                        builder: (context, value, _) {
-                                      return Container(
-                                        child: Wrap(
-                                          spacing: size16,
-                                          runSpacing: size16,
-                                          children: List<Widget>.generate(
-                                            snapshot.data['alasan'].length,
-                                            (int index) {
-                                              return GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      transaksiReference = snapshot
-                                                              .data[
-                                                          'transaksiid_reference'];
-
-                                                      value.refreshTampilan(
-                                                          index);
-                                                      print(
-                                                          value.valueSelected);
-                                                      idKategori = snapshot
-                                                              .data['alasan']
-                                                          [index]['idkategori'];
-                                                    });
-                                                  },
-                                                  child: buttonL(
-                                                    Center(
-                                                        child: Text(
-                                                      snapshot.data['alasan']
-                                                              [index]
-                                                          ['namakategori'],
-                                                      style: heading4(
-                                                        FontWeight.w400,
-                                                        value.valueSelected ==
-                                                                index
-                                                            ? primary500
-                                                            : bnw900,
-                                                        'Outfit',
-                                                      ),
-                                                    )),
-                                                    value.valueSelected == index
-                                                        ? primary100
-                                                        : bnw100,
-                                                    value.valueSelected == index
-                                                        ? primary500
-                                                        : bnw300,
-                                                  ));
-                                            },
-                                          ).toList(),
-                                        ),
-                                      );
-                                    }),
-                                    SizedBox(height: size16),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Detail Alasan',
-                                          style: heading4(FontWeight.w500,
-                                              bnw900, 'Outfit'),
-                                        ),
-                                        Text(
-                                          '*',
-                                          style: heading4(FontWeight.w700,
-                                              red500, 'Outfit'),
-                                        ),
-                                      ],
-                                    ),
-                                    IntrinsicHeight(
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.multiline,
-                                        maxLines: null,
-                                        style: heading2(
-                                            FontWeight.w600, bnw900, 'Outfit'),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            value.isEmpty
-                                                ? errorText = ''
-                                                : null;
-                                          });
-                                        },
-                                        cursorColor: primary500,
-                                        controller: textController,
-                                        decoration: InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: size16),
-                                          hintText:
-                                              'Cth : Transakasi salah karena ada kesalahan penginputan.',
-                                          hintStyle: heading2(FontWeight.w600,
-                                              bnw400, 'Outfit'),
-                                          errorText: errorText.isNotEmpty
-                                              ? errorText
-                                              : null,
-                                          errorStyle: body1(FontWeight.w500,
-                                              red500, 'Outfit'),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: primary500,
-                                            ),
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 1,
-                                              color: bnw400,
-                                            ),
-                                          ),
-                                          focusedErrorBorder:
-                                              UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: red500,
-                                            ),
-                                          ),
-                                        ),
+                                    Text(
+                                      'Pilih alasan yang sesuai',
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        bnw600,
+                                        'Outfit',
                                       ),
                                     ),
                                   ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: size16),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                controller: _scrollController,
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                physics: BouncingScrollPhysics(),
+                                child: Container(
+                                  width: double.infinity,
+                                  color: bnw100,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Alasan Tidak Sesuai',
+                                            style: heading3(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          Text(
+                                            '*',
+                                            style: heading3(
+                                              FontWeight.w400,
+                                              danger500,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: size16),
+                                      Consumer<RefreshSelected>(
+                                        builder: (context, value, _) {
+                                          return Container(
+                                            child: Wrap(
+                                              spacing: size16,
+                                              runSpacing: size16,
+                                              children: List<Widget>.generate(
+                                                snapshot.data['alasan'].length,
+                                                (int index) {
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        transaksiReference =
+                                                            snapshot
+                                                                .data['transaksiid_reference'];
+
+                                                        value.refreshTampilan(
+                                                          index,
+                                                        );
+                                                        print(
+                                                          value.valueSelected,
+                                                        );
+                                                        idKategori = snapshot
+                                                            .data['alasan'][index]['idkategori'];
+                                                      });
+                                                    },
+                                                    child: buttonL(
+                                                      Center(
+                                                        child: Text(
+                                                          snapshot
+                                                              .data['alasan'][index]['namakategori'],
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            value.valueSelected ==
+                                                                    index
+                                                                ? primary500
+                                                                : bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      value.valueSelected ==
+                                                              index
+                                                          ? primary100
+                                                          : bnw100,
+                                                      value.valueSelected ==
+                                                              index
+                                                          ? primary500
+                                                          : bnw300,
+                                                    ),
+                                                  );
+                                                },
+                                              ).toList(),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(height: size16),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Detail Alasan',
+                                            style: heading4(
+                                              FontWeight.w500,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          Text(
+                                            '*',
+                                            style: heading4(
+                                              FontWeight.w700,
+                                              red500,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      IntrinsicHeight(
+                                        child: TextFormField(
+                                          keyboardType: TextInputType.multiline,
+                                          maxLines: null,
+                                          style: heading2(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              value.isEmpty
+                                                  ? errorText = ''
+                                                  : null;
+                                            });
+                                          },
+                                          cursorColor: primary500,
+                                          controller: textController,
+                                          decoration: InputDecoration(
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  vertical: size16,
+                                                ),
+                                            hintText:
+                                                'Cth : Transakasi salah karena ada kesalahan penginputan.',
+                                            hintStyle: heading2(
+                                              FontWeight.w600,
+                                              bnw400,
+                                              'Outfit',
+                                            ),
+                                            errorText: errorText.isNotEmpty
+                                                ? errorText
+                                                : null,
+                                            errorStyle: body1(
+                                              FontWeight.w500,
+                                              red500,
+                                              'Outfit',
+                                            ),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                width: 2,
+                                                color: primary500,
+                                              ),
+                                            ),
+                                            enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                width: 1,
+                                                color: bnw400,
+                                              ),
+                                            ),
+                                            focusedErrorBorder:
+                                                UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    width: 2,
+                                                    color: red500,
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          textController.text.isEmpty
-                              ? SizedBox()
-                              : Column(
-                                  children: [
-                                    SizedBox(height: size32),
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            whenLoading(context);
-                                            // print(
-                                            //     '$transaksiReference $idKategori ${textController.text}');
+                            textController.text.isEmpty
+                                ? SizedBox()
+                                : Column(
+                                    children: [
+                                      SizedBox(height: size32),
+                                      SizedBox(
+                                        width: MediaQuery.of(
+                                          context,
+                                        ).size.width,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              whenLoading(context);
+                                              // print(
+                                              //     '$transaksiReference $idKategori ${textController.text}');
 
-                                            // print(snapshot
-                                            //     .data['transaksiid_reference']);
-                                            // cartProductIds.clear();
-                                            width = null;
-                                            widtValue = 120;
-                                            heightInformation = 0;
-                                            widthInformation = 0;
+                                              // print(snapshot
+                                              //     .data['transaksiid_reference']);
+                                              // cartProductIds.clear();
+                                              width = null;
+                                              widtValue = 120;
+                                              heightInformation = 0;
+                                              widthInformation = 0;
 
-                                            // cart.clear();
-                                            // cartMap.clear();
+                                              // cart.clear();
+                                              // cartMap.clear();
 
-                                            deleteReference(
-                                                    context,
-                                                    widget.token,
-                                                    snapshot.data[
-                                                        'transaksiid_reference'],
-                                                    idKategori,
-                                                    textController.text,
-                                                    transactionidValue)
-                                                .then((value) {
-                                              if (value != '00') {
-                                                setState(() {
-                                                  // Navigator.of(context,
-                                                  //         rootNavigator: true)
-                                                  //     .pop();
-                                                  WidgetsBinding.instance
-                                                      .addPostFrameCallback(
-                                                          (_) {
-                                                    scrollToTextField();
+                                              deleteReference(
+                                                context,
+                                                widget.token,
+                                                snapshot
+                                                    .data['transaksiid_reference'],
+                                                idKategori,
+                                                textController.text,
+                                                transactionidValue,
+                                              ).then((value) {
+                                                if (value != '00') {
+                                                  setState(() {
+                                                    // Navigator.of(context,
+                                                    //         rootNavigator: true)
+                                                    //     .pop();
+                                                    WidgetsBinding.instance
+                                                        .addPostFrameCallback((
+                                                          _,
+                                                        ) {
+                                                          scrollToTextField();
+                                                        });
+                                                    closeLoading(context);
                                                   });
+                                                } else {
                                                   closeLoading(context);
-                                                });
-                                              } else {
-                                                closeLoading(context);
-                                              }
+                                                }
+                                              });
+                                              setState(() {});
+                                              // initState();
                                             });
-                                            setState(() {});
-                                            // initState();
-                                          });
-                                        },
-                                        child: buttonXL(
-                                          Center(
-                                            child: Text(
-                                              'Batalkan Riwayat Pesanan',
-                                              style: heading3(FontWeight.w600,
-                                                  bnw100, 'Outfit'),
+                                          },
+                                          child: buttonXL(
+                                            Center(
+                                              child: Text(
+                                                'Batalkan Riwayat Pesanan',
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  bnw100,
+                                                  'Outfit',
+                                                ),
+                                              ),
                                             ),
+                                            double.infinity,
                                           ),
-                                          double.infinity,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                        ],
+                                    ],
+                                  ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              });
+                  );
+                },
+              );
             }
             return SizedBox();
           },

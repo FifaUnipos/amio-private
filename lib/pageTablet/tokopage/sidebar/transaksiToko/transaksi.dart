@@ -431,6 +431,7 @@ class _TransactionPageState extends State<TransactionPage>
     };
 
     log("Payload ke server: ${json.encode(bodyJson)}");
+    log("Payload Detail $mapCalculateFinal");
 
     final response = await http.post(
       Uri.parse(createTransaksiUrl),
@@ -1681,6 +1682,9 @@ class _TransactionPageState extends State<TransactionPage>
                           physics: BouncingScrollPhysics(),
                           itemCount: cart.length,
                           itemBuilder: (context, i) {
+                            List<dynamic> variants = cart[i].variants != null
+                                ? jsonDecode(cart[i].variants!)
+                                : [];
                             return Container(
                               decoration: BoxDecoration(
                                 border: Border(
@@ -1774,6 +1778,50 @@ class _TransactionPageState extends State<TransactionPage>
                                                 'Outfit',
                                               ),
                                             ),
+                                            if (variants.isNotEmpty)
+                                              ...variants.map<Widget>((
+                                                variant,
+                                              ) {
+                                                return Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    // Text(
+                                                    //   'Kategori: ${variant['variant_category_title']}',
+                                                    //   style: heading3(
+                                                    //     FontWeight.w500,
+                                                    //     bnw900,
+                                                    //     'Outfit',
+                                                    //   ),
+                                                    // ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          '+ Variant: ${variant['variant_detail'].map((detail) => detail['variant_name']).join(', ')}',
+                                                          style: heading3(
+                                                            FontWeight.w500,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+
+                                                        // Text(
+                                                        //   "${FormatCurrency.convertToIdr(variant['variant_detail'].fold(0, (sum, detail) => sum + (detail['variant_price'] ?? 0)))}",
+                                                        //   // '${variant['variant_detail'].map((detail) => detail['variant_price']).join(', ')}',
+                                                        //   style: heading3(
+                                                        //     FontWeight.w500,
+                                                        //     bnw900,
+                                                        //     'Outfit',
+                                                        //   ),
+                                                        // ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              }).toList(),
                                           ],
                                         ),
                                       ],
@@ -1946,6 +1994,8 @@ class _TransactionPageState extends State<TransactionPage>
                                         ),
                                         Expanded(
                                           child: RefreshIndicator(
+                                            color: bnw100,
+                                            backgroundColor: primary500,
                                             onRefresh: () async {
                                               initState();
                                             },
@@ -2227,6 +2277,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                 pelangganId,
                                                 typePrice,
                                                 discountIdFix,
+                                                '',
                                               );
                                             });
                                           },
@@ -4849,7 +4900,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                         >
                                                                                         map1 = {};
                                                                                         map1['name'] = customProdukName.text;
-                                                                                        map1['productid'] = 'custom';
+                                                                                        map1['product_id'] = 'custom';
                                                                                         // map1['quantity'] = '1';
                                                                                         map1['quantity'] = counterCart.toString();
 
@@ -5853,7 +5904,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     >
                                                                                     map1 = {};
                                                                                     map1['name'] = datasTransaksi![index].name.toString();
-                                                                                    map1['productid'] = datasTransaksi![index].productid.toString();
+                                                                                    map1['product_id'] = datasTransaksi![index].productid.toString();
                                                                                     // map1['quantity'] = '1';
                                                                                     map1['quantity'] = counterCart.toString();
 
@@ -6233,6 +6284,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                 // ! grid produk
                                                 Expanded(
                                                   child: RefreshIndicator(
+                                                    color: bnw100,
+                                                    backgroundColor: primary500,
                                                     onRefresh: () async {
                                                       setState(() {});
                                                       initState();
@@ -6447,7 +6500,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                                         ),
 
                                                                         // 🛒 Badge merah jumlah produk
-                                                                       
                                                                         if (cart.any(
                                                                           (e) =>
                                                                               e.productid ==
@@ -6469,7 +6521,11 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               child: Text(
                                                                                 // ✅ Konversi quantity ke int agar tipe fold cocok
                                                                                 '${cart.where((e) => e.productid == datasTransaksi![i].productid.toString()).fold<int>(0, (sum, item) => sum + (item.quantity as int))}',
-                                                                                style: heading3(FontWeight.w600, bnw100, 'Outfit')
+                                                                                style: heading3(
+                                                                                  FontWeight.w600,
+                                                                                  bnw100,
+                                                                                  'Outfit',
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -8214,6 +8270,7 @@ class _TransactionPageState extends State<TransactionPage>
                                       pelangganId,
                                       '',
                                       '',
+                                      '',
                                     ).then((value) {
                                       if (cartMap.isNotEmpty && value == '00') {
                                         discountName = "";
@@ -9107,9 +9164,6 @@ class _TransactionPageState extends State<TransactionPage>
 
                                 cartMap[existingIndex]['quantity'] =
                                     cart[existingIndex].quantity.toString();
-                                print(
-                                  '🔁 Produk sama + varian sama, tambah qty jadi ${cart[existingIndex].quantity}',
-                                );
                               } else {
                                 // 🆕 Item baru → tambahkan baris baru
                                 sumTotal += (finalPrice * counterCart);
@@ -9128,8 +9182,23 @@ class _TransactionPageState extends State<TransactionPage>
                                     quantity: counterCart,
                                     desc: catatan,
                                     idRequest: "",
+                                    variants:
+                                        selectedVariantList != null &&
+                                            selectedVariantList.isNotEmpty
+                                        ? jsonEncode(
+                                            selectedVariantList,
+                                          ) // Encode list of variants to JSON string
+                                        : null, // Jika tidak ada variants, set ke null
                                   ),
                                 );
+
+                                // for (var cartItem in cart) {
+                                //   print(
+                                //     'Cart Item: ${cartItem.name}, Variants: ${cartItem.variants}',
+                                //   );
+                                // }
+
+                                // print('ini adalah cart baru ${cart}');
 
                                 cartProductIds.add(productId);
 
@@ -9145,14 +9214,15 @@ class _TransactionPageState extends State<TransactionPage>
                                 map1['is_online'] = tapTrue == 2
                                     ? 'true'
                                     : 'false';
-                                map1['variants'] = jsonEncode(
-                                  selectedVariantList ?? [],
-                                );
 
+                                // Menambahkan variants jika ada
+                                map1['variants'] =
+                                    selectedVariantList != null &&
+                                        selectedVariantList!.isNotEmpty
+                                    ? jsonEncode(selectedVariantList)
+                                    : '[]';
                                 cartMap.add(map1);
-                                print(
-                                  '🆕 Produk baru ditambahkan: ${jsonEncode(map1)}',
-                                );
+                                print('🆕 Produk baru ditambahkan: ${cartMap}');
                               }
 
                               Navigator.pop(context);

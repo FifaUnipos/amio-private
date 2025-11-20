@@ -94,7 +94,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     postingRekonUrl = '$url/api/rekon/posting',
     getYearRekonUrl = '$url/api/rekon/year',
     getMonthRekonUrl = '$url/api/rekon/month',
-    getTransaksiSingleRiwayatUrl = '$url/api/transaction/receipt',
+    getTransaksiSingleRiwayatUrl = '$url/api/v2/transaction/receipt',
     calculateTransaksiUrl = '$url/api/v2/transaction/calculating',
     updateAkunUrl = '$url/api/user/update',
     deleteAkunUrl = '$url/api/user/delete',
@@ -2391,12 +2391,12 @@ Future createProduct(
   PageController controller,
 ) async {
   whenLoading(context);
-  final String jsonTest = json.encode(merchid);
+  // final String jsonTest = json.encode(merchid);
   var body = {
     "deviceid": identifier,
     "name": name,
     "shortname": "",
-    "merchantid": jsonTest,
+    "merchantid": merchid,
     "typeproducts": typeProduct,
     "isPPN": isPPN,
     "isActive": isActive,
@@ -2407,8 +2407,8 @@ Future createProduct(
 
   final response = await http.post(
     Uri.parse(createProdukUrl),
-    headers: {'token': token},
-    body: body,
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: jsonEncode(body),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -2440,6 +2440,7 @@ Future calculateTransaction(
   memberid,
   typePrice,
   discount,
+  transactionid,
 ) async {
   whenLoading(context);
   print('🧾 detail cart: $details');
@@ -2458,25 +2459,29 @@ Future calculateTransaction(
     };
   }).toList();
 
+  print('🧾 preparedDetails: $preparedDetails');
+
   final response = await http.post(
     Uri.parse(calculateTransaksiUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: json.encode({
       "deviceid": identifier,
       "member_id": memberid,
-      "detail": preparedDetails,
+      "transaction_id": transactionid,
       "discount_id": discount,
       "typePrice": typePrice,
+      "detail": preparedDetails,
     }),
   );
 
   var jsonResponse = jsonDecode(response.body);
   var data = jsonResponse['data'];
+  debugPrint('🧾 Response Calculate: $jsonResponse');
 
   if (response.statusCode == 200) {
     closeLoading(context);
-    print('✅ Success');
-    log(jsonResponse.toString());
+    // print('✅ Success');
+    // log(jsonResponse.toString());
 
     totalTransaksi = data['amount'] ?? 0;
     subTotal = data['total_before_dsc_tax'] ?? 0;
@@ -2490,7 +2495,7 @@ Future calculateTransaction(
   } else {
     closeLoading(context);
     showSnackbar(context, jsonResponse.toString());
-    log(jsonResponse.toString());
+    // log(jsonResponse.toString());
     return jsonResponse['rc'];
   }
 }
@@ -2515,39 +2520,60 @@ Future createTransaction(
   memberid,
 ) async {
   whenLoading(context);
-  final String detail = json.encode(details);
-
   List<Map<String, String>> mapCalculate = List.empty(growable: true);
 
   for (var detail in details) {
     Map<String, String> map1 = {};
-    map1['name'] = detail['name']!;
-    map1['productid'] = detail['productid']!;
-    map1['quantity'] = detail['quantity']!;
-    map1['image'] = detail['image']!;
-    map1['amount'] = detail['amount_display'] ?? detail['amount']!;
-    map1['description'] = detail['description']!;
-
+    map1['name'] = detail['name'] ?? '';
+    map1['product_id'] = detail['product_id'] ?? '';
+    map1['quantity'] = detail['quantity'] ?? '';
+    map1['image'] = detail['image'] ?? '';
+    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
+    map1['description'] = detail['description'] ?? '';
+    map1['id_request'] = detail['id_request'] ?? '';
+    map1['is_online'] = detail['is_online'] ?? '';
+    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
     mapCalculate.add(map1);
   }
 
-  log(mapCalculate.toString());
+  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
+  // agar is_online jadi bool dan variants jadi array JSON
+  List<Map<String, dynamic>> mapCalculateFinal = [];
 
-  final String detailBaru = json.encode(mapCalculate);
+  for (var item in mapCalculate) {
+    mapCalculateFinal.add({
+      "name": item['name'],
+      "product_id": item['product_id'],
+      "quantity": item['quantity'],
+      "image": item['image'],
+      "amount": item['amount'],
+      "description": item['description'],
+      "id_request": item['id_request'],
+      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
+      "variants": jsonDecode(
+        item['variants'] ?? '[]',
+      ), // ✅ ubah string ke array JSON
+    });
+  }
+
+  // 🧩 Kirim ke server
+  final bodyJson = {
+    "deviceid": identifier,
+    "discount_id": "",
+    "member_id": memberid,
+    "transaction_id": transactionid,
+    "value": value,
+    "payment_method": method,
+    "payment_reference": reference,
+    "detail": mapCalculateFinal,
+  };
+
+  // final String detailBaru = json.encode(mapCalculate);
 
   final response = await http.post(
     Uri.parse(createTransaksiUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "discount": "",
-      "memberid": memberid,
-      "transactionid": transactionid,
-      "value": value,
-      "payment_method": method,
-      "payment_reference": reference,
-      "detail": detailBaru,
-    },
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: json.encode(bodyJson),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -2937,7 +2963,7 @@ Future getDetailRiwayatTransaksi(
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
     headers: {'token': token},
-    body: {"deviceid": identifier, "transactionid": transactionid},
+    body: {"device_id": identifier, "transaction_id": transactionid},
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -2966,22 +2992,18 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
   transactionid,
   merchantid,
 ) async {
-  final body = {
-    "deviceid": identifier,
-    "transactionid": transactionid,
-    "merchantid": merchantid,
-  };
+  final body = {"transaction_id": transactionid, "merchantid": merchantid};
 
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
     body: body,
-    headers: {'token': token},
+    headers: {'token': token, "DEVICE-ID": identifier!},
   );
 
   Map<String, dynamic> data = jsonDecode(response.body);
   if (response.statusCode == 200) {
     log("ini data $data");
-    printext = data['data']['rawstruk'];
+    printext = data['data']['rawstruk'] ?? '';
 
     return data;
   } else {
@@ -3027,15 +3049,15 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksiGrup(
   merchid,
 ) async {
   final body = {
-    "deviceid": identifier,
-    "transactionid": transactionid,
+    "device_id": identifier,
+    "transaction_id": transactionid,
     "merchantid": merchid,
   };
 
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
     body: body,
-    headers: {'token': token},
+    headers: {'token': token, 'Content-Type': 'application/json'},
   );
 
   // mengembalikan data yang didapat dari API sebagai objek Map

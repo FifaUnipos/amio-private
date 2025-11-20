@@ -6,6 +6,8 @@ class CartTransaksi {
   String idRequest = "";
   num? price;
   num quantity = 1;
+  String? variants;
+
   CartTransaksi({
     required this.name,
     required this.productid,
@@ -14,4 +16,6 @@ class CartTransaksi {
     required this.price,
     required this.quantity,
     required this.idRequest,
-  });}
+    this.variants,
+  });
+}

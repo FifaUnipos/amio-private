@@ -832,6 +832,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                       ).then((value) async {
                         if (value == '00') {
                           refreshDataProduk();
+                          
                           conNameProduk.text = '';
                           conHarga.text = '';
                           conHargaOnline.text = '';

@@ -50,7 +50,7 @@ class Dashboarpagenew extends StatefulWidget {
 class _DashboarpagenewState extends State<Dashboarpagenew> {
   PageController _pageController = PageController();
   List<ModelDataToko>? datas;
-  late WebViewController webController;
+  WebViewController? webController;
 
   late Future<List<KulasedayaMember>> futureMembers;
 
@@ -164,9 +164,9 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Image.network(
-                              'https://fifapay.co.id/assets/img/logo.png',
-                              width: 200,
+                            Image.asset(
+                              'assets/images/fifapaylogo.png',
+                              width: 100,
                             ),
                             SizedBox(height: size12),
                             Text(
@@ -302,16 +302,46 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                         typeAccount != 'Group_Merchant'
                             ? GestureDetector(
                                 onTap: () {
-                                  String sessCodeFix = "&sess_code=$sessCode";
-                                  print("my code $bindingUrl$sessCodeFix");
+                                  // pastikan query pertama pakai ? bukan &
+                                  String sessCodeFix = "?sess_code=$sessCode";
+
+                                  // pastikan URL ada https://
+                                  final fullUrl = bindingUrl + sessCodeFix;
+                                  print("URL yang dimuat => $fullUrl");
+
                                   try {
                                     webController = WebViewController()
                                       ..setJavaScriptMode(
                                         JavaScriptMode.unrestricted,
                                       )
-                                      ..loadRequest(
-                                        Uri.parse(bindingUrl + sessCodeFix),
-                                      );
+                                      ..addJavaScriptChannel(
+                                        'flutterCallback',
+                                        onMessageReceived:
+                                            (JavaScriptMessage message) {
+                                              print(
+                                                "Message from web: ${message.message}",
+                                              );
+                                              setState(() {
+                                                dashboardKulasedaya(
+                                                  widget.token,
+                                                );
+                                                Navigator.of(context).popUntil(
+                                                  (route) => route.isFirst,
+                                                );
+                                              });
+                                            },
+                                      )
+                                      ..setNavigationDelegate(
+                                        NavigationDelegate(
+                                          onPageFinished: (String url) {
+                                            webController?.runJavaScript("""
+                  FlutterCallback.postMessage('Halo dari Web!');
+              """);
+                                          },
+                                        ),
+                                      )
+                                      ..loadRequest(Uri.parse(fullUrl));
+
                                     print(
                                       "WebController initialized successfully",
                                     );
@@ -335,51 +365,14 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                             ),
                                           ),
                                         ),
-                                        body: WebViewWidget(
-                                          controller: webController
-                                            ..setJavaScriptMode(
-                                              JavaScriptMode.unrestricted,
-                                            ) // Aktifkan JavaScript
-                                            ..addJavaScriptChannel(
-                                              'flutterCallback', // Nama channel yang digunakan
-                                              onMessageReceived:
-                                                  (JavaScriptMessage message) {
-                                                    print(
-                                                      "Message from web: ${message.message}",
-                                                    );
-
-                                                    setState(() {
-                                                      dashboardKulasedaya(
-                                                        widget.token,
-                                                      );
-
-                                                      Navigator.of(
-                                                        context,
-                                                      ).popUntil(
-                                                        (route) =>
-                                                            route.isFirst,
-                                                      );
-                                                    });
-                                                  },
-                                            )
-                                            ..setNavigationDelegate(
-                                              NavigationDelegate(
-                                                onPageFinished: (String url) {
-                                                  // Pastikan halaman sudah selesai dimuat sebelum menjalankan kode JavaScript
-                                                  webController.runJavaScript(
-                                                    """
-                                              console.log('flutterCallback tersedia:', typeof flutterCallback !== 'undefined');
-                                              console.log('Menguji pengiriman pesan');
-                                              FlutterCallback.postMessage('Halo dari Web!');
-                                            """,
-                                                  );
-                                                },
+                                        body: webController == null
+                                            ? const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              )
+                                            : WebViewWidget(
+                                                controller: webController!,
                                               ),
-                                            )
-                                            ..loadRequest(
-                                              Uri.parse(bindingUrl),
-                                            ), // Ganti dengan URL halaman web
-                                        ),
                                       ),
                                     ),
                                   );
