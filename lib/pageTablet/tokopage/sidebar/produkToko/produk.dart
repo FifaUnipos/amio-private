@@ -849,7 +849,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                     child: buttonXL(
                       Center(
                         child: Text(
-                          'Tambah Variant',
+                          'Tambah',
                           style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ),
