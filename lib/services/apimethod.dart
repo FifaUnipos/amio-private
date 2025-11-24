@@ -1093,9 +1093,10 @@ Future updateProduk(
 
   try {
     whenLoading(context);
+    // log('KODE $typeproducts');
     final response = await http.post(
       Uri.parse(updateProdukUrl),
-      body: {
+      body: jsonEncode({
         "deviceid": identifier,
         "productid": productid,
         "name": name,
@@ -1107,8 +1108,8 @@ Future updateProduk(
         "isPPN": isPPN,
         // "product_image": 'data:image/jpeg;base64,$img',
         "product_image": imgFix,
-      },
-      headers: {"token": "$token"},
+      }),
+      headers: {"token": "$token", "Content-Type": "application/json"},
     );
 
     var jsonResponse = jsonDecode(response.body);

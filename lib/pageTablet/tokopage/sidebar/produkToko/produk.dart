@@ -729,8 +729,8 @@ class _ProdukTokoState extends State<ProdukToko> {
                           widget.token,
                           conNameProduk.text,
                           idProduct,
-                          onswitchppn.toString(),
-                          onswitchtampikan.toString(),
+                          onswitchppn,
+                          onswitchtampikan,
                           conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                           conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
                           img64.toString(),
@@ -781,8 +781,8 @@ class _ProdukTokoState extends State<ProdukToko> {
                         widget.token,
                         conNameProduk.text,
                         idProduct.toString(),
-                        onswitchppn.toString(),
-                        onswitchtampikan.toString(),
+                        onswitchppn,
+                        onswitchtampikan,
                         conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                         conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
                         img64.toString(),
@@ -815,15 +815,14 @@ class _ProdukTokoState extends State<ProdukToko> {
                   child: GestureDetector(
                     onTap: () {
                       // print(idProduct);
-
                       List<String> value = [""];
                       createProduct(
                         context,
                         widget.token,
                         conNameProduk.text,
                         idProduct,
-                        onswitchppn.toString(),
-                        onswitchtampikan.toString(),
+                        onswitchppn,
+                        onswitchtampikan,
                         conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                         conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
                         img64.toString(),
@@ -832,7 +831,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                       ).then((value) async {
                         if (value == '00') {
                           refreshDataProduk();
-                          
+
                           conNameProduk.text = '';
                           conHarga.text = '';
                           conHargaOnline.text = '';
@@ -850,7 +849,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                     child: buttonXL(
                       Center(
                         child: Text(
-                          'Tambah',
+                          'Tambah Variant',
                           style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ),

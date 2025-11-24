@@ -8345,6 +8345,7 @@ class _TransactionPageState extends State<TransactionPage>
       context: context,
       builder: (context) {
         return Container(
+          height: MediaQuery.of(context).size.height * 0.5,
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
