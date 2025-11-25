@@ -68,7 +68,7 @@ class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
     // NotifFCM.setNotifiications();
 
     deviceDetails();
-    dashboardKulasedaya(checkToken);
+    dashboardKulasedaya(checkToken ?? '');
     setState(() {});
 
     _pageController = PageController(

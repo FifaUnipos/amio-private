@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produkVariantPage.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/ubahProductVariantPage.dart';
+import 'package:unipos_app_335/services/provider.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
@@ -68,8 +71,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   late String nameKategoriEdit;
   TextEditingController controllerName = TextEditingController();
-  late TextEditingController controllerNameEdit =
-      TextEditingController(text: nameKategoriEdit);
+  late TextEditingController controllerNameEdit = TextEditingController(
+    text: nameKategoriEdit,
+  );
 
   String textOrderBy = 'Nama Produk A ke Z';
   String textvalueOrderBy = 'upDownNama';
@@ -167,14 +171,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   late bool onswitchtampikanEdit = tampilEdit == '0' ? false : true;
   late String ppnAktifEdit = ppnEdit == '0' ? "Tidak Aktif" : 'Aktif';
   late String kasirAktifEdit = tampilEdit == '0' ? "Tidak Aktif" : 'Aktif';
-
+  bool isLoading = false;
   Timer? _debounce;
 
   void _onChanged(String value) {
+    List<String> val = [widget.merchId];
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasProduk = await getProductGrup(
-          context, widget.token, value, widget.merchId, textvalueOrderBy);
+        context,
+        widget.token,
+        value,
+        val,
+        textvalueOrderBy,
+      );
       setState(() {});
     });
   }
@@ -189,35 +199,34 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     conHargaOnlineEdit.addListener(formatOnlineInputRpEdit);
 
     // getSingleProduct(context, widget.token, "", singleProductId, setState);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [widget.merchId];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [widget.merchId];
 
-        await getDataProduk(value);
+      await getDataProduk(value);
 
-        setState(() {
-          // log(datasProduk.toString());
-          datasProduk;
-        });
+      setState(() {
+        // log(datasProduk.toString());
+        datasProduk;
+      });
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
 
     _getProductList();
     super.initState();
   }
 
   Future<dynamic> getDataProduk(List<String> value) async {
+    List<String> val = [widget.merchId];
     return datasProduk = await getProductGrup(
       context,
       widget.token,
       '',
-      widget.merchId,
+      val,
       textvalueOrderBy,
     );
   }
@@ -347,6 +356,16 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
               pageProdukToko(isFalseAvailable),
               tambahProdukToko(setState, context),
               editProdukToko(),
+              ProductVariantPage(
+                token: widget.token,
+                pageController: _pageController,
+                merchantId: widget.merchId,
+              ),
+              UbahProductVariantPage(
+                token: widget.token,
+                pageController: _pageController,
+                merchantId: widget.merchId,
+              ),
               // ubahProdukGrupToko(setState, context, singleProductId),
               // LihatProdukUbahPage(
               //   token: widget.token,
@@ -361,7 +380,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     );
   }
 
-//! page
+  //! page
   tambahProdukToko(StateSetter setState, BuildContext context) {
     return StatefulBuilder(
       builder: (context, setState) => Column(
@@ -373,8 +392,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 GestureDetector(
                   onTap: () {
                     _pageController.previousPage(
-                        duration: Duration(milliseconds: 10),
-                        curve: Curves.ease);
+                      duration: Duration(milliseconds: 10),
+                      curve: Curves.ease,
+                    );
                     refreshTampilan();
                   },
                   child: Icon(
@@ -442,22 +462,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: primary500,
-                          ),
+                          borderSide: BorderSide(width: 2, color: primary500),
                         ),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1.5,
-                            color: bnw500,
-                          ),
+                          borderSide: BorderSide(width: 1.5, color: bnw500),
                         ),
                         enabled: false,
-                        suffixIcon: Icon(
-                          PhosphorIcons.plus,
-                          color: bnw900,
-                        ),
+                        suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
                         hintText: 'Tambah Gambar',
                         hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       ),
@@ -472,9 +483,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                   TextInputType.text,
                 ),
                 SizedBox(height: size16),
-                SizedBox(
-                  child: kategoriList(context),
-                ),
+                SizedBox(child: kategoriList(context)),
                 SizedBox(height: size16),
                 fieldAddProduk(
                   'Harga',
@@ -493,16 +502,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    setState(
-                      () {
-                        onswitchppn = !onswitchppn;
-                        onswitchppn
-                            ? ppnAktif = "Aktif"
-                            : ppnAktif = "Tidak Aktif";
-                        // log(onswitchppn.toString());
-                        log(ppnAktif);
-                      },
-                    );
+                    setState(() {
+                      onswitchppn = !onswitchppn;
+                      onswitchppn
+                          ? ppnAktif = "Aktif"
+                          : ppnAktif = "Tidak Aktif";
+                      // log(onswitchppn.toString());
+                      log(ppnAktif);
+                    });
                   },
                   child: Container(
                     child: Row(
@@ -513,13 +520,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           children: [
                             Text(
                               'PPN',
-                              style:
-                                  heading2(FontWeight.w600, bnw900, 'Outfit'),
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               ppnAktif,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -528,8 +541,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           height: 28,
                           value: onswitchppn,
                           padding: 0,
-                          activeIcon:
-                              Icon(PhosphorIcons.check, color: primary500),
+                          activeIcon: Icon(
+                            PhosphorIcons.check,
+                            color: primary500,
+                          ),
                           inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                           activeColor: primary500,
                           inactiveColor: bnw100,
@@ -537,19 +552,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           inactiveToggleColor: bnw900,
                           activeToggleColor: primary200,
                           activeSwitchBorder: Border.all(color: primary500),
-                          inactiveSwitchBorder:
-                              Border.all(color: bnw300, width: 2),
+                          inactiveSwitchBorder: Border.all(
+                            color: bnw300,
+                            width: 2,
+                          ),
                           onToggle: (val) {
-                            setState(
-                              () {
-                                onswitchppn = val;
-                                onswitchppn
-                                    ? ppnAktif = "Aktif"
-                                    : ppnAktif = "Tidak Aktif";
-                                log(onswitchppn.toString());
-                                log(ppnAktif);
-                              },
-                            );
+                            setState(() {
+                              onswitchppn = val;
+                              onswitchppn
+                                  ? ppnAktif = "Aktif"
+                                  : ppnAktif = "Tidak Aktif";
+                              log(onswitchppn.toString());
+                              log(ppnAktif);
+                            });
                           },
                         ),
                       ],
@@ -578,13 +593,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             children: [
                               Text(
                                 'Tampilkan Di Kasir',
-                                style:
-                                    heading2(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 kasirAktif,
-                                style:
-                                    heading4(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                             ],
                           ),
@@ -594,8 +615,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           height: 28,
                           value: onswitchtampikan,
                           padding: 0,
-                          activeIcon:
-                              Icon(PhosphorIcons.check, color: primary500),
+                          activeIcon: Icon(
+                            PhosphorIcons.check,
+                            color: primary500,
+                          ),
                           inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                           activeColor: primary500,
                           inactiveColor: bnw100,
@@ -603,8 +626,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           inactiveToggleColor: bnw900,
                           activeToggleColor: primary200,
                           activeSwitchBorder: Border.all(color: primary500),
-                          inactiveSwitchBorder:
-                              Border.all(color: bnw300, width: 2),
+                          inactiveSwitchBorder: Border.all(
+                            color: bnw300,
+                            width: 2,
+                          ),
                           onToggle: (val) {
                             onswitchtampikan = val;
                             onswitchtampikan
@@ -616,6 +641,54 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           },
                         ),
                       ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: GestureDetector(
+                    onTap: () {
+                      List<String> value = [widget.merchId];
+                      // create hello world
+                      createProduct(
+                        context,
+                        widget.token,
+                        conNameProduk.text,
+                        idProduct,
+                        onswitchppn,
+                        onswitchtampikan,
+                        conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                        conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                        img64.toString(),
+                        value,
+                        _pageController,
+                      ).then((value) async {
+                        if (value == '00') {
+                          refreshDataProduk();
+                          conNameProduk.text = '';
+                          conHarga.text = '';
+                          conHargaOnline.text = '';
+                          idProduct = '';
+                          await Future.delayed(Duration(seconds: 1));
+                          _pageController.jumpToPage(3);
+                          setState(() {});
+                          initState();
+                          getDataProduk(['']);
+                        }
+                      });
+                      initState();
+                      setState(() {});
+                    },
+                    child: buttonXLoutline(
+                      Center(
+                        child: Text(
+                          'Tambah Variant',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                      ),
+                      0,
+                      bnw900,
                     ),
                   ),
                 ),
@@ -633,9 +706,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       context,
                       widget.token,
                       conNameProduk.text,
-                      idProduct.toString(),
-                      onswitchppn.toString(),
-                      onswitchtampikan.toString(),
+                      idProduct,
+                      onswitchppn,
+                      onswitchtampikan,
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       img64.toString(),
@@ -673,8 +746,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       widget.token,
                       conNameProduk.text,
                       idProduct,
-                      onswitchppn.toString(),
-                      onswitchtampikan.toString(),
+                      onswitchppn,
+                      onswitchtampikan,
                       conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
                       img64.toString(),
@@ -708,22 +781,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
   }
 
   pageProdukToko(bool isFalseAvailable) {
-    List<String> value = [widget.merchId];
+    List<String> val = [widget.merchId];
+
     return FutureBuilder(
-      future: getProductGrup(
-        context,
-        widget.token,
-        '',
-        widget.merchId,
-        textvalueOrderBy,
-      ),
+      future: getProductGrup(context, widget.token, '', val, textvalueOrderBy),
       builder: (context, snapshot) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -770,29 +838,23 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         controller: searchController,
                         onChanged: _onChanged,
                         decoration: InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(vertical: size12),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: size12,
+                          ),
                           isDense: true,
                           filled: true,
                           fillColor: bnw200,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              color: bnw300,
-                            ),
+                            borderSide: BorderSide(color: bnw300),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              width: 2,
-                              color: primary500,
-                            ),
+                            borderSide: BorderSide(width: 2, color: primary500),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              color: bnw300,
-                            ),
+                            borderSide: BorderSide(color: bnw300),
                           ),
                           prefixIcon: Container(
                             margin: EdgeInsets.only(left: 20, right: size12),
@@ -816,8 +878,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 )
                               : null,
                           hintText: 'Cari nama produk',
-                          hintStyle:
-                              heading3(FontWeight.w500, bnw400, 'Outfit'),
+                          hintStyle: heading3(
+                            FontWeight.w500,
+                            bnw400,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),
@@ -825,8 +890,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     GestureDetector(
                       onTap: () {
                         _pageController.nextPage(
-                            duration: Duration(milliseconds: 10),
-                            curve: Curves.ease);
+                          duration: Duration(milliseconds: 10),
+                          curve: Curves.ease,
+                        );
                       },
                       child: buttonXL(
                         Row(
@@ -836,14 +902,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size12),
                             Text(
                               'Produk',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
                         130,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -891,7 +960,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 child: Text(
                                   'Info Produk',
                                   style: heading4(
-                                      FontWeight.w700, bnw100, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -908,7 +980,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 child: Text(
                                   'Harga Normal',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -925,7 +1000,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 child: Text(
                                   'Harga Online',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -939,8 +1017,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               ),
                               child: Text(
                                 'PPN',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -954,8 +1035,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               ),
                               child: Text(
                                 'Tampil Kasir',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -977,8 +1061,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     checkFill == 'penuh'
                                         ? PhosphorIcons.check_square_fill
                                         : isSelectionMode
-                                            ? PhosphorIcons.minus_circle_fill
-                                            : PhosphorIcons.square,
+                                        ? PhosphorIcons.minus_circle_fill
+                                        : PhosphorIcons.square,
                                     color: bnw100,
                                   ),
                                 ),
@@ -986,8 +1070,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             ),
                             Text(
                               '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                             SizedBox(width: size8),
                             GestureDetector(
@@ -1002,14 +1089,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                         children: [
                                           Text(
                                             'Yakin Ingin Menghapus Produk?',
-                                            style: heading1(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: heading1(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                           SizedBox(height: size16),
                                           Text(
                                             'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                            style: heading2(FontWeight.w400,
-                                                bnw900, 'Outfit'),
+                                            style: heading2(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -1024,22 +1117,22 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   widget.token,
                                                   listProduct,
                                                   widget.merchId,
-                                                ).then(
-                                                  (value) async {
-                                                    if (value == '00') {
-                                                      refreshDataProduk();
-                                                      await Future.delayed(
-                                                          Duration(seconds: 1));
-                                                      conNameProduk.text = '';
-                                                      conHarga.text = '';
-                                                      idProduct = null;
-                                                      _pageController
-                                                          .jumpToPage(0);
-                                                      setState(() {});
-                                                      initState();
-                                                    }
-                                                  },
-                                                );
+                                                ).then((value) async {
+                                                  if (value == '00') {
+                                                    refreshDataProduk();
+                                                    await Future.delayed(
+                                                      Duration(seconds: 1),
+                                                    );
+                                                    conNameProduk.text = '';
+                                                    conHarga.text = '';
+                                                    idProduct = null;
+                                                    _pageController.jumpToPage(
+                                                      0,
+                                                    );
+                                                    setState(() {});
+                                                    initState();
+                                                  }
+                                                });
                                                 refreshDataProduk();
 
                                                 setState(() {});
@@ -1050,14 +1143,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   child: Text(
                                                     'Iya, Hapus',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        primary500,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      primary500,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                                 primary500,
                                               ),
                                             ),
@@ -1073,14 +1167,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   child: Text(
                                                     'Batalkan',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw100,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw100,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                               ),
                                             ),
                                           ),
@@ -1095,12 +1190,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(PhosphorIcons.trash_fill,
-                                        color: bnw900),
+                                    Icon(
+                                      PhosphorIcons.trash_fill,
+                                      color: bnw900,
+                                    ),
                                     Text(
                                       'Hapus Semua',
                                       style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1159,7 +1259,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     Text(
                                       'Nonaktifkan PPN',
                                       style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1215,7 +1318,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     Text(
                                       'Aktifkan Tampilkan dikasir',
                                       style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1266,7 +1372,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                              color: bnw300, width: width1),
+                                            color: bnw300,
+                                            width: width1,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
@@ -1305,35 +1413,38 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                     child: ClipRRect(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              size8),
-                                                      child: datasProduk![index]
+                                                            size8,
+                                                          ),
+                                                      child:
+                                                          datasProduk![index]
                                                                   .productImage !=
                                                               null
                                                           ? Padding(
                                                               padding:
                                                                   EdgeInsets.all(
-                                                                      size8),
+                                                                    size8,
+                                                                  ),
                                                               child: ClipRRect(
                                                                 borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            size8),
-                                                                child: Image
-                                                                    .network(
-                                                                  datasProduk![
-                                                                          index]
+                                                                    BorderRadius.circular(
+                                                                      size8,
+                                                                    ),
+                                                                child: Image.network(
+                                                                  datasProduk![index]
                                                                       .productImage
                                                                       .toString(),
                                                                   fit: BoxFit
                                                                       .cover,
-                                                                  errorBuilder: (context,
-                                                                          error,
-                                                                          stackTrace) =>
-                                                                      SizedBox(
-                                                                    child: SvgPicture
-                                                                        .asset(
-                                                                            'assets/logoProduct.svg'),
-                                                                  ),
+                                                                  errorBuilder:
+                                                                      (
+                                                                        context,
+                                                                        error,
+                                                                        stackTrace,
+                                                                      ) => SizedBox(
+                                                                        child: SvgPicture.asset(
+                                                                          'assets/logoProduct.svg',
+                                                                        ),
+                                                                      ),
                                                                 ),
                                                               ),
                                                             )
@@ -1355,9 +1466,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   .name ??
                                                               '',
                                                           style: heading4(
-                                                              FontWeight.w600,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                           maxLines: 3,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -1367,9 +1479,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   .typeproducts ??
                                                               '',
                                                           style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                           maxLines: 3,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -1386,13 +1499,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                             flex: 2,
                                             child: Container(
                                               constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
+                                                maxWidth:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width /
                                                     size8,
-                                                minWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
+                                                minWidth:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width /
                                                     size8,
                                               ),
                                               child: Column(
@@ -1404,17 +1519,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           0
                                                       ? Text(
                                                           FormatCurrency.convertToIdr(
-                                                                  datasProduk![
-                                                                          index]
-                                                                      .price_after)
-                                                              .toString(),
+                                                            datasProduk![index]
+                                                                .price_after,
+                                                          ).toString(),
                                                           maxLines: 3,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         )
                                                       : Column(
                                                           crossAxisAlignment:
@@ -1423,57 +1538,60 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           children: [
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                      datasProduk![
-                                                                              index]
-                                                                          .price_after)
-                                                                  .toString(),
+                                                                datasProduk![index]
+                                                                    .price_after,
+                                                              ).toString(),
                                                               maxLines: 3,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
                                                               style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             SizedBox(
-                                                                height: size4),
+                                                              height: size4,
+                                                            ),
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                      datasProduk![
-                                                                              index]
-                                                                          .price)
-                                                                  .toString(),
+                                                                datasProduk![index]
+                                                                    .price,
+                                                              ).toString(),
                                                               maxLines: 3,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
                                                               style:
                                                                   body3lineThrough(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                             ),
                                                             SizedBox(
-                                                                height: size4),
+                                                              height: size4,
+                                                            ),
                                                             datasProduk![index]
                                                                         .discount_type ==
                                                                     'price'
                                                                 ? Text(
                                                                     FormatCurrency.convertToIdr(
-                                                                            datasProduk![index].discount)
-                                                                        .toString(),
+                                                                      datasProduk![index]
+                                                                          .discount,
+                                                                    ).toString(),
                                                                     maxLines: 3,
                                                                     overflow:
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                     style: body2(
-                                                                        FontWeight
-                                                                            .w700,
-                                                                        danger500,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit',
+                                                                    ),
                                                                   )
                                                                 : Text(
                                                                     '${datasProduk![index].discount}%',
@@ -1482,10 +1600,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                     style: body2(
-                                                                        FontWeight
-                                                                            .w700,
-                                                                        danger500,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                           ],
                                                         ),
@@ -1521,13 +1640,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                             flex: 2,
                                             child: Container(
                                               constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
+                                                maxWidth:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width /
                                                     size8,
-                                                minWidth: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
+                                                minWidth:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width /
                                                     size8,
                                               ),
                                               child: Column(
@@ -1539,17 +1660,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           0
                                                       ? Text(
                                                           FormatCurrency.convertToIdr(
-                                                                  datasProduk![
-                                                                          index]
-                                                                      .price_online_shop_after)
-                                                              .toString(),
+                                                            datasProduk![index]
+                                                                .price_online_shop_after,
+                                                          ).toString(),
                                                           maxLines: 3,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         )
                                                       : Column(
                                                           crossAxisAlignment:
@@ -1558,57 +1679,60 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           children: [
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                      datasProduk![
-                                                                              index]
-                                                                          .price_online_shop_after)
-                                                                  .toString(),
+                                                                datasProduk![index]
+                                                                    .price_online_shop_after,
+                                                              ).toString(),
                                                               maxLines: 3,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
                                                               style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             SizedBox(
-                                                                height: size4),
+                                                              height: size4,
+                                                            ),
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                      datasProduk![
-                                                                              index]
-                                                                          .price_online_shop)
-                                                                  .toString(),
+                                                                datasProduk![index]
+                                                                    .price_online_shop,
+                                                              ).toString(),
                                                               maxLines: 3,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
                                                               style:
                                                                   body3lineThrough(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                             ),
                                                             SizedBox(
-                                                                height: size4),
+                                                              height: size4,
+                                                            ),
                                                             datasProduk![index]
                                                                         .discount_type ==
                                                                     'price'
                                                                 ? Text(
                                                                     FormatCurrency.convertToIdr(
-                                                                            datasProduk![index].discount)
-                                                                        .toString(),
+                                                                      datasProduk![index]
+                                                                          .discount,
+                                                                    ).toString(),
                                                                     maxLines: 3,
                                                                     overflow:
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                     style: body2(
-                                                                        FontWeight
-                                                                            .w700,
-                                                                        danger500,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit',
+                                                                    ),
                                                                   )
                                                                 : Text(
                                                                     '${datasProduk![index].discount}%',
@@ -1617,10 +1741,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                     style: body2(
-                                                                        FontWeight
-                                                                            .w700,
-                                                                        danger500,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      danger500,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                           ],
                                                         ),
@@ -1631,13 +1756,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                           SizedBox(width: size16),
                                           Container(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              maxWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   18,
-                                              minWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              minWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   18,
                                             ),
                                             child: FlutterSwitch(
@@ -1646,11 +1773,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   ? true
                                                   : false,
                                               activeIcon: Icon(
-                                                  PhosphorIcons.check,
-                                                  color: primary500),
+                                                PhosphorIcons.check,
+                                                color: primary500,
+                                              ),
                                               inactiveIcon: Icon(
-                                                  PhosphorIcons.x,
-                                                  color: bnw100),
+                                                PhosphorIcons.x,
+                                                color: bnw100,
+                                              ),
                                               activeColor: primary500,
                                               inactiveColor: bnw100,
                                               borderRadius: 30.0,
@@ -1658,15 +1787,18 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                               height: 27.0,
                                               inactiveToggleColor: bnw900,
                                               activeToggleColor: primary200,
-                                              activeSwitchBorder:
-                                                  Border.all(color: primary500),
+                                              activeSwitchBorder: Border.all(
+                                                color: primary500,
+                                              ),
                                               inactiveSwitchBorder: Border.all(
-                                                  color: bnw300, width: 2),
+                                                color: bnw300,
+                                                width: 2,
+                                              ),
                                               onToggle: (bool value) {
                                                 dataProduk.isPPN = 1;
                                                 // print('hello');
                                                 List<String> listProduct = [
-                                                  dataProduk.productid!
+                                                  dataProduk.productid!,
                                                 ];
                                                 changePpn(
                                                   context,
@@ -1691,13 +1823,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                           SizedBox(width: size16),
                                           Container(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              maxWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   12,
-                                              minWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              minWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   12,
                                             ),
                                             child: FlutterSwitch(
@@ -1708,24 +1842,29 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                               width: 50.0,
                                               height: 27.0,
                                               activeIcon: Icon(
-                                                  PhosphorIcons.check,
-                                                  color: primary500),
+                                                PhosphorIcons.check,
+                                                color: primary500,
+                                              ),
                                               inactiveIcon: Icon(
-                                                  PhosphorIcons.x,
-                                                  color: bnw100),
+                                                PhosphorIcons.x,
+                                                color: bnw100,
+                                              ),
                                               activeColor: primary500,
                                               inactiveColor: bnw100,
                                               borderRadius: 30.0,
                                               inactiveToggleColor: bnw900,
                                               activeToggleColor: primary200,
-                                              activeSwitchBorder:
-                                                  Border.all(color: primary500),
+                                              activeSwitchBorder: Border.all(
+                                                color: primary500,
+                                              ),
                                               inactiveSwitchBorder: Border.all(
-                                                  color: bnw300, width: 2),
+                                                color: bnw300,
+                                                width: 2,
+                                              ),
                                               onToggle: (bool value) {
                                                 // print('hello');
                                                 List<String> listProduct = [
-                                                  dataProduk.productid!
+                                                  dataProduk.productid!,
                                                 ];
                                                 changeActive(
                                                   context,
@@ -1755,13 +1894,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                 setState(() {
                                                   showModalBottom(
                                                     context,
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height,
                                                     IntrinsicHeight(
                                                       child: Padding(
                                                         padding: EdgeInsets.all(
-                                                            28.0),
+                                                          28.0,
+                                                        ),
                                                         child: Column(
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
@@ -1784,26 +1924,29 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                       dataProduk
                                                                           .name!,
                                                                       style: heading2(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                     Text(
                                                                       dataProduk
                                                                           .typeproducts!,
                                                                       style: heading4(
-                                                                          FontWeight
-                                                                              .w400,
-                                                                          bnw900,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                   ],
                                                                 ),
                                                                 GestureDetector(
                                                                   onTap: () =>
                                                                       Navigator.pop(
-                                                                          context),
+                                                                        context,
+                                                                      ),
                                                                   child: Icon(
                                                                     PhosphorIcons
                                                                         .x_fill,
@@ -1814,7 +1957,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                               ],
                                                             ),
                                                             SizedBox(
-                                                                height: 20),
+                                                              height: 20,
+                                                            ),
                                                             GestureDetector(
                                                               behavior:
                                                                   HitTestBehavior
@@ -1832,8 +1976,9 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   dataProduk
                                                                       .productid,
                                                                   setState,
-                                                                ).then(
-                                                                    (value) async {
+                                                                ).then((
+                                                                  value,
+                                                                ) async {
                                                                   if (value ==
                                                                       '00') {
                                                                     conNameProdukEdit
@@ -1852,31 +1997,34 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                         dataProduk
                                                                             .productid!;
 
-                                                                    onswitchppnEdit = ppnEdit ==
+                                                                    onswitchppnEdit =
+                                                                        ppnEdit ==
                                                                             '0'
                                                                         ? false
                                                                         : true;
 
-                                                                    onswitchtampikanEdit = tampilEdit ==
+                                                                    onswitchtampikanEdit =
+                                                                        tampilEdit ==
                                                                             '0'
                                                                         ? false
                                                                         : true;
 
-                                                                    ppnAktifEdit = ppnEdit ==
+                                                                    ppnAktifEdit =
+                                                                        ppnEdit ==
                                                                             '0'
                                                                         ? "Tidak Aktif"
                                                                         : 'Aktif';
 
-                                                                    kasirAktifEdit = tampilEdit ==
+                                                                    kasirAktifEdit =
+                                                                        tampilEdit ==
                                                                             '0'
                                                                         ? "Tidak Aktif"
                                                                         : 'Aktif';
 
                                                                     conHargaEdit
-                                                                            .text =
-                                                                        dataProduk
-                                                                            .price
-                                                                            .toString();
+                                                                        .text = dataProduk
+                                                                        .price
+                                                                        .toString();
 
                                                                     jenisProductEdit =
                                                                         dataProduk
@@ -1884,52 +2032,145 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
                                                                     onswitchtampikan =
                                                                         dataProduk.isActive ==
-                                                                                1
-                                                                            ? true
-                                                                            : false;
+                                                                            1
+                                                                        ? true
+                                                                        : false;
 
                                                                     onswitchppn =
                                                                         dataProduk.isPPN ==
-                                                                                1
-                                                                            ? true
-                                                                            : false;
+                                                                            1
+                                                                        ? true
+                                                                        : false;
 
                                                                     idProduct =
                                                                         jenisProductEdit;
-                                                                    await Future.delayed(Duration(
+                                                                    await Future.delayed(
+                                                                      Duration(
                                                                         seconds:
-                                                                            1));
+                                                                            1,
+                                                                      ),
+                                                                    );
 
                                                                     _pageController
                                                                         .jumpToPage(
-                                                                            2);
+                                                                          2,
+                                                                        );
                                                                     Navigator.pop(
-                                                                        context);
+                                                                      context,
+                                                                    );
 
                                                                     setState(
-                                                                        () {});
+                                                                      () {},
+                                                                    );
                                                                   }
                                                                 });
 
                                                                 // print(
                                                                 //     singleProductId);
                                                               },
-                                                              child:
-                                                                  modalBottomValue(
+                                                              child: modalBottomValue(
                                                                 'Ubah Produk',
                                                                 PhosphorIcons
                                                                     .pencil_line,
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                                height: 10),
+                                                              height: size12,
+                                                            ),
+
+                                                            GestureDetector(
+                                                              behavior:
+                                                                  HitTestBehavior
+                                                                      .translucent,
+                                                              onTap: () async {
+                                                                whenLoading(
+                                                                  context,
+                                                                );
+                                                                setState(
+                                                                  () =>
+                                                                      isLoading =
+                                                                          true,
+                                                                );
+                                                                productIdVariant =
+                                                                    dataProduk
+                                                                        .productid!;
+                                                                var response =
+                                                                    await getProductVariant(
+                                                                      context,
+                                                                      widget
+                                                                          .token,
+                                                                      widget
+                                                                          .merchId,
+                                                                      dataProduk
+                                                                          .productid!,
+                                                                    );
+
+                                                                print(
+                                                                  '📦 ini response $response',
+                                                                );
+
+                                                                if (response !=
+                                                                        null &&
+                                                                    response['rc'] ==
+                                                                        '00' &&
+                                                                    response['data'] !=
+                                                                        null) {
+                                                                  Provider.of<
+                                                                        ProductVariantProvider
+                                                                      >(
+                                                                        context,
+                                                                        listen:
+                                                                            false,
+                                                                      )
+                                                                      .setProductData(
+                                                                        response['data'],
+                                                                      );
+
+                                                                  _pageController
+                                                                      .jumpToPage(
+                                                                        4,
+                                                                      );
+                                                                  closeLoading(
+                                                                    context,
+                                                                  );
+                                                                } else {
+                                                                  closeLoading(
+                                                                    context,
+                                                                  );
+                                                                  showSnackbar(
+                                                                    context,
+                                                                    "Failed to fetch or no data available",
+                                                                  );
+                                                                }
+
+                                                                setState(
+                                                                  () =>
+                                                                      isLoading =
+                                                                          false,
+                                                                );
+
+                                                                Navigator.pop(
+                                                                  context,
+                                                                );
+                                                              },
+
+                                                              child: modalBottomValue(
+                                                                'Variant Produk',
+                                                                PhosphorIcons
+                                                                    .ruler,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: size12,
+                                                            ),
                                                             GestureDetector(
                                                               behavior:
                                                                   HitTestBehavior
                                                                       .translucent,
                                                               onTap: () {
                                                                 Navigator.pop(
-                                                                    context);
+                                                                  context,
+                                                                );
                                                                 showBottomPilihan(
                                                                   context,
                                                                   Column(
@@ -1942,31 +2183,39 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                           Text(
                                                                             'Yakin Ingin Menghapus Produk?',
                                                                             style: heading1(
-                                                                                FontWeight.w600,
-                                                                                bnw900,
-                                                                                'Outfit'),
+                                                                              FontWeight.w600,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                           SizedBox(
-                                                                              height: size16),
+                                                                            height:
+                                                                                size16,
+                                                                          ),
                                                                           Text(
                                                                             'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                                             style: heading2(
-                                                                                FontWeight.w400,
-                                                                                bnw900,
-                                                                                'Outfit'),
+                                                                              FontWeight.w400,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                           SizedBox(
-                                                                              height: size16),
+                                                                            height:
+                                                                                size16,
+                                                                          ),
                                                                         ],
                                                                       ),
                                                                       Row(
                                                                         children: [
                                                                           Expanded(
-                                                                            child:
-                                                                                GestureDetector(
+                                                                            child: GestureDetector(
                                                                               onTap: () {
-                                                                                List<String> listProduct = [
-                                                                                  dataProduk.productid!
+                                                                                List<
+                                                                                  String
+                                                                                >
+                                                                                listProduct = [
+                                                                                  dataProduk.productid!,
                                                                                 ];
 
                                                                                 deleteProduk(
@@ -1975,15 +2224,26 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                                   listProduct,
                                                                                   widget.merchId,
                                                                                 ).then(
-                                                                                  (value) async {
-                                                                                    if (value == '00') {
+                                                                                  (
+                                                                                    value,
+                                                                                  ) async {
+                                                                                    if (value ==
+                                                                                        '00') {
                                                                                       refreshDataProduk();
-                                                                                      await Future.delayed(Duration(seconds: 1));
+                                                                                      await Future.delayed(
+                                                                                        Duration(
+                                                                                          seconds: 1,
+                                                                                        ),
+                                                                                      );
                                                                                       conNameProduk.text = '';
                                                                                       conHarga.text = '';
                                                                                       idProduct = '';
-                                                                                      _pageController.jumpToPage(0);
-                                                                                      setState(() {});
+                                                                                      _pageController.jumpToPage(
+                                                                                        0,
+                                                                                      );
+                                                                                      setState(
+                                                                                        () {},
+                                                                                      );
                                                                                       initState();
                                                                                     }
                                                                                   },
@@ -1992,36 +2252,53 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                                 refreshDataProduk();
 
                                                                                 initState();
-                                                                                setState(() {});
+                                                                                setState(
+                                                                                  () {},
+                                                                                );
                                                                               },
                                                                               child: buttonXLoutline(
                                                                                 Center(
                                                                                   child: Text(
                                                                                     'Iya, Hapus',
-                                                                                    style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                    style: heading3(
+                                                                                      FontWeight.w600,
+                                                                                      primary500,
+                                                                                      'Outfit',
+                                                                                    ),
                                                                                   ),
                                                                                 ),
-                                                                                MediaQuery.of(context).size.width,
+                                                                                MediaQuery.of(
+                                                                                  context,
+                                                                                ).size.width,
                                                                                 primary500,
                                                                               ),
                                                                             ),
                                                                           ),
                                                                           SizedBox(
-                                                                              width: 12),
+                                                                            width:
+                                                                                12,
+                                                                          ),
                                                                           Expanded(
-                                                                            child:
-                                                                                GestureDetector(
+                                                                            child: GestureDetector(
                                                                               onTap: () {
-                                                                                Navigator.pop(context);
+                                                                                Navigator.pop(
+                                                                                  context,
+                                                                                );
                                                                               },
                                                                               child: buttonXL(
                                                                                 Center(
                                                                                   child: Text(
                                                                                     'Batalkan',
-                                                                                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                    style: heading3(
+                                                                                      FontWeight.w600,
+                                                                                      bnw100,
+                                                                                      'Outfit',
+                                                                                    ),
                                                                                   ),
                                                                                 ),
-                                                                                MediaQuery.of(context).size.width,
+                                                                                MediaQuery.of(
+                                                                                  context,
+                                                                                ).size.width,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -2031,8 +2308,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   ),
                                                                 );
                                                               },
-                                                              child:
-                                                                  modalBottomValue(
+                                                              child: modalBottomValue(
                                                                 'Hapus Produk',
                                                                 PhosphorIcons
                                                                     .trash,
@@ -2050,15 +2326,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
-                                                    Icon(PhosphorIcons
-                                                        .pencil_line),
+                                                    Icon(
+                                                      PhosphorIcons.pencil_line,
+                                                    ),
                                                     SizedBox(width: 6),
                                                     Text(
                                                       'Atur',
                                                       style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -2119,7 +2397,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
           Expanded(
@@ -2152,27 +2430,26 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 ),
                               )
                             : imageEdit!.isEmpty
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(size8),
-                                    child: Image.network(
-                                      imageEdit!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              SizedBox(
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(size8),
+                                child: Image.network(
+                                  imageEdit!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      SizedBox(
                                         child: SvgPicture.asset(
-                                            'assets/logoProduct.svg'),
+                                          'assets/logoProduct.svg',
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(size8),
-                                    child: Image.network(
-                                      imageEdit!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              GestureDetector(
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(size8),
+                                child: Image.network(
+                                  imageEdit!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      GestureDetector(
                                         onTap: () {
                                           tambahGambar(context);
                                         },
@@ -2183,8 +2460,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                                ),
+                              ),
                       ),
                     ),
                     SizedBox(width: size16),
@@ -2202,22 +2479,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: primary500,
-                          ),
+                          borderSide: BorderSide(width: 2, color: primary500),
                         ),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1.5,
-                            color: bnw500,
-                          ),
+                          borderSide: BorderSide(width: 1.5, color: bnw500),
                         ),
                         enabled: false,
-                        suffixIcon: Icon(
-                          PhosphorIcons.plus,
-                          color: bnw900,
-                        ),
+                        suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
                         hintText: 'Tambah Gambar',
                         hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       ),
@@ -2233,11 +2501,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 SizedBox(height: size16),
                 kategoriList(context),
                 SizedBox(height: size16),
-                fieldEditProduk(
-                  'Harga',
-                  conHargaEdit,
-                  TextInputType.number,
-                ),
+                fieldEditProduk('Harga', conHargaEdit, TextInputType.number),
                 SizedBox(height: size16),
                 fieldEditProdukTanpaBintang(
                   'Harga Online',
@@ -2277,8 +2541,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         // value: snapshot.data['isActive'] == 1 ? true : false,
                         value: onswitchppnEdit,
                         padding: 0,
-                        activeIcon:
-                            Icon(PhosphorIcons.check, color: primary500),
+                        activeIcon: Icon(
+                          PhosphorIcons.check,
+                          color: primary500,
+                        ),
                         inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                         activeColor: primary500,
                         inactiveColor: bnw100,
@@ -2286,19 +2552,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         inactiveToggleColor: bnw900,
                         activeToggleColor: primary200,
                         activeSwitchBorder: Border.all(color: primary500),
-                        inactiveSwitchBorder:
-                            Border.all(color: bnw300, width: 2),
+                        inactiveSwitchBorder: Border.all(
+                          color: bnw300,
+                          width: 2,
+                        ),
                         onToggle: (val) {
-                          setState(
-                            () {
-                              onswitchppnEdit = val;
-                              onswitchppnEdit
-                                  ? ppnAktifEdit = "Aktif"
-                                  : ppnAktifEdit = "Tidak Aktif";
-                              log(onswitchppnEdit.toString());
-                              log(ppnAktifEdit);
-                            },
-                          );
+                          setState(() {
+                            onswitchppnEdit = val;
+                            onswitchppnEdit
+                                ? ppnAktifEdit = "Aktif"
+                                : ppnAktifEdit = "Tidak Aktif";
+                            log(onswitchppnEdit.toString());
+                            log(ppnAktifEdit);
+                          });
                         },
                       ),
                     ],
@@ -2308,14 +2574,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    setState(
-                      () {
-                        onswitchtampikanEdit = !onswitchtampikanEdit;
-                        onswitchtampikanEdit
-                            ? kasirAktifEdit = "Aktif"
-                            : kasirAktifEdit = "Tidak Aktif";
-                      },
-                    );
+                    setState(() {
+                      onswitchtampikanEdit = !onswitchtampikanEdit;
+                      onswitchtampikanEdit
+                          ? kasirAktifEdit = "Aktif"
+                          : kasirAktifEdit = "Tidak Aktif";
+                    });
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2336,12 +2600,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       FlutterSwitch(
                         width: 52,
                         height: 28,
-                        // value: snapshot.data['isPPN'] == 1 ? true : false,
 
+                        // value: snapshot.data['isPPN'] == 1 ? true : false,
                         value: onswitchtampikanEdit,
                         padding: 0,
-                        activeIcon:
-                            Icon(PhosphorIcons.check, color: primary500),
+                        activeIcon: Icon(
+                          PhosphorIcons.check,
+                          color: primary500,
+                        ),
                         inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                         activeColor: primary500,
                         inactiveColor: bnw100,
@@ -2349,8 +2615,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         inactiveToggleColor: bnw900,
                         activeToggleColor: primary200,
                         activeSwitchBorder: Border.all(color: primary500),
-                        inactiveSwitchBorder:
-                            Border.all(color: bnw300, width: 2),
+                        inactiveSwitchBorder: Border.all(
+                          color: bnw300,
+                          width: 2,
+                        ),
                         onToggle: (val) {
                           onswitchtampikanEdit = val;
                           onswitchtampikanEdit
@@ -2393,8 +2661,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                   conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   conHargaOnlineEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   _pageController,
-                  onswitchtampikanEdit.toString(),
-                  onswitchppnEdit.toString(),
+                  onswitchtampikanEdit,
+                  onswitchppnEdit,
                   img64Edit.toString(),
                 ).then((value) async {
                   if (value == '00') {
@@ -2420,35 +2688,27 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 MediaQuery.of(context).size.width,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-//! widget
+  //! widget
   modalBottomValue(String title, icon) {
     return Column(
       children: [
         Container(
           padding: EdgeInsets.symmetric(vertical: size16),
           decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: bnw300,
-                width: 1,
-              ),
-            ),
+            border: Border(bottom: BorderSide(color: bnw300, width: 1)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(icon, color: bnw900),
               SizedBox(width: size16),
-              Text(
-                title,
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              )
+              Text(title, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
             ],
           ),
         ),
@@ -2459,18 +2719,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   tambahGambarEdit(BuildContext context) async {
     showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) => IntrinsicHeight(
         child: Container(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           decoration: BoxDecoration(
             color: bnw100,
             borderRadius: BorderRadius.only(
@@ -2496,37 +2753,37 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 SizedBox(
-                              child: SvgPicture.asset('assets/logoProduct.svg'),
-                            ),
+                                  child: SvgPicture.asset(
+                                    'assets/logoProduct.svg',
+                                  ),
+                                ),
                           ),
                         ),
                       )
                     : myImageEdit != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(120),
-                            child: Container(
-                                height: 200,
-                                width: 200,
-                                color: bnw400,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(size8),
-                                  child: Image.file(
-                                    myImageEdit!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )),
-                          )
-                        : Container(
-                            height: 200,
-                            width: 200,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(120),
-                            ),
-                            child: SvgPicture.asset(
-                              'assets/logoProduct.svg',
-                              fit: BoxFit.cover,
-                            ),
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(120),
+                        child: Container(
+                          height: 200,
+                          width: 200,
+                          color: bnw400,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(size8),
+                            child: Image.file(myImageEdit!, fit: BoxFit.cover),
                           ),
+                        ),
+                      )
+                    : Container(
+                        height: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(120),
+                        ),
+                        child: SvgPicture.asset(
+                          'assets/logoProduct.svg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                 SizedBox(height: size16),
                 Column(
                   children: [
@@ -2541,20 +2798,21 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 2,
-                                  color: primary500,
-                                ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: primary500,
                               ),
-                              focusColor: primary500,
-                              prefixIcon: Icon(
-                                PhosphorIcons.plus,
-                                color: bnw900,
-                              ),
-                              hintText: 'Tambah Foto',
-                              hintStyle:
-                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                            ),
+                            focusColor: primary500,
+                            prefixIcon: Icon(PhosphorIcons.plus, color: bnw900),
+                            hintText: 'Tambah Foto',
+                            hintStyle: heading3(
+                              FontWeight.w400,
+                              bnw900,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -2571,8 +2829,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               child: TextFormField(
                                 cursorColor: primary500,
                                 enabled: false,
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 decoration: InputDecoration(
                                   focusedBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(
@@ -2613,10 +2874,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
             ],
           ),
           IntrinsicHeight(
@@ -2631,18 +2889,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
               },
               decoration: InputDecoration(
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2,
-                    color: primary500,
-                  ),
+                  borderSide: BorderSide(width: 2, color: primary500),
                 ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1.5,
-                    color: bnw500,
-                  ),
+                  borderSide: BorderSide(width: 1.5, color: bnw500),
                 ),
                 hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
               ),
@@ -2660,14 +2912,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: body1(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: body1(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: body1(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: body1(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           TextFormField(
@@ -2678,18 +2924,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               isDense: true,
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -2707,14 +2947,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: body1(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: body1(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: body1(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: body1(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           IntrinsicHeight(
@@ -2729,18 +2963,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
               },
               decoration: InputDecoration(
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2,
-                    color: primary500,
-                  ),
+                  borderSide: BorderSide(width: 2, color: primary500),
                 ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1.5,
-                    color: bnw500,
-                  ),
+                  borderSide: BorderSide(width: 1.5, color: bnw500),
                 ),
                 hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
               ),
@@ -2795,21 +3023,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
     selectedFlag.updateAll((key, value) => isFalseAvailable);
     log(productId.toString());
-    setState(
-      () {
-        if (selectedFlag.containsValue(false)) {
-          checkFill = 'kosong';
-          listProduct.clear();
-          isSelectionMode = selectedFlag.containsValue(false);
-          isSelectionMode = selectedFlag.containsValue(true);
-        } else {
-          checkFill = 'penuh';
-          listProduct.clear();
-          listProduct.addAll(productId);
-          isSelectionMode = selectedFlag.containsValue(true);
-        }
-      },
-    );
+    setState(() {
+      if (selectedFlag.containsValue(false)) {
+        checkFill = 'kosong';
+        listProduct.clear();
+        isSelectionMode = selectedFlag.containsValue(false);
+        isSelectionMode = selectedFlag.containsValue(true);
+      } else {
+        checkFill = 'penuh';
+        listProduct.clear();
+        listProduct.addAll(productId);
+        isSelectionMode = selectedFlag.containsValue(true);
+      }
+    });
   }
 
   kategoriList(BuildContext context) {
@@ -2817,250 +3043,261 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
     return GestureDetector(
       onTap: () {
-        setState(
-          () {
-            // log(jenisProduct.toString());
-            showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
-              isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) =>
-                      FractionallySizedBox(
-                    heightFactor: isKeyboardActive ? 0.9 : 0.6,
-                    child: GestureDetector(
-                      onTap: () => textFieldFocusNode.unfocus(),
-                      child: Container(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        // height: MediaQuery.of(context).size.height / 1,
-                        decoration: BoxDecoration(
-                          color: bnw100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            topLeft: Radius.circular(12),
-                          ),
+        setState(() {
+          // log(jenisProduct.toString());
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            isScrollControlled: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setState) => FractionallySizedBox(
+                  heightFactor: isKeyboardActive ? 0.9 : 0.6,
+                  child: GestureDetector(
+                    onTap: () => textFieldFocusNode.unfocus(),
+                    child: Container(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      // height: MediaQuery.of(context).size.height / 1,
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(12),
+                          topLeft: Radius.circular(12),
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size32, size16, size32, size32),
-                          child: Column(
-                            children: [
-                              dividerShowdialog(),
-                              SizedBox(height: size16),
-                              FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            FocusScope(
+                              child: Focus(
+                                onFocusChange: (value) {
+                                  isKeyboardActive = value;
+                                  setState(() {});
+                                },
+                                child: TextField(
+                                  cursorColor: primary500,
+                                  controller: searchController,
+                                  focusNode: textFieldFocusNode,
+                                  onChanged: (value) {
+                                    //   isKeyboardActive = value.isNotEmpty;
+                                    _runSearchProduct(value);
                                     setState(() {});
                                   },
-                                  child: TextField(
-                                    cursorColor: primary500,
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: (value) {
-                                      //   isKeyboardActive = value.isNotEmpty;
-                                      _runSearchProduct(value);
-                                      setState(() {});
-                                    },
-                                    decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(
-                                            vertical: size12),
-                                        isDense: true,
-                                        filled: true,
-                                        fillColor: bnw200,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            width: 2,
-                                            color: primary500,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
-                                          borderSide: BorderSide(
-                                            color: bnw300,
-                                          ),
-                                        ),
-                                        suffixIcon: searchController
-                                                .text.isNotEmpty
-                                            ? GestureDetector(
-                                                onTap: () {
-                                                  searchController.text = '';
-                                                  _runSearchProduct('');
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  PhosphorIcons.x_fill,
-                                                  size: 20,
-                                                  color: bnw900,
-                                                ),
-                                              )
-                                            : null,
-                                        prefixIcon: Icon(
-                                          PhosphorIcons.magnifying_glass,
-                                          color: bnw500,
-                                        ),
-                                        hintText: 'Cari',
-                                        hintStyle: heading3(
-                                            FontWeight.w500, bnw500, 'Outfit')),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: RefreshIndicator(
-                                  onRefresh: () async {
-                                    initState();
-                                  },
-                                  child: ListView(
-                                    padding: EdgeInsets.zero,
-                                    children: [
-                                      SizedBox(height: size16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          tambahKategori(context,
-                                              isKeyboardActive, setState);
-                                          _getProductList();
-                                        },
-                                        child: buttonXLoutline(
-                                            Center(
-                                                child: Text(
-                                              'Tambah Kategori',
-                                              style: heading2(FontWeight.w600,
-                                                  primary500, 'Outfit'),
-                                            )),
-                                            double.infinity,
-                                            primary500),
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: size12,
+                                    ),
+                                    isDense: true,
+                                    filled: true,
+                                    fillColor: bnw200,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
                                       ),
-                                      SizedBox(height: size16),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        padding: EdgeInsets.zero,
-                                        physics: BouncingScrollPhysics(),
-                                        keyboardDismissBehavior:
-                                            ScrollViewKeyboardDismissBehavior
-                                                .onDrag,
-                                        itemCount:
-                                            searchResultListProduct?.length,
-                                        itemBuilder: (context, index) {
-                                          final product =
-                                              searchResultListProduct?[index];
-                                          final isSelected =
-                                              product == selectedProduct;
-
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                title: Text(
-                                                  product['jenisproduct'] !=
-                                                          null
-                                                      ? capitalizeEachWord(
-                                                          product['jenisproduct']
-                                                              .toString())
-                                                      : '',
-                                                ),
-                                                trailing: Icon(
-                                                  isSelected
-                                                      ? PhosphorIcons
-                                                          .radio_button_fill
-                                                      : PhosphorIcons
-                                                          .radio_button,
-                                                  color: isSelected
-                                                      ? primary500
-                                                      : bnw900,
-                                                ),
-                                                onTap: () {
-                                                  setState(() {
-                                                    textFieldFocusNode
-                                                        .unfocus();
-                                                    jenisProductEdit =
-                                                        product['jenisproduct'];
-
-                                                    jenisProduct =
-                                                        product['jenisproduct'];
-
-                                                    idProduct =
-                                                        product['kodeproduct'];
-
-                                                    _selectProduct(product);
-
-                                                    print(product[
-                                                        'jenisproduct']);
-                                                  });
-                                                },
-                                                onLongPress: () {
-                                                  Navigator.pop(context);
-                                                  nameKategoriEdit =
-                                                      product['jenisproduct'];
-                                                  ubahHapusKategori(
-                                                      product, setState);
-                                                },
-                                              ),
-                                              Divider(color: bnw300),
-                                            ],
-                                          );
-                                        },
+                                      borderSide: BorderSide(color: bnw300),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
                                       ),
-                                      SizedBox(height: size16),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {});
-                                  Navigator.pop(context);
-                                },
-                                child: buttonXXL(
-                                  Center(
-                                    child: Text(
-                                      'Selesai',
-                                      style: heading2(
-                                          FontWeight.w600, bnw100, 'Outfit'),
+                                      borderSide: BorderSide(
+                                        width: 2,
+                                        color: primary500,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
+                                      ),
+                                      borderSide: BorderSide(color: bnw300),
+                                    ),
+                                    suffixIcon: searchController.text.isNotEmpty
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              searchController.text = '';
+                                              _runSearchProduct('');
+                                              setState(() {});
+                                            },
+                                            child: Icon(
+                                              PhosphorIcons.x_fill,
+                                              size: 20,
+                                              color: bnw900,
+                                            ),
+                                          )
+                                        : null,
+                                    prefixIcon: Icon(
+                                      PhosphorIcons.magnifying_glass,
+                                      color: bnw500,
+                                    ),
+                                    hintText: 'Cari',
+                                    hintStyle: heading3(
+                                      FontWeight.w500,
+                                      bnw500,
+                                      'Outfit',
                                     ),
                                   ),
-                                  double.infinity,
                                 ),
                               ),
-                              SizedBox(height: size8)
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              child: RefreshIndicator(
+                                onRefresh: () async {
+                                  initState();
+                                },
+                                child: ListView(
+                                  padding: EdgeInsets.zero,
+                                  children: [
+                                    SizedBox(height: size16),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        tambahKategori(
+                                          context,
+                                          isKeyboardActive,
+                                          setState,
+                                        );
+                                        _getProductList();
+                                      },
+                                      child: buttonXLoutline(
+                                        Center(
+                                          child: Text(
+                                            'Tambah Kategori',
+                                            style: heading2(
+                                              FontWeight.w600,
+                                              primary500,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ),
+                                        double.infinity,
+                                        primary500,
+                                      ),
+                                    ),
+                                    SizedBox(height: size16),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.zero,
+                                      physics: BouncingScrollPhysics(),
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
+                                      itemCount:
+                                          searchResultListProduct?.length,
+                                      itemBuilder: (context, index) {
+                                        final product =
+                                            searchResultListProduct?[index];
+                                        final isSelected =
+                                            product == selectedProduct;
+
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              title: Text(
+                                                product['jenisproduct'] != null
+                                                    ? capitalizeEachWord(
+                                                        product['jenisproduct']
+                                                            .toString(),
+                                                      )
+                                                    : '',
+                                              ),
+                                              trailing: Icon(
+                                                isSelected
+                                                    ? PhosphorIcons
+                                                          .radio_button_fill
+                                                    : PhosphorIcons
+                                                          .radio_button,
+                                                color: isSelected
+                                                    ? primary500
+                                                    : bnw900,
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  textFieldFocusNode.unfocus();
+                                                  jenisProductEdit =
+                                                      product['jenisproduct'];
+
+                                                  jenisProduct =
+                                                      product['jenisproduct'];
+
+                                                  idProduct =
+                                                      product['kodeproduct'];
+
+                                                  _selectProduct(product);
+
+                                                  print(
+                                                    product['jenisproduct'],
+                                                  );
+                                                });
+                                              },
+                                              onLongPress: () {
+                                                Navigator.pop(context);
+                                                nameKategoriEdit =
+                                                    product['jenisproduct'];
+                                                ubahHapusKategori(
+                                                  product,
+                                                  setState,
+                                                );
+                                              },
+                                            ),
+                                            Divider(color: bnw300),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                    SizedBox(height: size16),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {});
+                                Navigator.pop(context);
+                              },
+                              child: buttonXXL(
+                                Center(
+                                  child: Text(
+                                    'Selesai',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                                double.infinity,
+                              ),
+                            ),
+                            SizedBox(height: size8),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                );
-              },
-            );
-          },
-        );
+                ),
+              );
+            },
+          );
+        });
       },
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           color: bnw100,
-          border: Border(
-            bottom: BorderSide(
-              width: 1.5,
-              color: bnw500,
-            ),
-          ),
+          border: Border(bottom: BorderSide(width: 1.5, color: bnw500)),
         ),
         child: Align(
           alignment: Alignment.centerLeft,
@@ -3088,13 +3325,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       jenisProductEdit == ''
                           ? 'Pilih Kategori'
                           : capitalizeEachWord(jenisProductEdit.toString()),
-                      style: heading2(FontWeight.w600,
-                          jenisProductEdit == '' ? bnw500 : bnw900, 'Outfit'),
+                      style: heading2(
+                        FontWeight.w600,
+                        jenisProductEdit == '' ? bnw500 : bnw900,
+                        'Outfit',
+                      ),
                     ),
-                    Icon(
-                      PhosphorIcons.caret_down,
-                      color: bnw900,
-                    )
+                    Icon(PhosphorIcons.caret_down, color: bnw900),
                   ],
                 ),
               ),
@@ -3130,10 +3367,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Icon(
-                      PhosphorIcons.x_fill,
-                      color: bnw900,
-                    ),
+                    child: Icon(PhosphorIcons.x_fill, color: bnw900),
                   ),
                 ],
               ),
@@ -3154,7 +3388,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     builder: (context) => IntrinsicHeight(
                       child: Container(
                         padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
                         // height: MediaQuery.of(context).size.height / 1,
                         decoration: BoxDecoration(
                           color: bnw100,
@@ -3165,7 +3400,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         ),
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
-                              size32, size16, size32, size32),
+                            size32,
+                            size16,
+                            size32,
+                            size32,
+                          ),
                           child: Column(
                             children: [
                               dividerShowdialog(),
@@ -3176,7 +3415,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   Text(
                                     'Ubah Kategori',
                                     style: heading1(
-                                        FontWeight.w700, bnw900, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                   SizedBox(height: size16),
                                   Row(
@@ -3184,12 +3426,18 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                       Text(
                                         'Kategori ',
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                       Text(
                                         '*',
-                                        style: heading4(FontWeight.w400,
-                                            danger500, 'Outfit'),
+                                        style: heading4(
+                                          FontWeight.w400,
+                                          danger500,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -3203,19 +3451,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                       ),
                                       controller: controllerNameEdit,
                                       decoration: InputDecoration(
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: primary500,
-                                            ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            width: 2,
+                                            color: primary500,
                                           ),
-                                          focusColor: primary500,
-                                          hintText: 'Cth : Rental Mobil',
-                                          hintStyle: heading2(
-                                            FontWeight.w600,
-                                            bnw400,
-                                            'Outfit',
-                                          )),
+                                        ),
+                                        focusColor: primary500,
+                                        hintText: 'Cth : Rental Mobil',
+                                        hintStyle: heading2(
+                                          FontWeight.w600,
+                                          bnw400,
+                                          'Outfit',
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -3234,8 +3483,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                         Center(
                                           child: Text(
                                             'Batal',
-                                            style: heading3(FontWeight.w600,
-                                                primary500, 'Outfit'),
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              primary500,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ),
                                         MediaQuery.of(context).size.width,
@@ -3269,8 +3521,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                         Center(
                                           child: Text(
                                             'Simpan',
-                                            style: heading3(FontWeight.w600,
-                                                bnw100, 'Outfit'),
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw100,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ),
                                         MediaQuery.of(context).size.width,
@@ -3305,14 +3560,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           children: [
                             Text(
                               'Yakin Ingin Menghapus Kategori?',
-                              style:
-                                  heading1(FontWeight.w600, bnw900, 'Outfit'),
+                              style: heading1(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             SizedBox(height: size16),
                             Text(
                               'Data kategori yang sudah dihapus tidak dapat dikembalikan lagi.',
-                              style:
-                                  heading2(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading2(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             SizedBox(height: size16),
                           ],
@@ -3322,8 +3583,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  hapusKategoriForm(context, widget.token,
-                                      product['kodeproduct']);
+                                  hapusKategoriForm(
+                                    context,
+                                    widget.token,
+                                    product['kodeproduct'],
+                                  );
 
                                   initState();
                                   setState(() {});
@@ -3332,8 +3596,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   Center(
                                     child: Text(
                                       'Iya, Hapus',
-                                      style: heading3(FontWeight.w600,
-                                          primary500, 'Outfit'),
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ),
                                   double.infinity,
@@ -3352,7 +3619,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     child: Text(
                                       'Batalkan',
                                       style: heading3(
-                                          FontWeight.w600, bnw100, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ),
                                   MediaQuery.of(context).size.width,
@@ -3365,10 +3635,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     ),
                   );
                 },
-                child: modalBottomValue(
-                  'Hapus Kategori',
-                  PhosphorIcons.trash,
-                ),
+                child: modalBottomValue('Hapus Kategori', PhosphorIcons.trash),
               ),
             ],
           ),
@@ -3378,20 +3645,20 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   }
 
   Future<dynamic> tambahKategori(
-      BuildContext context, bool isKeyboardActive, StateSetter setState) {
+    BuildContext context,
+    bool isKeyboardActive,
+    StateSetter setState,
+  ) {
     return showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) => IntrinsicHeight(
         child: Container(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           // height: MediaQuery.of(context).size.height / 1,
           decoration: BoxDecoration(
             color: bnw100,
@@ -3434,26 +3701,23 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         },
                         child: TextFormField(
                           cursorColor: primary500,
-                          style: heading2(
-                            FontWeight.w600,
-                            bnw900,
-                            'Outfit',
-                          ),
+                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                           controller: controllerName,
                           decoration: InputDecoration(
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 2,
-                                  color: primary500,
-                                ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: primary500,
                               ),
-                              focusColor: primary500,
-                              hintText: 'Cth : Rental Mobil',
-                              hintStyle: heading2(
-                                FontWeight.w600,
-                                bnw400,
-                                'Outfit',
-                              )),
+                            ),
+                            focusColor: primary500,
+                            hintText: 'Cth : Rental Mobil',
+                            hintStyle: heading2(
+                              FontWeight.w600,
+                              bnw400,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -3473,7 +3737,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             child: Text(
                               'Batal',
                               style: heading3(
-                                  FontWeight.w600, primary500, 'Outfit'),
+                                FontWeight.w600,
+                                primary500,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           MediaQuery.of(context).size.width,
@@ -3486,11 +3753,16 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       child: GestureDetector(
                         onTap: () {
                           tambahKategoriForm(
-                                  context, controllerName.text, widget.token)
-                              .then((value) {
+                            context,
+                            controllerName.text,
+                            widget.token,
+                          ).then((value) {
                             if (value == '00') {
                               showSnackBarComponent(
-                                  context, 'Berhasil tambah kategori', '00');
+                                context,
+                                'Berhasil tambah kategori',
+                                '00',
+                              );
 
                               errorText = '';
                               controllerName.text = '';
@@ -3508,8 +3780,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           Center(
                             child: Text(
                               'Simpan',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           MediaQuery.of(context).size.width,
@@ -3535,30 +3810,33 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProductList() async {
     await Future.delayed(Duration(seconds: 2));
-    await http.post(Uri.parse(provinceInfoUrl), body: {
-      "deviceid": identifier,
-    }, headers: {
-      "token": widget.token
-    }).then((response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data != null && data['data'] != null) {
-          setState(() {
-            typeproductList = List<dynamic>.from(data['data']);
-            searchResultListProduct = typeproductList;
-          });
-        }
-      }
-    });
+    await http
+        .post(
+          Uri.parse(provinceInfoUrl),
+          body: {"deviceid": identifier},
+          headers: {"token": widget.token},
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            if (data != null && data['data'] != null) {
+              setState(() {
+                typeproductList = List<dynamic>.from(data['data']);
+                searchResultListProduct = typeproductList;
+              });
+            }
+          }
+        });
   }
 
   void _runSearchProduct(String searchText) {
     setState(() {
       searchResultListProduct = typeproductList
-          ?.where((product) => product
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()))
+          ?.where(
+            (product) => product.toString().toLowerCase().contains(
+              searchText.toLowerCase(),
+            ),
+          )
           .toList();
     });
   }
@@ -3576,9 +3854,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -3587,8 +3863,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -3609,18 +3889,27 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                 Text(
                                   'Urutkan',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: 20),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -3630,26 +3919,31 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color:
                                                   valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
+                                                  ? primary500
+                                                  : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
-                                          label: Text(orderByProductText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
+                                          label: Text(
+                                            orderByProductText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByProduct == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           selected:
                                               valueOrderByProduct == index,
                                           onSelected: (bool selected) {
@@ -3689,7 +3983,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                   child: Text(
                                     'Tampilkan',
                                     style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 0,
@@ -3711,26 +4008,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,
@@ -3741,18 +4026,15 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   tambahGambar(BuildContext context) async {
     showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) => IntrinsicHeight(
         child: Container(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           decoration: BoxDecoration(
             color: bnw100,
             borderRadius: BorderRadius.only(
@@ -3771,16 +4053,14 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(120),
                         child: Container(
-                            height: 200,
-                            width: 200,
-                            color: bnw400,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(size8),
-                              child: Image.file(
-                                myImage!,
-                                fit: BoxFit.cover,
-                              ),
-                            )),
+                          height: 200,
+                          width: 200,
+                          color: bnw400,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(size8),
+                            child: Image.file(myImage!, fit: BoxFit.cover),
+                          ),
+                        ),
                       )
                     : Container(
                         height: 200,
@@ -3812,20 +4092,21 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           enabled: false,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                           decoration: InputDecoration(
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 2,
-                                  color: primary500,
-                                ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: primary500,
                               ),
-                              focusColor: primary500,
-                              prefixIcon: Icon(
-                                PhosphorIcons.plus,
-                                color: bnw900,
-                              ),
-                              hintText: 'Tambah Foto',
-                              hintStyle:
-                                  heading3(FontWeight.w400, bnw900, 'Outfit')),
+                            ),
+                            focusColor: primary500,
+                            prefixIcon: Icon(PhosphorIcons.plus, color: bnw900),
+                            hintText: 'Tambah Foto',
+                            hintStyle: heading3(
+                              FontWeight.w400,
+                              bnw900,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -3841,8 +4122,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               child: TextFormField(
                                 cursorColor: primary500,
                                 enabled: false,
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 decoration: InputDecoration(
                                   focusedBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(

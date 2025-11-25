@@ -780,7 +780,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                         context,
                         widget.token,
                         conNameProduk.text,
-                        idProduct.toString(),
+                        idProduct,
                         onswitchppn,
                         onswitchtampikan,
                         conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -1222,14 +1222,14 @@ class _ProdukTokoState extends State<ProdukToko> {
                   context,
                   widget.token,
                   conNameProdukEdit.text,
-                  "",
+                  kodejenisProductEdit,
                   singleProductId,
                   kodejenisProductEdit,
                   conHargaEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   conHargaOnlineEdit.text.replaceAll(RegExp(r'[^0-9]'), ''),
                   _pageController,
-                  onswitchtampikanEdit.toString(),
-                  onswitchppnEdit.toString(),
+                  onswitchtampikanEdit,
+                  onswitchppnEdit,
                   img64Edit.toString(),
                 ).then((value) async {
                   if (value == '00') {
@@ -1966,6 +1966,8 @@ class _ProdukTokoState extends State<ProdukToko> {
                                   .map((data) => data.productid!)
                                   .toList();
 
+                                  // print('ini adalah data produk : $dataProduk');
+
                               return Column(
                                 children: [
                                   Container(
@@ -1991,6 +1993,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               index,
                                               dataProduk.productid,
                                             );
+                                            // print(
+                                            //   datasProduk![index].productImage,
+                                            // );
                                             // log(data.name.toString());
                                             // print(dataProduk.isActive);
 

@@ -10,12 +10,13 @@ import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 
 class UbahProductVariantPage extends StatefulWidget {
-  final String token;
+  final String? token, merchantId;
   final PageController pageController;
 
   const UbahProductVariantPage({
     Key? key,
     required this.token,
+    this.merchantId,
     required this.pageController,
   }) : super(key: key);
 
@@ -339,7 +340,7 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                   createProductVariant(
                     context,
                     widget.token,
-                    '',
+                    widget.merchantId ?? '',
                     productIdVariant,
                     arrayResult,
                   ).then((value) {

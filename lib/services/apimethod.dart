@@ -114,7 +114,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getSingleProductUrl = '$url/api/product/single',
     getSinglePromosiUrl = '$url/api/voucher/single',
     getSingleAkunUrl = '$url/api/user/single',
-    getProductUrl = '$url/api/product',
+    getProductUrl = '$url/api/v2/product',
     getVoucherUrl = '$url/api/voucher',
     getPelanggantUrl = '$url/api/member/',
     getAllAkun = '$url/api/merchant/account',
@@ -1094,22 +1094,26 @@ Future updateProduk(
   try {
     whenLoading(context);
     // log('KODE $typeproducts');
+    var body = {
+      "deviceid": identifier,
+      "productid": productid,
+      "name": name,
+      "typeproducts": typeproducts,
+      "merchantid": merchid,
+      "price": price,
+      "price_online_shop": onlinePrice,
+      "isActive": isActive,
+      "isPPN": isPPN,
+      // "product_image": 'data:image/jpeg;base64,$img',
+      "product_image": imgFix,
+    };
+
+    // print('ini adalah body ${jsonEncode(body)}');
+
     final response = await http.post(
       Uri.parse(updateProdukUrl),
-      body: jsonEncode({
-        "deviceid": identifier,
-        "productid": productid,
-        "name": name,
-        "typeproducts": typeproducts,
-        "merchantid": merchid,
-        "price": price,
-        "price_online_shop": onlinePrice,
-        "isActive": isActive,
-        "isPPN": isPPN,
-        // "product_image": 'data:image/jpeg;base64,$img',
-        "product_image": imgFix,
-      }),
-      headers: {"token": "$token", "Content-Type": "application/json"},
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(body),
     );
 
     var jsonResponse = jsonDecode(response.body);
@@ -1918,20 +1922,24 @@ Future getProduct(
   List<String> merchid,
   orderby,
 ) async {
-  final String jsonTest = json.encode(merchid);
+  // final String jsonTest = json.encode(merchid);
+
+  final body = {
+    "deviceid": identifier,
+    "merchantid": merchid,
+    "name": name,
+    "orderby": orderby,
+    "isActive": "false",
+  };
+
   final response = await http.post(
     Uri.parse(getProductUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchantid": jsonTest,
-      "name": name,
-      "orderby": orderby,
-      "isActive": "false",
-    },
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: json.encode(body),
   );
 
   var jsonResponse = jsonDecode(response.body);
+  print('ini response ${response.body}');
   if (response.statusCode == 200) {
     print('succes');
 
@@ -1960,19 +1968,21 @@ Future getProductGrup(
   BuildContext context,
   token,
   String name,
-  merchid,
+  List<String> merchid,
   orderby,
 ) async {
+  final body = {
+    "deviceid": identifier,
+    "merchant_id": merchid,
+    "name": name,
+    "orderby": orderby,
+    // "isActive": "false",
+  };
+
   final response = await http.post(
     Uri.parse(getProductUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchantid": merchid,
-      "name": name,
-      "orderby": orderby,
-      // "isActive": "false",
-    },
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: json.encode(body),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -2405,6 +2415,8 @@ Future createProduct(
     "price_online_shop": onlinePrice,
     "product_image": "data:image/jpeg;base64,$image",
   };
+
+  // debugPrint(body.toString());
 
   final response = await http.post(
     Uri.parse(createProdukUrl),
@@ -2963,8 +2975,8 @@ Future getDetailRiwayatTransaksi(
 ) async {
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
-    headers: {'token': token},
-    body: {"device_id": identifier, "transaction_id": transactionid},
+    headers: {'token': token, "DEVICE-ID": identifier!},
+    body: {"transaction_id": transactionid, "merchantid": ''},
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -2993,11 +3005,12 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
   transactionid,
   merchantid,
 ) async {
-  final body = {"transaction_id": transactionid, "merchantid": merchantid};
+  final body = {"transaction_id": transactionid, "merchant_id": merchantid};
 
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
     body: body,
+
     headers: {'token': token, "DEVICE-ID": identifier!},
   );
 
@@ -3049,16 +3062,13 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksiGrup(
   transactionid,
   merchid,
 ) async {
-  final body = {
-    "device_id": identifier,
-    "transaction_id": transactionid,
-    "merchantid": merchid,
-  };
+  final body = {"transaction_id": transactionid, "merchant_id": merchid};
 
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
     body: body,
-    headers: {'token': token, 'Content-Type': 'application/json'},
+
+    headers: {'token': token, "DEVICE-ID": identifier!},
   );
 
   // mengembalikan data yang didapat dari API sebagai objek Map
@@ -3092,7 +3102,7 @@ Future<List<ProductModel>> getProductTransaksi(
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: json.encode({
         "deviceid": identifier,
-        "merchantid": jsonMerchId,
+        "merchantid": merchid,
         "name": name,
         "isActive": "1",
         "search": name,
@@ -3109,13 +3119,13 @@ Future<List<ProductModel>> getProductTransaksi(
 
     if (response.statusCode == 200 && jsonResponse['rc'] == '00') {
       final data = jsonResponse['data'];
-      if (data == null || data['product'] == null) {
+      if (data == null || data.isEmpty) {
         showSnackbar(context, "⚠️ Tidak ada data produk.");
         return [];
       }
 
       // Parsing ke model
-      final List<ProductModel> result = (data['product'] as List)
+      final List<ProductModel> result = (data as List)
           .map((item) => ProductModel.fromJson(item))
           .toList();
 

@@ -10,10 +10,14 @@ import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart'; // For min function
 
 class ProductVariantPage extends StatefulWidget {
-  String token;
+  String? token, merchantId;
   PageController? pageController;
-  ProductVariantPage({Key? key, required this.token, this.pageController})
-    : super(key: key);
+  ProductVariantPage({
+    Key? key,
+    required this.token,
+    this.merchantId,
+    this.pageController,
+  }) : super(key: key);
 
   @override
   _ProductVariantPageState createState() => _ProductVariantPageState();
@@ -395,7 +399,7 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
                   createProductVariant(
                     context,
                     widget.token,
-                    '',
+                    widget.merchantId ?? '',
                     productIdVariant,
                     arrayResult,
                   ).then((value) {
