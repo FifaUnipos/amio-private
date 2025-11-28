@@ -115,27 +115,24 @@ Future<dynamic> showDialogBilling(BuildContext context, text) {
 }
 
 void showSnackbar(BuildContext context, jsonResponse) async {
-  if (jsonResponse['rc'] == '63007') {
-    showDialogBilling(context, jsonResponse['message'] ?? jsonResponse['data']);
+  String? rc = jsonResponse['rc']?.toString();
+  String? message = jsonResponse['message'] ?? jsonResponse['data'];
+
+  if (rc == '63007') {
+    showDialogBilling(context, message ?? 'Error');
+  } else if (rc == '00') {
+    showSnackBarComponent(context, message ?? 'Berhasil', rc ?? '00');
   } else {
     showSnackBarComponent(
       context,
-      jsonResponse['message'] ?? jsonResponse['data'],
-      jsonResponse['rc'],
+      message ?? 'Error tidak diketahui',
+      rc ?? '99',
     );
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if (jsonResponse['rc'] == '63' || jsonResponse['rc'] == '14') {
+    if (rc == '63' || rc == '14') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.remove('token');
       prefs.remove('deviceid');
-
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => LoginPage(),
-      //   ),
-      // );
-      
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -152,7 +149,7 @@ void showSnackBarComponent(BuildContext context, String text, String rc) {
       height: 60,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size8),
-        color: rc == '00' ? succes600 : red500,
+        color: (rc == '00') ? succes600 : red500, // ✅ rc sudah dicek
       ),
       child: Center(
         child: Text(text, style: heading2(FontWeight.w700, bnw100, 'Outfit')),
@@ -165,13 +162,11 @@ void showSnackBarComponent(BuildContext context, String text, String rc) {
   );
 
   try {
-    // ✅ Ambil ScaffoldMessenger yang valid (fallback ke root)
     final messenger =
         ScaffoldMessenger.maybeOf(context) ??
         ScaffoldMessenger.of(
           Navigator.of(context, rootNavigator: true).context,
         );
-
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(snackBar);
   } catch (e) {

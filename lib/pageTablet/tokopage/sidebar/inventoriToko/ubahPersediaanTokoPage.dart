@@ -1221,7 +1221,7 @@ class _UbahPersediaanPageState extends State<UbahPersediaanPage> {
                                                                                 selectedDataPemakaian[id]!['unit_name'] = unitName;
                                                                                 selectedDataPemakaian[id]!['unit_factor'] = unitFactor;
                                                                                 selectedDataPemakaian[id]!['unit_id'] = unitId;
-                                                                                selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
+                                                                                selectedDataPemakaian[id]!['unit_conversion_id'] = unitId.isEmpty ? null : unitId;
                                                                               });
 
                                                                               // Menutup modal dan memperbarui UI

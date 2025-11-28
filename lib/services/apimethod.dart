@@ -87,7 +87,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     deleteTransaksiUrl = '$url/api/transaction/delete',
     headerTagihanUrl = '$url/api/transaction/create/reference/tagihan',
     deleteTagihanUrl = '$url/api/transaction/delete/reference/tagihan',
-    getTransaksiRiwayatUrl = '$url/api/transaction/',
+    getTransaksiRiwayatUrl = '$url/api/v2/transaction/',
     getPendapatanUrl = '$url/api/ppm/get',
     getRekonUrl = '$url/api/rekon/',
     saveRekonUrl = '$url/api/rekon/save',
@@ -1928,8 +1928,8 @@ Future getProduct(
     "deviceid": identifier,
     "merchantid": merchid,
     "name": name,
-    "orderby": orderby,
-    "isActive": "false",
+    "order_by": orderby,
+    // "is_active": false,
   };
 
   final response = await http.post(
@@ -1939,12 +1939,11 @@ Future getProduct(
   );
 
   var jsonResponse = jsonDecode(response.body);
-  print('ini response ${response.body}');
+  print('sukses get produk ${response.body}');
   if (response.statusCode == 200) {
-    print('succes');
+    // print('succes');
 
-    // print(jsonResponse.toString());
-
+    // productIdVariant = jsonResponse['data']['productid'].toString();
     final List<ModelDataProduk> result = [];
 
     final Map<String, dynamic> decoded = jsonDecode(response.body);
@@ -2374,14 +2373,16 @@ Future createProductVariant(
 
   // Decode the response body
   var jsonResponse = jsonDecode(response.body);
+  // print(response.body);
+  // print(jsonResponse);
 
   if (response.statusCode == 200) {
-    closeLoading(context);
     showSnackbar(context, jsonResponse);
+    closeLoading(context);
     return jsonResponse['rc'];
   } else {
-    closeLoading(context);
     showSnackbar(context, jsonResponse);
+    closeLoading(context);
     return jsonResponse['rc'];
   }
 }
@@ -2507,7 +2508,8 @@ Future calculateTransaction(
     return jsonResponse['rc'];
   } else {
     closeLoading(context);
-    showSnackbar(context, jsonResponse.toString());
+    showSnackbar(context, jsonResponse);
+
     // log(jsonResponse.toString());
     return jsonResponse['rc'];
   }
@@ -2624,36 +2626,73 @@ Future saveTransaction(
   setState,
   method,
   reference,
+  memberid,
 ) async {
-  final String detail = json.encode(details);
+  whenLoading(context);
+  List<Map<String, String>> mapCalculate = List.empty(growable: true);
+
+  for (var detail in details) {
+    Map<String, String> map1 = {};
+    map1['name'] = detail['name'] ?? '';
+    map1['product_id'] = detail['product_id'] ?? '';
+    map1['quantity'] = detail['quantity'] ?? '';
+    map1['image'] = detail['image'] ?? '';
+    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
+    map1['description'] = detail['description'] ?? '';
+    map1['id_request'] = detail['id_request'] ?? '';
+    map1['is_online'] = detail['is_online'] ?? '';
+    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
+    mapCalculate.add(map1);
+  }
+
+  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
+  // agar is_online jadi bool dan variants jadi array JSON
+  List<Map<String, dynamic>> mapCalculateFinal = [];
+
+  for (var item in mapCalculate) {
+    mapCalculateFinal.add({
+      "name": item['name'],
+      "product_id": item['product_id'],
+      "quantity": item['quantity'],
+      "image": item['image'],
+      "amount": item['amount'],
+      "description": item['description'],
+      "id_request": item['id_request'],
+      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
+      "variants": jsonDecode(
+        item['variants'] ?? '[]',
+      ), // ✅ ubah string ke array JSON
+    });
+  }
+
+  final bodyJson = {
+    "deviceid": identifier,
+    "discount_id": "",
+    "member_id": memberid,
+    "transaction_id": '',
+    "value": null,
+    "payment_method": '',
+    "payment_reference": reference,
+    "detail": mapCalculateFinal,
+  };
 
   final response = await http.post(
     Uri.parse(createTransaksiUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "discount": "",
-      "memberid": "",
-      "value": value,
-      "payment_method": method,
-      "payment_reference": reference,
-      "detail": detail,
-    },
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: json.encode(bodyJson),
   );
+
+  // print('🧾 Response Save Transaction: ${response.body}');
+
+  log("Payload ke server: ${json.encode(bodyJson)}");
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    print('succes');
-    pageController.jumpTo(0);
-    cart.clear();
-    setState(() {
-      subTotal = 0;
-    });
-    print(jsonResponse.toString());
-  } else {
-    print(jsonResponse['message'].toString());
-    // print(jsonResponse.toString());
     showSnackbar(context, jsonResponse);
+    closeLoading(context);
+  } else {
+    showSnackbar(context, jsonResponse);
+    closeLoading(context);
   }
 }
 
@@ -2940,13 +2979,16 @@ Future getRiwayatTransaksi(
 ) async {
   final response = await http.post(
     Uri.parse(getTransaksiRiwayatUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "condition": condition,
-      "orderby": orderby,
-      "merchantid": merchid,
+    headers: {
+      'token': token,
+      'DEVICE-ID': identifier!,
+      'Content-Type': 'application/json',
     },
+    body: jsonEncode({
+      "condition": condition,
+      "order_by": orderby,
+      "merchant_id": merchid,
+    }),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -3104,9 +3146,9 @@ Future<List<ProductModel>> getProductTransaksi(
         "deviceid": identifier,
         "merchantid": merchid,
         "name": name,
-        "isActive": "1",
+        "is_active": true,
         "search": name,
-        "orderby": orderby,
+        "order_by": orderby,
       }),
     );
 
@@ -3168,12 +3210,11 @@ Future getCoinTransaksi(
   if (response.statusCode == 200) {
     print('succes');
 
-    // print(jsonResponse.toString());
+    print('ini response coin: ${response.body}');
 
-    Map<String, dynamic> data = jsonDecode(response.body);
     // print(data['data']['coin']);
     // print(jsonResponse['data']['coin'].toString());
-    return data['data']['coin'];
+    return jsonResponse['data'];
   } else {
     print(jsonResponse['message'].toString());
     showSnackbar(context, jsonResponse);
@@ -3482,14 +3523,14 @@ Future getLaporanPergerakanInventori(
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
     Uri.parse(laporanPergerakanInventoriUrl),
-    headers: {'token': token},
-    body: {
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: jsonEncode({
       "deviceid": identifier,
-      "merchantid": jsonTest,
+      "merchant_id": merchid,
       "keyword": keyword.toString(),
-      "orderby": orderby.toString(),
+      "order_by": orderby.toString(),
       "export": export,
-    },
+    }),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -3887,7 +3928,7 @@ Future getStruk(BuildContext context, token, merchantid) async {
   } else {
     showSnackBarComponent(
       context,
-      jsonResponse['data']['message'],
+      jsonResponse['data']['message'] ?? jsonResponse['data']['data'],
       jsonResponse['rc'],
     );
   }
@@ -4175,8 +4216,9 @@ Future getMasterData(token, merchid, String name, orderby) async {
   );
 
   var jsonResponse = jsonDecode(response.body);
+  // print('ini ada response master data: ${response.body}');
   if (response.statusCode == 200) {
-    print('succes');
+    // print('succes');
 
     final List<ModelDataInventori> result = [];
 
@@ -4572,13 +4614,14 @@ Future<List<UnitConvertionModel>> getSingleUnitConvertion(
       body: body,
     );
 
-    // log('Status Code: ${response.statusCode}');
-    // log('Response Body: ${response.body}');
+    print('Response get single unit: ${response.body}');
+
     var jsonResponse = jsonDecode(response.body);
     var data = jsonResponse['data'];
 
     nameUnitConUbah.text = data['name'];
-    faktorConUnitUbah.text = double.parse(data['conversion_factor']).toString();
+    double conversionFactor = double.parse(data['conversion_factor']);
+    faktorConUnitUbah.text = conversionFactor.toStringAsFixed(2);
 
     if (response.statusCode == 200) {
       closeLoading(context);
@@ -4975,7 +5018,7 @@ Future<Map<String, Map<String, dynamic>>> getSelectedDataPenyesuaian(
     for (var item in detailList) {
       final String itemId = item['item_id'];
       final String qty = double.parse(
-        item['qty'].toString(),
+        item['qty_after_activity'].toString(),
       ).toInt().toString();
       final String price = double.parse(
         item['price'].toString(),
@@ -5264,7 +5307,7 @@ Future createPembelian(
   final response = await http.post(
     Uri.parse(createDetailPurchaseLink),
     headers: {'Content-Type': 'application/json', 'token': token},
-    body: jsonEncode(requestBody), // Encode seluruh requestBody di sini
+    body: jsonEncode(requestBody),
   );
 
   var jsonResponse = jsonDecode(response.body);

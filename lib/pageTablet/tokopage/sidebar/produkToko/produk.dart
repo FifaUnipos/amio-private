@@ -739,6 +739,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                         ).then((value) async {
                           if (value == '00') {
                             refreshDataProduk();
+                            getDataProduk(['']);
                             conNameProduk.text = '';
                             conHarga.text = '';
                             conHargaOnline.text = '';
@@ -747,7 +748,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                             _pageController.jumpToPage(3);
                             setState(() {});
                             initState();
-                            getDataProduk(['']);
                           }
                         });
                         initState();
@@ -1966,7 +1966,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                   .map((data) => data.productid!)
                                   .toList();
 
-                                  // print('ini adalah data produk : $dataProduk');
+                              // print('ini adalah data produk : $dataProduk');
 
                               return Column(
                                 children: [

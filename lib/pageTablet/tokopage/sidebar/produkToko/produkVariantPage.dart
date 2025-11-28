@@ -7,7 +7,8 @@ import 'dart:convert'; // For JSON encoding
 import 'dart:math';
 
 import 'package:unipos_app_335/utils/component/component_size.dart';
-import 'package:unipos_app_335/utils/component/component_textHeading.dart'; // For min function
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/utilities.dart'; // For min function
 
 class ProductVariantPage extends StatefulWidget {
   String? token, merchantId;
@@ -42,6 +43,18 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
             TextEditingController(), // Controller for max select
       });
     });
+  }
+
+  void formatInputRp(TextEditingController controller, String text) {
+    String cleanText = text.replaceAll('.', ''); // Bersihkan titik sebelumnya
+    int value = int.tryParse(cleanText) ?? 0;
+    String formattedAmount = formatCurrency(
+      value,
+    ); // Gunakan fungsi yang sudah ada
+    controller.value = TextEditingValue(
+      text: formattedAmount,
+      selection: TextSelection.collapsed(offset: formattedAmount.length),
+    );
   }
 
   // Function to add a new variant to a category
@@ -296,7 +309,7 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
                           final variant = category['variants'][variantIndex];
                           return ListTile(
                             title: fieldAddProduk(
-                              'Nama Variant',
+                              'Nama Varian  ',
                               'Takran Gula 1',
                               variant['controllerVariantName'],
                               TextInputType.text,
@@ -312,15 +325,22 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
                               children: [
                                 SizedBox(height: size12),
                                 fieldAddProduk(
-                                  'Harga Variant',
+                                  'Harga Varian',
                                   '5.000',
                                   variant['controllerVariantPrice'],
                                   TextInputType.number,
                                   (value) {
                                     setState(() {
+                                      formatInputRp(
+                                        variant['controllerVariantPrice'],
+                                        value,
+                                      ); // Format real-time
+                                      String cleanValue = value.replaceAll(
+                                        '.',
+                                        '',
+                                      ); // Bersihkan untuk simpan nilai asli
                                       variant['price'] =
-                                          double.tryParse(value) ??
-                                          0.0; // Update price
+                                          double.tryParse(cleanValue) ?? 0.0;
                                     });
                                   },
                                 ),

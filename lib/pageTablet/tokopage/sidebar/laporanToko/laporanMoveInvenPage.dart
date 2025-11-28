@@ -105,12 +105,12 @@ class LaporanPendapatanPerProdukState
                       Text(
                         'Pergerakan Inventaris',
                         style:
-                            heading1(FontWeight.w700, Colors.black, 'Outfit'),
+                            heading1(FontWeight.w700, bnw900, 'Outfit'),
                       ),
                       Text(
                         'Laporan',
                         style:
-                            heading3(FontWeight.w400, Colors.black, 'Outfit'),
+                            heading3(FontWeight.w400, bnw900, 'Outfit'),
                       ),
                     ],
                   ),
@@ -777,7 +777,7 @@ class LaporanPendapatanPerProdukState
               context: context,
               isScrollControlled: true,
               useSafeArea: true,
-              barrierColor: Colors.black.withOpacity(0.35),
+              barrierColor: bnw900.withOpacity(0.35),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(size24),
               ),

@@ -8,6 +8,7 @@ import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
 
 class UbahProductVariantPage extends StatefulWidget {
   final String? token, merchantId;
@@ -45,6 +46,16 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
       // Kosongkan supaya nanti muncul teks "Belum ada product variant"
       categories = [];
     }
+  }
+
+  void formatInputRp(TextEditingController controller, String text) {
+    String cleanText = text.replaceAll('.', '');
+    int value = int.tryParse(cleanText) ?? 0;
+    String formattedAmount = formatCurrency(value);
+    controller.value = TextEditingValue(
+      text: formattedAmount,
+      selection: TextSelection.collapsed(offset: formattedAmount.length),
+    );
   }
 
   // 🔹 Konversi response API ke struktur categories
@@ -451,27 +462,32 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                 Expanded(
                   child: TextFormField(
                     controller: variant['controllerVariantPrice'],
+
                     decoration: const InputDecoration(
                       labelText: "Harga *",
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
-                    onChanged: (val) =>
-                        variant['price'] = double.tryParse(val) ?? 0.0,
+                    onChanged: (val) {
+                      formatInputRp(variant['controllerVariantPrice'], val);
+                      variant['price'] = double.tryParse(val) ?? 0.0;
+                    },
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: "Harga Online *",
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (val) =>
-                        variant['priceOnline'] = double.tryParse(val) ?? 0.0,
-                  ),
-                ),
+                // const SizedBox(width: 8),
+                // Expanded(
+                //   child: TextFormField(
+                //     decoration: const InputDecoration(
+                //       labelText: "Harga Online *",
+                //       border: OutlineInputBorder(),
+                //     ),
+                //     keyboardType: TextInputType.number,
+                //     onChanged: (val) {
+                //       formatInputRp(variant['controllerVariantPrice'], val);
+                //       variant['priceOnline'] = double.tryParse(val) ?? 0.0;
+                //     },
+                //   ),
+                // ),
               ],
             ),
             _buildSwitch(

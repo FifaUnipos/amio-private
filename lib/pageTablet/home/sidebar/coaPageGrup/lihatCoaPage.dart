@@ -45,6 +45,13 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
   String _selectedOptionCategory = "Semua";
   String jenisProduct = "Pilih Kategori", kodeProduct = '';
 
+  List<String> dropdownItems = [
+    "Semua",
+    "Debit",
+    "EWallet",
+    "Credit",
+  ].toSet().toList();
+
   List<String>? productIdCheckAll;
   String checkFill = 'kosong';
 
@@ -70,32 +77,34 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
     checkConnection(context);
     _getProductList(_selectedOptionCategory);
 
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [''];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [''];
 
-        await getDataCOA(value);
+      await getDataCOA(value);
 
-        setState(() {
-          // log(datasCOA.toString());
-          datasCOA;
-        });
+      setState(() {
+        // log(datasCOA.toString());
+        datasCOA;
+      });
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
     // TODO: implement initState
 
     super.initState();
   }
 
   Future<dynamic> getDataCOA(List<String> value) async {
-    return datasCOA =
-        await getCOAPayment(context, widget.token, textOrderByCOA, '');
+    return datasCOA = await getCOAPayment(
+      context,
+      widget.token,
+      textOrderByCOA,
+      '',
+    );
   }
 
   @override
@@ -123,11 +132,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
       child: PageView(
         physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
-        children: [
-          pageCOA(isFalseAvailable),
-          tambahCOAToko(),
-          updateCOAToko(),
-        ],
+        children: [pageCOA(isFalseAvailable), tambahCOAToko(), updateCOAToko()],
       ),
     );
   }
@@ -181,33 +186,29 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                         controller: searchController,
                         onChanged: _onChanged,
                         decoration: InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(vertical: size12),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: size12,
+                          ),
                           isDense: true,
                           filled: true,
                           fillColor: bnw200,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              color: bnw300,
-                            ),
+                            borderSide: BorderSide(color: bnw300),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              width: 2,
-                              color: primary500,
-                            ),
+                            borderSide: BorderSide(width: 2, color: primary500),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(size8),
-                            borderSide: BorderSide(
-                              color: bnw300,
-                            ),
+                            borderSide: BorderSide(color: bnw300),
                           ),
                           prefixIcon: Container(
-                            margin:
-                                EdgeInsets.only(left: size20, right: size12),
+                            margin: EdgeInsets.only(
+                              left: size20,
+                              right: size12,
+                            ),
                             child: Icon(
                               PhosphorIcons.magnifying_glass,
                               color: bnw900,
@@ -228,8 +229,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                 )
                               : null,
                           hintText: 'Cari nama payment',
-                          hintStyle:
-                              heading3(FontWeight.w500, bnw400, 'Outfit'),
+                          hintStyle: heading3(
+                            FontWeight.w500,
+                            bnw400,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),
@@ -255,7 +259,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                       ),
                       0,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -308,8 +312,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                             child: Container(
                               child: Text(
                                 'Info COA',
-                                style:
-                                    heading4(FontWeight.w700, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w700,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                           ),
@@ -325,8 +332,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                               ),
                               child: Text(
                                 'Nomor Akun',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                           ),
@@ -346,8 +356,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                   checkFill == 'penuh'
                                       ? PhosphorIcons.check_square_fill
                                       : isSelectionMode
-                                          ? PhosphorIcons.minus_circle_fill
-                                          : PhosphorIcons.square,
+                                      ? PhosphorIcons.minus_circle_fill
+                                      : PhosphorIcons.square,
                                   color: bnw100,
                                 ),
                               ),
@@ -370,14 +380,20 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                       children: [
                                         Text(
                                           'Yakin Ingin Menghapus Pembayaran?',
-                                          style: heading1(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading1(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                         SizedBox(height: size16),
                                         Text(
                                           'Data COA yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                          style: heading2(FontWeight.w400,
-                                              bnw900, 'Outfit'),
+                                          style: heading2(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -391,8 +407,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                               //   dataProduk.productid!
                                               // ];
 
-                                              deleteCOA(context, widget.token,
-                                                  datasCOA);
+                                              deleteCOA(
+                                                context,
+                                                widget.token,
+                                                datasCOA,
+                                              );
                                               setState(() {});
                                               initState();
                                             },
@@ -401,9 +420,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                 child: Text(
                                                   'Iya, Hapus',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    primary500,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -422,9 +442,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                 child: Text(
                                                   'Batalkan',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw100,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    bnw100,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -446,7 +467,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                   Text(
                                     'Hapus Semua',
                                     style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -502,7 +526,9 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
-                                            color: bnw300, width: width1),
+                                          color: bnw300,
+                                          width: width1,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -541,7 +567,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            size8),
+                                                          size8,
+                                                        ),
                                                     child:
                                                         // datasCOA![index]
                                                         //             .productImage !=
@@ -575,10 +602,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                         //         ),
                                                         //       )
                                                         Icon(
-                                                      Icons.wallet,
-                                                      color: bnw900,
-                                                      size: 60,
-                                                    ),
+                                                          Icons.wallet,
+                                                          color: bnw900,
+                                                          size: 60,
+                                                        ),
                                                   ),
                                                 ),
                                                 SizedBox(width: size16),
@@ -593,9 +620,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                 .paymentMethod ??
                                                             '',
                                                         style: heading4(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                         maxLines: 3,
                                                         overflow: TextOverflow
                                                             .ellipsis,
@@ -605,9 +633,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                 .category ??
                                                             '',
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                         maxLines: 3,
                                                         overflow: TextOverflow
                                                             .ellipsis,
@@ -623,13 +652,15 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                           flex: 4,
                                           child: Container(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              maxWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   size8,
-                                              minWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
+                                              minWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width /
                                                   size8,
                                             ),
                                             child: Text(
@@ -638,8 +669,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                               maxLines: 3,
                                               textAlign: TextAlign.start,
                                               overflow: TextOverflow.ellipsis,
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -651,13 +685,14 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                               setState(() {
                                                 showModalBottom(
                                                   context,
-                                                  MediaQuery.of(context)
-                                                      .size
-                                                      .height,
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.height,
                                                   IntrinsicHeight(
                                                     child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(28.0),
+                                                      padding: EdgeInsets.all(
+                                                        28.0,
+                                                      ),
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -680,26 +715,29 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                     dataCOAPayment
                                                                         .paymentMethod!,
                                                                     style: heading2(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        bnw900,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                   Text(
                                                                     dataCOAPayment
                                                                         .accountNumber!,
                                                                     style: heading4(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw900,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                 ],
                                                               ),
                                                               GestureDetector(
                                                                 onTap: () =>
                                                                     Navigator.pop(
-                                                                        context),
+                                                                      context,
+                                                                    ),
                                                                 child: Icon(
                                                                   PhosphorIcons
                                                                       .x_fill,
@@ -709,7 +747,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                             ],
                                                           ),
                                                           SizedBox(
-                                                              height: size20),
+                                                            height: size20,
+                                                          ),
                                                           GestureDetector(
                                                             behavior:
                                                                 HitTestBehavior
@@ -732,26 +771,28 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                     dataCOAPayment
                                                                         .paymentMethod!;
                                                                 Navigator.pop(
-                                                                    context);
-                                                                whenLoading(
-                                                                    context);
-
-                                                                Future.delayed(Duration(
-                                                                        seconds:
-                                                                            2))
-                                                                    .then(
-                                                                  (value) {
-                                                                    _pageController
-                                                                        .jumpToPage(
-                                                                            2);
-                                                                    closeLoading(
-                                                                        context);
-                                                                  },
+                                                                  context,
                                                                 );
+                                                                whenLoading(
+                                                                  context,
+                                                                );
+
+                                                                Future.delayed(
+                                                                  Duration(
+                                                                    seconds: 2,
+                                                                  ),
+                                                                ).then((value) {
+                                                                  _pageController
+                                                                      .jumpToPage(
+                                                                        2,
+                                                                      );
+                                                                  closeLoading(
+                                                                    context,
+                                                                  );
+                                                                });
                                                               });
                                                             },
-                                                            child:
-                                                                modalBottomValue(
+                                                            child: modalBottomValue(
                                                               'Ubah COA',
                                                               PhosphorIcons
                                                                   .pencil_line,
@@ -764,7 +805,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                     .translucent,
                                                             onTap: () {
                                                               Navigator.pop(
-                                                                  context);
+                                                                context,
+                                                              );
                                                               showBottomPilihan(
                                                                 context,
                                                                 Column(
@@ -777,34 +819,39 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                         Text(
                                                                           'Yakin Ingin Menghapus Pembayaran?',
                                                                           style: heading1(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit'),
+                                                                            FontWeight.w600,
+                                                                            bnw900,
+                                                                            'Outfit',
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
-                                                                            height:
-                                                                                size16),
+                                                                          height:
+                                                                              size16,
+                                                                        ),
                                                                         Text(
                                                                           'Data COA yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                                           style: heading2(
-                                                                              FontWeight.w400,
-                                                                              bnw900,
-                                                                              'Outfit'),
+                                                                            FontWeight.w400,
+                                                                            bnw900,
+                                                                            'Outfit',
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
-                                                                            height:
-                                                                                size16),
+                                                                          height:
+                                                                              size16,
+                                                                        ),
                                                                       ],
                                                                     ),
                                                                     Row(
                                                                       children: [
                                                                         Expanded(
-                                                                          child:
-                                                                              GestureDetector(
-                                                                            onTap:
-                                                                                () {
-                                                                              List<String> listCOA = [
-                                                                                dataCOAPayment.idpaymentmethode!
+                                                                          child: GestureDetector(
+                                                                            onTap: () {
+                                                                              List<
+                                                                                String
+                                                                              >
+                                                                              listCOA = [
+                                                                                dataCOAPayment.idpaymentmethode!,
                                                                               ];
 
                                                                               // log(dataCOAPayment.idpaymentmethode!);
@@ -814,43 +861,58 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                                                 widget.token,
                                                                                 listCOA,
                                                                               );
-                                                                              Navigator.of(context).pop();
+                                                                              Navigator.of(
+                                                                                context,
+                                                                              ).pop();
 
                                                                               initState();
-                                                                              setState(() {});
+                                                                              setState(
+                                                                                () {},
+                                                                              );
                                                                             },
-                                                                            child:
-                                                                                buttonXLoutline(
+                                                                            child: buttonXLoutline(
                                                                               Center(
                                                                                 child: Text(
                                                                                   'Iya, Hapus',
-                                                                                  style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                  style: heading3(
+                                                                                    FontWeight.w600,
+                                                                                    primary500,
+                                                                                    'Outfit',
+                                                                                  ),
                                                                                 ),
                                                                               ),
-                                                                              MediaQuery.of(context).size.width,
+                                                                              MediaQuery.of(
+                                                                                context,
+                                                                              ).size.width,
                                                                               primary500,
                                                                             ),
                                                                           ),
                                                                         ),
                                                                         SizedBox(
-                                                                            width:
-                                                                                size12),
+                                                                          width:
+                                                                              size12,
+                                                                        ),
                                                                         Expanded(
-                                                                          child:
-                                                                              GestureDetector(
-                                                                            onTap:
-                                                                                () {
-                                                                              Navigator.pop(context);
+                                                                          child: GestureDetector(
+                                                                            onTap: () {
+                                                                              Navigator.pop(
+                                                                                context,
+                                                                              );
                                                                             },
-                                                                            child:
-                                                                                buttonXL(
+                                                                            child: buttonXL(
                                                                               Center(
                                                                                 child: Text(
                                                                                   'Batalkan',
-                                                                                  style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                  style: heading3(
+                                                                                    FontWeight.w600,
+                                                                                    bnw100,
+                                                                                    'Outfit',
+                                                                                  ),
                                                                                 ),
                                                                               ),
-                                                                              MediaQuery.of(context).size.width,
+                                                                              MediaQuery.of(
+                                                                                context,
+                                                                              ).size.width,
                                                                             ),
                                                                           ),
                                                                         ),
@@ -862,10 +924,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                             },
                                                             child:
                                                                 modalBottomValue(
-                                                              'Hapus COA',
-                                                              PhosphorIcons
-                                                                  .trash,
-                                                            ),
+                                                                  'Hapus COA',
+                                                                  PhosphorIcons
+                                                                      .trash,
+                                                                ),
                                                           ),
                                                         ],
                                                       ),
@@ -879,15 +941,17 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
-                                                  Icon(PhosphorIcons
-                                                      .pencil_line),
+                                                  Icon(
+                                                    PhosphorIcons.pencil_line,
+                                                  ),
                                                   SizedBox(width: 6),
                                                   Text(
                                                     'Atur',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -1009,8 +1073,11 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                 onTap: () {
                   // print(idProduct);
                   createCOA(
-                          context, widget.token, kodeProduct, conNumberCOA.text)
-                      .then((value) async {
+                    context,
+                    widget.token,
+                    kodeProduct,
+                    conNumberCOA.text,
+                  ).then((value) async {
                     if (value == '00') {
                       await Future.delayed(Duration(seconds: 1));
                       _pageController.jumpToPage(0);
@@ -1023,17 +1090,18 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                   setState(() {});
                 },
                 child: buttonXL(
-                    Center(
-                      child: Text(
-                        'Tambah',
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
+                  Center(
+                    child: Text(
+                      'Tambah',
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                     ),
-                    0),
+                  ),
+                  0,
+                ),
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -1120,38 +1188,38 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                   setState(() {});
                 },
                 child: buttonXL(
-                    Center(
-                      child: Text(
-                        'Simpan',
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
+                  Center(
+                    child: Text(
+                      'Simpan',
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                     ),
-                    0),
+                  ),
+                  0,
+                ),
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
 
   fieldAddProduk(
-      title, hint, mycontroller, TextInputType numberNo, bool urgent) {
+    title,
+    hint,
+    mycontroller,
+    TextInputType numberNo,
+    bool urgent,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(
-              title,
-              style: body1(FontWeight.w500, bnw900, 'Outfit'),
-            ),
+            Text(title, style: body1(FontWeight.w500, bnw900, 'Outfit')),
             urgent == true
-                ? Text(
-                    ' *',
-                    style: body1(FontWeight.w700, red500, 'Outfit'),
-                  )
-                : SizedBox()
+                ? Text(' *', style: body1(FontWeight.w700, red500, 'Outfit'))
+                : SizedBox(),
           ],
         ),
         IntrinsicHeight(
@@ -1170,18 +1238,12 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
             },
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1197,23 +1259,16 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
 
     return GestureDetector(
       onTap: () {
-        setState(
-          () {
-            // log(jenisProduct.toString());
-            kategoriListForm(context, isKeyboardActive);
-          },
-        );
+        setState(() {
+          // log(jenisProduct.toString());
+          kategoriListForm(context, isKeyboardActive);
+        });
       },
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           color: bnw100,
-          border: Border(
-            bottom: BorderSide(
-              width: 1.5,
-              color: bnw500,
-            ),
-          ),
+          border: Border(bottom: BorderSide(width: 1.5, color: bnw500)),
         ),
         child: Align(
           alignment: Alignment.centerLeft,
@@ -1241,13 +1296,13 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                       jenisProduct == ''
                           ? 'Pilih Kategori'
                           : capitalizeEachWord(jenisProduct.toString()),
-                      style: heading2(FontWeight.w600,
-                          jenisProduct == '' ? bnw500 : bnw900, 'Outfit'),
+                      style: heading2(
+                        FontWeight.w600,
+                        jenisProduct == '' ? bnw500 : bnw900,
+                        'Outfit',
+                      ),
                     ),
-                    Icon(
-                      PhosphorIcons.caret_down,
-                      color: bnw900,
-                    )
+                    Icon(PhosphorIcons.caret_down, color: bnw900),
                   ],
                 ),
               ),
@@ -1259,16 +1314,14 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
   }
 
   Future<dynamic> kategoriListForm(
-      BuildContext context, bool isKeyboardActive) {
+    BuildContext context,
+    bool isKeyboardActive,
+  ) {
     setState(() {});
     return showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -1278,7 +1331,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
               onTap: () => textFieldFocusNode.unfocus(),
               child: Container(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
                 // height: MediaQuery.of(context).size.height / 1,
                 decoration: BoxDecoration(
                   color: bnw100,
@@ -1312,55 +1366,58 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                     setState(() {});
                                   },
                                   decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: size12),
-                                      isDense: true,
-                                      filled: true,
-                                      fillColor: bnw200,
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(size8),
-                                        borderSide: BorderSide(
-                                          color: bnw300,
-                                        ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: size12,
+                                    ),
+                                    isDense: true,
+                                    filled: true,
+                                    fillColor: bnw200,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
                                       ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(size8),
-                                        borderSide: BorderSide(
-                                          width: 2,
-                                          color: primary500,
-                                        ),
+                                      borderSide: BorderSide(color: bnw300),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
                                       ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(size8),
-                                        borderSide: BorderSide(
-                                          color: bnw300,
-                                        ),
+                                      borderSide: BorderSide(
+                                        width: 2,
+                                        color: primary500,
                                       ),
-                                      suffixIcon:
-                                          searchController.text.isNotEmpty
-                                              ? GestureDetector(
-                                                  onTap: () {
-                                                    searchController.text = '';
-                                                    // _runSearchProduct('');
-                                                    setState(() {});
-                                                  },
-                                                  child: Icon(
-                                                    PhosphorIcons.x_fill,
-                                                    size: size20,
-                                                    color: bnw900,
-                                                  ),
-                                                )
-                                              : null,
-                                      prefixIcon: Icon(
-                                        PhosphorIcons.magnifying_glass,
-                                        color: bnw500,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
                                       ),
-                                      hintText: 'Cari',
-                                      hintStyle: heading3(
-                                          FontWeight.w500, bnw500, 'Outfit')),
+                                      borderSide: BorderSide(color: bnw300),
+                                    ),
+                                    suffixIcon: searchController.text.isNotEmpty
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              searchController.text = '';
+                                              // _runSearchProduct('');
+                                              setState(() {});
+                                            },
+                                            child: Icon(
+                                              PhosphorIcons.x_fill,
+                                              size: size20,
+                                              color: bnw900,
+                                            ),
+                                          )
+                                        : null,
+                                    prefixIcon: Icon(
+                                      PhosphorIcons.magnifying_glass,
+                                      color: bnw500,
+                                    ),
+                                    hintText: 'Cari',
+                                    hintStyle: heading3(
+                                      FontWeight.w500,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
+                                  ),
                                 ),
                               ),
                               SizedBox(width: size16),
@@ -1372,15 +1429,13 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                         isDense: true,
                                         dropdownColor: primary500,
                                         elevation: 1,
-                                        borderRadius:
-                                            BorderRadius.circular(size8),
+                                        borderRadius: BorderRadius.circular(
+                                          size8,
+                                        ),
                                         value: _selectedOptionCategory,
-                                        items: <String>[
-                                          '',
-                                          'Debit',
-                                          'EWallet',
-                                          'Credit'
-                                        ].map((String value) {
+                                        items: dropdownItems.map((
+                                          String value,
+                                        ) {
                                           return DropdownMenuItem<String>(
                                             value: value,
                                             child: Text(value),
@@ -1393,7 +1448,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                           initState();
                                         },
                                         style: heading2(
-                                            FontWeight.w600, bnw100, 'Outfit'),
+                                          FontWeight.w600,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
                                         iconEnabledColor: Colors.transparent,
                                         iconSize: 0,
                                       ),
@@ -1402,7 +1460,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                       PhosphorIcons.caret_down,
                                       size: size24,
                                       color: bnw100,
-                                    )
+                                    ),
                                   ],
                                 ),
                                 double.infinity,
@@ -1435,17 +1493,21 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
-                                            color: bnw300, width: width1),
+                                          color: bnw300,
+                                          width: width1,
+                                        ),
                                       ),
                                     ),
                                     child: ListTile(
                                       contentPadding: EdgeInsets.symmetric(
-                                          vertical: size16),
+                                        vertical: size16,
+                                      ),
                                       title: Text(
                                         product['paymentReferenceName'] != null
                                             ? capitalizeEachWord(
                                                 product['paymentReferenceName']
-                                                    .toString())
+                                                    .toString(),
+                                              )
                                             : '',
                                       ),
                                       trailing: Icon(
@@ -1466,7 +1528,8 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                           _selectProduct(product);
 
                                           print(
-                                              product['paymentReferenceName']);
+                                            product['paymentReferenceName'],
+                                          );
                                         });
                                       },
                                       onLongPress: () {
@@ -1494,14 +1557,17 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                           Center(
                             child: Text(
                               'Selesai',
-                              style:
-                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           double.infinity,
                         ),
                       ),
-                      SizedBox(height: size8)
+                      SizedBox(height: size8),
                     ],
                   ),
                 ),
@@ -1521,32 +1587,37 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
 
   // String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProductList(category) async {
-    await http.post(Uri.parse(getCoaRefLink), body: {
-      "deviceid": identifier,
-      "category": category == 'Semua' ? '' : category,
-    }, headers: {
-      "token": widget.token,
-    }).then((response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        // log("data product $data");
-        if (data != null && data['data'] != null) {
-          setState(() {
-            typeproductList = List<dynamic>.from(data['data']);
-            searchResultListProduct = typeproductList;
-          });
-        }
-      }
-    });
+    await http
+        .post(
+          Uri.parse(getCoaRefLink),
+          body: {
+            "deviceid": identifier,
+            "category": category == 'Semua' ? '' : category,
+          },
+          headers: {"token": widget.token},
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            // log("data product $data");
+            if (data != null && data['data'] != null) {
+              setState(() {
+                typeproductList = List<dynamic>.from(data['data']);
+                searchResultListProduct = typeproductList;
+              });
+            }
+          }
+        });
   }
 
   void _runSearchProduct(String searchText) {
     setState(() {
       searchResultListProduct = typeproductList
-          ?.where((product) => product
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()))
+          ?.where(
+            (product) => product.toString().toLowerCase().contains(
+              searchText.toLowerCase(),
+            ),
+          )
           .toList();
     });
   }
@@ -1582,21 +1653,19 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(
-      () {
-        if (selectedFlag.containsValue(false)) {
-          checkFill = 'kosong';
-          listProduct.clear();
-          isSelectionMode = selectedFlag.containsValue(false);
-          isSelectionMode = selectedFlag.containsValue(true);
-        } else {
-          checkFill = 'penuh';
-          listProduct.clear();
-          listProduct.addAll(productId);
-          isSelectionMode = selectedFlag.containsValue(true);
-        }
-      },
-    );
+    setState(() {
+      if (selectedFlag.containsValue(false)) {
+        checkFill = 'kosong';
+        listProduct.clear();
+        isSelectionMode = selectedFlag.containsValue(false);
+        isSelectionMode = selectedFlag.containsValue(true);
+      } else {
+        checkFill = 'penuh';
+        listProduct.clear();
+        listProduct.addAll(productId);
+        isSelectionMode = selectedFlag.containsValue(true);
+      }
+    });
   }
 
   Widget _buildSelectIcon(bool isSelected, PaymentMethod data) {
@@ -1618,9 +1687,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1629,8 +1696,12 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -1651,18 +1722,27 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                 Text(
                                   'Urutkan',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: size20),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -1672,26 +1752,31 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color:
                                                   valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
+                                                  ? primary500
+                                                  : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
-                                          label: Text(orderByProductText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
+                                          label: Text(
+                                            orderByProductText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByProduct == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           selected:
                                               valueOrderByProduct == index,
                                           onSelected: (bool selected) {
@@ -1731,7 +1816,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                   child: Text(
                                     'Tampilkan',
                                     style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 0,
@@ -1753,26 +1841,14 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,
@@ -1787,9 +1863,7 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1798,8 +1872,12 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -1820,18 +1898,27 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                 Text(
                                   'Urutkan',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: size20),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -1841,29 +1928,33 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color:
                                                   valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
+                                                  ? primary500
+                                                  : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
                                           label: Text(
-                                              orderByCOAText[index] == ''
-                                                  ? 'Semua'
-                                                  : orderByCOAText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
+                                            orderByCOAText[index] == ''
+                                                ? 'Semua'
+                                                : orderByCOAText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByProduct == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           selected:
                                               valueOrderByProduct == index,
                                           onSelected: (bool selected) {
@@ -1893,9 +1984,9 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
 
                                 textOrderByCOA =
                                     orderByCOAText[valueOrderByProduct] ==
-                                            'Semua'
-                                        ? ''
-                                        : orderByCOAText[valueOrderByProduct];
+                                        'Semua'
+                                    ? ''
+                                    : orderByCOAText[valueOrderByProduct];
                                 // textOrderByCOA =
                                 //     orderByCOAText[valueOrderByProduct];
 
@@ -1907,7 +1998,10 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
                                   child: Text(
                                     'Tampilkan',
                                     style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 0,
@@ -1929,26 +2023,14 @@ class _LihatCOAPageGrupState extends State<LihatCOAPageGrup> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari ${textOrderByCOA == '' ? 'Semua' : textOrderByCOA}',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,

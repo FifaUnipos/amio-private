@@ -201,7 +201,7 @@ class _TransactionPageState extends State<TransactionPage>
   }
 
   String textOrderBy = 'Nama Produk A ke Z';
-  String textvalueOrderBy = 'tanggalTerkini';
+  String textvalueOrderBy = 'upDownNama';
 
   late Future<List<PaymentMethod>> futurePaymentMethodsDebit;
   late Future<List<PaymentMethod>> futurePaymentMethodsKredit;
@@ -393,7 +393,7 @@ class _TransactionPageState extends State<TransactionPage>
         map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
         map1['description'] = detail['description'] ?? '';
         map1['id_request'] = detail['id_request'] ?? '';
-        map1['is_online'] = (tapTrue == 2).toString(); // sementara string
+        map1['is_online'] = detail['is_online'] ?? '';
         map1['variants'] = detail['variants'] ?? '[]'; // string JSON
         mapCalculate.add(map1);
       }
@@ -411,7 +411,7 @@ class _TransactionPageState extends State<TransactionPage>
           "amount": item['amount'],
           "description": item['description'],
           "id_request": item['id_request'],
-          "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
+          "is_online": (item["is_online"] == 'true'),
           "variants": jsonDecode(
             item['variants'] ?? '[]',
           ), // ✅ ubah string ke array JSON
@@ -1896,7 +1896,6 @@ class _TransactionPageState extends State<TransactionPage>
                                       context,
                                     ).viewInsets.bottom,
                                   ),
-                                  // height: MediaQuery.of(context).size.height / 1,
                                   decoration: BoxDecoration(
                                     color: bnw100,
                                     borderRadius: BorderRadius.only(
@@ -1938,7 +1937,6 @@ class _TransactionPageState extends State<TransactionPage>
                                               controller: searchController,
                                               focusNode: textFieldFocusNode,
                                               onChanged: (value) {
-                                                //   isKeyboardActive = value.isNotEmpty;
                                                 _runSearchProduct(value);
                                                 setState(() {});
                                               },
@@ -2058,16 +2056,13 @@ class _TransactionPageState extends State<TransactionPage>
                                                             textFieldFocusNode
                                                                 .unfocus();
 
+                                                            // Reset the selection when the dialog is closed.
                                                             if (product['date'] !=
                                                                 'Kedaluwarsa') {
                                                               _selectProduct(
                                                                 product,
                                                               );
                                                             }
-                                                            print(
-                                                              product['id'],
-                                                            );
-                                                            setState(() {});
                                                           });
                                                         },
                                                         child: Container(
@@ -2225,48 +2220,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                               ),
                                                             ],
                                                           ),
-
-                                                          // ListTile(
-                                                          //   contentPadding:
-                                                          //       EdgeInsets
-                                                          //           .symmetric(
-                                                          //               vertical:
-                                                          //                   size16),
-                                                          //   title: Text(
-                                                          //     product['name'] !=
-                                                          //             null
-                                                          //         ? capitalizeEachWord(
-                                                          //             product['name']
-                                                          //                 .toString())
-                                                          //         : '',
-                                                          //   ),
-                                                          //   trailing: Icon(
-                                                          //     isSelected
-                                                          //         ? PhosphorIcons
-                                                          //             .radio_button_fill
-                                                          //         : PhosphorIcons
-                                                          //             .radio_button,
-                                                          //     color: isSelected
-                                                          //         ? primary500
-                                                          //         : bnw900,
-                                                          //   ),
-                                                          //   onTap: () {
-                                                          //     setState(() {
-                                                          //       textFieldFocusNode
-                                                          //           .unfocus();
-
-                                                          //       _selectProduct(
-                                                          //           product);
-
-                                                          //       print(product[
-                                                          //           'id']);
-
-                                                          //       discountId =
-                                                          //           product['id'];
-                                                          //       setState(() {});
-                                                          //     });
-                                                          //   },
-                                                          // ),
                                                         ),
                                                       );
                                                     },
@@ -2279,16 +2232,15 @@ class _TransactionPageState extends State<TransactionPage>
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              print(discountId);
                                               discountIdFix = discountId;
                                               discountNameFix = discountName;
-                                              Navigator.pop(context);
+                                              // Navigator.pop(context);
+                                              Navigator.of(context).pop();
                                               String typePrice = "price";
                                               if (tapTrue == 1) {
                                                 typePrice = "price";
                                               } else if (typePrice == 2) {
-                                                typePrice =
-                                                    "price_online_shop    ";
+                                                typePrice = "price_online_shop";
                                               }
 
                                               calculateTransaction(
@@ -3587,151 +3539,151 @@ class _TransactionPageState extends State<TransactionPage>
 
   tunai(bool? displayCode, StateSetter setState, BuildContext context) {
     return StatefulBuilder(
-      builder: (context, setState) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Masukkan Uang Tunai',
-            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: size16),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Uang Tunai',
-                      style: heading3(FontWeight.w500, bnw900, 'Outfit'),
-                    ),
-                    Text(
-                      ' *',
-                      style: heading3(FontWeight.w700, red500, 'Outfit'),
-                    ),
-                  ],
-                ),
-                IntrinsicHeight(
-                  child: Container(
-                    child: TextFormField(
-                      cursorColor: primary500,
-                      onTap: () {
-                        displayCode = true;
-                        print(displayCode);
-                        setState(() {});
-                      },
-                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                      controller: uangTunaiController,
-                      inputFormatters: [
-                        NumericTextFormatter(),
-                        LengthLimitingTextInputFormatter(20),
-                      ],
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: size8),
-                        isDense: true,
-                        focusColor: primary500,
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 1.5, color: bnw500),
-                        ),
-                        // hintText: cart[0].price.toString(),
-                        hintText: 'Rp 0',
-                        hintStyle: heading1(FontWeight.w700, bnw500, 'Outfit'),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+      builder: (context, setState) => LayoutBuilder(
+        // Menggunakan LayoutBuilder untuk menghitung tinggi konten
+        builder: (context, constraints) {
+          bool isContentFitting =
+              constraints.maxHeight < MediaQuery.of(context).size.height;
 
-          SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                SizedBox(height: size16),
-                Row(
+          return Column(
+            // Column untuk menata widget
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Masukkan Uang Tunai',
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            uangTunaiController.text = '20000';
-                          });
-                        },
-                        child: buttonLoutline(
-                          Center(
-                            child: Text(
-                              'Rp 20,000',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                          ),
-                          bnw300,
+                    Row(
+                      children: [
+                        Text(
+                          'Uang Tunai',
+                          style: heading3(FontWeight.w500, bnw900, 'Outfit'),
                         ),
-                      ),
+                        Text(
+                          ' *',
+                          style: heading3(FontWeight.w700, red500, 'Outfit'),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: size16),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            uangTunaiController.text = '50000';
-                          });
-                        },
-                        child: buttonLoutline(
-                          Center(
-                            child: Text(
-                              'Rp 50,000',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
+                    IntrinsicHeight(
+                      child: Container(
+                        child: TextFormField(
+                          cursorColor: primary500,
+                          onTap: () {
+                            displayCode = true;
+                            print(displayCode);
+                            setState(() {});
+                          },
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                          controller: uangTunaiController,
+                          inputFormatters: [
+                            NumericTextFormatter(),
+                            LengthLimitingTextInputFormatter(20),
+                          ],
+                          keyboardType: TextInputType.number,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: size8,
+                            ),
+                            isDense: true,
+                            focusColor: primary500,
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(width: 1.5, color: bnw500),
+                            ),
+                            hintText: 'Rp 0',
+                            hintStyle: heading1(
+                              FontWeight.w700,
+                              bnw500,
+                              'Outfit',
                             ),
                           ),
-                          bnw300,
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: size16),
-                GestureDetector(
-                  onTap: () {
-                    uangTunaiController.text = totalTransaksi.toString();
-                    setState(() {});
-                  },
-                  child: buttonLoutline(
-                    Center(
-                      child: Text(
-                        'Uang Pas',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          uangTunaiController.text = '20000';
+                        });
+                      },
+                      child: buttonLoutline(
+                        Center(
+                          child: Text(
+                            'Rp 20,000',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        bnw300,
                       ),
                     ),
-                    bnw300,
                   ),
+                  SizedBox(width: size16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          uangTunaiController.text = '50000';
+                        });
+                      },
+                      child: buttonLoutline(
+                        Center(
+                          child: Text(
+                            'Rp 50,000',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        bnw300,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: size16),
+              GestureDetector(
+                onTap: () {
+                  uangTunaiController.text = totalTransaksi.toString();
+                  setState(() {});
+                },
+                child: buttonLoutline(
+                  Center(
+                    child: Text(
+                      'Uang Pas',
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                  ),
+                  bnw300,
                 ),
-                SizedBox(height: size16),
-              ],
-            ),
-          ),
-          // displayCode != true ? SizedBox() : Spacer(),
-          // Text('hello'),
-          Spacer(),
-          displayCode != true
-              ? rincianPembayaran(
-                  context,
-                  uangTunaiController.text,
-                  '001',
-                  'false',
-                )
-              : keypad(displayCode, uangTunaiController),
-        ],
+              ),
+              SizedBox(height: size16),
+
+              // Gunakan Spacer() hanya jika konten pas muat di layar
+              if (isContentFitting)
+                Spacer(), // Gunakan Spacer jika konten cukup
+              // Tampilan rincian atau keypad berdasarkan `displayCode`
+              displayCode != true
+                  ? rincianPembayaran(
+                      context,
+                      uangTunaiController.text,
+                      '001',
+                      'false',
+                    )
+                  : keypad(displayCode, uangTunaiController),
+            ],
+          );
+        },
       ),
     );
   }
@@ -3835,139 +3787,104 @@ class _TransactionPageState extends State<TransactionPage>
   rincianPembayaran(BuildContext context, pinValue, payMethod, payReference) {
     return WillPopScope(
       onWillPop: () async => true,
-      child: SingleChildScrollView(
+      child: Expanded(
+        child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
-        child: Column(
-          // shrinkWrap: true,
-          // padding: EdgeInsets.zero,
-          
-          children: [
-            Divider(),
-            Text(
-              'Rincian Pembayaran',
-              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: size8),
-            rincianText('Nama Pembeli', namaCustomerCalculate.toString()),
-            SizedBox(height: size8),
-            rincianText(
-              'Sub Total',
-              FormatCurrency.convertToIdr(subTotal ?? 0),
-            ),
-            SizedBox(height: size8),
-            rincianText('PPN', FormatCurrency.convertToIdr(ppnTransaksi ?? 0)),
-            SizedBox(height: size8),
-            rincianText(
-              'Diskon',
-              FormatCurrency.convertToIdr(discountProduct ?? 0),
-            ),
-            SizedBox(height: size16),
-            dash(),
-            SizedBox(height: size16),
-            uangTunaiController.text != '0'
-                ? uangTunaiController.text != 'Rp 0'
-                      ? Column(
-                          children: [
-                            rincianText(
-                              'Tunai',
-                              FormatCurrency.convertToIdr(
-                                (int.parse(
-                                  uangTunaiController.text.replaceAll(
-                                    RegExp(r'[^0-9]'),
-                                    '',
-                                  ),
-                                )),
+          child: Column(
+            // shrinkWrap: true,
+            // padding: EdgeInsets.zero,
+            children: [
+              Divider(),
+              Text(
+                'Rincian Pembayaran',
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size8),
+              rincianText('Nama Pembeli', namaCustomerCalculate.toString()),
+              SizedBox(height: size8),
+              rincianText(
+                'Sub Total',
+                FormatCurrency.convertToIdr(subTotal ?? 0),
+              ),
+              SizedBox(height: size8),
+              rincianText(
+                'PPN',
+                FormatCurrency.convertToIdr(ppnTransaksi ?? 0),
+              ),
+              SizedBox(height: size8),
+              rincianText(
+                'Diskon',
+                FormatCurrency.convertToIdr(discountProduct ?? 0),
+              ),
+              SizedBox(height: size16),
+              dash(),
+              SizedBox(height: size16),
+              uangTunaiController.text != '0'
+                  ? uangTunaiController.text != 'Rp 0'
+                        ? Column(
+                            children: [
+                              rincianText(
+                                'Tunai',
+                                FormatCurrency.convertToIdr(
+                                  (int.parse(
+                                    uangTunaiController.text.replaceAll(
+                                      RegExp(r'[^0-9]'),
+                                      '',
+                                    ),
+                                  )),
+                                ),
                               ),
-                            ),
-                            SizedBox(height: size16),
-                            rincianBlueText(
-                              (int.parse(
-                                            uangTunaiController.text.replaceAll(
-                                              RegExp(r'[^0-9]'),
-                                              '',
-                                            ),
-                                          ) -
-                                          totalTransaksi) <
-                                      0
-                                  ? 'Kurang'
-                                  : 'Kembalian',
-                              FormatCurrency.convertToIdr(
+                              SizedBox(height: size16),
+                              rincianBlueText(
                                 (int.parse(
-                                      uangTunaiController.text.replaceAll(
-                                        RegExp(r'[^0-9]'),
-                                        '',
-                                      ),
-                                    )) -
-                                    totalTransaksi,
+                                              uangTunaiController.text
+                                                  .replaceAll(
+                                                    RegExp(r'[^0-9]'),
+                                                    '',
+                                                  ),
+                                            ) -
+                                            totalTransaksi) <
+                                        0
+                                    ? 'Kurang'
+                                    : 'Kembalian',
+                                FormatCurrency.convertToIdr(
+                                  (int.parse(
+                                        uangTunaiController.text.replaceAll(
+                                          RegExp(r'[^0-9]'),
+                                          '',
+                                        ),
+                                      )) -
+                                      totalTransaksi,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: size16),
-                            dash(),
-                            SizedBox(height: size16),
-                          ],
-                        )
-                      : SizedBox()
-                : SizedBox(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  FormatCurrency.convertToIdr(totalTransaksi ?? 0),
-        
-                  // FormatCurrency.convertToIdr(
-                  //     cart[0].price ?? 0),
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-              ],
-            ),
-            SizedBox(height: size16),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: totalTransaksi < 0
-                  ? buttonXXLonOff(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(PhosphorIcons.wallet_fill, color: bnw100),
-                          SizedBox(width: size16),
-                          Text(
-                            'Bayar',
-                            style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      double.infinity,
-                      bnw300,
-                    )
-                  : GestureDetector(
-                      onTap: () {
-                        if (uangTunaiController.text != 'Rp 0') {
-                          if (uangTunaiController.text != '0') {
-                            createTransactionBayar(
-                              context,
-                              widget.token,
-                              pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
-                              cartMap,
-                              _pageController,
-                              cart,
-                              setState,
-                              payMethod,
-                              payReference,
-                              transactionidValue ?? '',
-                              pelangganId,
-                              '',
-                              discountId,
-                            );
-                          }
-                        }
-        
-                        setState(() {});
-                      },
-                      child: buttonXXLonOff(
+                              SizedBox(height: size16),
+                              dash(),
+                              SizedBox(height: size16),
+                            ],
+                          )
+                        : SizedBox()
+                  : SizedBox(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total',
+                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    FormatCurrency.convertToIdr(totalTransaksi ?? 0),
+
+                    // FormatCurrency.convertToIdr(
+                    //     cart[0].price ?? 0),
+                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                ],
+              ),
+              SizedBox(height: size16),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: totalTransaksi < 0
+                    ? buttonXXLonOff(
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -3984,14 +3901,58 @@ class _TransactionPageState extends State<TransactionPage>
                           ],
                         ),
                         double.infinity,
-                        (uangTunaiController.text == 'Rp 0' ||
-                                uangTunaiController.text == '0')
-                            ? bnw300
-                            : primary500,
+                        bnw300,
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          if (uangTunaiController.text != 'Rp 0') {
+                            if (uangTunaiController.text != '0') {
+                              createTransactionBayar(
+                                context,
+                                widget.token,
+                                pinValue.replaceAll(RegExp(r'[^0-9]'), ''),
+                                cartMap,
+                                _pageController,
+                                cart,
+                                setState,
+                                payMethod,
+                                payReference,
+                                transactionidValue ?? '',
+                                pelangganId,
+                                '',
+                                discountId,
+                              );
+                            }
+                          }
+
+                          setState(() {});
+                        },
+                        child: buttonXXLonOff(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(PhosphorIcons.wallet_fill, color: bnw100),
+                              SizedBox(width: size16),
+                              Text(
+                                'Bayar',
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
+                              ),
+                            ],
+                          ),
+                          double.infinity,
+                          (uangTunaiController.text == 'Rp 0' ||
+                                  uangTunaiController.text == '0')
+                              ? bnw300
+                              : primary500,
+                        ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -4186,7 +4147,7 @@ class _TransactionPageState extends State<TransactionPage>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: heading4(FontWeight.w400, bnw900, 'Outfit')),
+        Text(title ?? '', style: heading4(FontWeight.w400, bnw900, 'Outfit')),
         Text(subTitle, style: heading4(FontWeight.w400, bnw900, 'Outfit')),
       ],
     );
@@ -6092,197 +6053,201 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     ).size.width /
                                                                                     size8,
                                                                               ),
-                                                                              child: GestureDetector(
-                                                                                onTap: () async {
-                                                                                  String productId = datasTransaksi![index].productid.toString();
+                                                                              child:
+                                                                                  datasTransaksi![index].price_online_shop_after ==
+                                                                                      0
+                                                                                  ? SizedBox()
+                                                                                  : GestureDetector(
+                                                                                      onTap: () async {
+                                                                                        String productId = datasTransaksi![index].productid.toString();
 
-                                                                                  if (cartProductIds.contains(
-                                                                                    productId,
-                                                                                  )) {
-                                                                                    cartProductIds.remove(
-                                                                                      productId,
-                                                                                    );
+                                                                                        if (cartProductIds.contains(
+                                                                                          productId,
+                                                                                        )) {
+                                                                                          cartProductIds.remove(
+                                                                                            productId,
+                                                                                          );
 
-                                                                                    for (
-                                                                                      int index = 0;
-                                                                                      index <
-                                                                                          cart.length;
-                                                                                      index++
-                                                                                    ) {
-                                                                                      if (cart[index].productid ==
-                                                                                          productId) {
-                                                                                        total.removeAt(
-                                                                                          index,
-                                                                                        );
-                                                                                        cart.removeAt(
-                                                                                          index,
-                                                                                        );
-                                                                                        cartMap.removeAt(
-                                                                                          index,
-                                                                                        );
+                                                                                          for (
+                                                                                            int index = 0;
+                                                                                            index <
+                                                                                                cart.length;
+                                                                                            index++
+                                                                                          ) {
+                                                                                            if (cart[index].productid ==
+                                                                                                productId) {
+                                                                                              total.removeAt(
+                                                                                                index,
+                                                                                              );
+                                                                                              cart.removeAt(
+                                                                                                index,
+                                                                                              );
+                                                                                              cartMap.removeAt(
+                                                                                                index,
+                                                                                              );
 
-                                                                                        if (cart.isEmpty) {
-                                                                                          sumTotal = 0;
+                                                                                              if (cart.isEmpty) {
+                                                                                                sumTotal = 0;
+                                                                                              }
+                                                                                              break;
+                                                                                            }
+                                                                                          }
+
+                                                                                          isItemAdded = true;
+                                                                                        } else {
+                                                                                          cartProductIds.add(
+                                                                                            productId,
+                                                                                          );
+                                                                                          isItemAdded = false;
                                                                                         }
-                                                                                        break;
-                                                                                      }
-                                                                                    }
 
-                                                                                    isItemAdded = true;
-                                                                                  } else {
-                                                                                    cartProductIds.add(
-                                                                                      productId,
-                                                                                    );
-                                                                                    isItemAdded = false;
-                                                                                  }
+                                                                                        if (!isItemAdded) {
+                                                                                          // Navigator.pop(context);
+                                                                                          Map<
+                                                                                            String,
+                                                                                            String
+                                                                                          >
+                                                                                          map1 = {};
+                                                                                          map1['name'] = datasTransaksi![index].name.toString();
+                                                                                          map1['productid'] = datasTransaksi![index].productid.toString();
+                                                                                          // map1['quantity'] = '1';
+                                                                                          map1['quantity'] = counterCart.toString();
 
-                                                                                  if (!isItemAdded) {
-                                                                                    // Navigator.pop(context);
-                                                                                    Map<
-                                                                                      String,
-                                                                                      String
-                                                                                    >
-                                                                                    map1 = {};
-                                                                                    map1['name'] = datasTransaksi![index].name.toString();
-                                                                                    map1['productid'] = datasTransaksi![index].productid.toString();
-                                                                                    // map1['quantity'] = '1';
-                                                                                    map1['quantity'] = counterCart.toString();
+                                                                                          map1['image'] = datasTransaksi![index].product_image.toString();
 
-                                                                                    map1['image'] = datasTransaksi![index].product_image.toString();
+                                                                                          // log("${datasTransaksi![i]
+                                                                                          //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
+                                                                                          map1['amount_display'] = datasTransaksi![index].price_online_shop.toString();
+                                                                                          //                                  (datasTransaksi![i].price! * counterCart)
+                                                                                          // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
 
-                                                                                    // log("${datasTransaksi![i]
-                                                                                    //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
-                                                                                    map1['amount_display'] = datasTransaksi![index].price_online_shop.toString();
-                                                                                    //                                  (datasTransaksi![i].price! * counterCart)
-                                                                                    // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
+                                                                                          //ubah transaksi
+                                                                                          // datasTransaksi![i].price.toString();
+                                                                                          map1['amount'] = datasTransaksi![index].price_online_shop.toString();
+                                                                                          // datasTransaksi![i].price.toString();
 
-                                                                                    //ubah transaksi
-                                                                                    // datasTransaksi![i].price.toString();
-                                                                                    map1['amount'] = datasTransaksi![index].price_online_shop.toString();
-                                                                                    // datasTransaksi![i].price.toString();
+                                                                                          // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
 
-                                                                                    // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
+                                                                                          // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
 
-                                                                                    // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
+                                                                                          map1['description'] = conCatatanPreview.text;
+                                                                                          map1['id_request'] = '';
+                                                                                          cartMap.add(
+                                                                                            map1,
+                                                                                          );
 
-                                                                                    map1['description'] = conCatatanPreview.text;
-                                                                                    map1['id_request'] = '';
-                                                                                    cartMap.add(
-                                                                                      map1,
-                                                                                    );
+                                                                                          // log(datasTransaksi![i].product_image.toString());
 
-                                                                                    // log(datasTransaksi![i].product_image.toString());
+                                                                                          String name = datasTransaksi![index].name.toString().trim();
+                                                                                          String productid = datasTransaksi![index].productid.toString().trim();
+                                                                                          String image = datasTransaksi![index].product_image.toString().trim();
+                                                                                          // String desc = conCatatan[i]
+                                                                                          //     .text
+                                                                                          //     .toString()
+                                                                                          //     .trim();
 
-                                                                                    String name = datasTransaksi![index].name.toString().trim();
-                                                                                    String productid = datasTransaksi![index].productid.toString().trim();
-                                                                                    String image = datasTransaksi![index].product_image.toString().trim();
-                                                                                    // String desc = conCatatan[i]
-                                                                                    //     .text
-                                                                                    //     .toString()
-                                                                                    //     .trim();
+                                                                                          //int? price = ( datasTransaksi![i].price!);
+                                                                                          num? price = datasTransaksi![index].price_online_shop_after!;
+                                                                                          // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
 
-                                                                                    //int? price = ( datasTransaksi![i].price!);
-                                                                                    num? price = datasTransaksi![index].price_online_shop_after!;
-                                                                                    // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
+                                                                                          int i = 0;
+                                                                                          for (
+                                                                                            i;
+                                                                                            i <
+                                                                                                cart.length;
+                                                                                            i++
+                                                                                          ) {}
 
-                                                                                    int i = 0;
-                                                                                    for (
-                                                                                      i;
-                                                                                      i <
-                                                                                          cart.length;
-                                                                                      i++
-                                                                                    ) {}
+                                                                                          // int? quantity = cart[i];
 
-                                                                                    // int? quantity = cart[i];
+                                                                                          // log(name.toString());
+                                                                                          // log(price.toString());
+                                                                                          // log(productid.toString());
+                                                                                          // log(image.toString());
 
-                                                                                    // log(name.toString());
-                                                                                    // log(price.toString());
-                                                                                    // log(productid.toString());
-                                                                                    // log(image.toString());
+                                                                                          sumTotal =
+                                                                                              sumTotal +
+                                                                                              (price *
+                                                                                                  counterCart);
+                                                                                          // subTotal =
+                                                                                          //     subTotal + price.toInt();
+                                                                                          total.add(
+                                                                                            price *
+                                                                                                counterCart,
+                                                                                          );
 
-                                                                                    sumTotal =
-                                                                                        sumTotal +
-                                                                                        (price *
-                                                                                            counterCart);
-                                                                                    // subTotal =
-                                                                                    //     subTotal + price.toInt();
-                                                                                    total.add(
-                                                                                      price *
-                                                                                          counterCart,
-                                                                                    );
+                                                                                          conCatatan.add(
+                                                                                            TextEditingController(
+                                                                                              text: conCatatanPreview.text,
+                                                                                            ),
+                                                                                          );
 
-                                                                                    conCatatan.add(
-                                                                                      TextEditingController(
-                                                                                        text: conCatatanPreview.text,
-                                                                                      ),
-                                                                                    );
+                                                                                          cart.add(
+                                                                                            CartTransaksi(
+                                                                                              name: name,
+                                                                                              productid: productid,
+                                                                                              image: image,
+                                                                                              price: price,
+                                                                                              quantity: counterCart,
+                                                                                              desc: conCatatanPreview.text,
+                                                                                              idRequest: "",
+                                                                                              // quantity: cart[i]
+                                                                                              //     .quantity
+                                                                                              //     .toInt(),
+                                                                                            ),
+                                                                                          );
 
-                                                                                    cart.add(
-                                                                                      CartTransaksi(
-                                                                                        name: name,
-                                                                                        productid: productid,
-                                                                                        image: image,
-                                                                                        price: price,
-                                                                                        quantity: counterCart,
-                                                                                        desc: conCatatanPreview.text,
-                                                                                        idRequest: "",
-                                                                                        // quantity: cart[i]
-                                                                                        //     .quantity
-                                                                                        //     .toInt(),
-                                                                                      ),
-                                                                                    );
-
-                                                                                    // selectedIndexTransaksi[index];
-                                                                                  }
-                                                                                  // refreshColor();
-                                                                                  setState(
-                                                                                    () {},
-                                                                                  );
-                                                                                  initState();
-                                                                                },
-                                                                                child:
-                                                                                    cartProductIds.contains(
-                                                                                      datasTransaksi![index].productid.toString(),
-                                                                                    )
-                                                                                    ? SizedBox()
-                                                                                    : buttonL(
-                                                                                        Center(
-                                                                                          child: Column(
-                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                            children: [
-                                                                                              datasTransaksi![index].discount ==
-                                                                                                      0
-                                                                                                  ? Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_online_shop_after,
-                                                                                                      ).toString(),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        bnw900,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    )
-                                                                                                  : Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_online_shop_after,
-                                                                                                      ).toString(),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        danger500,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        ),
-                                                                                        bnw100,
-                                                                                        bnw900,
-                                                                                      ),
-                                                                              ),
+                                                                                          // selectedIndexTransaksi[index];
+                                                                                        }
+                                                                                        // refreshColor();
+                                                                                        setState(
+                                                                                          () {},
+                                                                                        );
+                                                                                        initState();
+                                                                                      },
+                                                                                      child:
+                                                                                          cartProductIds.contains(
+                                                                                            datasTransaksi![index].productid.toString(),
+                                                                                          )
+                                                                                          ? SizedBox()
+                                                                                          : buttonL(
+                                                                                              Center(
+                                                                                                child: Column(
+                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                  children: [
+                                                                                                    datasTransaksi![index].discount ==
+                                                                                                            0
+                                                                                                        ? Text(
+                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                              datasTransaksi![index].price_online_shop_after,
+                                                                                                            ).toString(),
+                                                                                                            maxLines: 3,
+                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                            style: heading4(
+                                                                                                              FontWeight.w400,
+                                                                                                              bnw900,
+                                                                                                              'Outfit',
+                                                                                                            ),
+                                                                                                          )
+                                                                                                        : Text(
+                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                              datasTransaksi![index].price_online_shop_after,
+                                                                                                            ).toString(),
+                                                                                                            maxLines: 3,
+                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                            style: heading4(
+                                                                                                              FontWeight.w400,
+                                                                                                              danger500,
+                                                                                                              'Outfit',
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                              ),
+                                                                                              bnw100,
+                                                                                              bnw900,
+                                                                                            ),
+                                                                                    ),
                                                                             ),
                                                                           ),
                                                                           SizedBox(
@@ -8220,19 +8185,32 @@ class _TransactionPageState extends State<TransactionPage>
                                         print(tapTrue);
                                         print("aku adalah data $cartMap");
 
-                                        createTransaction(
+                                        saveTransaction(
                                           context,
                                           widget.token,
                                           '',
                                           cartMap,
-                                          _pageController,
+                                          pageController,
                                           cart,
                                           setState,
                                           '',
                                           '',
-                                          '',
                                           pelangganId,
                                         );
+
+                                        // createTransaction(
+                                        //   context,
+                                        //   widget.token,
+                                        //   '',
+                                        //   cartMap,
+                                        //   _pageController,
+                                        //   cart,
+                                        //   setState,
+                                        //   '',
+                                        //   '',
+                                        //   '',
+                                        //   pelangganId,
+                                        // );
 
                                         cart.clear();
                                         cartMap.clear();
@@ -8355,7 +8333,7 @@ class _TransactionPageState extends State<TransactionPage>
     });
     conCounterPreview.text = '1';
     conCatatanPreview.text = '';
-
+    counterCart = 1;
     tapTrue = 1;
 
     return showModalBottomSheet(
@@ -8386,7 +8364,7 @@ class _TransactionPageState extends State<TransactionPage>
             child: Column(
               children: [
                 dividerShowdialog(),
-                StatefulBuilder(  
+                StatefulBuilder(
                   builder: (context, setState) => Expanded(
                     child: ListView(
                       children: [
@@ -8421,11 +8399,10 @@ class _TransactionPageState extends State<TransactionPage>
                                                   child,
                                                   loadingProgress,
                                                 ) {
-                                                  if (loadingProgress ==
-                                                      null) {
+                                                  if (loadingProgress == null) {
                                                     return child;
                                                   }
-            
+
                                                   return Center(
                                                     child: loading(),
                                                   );
@@ -8473,8 +8450,7 @@ class _TransactionPageState extends State<TransactionPage>
                                               ),
                                             ),
                                             Text(
-                                              datasTransaksi![i]
-                                                      .typeproducts ??
+                                              datasTransaksi![i].typeproducts ??
                                                   '',
                                               style: heading4(
                                                 FontWeight.w400,
@@ -8539,19 +8515,17 @@ class _TransactionPageState extends State<TransactionPage>
                                                             0;
                                                         counterCart =
                                                             parsedValue;
-                                                        conCounterPreview
-                                                                .text =
+                                                        conCounterPreview.text =
                                                             counterCart
                                                                 .toString();
                                                       });
                                                     },
-                                                    textAlign:
-                                                        TextAlign.center,
+                                                    textAlign: TextAlign.center,
                                                     decoration: InputDecoration(
                                                       // alignLabelWithHint: true,
                                                       hintText: counterCart
                                                           .toString(),
-            
+
                                                       // .toString(),
                                                       // _itemCount.toString(),
                                                       hintStyle: heading4(
@@ -8567,8 +8541,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                   onTap: () {
                                                     counterCart++;
                                                     conCounterPreview.text =
-                                                        counterCart
-                                                            .toString();
+                                                        counterCart.toString();
                                                     setState(() {});
                                                   },
                                                   child: buttonMoutlineColor(
@@ -8600,11 +8573,7 @@ class _TransactionPageState extends State<TransactionPage>
                             children: [
                               Text(
                                 'Varian Harga',
-                                style: body1(
-                                  FontWeight.w500,
-                                  bnw900,
-                                  'Outfit',
-                                ),
+                                style: body1(FontWeight.w500, bnw900, 'Outfit'),
                               ),
                               SizedBox(height: size16),
                               Row(
@@ -8634,9 +8603,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                     : bnw300,
                                               ),
                                               borderRadius:
-                                                  BorderRadius.circular(
-                                                    size8,
-                                                  ),
+                                                  BorderRadius.circular(size8),
                                             ),
                                           ),
                                           child: Row(
@@ -8659,61 +8626,67 @@ class _TransactionPageState extends State<TransactionPage>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: size16),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          tapTrue = 2;
-                                        });
-                                      },
-                                      child: IntrinsicWidth(
-                                        child: Container(
-                                          height: size56,
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size20,
-                                          ),
-                                          decoration: ShapeDecoration(
-                                            color: tapTrue == 2
-                                                ? primary100
-                                                : bnw100,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                width: width2,
-                                                color: tapTrue == 2
-                                                    ? primary500
-                                                    : bnw300,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    size8,
+                                  datasTransaksi![i].price_online_shop_after ==
+                                          0
+                                      ? SizedBox()
+                                      : SizedBox(width: size16),
+                                  datasTransaksi![i].price_online_shop_after ==
+                                          0
+                                      ? SizedBox()
+                                      : Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                tapTrue = 2;
+                                              });
+                                            },
+                                            child: IntrinsicWidth(
+                                              child: Container(
+                                                height: size56,
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: size20,
+                                                ),
+                                                decoration: ShapeDecoration(
+                                                  color: tapTrue == 2
+                                                      ? primary100
+                                                      : bnw100,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                      width: width2,
+                                                      color: tapTrue == 2
+                                                          ? primary500
+                                                          : bnw300,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          size8,
+                                                        ),
                                                   ),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Online',
-                                                style: heading3(
-                                                  FontWeight.w400,
-                                                  tapTrue == 2
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit',
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Online',
+                                                      style: heading3(
+                                                        FontWeight.w400,
+                                                        tapTrue == 2
+                                                            ? primary500
+                                                            : bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                               SizedBox(height: size16),
-            
+
                               //tulis disiini
                               FutureBuilder<List<ProductVariantCategory>?>(
                                 future: getProductVariantTransaksi(
@@ -8741,22 +8714,20 @@ class _TransactionPageState extends State<TransactionPage>
                                       ),
                                     );
                                   }
-            
+
                                   final data = snapshot.data!;
-            
+
                                   return Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: data.map((variantCategory) {
                                       // state lokal tiap kategori
                                       List<bool> selected = List.generate(
-                                        variantCategory
-                                            .productVariants
-                                            .length,
+                                        variantCategory.productVariants.length,
                                         (_) => false,
                                       );
                                       int selectedCount = 0;
-            
+
                                       return StatefulBuilder(
                                         builder: (context, setStateVariant) {
                                           return Column(
@@ -8773,8 +8744,7 @@ class _TransactionPageState extends State<TransactionPage>
                                               ),
                                               SizedBox(height: size4),
                                               Text(
-                                                variantCategory.isRequired ==
-                                                        1
+                                                variantCategory.isRequired == 1
                                                     ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
                                                     : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
                                                 style: body2(
@@ -8803,8 +8773,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                       final opt = variantCategory
                                                           .productVariants[index];
                                                       return CheckboxListTile(
-                                                        value:
-                                                            selected[index],
+                                                        value: selected[index],
                                                         onChanged: (value) {
                                                           setStateVariant(() {
                                                             // Handle maksimum pilihan
@@ -8841,27 +8810,25 @@ class _TransactionPageState extends State<TransactionPage>
                                                                 return;
                                                               }
                                                             }
-            
+
                                                             selected[index] =
-                                                                value ??
-                                                                false;
+                                                                value ?? false;
                                                             selectedCount =
                                                                 selected
                                                                     .where(
-                                                                      (e) =>
-                                                                          e,
+                                                                      (e) => e,
                                                                     )
                                                                     .length;
-            
+
                                                             String productId =
                                                                 datasTransaksi![i]
                                                                     .productid
                                                                     .toString();
-            
+
                                                             // 🔹 Ambil list varian untuk produk ini (kalau belum ada, buat baru)
                                                             selectedVariantsByProduct[productId] ??=
                                                                 [];
-            
+
                                                             // Hapus dulu varian dari kategori ini (biar gak dobel)
                                                             selectedVariantsByProduct[productId]!
                                                                 .removeWhere(
@@ -8871,7 +8838,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                           .id
                                                                           .toString(),
                                                                 );
-            
+
                                                             // 🔹 Buat list variant_id yang dipilih di kategori ini
                                                             List<String>
                                                             selectedIds = [];
@@ -8881,9 +8848,8 @@ class _TransactionPageState extends State<TransactionPage>
                                                                 dynamic
                                                               >
                                                             >
-                                                            variantDetails =
-                                                                [];
-            
+                                                            variantDetails = [];
+
                                                             for (
                                                               int j = 0;
                                                               j <
@@ -8895,10 +8861,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                                 final v =
                                                                     variantCategory
                                                                         .productVariants[j];
-                                                                selectedIds
-                                                                    .add(
-                                                                      v.id,
-                                                                    );
+                                                                selectedIds.add(
+                                                                  v.id,
+                                                                );
                                                                 variantDetails.add({
                                                                   "variant_id":
                                                                       v.id,
@@ -8910,15 +8875,16 @@ class _TransactionPageState extends State<TransactionPage>
                                                                       ) ??
                                                                       0,
                                                                   "is_online":
-                                                                      false,
+                                                                      (tapTrue ==
+                                                                      2),
                                                                 });
-            
+
                                                                 print(
                                                                   '🧩 Varian dipilih: ${v.name} (${v.price})',
                                                                 );
                                                               }
                                                             }
-            
+
                                                             if (selectedIds
                                                                 .isNotEmpty) {
                                                               selectedVariantsByProduct[productId]!.add({
@@ -8933,23 +8899,23 @@ class _TransactionPageState extends State<TransactionPage>
                                                               });
                                                             } else {
                                                               // Kalau kosong, hapus kategori dari map
-                                                              selectedVariantsByProduct[productId]!.removeWhere(
-                                                                (e) =>
-                                                                    e['variant_category_id'] ==
-                                                                    variantCategory
-                                                                        .id
-                                                                        .toString(),
-                                                              );
+                                                              selectedVariantsByProduct[productId]!
+                                                                  .removeWhere(
+                                                                    (e) =>
+                                                                        e['variant_category_id'] ==
+                                                                        variantCategory
+                                                                            .id
+                                                                            .toString(),
+                                                                  );
                                                             }
-            
+
                                                             print(
                                                               '✅ Selected variants for $productId: '
                                                               '${jsonEncode(selectedVariantsByProduct[productId])}',
                                                             );
                                                           });
                                                         },
-                                                        activeColor:
-                                                            primary500,
+                                                        activeColor: primary500,
                                                         title: Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
@@ -8972,8 +8938,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                             Text(
                                                               '${FormatCurrency.convertToIdr(double.tryParse(opt.price) ?? 0)}',
                                                               style: heading4(
-                                                                FontWeight
-                                                                    .w400,
+                                                                FontWeight.w400,
                                                                 bnw900,
                                                                 'Outfit',
                                                               ),
@@ -8985,8 +8950,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                 .trailing,
                                                         contentPadding:
                                                             EdgeInsets.symmetric(
-                                                              horizontal:
-                                                                  size8,
+                                                              horizontal: size8,
                                                             ),
                                                       );
                                                     },
@@ -9011,15 +8975,11 @@ class _TransactionPageState extends State<TransactionPage>
                                   );
                                 },
                               ),
-            
+
                               SizedBox(height: size16),
                               Text(
                                 'Catatan',
-                                style: body1(
-                                  FontWeight.w500,
-                                  bnw900,
-                                  'Outfit',
-                                ),
+                                style: body1(FontWeight.w500, bnw900, 'Outfit'),
                               ),
                               IntrinsicHeight(
                                 child: TextFormField(
@@ -9083,9 +9043,7 @@ class _TransactionPageState extends State<TransactionPage>
                           for (var product in datasTransaksi!) {
                             print('Produk: ${product.name}');
                             for (var cat in product.variants) {
-                              print(
-                                '  Kategori: ${cat.variantCategoryTitle}',
-                              );
+                              print('  Kategori: ${cat.variantCategoryTitle}');
                               for (var opt in cat.variants) {
                                 print(
                                   '    - ${opt.variantProductName} (Rp${opt.variantProductPrice})',
@@ -9093,7 +9051,7 @@ class _TransactionPageState extends State<TransactionPage>
                               }
                             }
                           }
-            
+
                           Navigator.pop(context);
                         },
                         child: buttonXLoutline(
@@ -9118,7 +9076,7 @@ class _TransactionPageState extends State<TransactionPage>
                         onTap: () {
                           setState(() {
                             if (tapTrue == 0) tapTrue = 1;
-            
+
                             String productId = datasTransaksi![i].productid
                                 .toString();
                             String name = datasTransaksi![i].name
@@ -9127,15 +9085,15 @@ class _TransactionPageState extends State<TransactionPage>
                             String image = datasTransaksi![i].product_image
                                 .toString()
                                 .trim();
-            
+
                             num basePrice = (tapTrue == 2
                                 ? datasTransaksi![i].price_online_shop_after!
                                 : datasTransaksi![i].price_after!);
-            
+
                             num totalVariantPrice = 0;
                             List<Map<String, dynamic>>? selectedVariantList =
                                 selectedVariantsByProduct[productId];
-            
+
                             if (selectedVariantList != null &&
                                 selectedVariantList.isNotEmpty) {
                               for (var variantCat in selectedVariantList) {
@@ -9153,9 +9111,9 @@ class _TransactionPageState extends State<TransactionPage>
                                 }
                               }
                             }
-            
+
                             num finalPrice = basePrice + totalVariantPrice;
-            
+
                             // 🆕 Buat "signature" unik dari kombinasi
                             String variantSignature = jsonEncode(
                               selectedVariantList ?? [],
@@ -9163,7 +9121,7 @@ class _TransactionPageState extends State<TransactionPage>
                             String catatan = conCatatanPreview.text.trim();
                             String signature =
                                 "$productId|$variantSignature|$catatan|$tapTrue";
-            
+
                             // 🧾 Cek apakah item dengan kombinasi ini sudah ada
                             int existingIndex = cart.indexWhere(
                               (e) =>
@@ -9174,9 +9132,9 @@ class _TransactionPageState extends State<TransactionPage>
                                   e.desc == catatan &&
                                   (cartMap[cart.indexOf(e)]['is_online'] ??
                                           'false') ==
-                                      (tapTrue == 2 ? 'true' : 'false'),
+                                      (tapTrue == 2 ? true : false),
                             );
-            
+
                             if (existingIndex != -1) {
                               // ✅ Item dengan varian & catatan yang sama → tambah qty
                               cart[existingIndex].quantity += counterCart;
@@ -9184,18 +9142,18 @@ class _TransactionPageState extends State<TransactionPage>
                                   cart[existingIndex].price! *
                                   cart[existingIndex].quantity;
                               sumTotal = total.fold(0, (a, b) => a + b);
-            
+
                               cartMap[existingIndex]['quantity'] =
                                   cart[existingIndex].quantity.toString();
                             } else {
                               // 🆕 Item baru → tambahkan baris baru
                               sumTotal += (finalPrice * counterCart);
                               total.add(finalPrice * counterCart);
-            
+
                               conCatatan.add(
                                 TextEditingController(text: catatan),
                               );
-            
+
                               cart.add(
                                 CartTransaksi(
                                   name: name,
@@ -9214,17 +9172,17 @@ class _TransactionPageState extends State<TransactionPage>
                                       : null, // Jika tidak ada variants, set ke null
                                 ),
                               );
-            
+
                               // for (var cartItem in cart) {
                               //   print(
                               //     'Cart Item: ${cartItem.name}, Variants: ${cartItem.variants}',
                               //   );
                               // }
-            
+
                               // print('ini adalah cart baru ${cart}');
-            
+
                               cartProductIds.add(productId);
-            
+
                               Map<String, String> map1 = {};
                               map1['name'] = name;
                               map1['product_id'] = productId;
@@ -9237,7 +9195,7 @@ class _TransactionPageState extends State<TransactionPage>
                               map1['is_online'] = tapTrue == 2
                                   ? 'true'
                                   : 'false';
-            
+
                               // Menambahkan variants jika ada
                               map1['variants'] =
                                   selectedVariantList != null &&
@@ -9247,7 +9205,7 @@ class _TransactionPageState extends State<TransactionPage>
                               cartMap.add(map1);
                               print('🆕 Produk baru ditambahkan: ${cartMap}');
                             }
-            
+
                             Navigator.pop(context);
                           });
                         },
@@ -9369,8 +9327,7 @@ class _TransactionPageState extends State<TransactionPage>
                               borderRadius: BorderRadius.circular(25),
                             ),
                             context: context,
-                            builder: (context) => StatefulBuilder(
-                              builder: (context, setState) => IntrinsicHeight(
+                            builder: (context) => IntrinsicHeight(
                                 child: Container(
                                   padding: EdgeInsets.only(
                                     bottom: MediaQuery.of(
@@ -9532,7 +9489,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                 context,
                                                               );
                                                               setState(() {});
-                                                              initState();
+                                                              // initState(); 
                                                             },
                                                             child: buttonXL(
                                                               Center(
@@ -9561,7 +9518,7 @@ class _TransactionPageState extends State<TransactionPage>
                                   ),
                                 ),
                               ),
-                            ),
+                           
                           );
                         },
                         child: Container(

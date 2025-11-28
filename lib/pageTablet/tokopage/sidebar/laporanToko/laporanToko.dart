@@ -133,10 +133,10 @@ class _LaporanTokoState extends State<LaporanToko> {
           PhosphorIcons.clipboard_fill),
       ObjectLaporan('Pergerakan Inventaris', 'Laporan Pergerakan Inventaris',
           PhosphorIcons.swap_fill),
-      ObjectLaporan(
-          'Penggunaan Bahan Produk',
-          'Laporan Penggunaan Bahan Produk',
-          PhosphorIcons.archive_box_fill),
+      // ObjectLaporan(
+      //     'Penggunaan Bahan Produk',
+      //     'Laporan Penggunaan Bahan Produk',
+      //     PhosphorIcons.archive_box_fill),
     ];
 
     return WillPopScope(

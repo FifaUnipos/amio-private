@@ -151,7 +151,9 @@ class _SimpanPageState extends State<SimpanPage> {
                     GestureDetector(
                       onTap: () {
                         widget.pageController.jumpToPage(0);
-
+                        transactionidValue = '';
+                        cart.clear();
+                        cartMap.clear();
                         setState(() {});
                       },
                       child: Icon(

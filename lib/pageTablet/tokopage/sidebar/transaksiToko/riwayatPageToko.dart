@@ -435,8 +435,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                         FormatCurrency.convertToIdr(
                                                           double.parse(
                                                             datasRiwayat![index]
-                                                                .amount
-                                                                .toString(),
+                                                                    .amount ??
+                                                                '0',
                                                           ),
                                                         ).toString(),
                                                         style: heading4(
@@ -538,67 +538,68 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             data,
                                                           ),
                                                     ),
-                                                    data['is_color'] == '1'
-                                                        ? SizedBox()
-                                                        : Column(
-                                                            children: [
-                                                              SizedBox(
-                                                                width: size16,
-                                                              ),
-                                                              GestureDetector(
-                                                                onTap: () {
-                                                                  whenLoading(
-                                                                    context,
-                                                                  );
 
-                                                                  transaksiViewReference(
-                                                                    context,
-                                                                    widget
-                                                                        .token,
-                                                                    data['transactionid'],
-                                                                  ).then((
-                                                                    value,
-                                                                  ) {
-                                                                    if (value['rc'] ==
-                                                                        '00') {
-                                                                      Navigator.of(
-                                                                        context,
-                                                                        rootNavigator:
-                                                                            true,
-                                                                      ).pop();
-                                                                      showBottomRiwayatPerubahan(
-                                                                        context,
-                                                                        data,
-                                                                      );
-                                                                    } else {
-                                                                      Navigator.of(
-                                                                        context,
-                                                                        rootNavigator:
-                                                                            true,
-                                                                      ).pop();
-                                                                    }
-                                                                  });
-                                                                },
-                                                                child: Container(
-                                                                  padding: EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        size12,
-                                                                    vertical:
-                                                                        size16,
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Lihat Riwayat',
-                                                                    style: heading3(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      primary500,
-                                                                      'Outfit',
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                    // data['is_color'] == '1'
+                                                    //     ? SizedBox()
+                                                    //     : Column(
+                                                    //         children: [
+                                                    //           SizedBox(
+                                                    //             width: size16,
+                                                    //           ),
+                                                    //           GestureDetector(
+                                                    //             onTap: () {
+                                                    //               whenLoading(
+                                                    //                 context,
+                                                    //               );
+
+                                                    //               transaksiViewReference(
+                                                    //                 context,
+                                                    //                 widget
+                                                    //                     .token,
+                                                    //                 data['transactionid'],
+                                                    //               ).then((
+                                                    //                 value,
+                                                    //               ) {
+                                                    //                 if (value['rc'] ==
+                                                    //                     '00') {
+                                                    //                   Navigator.of(
+                                                    //                     context,
+                                                    //                     rootNavigator:
+                                                    //                         true,
+                                                    //                   ).pop();
+                                                    //                   showBottomRiwayatPerubahan(
+                                                    //                     context,
+                                                    //                     data,
+                                                    //                   );
+                                                    //                 } else {
+                                                    //                   Navigator.of(
+                                                    //                     context,
+                                                    //                     rootNavigator:
+                                                    //                         true,
+                                                    //                   ).pop();
+                                                    //                 }
+                                                    //               });
+                                                    //             },
+                                                    //             child: Container(
+                                                    //               padding: EdgeInsets.symmetric(
+                                                    //                 horizontal:
+                                                    //                     size12,
+                                                    //                 vertical:
+                                                    //                     size16,
+                                                    //               ),
+                                                    //               child: Text(
+                                                    //                 'Lihat Riwayat',
+                                                    //                 style: heading3(
+                                                    //                   FontWeight
+                                                    //                       .w600,
+                                                    //                   primary500,
+                                                    //                   'Outfit',
+                                                    //                 ),
+                                                    //               ),
+                                                    //             ),
+                                                    //           ),
+                                                    //         ],
+                                                    //       ),
                                                   ],
                                                 ),
                                                 SizedBox(height: size16),
@@ -834,7 +835,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                   ),
                                                                 ),
                                                                 Text(
-                                                                  'Varian:\n${variantInfo.join(', ')}',
+                                                                  'Varian:\n${variantInfo.join('\n')}',
                                                                   style: body1(
                                                                     FontWeight
                                                                         .w400,
@@ -948,8 +949,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              data['total_before_dsc_tax'] ??
-                                                                  '-',
+                                                              double.tryParse(
+                                                                data['total_before_dsc_tax'],
+                                                              ),
                                                             ).toString(),
                                                             style: heading4(
                                                               FontWeight.w400,
@@ -1009,7 +1011,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       ),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                          int.parse(
+                                                          double.parse(
                                                             data['amount']
                                                                 .toString(),
                                                           ),
@@ -1073,7 +1075,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              int.parse(
+                                                              double.parse(
                                                                 data['money_paid']
                                                                     .toString(),
                                                               ),
@@ -1681,9 +1683,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                     ),
                                                                     Text(
                                                                       FormatCurrency.convertToIdr(
-                                                                        int.parse(
-                                                                          detail[index]['amount']
-                                                                              .toString(),
+                                                                        double.parse(
+                                                                          detail[index]['amount'],
                                                                         ),
                                                                       ).toString(),
                                                                       style: body1(
@@ -2307,5 +2308,4 @@ class _RiwayatPageState extends State<RiwayatPage> {
       },
     );
   }
-
 }

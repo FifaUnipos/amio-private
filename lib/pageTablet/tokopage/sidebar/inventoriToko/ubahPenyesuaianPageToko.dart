@@ -1059,7 +1059,7 @@ class _UbahPenyesuaianTokoState extends State<UbahPenyesuaianToko> {
                                                                                   selectedDataPemakaian[id]!['unit_name'] = unitName;
                                                                                   selectedDataPemakaian[id]!['unit_factor'] = unitFactor; // tipe num/double
                                                                                   selectedDataPemakaian[id]!['unit_id'] = unitId;
-                                                                                  selectedDataPemakaian[id]!['unit_conversion_id'] = unitId;
+                                                                                  selectedDataPemakaian[id]!['unit_conversion_id'] = unitId.isEmpty ? null : unitId;
                                                                                 });
 
                                                                                 Navigator.pop(context, unit);

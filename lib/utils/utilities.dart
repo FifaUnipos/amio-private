@@ -25,14 +25,23 @@ String errorText = '';
 
 class FormatCurrency {
   static String convertToIdr(dynamic number) {
+    // Pastikan 'number' adalah angka atau string yang bisa diparse
+    String numberString = number.toString();
+    // Menghapus tanda titik desimal yang menyebabkan error
+    numberString = numberString.replaceAll(',', '');
+    
+    double parsedNumber = double.tryParse(numberString) ?? 0.0;
+    
     NumberFormat currencyFormatter = NumberFormat.currency(
       locale: 'id',
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    return currencyFormatter.format(number);
+
+    return currencyFormatter.format(parsedNumber);
   }
 }
+
 
 int parseFlexibleNumber(dynamic value) {
   if (value == null) return 0;
