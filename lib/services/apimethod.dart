@@ -2670,7 +2670,7 @@ Future saveTransaction(
     "discount_id": "",
     "member_id": memberid,
     "transaction_id": '',
-    "value": null,
+    "value": '',
     "payment_method": '',
     "payment_reference": reference,
     "detail": mapCalculateFinal,
@@ -3051,10 +3051,16 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
 
   final response = await http.post(
     Uri.parse(getTransaksiSingleRiwayatUrl),
-    body: body,
 
-    headers: {'token': token, "DEVICE-ID": identifier!},
+    headers: {
+      'token': token,
+      "DEVICE-ID": identifier!,
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(body),
   );
+
+  debugPrint('response body: ${response.body}');
 
   Map<String, dynamic> data = jsonDecode(response.body);
   if (response.statusCode == 200) {
@@ -3096,34 +3102,6 @@ Future<Map<String, dynamic>> getSinglePendapatanHarian(
     return data;
   } else {
     throw Exception('Failed to load data ${data}');
-  }
-}
-
-Future<Map<String, dynamic>> getSingleRiwayatTransaksiGrup(
-  token,
-  transactionid,
-  merchid,
-) async {
-  final body = {"transaction_id": transactionid, "merchant_id": merchid};
-
-  final response = await http.post(
-    Uri.parse(getTransaksiSingleRiwayatUrl),
-    body: body,
-
-    headers: {'token': token, "DEVICE-ID": identifier!},
-  );
-
-  // mengembalikan data yang didapat dari API sebagai objek Map
-  if (response.statusCode == 200) {
-    // Convert response body to JSON
-    Map<String, dynamic> data = jsonDecode(response.body);
-
-    printext = data['data']['raw'];
-    // print(data['data'].toString());
-
-    return data;
-  } else {
-    throw Exception('Failed to load data');
   }
 }
 

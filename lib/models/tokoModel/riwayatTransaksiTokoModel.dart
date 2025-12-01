@@ -31,7 +31,7 @@ class TokoDataRiwayatModel {
   TokoDataRiwayatModel.fromJson(Map<String, dynamic> json) {
     transactionid = json['transaction_id'];
     customer = json['customer'];
-    merchantid = json['merchantid'];
+    merchantid = json['merchant_id'];
     amount = json['amount'];
     entrydate = json['entry_date'];
     isPaid = json['is_paid'];

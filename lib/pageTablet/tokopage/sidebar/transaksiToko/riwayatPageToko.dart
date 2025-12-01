@@ -749,11 +749,21 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       variants.isNotEmpty) {
                                                     for (var variant
                                                         in variants) {
-                                                      // Menyusun nama kategori dan nama produk
+                                                      // Menyusun nama kategori dan nama produk beserta harga
                                                       for (var product
                                                           in variant['variant_products']) {
+                                                        // Format the price using FormatCurrency.convertToIdr
+                                                        var formattedPrice =
+                                                            FormatCurrency.convertToIdr(
+                                                              double.tryParse(
+                                                                    product['price']
+                                                                        .toString(),
+                                                                  ) ??
+                                                                  0.0,
+                                                            );
+
                                                         variantInfo.add(
-                                                          '+ ${variant['variant_category_title']} (${product['variant_product_name']})',
+                                                          '${variant['variant_category_title']} (${product['variant_product_name']}) - $formattedPrice',
                                                         );
                                                       }
                                                     }
@@ -763,7 +773,11 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     child: Column(
                                                       children: [
                                                         Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
                                                           children: [
+                                                            // Quantity text
                                                             Text(
                                                               'x${detail[index]['quantity']}',
                                                               style: heading3(
@@ -775,6 +789,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             SizedBox(
                                                               width: size8,
                                                             ),
+
+                                                            // Product image
                                                             SizedBox(
                                                               height: size48,
                                                               width: size48,
@@ -802,57 +818,62 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             SizedBox(
                                                               width: size8,
                                                             ),
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  detail[index]['name'] ??
-                                                                      '-',
-                                                                  style: heading3(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw900,
-                                                                    'Outfit',
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  FormatCurrency.convertToIdr(
-                                                                    int.parse(
-                                                                      detail[index]['price']
-                                                                          .toString(),
+
+                                                            // Product details (name, price, variants, description)
+                                                            Expanded(
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    detail[index]['name'] ??
+                                                                        '-',
+                                                                    style: heading3(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
                                                                     ),
-                                                                  ).toString(),
-                                                                  style: body1(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit',
                                                                   ),
-                                                                ),
-                                                                Text(
-                                                                  'Varian:\n${variantInfo.join('\n')}',
-                                                                  style: body1(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit',
+                                                                  // Using FormatCurrency.convertToIdr to format the price
+                                                                  Text(
+                                                                    FormatCurrency.convertToIdr(
+                                                                      double.tryParse(
+                                                                            detail[index]['price'].toString(),
+                                                                          ) ??
+                                                                          0.0,
+                                                                    ),
+                                                                    style: body1(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                                Text(
-                                                                  'Catatan : ${detail[index]['description']}',
-                                                                  style: body1(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit',
+                                                                  // Display variant info if available
+                                                                  if (variantInfo
+                                                                      .isNotEmpty)
+                                                                    Text(
+                                                                      'Varian:\n${variantInfo.join('\n')}',
+                                                                      style: body1(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                  Text(
+                                                                    'Catatan : ${detail[index]['description'] ?? '-'}',
+                                                                    style: body1(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              ],
+                                                                ],
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
@@ -1075,7 +1096,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              double.parse(
+                                                              double.tryParse(
                                                                 data['money_paid']
                                                                     .toString(),
                                                               ),
@@ -1091,7 +1112,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              int.parse(
+                                                              double.tryParse(
                                                                 data['change_money']
                                                                         .toString() ??
                                                                     "-",
@@ -1695,7 +1716,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                       ),
                                                                     ),
                                                                     Text(
-                                                                      'Catatan : ${detail[index]['description']}',
+                                                                      'Catatan : ${detail[index]['description'] ?? '-'}',
                                                                       style: body1(
                                                                         FontWeight
                                                                             .w400,

@@ -1,4 +1,5 @@
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/printer/printerPage.dart';
 import 'package:flutter/services.dart';
 
@@ -334,10 +335,6 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                           setState(() {
                                             transactionidValue;
                                           });
-
-                                          setState(() {
-                                            transactionidValue;
-                                          });
                                         },
                                         child: Column(
                                           children: [
@@ -460,18 +457,17 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                   ? Container()
                   : Expanded(
                       child: FutureBuilder(
-                        future: getSingleRiwayatTransaksiGrup(
+                        future: getSingleRiwayatTransaksi(
                           widget.token,
                           transactionidValue,
-                          merchidValue,
+                          widget.merchid,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             Map<String, dynamic> data = snapshot.data!['data'];
                             List detail = data['detail'];
 
-                            return AnimatedContainer(
-                              duration: Duration(seconds: 1),
+                            return Container(
                               padding: EdgeInsets.all(size16),
                               height: heightInformation,
                               width: widthInformation,
@@ -481,6 +477,8 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: ListView(
@@ -493,7 +491,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Informasi Pesanan',
+                                              'Informasi Transaksi',
                                               style: heading3(
                                                 FontWeight.w600,
                                                 bnw900,
@@ -508,65 +506,68 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                     data,
                                                   ),
                                                 ),
-                                                data['is_color'] == '1'
-                                                    ? SizedBox()
-                                                    : Column(
-                                                        children: [
-                                                          SizedBox(
-                                                            width: size16,
-                                                          ),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              whenLoading(
-                                                                context,
-                                                              );
 
-                                                              transaksiViewReference(
-                                                                context,
-                                                                widget.token,
-                                                                data['transactionid'],
-                                                              ).then((value) {
-                                                                if (value['rc'] ==
-                                                                    '00') {
-                                                                  Navigator.of(
-                                                                    context,
-                                                                    rootNavigator:
-                                                                        true,
-                                                                  ).pop();
-                                                                  showBottomRiwayatPerubahan(
-                                                                    context,
-                                                                    data,
-                                                                  );
-                                                                } else {
-                                                                  Navigator.of(
-                                                                    context,
-                                                                    rootNavigator:
-                                                                        true,
-                                                                  ).pop();
-                                                                }
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              padding:
-                                                                  EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        size12,
-                                                                    vertical:
-                                                                        size16,
-                                                                  ),
-                                                              child: Text(
-                                                                'Lihat Riwayat',
-                                                                style: heading3(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  primary500,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                // data['is_color'] == '1'
+                                                //     ? SizedBox()
+                                                //     : Column(
+                                                //         children: [
+                                                //           SizedBox(
+                                                //             width: size16,
+                                                //           ),
+                                                //           GestureDetector(
+                                                //             onTap: () {
+                                                //               whenLoading(
+                                                //                 context,
+                                                //               );
+
+                                                //               transaksiViewReference(
+                                                //                 context,
+                                                //                 widget
+                                                //                     .token,
+                                                //                 data['transactionid'],
+                                                //               ).then((
+                                                //                 value,
+                                                //               ) {
+                                                //                 if (value['rc'] ==
+                                                //                     '00') {
+                                                //                   Navigator.of(
+                                                //                     context,
+                                                //                     rootNavigator:
+                                                //                         true,
+                                                //                   ).pop();
+                                                //                   showBottomRiwayatPerubahan(
+                                                //                     context,
+                                                //                     data,
+                                                //                   );
+                                                //                 } else {
+                                                //                   Navigator.of(
+                                                //                     context,
+                                                //                     rootNavigator:
+                                                //                         true,
+                                                //                   ).pop();
+                                                //                 }
+                                                //               });
+                                                //             },
+                                                //             child: Container(
+                                                //               padding: EdgeInsets.symmetric(
+                                                //                 horizontal:
+                                                //                     size12,
+                                                //                 vertical:
+                                                //                     size16,
+                                                //               ),
+                                                //               child: Text(
+                                                //                 'Lihat Riwayat',
+                                                //                 style: heading3(
+                                                //                   FontWeight
+                                                //                       .w600,
+                                                //                   primary500,
+                                                //                   'Outfit',
+                                                //                 ),
+                                                //               ),
+                                                //             ),
+                                                //           ),
+                                                //         ],
+                                                //       ),
                                               ],
                                             ),
                                             SizedBox(height: size16),
@@ -766,7 +767,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                             ),
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                int.parse(
+                                                                double.tryParse(
                                                                   detail[index]['price']
                                                                       .toString(),
                                                                 ),
@@ -778,7 +779,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                               ),
                                                             ),
                                                             Text(
-                                                              'Varian:\n${variantInfo.join(', ')}',
+                                                              'Varian:\n${variantInfo.join('\n')}',
                                                               style: body1(
                                                                 FontWeight.w400,
                                                                 bnw900,
@@ -881,8 +882,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                       SizedBox(height: size8),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                          data['total_before_dsc_tax'] ??
-                                                              '-',
+                                                          double.tryParse(
+                                                            data['total_before_dsc_tax'],
+                                                          ),
                                                         ).toString(),
                                                         style: heading4(
                                                           FontWeight.w400,
@@ -936,7 +938,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                   ),
                                                   Text(
                                                     FormatCurrency.convertToIdr(
-                                                      int.parse(
+                                                      double.parse(
                                                         data['amount']
                                                             .toString(),
                                                       ),
@@ -991,7 +993,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                       SizedBox(height: size8),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                          int.parse(
+                                                          double.tryParse(
                                                             data['money_paid']
                                                                 .toString(),
                                                           ),
@@ -1005,7 +1007,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                       SizedBox(height: size8),
                                                       Text(
                                                         FormatCurrency.convertToIdr(
-                                                          int.parse(
+                                                          double.tryParse(
                                                             data['change_money']
                                                                     .toString() ??
                                                                 "-",
@@ -1028,29 +1030,51 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                       ],
                                     ),
                                   ),
+                                  SizedBox(height: size8),
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: [
+                                      data['is_color'] == '1'
+                                          ? GestureDetector(
+                                              onTap: () {
+                                                // hapusAlasan(context);
+                                              },
+                                              child: Text(
+                                                'Transaksi Tidak Sesuai',
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  danger500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            )
+                                          : SizedBox(),
+                                      SizedBox(width: size12),
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () {
+                                            // if (logoStrukPrinter != '') {
+                                            //   getStrukPhoto();
+                                            // }
+
+                                            // log("ini adalah struk ${printext}");
+
                                             widget.bluetooth.isConnected.then((
                                               isConnected,
                                             ) {
                                               if (isConnected == true) {
-                                                // widget.bluetooth.printNewLine();
-                                                widget.bluetooth.printNewLine();
-                                                // widget.bluetooth.printImage(file.path);
-                                                // bluetooth.printImageBytes(
-                                                //     img); //image from Network
+                                                showSnackBarComponent(
+                                                  context,
+                                                  'Berhasil cetak struk',
+                                                  '00',
+                                                );
+                                                // widget.bluetooth
+                                                //     .printNewLine();
                                                 logoStrukPrinter!.isEmpty
                                                     ? widget.bluetooth
                                                           .printNewLine()
                                                     : bluetooth.printImageBytes(
                                                         imageStruk,
                                                       );
-                                                widget.bluetooth.printNewLine();
                                                 widget.bluetooth.printNewLine();
                                                 widget.bluetooth.printCustom(
                                                   printext.replaceAll(
@@ -1064,8 +1088,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                 //     widget.printtext.replaceAll(RegExp('[|]'), '\n'),
                                                 //     Size.bold.val,
                                                 //     0);
+                                                // widget.bluetooth
+                                                //     .printNewLine();
                                                 widget.bluetooth.printNewLine();
-                                                // widget.bluetooth.printNewLine();
                                                 widget.bluetooth.paperCut();
                                               } else {
                                                 dialogNoPrinter(context);
@@ -1081,9 +1106,9 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                 Icon(
                                                   PhosphorIcons.printer_fill,
                                                   color: primary500,
-                                                  size: size20,
+                                                  size: size24,
                                                 ),
-                                                SizedBox(width: size16),
+                                                SizedBox(width: size12),
                                                 Text(
                                                   'Cetak Struk',
                                                   style: heading3(
@@ -1094,40 +1119,48 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                 ),
                                               ],
                                             ),
-                                            MediaQuery.of(context).size.width /
-                                                5.7,
+                                            MediaQuery.of(context).size.width,
                                             primary500,
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: size16),
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            width = null;
-                                            widtValue = 120;
-                                            heightInformation = 0;
-                                            widthInformation = 0;
-                                            printext = '';
-                                            cartProductIds.clear();
-                                            setState(() {});
-                                          },
-                                          child: buttonXL(
-                                            Center(
-                                              child: Text(
-                                                'Selesai',
-                                                style: heading3(
-                                                  FontWeight.w600,
-                                                  bnw100,
-                                                  'Outfit',
-                                                ),
+                                      data['is_color'] == '1'
+                                          ? SizedBox()
+                                          : Expanded(
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(width: size12),
+                                                  Expanded(
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        width = null;
+                                                        widtValue = 120;
+                                                        heightInformation = 0;
+                                                        widthInformation = 0;
+                                                        printext = '';
+                                                        cartProductIds.clear();
+                                                        setState(() {});
+                                                      },
+                                                      child: buttonXL(
+                                                        Center(
+                                                          child: Text(
+                                                            'Selesai',
+                                                            style: heading3(
+                                                              FontWeight.w600,
+                                                              bnw100,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            MediaQuery.of(context).size.width /
-                                                5.7,
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ],
@@ -1137,7 +1170,8 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                             // return Text("Error: ${snapshot.error}");
                             return Center(child: loading());
                           }
-                          return loading();
+                          return Center(child: loading());
+                          // return Flexible(child: SkeletonJustLine());
                         },
                       ),
                     ),
