@@ -1302,7 +1302,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                           detail[i]['product_image']
                                                               .toString()
                                                               .trim();
-                                                      int price = int.parse(
+                                                      double? price = double.tryParse(
                                                         detail[i]['price']
                                                             .toString(),
                                                       );
@@ -1313,7 +1313,7 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                                       sumTotal =
                                                           sumTotal +
-                                                          price; // Update total berdasarkan harga produk
+                                                          price!; // Update total berdasarkan harga produk
                                                       total.add(price);
 
                                                       cart.add(

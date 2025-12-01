@@ -195,7 +195,7 @@ class _BantuanGrupState extends State<BantuanGrup> {
               ),
               SizedBox(height: size8),
               Text(
-                'Versi Aplikasi 1.5.29',
+                'Versi Aplikasi 1.5.32',
                 style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
             ],

@@ -237,10 +237,7 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                                 const SizedBox(width: 4),
                                 GestureDetector(
                                   onTap: () => _removeCategory(index),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.red,
-                                  ),
+                                  child: Icon(Icons.close, color: danger500),
                                 ),
                               ],
                             ),
@@ -348,18 +345,19 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
               child: GestureDetector(
                 onTap: () {
                   List<Map<String, dynamic>> arrayResult = generateArrayData();
-                  createProductVariant(
-                    context,
-                    widget.token,
-                    widget.merchantId ?? '',
-                    productIdVariant,
-                    arrayResult,
-                  ).then((value) {
-                    if (value == "00") {
-                      widget.pageController.jumpToPage(0);
-                      productIdVariant = '';
-                    }
-                  });
+                  print(arrayResult);
+                  // createProductVariant(
+                  //   context,
+                  //   widget.token,
+                  //   widget.merchantId ?? '',
+                  //   productIdVariant,
+                  //   arrayResult,
+                  // ).then((value) {
+                  //   if (value == "00") {
+                  //     widget.pageController.jumpToPage(0);
+                  //     productIdVariant = '';
+                  //   }
+                  // });
                 },
                 child: buttonXL(
                   Center(
@@ -437,10 +435,10 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                 ),
                 GestureDetector(
                   onTap: () => _removeVariant(categoryIndex, variantIndex),
-                  child: const Text(
+                  child: Text(
                     "Hapus",
                     style: TextStyle(
-                      color: Colors.red,
+                      color: danger500,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -470,7 +468,11 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                     keyboardType: TextInputType.number,
                     onChanged: (val) {
                       formatInputRp(variant['controllerVariantPrice'], val);
-                      variant['price'] = double.tryParse(val) ?? 0.0;
+
+                      // Parse nilai bersih (tanpa titik/pemisah ribuan)
+                      String cleanValue = val.replaceAll(RegExp(r'[^0-9]'), '');
+                      double parsedPrice = double.tryParse(cleanValue) ?? 0.0;
+                      variant['price'] = parsedPrice;
                     },
                   ),
                 ),

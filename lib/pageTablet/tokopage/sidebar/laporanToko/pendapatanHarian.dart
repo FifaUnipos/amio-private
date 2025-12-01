@@ -797,11 +797,13 @@ class LaporanPendapatanHarianPageState
                                             )
                                             .toList();
 
+                                    // Cek apakah merchant['detail']['paymentMethod'] adalah Map dan cast dengan benar
                                     final paymentMethod =
-                                        ((merchant['detail']?['paymentMethod']
-                                                    as Map?) ??
-                                                {})
-                                            .cast<String, dynamic>();
+                                        (merchant['detail']?['paymentMethod']
+                                            is Map)
+                                        ? (merchant['detail']?['paymentMethod']
+                                              as Map<String, dynamic>)
+                                        : {};
 
                                     return Container(
                                       margin: EdgeInsets.only(top: size12),
