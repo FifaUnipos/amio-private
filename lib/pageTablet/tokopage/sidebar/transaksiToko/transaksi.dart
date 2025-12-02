@@ -57,6 +57,8 @@ List<Map<String, String>> cartMapBayar = List.empty(growable: true);
 List<num> total = List.empty(growable: true);
 List<TextEditingController> conCatatan = List.empty(growable: true);
 List<String> cartProductIds = [];
+List<bool> isOfflineAddedList = [];
+List<bool> isOnlineAddedList = [];
 
 num sumTotal = 0;
 String? logoStruk = '', logoStrukPrinter = '';
@@ -285,6 +287,15 @@ class _TransactionPageState extends State<TransactionPage>
         initialPage: 0,
         keepPage: true,
         viewportFraction: 1,
+      );
+
+      isOfflineAddedList = List.generate(
+        datasTransaksi!.length,
+        (index) => false,
+      );
+      isOnlineAddedList = List.generate(
+        datasTransaksi!.length,
+        (index) => false,
       );
     });
 
@@ -5840,48 +5851,50 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                 onTap: () async {
                                                                                   String productId = datasTransaksi![index].productid.toString();
 
-                                                                                  if (cartProductIds.contains(
-                                                                                    productId,
-                                                                                  )) {
+                                                                                  // Tombol harga offline
+                                                                                  if (isOfflineAddedList[index]) {
+                                                                                    // Jika produk sudah ada di keranjang untuk harga offline, hapus produk tersebut
                                                                                     cartProductIds.remove(
                                                                                       productId,
                                                                                     );
 
+                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
                                                                                     for (
-                                                                                      int index = 0;
-                                                                                      index <
+                                                                                      int i = 0;
+                                                                                      i <
                                                                                           cart.length;
-                                                                                      index++
+                                                                                      i++
                                                                                     ) {
-                                                                                      if (cart[index].productid ==
+                                                                                      if (cart[i].productid ==
                                                                                           productId) {
+                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
                                                                                         total.removeAt(
-                                                                                          index,
-                                                                                        );
+                                                                                          i,
+                                                                                        ); // Menghapus harga produk dari total
                                                                                         cart.removeAt(
-                                                                                          index,
-                                                                                        );
+                                                                                          i,
+                                                                                        ); // Menghapus produk dari cart
                                                                                         cartMap.removeAt(
-                                                                                          index,
-                                                                                        );
+                                                                                          i,
+                                                                                        ); // Menghapus produk dari cartMap
 
+                                                                                        // Jika cart kosong, set sumTotal ke 0
                                                                                         if (cart.isEmpty) {
                                                                                           sumTotal = 0;
+                                                                                        } else {
+                                                                                          sumTotal -=
+                                                                                              price! *
+                                                                                              counterCart; // Mengurangi sumTotal
                                                                                         }
                                                                                         break;
                                                                                       }
                                                                                     }
-
-                                                                                    isItemAdded = true;
+                                                                                    isOfflineAddedList[index] = false; // Mengubah status tombol offline menjadi "Tambah ke Keranjang"
                                                                                   } else {
+                                                                                    // Tambahkan produk ke keranjang untuk harga offline
                                                                                     cartProductIds.add(
                                                                                       productId,
                                                                                     );
-                                                                                    isItemAdded = false;
-                                                                                  }
-
-                                                                                  if (!isItemAdded) {
-                                                                                    // Navigator.pop(context);
                                                                                     Map<
                                                                                       String,
                                                                                       String
@@ -5889,78 +5902,22 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     map1 = {};
                                                                                     map1['name'] = datasTransaksi![index].name.toString();
                                                                                     map1['product_id'] = datasTransaksi![index].productid.toString();
-                                                                                    // map1['quantity'] = '1';
                                                                                     map1['quantity'] = counterCart.toString();
-
                                                                                     map1['image'] = datasTransaksi![index].product_image.toString();
-
-                                                                                    // log("${datasTransaksi![i]
-                                                                                    //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
-                                                                                    map1['amount_display'] = datasTransaksi![index].price!.toString();
-                                                                                    //                                  (datasTransaksi![i].price! * counterCart)
-                                                                                    // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
-
-                                                                                    //ubah transaksi
-                                                                                    // datasTransaksi![i].price.toString();
+                                                                                    map1['amount_display'] = datasTransaksi![index].price_after!.toString();
                                                                                     map1['amount'] = datasTransaksi![index].price_after!.toString();
-                                                                                    // datasTransaksi![i].price.toString();
-
-                                                                                    // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
-
-                                                                                    // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
-
                                                                                     map1['description'] = conCatatanPreview.text;
                                                                                     map1['id_request'] = '';
+
                                                                                     cartMap.add(
                                                                                       map1,
                                                                                     );
 
-                                                                                    // log(datasTransaksi![i].product_image.toString());
-
                                                                                     String name = datasTransaksi![index].name.toString().trim();
                                                                                     String productid = datasTransaksi![index].productid.toString().trim();
                                                                                     String image = datasTransaksi![index].product_image.toString().trim();
-                                                                                    // String desc = conCatatan[i]
-                                                                                    //     .text
-                                                                                    //     .toString()
-                                                                                    //     .trim();
 
-                                                                                    //int? price = ( datasTransaksi![i].price!);
                                                                                     num? price = datasTransaksi![index].price_after!;
-                                                                                    // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
-
-                                                                                    int i = 0;
-                                                                                    for (
-                                                                                      i;
-                                                                                      i <
-                                                                                          cart.length;
-                                                                                      i++
-                                                                                    ) {}
-
-                                                                                    // int? quantity = cart[i];
-
-                                                                                    // log(name.toString());
-                                                                                    // log(price.toString());
-                                                                                    // log(productid.toString());
-                                                                                    // log(image.toString());
-
-                                                                                    sumTotal =
-                                                                                        sumTotal +
-                                                                                        (price *
-                                                                                            counterCart);
-                                                                                    // subTotal =
-                                                                                    //     subTotal + price.toInt();
-                                                                                    total.add(
-                                                                                      price *
-                                                                                          counterCart,
-                                                                                    );
-
-                                                                                    conCatatan.add(
-                                                                                      TextEditingController(
-                                                                                        text: conCatatanPreview.text,
-                                                                                      ),
-                                                                                    );
-
                                                                                     cart.add(
                                                                                       CartTransaksi(
                                                                                         name: name,
@@ -5970,26 +5927,26 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                         quantity: counterCart,
                                                                                         desc: conCatatanPreview.text,
                                                                                         idRequest: "",
-                                                                                        // quantity: cart[i]
-                                                                                        //     .quantity
-                                                                                        //     .toInt(),
                                                                                       ),
                                                                                     );
 
-                                                                                    // selectedIndexTransaksi[index];
+                                                                                    sumTotal +=
+                                                                                        price *
+                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
+                                                                                    total.add(
+                                                                                      price *
+                                                                                          counterCart,
+                                                                                    ); // Menambahkan harga produk ke total
+                                                                                    isOfflineAddedList[index] = true; // Mengubah status tombol offline menjadi "Hapus"
                                                                                   }
-                                                                                  // refreshColor();
+
                                                                                   setState(
                                                                                     () {},
-                                                                                  );
-                                                                                  initState();
+                                                                                  ); // Memperbarui tampilan
                                                                                 },
                                                                                 child: buttonL(
                                                                                   Center(
-                                                                                    child:
-                                                                                        cartProductIds.contains(
-                                                                                          datasTransaksi![index].productid.toString(),
-                                                                                        )
+                                                                                    child: isOfflineAddedList[index]
                                                                                         ? Text(
                                                                                             'Hapus',
                                                                                             style: heading3(
@@ -6006,7 +5963,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                   ? Text(
                                                                                                       FormatCurrency.convertToIdr(
                                                                                                         datasTransaksi![index].price_after,
-                                                                                                      ).toString(),
+                                                                                                      ),
                                                                                                       maxLines: 3,
                                                                                                       overflow: TextOverflow.ellipsis,
                                                                                                       style: heading4(
@@ -6018,7 +5975,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                                   : Text(
                                                                                                       FormatCurrency.convertToIdr(
                                                                                                         datasTransaksi![index].price_after,
-                                                                                                      ).toString(),
+                                                                                                      ),
                                                                                                       maxLines: 3,
                                                                                                       overflow: TextOverflow.ellipsis,
                                                                                                       style: heading4(
@@ -6053,201 +6010,150 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     ).size.width /
                                                                                     size8,
                                                                               ),
-                                                                              child:
-                                                                                  datasTransaksi![index].price_online_shop_after ==
-                                                                                      0
-                                                                                  ? SizedBox()
-                                                                                  : GestureDetector(
-                                                                                      onTap: () async {
-                                                                                        String productId = datasTransaksi![index].productid.toString();
+                                                                              child: GestureDetector(
+                                                                                onTap: () async {
+                                                                                  String productId = datasTransaksi![index].productid.toString();
 
-                                                                                        if (cartProductIds.contains(
-                                                                                          productId,
-                                                                                        )) {
-                                                                                          cartProductIds.remove(
-                                                                                            productId,
-                                                                                          );
+                                                                                  // Tombol harga online
+                                                                                  if (isOnlineAddedList[index]) {
+                                                                                    // Jika produk sudah ada di keranjang untuk harga online, hapus produk tersebut
+                                                                                    cartProductIds.remove(
+                                                                                      productId,
+                                                                                    );
 
-                                                                                          for (
-                                                                                            int index = 0;
-                                                                                            index <
-                                                                                                cart.length;
-                                                                                            index++
-                                                                                          ) {
-                                                                                            if (cart[index].productid ==
-                                                                                                productId) {
-                                                                                              total.removeAt(
-                                                                                                index,
-                                                                                              );
-                                                                                              cart.removeAt(
-                                                                                                index,
-                                                                                              );
-                                                                                              cartMap.removeAt(
-                                                                                                index,
-                                                                                              );
+                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
+                                                                                    for (
+                                                                                      int i = 0;
+                                                                                      i <
+                                                                                          cart.length;
+                                                                                      i++
+                                                                                    ) {
+                                                                                      if (cart[i].productid ==
+                                                                                          productId) {
+                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
+                                                                                        total.removeAt(
+                                                                                          i,
+                                                                                        ); // Menghapus harga produk dari total
+                                                                                        cart.removeAt(
+                                                                                          i,
+                                                                                        ); // Menghapus produk dari cart
+                                                                                        cartMap.removeAt(
+                                                                                          i,
+                                                                                        ); // Menghapus produk dari cartMap
 
-                                                                                              if (cart.isEmpty) {
-                                                                                                sumTotal = 0;
-                                                                                              }
-                                                                                              break;
-                                                                                            }
-                                                                                          }
-
-                                                                                          isItemAdded = true;
+                                                                                        // Jika cart kosong, set sumTotal ke 0
+                                                                                        if (cart.isEmpty) {
+                                                                                          sumTotal = 0;
                                                                                         } else {
-                                                                                          cartProductIds.add(
-                                                                                            productId,
-                                                                                          );
-                                                                                          isItemAdded = false;
+                                                                                          sumTotal -=
+                                                                                              price! *
+                                                                                              counterCart; // Mengurangi sumTotal
                                                                                         }
+                                                                                        break;
+                                                                                      }
+                                                                                    }
+                                                                                    isOnlineAddedList[index] = false; // Mengubah status tombol online menjadi "Tambah ke Keranjang"
+                                                                                  } else {
+                                                                                    // Tambahkan produk ke keranjang untuk harga online
+                                                                                    cartProductIds.add(
+                                                                                      productId,
+                                                                                    );
+                                                                                    Map<
+                                                                                      String,
+                                                                                      String
+                                                                                    >
+                                                                                    map1 = {};
+                                                                                    map1['name'] = datasTransaksi![index].name.toString();
+                                                                                    map1['product_id'] = datasTransaksi![index].productid.toString();
+                                                                                    map1['quantity'] = counterCart.toString();
+                                                                                    map1['image'] = datasTransaksi![index].product_image.toString();
+                                                                                    map1['amount_display'] = datasTransaksi![index].price_online_shop!.toString();
+                                                                                    map1['amount'] = datasTransaksi![index].price_online_shop!.toString();
+                                                                                    map1['description'] = conCatatanPreview.text;
+                                                                                    map1['id_request'] = '';
 
-                                                                                        if (!isItemAdded) {
-                                                                                          // Navigator.pop(context);
-                                                                                          Map<
-                                                                                            String,
-                                                                                            String
-                                                                                          >
-                                                                                          map1 = {};
-                                                                                          map1['name'] = datasTransaksi![index].name.toString();
-                                                                                          map1['productid'] = datasTransaksi![index].productid.toString();
-                                                                                          // map1['quantity'] = '1';
-                                                                                          map1['quantity'] = counterCart.toString();
+                                                                                    cartMap.add(
+                                                                                      map1,
+                                                                                    );
 
-                                                                                          map1['image'] = datasTransaksi![index].product_image.toString();
+                                                                                    String name = datasTransaksi![index].name.toString().trim();
+                                                                                    String productid = datasTransaksi![index].productid.toString().trim();
+                                                                                    String image = datasTransaksi![index].product_image.toString().trim();
 
-                                                                                          // log("${datasTransaksi![i]
-                                                                                          //             .price_online_shop_after} ${datasTransaksi![i].price_after} asade ${datasTransaksi![i].price}");
-                                                                                          map1['amount_display'] = datasTransaksi![index].price_online_shop.toString();
-                                                                                          //                                  (datasTransaksi![i].price! * counterCart)
-                                                                                          // (tapTrue == 2 ? datasTransaksi![index].price_online_shop : datasTransaksi![index].price!).toString();
+                                                                                    num? price = datasTransaksi![index].price_online_shop!;
+                                                                                    cart.add(
+                                                                                      CartTransaksi(
+                                                                                        name: name,
+                                                                                        productid: productid,
+                                                                                        image: image,
+                                                                                        price: price,
+                                                                                        quantity: counterCart,
+                                                                                        desc: conCatatanPreview.text,
+                                                                                        idRequest: "",
+                                                                                      ),
+                                                                                    );
 
-                                                                                          //ubah transaksi
-                                                                                          // datasTransaksi![i].price.toString();
-                                                                                          map1['amount'] = datasTransaksi![index].price_online_shop.toString();
-                                                                                          // datasTransaksi![i].price.toString();
+                                                                                    sumTotal +=
+                                                                                        price *
+                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
+                                                                                    total.add(
+                                                                                      price *
+                                                                                          counterCart,
+                                                                                    ); // Menambahkan harga produk ke total
+                                                                                    isOnlineAddedList[index] = true; // Mengubah status tombol online menjadi "Hapus"
+                                                                                  }
 
-                                                                                          // (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after : datasTransaksi![index].price_after!).toString();
-
-                                                                                          // log('hello ${datasTransaksi![i].price_online_shop} ${datasTransaksi![i].price!}');
-
-                                                                                          map1['description'] = conCatatanPreview.text;
-                                                                                          map1['id_request'] = '';
-                                                                                          cartMap.add(
-                                                                                            map1,
-                                                                                          );
-
-                                                                                          // log(datasTransaksi![i].product_image.toString());
-
-                                                                                          String name = datasTransaksi![index].name.toString().trim();
-                                                                                          String productid = datasTransaksi![index].productid.toString().trim();
-                                                                                          String image = datasTransaksi![index].product_image.toString().trim();
-                                                                                          // String desc = conCatatan[i]
-                                                                                          //     .text
-                                                                                          //     .toString()
-                                                                                          //     .trim();
-
-                                                                                          //int? price = ( datasTransaksi![i].price!);
-                                                                                          num? price = datasTransaksi![index].price_online_shop_after!;
-                                                                                          // num? price = (tapTrue == 2 ? datasTransaksi![index].price_online_shop_after! : datasTransaksi![index].price_after!);
-
-                                                                                          int i = 0;
-                                                                                          for (
-                                                                                            i;
-                                                                                            i <
-                                                                                                cart.length;
-                                                                                            i++
-                                                                                          ) {}
-
-                                                                                          // int? quantity = cart[i];
-
-                                                                                          // log(name.toString());
-                                                                                          // log(price.toString());
-                                                                                          // log(productid.toString());
-                                                                                          // log(image.toString());
-
-                                                                                          sumTotal =
-                                                                                              sumTotal +
-                                                                                              (price *
-                                                                                                  counterCart);
-                                                                                          // subTotal =
-                                                                                          //     subTotal + price.toInt();
-                                                                                          total.add(
-                                                                                            price *
-                                                                                                counterCart,
-                                                                                          );
-
-                                                                                          conCatatan.add(
-                                                                                            TextEditingController(
-                                                                                              text: conCatatanPreview.text,
-                                                                                            ),
-                                                                                          );
-
-                                                                                          cart.add(
-                                                                                            CartTransaksi(
-                                                                                              name: name,
-                                                                                              productid: productid,
-                                                                                              image: image,
-                                                                                              price: price,
-                                                                                              quantity: counterCart,
-                                                                                              desc: conCatatanPreview.text,
-                                                                                              idRequest: "",
-                                                                                              // quantity: cart[i]
-                                                                                              //     .quantity
-                                                                                              //     .toInt(),
-                                                                                            ),
-                                                                                          );
-
-                                                                                          // selectedIndexTransaksi[index];
-                                                                                        }
-                                                                                        // refreshColor();
-                                                                                        setState(
-                                                                                          () {},
-                                                                                        );
-                                                                                        initState();
-                                                                                      },
-                                                                                      child:
-                                                                                          cartProductIds.contains(
-                                                                                            datasTransaksi![index].productid.toString(),
-                                                                                          )
-                                                                                          ? SizedBox()
-                                                                                          : buttonL(
-                                                                                              Center(
-                                                                                                child: Column(
-                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                  children: [
-                                                                                                    datasTransaksi![index].discount ==
-                                                                                                            0
-                                                                                                        ? Text(
-                                                                                                            FormatCurrency.convertToIdr(
-                                                                                                              datasTransaksi![index].price_online_shop_after,
-                                                                                                            ).toString(),
-                                                                                                            maxLines: 3,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                            style: heading4(
-                                                                                                              FontWeight.w400,
-                                                                                                              bnw900,
-                                                                                                              'Outfit',
-                                                                                                            ),
-                                                                                                          )
-                                                                                                        : Text(
-                                                                                                            FormatCurrency.convertToIdr(
-                                                                                                              datasTransaksi![index].price_online_shop_after,
-                                                                                                            ).toString(),
-                                                                                                            maxLines: 3,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                            style: heading4(
-                                                                                                              FontWeight.w400,
-                                                                                                              danger500,
-                                                                                                              'Outfit',
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                  ],
-                                                                                                ),
-                                                                                              ),
-                                                                                              bnw100,
+                                                                                  setState(
+                                                                                    () {},
+                                                                                  ); // Memperbarui tampilan
+                                                                                },
+                                                                                child: buttonL(
+                                                                                  Center(
+                                                                                    child: isOnlineAddedList[index]
+                                                                                        ? Text(
+                                                                                            'Hapus',
+                                                                                            style: heading3(
+                                                                                              FontWeight.w600,
                                                                                               bnw900,
+                                                                                              'Outfit',
                                                                                             ),
-                                                                                    ),
+                                                                                          )
+                                                                                        : Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                            children: [
+                                                                                              datasTransaksi![index].discount ==
+                                                                                                      0
+                                                                                                  ? Text(
+                                                                                                      FormatCurrency.convertToIdr(
+                                                                                                        datasTransaksi![index].price_online_shop,
+                                                                                                      ),
+                                                                                                      maxLines: 3,
+                                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                                      style: heading4(
+                                                                                                        FontWeight.w400,
+                                                                                                        bnw900,
+                                                                                                        'Outfit',
+                                                                                                      ),
+                                                                                                    )
+                                                                                                  : Text(
+                                                                                                      FormatCurrency.convertToIdr(
+                                                                                                        datasTransaksi![index].price_online_shop,
+                                                                                                      ),
+                                                                                                      maxLines: 3,
+                                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                                      style: heading4(
+                                                                                                        FontWeight.w400,
+                                                                                                        danger500,
+                                                                                                        'Outfit',
+                                                                                                      ),
+                                                                                                    ),
+                                                                                            ],
+                                                                                          ),
+                                                                                  ),
+                                                                                  bnw100,
+                                                                                  bnw900,
+                                                                                ),
+                                                                              ),
                                                                             ),
                                                                           ),
                                                                           SizedBox(
@@ -6307,17 +6213,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                                     0.60,
                                                               ),
                                                               itemBuilder: (context, i) {
-                                                                // Create for consume api and get data
-                                                                String
-                                                                productSelect =
-                                                                    datasTransaksi![i]
-                                                                        .productid!;
-
-                                                                String
-                                                                productId =
-                                                                    datasTransaksi![i]
-                                                                        .productid
-                                                                        .toString();
                                                                 return // 🔹 Ambil productId di luar GestureDetector
                                                                 GestureDetector(
                                                                   onTap: () {
@@ -6527,780 +6422,781 @@ class _TransactionPageState extends State<TransactionPage>
                                                           SizedBox(
                                                             height: size16,
                                                           ),
-                                                          SizedBox(
-                                                            child: FutureBuilder(
-                                                              future:
-                                                                  getCoinTransaksi(
-                                                                    context,
-                                                                    widget
-                                                                        .token,
-                                                                    '',
-                                                                    [''],
-                                                                  ),
-                                                              builder: (context, snapshot) {
-                                                                if (snapshot
-                                                                    .hasData) {
-                                                                  return GridView.builder(
-                                                                    shrinkWrap:
-                                                                        true,
-                                                                    padding:
-                                                                        EdgeInsets
-                                                                            .zero,
-                                                                    physics:
-                                                                        BouncingScrollPhysics(),
-                                                                    itemCount:
-                                                                        snapshot
-                                                                            .data
-                                                                            .length,
-                                                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                                      // mainAxisExtent:
-                                                                      //     null,
-                                                                      crossAxisCount:
-                                                                          4,
-                                                                      crossAxisSpacing:
-                                                                          size16,
-                                                                      mainAxisSpacing:
-                                                                          size16,
-                                                                      childAspectRatio:
-                                                                          0.60,
-                                                                    ),
-                                                                    itemBuilder: (context, i) => GestureDetector(
-                                                                      onTap: () async {
-                                                                        var coin =
-                                                                            snapshot.data[i];
+                                                          // SizedBox(
+                                                          //   child: FutureBuilder(
+                                                          //     future:
+                                                          //         getCoinTransaksi(
+                                                          //           context,
+                                                          //           widget
+                                                          //               .token,
+                                                          //           '',
+                                                          //           [''],
+                                                          //         ),
+                                                          //     builder: (context, snapshot) {
+                                                          //       if (snapshot
+                                                          //           .hasData) {
+                                                          //         return GridView.builder(
+                                                          //           shrinkWrap:
+                                                          //               true,
+                                                          //           padding:
+                                                          //               EdgeInsets
+                                                          //                   .zero,
+                                                          //           physics:
+                                                          //               BouncingScrollPhysics(),
+                                                          //           itemCount:
+                                                          //               snapshot
+                                                          //                   .data
+                                                          //                   .length,
+                                                          //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                                          //             // mainAxisExtent:
+                                                          //             //     null,
+                                                          //             crossAxisCount:
+                                                          //                 4,
+                                                          //             crossAxisSpacing:
+                                                          //                 size16,
+                                                          //             mainAxisSpacing:
+                                                          //                 size16,
+                                                          //             childAspectRatio:
+                                                          //                 0.60,
+                                                          //           ),
+                                                          //           itemBuilder: (context, i) => GestureDetector(
+                                                          //             onTap: () async {
+                                                          //               var coin =
+                                                          //                   snapshot.data[i];
 
-                                                                        counterCart =
-                                                                            1;
-                                                                        String
-                                                                        productId =
-                                                                            coin['voucherid'].toString();
+                                                          //               counterCart =
+                                                          //                   1;
+                                                          //               String
+                                                          //               productId =
+                                                          //                   coin['voucherid'].toString();
 
-                                                                        conCatatanPreview.text =
-                                                                            '';
+                                                          //               conCatatanPreview.text =
+                                                          //                   '';
 
-                                                                        if (cartProductIds.contains(
-                                                                          productId,
-                                                                        )) {
-                                                                          cartProductIds.remove(
-                                                                            productId,
-                                                                          );
+                                                          //               if (cartProductIds.contains(
+                                                          //                 productId,
+                                                          //               )) {
+                                                          //                 cartProductIds.remove(
+                                                          //                   productId,
+                                                          //                 );
 
-                                                                          for (
-                                                                            int
-                                                                            index =
-                                                                                0;
-                                                                            index <
-                                                                                cart.length;
-                                                                            index++
-                                                                          ) {
-                                                                            if (cart[index].productid ==
-                                                                                productId) {
-                                                                              cart.removeAt(
-                                                                                index,
-                                                                              );
-                                                                              cartMap.removeAt(
-                                                                                index,
-                                                                              );
-                                                                              total.removeAt(
-                                                                                index,
-                                                                              );
+                                                          //                 for (
+                                                          //                   int
+                                                          //                   index =
+                                                          //                       0;
+                                                          //                   index <
+                                                          //                       cart.length;
+                                                          //                   index++
+                                                          //                 ) {
+                                                          //                   if (cart[index].productid ==
+                                                          //                       productId) {
+                                                          //                     cart.removeAt(
+                                                          //                       index,
+                                                          //                     );
+                                                          //                     cartMap.removeAt(
+                                                          //                       index,
+                                                          //                     );
+                                                          //                     total.removeAt(
+                                                          //                       index,
+                                                          //                     );
 
-                                                                              conCatatan.removeAt(
-                                                                                index,
-                                                                              );
-                                                                              conCounterPreview.clear();
-                                                                              conCatatanPreview.text = '';
+                                                          //                     conCatatan.removeAt(
+                                                          //                       index,
+                                                          //                     );
+                                                          //                     conCounterPreview.clear();
+                                                          //                     conCatatanPreview.text = '';
 
-                                                                              if (cart.isEmpty) {
-                                                                                sumTotal = 0;
-                                                                              }
-                                                                              break;
-                                                                            }
-                                                                          }
+                                                          //                     if (cart.isEmpty) {
+                                                          //                       sumTotal = 0;
+                                                          //                     }
+                                                          //                     break;
+                                                          //                   }
+                                                          //                 }
 
-                                                                          isItemAdded =
-                                                                              true;
-                                                                        } else {
-                                                                          showModalBottomSheet(
-                                                                            constraints: const BoxConstraints(
-                                                                              maxWidth: double.infinity,
-                                                                            ),
-                                                                            useRootNavigator:
-                                                                                false,
-                                                                            isScrollControlled:
-                                                                                true,
-                                                                            shape: RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(
-                                                                                size16,
-                                                                              ),
-                                                                            ),
-                                                                            context:
-                                                                                context,
-                                                                            builder:
-                                                                                (
-                                                                                  context,
-                                                                                ) {
-                                                                                  return Container(
-                                                                                    padding: EdgeInsets.only(
-                                                                                      bottom: MediaQuery.of(
-                                                                                        context,
-                                                                                      ).viewInsets.bottom,
-                                                                                    ),
-                                                                                    decoration: ShapeDecoration(
-                                                                                      color: bnw100,
-                                                                                      shape: RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.only(
-                                                                                          topLeft: Radius.circular(
-                                                                                            size16,
-                                                                                          ),
-                                                                                          topRight: Radius.circular(
-                                                                                            size16,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    child: Padding(
-                                                                                      padding: EdgeInsets.fromLTRB(
-                                                                                        size32,
-                                                                                        size16,
-                                                                                        size32,
-                                                                                        size32,
-                                                                                      ),
-                                                                                      child: IntrinsicHeight(
-                                                                                        child: Column(
-                                                                                          children: [
-                                                                                            dividerShowdialog(),
-                                                                                            SingleChildScrollView(
-                                                                                              child: Column(
-                                                                                                children: [
-                                                                                                  SizedBox(
-                                                                                                    height: size16,
-                                                                                                  ),
-                                                                                                  Container(
-                                                                                                    decoration: BoxDecoration(
-                                                                                                      borderRadius: BorderRadius.circular(
-                                                                                                        size12,
-                                                                                                      ),
-                                                                                                      border: Border.all(
-                                                                                                        color: bnw300,
-                                                                                                      ),
-                                                                                                    ),
-                                                                                                    child: Column(
-                                                                                                      children: [
-                                                                                                        Padding(
-                                                                                                          padding: EdgeInsets.all(
-                                                                                                            size8,
-                                                                                                          ),
-                                                                                                          child: Column(
-                                                                                                            children: [
-                                                                                                              Row(
-                                                                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                                                children: [
-                                                                                                                  ClipRRect(
-                                                                                                                    borderRadius: BorderRadius.circular(
-                                                                                                                      size8,
-                                                                                                                    ),
-                                                                                                                    child: Container(
-                                                                                                                      height: size120,
-                                                                                                                      width: size120,
-                                                                                                                      child: SvgPicture.asset(
-                                                                                                                        'assets/logoProduct.svg',
-                                                                                                                        fit: BoxFit.cover,
-                                                                                                                      ),
-                                                                                                                    ),
-                                                                                                                  ),
-                                                                                                                  SizedBox(
-                                                                                                                    width: size12,
-                                                                                                                  ),
-                                                                                                                  Column(
-                                                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                                    children: [
-                                                                                                                      Text(
-                                                                                                                        coin['namavoucher'] ??
-                                                                                                                            '',
-                                                                                                                        style: heading3(
-                                                                                                                          FontWeight.w600,
-                                                                                                                          bnw900,
-                                                                                                                          'Outfit',
-                                                                                                                        ),
-                                                                                                                      ),
-                                                                                                                      Text(
-                                                                                                                        FormatCurrency.convertToIdr(
-                                                                                                                          coin['price'],
-                                                                                                                        ),
-                                                                                                                        style: heading3(
-                                                                                                                          FontWeight.w400,
-                                                                                                                          bnw900,
-                                                                                                                          'Outfit',
-                                                                                                                        ),
-                                                                                                                      ),
-                                                                                                                      Text(
-                                                                                                                        coin['typeproducts'] ??
-                                                                                                                            '',
-                                                                                                                        style: heading4(
-                                                                                                                          FontWeight.w400,
-                                                                                                                          bnw500,
-                                                                                                                          'Outfit',
-                                                                                                                        ),
-                                                                                                                      ),
-                                                                                                                    ],
-                                                                                                                  ),
-                                                                                                                  Spacer(),
-                                                                                                                  Column(
-                                                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                                                    children: [
-                                                                                                                      Text(
-                                                                                                                        'Jumlah',
-                                                                                                                        style: heading3(
-                                                                                                                          FontWeight.w400,
-                                                                                                                          bnw900,
-                                                                                                                          'Outfit',
-                                                                                                                        ),
-                                                                                                                      ),
-                                                                                                                      SizedBox(
-                                                                                                                        height: size8,
-                                                                                                                      ),
-                                                                                                                      Row(
-                                                                                                                        children: [
-                                                                                                                          GestureDetector(
-                                                                                                                            onTap: () {
-                                                                                                                              if (counterCart >
-                                                                                                                                  1) {
-                                                                                                                                counterCart--;
-                                                                                                                                conCounterPreview.text = counterCart.toString();
-                                                                                                                              }
-                                                                                                                              setState(
-                                                                                                                                () {},
-                                                                                                                              );
-                                                                                                                            },
-                                                                                                                            child: buttonMoutlineColor(
-                                                                                                                              Icon(
-                                                                                                                                PhosphorIcons.minus,
-                                                                                                                                color: primary500,
-                                                                                                                                size: size24,
-                                                                                                                              ),
-                                                                                                                              primary500,
-                                                                                                                            ),
-                                                                                                                          ),
-                                                                                                                          SizedBox(
-                                                                                                                            width: size8,
-                                                                                                                          ),
-                                                                                                                          SizedBox(
-                                                                                                                            height: size48,
-                                                                                                                            width: size56,
-                                                                                                                            child: TextFormField(
-                                                                                                                              cursorColor: primary500,
-                                                                                                                              enabled: true,
-                                                                                                                              controller: conCounterPreview,
-                                                                                                                              keyboardType: TextInputType.number,
-                                                                                                                              onChanged:
-                                                                                                                                  (
-                                                                                                                                    value,
-                                                                                                                                  ) {
-                                                                                                                                    setState(
-                                                                                                                                      () {
-                                                                                                                                        int parsedValue =
-                                                                                                                                            int.tryParse(
-                                                                                                                                              value,
-                                                                                                                                            ) ??
-                                                                                                                                            0;
-                                                                                                                                        counterCart = parsedValue;
-                                                                                                                                        conCounterPreview.text = counterCart.toString();
-                                                                                                                                      },
-                                                                                                                                    );
-                                                                                                                                  },
-                                                                                                                              textAlign: TextAlign.center,
-                                                                                                                              decoration: InputDecoration(
-                                                                                                                                // alignLabelWithHint: true,
-                                                                                                                                hintText: counterCart.toString(),
+                                                          //                 isItemAdded =
+                                                          //                     true;
+                                                          //               } else {
+                                                          //                 showModalBottomSheet(
+                                                          //                   constraints: const BoxConstraints(
+                                                          //                     maxWidth: double.infinity,
+                                                          //                   ),
+                                                          //                   useRootNavigator:
+                                                          //                       false,
+                                                          //                   isScrollControlled:
+                                                          //                       true,
+                                                          //                   shape: RoundedRectangleBorder(
+                                                          //                     borderRadius: BorderRadius.circular(
+                                                          //                       size16,
+                                                          //                     ),
+                                                          //                   ),
+                                                          //                   context:
+                                                          //                       context,
+                                                          //                   builder:
+                                                          //                       (
+                                                          //                         context,
+                                                          //                       ) {
+                                                          //                         return Container(
+                                                          //                           padding: EdgeInsets.only(
+                                                          //                             bottom: MediaQuery.of(
+                                                          //                               context,
+                                                          //                             ).viewInsets.bottom,
+                                                          //                           ),
+                                                          //                           decoration: ShapeDecoration(
+                                                          //                             color: bnw100,
+                                                          //                             shape: RoundedRectangleBorder(
+                                                          //                               borderRadius: BorderRadius.only(
+                                                          //                                 topLeft: Radius.circular(
+                                                          //                                   size16,
+                                                          //                                 ),
+                                                          //                                 topRight: Radius.circular(
+                                                          //                                   size16,
+                                                          //                                 ),
+                                                          //                               ),
+                                                          //                             ),
+                                                          //                           ),
+                                                          //                           child: Padding(
+                                                          //                             padding: EdgeInsets.fromLTRB(
+                                                          //                               size32,
+                                                          //                               size16,
+                                                          //                               size32,
+                                                          //                               size32,
+                                                          //                             ),
+                                                          //                             child: IntrinsicHeight(
+                                                          //                               child: Column(
+                                                          //                                 children: [
+                                                          //                                   dividerShowdialog(),
+                                                          //                                   SingleChildScrollView(
+                                                          //                                     child: Column(
+                                                          //                                       children: [
+                                                          //                                         SizedBox(
+                                                          //                                           height: size16,
+                                                          //                                         ),
+                                                          //                                         Container(
+                                                          //                                           decoration: BoxDecoration(
+                                                          //                                             borderRadius: BorderRadius.circular(
+                                                          //                                               size12,
+                                                          //                                             ),
+                                                          //                                             border: Border.all(
+                                                          //                                               color: bnw300,
+                                                          //                                             ),
+                                                          //                                           ),
+                                                          //                                           child: Column(
+                                                          //                                             children: [
+                                                          //                                               Padding(
+                                                          //                                                 padding: EdgeInsets.all(
+                                                          //                                                   size8,
+                                                          //                                                 ),
+                                                          //                                                 child: Column(
+                                                          //                                                   children: [
+                                                          //                                                     Row(
+                                                          //                                                       crossAxisAlignment: CrossAxisAlignment.center,
+                                                          //                                                       mainAxisAlignment: MainAxisAlignment.start,
+                                                          //                                                       children: [
+                                                          //                                                         ClipRRect(
+                                                          //                                                           borderRadius: BorderRadius.circular(
+                                                          //                                                             size8,
+                                                          //                                                           ),
+                                                          //                                                           child: Container(
+                                                          //                                                             height: size120,
+                                                          //                                                             width: size120,
+                                                          //                                                             child: SvgPicture.asset(
+                                                          //                                                               'assets/logoProduct.svg',
+                                                          //                                                               fit: BoxFit.cover,
+                                                          //                                                             ),
+                                                          //                                                           ),
+                                                          //                                                         ),
+                                                          //                                                         SizedBox(
+                                                          //                                                           width: size12,
+                                                          //                                                         ),
+                                                          //                                                         Column(
+                                                          //                                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                                          //                                                           children: [
+                                                          //                                                             Text(
+                                                          //                                                               coin['namavoucher'] ??
+                                                          //                                                                   '',
+                                                          //                                                               style: heading3(
+                                                          //                                                                 FontWeight.w600,
+                                                          //                                                                 bnw900,
+                                                          //                                                                 'Outfit',
+                                                          //                                                               ),
+                                                          //                                                             ),
+                                                          //                                                             Text(
+                                                          //                                                               FormatCurrency.convertToIdr(
+                                                          //                                                                 coin['price'],
+                                                          //                                                               ),
+                                                          //                                                               style: heading3(
+                                                          //                                                                 FontWeight.w400,
+                                                          //                                                                 bnw900,
+                                                          //                                                                 'Outfit',
+                                                          //                                                               ),
+                                                          //                                                             ),
+                                                          //                                                             Text(
+                                                          //                                                               coin['typeproducts'] ??
+                                                          //                                                                   '',
+                                                          //                                                               style: heading4(
+                                                          //                                                                 FontWeight.w400,
+                                                          //                                                                 bnw500,
+                                                          //                                                                 'Outfit',
+                                                          //                                                               ),
+                                                          //                                                             ),
+                                                          //                                                           ],
+                                                          //                                                         ),
+                                                          //                                                         Spacer(),
+                                                          //                                                         Column(
+                                                          //                                                           mainAxisAlignment: MainAxisAlignment.center,
+                                                          //                                                           children: [
+                                                          //                                                             Text(
+                                                          //                                                               'Jumlah',
+                                                          //                                                               style: heading3(
+                                                          //                                                                 FontWeight.w400,
+                                                          //                                                                 bnw900,
+                                                          //                                                                 'Outfit',
+                                                          //                                                               ),
+                                                          //                                                             ),
+                                                          //                                                             SizedBox(
+                                                          //                                                               height: size8,
+                                                          //                                                             ),
+                                                          //                                                             Row(
+                                                          //                                                               children: [
+                                                          //                                                                 GestureDetector(
+                                                          //                                                                   onTap: () {
+                                                          //                                                                     if (counterCart >
+                                                          //                                                                         1) {
+                                                          //                                                                       counterCart--;
+                                                          //                                                                       conCounterPreview.text = counterCart.toString();
+                                                          //                                                                     }
+                                                          //                                                                     setState(
+                                                          //                                                                       () {},
+                                                          //                                                                     );
+                                                          //                                                                   },
+                                                          //                                                                   child: buttonMoutlineColor(
+                                                          //                                                                     Icon(
+                                                          //                                                                       PhosphorIcons.minus,
+                                                          //                                                                       color: primary500,
+                                                          //                                                                       size: size24,
+                                                          //                                                                     ),
+                                                          //                                                                     primary500,
+                                                          //                                                                   ),
+                                                          //                                                                 ),
+                                                          //                                                                 SizedBox(
+                                                          //                                                                   width: size8,
+                                                          //                                                                 ),
+                                                          //                                                                 SizedBox(
+                                                          //                                                                   height: size48,
+                                                          //                                                                   width: size56,
+                                                          //                                                                   child: TextFormField(
+                                                          //                                                                     cursorColor: primary500,
+                                                          //                                                                     enabled: true,
+                                                          //                                                                     controller: conCounterPreview,
+                                                          //                                                                     keyboardType: TextInputType.number,
+                                                          //                                                                     onChanged:
+                                                          //                                                                         (
+                                                          //                                                                           value,
+                                                          //                                                                         ) {
+                                                          //                                                                           setState(
+                                                          //                                                                             () {
+                                                          //                                                                               int parsedValue =
+                                                          //                                                                                   int.tryParse(
+                                                          //                                                                                     value,
+                                                          //                                                                                   ) ??
+                                                          //                                                                                   0;
+                                                          //                                                                               counterCart = parsedValue;
+                                                          //                                                                               conCounterPreview.text = counterCart.toString();
+                                                          //                                                                             },
+                                                          //                                                                           );
+                                                          //                                                                         },
+                                                          //                                                                     textAlign: TextAlign.center,
+                                                          //                                                                     decoration: InputDecoration(
+                                                          //                                                                       // alignLabelWithHint: true,
+                                                          //                                                                       hintText: counterCart.toString(),
 
-                                                                                                                                // .toString(),
-                                                                                                                                // _itemCount.toString(),
-                                                                                                                                hintStyle: heading4(
-                                                                                                                                  FontWeight.w600,
-                                                                                                                                  bnw800,
-                                                                                                                                  'Outfit',
-                                                                                                                                ),
-                                                                                                                              ),
-                                                                                                                            ),
-                                                                                                                          ),
-                                                                                                                          SizedBox(
-                                                                                                                            width: size8,
-                                                                                                                          ),
-                                                                                                                          GestureDetector(
-                                                                                                                            onTap: () {
-                                                                                                                              counterCart++;
-                                                                                                                              conCounterPreview.text = counterCart.toString();
-                                                                                                                              setState(
-                                                                                                                                () {},
-                                                                                                                              );
-                                                                                                                            },
-                                                                                                                            child: buttonMoutlineColor(
-                                                                                                                              Icon(
-                                                                                                                                PhosphorIcons.plus,
-                                                                                                                                color: primary500,
-                                                                                                                                size: size24,
-                                                                                                                              ),
-                                                                                                                              primary500,
-                                                                                                                              // 50,
-                                                                                                                            ),
-                                                                                                                          ),
-                                                                                                                        ],
-                                                                                                                      ),
-                                                                                                                    ],
-                                                                                                                  ),
-                                                                                                                ],
-                                                                                                              ),
-                                                                                                            ],
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                      ],
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  SizedBox(
-                                                                                                    height: size16,
-                                                                                                  ),
-                                                                                                  Container(
-                                                                                                    child: Column(
-                                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                      children: [
-                                                                                                        Text(
-                                                                                                          'Catatan',
-                                                                                                          style: body1(
-                                                                                                            FontWeight.w500,
-                                                                                                            bnw900,
-                                                                                                            'Outfit',
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                        IntrinsicHeight(
-                                                                                                          child: TextFormField(
-                                                                                                            cursorColor: primary500,
-                                                                                                            // keyboardType: numberNo,
-                                                                                                            style: heading2(
-                                                                                                              FontWeight.w600,
-                                                                                                              bnw900,
-                                                                                                              'Outfit',
-                                                                                                            ),
-                                                                                                            controller: conCatatanPreview,
-                                                                                                            onChanged:
-                                                                                                                (
-                                                                                                                  value,
-                                                                                                                ) {
-                                                                                                                  // String formattedValue = formatCurrency(value);
-                                                                                                                  // conHarga.value = TextEditingValue(
-                                                                                                                  //   text: formattedValue,
-                                                                                                                  //   selection:
-                                                                                                                  //       TextSelection.collapsed(offset: formattedValue.length),
-                                                                                                                  // );
-                                                                                                                },
-                                                                                                            decoration: InputDecoration(
-                                                                                                              focusedBorder: UnderlineInputBorder(
-                                                                                                                borderSide: BorderSide(
-                                                                                                                  width: 2,
-                                                                                                                  color: primary500,
-                                                                                                                ),
-                                                                                                              ),
-                                                                                                              isDense: true,
-                                                                                                              contentPadding: EdgeInsets.symmetric(
-                                                                                                                vertical: size12,
-                                                                                                              ),
-                                                                                                              enabledBorder: UnderlineInputBorder(
-                                                                                                                borderSide: BorderSide(
-                                                                                                                  width: 1.5,
-                                                                                                                  color: bnw500,
-                                                                                                                ),
-                                                                                                              ),
-                                                                                                              hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                                                                                              hintStyle: heading2(
-                                                                                                                FontWeight.w600,
-                                                                                                                bnw500,
-                                                                                                                'Outfit',
-                                                                                                              ),
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                      ],
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            SizedBox(
-                                                                                              height: size32,
-                                                                                            ),
-                                                                                            Row(
-                                                                                              children: [
-                                                                                                Expanded(
-                                                                                                  child: GestureDetector(
-                                                                                                    onTap: () {
-                                                                                                      setState(
-                                                                                                        () {},
-                                                                                                      );
-                                                                                                      Navigator.pop(
-                                                                                                        context,
-                                                                                                      );
-                                                                                                    },
-                                                                                                    child: buttonXLoutline(
-                                                                                                      Center(
-                                                                                                        child: Text(
-                                                                                                          'Batalkan',
-                                                                                                          style: heading3(
-                                                                                                            FontWeight.w600,
-                                                                                                            primary500,
-                                                                                                            'Outfit',
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                      ),
-                                                                                                      MediaQuery.of(
-                                                                                                        context,
-                                                                                                      ).size.width,
-                                                                                                      primary500,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                                SizedBox(
-                                                                                                  width: size16,
-                                                                                                ),
-                                                                                                Expanded(
-                                                                                                  child: GestureDetector(
-                                                                                                    onTap: () {
-                                                                                                      setState(
-                                                                                                        () {
-                                                                                                          String productId = coin['voucherid'];
+                                                          //                                                                       // .toString(),
+                                                          //                                                                       // _itemCount.toString(),
+                                                          //                                                                       hintStyle: heading4(
+                                                          //                                                                         FontWeight.w600,
+                                                          //                                                                         bnw800,
+                                                          //                                                                         'Outfit',
+                                                          //                                                                       ),
+                                                          //                                                                     ),
+                                                          //                                                                   ),
+                                                          //                                                                 ),
+                                                          //                                                                 SizedBox(
+                                                          //                                                                   width: size8,
+                                                          //                                                                 ),
+                                                          //                                                                 GestureDetector(
+                                                          //                                                                   onTap: () {
+                                                          //                                                                     counterCart++;
+                                                          //                                                                     conCounterPreview.text = counterCart.toString();
+                                                          //                                                                     setState(
+                                                          //                                                                       () {},
+                                                          //                                                                     );
+                                                          //                                                                   },
+                                                          //                                                                   child: buttonMoutlineColor(
+                                                          //                                                                     Icon(
+                                                          //                                                                       PhosphorIcons.plus,
+                                                          //                                                                       color: primary500,
+                                                          //                                                                       size: size24,
+                                                          //                                                                     ),
+                                                          //                                                                     primary500,
+                                                          //                                                                     // 50,
+                                                          //                                                                   ),
+                                                          //                                                                 ),
+                                                          //                                                               ],
+                                                          //                                                             ),
+                                                          //                                                           ],
+                                                          //                                                         ),
+                                                          //                                                       ],
+                                                          //                                                     ),
+                                                          //                                                   ],
+                                                          //                                                 ),
+                                                          //                                               ),
+                                                          //                                             ],
+                                                          //                                           ),
+                                                          //                                         ),
+                                                          //                                         SizedBox(
+                                                          //                                           height: size16,
+                                                          //                                         ),
+                                                          //                                         Container(
+                                                          //                                           child: Column(
+                                                          //                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                                          //                                             children: [
+                                                          //                                               Text(
+                                                          //                                                 'Catatan',
+                                                          //                                                 style: body1(
+                                                          //                                                   FontWeight.w500,
+                                                          //                                                   bnw900,
+                                                          //                                                   'Outfit',
+                                                          //                                                 ),
+                                                          //                                               ),
+                                                          //                                               IntrinsicHeight(
+                                                          //                                                 child: TextFormField(
+                                                          //                                                   cursorColor: primary500,
+                                                          //                                                   // keyboardType: numberNo,
+                                                          //                                                   style: heading2(
+                                                          //                                                     FontWeight.w600,
+                                                          //                                                     bnw900,
+                                                          //                                                     'Outfit',
+                                                          //                                                   ),
+                                                          //                                                   controller: conCatatanPreview,
+                                                          //                                                   onChanged:
+                                                          //                                                       (
+                                                          //                                                         value,
+                                                          //                                                       ) {
+                                                          //                                                         // String formattedValue = formatCurrency(value);
+                                                          //                                                         // conHarga.value = TextEditingValue(
+                                                          //                                                         //   text: formattedValue,
+                                                          //                                                         //   selection:
+                                                          //                                                         //       TextSelection.collapsed(offset: formattedValue.length),
+                                                          //                                                         // );
+                                                          //                                                       },
+                                                          //                                                   decoration: InputDecoration(
+                                                          //                                                     focusedBorder: UnderlineInputBorder(
+                                                          //                                                       borderSide: BorderSide(
+                                                          //                                                         width: 2,
+                                                          //                                                         color: primary500,
+                                                          //                                                       ),
+                                                          //                                                     ),
+                                                          //                                                     isDense: true,
+                                                          //                                                     contentPadding: EdgeInsets.symmetric(
+                                                          //                                                       vertical: size12,
+                                                          //                                                     ),
+                                                          //                                                     enabledBorder: UnderlineInputBorder(
+                                                          //                                                       borderSide: BorderSide(
+                                                          //                                                         width: 1.5,
+                                                          //                                                         color: bnw500,
+                                                          //                                                       ),
+                                                          //                                                     ),
+                                                          //                                                     hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
+                                                          //                                                     hintStyle: heading2(
+                                                          //                                                       FontWeight.w600,
+                                                          //                                                       bnw500,
+                                                          //                                                       'Outfit',
+                                                          //                                                     ),
+                                                          //                                                   ),
+                                                          //                                                 ),
+                                                          //                                               ),
+                                                          //                                             ],
+                                                          //                                           ),
+                                                          //                                         ),
+                                                          //                                       ],
+                                                          //                                     ),
+                                                          //                                   ),
+                                                          //                                   SizedBox(
+                                                          //                                     height: size32,
+                                                          //                                   ),
+                                                          //                                   Row(
+                                                          //                                     children: [
+                                                          //                                       Expanded(
+                                                          //                                         child: GestureDetector(
+                                                          //                                           onTap: () {
+                                                          //                                             setState(
+                                                          //                                               () {},
+                                                          //                                             );
+                                                          //                                             Navigator.pop(
+                                                          //                                               context,
+                                                          //                                             );
+                                                          //                                           },
+                                                          //                                           child: buttonXLoutline(
+                                                          //                                             Center(
+                                                          //                                               child: Text(
+                                                          //                                                 'Batalkan',
+                                                          //                                                 style: heading3(
+                                                          //                                                   FontWeight.w600,
+                                                          //                                                   primary500,
+                                                          //                                                   'Outfit',
+                                                          //                                                 ),
+                                                          //                                               ),
+                                                          //                                             ),
+                                                          //                                             MediaQuery.of(
+                                                          //                                               context,
+                                                          //                                             ).size.width,
+                                                          //                                             primary500,
+                                                          //                                           ),
+                                                          //                                         ),
+                                                          //                                       ),
+                                                          //                                       SizedBox(
+                                                          //                                         width: size16,
+                                                          //                                       ),
+                                                          //                                       Expanded(
+                                                          //                                         child: GestureDetector(
+                                                          //                                           onTap: () {
+                                                          //                                             setState(
+                                                          //                                               () {
+                                                          //                                                 String productId = coin['voucherid'];
 
-                                                                                                          if (cartProductIds.contains(
-                                                                                                            productId,
-                                                                                                          )) {
-                                                                                                            cartProductIds.remove(
-                                                                                                              productId,
-                                                                                                            );
+                                                          //                                                 if (cartProductIds.contains(
+                                                          //                                                   productId,
+                                                          //                                                 )) {
+                                                          //                                                   cartProductIds.remove(
+                                                          //                                                     productId,
+                                                          //                                                   );
 
-                                                                                                            for (
-                                                                                                              int index = 0;
-                                                                                                              index <
-                                                                                                                  cart.length;
-                                                                                                              index++
-                                                                                                            ) {
-                                                                                                              if (cart[index].productid ==
-                                                                                                                  productId) {
-                                                                                                                cart.removeAt(
-                                                                                                                  index,
-                                                                                                                );
-                                                                                                                cartMap.removeAt(
-                                                                                                                  index,
-                                                                                                                );
-                                                                                                                total.removeAt(
-                                                                                                                  index,
-                                                                                                                );
-                                                                                                                if (cart.isEmpty) {
-                                                                                                                  sumTotal = 0;
-                                                                                                                }
-                                                                                                                break;
-                                                                                                              }
-                                                                                                            }
+                                                          //                                                   for (
+                                                          //                                                     int index = 0;
+                                                          //                                                     index <
+                                                          //                                                         cart.length;
+                                                          //                                                     index++
+                                                          //                                                   ) {
+                                                          //                                                     if (cart[index].productid ==
+                                                          //                                                         productId) {
+                                                          //                                                       cart.removeAt(
+                                                          //                                                         index,
+                                                          //                                                       );
+                                                          //                                                       cartMap.removeAt(
+                                                          //                                                         index,
+                                                          //                                                       );
+                                                          //                                                       total.removeAt(
+                                                          //                                                         index,
+                                                          //                                                       );
+                                                          //                                                       if (cart.isEmpty) {
+                                                          //                                                         sumTotal = 0;
+                                                          //                                                       }
+                                                          //                                                       break;
+                                                          //                                                     }
+                                                          //                                                   }
 
-                                                                                                            isItemAdded = true;
-                                                                                                          } else {
-                                                                                                            cartProductIds.add(
-                                                                                                              productId,
-                                                                                                            );
-                                                                                                            isItemAdded = false;
-                                                                                                          }
+                                                          //                                                   isItemAdded = true;
+                                                          //                                                 } else {
+                                                          //                                                   cartProductIds.add(
+                                                          //                                                     productId,
+                                                          //                                                   );
+                                                          //                                                   isItemAdded = false;
+                                                          //                                                 }
 
-                                                                                                          if (!isItemAdded) {
-                                                                                                            Navigator.pop(
-                                                                                                              context,
-                                                                                                            );
-                                                                                                            Map<
-                                                                                                              String,
-                                                                                                              String
-                                                                                                            >
-                                                                                                            map1 = {};
-                                                                                                            map1['name'] = coin['namavoucher'];
-                                                                                                            map1['productid'] = coin['voucherid'];
-                                                                                                            // map1['quantity'] = '1';
-                                                                                                            map1['quantity'] = counterCart.toString();
+                                                          //                                                 if (!isItemAdded) {
+                                                          //                                                   Navigator.pop(
+                                                          //                                                     context,
+                                                          //                                                   );
+                                                          //                                                   Map<
+                                                          //                                                     String,
+                                                          //                                                     String
+                                                          //                                                   >
+                                                          //                                                   map1 = {};
+                                                          //                                                   map1['name'] = coin['namavoucher'];
+                                                          //                                                   map1['productid'] = coin['voucherid'];
+                                                          //                                                   // map1['quantity'] = '1';
+                                                          //                                                   map1['quantity'] = counterCart.toString();
 
-                                                                                                            map1['image'] = coin['product_image'];
-                                                                                                            map1['amount'] =
-                                                                                                                (coin['price'] *
-                                                                                                                        counterCart)
-                                                                                                                    .toString();
-                                                                                                            map1['description'] = conCatatanPreview.text;
-                                                                                                            map1['id_request'] = '';
-                                                                                                            cartMap.add(
-                                                                                                              map1,
-                                                                                                            );
+                                                          //                                                   map1['image'] = coin['product_image'];
+                                                          //                                                   map1['amount'] =
+                                                          //                                                       (coin['price'] *
+                                                          //                                                               counterCart)
+                                                          //                                                           .toString();
+                                                          //                                                   map1['description'] = conCatatanPreview.text;
+                                                          //                                                   map1['id_request'] = '';
+                                                          //                                                   cartMap.add(
+                                                          //                                                     map1,
+                                                          //                                                   );
 
-                                                                                                            // log(datasTransaksi![i].product_image.toString());
+                                                          //                                                   // log(datasTransaksi![i].product_image.toString());
 
-                                                                                                            String name = coin['namavoucher'].trim();
-                                                                                                            String productid = coin['voucherid'].toString().trim();
-                                                                                                            String image = coin['product_image'].toString().trim();
-                                                                                                            // String desc = conCatatan[i]
-                                                                                                            //     .text
-                                                                                                            //     .toString()
-                                                                                                            //     .trim();
+                                                          //                                                   String name = coin['namavoucher'].trim();
+                                                          //                                                   String productid = coin['voucherid'].toString().trim();
+                                                          //                                                   String image = coin['product_image'].toString().trim();
+                                                          //                                                   // String desc = conCatatan[i]
+                                                          //                                                   //     .text
+                                                          //                                                   //     .toString()
+                                                          //                                                   //     .trim();
 
-                                                                                                            int? price = (coin['price']);
+                                                          //                                                   int? price = (coin['price']);
 
-                                                                                                            int index = 0;
-                                                                                                            for (
-                                                                                                              index;
-                                                                                                              index <
-                                                                                                                  cart.length;
-                                                                                                              index++
-                                                                                                            ) {}
+                                                          //                                                   int index = 0;
+                                                          //                                                   for (
+                                                          //                                                     index;
+                                                          //                                                     index <
+                                                          //                                                         cart.length;
+                                                          //                                                     index++
+                                                          //                                                   ) {}
 
-                                                                                                            // int? quantity = cart[i];
+                                                          //                                                   // int? quantity = cart[i];
 
-                                                                                                            // log(name.toString());
-                                                                                                            // log(price.toString());
-                                                                                                            // log(productid.toString());
-                                                                                                            // log(image.toString());
+                                                          //                                                   // log(name.toString());
+                                                          //                                                   // log(price.toString());
+                                                          //                                                   // log(productid.toString());
+                                                          //                                                   // log(image.toString());
 
-                                                                                                            sumTotal =
-                                                                                                                sumTotal +
-                                                                                                                (price! *
-                                                                                                                    counterCart);
-                                                                                                            // subTotal =
-                                                                                                            //     subTotal + price.toInt();
-                                                                                                            total.add(
-                                                                                                              price *
-                                                                                                                  counterCart,
-                                                                                                            );
-                                                                                                            conCatatan.add(
-                                                                                                              TextEditingController(
-                                                                                                                text: conCatatanPreview.text,
-                                                                                                              ),
-                                                                                                            );
-                                                                                                            cart.add(
-                                                                                                              CartTransaksi(
-                                                                                                                name: name,
-                                                                                                                productid: productid,
-                                                                                                                image: image,
-                                                                                                                price: price,
-                                                                                                                quantity: counterCart,
-                                                                                                                desc: conCatatanPreview.text,
-                                                                                                                idRequest: "",
-                                                                                                                // quantity: cart[i]
-                                                                                                                //     .quantity
-                                                                                                                //     .toInt(),
-                                                                                                              ),
-                                                                                                            );
-                                                                                                            // for (int i = 0; i <= cart.length; i++) {
-                                                                                                            //   conCatatan.add(
-                                                                                                            //     TextEditingController(
-                                                                                                            //       text: conCatatanPreview.text,
-                                                                                                            //     ),
-                                                                                                            //   );
-                                                                                                            //   inputValues.add(conCatatanPreview.text);
-                                                                                                            //   setState(() {});
-                                                                                                            //   initState();
-                                                                                                            // }
+                                                          //                                                   sumTotal =
+                                                          //                                                       sumTotal +
+                                                          //                                                       (price! *
+                                                          //                                                           counterCart);
+                                                          //                                                   // subTotal =
+                                                          //                                                   //     subTotal + price.toInt();
+                                                          //                                                   total.add(
+                                                          //                                                     price *
+                                                          //                                                         counterCart,
+                                                          //                                                   );
+                                                          //                                                   conCatatan.add(
+                                                          //                                                     TextEditingController(
+                                                          //                                                       text: conCatatanPreview.text,
+                                                          //                                                     ),
+                                                          //                                                   );
+                                                          //                                                   cart.add(
+                                                          //                                                     CartTransaksi(
+                                                          //                                                       name: name,
+                                                          //                                                       productid: productid,
+                                                          //                                                       image: image,
+                                                          //                                                       price: price,
+                                                          //                                                       quantity: counterCart,
+                                                          //                                                       desc: conCatatanPreview.text,
+                                                          //                                                       idRequest: "",
+                                                          //                                                       // quantity: cart[i]
+                                                          //                                                       //     .quantity
+                                                          //                                                       //     .toInt(),
+                                                          //                                                     ),
+                                                          //                                                   );
+                                                          //                                                   // for (int i = 0; i <= cart.length; i++) {
+                                                          //                                                   //   conCatatan.add(
+                                                          //                                                   //     TextEditingController(
+                                                          //                                                   //       text: conCatatanPreview.text,
+                                                          //                                                   //     ),
+                                                          //                                                   //   );
+                                                          //                                                   //   inputValues.add(conCatatanPreview.text);
+                                                          //                                                   //   setState(() {});
+                                                          //                                                   //   initState();
+                                                          //                                                   // }
 
-                                                                                                            refreshColor();
+                                                          //                                                   refreshColor();
 
-                                                                                                            num totalku = 0;
-                                                                                                            cartMap.forEach(
-                                                                                                              (
-                                                                                                                element,
-                                                                                                              ) {
-                                                                                                                var myelement = int.parse(
-                                                                                                                  element['amount']!,
-                                                                                                                );
-                                                                                                                totalku =
-                                                                                                                    totalku +
-                                                                                                                    (myelement *
-                                                                                                                        counterCart);
-                                                                                                              },
-                                                                                                            );
+                                                          //                                                   num totalku = 0;
+                                                          //                                                   cartMap.forEach(
+                                                          //                                                     (
+                                                          //                                                       element,
+                                                          //                                                     ) {
+                                                          //                                                       var myelement = int.parse(
+                                                          //                                                         element['amount']!,
+                                                          //                                                       );
+                                                          //                                                       totalku =
+                                                          //                                                           totalku +
+                                                          //                                                           (myelement *
+                                                          //                                                               counterCart);
+                                                          //                                                     },
+                                                          //                                                   );
 
-                                                                                                            sumTotal = totalku;
+                                                          //                                                   sumTotal = totalku;
 
-                                                                                                            selectedIndexTransaksi[i];
-                                                                                                          } else {
-                                                                                                            // isItemAdded = false;
-                                                                                                            // cartProductIds.remove(productSelect);
-                                                                                                          }
-                                                                                                        },
-                                                                                                      );
+                                                          //                                                   selectedIndexTransaksi[i];
+                                                          //                                                 } else {
+                                                          //                                                   // isItemAdded = false;
+                                                          //                                                   // cartProductIds.remove(productSelect);
+                                                          //                                                 }
+                                                          //                                               },
+                                                          //                                             );
 
-                                                                                                      initState();
-                                                                                                    },
-                                                                                                    child: buttonXL(
-                                                                                                      Center(
-                                                                                                        child: Text(
-                                                                                                          'Tambah Ke Keranjang',
-                                                                                                          style: heading3(
-                                                                                                            FontWeight.w600,
-                                                                                                            bnw100,
-                                                                                                            'Outfit',
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                      ),
-                                                                                                      MediaQuery.of(
-                                                                                                        context,
-                                                                                                      ).size.width,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  );
-                                                                                },
-                                                                          );
-                                                                        }
+                                                          //                                             initState();
+                                                          //                                           },
+                                                          //                                           child: buttonXL(
+                                                          //                                             Center(
+                                                          //                                               child: Text(
+                                                          //                                                 'Tambah Ke Keranjang',
+                                                          //                                                 style: heading3(
+                                                          //                                                   FontWeight.w600,
+                                                          //                                                   bnw100,
+                                                          //                                                   'Outfit',
+                                                          //                                                 ),
+                                                          //                                               ),
+                                                          //                                             ),
+                                                          //                                             MediaQuery.of(
+                                                          //                                               context,
+                                                          //                                             ).size.width,
+                                                          //                                           ),
+                                                          //                                         ),
+                                                          //                                       ),
+                                                          //                                     ],
+                                                          //                                   ),
+                                                          //                                 ],
+                                                          //                               ),
+                                                          //                             ),
+                                                          //                           ),
+                                                          //                         );
+                                                          //                       },
+                                                          //                 );
+                                                          //               }
 
-                                                                        setState(
-                                                                          () {},
-                                                                        );
-                                                                        initState();
-                                                                      },
-                                                                      child: Container(
-                                                                        padding:
-                                                                            EdgeInsets.all(
-                                                                              size8,
-                                                                            ),
-                                                                        decoration: BoxDecoration(
-                                                                          color:
-                                                                              cartProductIds.contains(
-                                                                                snapshot.data[i]['voucherid'].toString(),
-                                                                              )
-                                                                              ? primary100
-                                                                              : bnw100,
-                                                                          borderRadius: BorderRadius.circular(
-                                                                            size12,
-                                                                          ),
-                                                                          border: Border.all(
-                                                                            // color: bnw900,
-                                                                            color:
-                                                                                cartProductIds.contains(
-                                                                                  snapshot.data[i]['voucherid'].toString(),
-                                                                                )
-                                                                                ? primary500
-                                                                                : bnw300,
-                                                                            width:
-                                                                                2,
-                                                                          ),
-                                                                        ),
-                                                                        child: Column(
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.start,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.spaceBetween,
-                                                                          children: [
-                                                                            Expanded(
-                                                                              flex: 3,
-                                                                              child: ClipRRect(
-                                                                                borderRadius: BorderRadius.circular(
-                                                                                  size8,
-                                                                                ),
-                                                                                child: SizedBox(
-                                                                                  height:
-                                                                                      double.infinity /
-                                                                                      2,
-                                                                                  width: double.infinity,
-                                                                                  child:
-                                                                                      snapshot.data![i]['product_image'] !=
-                                                                                          null
-                                                                                      ? ClipRRect(
-                                                                                          borderRadius: BorderRadius.circular(
-                                                                                            size8,
-                                                                                          ),
-                                                                                          child: Image.network(
-                                                                                            snapshot.data![i]['product_image'].toString(),
-                                                                                            height: size48,
-                                                                                            width: size48,
-                                                                                            fit: BoxFit.cover,
-                                                                                            loadingBuilder:
-                                                                                                (
-                                                                                                  context,
-                                                                                                  child,
-                                                                                                  loadingProgress,
-                                                                                                ) {
-                                                                                                  if (loadingProgress ==
-                                                                                                      null) {
-                                                                                                    return child;
-                                                                                                  }
+                                                          //               setState(
+                                                          //                 () {},
+                                                          //               );
+                                                          //               initState();
+                                                          //             },
+                                                          //             child: Container(
+                                                          //               padding:
+                                                          //                   EdgeInsets.all(
+                                                          //                     size8,
+                                                          //                   ),
+                                                          //               decoration: BoxDecoration(
+                                                          //                 color:
+                                                          //                     cartProductIds.contains(
+                                                          //                       snapshot.data[i]['voucherid'].toString(),
+                                                          //                     )
+                                                          //                     ? primary100
+                                                          //                     : bnw100,
+                                                          //                 borderRadius: BorderRadius.circular(
+                                                          //                   size12,
+                                                          //                 ),
+                                                          //                 border: Border.all(
+                                                          //                   // color: bnw900,
+                                                          //                   color:
+                                                          //                       cartProductIds.contains(
+                                                          //                         snapshot.data[i]['voucherid'].toString(),
+                                                          //                       )
+                                                          //                       ? primary500
+                                                          //                       : bnw300,
+                                                          //                   width:
+                                                          //                       2,
+                                                          //                 ),
+                                                          //               ),
+                                                          //               child: Column(
+                                                          //                 crossAxisAlignment:
+                                                          //                     CrossAxisAlignment.start,
+                                                          //                 mainAxisAlignment:
+                                                          //                     MainAxisAlignment.spaceBetween,
+                                                          //                 children: [
+                                                          //                   Expanded(
+                                                          //                     flex: 3,
+                                                          //                     child: ClipRRect(
+                                                          //                       borderRadius: BorderRadius.circular(
+                                                          //                         size8,
+                                                          //                       ),
+                                                          //                       child: SizedBox(
+                                                          //                         height:
+                                                          //                             double.infinity /
+                                                          //                             2,
+                                                          //                         width: double.infinity,
+                                                          //                         child:
+                                                          //                             snapshot.data![i]['product_image'] !=
+                                                          //                                 null
+                                                          //                             ? ClipRRect(
+                                                          //                                 borderRadius: BorderRadius.circular(
+                                                          //                                   size8,
+                                                          //                                 ),
+                                                          //                                 child: Image.network(
+                                                          //                                   snapshot.data![i]['product_image'].toString(),
+                                                          //                                   height: size48,
+                                                          //                                   width: size48,
+                                                          //                                   fit: BoxFit.cover,
+                                                          //                                   loadingBuilder:
+                                                          //                                       (
+                                                          //                                         context,
+                                                          //                                         child,
+                                                          //                                         loadingProgress,
+                                                          //                                       ) {
+                                                          //                                         if (loadingProgress ==
+                                                          //                                             null) {
+                                                          //                                           return child;
+                                                          //                                         }
 
-                                                                                                  return Center(
-                                                                                                    child: loading(),
-                                                                                                  );
-                                                                                                },
-                                                                                            errorBuilder:
-                                                                                                (
-                                                                                                  context,
-                                                                                                  error,
-                                                                                                  stackTrace,
-                                                                                                ) => Icon(
-                                                                                                  PhosphorIcons.tag_fill,
-                                                                                                  color: bnw900,
-                                                                                                  size: 100,
-                                                                                                ),
-                                                                                          ),
-                                                                                        )
-                                                                                      : Icon(
-                                                                                          PhosphorIcons.tag_fill,
-                                                                                          color: bnw900,
-                                                                                          size: 100,
-                                                                                        ),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                            Expanded(
-                                                                              flex: 2,
-                                                                              child: SizedBox(
-                                                                                child: Column(
-                                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      snapshot.data![i]['namavoucher'] ??
-                                                                                          '',
-                                                                                      style: heading4(
-                                                                                        FontWeight.w700,
-                                                                                        bnw900,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                    Text(
-                                                                                      snapshot.data![i]['point'].toString(),
-                                                                                      style: body1(
-                                                                                        FontWeight.w400,
-                                                                                        bnw900,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                    Text(
-                                                                                      FormatCurrency.convertToIdr(
-                                                                                        snapshot.data![i]['price'],
-                                                                                      ),
-                                                                                      style: body1(
-                                                                                        FontWeight.w400,
-                                                                                        bnw900,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                                return SizedBox();
-                                                              },
-                                                            ),
-                                                          ),
+                                                          //                                         return Center(
+                                                          //                                           child: loading(),
+                                                          //                                         );
+                                                          //                                       },
+                                                          //                                   errorBuilder:
+                                                          //                                       (
+                                                          //                                         context,
+                                                          //                                         error,
+                                                          //                                         stackTrace,
+                                                          //                                       ) => Icon(
+                                                          //                                         PhosphorIcons.tag_fill,
+                                                          //                                         color: bnw900,
+                                                          //                                         size: 100,
+                                                          //                                       ),
+                                                          //                                 ),
+                                                          //                               )
+                                                          //                             : Icon(
+                                                          //                                 PhosphorIcons.tag_fill,
+                                                          //                                 color: bnw900,
+                                                          //                                 size: 100,
+                                                          //                               ),
+                                                          //                       ),
+                                                          //                     ),
+                                                          //                   ),
+                                                          //                   Expanded(
+                                                          //                     flex: 2,
+                                                          //                     child: SizedBox(
+                                                          //                       child: Column(
+                                                          //                         mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                          //                         crossAxisAlignment: CrossAxisAlignment.start,
+                                                          //                         children: [
+                                                          //                           Text(
+                                                          //                             snapshot.data![i]['namavoucher'] ??
+                                                          //                                 '',
+                                                          //                             style: heading4(
+                                                          //                               FontWeight.w700,
+                                                          //                               bnw900,
+                                                          //                               'Outfit',
+                                                          //                             ),
+                                                          //                           ),
+                                                          //                           Text(
+                                                          //                             snapshot.data![i]['point'].toString(),
+                                                          //                             style: body1(
+                                                          //                               FontWeight.w400,
+                                                          //                               bnw900,
+                                                          //                               'Outfit',
+                                                          //                             ),
+                                                          //                           ),
+                                                          //                           Text(
+                                                          //                             FormatCurrency.convertToIdr(
+                                                          //                               snapshot.data![i]['price'],
+                                                          //                             ),
+                                                          //                             style: body1(
+                                                          //                               FontWeight.w400,
+                                                          //                               bnw900,
+                                                          //                               'Outfit',
+                                                          //                             ),
+                                                          //                           ),
+                                                          //                         ],
+                                                          //                       ),
+                                                          //                     ),
+                                                          //                   ),
+                                                          //                 ],
+                                                          //               ),
+                                                          //             ),
+                                                          //           ),
+                                                          //         );
+                                                          //       }
+                                                          //       return SizedBox();
+                                                          //     },
+                                                          //   ),
+                                                          // ),
+                                                   
                                                         ],
                                                       ),
                                                     ),
@@ -8196,7 +8092,24 @@ class _TransactionPageState extends State<TransactionPage>
                                           '',
                                           '',
                                           pelangganId,
-                                        );
+                                        ).then((value) {
+                                          if (value == 'success') {
+                                            cart.clear();
+                                            cartMap.clear();
+                                            sumTotal = 0;
+                                            cartProductIds.clear();
+                                            total = [];
+                                            subTotal = 0;
+
+                                            refreshColor();
+
+                                            cartProductIds.clear();
+                                            conCatatan.clear();
+                                            conCounterPreview.clear();
+
+                                            setState(() {});
+                                          }
+                                        });
 
                                         // createTransaction(
                                         //   context,
@@ -8211,21 +8124,6 @@ class _TransactionPageState extends State<TransactionPage>
                                         //   '',
                                         //   pelangganId,
                                         // );
-
-                                        cart.clear();
-                                        cartMap.clear();
-                                        sumTotal = 0;
-                                        cartProductIds.clear();
-                                        total = [];
-                                        subTotal = 0;
-
-                                        refreshColor();
-
-                                        cartProductIds.clear();
-                                        conCatatan.clear();
-                                        conCounterPreview.clear();
-
-                                        setState(() {});
                                       },
                                       child: buttonXLoutline(
                                         Center(
@@ -9328,197 +9226,194 @@ class _TransactionPageState extends State<TransactionPage>
                             ),
                             context: context,
                             builder: (context) => IntrinsicHeight(
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(
-                                      context,
-                                    ).viewInsets.bottom,
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(
+                                    context,
+                                  ).viewInsets.bottom,
+                                ),
+                                // height: MediaQuery.of(context).size.height / 1,
+                                decoration: BoxDecoration(
+                                  color: bnw100,
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    topLeft: Radius.circular(12),
                                   ),
-                                  // height: MediaQuery.of(context).size.height / 1,
-                                  decoration: BoxDecoration(
-                                    color: bnw100,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(12),
-                                      topLeft: Radius.circular(12),
-                                    ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    size32,
+                                    size16,
+                                    size32,
+                                    size32,
                                   ),
-                                  child: Padding(
-                                    padding: EdgeInsets.fromLTRB(
-                                      size32,
-                                      size16,
-                                      size32,
-                                      size32,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        dividerShowdialog(),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: size16),
-                                            Text(
-                                              'Pilih Pembeli',
-                                              style: heading1(
-                                                FontWeight.w700,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
+                                  child: Column(
+                                    children: [
+                                      dividerShowdialog(),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: size16),
+                                          Text(
+                                            'Pilih Pembeli',
+                                            style: heading1(
+                                              FontWeight.w700,
+                                              bnw900,
+                                              'Outfit',
                                             ),
-                                            SizedBox(height: size16),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  'Nama Pembeli ',
-                                                  style: heading4(
-                                                    FontWeight.w400,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '*',
-                                                  style: heading4(
-                                                    FontWeight.w400,
-                                                    danger500,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            TextFormField(
-                                              style: heading2(
-                                                FontWeight.w600,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
-                                              controller:
-                                                  controllerPelangganName,
-                                              onChanged: (value) {
-                                                setState(() {});
-                                              },
-                                              cursorColor: primary500,
-                                              decoration: InputDecoration(
-                                                contentPadding:
-                                                    EdgeInsets.symmetric(
-                                                      vertical: size12,
-                                                    ),
-                                                isDense: true,
-                                                focusedBorder:
-                                                    UnderlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            size8,
-                                                          ),
-                                                      borderSide: BorderSide(
-                                                        width: 2,
-                                                        color: primary500,
-                                                      ),
-                                                    ),
-                                                focusColor: primary500,
-                                                hintText:
-                                                    'Cth : Muhammad Nabil Musyaffa',
-                                                hintStyle: heading2(
-                                                  FontWeight.w600,
-                                                  bnw400,
+                                          ),
+                                          SizedBox(height: size16),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Nama Pembeli ',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw900,
                                                   'Outfit',
                                                 ),
                                               ),
+                                              Text(
+                                                '*',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  danger500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          TextFormField(
+                                            style: heading2(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
                                             ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              controllerPelangganName
-                                                  .text
-                                                  .isNotEmpty
-                                              ? size32
-                                              : 0,
-                                        ),
-                                        controllerPelangganName.text.isNotEmpty
-                                            ? Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceAround,
-                                                children: [
-                                                  Expanded(
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        pelangganId = '';
-                                                        Navigator.pop(context);
-                                                        pilihPembeliShowBottom(
-                                                          context,
-                                                          index,
-                                                        );
-                                                      },
-                                                      child: buttonXLoutline(
-                                                        Center(
-                                                          child: Text(
-                                                            'Batal',
-                                                            style: heading3(
-                                                              FontWeight.w600,
-                                                              primary500,
-                                                              'Outfit',
-                                                            ),
+                                            controller: controllerPelangganName,
+                                            onChanged: (value) {
+                                              setState(() {});
+                                            },
+                                            cursorColor: primary500,
+                                            decoration: InputDecoration(
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
+                                                    vertical: size12,
+                                                  ),
+                                              isDense: true,
+                                              focusedBorder:
+                                                  UnderlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          size8,
+                                                        ),
+                                                    borderSide: BorderSide(
+                                                      width: 2,
+                                                      color: primary500,
+                                                    ),
+                                                  ),
+                                              focusColor: primary500,
+                                              hintText:
+                                                  'Cth : Muhammad Nabil Musyaffa',
+                                              hintStyle: heading2(
+                                                FontWeight.w600,
+                                                bnw400,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            controllerPelangganName
+                                                .text
+                                                .isNotEmpty
+                                            ? size32
+                                            : 0,
+                                      ),
+                                      controllerPelangganName.text.isNotEmpty
+                                          ? Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      pelangganId = '';
+                                                      Navigator.pop(context);
+                                                      pilihPembeliShowBottom(
+                                                        context,
+                                                        index,
+                                                      );
+                                                    },
+                                                    child: buttonXLoutline(
+                                                      Center(
+                                                        child: Text(
+                                                          'Batal',
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            primary500,
+                                                            'Outfit',
                                                           ),
                                                         ),
-                                                        MediaQuery.of(
-                                                          context,
-                                                        ).size.width,
-                                                        primary500,
                                                       ),
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width,
+                                                      primary500,
                                                     ),
                                                   ),
-                                                  SizedBox(width: size16),
-                                                  Expanded(
-                                                    child: Consumer<RefreshTampilan>(
-                                                      builder:
-                                                          (
-                                                            context,
-                                                            value,
-                                                            child,
-                                                          ) => GestureDetector(
-                                                            onTap: () {
-                                                              pelangganId =
-                                                                  controllerPelangganName
-                                                                      .text;
-                                                              value.namaPelanggan =
-                                                                  controllerPelangganName
-                                                                      .text;
-                                                              Navigator.pop(
-                                                                context,
-                                                              );
-                                                              setState(() {});
-                                                              // initState(); 
-                                                            },
-                                                            child: buttonXL(
-                                                              Center(
-                                                                child: Text(
-                                                                  'Simpan',
-                                                                  style: heading3(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw100,
-                                                                    'Outfit',
-                                                                  ),
+                                                ),
+                                                SizedBox(width: size16),
+                                                Expanded(
+                                                  child: Consumer<RefreshTampilan>(
+                                                    builder:
+                                                        (
+                                                          context,
+                                                          value,
+                                                          child,
+                                                        ) => GestureDetector(
+                                                          onTap: () {
+                                                            pelangganId =
+                                                                controllerPelangganName
+                                                                    .text;
+                                                            value.namaPelanggan =
+                                                                controllerPelangganName
+                                                                    .text;
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            setState(() {});
+                                                            // initState();
+                                                          },
+                                                          child: buttonXL(
+                                                            Center(
+                                                              child: Text(
+                                                                'Simpan',
+                                                                style: heading3(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw100,
+                                                                  'Outfit',
                                                                 ),
                                                               ),
-                                                              MediaQuery.of(
-                                                                context,
-                                                              ).size.width,
                                                             ),
+                                                            MediaQuery.of(
+                                                              context,
+                                                            ).size.width,
                                                           ),
-                                                    ),
+                                                        ),
                                                   ),
-                                                ],
-                                              )
-                                            : SizedBox(),
-                                      ],
-                                    ),
+                                                ),
+                                              ],
+                                            )
+                                          : SizedBox(),
+                                    ],
                                   ),
                                 ),
                               ),
-                           
+                            ),
                           );
                         },
                         child: Container(

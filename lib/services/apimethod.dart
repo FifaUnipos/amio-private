@@ -3470,7 +3470,7 @@ Future getLaporanStok(
       "deviceid": identifier,
       "merchantid": jsonTest,
       "keyword": keyword.toString(),
-      "orderby": orderby.toString(),
+      "order_by": orderby.toString(),
       "export": export,
     },
   );
@@ -5048,10 +5048,9 @@ Future<List<DetailItem>> getDetailPenyesuian(
     body: {"deviceid": identifier, "group_id": groupid},
   );
 
-  log('hello ${response.body}');
 
   if (response.statusCode == 200) {
-    log('Success fetch detail pembelian ${response.body}');
+    debugPrint('Success fetch detail pembelian ${response.body}');
     final decoded = jsonDecode(response.body);
 
     titlePenyesuaianUbah = decoded['data']['title'];
@@ -5094,7 +5093,7 @@ Future<List<ProdukMaterialModel>> getDetailBom(
       tanggalAwalInventoryUbah = decoded['data']['date'] ?? '';
 
       // Mengambil data 'details' dan memetakannya ke model ProdukMaterialModel
-      final List<dynamic> detailListUbah = decoded['data']['details'];
+      final List<dynamic> detailListUbah = decoded['data']['detail'];
 
       // Parsing ke dalam List<ProdukMaterialModel>
       final List<ProdukMaterialModel> result = detailListUbah

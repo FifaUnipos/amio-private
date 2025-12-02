@@ -8182,7 +8182,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                   List<Map<String, dynamic>> convertedOrderInventory =
                       selectedDataPemakaian.values.map((e) {
                         final quantityValue =
-                            double.tryParse(e['qty'].toString())?.toInt() ?? 0;
+                            double.tryParse(e['qty'].toString())?.toDouble() ?? 0;
 
                         // Remove qty, set quantity_needed
                         final newMap = {...e};

@@ -25,7 +25,7 @@ class ProdukMaterialModel {
 
   factory ProdukMaterialModel.fromJson(Map<String, dynamic> json) {
     return ProdukMaterialModel(
-      id: json['inventory_master_id'],
+      id: json['id'],
       inventoryMasterId: json['inventory_master_id'],
       quantityNeeded: json['quantity_needed'],
       unitConversionId: json['unit_conversion_id'] ?? '',

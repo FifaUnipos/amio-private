@@ -83,13 +83,11 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
 
         // Perbarui dataPemakaian dengan data yang sudah difilter
         dataPemakaian = uniqueData;
-        print("dataPemakaian updated: $dataPemakaian");
       });
     } catch (e) {
       print("Error fetching data: $e");
       showSnackbar(context, {"message": e.toString()});
     }
-    setState(() {});
   }
 
   void getDetailData() async {
@@ -115,19 +113,20 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
       qtyControllerMap[id] = TextEditingController(
         text: double.tryParse(item.quantityNeeded)?.toStringAsFixed(0) ?? '',
       );
-
+      // hargaControllerMap[id] = TextEditingController(
+      //   text: double.tryParse(item.)?.toStringAsFixed(0) ?? '',
+      // );
       unitControllerMap[id] = TextEditingController(
-        text: item.unitConversionName ?? '-',
+        text: item.unitConversionName,
       );
-
       selectedDataPemakaian[id] = {
         // "id": item.inventoryMasterId,
         "inventory_master_id": item.inventoryMasterId,
         "unit": item.unitName,
         "name": item.itemName,
-        "category": item.unitConversionName ?? item.unitName,
+        "category": item.unitConversionName,
         "qty": item.quantityNeeded,
-        "unit_conversion_id": item.unitConversionId ?? '',
+        "unit_conversion_id": item.unitConversionId,
         "unit_name": item.unitConversionName,
         "unit_factor": item.unitConversionFactor,
         // "unit_id": item.unitConversionId,
@@ -156,8 +155,6 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     isNotEmpty = true;
     getMasterDataTokoAndUpdateState();
     getDetailData();
@@ -168,15 +165,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
       (index) => TextEditingController(),
     );
     initializeControllers();
-  }
-
-  @override
-  void dispose() {
-    for (var controller in qtyController) {
-      controller.dispose();
-    }
-
-    super.dispose();
+    super.initState();
   }
 
   void initializeControllers() {
@@ -538,8 +527,6 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                             final isSelected = selectedDataPemakaian
                                 .containsKey(productId);
 
-                            // print('data di orderInventory: $data');
-
                             return Container(
                               margin: EdgeInsets.symmetric(vertical: size12),
                               decoration: BoxDecoration(
@@ -689,8 +676,22 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
         SizedBox(height: size16),
         GestureDetector(
           onTap: () {
-            print("Selected Data Pemakaian: $selectedDataPemakaian");
-            print('dataPemakaian: $dataPemakaian');
+            if (selectedDataPemakaian.isEmpty) {
+              selectedDataPemakaian.clear();
+            }
+            qtyController = List.generate(
+              dataPemakaian.length,
+              (index) => TextEditingController(),
+            );
+            // hargaSatuanControllers = List.generate(
+            //   dataPemakaian.length,
+            //   (index) => TextEditingController(),
+            // );
+            // textController = List.generate(
+            //   dataPemakaian.length,
+            //   (index) => TextEditingController(text: '-'),
+            // );
+
             showModalBottom(
               context,
               double.infinity,
@@ -748,10 +749,8 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                                   final id = item['id'];
 
                                                   if (value == true) {
-                                                    // Add item to selectedDataPemakaian with all necessary data
                                                     selectedDataPemakaian[id] = {
-                                                      "id":
-                                                          item['inventory_master_id'],
+                                                      "id": id,
                                                       "inventory_master_id":
                                                           item['inventory_master_id'],
                                                       "name": item['name_item'],
@@ -1354,7 +1353,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                     productMaterialIdUbah,
                     judulPenyesuaian.text,
                     '',
-                    ubahProdukBOMid,
+                    productMaterialIdUbah,
                     convertedOrderInventory,
                   ).then((value) {
                     if (value == '00') {
