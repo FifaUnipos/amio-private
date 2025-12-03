@@ -329,6 +329,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                             //     2.6;
                                             widtValue = 60;
 
+
                                             widthInformation = MediaQuery.of(
                                               context,
                                             ).size.width;

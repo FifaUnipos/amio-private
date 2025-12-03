@@ -106,22 +106,18 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
     // print('detailList length: ${detailList}');
 
     for (var item in detailList) {
-      // print('item.qty = ${item.quantityNeeded}');
+      final String masterId = item.inventoryMasterId; // UUID master dari API
 
-      final id = item.id;
-
-      qtyControllerMap[id] = TextEditingController(
-        text: double.tryParse(item.quantityNeeded)?.toStringAsFixed(0) ?? '',
+      qtyControllerMap[masterId] = TextEditingController(
+        text: double.tryParse(item.quantityNeeded)?.toStringAsFixed(2) ?? '',
       );
-      // hargaControllerMap[id] = TextEditingController(
-      //   text: double.tryParse(item.)?.toStringAsFixed(0) ?? '',
-      // );
-      unitControllerMap[id] = TextEditingController(
+      unitControllerMap[masterId] = TextEditingController(
         text: item.unitConversionName,
       );
-      selectedDataPemakaian[id] = {
-        // "id": item.inventoryMasterId,
-        "inventory_master_id": item.inventoryMasterId,
+
+      selectedDataPemakaian[masterId] = {
+        "bom_detail_id": item.id, // ID detail BOM tetap disimpan
+        "inventory_master_id": masterId, // UUID master = key map
         "unit": item.unitName,
         "name": item.itemName,
         "category": item.unitConversionName,
@@ -129,11 +125,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
         "unit_conversion_id": item.unitConversionId,
         "unit_name": item.unitConversionName,
         "unit_factor": item.unitConversionFactor,
-        // "unit_id": item.unitConversionId,
       };
-
-      print('selectedDataPemakaian: $selectedDataPemakaian');
-      // print('dataPemakaian: $dataPemakaian');
     }
 
     setState(() {
@@ -578,9 +570,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                   Expanded(
                                     flex: 4,
                                     child: Text(
-                                      parseFlexibleNumber(
-                                        data['qty'],
-                                      ).toString(),
+                                      double.tryParse(data['qty']).toString(),
                                       style: heading4(
                                         FontWeight.w400,
                                         bnw900,
@@ -734,6 +724,16 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                 itemCount: dataPemakaian.length,
                                 itemBuilder: (context, index) {
                                   final item = dataPemakaian[index];
+                                  final String key = item['id'];
+                                  final bool isSelected = selectedDataPemakaian
+                                      .containsKey(key);
+
+                                  // print('item master id: $key');
+                                  // print('isSelected: $isSelected');
+                                  // print(
+                                  //   'selectedDataPemakaian keys: ${selectedDataPemakaian.keys}',
+                                  // );
+
                                   return StatefulBuilder(
                                     builder: (context, setState) {
                                       return Column(
@@ -743,41 +743,43 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                             leading: Checkbox(
                                               activeColor: primary500,
                                               value: selectedDataPemakaian
-                                                  .containsKey(item['id']),
+                                                  .containsKey(key),
                                               onChanged: (bool? value) {
                                                 setState(() {
-                                                  final id = item['id'];
-
                                                   if (value == true) {
-                                                    selectedDataPemakaian[id] = {
-                                                      "id": id,
-                                                      "inventory_master_id":
-                                                          item['inventory_master_id'],
-                                                      "name": item['name_item'],
-                                                      "category":
-                                                          item['category'],
-                                                      "unit": item['name_item'],
-                                                      "qty":
-                                                          0, // Default value, should be updated later
-                                                      "unit_conversion_id":
-                                                          item['unit_conversion_id'],
-                                                      "unit_name":
-                                                          item['unit_name'],
-                                                      "price": item['price'],
-                                                    };
-                                                  } else {
-                                                    // Remove item from selectedDataPemakaian and orderInventory
-                                                    selectedDataPemakaian
-                                                        .remove(id);
-                                                    orderInventory.removeWhere(
-                                                      (inv) =>
-                                                          inv['inventory_master_id'] ==
-                                                          id,
-                                                    );
+                                                    // Jika belum ada, tambah item ke selectedDataPemakaian
+                                                    if (value == true) {
+                                                      selectedDataPemakaian[key] = {
+                                                        "id": item['id'],
+                                                        "inventory_master_id":
+                                                            key,
+                                                        "name":
+                                                            item['name_item'],
+                                                        "category":
+                                                            item['category'] ??
+                                                            '',
+                                                        "unit":
+                                                            item['name_item'],
+                                                        "qty": 0,
+                                                        "unit_conversion_id":
+                                                            item['unit_conversion_id'] ??
+                                                            '',
+                                                        "unit_name":
+                                                            item['unit_name'] ??
+                                                            '',
+                                                        "price":
+                                                            item['price'] ?? 0,
+                                                      };
+                                                    } else {
+                                                      selectedDataPemakaian
+                                                          .remove(key);
+                                                      orderInventory.removeWhere(
+                                                        (inv) =>
+                                                            inv['inventory_master_id'] ==
+                                                            key,
+                                                      );
+                                                    }
                                                   }
-
-                                                  // This is important to refresh the state
-                                                  setState(() {});
                                                 });
                                               },
                                             ),
@@ -1217,6 +1219,13 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                             child: GestureDetector(
                               onTap: () {
                                 // 1. Simpan semua item yang dicentang ke orderInventory
+                                // Hapus item dari orderInventory yang sudah tidak dicentang
+                                orderInventory.removeWhere((item) {
+                                  final id = item['inventory_master_id'];
+                                  return !selectedDataPemakaian.containsKey(id);
+                                });
+
+                                // Tambahkan/Update item yang dicentang
                                 for (var entry
                                     in selectedDataPemakaian.entries) {
                                   final newItem = entry.value;
@@ -1353,7 +1362,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                     productMaterialIdUbah,
                     judulPenyesuaian.text,
                     '',
-                    productMaterialIdUbah,
+                    ubahProdukBOMid,
                     convertedOrderInventory,
                   ).then((value) {
                     if (value == '00') {
@@ -1550,7 +1559,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
     List<String> merchid,
     TextEditingController controller,
   ) async {
-    final products = await getProduct(context, token, '', merchid, 'asc');
+    final products = await getProduct(context, token, '', merchid, '');
 
     if (products.isNotEmpty) {
       showModalBottomSheet(
@@ -1574,7 +1583,6 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                   subtitle: Text(product.typeproducts?.toString() ?? ''),
                   onTap: () {
                     // Isi controller dan tutup sheet
-                    // print(product.productid);
                     controller.text = product.productid ?? '';
                     tambahProdukCon.text = product.name ?? '';
 
@@ -1583,6 +1591,7 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                     ubahJudulProdukBOM.text = product.name ?? '';
                     produkNameBom = product.name ?? '';
                     setState(() {});
+                    // print(product.productid);
                     Navigator.pop(context);
                   },
                 );

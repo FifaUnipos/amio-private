@@ -146,10 +146,10 @@ class _InventoriPageTestState extends State<UnitConvertionPage>
   }
 
   void fetchBOMSingle(id) async {
-    final details = await getSingleBOM(
+    final details = await getDetailBom(
       context,
       widget.token,
-      '',
+      // '',
       id,
     ).then(
       (value) {

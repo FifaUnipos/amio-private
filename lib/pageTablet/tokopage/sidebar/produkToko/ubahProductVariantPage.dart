@@ -346,18 +346,18 @@ class _UbahProductVariantPageState extends State<UbahProductVariantPage> {
                 onTap: () {
                   List<Map<String, dynamic>> arrayResult = generateArrayData();
                   print(arrayResult);
-                  // createProductVariant(
-                  //   context,
-                  //   widget.token,
-                  //   widget.merchantId ?? '',
-                  //   productIdVariant,
-                  //   arrayResult,
-                  // ).then((value) {
-                  //   if (value == "00") {
-                  //     widget.pageController.jumpToPage(0);
-                  //     productIdVariant = '';
-                  //   }
-                  // });
+                  createProductVariant(
+                    context,
+                    widget.token,
+                    widget.merchantId ?? '',
+                    productIdVariant,
+                    arrayResult,
+                  ).then((value) {
+                    if (value == "00") {
+                      widget.pageController.jumpToPage(0);
+                      productIdVariant = '';
+                    }
+                  });
                 },
                 child: buttonXL(
                   Center(

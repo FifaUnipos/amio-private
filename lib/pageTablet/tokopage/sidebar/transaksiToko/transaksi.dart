@@ -5913,6 +5913,12 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                       map1,
                                                                                     );
 
+                                                                                    conCatatan.add(
+                                                                                      TextEditingController(
+                                                                                        text: conCatatanPreview.text,
+                                                                                      ),
+                                                                                    );
+
                                                                                     String name = datasTransaksi![index].name.toString().trim();
                                                                                     String productid = datasTransaksi![index].productid.toString().trim();
                                                                                     String image = datasTransaksi![index].product_image.toString().trim();
@@ -6107,52 +6113,56 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     () {},
                                                                                   ); // Memperbarui tampilan
                                                                                 },
-                                                                                child: buttonL(
-                                                                                  Center(
-                                                                                    child: isOnlineAddedList[index]
-                                                                                        ? Text(
-                                                                                            'Hapus',
-                                                                                            style: heading3(
-                                                                                              FontWeight.w600,
-                                                                                              bnw900,
-                                                                                              'Outfit',
-                                                                                            ),
-                                                                                          )
-                                                                                        : Column(
-                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                            children: [
-                                                                                              datasTransaksi![index].discount ==
-                                                                                                      0
-                                                                                                  ? Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_online_shop,
-                                                                                                      ),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        bnw900,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    )
-                                                                                                  : Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_online_shop,
-                                                                                                      ),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        danger500,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    ),
-                                                                                            ],
-                                                                                          ),
-                                                                                  ),
-                                                                                  bnw100,
-                                                                                  bnw900,
-                                                                                ),
+                                                                                child:
+                                                                                    datasTransaksi![index].price_online_shop ==
+                                                                                        0
+                                                                                    ? SizedBox()
+                                                                                    : buttonL(
+                                                                                        Center(
+                                                                                          child: isOnlineAddedList[index]
+                                                                                              ? Text(
+                                                                                                  'Hapus',
+                                                                                                  style: heading3(
+                                                                                                    FontWeight.w600,
+                                                                                                    bnw900,
+                                                                                                    'Outfit',
+                                                                                                  ),
+                                                                                                )
+                                                                                              : Column(
+                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                  children: [
+                                                                                                    datasTransaksi![index].discount ==
+                                                                                                            0
+                                                                                                        ? Text(
+                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                              datasTransaksi![index].price_online_shop,
+                                                                                                            ),
+                                                                                                            maxLines: 3,
+                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                            style: heading4(
+                                                                                                              FontWeight.w400,
+                                                                                                              bnw900,
+                                                                                                              'Outfit',
+                                                                                                            ),
+                                                                                                          )
+                                                                                                        : Text(
+                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                              datasTransaksi![index].price_online_shop,
+                                                                                                            ),
+                                                                                                            maxLines: 3,
+                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                            style: heading4(
+                                                                                                              FontWeight.w400,
+                                                                                                              danger500,
+                                                                                                              'Outfit',
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                        ),
+                                                                                        bnw100,
+                                                                                        bnw900,
+                                                                                      ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -6422,6 +6432,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                           SizedBox(
                                                             height: size16,
                                                           ),
+
                                                           // SizedBox(
                                                           //   child: FutureBuilder(
                                                           //     future:
@@ -7196,7 +7207,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                           //     },
                                                           //   ),
                                                           // ),
-                                                   
                                                         ],
                                                       ),
                                                     ),

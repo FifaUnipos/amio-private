@@ -190,9 +190,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   }
 
   Future<dynamic> getUnit(List<String> value) async {
-    log('getUnit dipanggil');
+    // log('getUnit dipanggil');
     final result = await getUnitConvertion(widget.token, '', '', '');
-    log('Hasil getUnitConvertion = $result');
+    // log('Hasil getUnitConvertion = $result');
     return datasProdukUnit = result;
   }
 
@@ -5895,7 +5895,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             backgroundColor: primary500,
                             onRefresh: () async {
                               setState(() {});
-                              // initState();
+                              initState();
                             },
                             child: ListView.builder(
                               // physics: BouncingScrollPhysics(),
@@ -6062,37 +6062,53 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                     SizedBox(height: size24),
                                                     GestureDetector(
                                                       onTap: () async {
-                                                        Navigator.pop(context);
+                                                        setState(() {
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
 
-                                                        productMaterialIdUbah =
+                                                          productMaterialIdUbah =
+                                                              datasProdukBOM![index]
+                                                                  .id
+                                                                  .toString();
+
+                                                          print(
+                                                            productMaterialIdUbah,
+                                                          );
+
+                                                          // fetchBOMSingle(
+                                                          //   datasProdukBOM![index]
+                                                          //       .id
+                                                          //       .toString(),
+                                                          // );
+
+                                                          getSingleBOMSelected(
+                                                            context,
+                                                            widget.token,
+                                                            '',
                                                             datasProdukBOM![index]
                                                                 .id
-                                                                .toString();
+                                                                .toString(),
+                                                          );
 
-                                                        print(
-                                                          productMaterialIdUbah,
-                                                        );
-
-                                                        // fetchBOMSingle(
-                                                        //   datasProdukBOM![index]
-                                                        //       .id
-                                                        //       .toString(),
-                                                        // );
-
-                                                        getSingleBOM(
-                                                          context,
-                                                          widget.token,
-                                                          '',
-                                                          productMaterialIdUbah,
-                                                        ).then((value) {
-                                                          Future.delayed(
-                                                            Duration(
-                                                              seconds: 1,
-                                                            ),
+                                                          getDetailBom(
+                                                            context,
+                                                            widget.token,
+                                                            datasProdukBOM![index]
+                                                                    .id ??
+                                                                '',
                                                           ).then((value) {
-                                                            _pageController
-                                                                .jumpToPage(9);
-                                                            initState();
+                                                            Future.delayed(
+                                                              Duration(
+                                                                seconds: 1,
+                                                              ),
+                                                            ).then((value) {
+                                                              _pageController
+                                                                  .jumpToPage(
+                                                                    9,
+                                                                  );
+                                                              initState();
+                                                            });
                                                           });
                                                         });
                                                       },
@@ -7107,7 +7123,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
-                                print('hello');
+                                // print('hello');
                                 showProductSelector(
                                   context,
                                   widget.token,
@@ -8145,17 +8161,11 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                     widget.token,
                     '',
                     judulPembelian.text,
-                    searchProductID.text,
+                    ubahProdukBOMid,
                     convertedOrderInventory,
                   ).then((value) {
                     if (value == '00') {
                       // _pageController.jumpToPage(0);
-                      convertedOrderInventory.clear();
-                      judulPembelian.clear();
-                      searchProductID.clear();
-                      listProduct.clear();
-                      tambahProdukCon.clear();
-                      orderInventory.clear();
 
                       setState(() {});
                       initState();
@@ -8182,7 +8192,8 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                   List<Map<String, dynamic>> convertedOrderInventory =
                       selectedDataPemakaian.values.map((e) {
                         final quantityValue =
-                            double.tryParse(e['qty'].toString())?.toDouble() ?? 0;
+                            double.tryParse(e['qty'].toString())?.toDouble() ??
+                            0;
 
                         // Remove qty, set quantity_needed
                         final newMap = {...e};
@@ -8197,18 +8208,23 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                     widget.token,
                     '',
                     judulPembelian.text,
-                    searchProductID.text,
+                    ubahProdukBOMid,
                     convertedOrderInventory,
                   ).then((value) {
                     if (value == '00') {
                       _pageController.jumpToPage(0);
                       convertedOrderInventory.clear();
-
+                      judulPembelian.clear();
+                      searchProductID.clear();
+                      listProduct.clear();
+                      tambahProdukCon.clear();
+                      orderInventory.clear();
+                      ubahProdukBOMid = '';
                       setState(() {});
                       initState();
                     }
                   });
-                  print(convertedOrderInventory);
+                  print(searchProductID.text);
                 },
                 child: buttonXL(
                   Center(
