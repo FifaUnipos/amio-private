@@ -326,12 +326,12 @@ Future tambahKategoriForm(context, name, token) async {
       closeLoading(context);
       // Navigator.pop(context);
 
-      // showSnackbar(context, jsonResponse);
+      showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
       closeLoading(context);
       // Navigator.pop(context);
-      // showSnackbar(context, jsonResponse);
+      showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
   } catch (e) {
@@ -2684,7 +2684,7 @@ Future saveTransaction(
 
   // print('🧾 Response Save Transaction: ${response.body}');
 
-  log("Payload ke server: ${json.encode(bodyJson)}");
+  // log("Payload ke server: ${json.encode(bodyJson)}");
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
@@ -2694,6 +2694,7 @@ Future saveTransaction(
     showSnackbar(context, jsonResponse);
     closeLoading(context);
   }
+  return jsonResponse['rc'];
 }
 
 Future deletePesanan(BuildContext context, token, transactionid) async {

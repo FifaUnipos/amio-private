@@ -570,7 +570,9 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                   Expanded(
                                     flex: 4,
                                     child: Text(
-                                      double.tryParse(data['qty']).toString(),
+                                      double.tryParse(
+                                        data['qty'] ?? 0.0,
+                                      ).toString(),
                                       style: heading4(
                                         FontWeight.w400,
                                         bnw900,
@@ -631,17 +633,28 @@ class _UbahPenyesuaianTokoState extends State<UbahProdukMaterial> {
                                   GestureDetector(
                                     onTap: () {
                                       var removedItem = orderInventory[index];
-                                      var itemId =
-                                          removedItem['inventory_master_id'];
+                                      var itemId = removedItem['bom_detail_id'];
+                                      print('orderInventory $orderInventory');
+                                      print(
+                                        'selectedDataPemakaian $selectedDataPemakaian',
+                                      );
+                                      print('itemId $itemId');
 
-                                      selectedDataPemakaian.remove(itemId);
                                       orderInventory.removeAt(index);
+                                      selectedDataPemakaian.removeWhere((
+                                        key,
+                                        value,
+                                      ) {
+                                        return value['bom_detail_id'] == itemId;
+                                      });
 
-                                      // Optional: hapus dari dataPemakaian kalau kamu ingin menghilangkan total
-                                      // dataPemakaian.removeWhere((item) => item['inventory_master_id'] == itemId);
+                                      print(
+                                        'Updated selectedDataPemakaian: $selectedDataPemakaian',
+                                      );
 
                                       setState(() {});
                                     },
+
                                     child: Icon(
                                       PhosphorIcons.x_fill,
                                       color: red500,

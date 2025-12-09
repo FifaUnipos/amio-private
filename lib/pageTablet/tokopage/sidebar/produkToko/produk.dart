@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produkVariantPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/ubahProductVariantPage.dart';
 import 'package:unipos_app_335/services/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
@@ -206,12 +207,6 @@ class _ProdukTokoState extends State<ProdukToko> {
   }
 
   Future<void> uploadFile(BuildContext context) async {
-    if (filePath == null) {
-      final rootContext = Navigator.of(context, rootNavigator: true).context;
-      showSnackBarComponent(rootContext, '⚠️ Pilih file terlebih dahulu', '99');
-      return;
-    }
-
     try {
       if (!mounted) return;
       setState(() => isUploading = true);
@@ -1387,6 +1382,65 @@ class _ProdukTokoState extends State<ProdukToko> {
                                     ),
                                   ),
                                   SizedBox(height: size16),
+                                  Text(
+                                    'Berikut adalah contoh data untuk diupload.',
+                                    style: heading4(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size16),
+                                  Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          final url = Uri.parse(
+                                            'https://docs.google.com/spreadsheets/d/1ZZQf5wBIBwS2SVRC21eRD20yBxWfmxMO/edit?usp=sharing&ouid=113337689543111418112&rtpof=true&sd=true',
+                                          );
+                                          launchUrl(url);
+                                        },
+                                        child: buttonXLoutline(
+                                          Center(
+                                            child: Text(
+                                              'Download Excel',
+                                              style: heading4(
+                                                FontWeight.w600,
+                                                primary500,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                          double.infinity,
+                                          primary500,
+                                        ),
+                                      ),
+                                      SizedBox(width: size16),
+                                      GestureDetector(
+                                        onTap: () {
+                                          final url = Uri.parse(
+                                            'https://drive.google.com/file/d/1BHhWQRT3QrlPazCB-YJwTwlts-H31kJd/view?usp=sharing',
+                                          );
+                                          launchUrl(url);
+                                        },
+                                        child: buttonXLoutline(
+                                          Center(
+                                            child: Text(
+                                              'Download CSV',
+                                              style: heading4(
+                                                FontWeight.w600,
+                                                primary500,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                          double.infinity,
+                                          primary500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: size16),
                                   Text('Pilih file dari perangkat Anda:'),
                                   SizedBox(height: size12),
                                   Row(
@@ -1442,7 +1496,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               child: Text(
                                                 'Batal',
                                                 style: heading3(
-                                                  FontWeight.w500,
+                                                  FontWeight.w600,
                                                   primary500,
                                                   'Outfit',
                                                 ),
@@ -1458,13 +1512,30 @@ class _ProdukTokoState extends State<ProdukToko> {
                                           onTap: isUploading
                                               ? null
                                               : () async {
+                                                  if (filePath == null) {
+                                                    // Navigator.pop(context);
+
+                                                    final rootContext =
+                                                        Navigator.of(
+                                                          context,
+                                                          rootNavigator: true,
+                                                        ).context;
+                                                    showSnackBarComponent(
+                                                      rootContext,
+                                                      '⚠️ Pilih file terlebih dahulu',
+                                                      '05',
+                                                    );
+                                                    return;
+                                                  }
+
                                                   await uploadFile(context);
                                                   setState(() {
                                                     print(
                                                       'isUploading: $isUploading',
                                                     );
-                                                  }); // refresh tampilan
+                                                  });
                                                 },
+
                                           child: buttonL(
                                             Row(
                                               mainAxisAlignment:
@@ -1480,7 +1551,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                       ? 'Mengunggah...'
                                                       : 'Upload',
                                                   style: heading3(
-                                                    FontWeight.w500,
+                                                    FontWeight.w600,
                                                     bnw100,
                                                     'Outfit',
                                                   ),
@@ -3799,6 +3870,7 @@ class _ProdukTokoState extends State<ProdukToko> {
   }
 
   ubahHapusKategori(product) {
+    final outerContext = context;
     showModalBottom(
       context,
       MediaQuery.of(context).size.height,
@@ -4047,7 +4119,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  whenLoading(context);
+                                  // whenLoading(context);
                                   setState(() {
                                     hapusKategoriForm(
                                       context,
@@ -4055,13 +4127,21 @@ class _ProdukTokoState extends State<ProdukToko> {
                                       product['kodeproduct'],
                                     ).then((value) {
                                       if (value == '00') {
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                        kategoriListForm(context, false);
+                                        // Navigator.pop(context);
+                                        Navigator.pop(outerContext);
+                                        // kategoriListForm(context, false);
                                         showSnackBarComponent(
                                           context,
                                           'Berhasil hapus kategori',
                                           '00',
+                                        );
+                                        _getProductList();
+                                      } else {
+                                        Navigator.pop(outerContext);
+                                        showSnackBarComponent(
+                                          context,
+                                          'Kategori tidak dapat dihapus',
+                                          '05',
                                         );
                                       }
                                     });

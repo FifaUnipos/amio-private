@@ -27,6 +27,7 @@ class ProductVariantPage extends StatefulWidget {
 class _ProductVariantPageState extends State<ProductVariantPage> {
   // List to hold the categories and variants
   List<Map<String, dynamic>> categories = [];
+  int? expandedIndex;
 
   // Function to add a new category
   void _addCategory() {
@@ -216,181 +217,133 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
         ),
         SizedBox(height: size16),
         Expanded(
-          child: ListView.builder(
-            itemCount: categories.length,
-            itemBuilder: (context, categoryIndex) {
-              final category = categories[categoryIndex];
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+          child: categories.isEmpty
+              ? const Center(
+                  child: Text(
+                    "Belum ada product variant",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                  child: ExpansionTile(
-                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                    childrenPadding: EdgeInsets.all(size12),
-                    // tilePadding: EdgeInsets.all(size12),
-                    title: Text(
-                      "Kategori Variant #${categoryIndex + 1}",
-                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(PhosphorIcons.trash_fill),
-                      onPressed: () => _removeCategory(categoryIndex),
-                    ),
-                    children: [
-                      // Using the fieldAddProduk function for category input fields
-                      fieldAddProduk(
-                        'Judul Kategori',
-                        'Takaran Gula',
-                        category['controllerNameEdit'],
-                        TextInputType.text,
-                        (value) {
-                          setState(() {
-                            category['categoryName'] =
-                                value; // Update category name
-                          });
-                        },
+                )
+              : ListView.builder(
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    var category = categories[index];
+                    bool isExpanded = expandedIndex == index;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
                       ),
-                      SizedBox(height: size12),
-                      fieldAddProduk(
-                        'Maximum Select',
-                        '1',
-                        category['controllerMaxSelect'],
-                        TextInputType.number,
-                        (value) {
-                          setState(() {
-                            category['maxSelect'] =
-                                int.tryParse(value) ?? 1; // Update maxSelect
-                          });
-                        },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      Column(
+                      child: Column(
                         children: [
-                          SwitchListTile(
-                            activeColor: primary500,
+                          ListTile(
                             title: Text(
-                              "Tampilkan Di Kasir",
-                              style: body1(FontWeight.w500, bnw900, 'Outfit'),
+                              "Kategori Variant #${index + 1}",
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
-                            value: category['is_active'],
-                            onChanged: (value) {
-                              setState(() {
-                                category['is_active'] = value;
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            activeColor: primary500,
-                            title: Text(
-                              "Wajib Diisi",
-                              style: body1(FontWeight.w500, bnw900, 'Outfit'),
-                            ),
-                            value: category['isRequired'],
-                            onChanged: (value) {
-                              setState(() {
-                                category['isRequired'] = value;
-                              });
-                            },
-                          ),
-                          SizedBox(height: size12),
-                        ],
-                      ),
-                      Divider(),
-                      Text("Variants"),
-                      SizedBox(height: size12),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics:
-                            NeverScrollableScrollPhysics(), // Prevent double scroll
-                        itemCount: category['variants'].length,
-                        itemBuilder: (context, variantIndex) {
-                          final variant = category['variants'][variantIndex];
-                          return ListTile(
-                            title: fieldAddProduk(
-                              'Nama Varian  ',
-                              'Takran Gula 1',
-                              variant['controllerVariantName'],
-                              TextInputType.text,
-                              (value) {
-                                setState(() {
-                                  variant['variantName'] =
-                                      value; // Update variant name
-                                });
-                              },
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                SizedBox(height: size12),
-                                fieldAddProduk(
-                                  'Harga Varian',
-                                  '5.000',
-                                  variant['controllerVariantPrice'],
-                                  TextInputType.number,
-                                  (value) {
-                                    setState(() {
-                                      formatInputRp(
-                                        variant['controllerVariantPrice'],
-                                        value,
-                                      ); // Format real-time
-                                      String cleanValue = value.replaceAll(
-                                        '.',
-                                        '',
-                                      ); // Bersihkan untuk simpan nilai asli
-                                      variant['price'] =
-                                          double.tryParse(cleanValue) ?? 0.0;
-                                    });
-                                  },
+                                Icon(
+                                  isExpanded
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
                                 ),
-                                SwitchListTile(
-                                  activeColor: primary500,
-                                  title: Text("Tampilkan di kasir"),
-                                  value: variant['displayInCasir'],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      variant['displayInCasir'] = value;
-                                    });
-                                  },
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () => _removeCategory(index),
+                                  child: Icon(Icons.close, color: danger500),
                                 ),
                               ],
                             ),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                _removeVariant(categoryIndex, variantIndex);
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                      GestureDetector(
-                        onTap: () => _addVariant(categoryIndex),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: buttonXLoutline(
-                            Center(
-                              child: Text(
-                                "Tambah Variant",
-                                style: heading3(
-                                  FontWeight.w600,
-                                  primary600,
-                                  'Outfit',
-                                ),
+                            onTap: () {
+                              setState(() {
+                                expandedIndex = isExpanded ? null : index;
+                              });
+                            },
+                          ),
+
+                          // 🔹 Expanded Body
+                          if (isExpanded)
+                            Padding(
+                              padding: EdgeInsets.all(size12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(),
+                                  _buildTextField(
+                                    label: "Judul Kategori *",
+                                    initialValue:
+                                        category['categoryName'] ?? '',
+                                    hint: "Contoh: Takaran Gula",
+                                    onChanged: (val) =>
+                                        category['categoryName'] = val,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildTextField(
+                                    label: "Maximum Select *",
+                                    initialValue: '1',
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (val) =>
+                                        category['controllerMaxSelect'] =
+                                            int.tryParse(val) ?? 1,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildSwitch(
+                                    label: "Tampilkan di kasir *",
+                                    value: category['is_active'],
+
+                                    onChanged: (val) => setState(
+                                      () => category['is_active'] = val,
+                                    ),
+                                  ),
+                                  _buildSwitch(
+                                    label: "Wajib diisikan *",
+                                    value: category['isRequired'],
+                                    onChanged: (val) => setState(
+                                      () => category['isRequired'] = val,
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    "Variant",
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // 🔹 Daftar Varian
+                                  for (
+                                    int v = 0;
+                                    v < category['variants'].length;
+                                    v++
+                                  )
+                                    _buildVariantCard(index, v),
+
+                                  const SizedBox(height: 8),
+                                  OutlinedButton(
+                                    onPressed: () => _addVariant(index),
+                                    child: const Text("Tambah Variant"),
+                                  ),
+                                ],
                               ),
                             ),
-                            double.infinity,
-                            primary500,
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
         SizedBox(height: size16),
         Row(
@@ -443,6 +396,134 @@ class _ProductVariantPageState extends State<ProductVariantPage> {
           ],
         ),
       ],
+    );
+  }
+
+  // 🔹 Helper Widget Builders
+  Widget _buildTextField({
+    required String label,
+    String? initialValue,
+    String? hint,
+    TextInputType keyboardType = TextInputType.text,
+    required Function(String) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: heading3(FontWeight.w500, bnw900, 'Outfit')),
+        const SizedBox(height: 6),
+        TextFormField(
+          initialValue: initialValue,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: const OutlineInputBorder(),
+          ),
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSwitch({
+    required String label,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Row(
+      children: [
+        Text(label, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+        const Spacer(),
+        Switch(activeColor: primary500, value: value, onChanged: onChanged),
+      ],
+    );
+  }
+
+  Widget _buildVariantCard(int categoryIndex, int variantIndex) {
+    var variant = categories[categoryIndex]['variants'][variantIndex];
+    return Card(
+      color: bnw100,
+      elevation: 0,
+      child: Padding(
+        padding: EdgeInsets.all(size12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Nama Varian *",
+                  style: heading3(FontWeight.w500, bnw900, 'Outfit'),
+                ),
+                GestureDetector(
+                  onTap: () => _removeVariant(categoryIndex, variantIndex),
+                  child: Text(
+                    "Hapus",
+                    style: TextStyle(
+                      color: danger500,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: variant['controllerVariantName'],
+              decoration: const InputDecoration(
+                hintText: "Contoh: Roti Biasa",
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (val) => variant['variantName'] = val,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: variant['controllerVariantPrice'],
+
+                    decoration: const InputDecoration(
+                      labelText: "Harga *",
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (val) {
+                      formatInputRp(variant['controllerVariantPrice'], val);
+
+                      // Parse nilai bersih (tanpa titik/pemisah ribuan)
+                      String cleanValue = val.replaceAll(RegExp(r'[^0-9]'), '');
+                      double parsedPrice = double.tryParse(cleanValue) ?? 0.0;
+                      variant['price'] = parsedPrice;
+                    },
+                  ),
+                ),
+                // const SizedBox(width: 8),
+                // Expanded(
+                //   child: TextFormField(
+                //     decoration: const InputDecoration(
+                //       labelText: "Harga Online *",
+                //       border: OutlineInputBorder(),
+                //     ),
+                //     keyboardType: TextInputType.number,
+                //     onChanged: (val) {
+                //       formatInputRp(variant['controllerVariantPrice'], val);
+                //       variant['priceOnline'] = double.tryParse(val) ?? 0.0;
+                //     },
+                //   ),
+                // ),
+              ],
+            ),
+            _buildSwitch(
+              label: "Tampilkan di kasir *",
+              value: variant['displayInCasir'],
+              onChanged: (val) =>
+                  setState(() => variant['displayInCasir'] = val),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

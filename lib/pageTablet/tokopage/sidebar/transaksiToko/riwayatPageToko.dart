@@ -329,7 +329,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                             //     2.6;
                                             widtValue = 60;
 
-
                                             widthInformation = MediaQuery.of(
                                               context,
                                             ).size.width;
@@ -753,7 +752,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       // Menyusun nama kategori dan nama produk beserta harga
                                                       for (var product
                                                           in variant['variant_products']) {
-                                                        // Format the price using FormatCurrency.convertToIdr
+                                                        // Format harga menggunakan FormatCurrency.convertToIdr
                                                         var formattedPrice =
                                                             FormatCurrency.convertToIdr(
                                                               double.tryParse(
@@ -763,8 +762,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                                   0.0,
                                                             );
 
+                                                        // Menambahkan varian dalam format rapi
                                                         variantInfo.add(
-                                                          '${variant['variant_category_title']} (${product['variant_product_name']}) - $formattedPrice',
+                                                          '+ ${variant['variant_category_title']} (${product['variant_product_name']})\n'
+                                                          '- $formattedPrice \n',
                                                         );
                                                       }
                                                     }
