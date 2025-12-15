@@ -15,7 +15,7 @@ class KulasedayaMember {
     return KulasedayaMember(
       memberCode: json['member_code'],
       nama: json['nama'],
-      isBinded: json['is_binded'],
+      isBinded: json['status'],
       saldo: json['saldo'],
     );
   }

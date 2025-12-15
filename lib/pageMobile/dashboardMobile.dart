@@ -876,7 +876,8 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                       children: [
                         FutureBuilder<List<KulasedayaBinding>>(
                           future: bindingKulasedaya(widget.token),
-                          builder: (context, snapshot) {
+                          builder: (context, snapshot)
+                           {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return const CircularProgressIndicator();

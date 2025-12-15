@@ -522,76 +522,84 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                         ),
                         child: Column(
                           children: [
-                            Container(
-                              padding: EdgeInsets.all(size12),
-                              decoration: BoxDecoration(
-                                color: primary100,
-                                borderRadius: BorderRadius.circular(size16),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SizedBox(
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                              'assets/images/fifapaylogo.png',
-                                              height: 40,
-                                            ),
-                                            SizedBox(width: size12),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'FifaPay',
-                                                  style: heading2(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                Text(
-                                                  statusKulasedaya == 'true'
-                                                      ? 'Terhubung'
-                                                      : 'Belum Terhubung',
-                                                  style: body1(
-                                                    FontWeight.w300,
-                                                    statusKulasedaya == 'true'
-                                                        ? primary500
-                                                        : red500,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        FormatCurrency.convertToIdr(
-                                          int.parse(saldoKulasedaya ?? '0'),
-                                        ),
-                                        style: heading1(
-                                          FontWeight.w700,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ],
+                            FutureBuilder<List<KulasedayaBinding>>(
+                              future: bindingKulasedaya(widget.token),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                }
+                                if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return const Text('Gagal memuat data');
+                                }
+
+                                final data = snapshot.data!.first;
+
+                                return Container(
+                                  padding: EdgeInsets.all(size12),
+                                  decoration: BoxDecoration(
+                                    color: primary100,
+                                    borderRadius: BorderRadius.circular(size16),
                                   ),
-                                  statusKulasedaya == 'true'
-                                      ? SizedBox()
-                                      : SizedBox(height: size16),
-                                  statusKulasedaya == 'true'
-                                      ? SizedBox()
-                                      : GestureDetector(
-                                          onTap: () {
-                                            _pageController.jumpToPage(1);
-                                          },
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/fifapaylogo.png',
+                                                height: 40,
+                                              ),
+                                              SizedBox(width: size12),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'FifaPay',
+                                                    style: heading2(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    data.status
+                                                        ? 'Terhubung'
+                                                        : 'Belum Terhubung',
+                                                    style: body1(
+                                                      FontWeight.w300,
+                                                      data.status
+                                                          ? primary500
+                                                          : red500,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            FormatCurrency.convertToIdr(
+                                              int.tryParse(data.saldo) ?? 0,
+                                            ),
+                                            style: heading1(
+                                              FontWeight.w700,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (!data.status) ...[
+                                        SizedBox(height: size16),
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _pageController.jumpToPage(1),
                                           child: SizedBox(
                                             width: double.infinity,
                                             child: buttonXL(
@@ -609,8 +617,11 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                             ),
                                           ),
                                         ),
-                                ],
-                              ),
+                                      ],
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                             FutureBuilder(
                               future: dashboard(identifier, widget.token),

@@ -210,6 +210,7 @@ class _TransactionPageState extends State<TransactionPage>
   late Future<List<PaymentMethod>> futurePaymentMethodsDebit;
   late Future<List<PaymentMethod>> futurePaymentMethodsKredit;
   late Future<List<PaymentMethod>> futurePaymentMethodsEWallet;
+  late Future<List<PaymentMethod>> futurePaymentMethodsLainya;
   String idpaymentmethode = '';
 
   @override
@@ -222,6 +223,7 @@ class _TransactionPageState extends State<TransactionPage>
     futurePaymentMethodsDebit = fetchPaymentMethods(widget.token, 'Debit');
     futurePaymentMethodsKredit = fetchPaymentMethods(widget.token, 'Kredit');
     futurePaymentMethodsEWallet = fetchPaymentMethods(widget.token, 'EWallet');
+    futurePaymentMethodsLainya = fetchPaymentMethods(widget.token, 'Other');
 
     if (isTagihan == true) {
       isTagihan = false;
@@ -1609,10 +1611,15 @@ class _TransactionPageState extends State<TransactionPage>
       PhosphorIcons.cardholder_fill,
     ),
     MyObject(
-      'Fifapay Koin',
-      'Pilih daftar pelanggan',
-      PhosphorIcons.coins_fill,
+      'Lainya',
+      'Pilih metode pembayaran lainya',
+      PhosphorIcons.dots_three_circle_fill,
     ),
+    // MyObject(
+    //   'Fifapay Koin',
+    //   'Pilih daftar pelanggan',
+    //   PhosphorIcons.coins_fill,
+    // ),
   ];
 
   int selectedIndex = 0;
@@ -2793,7 +2800,8 @@ class _TransactionPageState extends State<TransactionPage>
                             dompetDigital(context),
                             kartuKredit(context),
                             kartuDedit(context),
-                            fifaKoin(context),
+                            pembayaranLainya(context),
+                            // fifaKoin(context),
                           ],
                         ),
                       ),
@@ -2808,104 +2816,315 @@ class _TransactionPageState extends State<TransactionPage>
     );
   }
 
-  fifaKoin(BuildContext context) {
-    pinController.text = totalTransaksi.toString();
+  // fifaKoin(BuildContext context) {
+  //   pinController.text = totalTransaksi.toString();
+  //   return StatefulBuilder(
+  //     builder: (context, setState) => Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Pilih Pembeli',
+  //           style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+  //         ),
+  //         SizedBox(height: size16),
+  //         Consumer<RefreshTampilan>(
+  //           builder: (context, value, child) => SizedBox(
+  //             width: double.infinity,
+  //             child: GestureDetector(
+  //               onTap: () {
+  //                 pilihPembeliShowBottom(context, 6);
+  //               },
+  //               child: buttonL(
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   crossAxisAlignment: CrossAxisAlignment.center,
+  //                   children: [
+  //                     Icon(
+  //                       value.namaPelanggan == ''
+  //                           ? PhosphorIcons.users_three
+  //                           : PhosphorIcons.users_three_fill,
+  //                       color: value.namaPelanggan == '' ? bnw900 : primary500,
+  //                       size: size24,
+  //                     ),
+  //                     SizedBox(width: size16),
+  //                     value.namaPelanggan != ''
+  //                         ? Expanded(
+  //                             child: SizedBox(
+  //                               child: Text(
+  //                                 value.namaPelanggan == ''
+  //                                     ? 'Pilih Pembeli'
+  //                                     : value.namaPelanggan.toString(),
+  //                                 textAlign: TextAlign.start,
+  //                                 maxLines: 1,
+  //                                 overflow: TextOverflow.ellipsis,
+  //                                 style: heading4(
+  //                                   FontWeight.w400,
+  //                                   value.namaPelanggan == ''
+  //                                       ? bnw900
+  //                                       : primary500,
+  //                                   'Outfit',
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           )
+  //                         : Container(
+  //                             child: Text(
+  //                               'Pilih Pembeli',
+  //                               textAlign: TextAlign.center,
+  //                               overflow: TextOverflow.ellipsis,
+  //                               maxLines: 1,
+  //                               style: heading4(
+  //                                 FontWeight.w400,
+  //                                 value.namaPelanggan == ''
+  //                                     ? bnw900
+  //                                     : primary500,
+  //                                 'Outfit',
+  //                               ),
+  //                             ),
+  //                           ),
+
+  //                     // SizedBox(width: size16),
+  //                     value.namaPelanggan != ''
+  //                         ? GestureDetector(
+  //                             onTap: () {
+  //                               pelangganId = '';
+  //                               value.namaPelanggan = '';
+  //                               value.idPelanggan = '';
+  //                               value.notifyListeners();
+  //                               setState(() {});
+  //                             },
+  //                             child: Icon(
+  //                               PhosphorIcons.x,
+  //                               color: primary500,
+  //                               size: size24,
+  //                             ),
+  //                           )
+  //                         : SizedBox(),
+  //                   ],
+  //                 ),
+  //                 value.namaPelanggan == '' ? bnw100 : primary100,
+  //                 value.namaPelanggan == '' ? bnw300 : primary500,
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         Spacer(),
+  //         rincianPembayaran(
+  //           context,
+  //           (uangTunaiController.text = totalTransaksi.toString()),
+  //           '006',
+  //           '',
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  pembayaranLainya(BuildContext context) {
+    bool displayCode = false;
+    
+
     return StatefulBuilder(
-      builder: (context, setState) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, setState) => PageView(
+        controller: dompetDigitalPageCon,
+        scrollDirection: Axis.vertical,
+        pageSnapping: true,
+        reverse: false,
+        physics: NeverScrollableScrollPhysics(),
         children: [
-          Text(
-            'Pilih Pembeli',
-            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: size16),
-          Consumer<RefreshTampilan>(
-            builder: (context, value, child) => SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: () {
-                  pilihPembeliShowBottom(context, 6);
-                },
-                child: buttonL(
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        value.namaPelanggan == ''
-                            ? PhosphorIcons.users_three
-                            : PhosphorIcons.users_three_fill,
-                        color: value.namaPelanggan == '' ? bnw900 : primary500,
-                        size: size24,
-                      ),
-                      SizedBox(width: size16),
-                      value.namaPelanggan != ''
-                          ? Expanded(
-                              child: SizedBox(
-                                child: Text(
-                                  value.namaPelanggan == ''
-                                      ? 'Pilih Pembeli'
-                                      : value.namaPelanggan.toString(),
-                                  textAlign: TextAlign.start,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    value.namaPelanggan == ''
-                                        ? bnw900
-                                        : primary500,
-                                    'Outfit',
-                                  ),
+          SizedBox(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pilih Pembayaran',
+                  style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size16),
+                Expanded(
+                  child: FutureBuilder<List<PaymentMethod>>(
+                    future: futurePaymentMethodsLainya,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Payment tidak ditemukan.\n Buat Terlebih dahulu.',
+                          ),
+                        );
+                      }
+
+                      final paymentMethods = snapshot.data!;
+
+                      return ListView.builder(
+                        itemCount: paymentMethods.length,
+                        itemBuilder: (context, index) {
+                          final payment = paymentMethods[index];
+                          return GestureDetector(
+                            onTap: () {
+                              selectedIndexDompetDigital = index;
+                              print(totalTransaksi);
+                              idpaymentmethode = payment.idpaymentmethode!;
+                              // dompetDigitalPageCon.jumpToPage(index + 1);
+                              // _pageMetodeSwap.animateToPage(
+                              //   1,
+                              //   duration:  Duration(milliseconds: 10),
+                              //   curve: Curves.easeIn,
+                              // );
+
+                              setState(() {});
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: size16),
+                              padding: EdgeInsets.all(size12),
+                              width: double.infinity,
+                              height: 98,
+                              decoration: BoxDecoration(
+                                color: selectedIndexDompetDigital == index
+                                    ? primary200
+                                    : bnw100,
+                                borderRadius: BorderRadius.circular(size8),
+                                border: Border.all(
+                                  color: selectedIndexDompetDigital == index
+                                      ? primary500
+                                      : bnw300,
+                                  width: 1.6,
                                 ),
                               ),
-                            )
-                          : Container(
-                              child: Text(
-                                'Pilih Pembeli',
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: heading4(
-                                  FontWeight.w400,
-                                  value.namaPelanggan == ''
-                                      ? bnw900
-                                      : primary500,
-                                  'Outfit',
-                                ),
+                              child: Row(
+                                children: [
+                                  Icon(PhosphorIcons.wallet_fill, size: size64),
+                                  // Image.asset(
+                                  //   "assets/${metodePembayaranObjects[index].image}",
+                                  // ),
+                                  SizedBox(width: size16),
+                                  Flexible(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          payment.paymentMethod ?? '',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        Text(
+                                          payment.accountNumber ?? '-',
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                          );
 
-                      // SizedBox(width: size16),
-                      value.namaPelanggan != ''
-                          ? GestureDetector(
-                              onTap: () {
-                                pelangganId = '';
-                                value.namaPelanggan = '';
-                                value.idPelanggan = '';
-                                value.notifyListeners();
-                                setState(() {});
-                              },
-                              child: Icon(
-                                PhosphorIcons.x,
-                                color: primary500,
-                                size: size24,
-                              ),
-                            )
-                          : SizedBox(),
-                    ],
+                          // ListTile(
+                          //   title: Text(payment.paymentMethod ?? '-'),
+                          //   subtitle:
+                          //       Text('Account Number: ${payment.accountNumber}'),
+                          // );
+                        },
+                      );
+                    },
                   ),
-                  value.namaPelanggan == '' ? bnw100 : primary100,
-                  value.namaPelanggan == '' ? bnw300 : primary500,
                 ),
-              ),
+                Divider(),
+                rincianPembayaranDebitKredit(
+                  context,
+                  (uangTunaiController.text = totalTransaksi.toString()),
+                  idpaymentmethode,
+                  debitpinController.text,
+                ),
+                // rincianPembayaranSelanjutnya(
+                //   context,
+                //   dompetDigitalPageCon,
+                //   _pageMetodeSwap,
+                //   selectedIndexDompetDigital,
+                //   3,
+                //   coaValueDebit == '' ? true : false,
+                // )
+              ],
             ),
           ),
-          Spacer(),
-          rincianPembayaran(
-            context,
-            (uangTunaiController.text = totalTransaksi.toString()),
-            '006',
-            '',
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Masukkan Nomor Kartu Debit',
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: size16),
+              Row(
+                children: [
+                  Text(
+                    'Nomor Kartu',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    ' *',
+                    style: heading3(FontWeight.w400, red500, 'Outfit'),
+                  ),
+                ],
+              ),
+              IntrinsicHeight(
+                child: Container(
+                  child: TextField(
+                    cursorColor: primary500,
+                    onTap: () {
+                      displayCode = true;
+                      print(displayCode);
+                      setState(() {});
+                    },
+                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    controller: debitpinController,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(20),
+                      NumericTextFormatter(),
+                    ],
+                    keyboardType: TextInputType.number,
+                    readOnly: true,
+                    onChanged: (value) {},
+                    decoration: InputDecoration(
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(width: 2, color: primary500),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: size8),
+                      isDense: true,
+                      focusColor: primary500,
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(width: 1.5, color: bnw500),
+                      ),
+                      hintText: 'Cth : 0000-0000-0000-0000',
+                      hintStyle: heading2(FontWeight.w700, bnw500, 'Outfit'),
+                    ),
+                  ),
+                ),
+              ),
+              Spacer(),
+              Divider(),
+              displayCode != true
+                  ? rincianPembayaranDebitKredit(
+                      context,
+                      (uangTunaiController.text = totalTransaksi.toString()),
+                      idpaymentmethode,
+                      debitpinController.text,
+                    )
+                  : keypad(displayCode, debitpinController),
+            ],
           ),
         ],
       ),
@@ -5195,7 +5414,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                             (
                                                                               map,
                                                                             ) =>
-                                                                                map['productid'] ==
+                                                                                map['product_id'] ==
                                                                                 'digitalProduct',
                                                                           );
                                                                           cart.removeWhere(
@@ -5254,7 +5473,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               >
                                                                               map = {
                                                                                 'name': item['nama_produk'].toString(),
-                                                                                'productid': 'digitalProduct',
+                                                                                'product_id': 'digitalProduct',
                                                                                 'image': 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
                                                                                 'amount':
                                                                                     item['total'] ??
@@ -6465,781 +6684,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                           SizedBox(
                                                             height: size16,
                                                           ),
-
-                                                          // SizedBox(
-                                                          //   child: FutureBuilder(
-                                                          //     future:
-                                                          //         getCoinTransaksi(
-                                                          //           context,
-                                                          //           widget
-                                                          //               .token,
-                                                          //           '',
-                                                          //           [''],
-                                                          //         ),
-                                                          //     builder: (context, snapshot) {
-                                                          //       if (snapshot
-                                                          //           .hasData) {
-                                                          //         return GridView.builder(
-                                                          //           shrinkWrap:
-                                                          //               true,
-                                                          //           padding:
-                                                          //               EdgeInsets
-                                                          //                   .zero,
-                                                          //           physics:
-                                                          //               BouncingScrollPhysics(),
-                                                          //           itemCount:
-                                                          //               snapshot
-                                                          //                   .data
-                                                          //                   .length,
-                                                          //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                          //             // mainAxisExtent:
-                                                          //             //     null,
-                                                          //             crossAxisCount:
-                                                          //                 4,
-                                                          //             crossAxisSpacing:
-                                                          //                 size16,
-                                                          //             mainAxisSpacing:
-                                                          //                 size16,
-                                                          //             childAspectRatio:
-                                                          //                 0.60,
-                                                          //           ),
-                                                          //           itemBuilder: (context, i) => GestureDetector(
-                                                          //             onTap: () async {
-                                                          //               var coin =
-                                                          //                   snapshot.data[i];
-
-                                                          //               counterCart =
-                                                          //                   1;
-                                                          //               String
-                                                          //               productId =
-                                                          //                   coin['voucherid'].toString();
-
-                                                          //               conCatatanPreview.text =
-                                                          //                   '';
-
-                                                          //               if (cartProductIds.contains(
-                                                          //                 productId,
-                                                          //               )) {
-                                                          //                 cartProductIds.remove(
-                                                          //                   productId,
-                                                          //                 );
-
-                                                          //                 for (
-                                                          //                   int
-                                                          //                   index =
-                                                          //                       0;
-                                                          //                   index <
-                                                          //                       cart.length;
-                                                          //                   index++
-                                                          //                 ) {
-                                                          //                   if (cart[index].productid ==
-                                                          //                       productId) {
-                                                          //                     cart.removeAt(
-                                                          //                       index,
-                                                          //                     );
-                                                          //                     cartMap.removeAt(
-                                                          //                       index,
-                                                          //                     );
-                                                          //                     total.removeAt(
-                                                          //                       index,
-                                                          //                     );
-
-                                                          //                     conCatatan.removeAt(
-                                                          //                       index,
-                                                          //                     );
-                                                          //                     conCounterPreview.clear();
-                                                          //                     conCatatanPreview.text = '';
-
-                                                          //                     if (cart.isEmpty) {
-                                                          //                       sumTotal = 0;
-                                                          //                     }
-                                                          //                     break;
-                                                          //                   }
-                                                          //                 }
-
-                                                          //                 isItemAdded =
-                                                          //                     true;
-                                                          //               } else {
-                                                          //                 showModalBottomSheet(
-                                                          //                   constraints: const BoxConstraints(
-                                                          //                     maxWidth: double.infinity,
-                                                          //                   ),
-                                                          //                   useRootNavigator:
-                                                          //                       false,
-                                                          //                   isScrollControlled:
-                                                          //                       true,
-                                                          //                   shape: RoundedRectangleBorder(
-                                                          //                     borderRadius: BorderRadius.circular(
-                                                          //                       size16,
-                                                          //                     ),
-                                                          //                   ),
-                                                          //                   context:
-                                                          //                       context,
-                                                          //                   builder:
-                                                          //                       (
-                                                          //                         context,
-                                                          //                       ) {
-                                                          //                         return Container(
-                                                          //                           padding: EdgeInsets.only(
-                                                          //                             bottom: MediaQuery.of(
-                                                          //                               context,
-                                                          //                             ).viewInsets.bottom,
-                                                          //                           ),
-                                                          //                           decoration: ShapeDecoration(
-                                                          //                             color: bnw100,
-                                                          //                             shape: RoundedRectangleBorder(
-                                                          //                               borderRadius: BorderRadius.only(
-                                                          //                                 topLeft: Radius.circular(
-                                                          //                                   size16,
-                                                          //                                 ),
-                                                          //                                 topRight: Radius.circular(
-                                                          //                                   size16,
-                                                          //                                 ),
-                                                          //                               ),
-                                                          //                             ),
-                                                          //                           ),
-                                                          //                           child: Padding(
-                                                          //                             padding: EdgeInsets.fromLTRB(
-                                                          //                               size32,
-                                                          //                               size16,
-                                                          //                               size32,
-                                                          //                               size32,
-                                                          //                             ),
-                                                          //                             child: IntrinsicHeight(
-                                                          //                               child: Column(
-                                                          //                                 children: [
-                                                          //                                   dividerShowdialog(),
-                                                          //                                   SingleChildScrollView(
-                                                          //                                     child: Column(
-                                                          //                                       children: [
-                                                          //                                         SizedBox(
-                                                          //                                           height: size16,
-                                                          //                                         ),
-                                                          //                                         Container(
-                                                          //                                           decoration: BoxDecoration(
-                                                          //                                             borderRadius: BorderRadius.circular(
-                                                          //                                               size12,
-                                                          //                                             ),
-                                                          //                                             border: Border.all(
-                                                          //                                               color: bnw300,
-                                                          //                                             ),
-                                                          //                                           ),
-                                                          //                                           child: Column(
-                                                          //                                             children: [
-                                                          //                                               Padding(
-                                                          //                                                 padding: EdgeInsets.all(
-                                                          //                                                   size8,
-                                                          //                                                 ),
-                                                          //                                                 child: Column(
-                                                          //                                                   children: [
-                                                          //                                                     Row(
-                                                          //                                                       crossAxisAlignment: CrossAxisAlignment.center,
-                                                          //                                                       mainAxisAlignment: MainAxisAlignment.start,
-                                                          //                                                       children: [
-                                                          //                                                         ClipRRect(
-                                                          //                                                           borderRadius: BorderRadius.circular(
-                                                          //                                                             size8,
-                                                          //                                                           ),
-                                                          //                                                           child: Container(
-                                                          //                                                             height: size120,
-                                                          //                                                             width: size120,
-                                                          //                                                             child: SvgPicture.asset(
-                                                          //                                                               'assets/logoProduct.svg',
-                                                          //                                                               fit: BoxFit.cover,
-                                                          //                                                             ),
-                                                          //                                                           ),
-                                                          //                                                         ),
-                                                          //                                                         SizedBox(
-                                                          //                                                           width: size12,
-                                                          //                                                         ),
-                                                          //                                                         Column(
-                                                          //                                                           crossAxisAlignment: CrossAxisAlignment.start,
-                                                          //                                                           children: [
-                                                          //                                                             Text(
-                                                          //                                                               coin['namavoucher'] ??
-                                                          //                                                                   '',
-                                                          //                                                               style: heading3(
-                                                          //                                                                 FontWeight.w600,
-                                                          //                                                                 bnw900,
-                                                          //                                                                 'Outfit',
-                                                          //                                                               ),
-                                                          //                                                             ),
-                                                          //                                                             Text(
-                                                          //                                                               FormatCurrency.convertToIdr(
-                                                          //                                                                 coin['price'],
-                                                          //                                                               ),
-                                                          //                                                               style: heading3(
-                                                          //                                                                 FontWeight.w400,
-                                                          //                                                                 bnw900,
-                                                          //                                                                 'Outfit',
-                                                          //                                                               ),
-                                                          //                                                             ),
-                                                          //                                                             Text(
-                                                          //                                                               coin['typeproducts'] ??
-                                                          //                                                                   '',
-                                                          //                                                               style: heading4(
-                                                          //                                                                 FontWeight.w400,
-                                                          //                                                                 bnw500,
-                                                          //                                                                 'Outfit',
-                                                          //                                                               ),
-                                                          //                                                             ),
-                                                          //                                                           ],
-                                                          //                                                         ),
-                                                          //                                                         Spacer(),
-                                                          //                                                         Column(
-                                                          //                                                           mainAxisAlignment: MainAxisAlignment.center,
-                                                          //                                                           children: [
-                                                          //                                                             Text(
-                                                          //                                                               'Jumlah',
-                                                          //                                                               style: heading3(
-                                                          //                                                                 FontWeight.w400,
-                                                          //                                                                 bnw900,
-                                                          //                                                                 'Outfit',
-                                                          //                                                               ),
-                                                          //                                                             ),
-                                                          //                                                             SizedBox(
-                                                          //                                                               height: size8,
-                                                          //                                                             ),
-                                                          //                                                             Row(
-                                                          //                                                               children: [
-                                                          //                                                                 GestureDetector(
-                                                          //                                                                   onTap: () {
-                                                          //                                                                     if (counterCart >
-                                                          //                                                                         1) {
-                                                          //                                                                       counterCart--;
-                                                          //                                                                       conCounterPreview.text = counterCart.toString();
-                                                          //                                                                     }
-                                                          //                                                                     setState(
-                                                          //                                                                       () {},
-                                                          //                                                                     );
-                                                          //                                                                   },
-                                                          //                                                                   child: buttonMoutlineColor(
-                                                          //                                                                     Icon(
-                                                          //                                                                       PhosphorIcons.minus,
-                                                          //                                                                       color: primary500,
-                                                          //                                                                       size: size24,
-                                                          //                                                                     ),
-                                                          //                                                                     primary500,
-                                                          //                                                                   ),
-                                                          //                                                                 ),
-                                                          //                                                                 SizedBox(
-                                                          //                                                                   width: size8,
-                                                          //                                                                 ),
-                                                          //                                                                 SizedBox(
-                                                          //                                                                   height: size48,
-                                                          //                                                                   width: size56,
-                                                          //                                                                   child: TextFormField(
-                                                          //                                                                     cursorColor: primary500,
-                                                          //                                                                     enabled: true,
-                                                          //                                                                     controller: conCounterPreview,
-                                                          //                                                                     keyboardType: TextInputType.number,
-                                                          //                                                                     onChanged:
-                                                          //                                                                         (
-                                                          //                                                                           value,
-                                                          //                                                                         ) {
-                                                          //                                                                           setState(
-                                                          //                                                                             () {
-                                                          //                                                                               int parsedValue =
-                                                          //                                                                                   int.tryParse(
-                                                          //                                                                                     value,
-                                                          //                                                                                   ) ??
-                                                          //                                                                                   0;
-                                                          //                                                                               counterCart = parsedValue;
-                                                          //                                                                               conCounterPreview.text = counterCart.toString();
-                                                          //                                                                             },
-                                                          //                                                                           );
-                                                          //                                                                         },
-                                                          //                                                                     textAlign: TextAlign.center,
-                                                          //                                                                     decoration: InputDecoration(
-                                                          //                                                                       // alignLabelWithHint: true,
-                                                          //                                                                       hintText: counterCart.toString(),
-
-                                                          //                                                                       // .toString(),
-                                                          //                                                                       // _itemCount.toString(),
-                                                          //                                                                       hintStyle: heading4(
-                                                          //                                                                         FontWeight.w600,
-                                                          //                                                                         bnw800,
-                                                          //                                                                         'Outfit',
-                                                          //                                                                       ),
-                                                          //                                                                     ),
-                                                          //                                                                   ),
-                                                          //                                                                 ),
-                                                          //                                                                 SizedBox(
-                                                          //                                                                   width: size8,
-                                                          //                                                                 ),
-                                                          //                                                                 GestureDetector(
-                                                          //                                                                   onTap: () {
-                                                          //                                                                     counterCart++;
-                                                          //                                                                     conCounterPreview.text = counterCart.toString();
-                                                          //                                                                     setState(
-                                                          //                                                                       () {},
-                                                          //                                                                     );
-                                                          //                                                                   },
-                                                          //                                                                   child: buttonMoutlineColor(
-                                                          //                                                                     Icon(
-                                                          //                                                                       PhosphorIcons.plus,
-                                                          //                                                                       color: primary500,
-                                                          //                                                                       size: size24,
-                                                          //                                                                     ),
-                                                          //                                                                     primary500,
-                                                          //                                                                     // 50,
-                                                          //                                                                   ),
-                                                          //                                                                 ),
-                                                          //                                                               ],
-                                                          //                                                             ),
-                                                          //                                                           ],
-                                                          //                                                         ),
-                                                          //                                                       ],
-                                                          //                                                     ),
-                                                          //                                                   ],
-                                                          //                                                 ),
-                                                          //                                               ),
-                                                          //                                             ],
-                                                          //                                           ),
-                                                          //                                         ),
-                                                          //                                         SizedBox(
-                                                          //                                           height: size16,
-                                                          //                                         ),
-                                                          //                                         Container(
-                                                          //                                           child: Column(
-                                                          //                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                                          //                                             children: [
-                                                          //                                               Text(
-                                                          //                                                 'Catatan',
-                                                          //                                                 style: body1(
-                                                          //                                                   FontWeight.w500,
-                                                          //                                                   bnw900,
-                                                          //                                                   'Outfit',
-                                                          //                                                 ),
-                                                          //                                               ),
-                                                          //                                               IntrinsicHeight(
-                                                          //                                                 child: TextFormField(
-                                                          //                                                   cursorColor: primary500,
-                                                          //                                                   // keyboardType: numberNo,
-                                                          //                                                   style: heading2(
-                                                          //                                                     FontWeight.w600,
-                                                          //                                                     bnw900,
-                                                          //                                                     'Outfit',
-                                                          //                                                   ),
-                                                          //                                                   controller: conCatatanPreview,
-                                                          //                                                   onChanged:
-                                                          //                                                       (
-                                                          //                                                         value,
-                                                          //                                                       ) {
-                                                          //                                                         // String formattedValue = formatCurrency(value);
-                                                          //                                                         // conHarga.value = TextEditingValue(
-                                                          //                                                         //   text: formattedValue,
-                                                          //                                                         //   selection:
-                                                          //                                                         //       TextSelection.collapsed(offset: formattedValue.length),
-                                                          //                                                         // );
-                                                          //                                                       },
-                                                          //                                                   decoration: InputDecoration(
-                                                          //                                                     focusedBorder: UnderlineInputBorder(
-                                                          //                                                       borderSide: BorderSide(
-                                                          //                                                         width: 2,
-                                                          //                                                         color: primary500,
-                                                          //                                                       ),
-                                                          //                                                     ),
-                                                          //                                                     isDense: true,
-                                                          //                                                     contentPadding: EdgeInsets.symmetric(
-                                                          //                                                       vertical: size12,
-                                                          //                                                     ),
-                                                          //                                                     enabledBorder: UnderlineInputBorder(
-                                                          //                                                       borderSide: BorderSide(
-                                                          //                                                         width: 1.5,
-                                                          //                                                         color: bnw500,
-                                                          //                                                       ),
-                                                          //                                                     ),
-                                                          //                                                     hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                                          //                                                     hintStyle: heading2(
-                                                          //                                                       FontWeight.w600,
-                                                          //                                                       bnw500,
-                                                          //                                                       'Outfit',
-                                                          //                                                     ),
-                                                          //                                                   ),
-                                                          //                                                 ),
-                                                          //                                               ),
-                                                          //                                             ],
-                                                          //                                           ),
-                                                          //                                         ),
-                                                          //                                       ],
-                                                          //                                     ),
-                                                          //                                   ),
-                                                          //                                   SizedBox(
-                                                          //                                     height: size32,
-                                                          //                                   ),
-                                                          //                                   Row(
-                                                          //                                     children: [
-                                                          //                                       Expanded(
-                                                          //                                         child: GestureDetector(
-                                                          //                                           onTap: () {
-                                                          //                                             setState(
-                                                          //                                               () {},
-                                                          //                                             );
-                                                          //                                             Navigator.pop(
-                                                          //                                               context,
-                                                          //                                             );
-                                                          //                                           },
-                                                          //                                           child: buttonXLoutline(
-                                                          //                                             Center(
-                                                          //                                               child: Text(
-                                                          //                                                 'Batalkan',
-                                                          //                                                 style: heading3(
-                                                          //                                                   FontWeight.w600,
-                                                          //                                                   primary500,
-                                                          //                                                   'Outfit',
-                                                          //                                                 ),
-                                                          //                                               ),
-                                                          //                                             ),
-                                                          //                                             MediaQuery.of(
-                                                          //                                               context,
-                                                          //                                             ).size.width,
-                                                          //                                             primary500,
-                                                          //                                           ),
-                                                          //                                         ),
-                                                          //                                       ),
-                                                          //                                       SizedBox(
-                                                          //                                         width: size16,
-                                                          //                                       ),
-                                                          //                                       Expanded(
-                                                          //                                         child: GestureDetector(
-                                                          //                                           onTap: () {
-                                                          //                                             setState(
-                                                          //                                               () {
-                                                          //                                                 String productId = coin['voucherid'];
-
-                                                          //                                                 if (cartProductIds.contains(
-                                                          //                                                   productId,
-                                                          //                                                 )) {
-                                                          //                                                   cartProductIds.remove(
-                                                          //                                                     productId,
-                                                          //                                                   );
-
-                                                          //                                                   for (
-                                                          //                                                     int index = 0;
-                                                          //                                                     index <
-                                                          //                                                         cart.length;
-                                                          //                                                     index++
-                                                          //                                                   ) {
-                                                          //                                                     if (cart[index].productid ==
-                                                          //                                                         productId) {
-                                                          //                                                       cart.removeAt(
-                                                          //                                                         index,
-                                                          //                                                       );
-                                                          //                                                       cartMap.removeAt(
-                                                          //                                                         index,
-                                                          //                                                       );
-                                                          //                                                       total.removeAt(
-                                                          //                                                         index,
-                                                          //                                                       );
-                                                          //                                                       if (cart.isEmpty) {
-                                                          //                                                         sumTotal = 0;
-                                                          //                                                       }
-                                                          //                                                       break;
-                                                          //                                                     }
-                                                          //                                                   }
-
-                                                          //                                                   isItemAdded = true;
-                                                          //                                                 } else {
-                                                          //                                                   cartProductIds.add(
-                                                          //                                                     productId,
-                                                          //                                                   );
-                                                          //                                                   isItemAdded = false;
-                                                          //                                                 }
-
-                                                          //                                                 if (!isItemAdded) {
-                                                          //                                                   Navigator.pop(
-                                                          //                                                     context,
-                                                          //                                                   );
-                                                          //                                                   Map<
-                                                          //                                                     String,
-                                                          //                                                     String
-                                                          //                                                   >
-                                                          //                                                   map1 = {};
-                                                          //                                                   map1['name'] = coin['namavoucher'];
-                                                          //                                                   map1['productid'] = coin['voucherid'];
-                                                          //                                                   // map1['quantity'] = '1';
-                                                          //                                                   map1['quantity'] = counterCart.toString();
-
-                                                          //                                                   map1['image'] = coin['product_image'];
-                                                          //                                                   map1['amount'] =
-                                                          //                                                       (coin['price'] *
-                                                          //                                                               counterCart)
-                                                          //                                                           .toString();
-                                                          //                                                   map1['description'] = conCatatanPreview.text;
-                                                          //                                                   map1['id_request'] = '';
-                                                          //                                                   cartMap.add(
-                                                          //                                                     map1,
-                                                          //                                                   );
-
-                                                          //                                                   // log(datasTransaksi![i].product_image.toString());
-
-                                                          //                                                   String name = coin['namavoucher'].trim();
-                                                          //                                                   String productid = coin['voucherid'].toString().trim();
-                                                          //                                                   String image = coin['product_image'].toString().trim();
-                                                          //                                                   // String desc = conCatatan[i]
-                                                          //                                                   //     .text
-                                                          //                                                   //     .toString()
-                                                          //                                                   //     .trim();
-
-                                                          //                                                   int? price = (coin['price']);
-
-                                                          //                                                   int index = 0;
-                                                          //                                                   for (
-                                                          //                                                     index;
-                                                          //                                                     index <
-                                                          //                                                         cart.length;
-                                                          //                                                     index++
-                                                          //                                                   ) {}
-
-                                                          //                                                   // int? quantity = cart[i];
-
-                                                          //                                                   // log(name.toString());
-                                                          //                                                   // log(price.toString());
-                                                          //                                                   // log(productid.toString());
-                                                          //                                                   // log(image.toString());
-
-                                                          //                                                   sumTotal =
-                                                          //                                                       sumTotal +
-                                                          //                                                       (price! *
-                                                          //                                                           counterCart);
-                                                          //                                                   // subTotal =
-                                                          //                                                   //     subTotal + price.toInt();
-                                                          //                                                   total.add(
-                                                          //                                                     price *
-                                                          //                                                         counterCart,
-                                                          //                                                   );
-                                                          //                                                   conCatatan.add(
-                                                          //                                                     TextEditingController(
-                                                          //                                                       text: conCatatanPreview.text,
-                                                          //                                                     ),
-                                                          //                                                   );
-                                                          //                                                   cart.add(
-                                                          //                                                     CartTransaksi(
-                                                          //                                                       name: name,
-                                                          //                                                       productid: productid,
-                                                          //                                                       image: image,
-                                                          //                                                       price: price,
-                                                          //                                                       quantity: counterCart,
-                                                          //                                                       desc: conCatatanPreview.text,
-                                                          //                                                       idRequest: "",
-                                                          //                                                       // quantity: cart[i]
-                                                          //                                                       //     .quantity
-                                                          //                                                       //     .toInt(),
-                                                          //                                                     ),
-                                                          //                                                   );
-                                                          //                                                   // for (int i = 0; i <= cart.length; i++) {
-                                                          //                                                   //   conCatatan.add(
-                                                          //                                                   //     TextEditingController(
-                                                          //                                                   //       text: conCatatanPreview.text,
-                                                          //                                                   //     ),
-                                                          //                                                   //   );
-                                                          //                                                   //   inputValues.add(conCatatanPreview.text);
-                                                          //                                                   //   setState(() {});
-                                                          //                                                   //   initState();
-                                                          //                                                   // }
-
-                                                          //                                                   refreshColor();
-
-                                                          //                                                   num totalku = 0;
-                                                          //                                                   cartMap.forEach(
-                                                          //                                                     (
-                                                          //                                                       element,
-                                                          //                                                     ) {
-                                                          //                                                       var myelement = int.parse(
-                                                          //                                                         element['amount']!,
-                                                          //                                                       );
-                                                          //                                                       totalku =
-                                                          //                                                           totalku +
-                                                          //                                                           (myelement *
-                                                          //                                                               counterCart);
-                                                          //                                                     },
-                                                          //                                                   );
-
-                                                          //                                                   sumTotal = totalku;
-
-                                                          //                                                   selectedIndexTransaksi[i];
-                                                          //                                                 } else {
-                                                          //                                                   // isItemAdded = false;
-                                                          //                                                   // cartProductIds.remove(productSelect);
-                                                          //                                                 }
-                                                          //                                               },
-                                                          //                                             );
-
-                                                          //                                             initState();
-                                                          //                                           },
-                                                          //                                           child: buttonXL(
-                                                          //                                             Center(
-                                                          //                                               child: Text(
-                                                          //                                                 'Tambah Ke Keranjang',
-                                                          //                                                 style: heading3(
-                                                          //                                                   FontWeight.w600,
-                                                          //                                                   bnw100,
-                                                          //                                                   'Outfit',
-                                                          //                                                 ),
-                                                          //                                               ),
-                                                          //                                             ),
-                                                          //                                             MediaQuery.of(
-                                                          //                                               context,
-                                                          //                                             ).size.width,
-                                                          //                                           ),
-                                                          //                                         ),
-                                                          //                                       ),
-                                                          //                                     ],
-                                                          //                                   ),
-                                                          //                                 ],
-                                                          //                               ),
-                                                          //                             ),
-                                                          //                           ),
-                                                          //                         );
-                                                          //                       },
-                                                          //                 );
-                                                          //               }
-
-                                                          //               setState(
-                                                          //                 () {},
-                                                          //               );
-                                                          //               initState();
-                                                          //             },
-                                                          //             child: Container(
-                                                          //               padding:
-                                                          //                   EdgeInsets.all(
-                                                          //                     size8,
-                                                          //                   ),
-                                                          //               decoration: BoxDecoration(
-                                                          //                 color:
-                                                          //                     cartProductIds.contains(
-                                                          //                       snapshot.data[i]['voucherid'].toString(),
-                                                          //                     )
-                                                          //                     ? primary100
-                                                          //                     : bnw100,
-                                                          //                 borderRadius: BorderRadius.circular(
-                                                          //                   size12,
-                                                          //                 ),
-                                                          //                 border: Border.all(
-                                                          //                   // color: bnw900,
-                                                          //                   color:
-                                                          //                       cartProductIds.contains(
-                                                          //                         snapshot.data[i]['voucherid'].toString(),
-                                                          //                       )
-                                                          //                       ? primary500
-                                                          //                       : bnw300,
-                                                          //                   width:
-                                                          //                       2,
-                                                          //                 ),
-                                                          //               ),
-                                                          //               child: Column(
-                                                          //                 crossAxisAlignment:
-                                                          //                     CrossAxisAlignment.start,
-                                                          //                 mainAxisAlignment:
-                                                          //                     MainAxisAlignment.spaceBetween,
-                                                          //                 children: [
-                                                          //                   Expanded(
-                                                          //                     flex: 3,
-                                                          //                     child: ClipRRect(
-                                                          //                       borderRadius: BorderRadius.circular(
-                                                          //                         size8,
-                                                          //                       ),
-                                                          //                       child: SizedBox(
-                                                          //                         height:
-                                                          //                             double.infinity /
-                                                          //                             2,
-                                                          //                         width: double.infinity,
-                                                          //                         child:
-                                                          //                             snapshot.data![i]['product_image'] !=
-                                                          //                                 null
-                                                          //                             ? ClipRRect(
-                                                          //                                 borderRadius: BorderRadius.circular(
-                                                          //                                   size8,
-                                                          //                                 ),
-                                                          //                                 child: Image.network(
-                                                          //                                   snapshot.data![i]['product_image'].toString(),
-                                                          //                                   height: size48,
-                                                          //                                   width: size48,
-                                                          //                                   fit: BoxFit.cover,
-                                                          //                                   loadingBuilder:
-                                                          //                                       (
-                                                          //                                         context,
-                                                          //                                         child,
-                                                          //                                         loadingProgress,
-                                                          //                                       ) {
-                                                          //                                         if (loadingProgress ==
-                                                          //                                             null) {
-                                                          //                                           return child;
-                                                          //                                         }
-
-                                                          //                                         return Center(
-                                                          //                                           child: loading(),
-                                                          //                                         );
-                                                          //                                       },
-                                                          //                                   errorBuilder:
-                                                          //                                       (
-                                                          //                                         context,
-                                                          //                                         error,
-                                                          //                                         stackTrace,
-                                                          //                                       ) => Icon(
-                                                          //                                         PhosphorIcons.tag_fill,
-                                                          //                                         color: bnw900,
-                                                          //                                         size: 100,
-                                                          //                                       ),
-                                                          //                                 ),
-                                                          //                               )
-                                                          //                             : Icon(
-                                                          //                                 PhosphorIcons.tag_fill,
-                                                          //                                 color: bnw900,
-                                                          //                                 size: 100,
-                                                          //                               ),
-                                                          //                       ),
-                                                          //                     ),
-                                                          //                   ),
-                                                          //                   Expanded(
-                                                          //                     flex: 2,
-                                                          //                     child: SizedBox(
-                                                          //                       child: Column(
-                                                          //                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                          //                         crossAxisAlignment: CrossAxisAlignment.start,
-                                                          //                         children: [
-                                                          //                           Text(
-                                                          //                             snapshot.data![i]['namavoucher'] ??
-                                                          //                                 '',
-                                                          //                             style: heading4(
-                                                          //                               FontWeight.w700,
-                                                          //                               bnw900,
-                                                          //                               'Outfit',
-                                                          //                             ),
-                                                          //                           ),
-                                                          //                           Text(
-                                                          //                             snapshot.data![i]['point'].toString(),
-                                                          //                             style: body1(
-                                                          //                               FontWeight.w400,
-                                                          //                               bnw900,
-                                                          //                               'Outfit',
-                                                          //                             ),
-                                                          //                           ),
-                                                          //                           Text(
-                                                          //                             FormatCurrency.convertToIdr(
-                                                          //                               snapshot.data![i]['price'],
-                                                          //                             ),
-                                                          //                             style: body1(
-                                                          //                               FontWeight.w400,
-                                                          //                               bnw900,
-                                                          //                               'Outfit',
-                                                          //                             ),
-                                                          //                           ),
-                                                          //                         ],
-                                                          //                       ),
-                                                          //                     ),
-                                                          //                   ),
-                                                          //                 ],
-                                                          //               ),
-                                                          //             ),
-                                                          //           ),
-                                                          //         );
-                                                          //       }
-                                                          //       return SizedBox();
-                                                          //     },
-                                                          //   ),
-                                                          // ),
                                                         ],
                                                       ),
                                                     ),
@@ -7590,6 +7034,24 @@ class _TransactionPageState extends State<TransactionPage>
                                     );
                                     sumTotal = sum;
 
+                                    // 🔹 Decode JSON variants dari cart[i]
+                                    List<dynamic>
+                                    selectedVariantListForThisCart = [];
+                                    if (cart[i].variants != null &&
+                                        cart[i].variants!.isNotEmpty) {
+                                      selectedVariantListForThisCart =
+                                          jsonDecode(cart[i].variants!);
+                                    }
+
+                                    // 🔹 Ambil master kategori varian untuk product ini
+                                    final variantCategoriesForProduct =
+                                        lastVariantData
+                                            .where(
+                                              (cat) =>
+                                                  cat.productId.toString() ==
+                                                  cart[i].productid,
+                                            )
+                                            .toList();
                                     return GestureDetector(
                                       onTap: () {},
                                       child: Container(
@@ -7675,18 +7137,39 @@ class _TransactionPageState extends State<TransactionPage>
                                                 ],
                                               ),
                                             ),
+                                            if (variantCategoriesForProduct
+                                                .isNotEmpty)
+                                              CartVariantDropdownInCart(
+                                                productId: cart[i].productid!,
+                                                cartIndex: i,
+                                                categories:
+                                                    variantCategoriesForProduct,
+                                                selectedVariantListFromCart:
+                                                    selectedVariantListForThisCart,
+                                                onPriceChanged: () {
+                                                  total[i] =
+                                                      cart[i].price! *
+                                                      cart[i].quantity;
+                                                  sumTotal = total.fold<num>(
+                                                    0,
+                                                    (a, b) => a + b,
+                                                  );
+                                                  setState(() {});
+                                                },
+                                              ),
                                             Container(
                                               child: Row(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.end,
                                                 children: [
+                                                  SizedBox(height: size16),
                                                   Flexible(
                                                     flex: 4,
                                                     child: Container(
                                                       height: 38,
                                                       child: TextFormField(
                                                         enabled:
-                                                            (cartMap[i]['productid'] ==
+                                                            (cartMap[i]['product_id'] ==
                                                                 'digitalProduct')
                                                             ? false
                                                             : true,
@@ -7728,7 +7211,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                       primary500,
                                                     ),
                                                     onTap: () {
-                                                      if ((cartMap[i]['productid'] ==
+                                                      if ((cartMap[i]['product_id'] ==
                                                           'digitalProduct')) {
                                                         print(
                                                           "button Plus Dissable",
@@ -7803,7 +7286,9 @@ class _TransactionPageState extends State<TransactionPage>
                                                                             size12,
                                                                       ),
                                                                       Text(
-                                                                        'Silahkan buka menu Produk Digital pada "Kuston", didalam keranjang untuk menghapus Item ini',
+
+                                                                        'Silahkan buka menu Produk Digital pada "Kustom"\ndidalam keranjang untuk menghapus Item ini',
+                                                                       textAlign: TextAlign.center,
                                                                         style: heading2(
                                                                           FontWeight
                                                                               .w600,
@@ -7962,7 +7447,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                   SizedBox(width: size8),
                                                   GestureDetector(
                                                     onTap: () {
-                                                      if ((cartMap[i]['productid'] ==
+                                                      if ((cartMap[i]['product_id'] ==
                                                           'digitalProduct')) {
                                                         print(
                                                           "button Plus Dissable",
@@ -8000,13 +7485,13 @@ class _TransactionPageState extends State<TransactionPage>
                                                       Icon(
                                                         PhosphorIcons.plus,
                                                         color:
-                                                            (cartMap[i]['productid'] ==
+                                                            (cartMap[i]['product_id'] ==
                                                                 'digitalProduct')
                                                             ? bnw300
                                                             : primary500,
                                                         size: size24,
                                                       ),
-                                                      (cartMap[i]['productid'] ==
+                                                      (cartMap[i]['product_id'] ==
                                                               'digitalProduct')
                                                           ? bnw300
                                                           : primary500,
@@ -8703,7 +8188,25 @@ class _TransactionPageState extends State<TransactionPage>
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              // ... title, teks wajib/opsional, errorText, dll
+                                              Text(
+                                                variantCategory.title,
+                                                style: body1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              SizedBox(height: size4),
+                                              Text(
+                                                variantCategory.isRequired == 1
+                                                    ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
+                                                    : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
+                                                style: body2(
+                                                  FontWeight.w400,
+                                                  danger500,
+                                                  'Outfit',
+                                                ),
+                                              ),
                                               SizedBox(height: size12),
                                               Container(
                                                 decoration: BoxDecoration(
@@ -9884,5 +9387,511 @@ class _TransactionPageState extends State<TransactionPage>
 
       setState(() {});
     }
+  }
+}
+
+class VariantDropdownList extends StatelessWidget {
+  final String productId;
+  final List<ProductVariantCategory> categories;
+  final Map<String, List<Map<String, dynamic>>> selectedVariantsByProduct;
+  final Map<String, String> variantErrorByCategory;
+  final int tapTrue;
+
+  const VariantDropdownList({
+    Key? key,
+    required this.productId,
+    required this.categories,
+    required this.selectedVariantsByProduct,
+    required this.variantErrorByCategory,
+    required this.tapTrue,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // 🔹 Satu dropdown utama: "Variant"
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      title: Text('Variant', style: body1(FontWeight.w600, bnw900, 'Outfit')),
+      children: [
+        // 🔹 Di dalamnya baru list kategori varian (logika lama)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: categories.map((variantCategory) {
+            // state lokal tiap kategori
+            List<bool> selected = List.generate(
+              variantCategory.productVariants.length,
+              (_) => false,
+            );
+            List<int> selectedIndexes = [];
+            int selectedCount = 0;
+            final String categoryId = variantCategory.id.toString();
+
+            return StatefulBuilder(
+              builder: (context, setStateVariant) {
+                final String? errorText = variantErrorByCategory[categoryId];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // judul kategori + info wajib/opsional
+                    Text(
+                      variantCategory.title,
+                      style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: size4),
+                    Text(
+                      variantCategory.isRequired == 1
+                          ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
+                          : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
+                      style: body2(FontWeight.w400, danger500, 'Outfit'),
+                    ),
+                    SizedBox(height: size12),
+
+                    // box list checkbox
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(size8),
+                        border: Border.all(
+                          color: errorText != null ? danger500 : bnw300,
+                        ),
+                      ),
+                      child: Column(
+                        children: List.generate(
+                          variantCategory.productVariants.length,
+                          (index) {
+                            final opt = variantCategory.productVariants[index];
+
+                            return CheckboxListTile(
+                              value: selected[index],
+                              onChanged: (value) {
+                                setStateVariant(() {
+                                  if (value == true) {
+                                    // maximumSelected == 1 → radio behaviour
+                                    if (variantCategory.maximumSelected == 1) {
+                                      for (
+                                        int j = 0;
+                                        j < selected.length;
+                                        j++
+                                      ) {
+                                        selected[j] = false;
+                                      }
+                                      selectedIndexes.clear();
+                                    }
+
+                                    // maximumSelected > 1 → geser pilihan lama
+                                    if (variantCategory.maximumSelected > 1 &&
+                                        selectedIndexes.length >=
+                                            variantCategory.maximumSelected) {
+                                      final removedIndex = selectedIndexes
+                                          .removeAt(0);
+                                      selected[removedIndex] = false;
+                                    }
+
+                                    // set pilihan baru
+                                    selected[index] = true;
+                                    if (!selectedIndexes.contains(index)) {
+                                      selectedIndexes.add(index);
+                                    }
+                                  } else {
+                                    // uncheck
+                                    selected[index] = false;
+                                    selectedIndexes.remove(index);
+                                  }
+
+                                  // hitung ulang count
+                                  selectedCount = selected
+                                      .where((e) => e)
+                                      .length;
+
+                                  if (selectedCount > 0) {
+                                    variantErrorByCategory.remove(categoryId);
+                                  }
+
+                                  // sync ke selectedVariantsByProduct
+                                  selectedVariantsByProduct[productId] ??= [];
+                                  selectedVariantsByProduct[productId]!
+                                      .removeWhere(
+                                        (e) =>
+                                            e['variant_category_id'] ==
+                                            categoryId,
+                                      );
+
+                                  final List<String> selectedIds = [];
+                                  final List<Map<String, dynamic>>
+                                  variantDetails = [];
+
+                                  for (int j = 0; j < selected.length; j++) {
+                                    if (selected[j]) {
+                                      final v =
+                                          variantCategory.productVariants[j];
+                                      selectedIds.add(v.id);
+                                      variantDetails.add({
+                                        "variant_id": v.id,
+                                        "variant_name": v.name,
+                                        "variant_price":
+                                            num.tryParse(v.price) ?? 0,
+                                        "is_online": (tapTrue == 2),
+                                      });
+                                    }
+                                  }
+
+                                  if (selectedIds.isNotEmpty) {
+                                    selectedVariantsByProduct[productId]!.add({
+                                      "variant_category_id": categoryId,
+                                      "variant_id": selectedIds,
+                                      "variant_detail": variantDetails,
+                                    });
+                                  }
+                                });
+                              },
+                              activeColor: primary500,
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      opt.name,
+                                      style: heading3(
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    FormatCurrency.convertToIdr(
+                                      double.tryParse(opt.price) ?? 0,
+                                    ),
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              controlAffinity: ListTileControlAffinity.trailing,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: size8,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: size8),
+                    Text(
+                      "$selectedCount dari ${variantCategory.productVariants.length}",
+                      style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: size16),
+                  ],
+                );
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class CartVariantDropdownInCart extends StatefulWidget {
+  final String productId;
+  final int cartIndex;
+  final List<ProductVariantCategory> categories;
+  final List<dynamic> selectedVariantListFromCart;
+  final void Function()? onPriceChanged;
+
+  const CartVariantDropdownInCart({
+    Key? key,
+    required this.productId,
+    required this.cartIndex,
+    required this.categories,
+    required this.selectedVariantListFromCart,
+    this.onPriceChanged,
+  }) : super(key: key);
+
+  @override
+  State<CartVariantDropdownInCart> createState() =>
+      _CartVariantDropdownInCartState();
+}
+
+class _CartVariantDropdownInCartState extends State<CartVariantDropdownInCart> {
+  final Map<String, List<bool>> _selectedByCategory = {};
+  final Map<String, List<int>> _selectedIndexesByCategory = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _initSelectedFromCart();
+  }
+
+  void _initSelectedFromCart() {
+    for (final cat in widget.categories) {
+      final catId = cat.id.toString();
+
+      final selected = List<bool>.filled(cat.productVariants.length, false);
+      final selectedIndexes = <int>[];
+
+      final found = widget.selectedVariantListFromCart.firstWhere(
+        (e) => e['variant_category_id'].toString() == catId,
+        orElse: () => null,
+      );
+
+      if (found != null) {
+        final List<dynamic>? details = found['variant_detail'];
+        if (details != null) {
+          for (int i = 0; i < cat.productVariants.length; i++) {
+            final v = cat.productVariants[i];
+            final isSelected = details.any(
+              (d) => d['variant_id'].toString() == v.id.toString(),
+            );
+            if (isSelected) {
+              selected[i] = true;
+              selectedIndexes.add(i);
+            }
+          }
+        }
+      }
+
+      _selectedByCategory[catId] = selected;
+      _selectedIndexesByCategory[catId] = selectedIndexes;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: EdgeInsets.zero,
+      visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+      shape: const Border(),
+      collapsedShape: const Border(),
+      backgroundColor: Colors.transparent,
+      collapsedBackgroundColor: Colors.transparent,
+      title: Text('Variant', style: body1(FontWeight.w600, bnw900, 'Outfit')),
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: widget.categories.map((variantCategory) {
+            final catId = variantCategory.id.toString();
+            final selected =
+                _selectedByCategory[catId] ??
+                List<bool>.filled(
+                  variantCategory.productVariants.length,
+                  false,
+                );
+            final selectedIndexes = _selectedIndexesByCategory[catId] ?? [];
+
+            final int selectedCount = selected.where((e) => e).length;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  variantCategory.title,
+                  style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size4),
+                Text(
+                  variantCategory.isRequired == 1
+                      ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
+                      : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
+                  style: body2(FontWeight.w400, danger500, 'Outfit'),
+                ),
+                SizedBox(height: size8),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(size8),
+                    border: Border.all(color: bnw300),
+                  ),
+                  child: Column(
+                    children: List.generate(variantCategory.productVariants.length, (
+                      index,
+                    ) {
+                      final opt = variantCategory.productVariants[index];
+
+                      return CheckboxListTile(
+                        value: selected[index],
+                        onChanged: (value) {
+                          setState(() {
+                            final num hargaVarian =
+                                num.tryParse(opt.price) ?? 0;
+
+                            if (value == true) {
+                              // ===== maksimumSelected =====
+                              if (variantCategory.maximumSelected == 1) {
+                                // kalau sebelumnya ada pilihan lain, kurangi dulu harganya
+                                for (int j = 0; j < selected.length; j++) {
+                                  if (selected[j] && j != index) {
+                                    final oldV =
+                                        variantCategory.productVariants[j];
+                                    final num oldHarga =
+                                        num.tryParse(oldV.price) ?? 0;
+
+                                    cart[widget.cartIndex].price =
+                                        (cart[widget.cartIndex].price ?? 0) -
+                                        oldHarga;
+                                  }
+                                  selected[j] = false;
+                                }
+                                selectedIndexes.clear();
+                              }
+
+                              if (variantCategory.maximumSelected > 1 &&
+                                  selectedIndexes.length >=
+                                      variantCategory.maximumSelected) {
+                                // buang pilihan paling lama dan kurangi harganya
+                                final removedIndex = selectedIndexes.removeAt(
+                                  0,
+                                );
+                                if (selected[removedIndex]) {
+                                  final removedV = variantCategory
+                                      .productVariants[removedIndex];
+                                  final num removedHarga =
+                                      num.tryParse(removedV.price) ?? 0;
+
+                                  cart[widget.cartIndex].price =
+                                      (cart[widget.cartIndex].price ?? 0) -
+                                      removedHarga;
+                                }
+                                selected[removedIndex] = false;
+                              }
+
+                              // centang baru → TAMBAH harga varian
+                              selected[index] = true;
+                              if (!selectedIndexes.contains(index)) {
+                                selectedIndexes.add(index);
+                              }
+
+                              cart[widget.cartIndex].price =
+                                  (cart[widget.cartIndex].price ?? 0) +
+                                  hargaVarian;
+                            } else {
+                              // UNCHECK → KURANGI harga varian
+                              if (selected[index]) {
+                                cart[widget.cartIndex].price =
+                                    (cart[widget.cartIndex].price ?? 0) -
+                                    hargaVarian;
+                              }
+                              selected[index] = false;
+                              selectedIndexes.remove(index);
+                            }
+
+                            // simpan state centang
+                            _selectedByCategory[catId] = selected;
+                            _selectedIndexesByCategory[catId] = selectedIndexes;
+
+                            // update total & sumTotal PERSIS seperti plus/minus
+                            final num qty = cart[widget.cartIndex].quantity;
+                            total[widget.cartIndex] =
+                                qty * (cart[widget.cartIndex].price ?? 0);
+                            if (total.isNotEmpty) {
+                              sumTotal = total.reduce((a, b) => a + b);
+                            } else {
+                              sumTotal = 0;
+                            }
+
+                            // sync JSON varian (tanpa ubah harga lagi)
+                            _syncBackToCart();
+
+                            // kalau masih mau callback luar:
+                            widget.onPriceChanged?.call();
+                          });
+                        },
+                        activeColor: primary500,
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                opt.name,
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              FormatCurrency.convertToIdr(
+                                double.tryParse(opt.price) ?? 0,
+                              ),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                          ],
+                        ),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                        contentPadding: EdgeInsets.symmetric(horizontal: size8),
+                      );
+                    }),
+                  ),
+                ),
+                SizedBox(height: size4),
+                Text(
+                  "Dipilih: $selectedCount dari ${variantCategory.productVariants.length}",
+                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size12),
+              ],
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  void _syncBackToCart() {
+    final List<Map<String, dynamic>> newSelectedVariantList = [];
+
+    for (final cat in widget.categories) {
+      final catId = cat.id.toString();
+      final selected =
+          _selectedByCategory[catId] ??
+          List<bool>.filled(cat.productVariants.length, false);
+
+      final List<String> selectedIds = [];
+      final List<Map<String, dynamic>> variantDetails = [];
+
+      for (int i = 0; i < selected.length; i++) {
+        if (selected[i]) {
+          final v = cat.productVariants[i];
+          final num hargaVarian = num.tryParse(v.price) ?? 0;
+
+          selectedIds.add(v.id);
+          variantDetails.add({
+            "variant_id": v.id,
+            "variant_name": v.name,
+            "variant_price": hargaVarian,
+            "is_online": v.isActive,
+          });
+        }
+      }
+
+      if (selectedIds.isNotEmpty) {
+        newSelectedVariantList.add({
+          "variant_category_id": catId,
+          "variant_id": selectedIds,
+          "variant_detail": variantDetails,
+        });
+      }
+    }
+
+    final jsonStr = jsonEncode(newSelectedVariantList);
+    cart[widget.cartIndex].variants = newSelectedVariantList.isEmpty
+        ? null
+        : jsonStr;
+    cartMap[widget.cartIndex]['variants'] = newSelectedVariantList.isEmpty
+        ? '[]'
+        : jsonStr;
   }
 }

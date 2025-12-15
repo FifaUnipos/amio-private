@@ -1552,7 +1552,7 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
       options: Options(headers: {"token": token}),
     );
 
-    log(response.data['data'].toString());
+    print('ini adalah member $response');
 
     if (response.statusCode == 200 &&
         response.data != null &&
@@ -4123,13 +4123,18 @@ Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
   }
 }
 
-String coaValueKredit = '', coaValueDebit = '', coaValueEWallet = '';
+String coaValueKredit = '',
+    coaValueDebit = '',
+    coaValueEWallet = '',
+    coaValueLainya = '';
 Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
   final response = await http.post(
     Uri.parse(getCoaMethodLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "category": category},
   );
+
+  // debugPrint('get payment ${response.body}');
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
@@ -4142,6 +4147,8 @@ Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
       jsonData.isEmpty ? coaValueDebit = 'null' : '';
     } else if (category == 'EWallet') {
       jsonData.isEmpty ? coaValueEWallet = 'null' : '';
+    } else if (category == 'Other') {
+      jsonData.isEmpty ? coaValueLainya = 'null' : '';
     }
     return jsonData.map((data) => PaymentMethod.fromJson(data)).toList();
   } else {
@@ -4163,7 +4170,7 @@ Future getAdjustment(token, merchid, String name, orderby) async {
 
   var jsonResponse = jsonDecode(response.body);
 
-  log(jsonResponse.toString());
+
   if (response.statusCode == 200) {
     // print('kuontol');
 
