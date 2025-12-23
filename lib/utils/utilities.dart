@@ -1,7 +1,6 @@
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
-import 'package:unipos_app_335/pageMobile/pageTokoMobile/pengembanganPage.dart';
 import 'package:unipos_app_335/pageTablet/home/dashboard.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/dashboardtoko.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/login_page.dart';
@@ -29,9 +28,9 @@ class FormatCurrency {
     String numberString = number.toString();
     // Menghapus tanda titik desimal yang menyebabkan error
     numberString = numberString.replaceAll(',', '');
-    
+
     double parsedNumber = double.tryParse(numberString) ?? 0.0;
-    
+
     NumberFormat currencyFormatter = NumberFormat.currency(
       locale: 'id',
       symbol: 'Rp ',
@@ -41,7 +40,6 @@ class FormatCurrency {
     return currencyFormatter.format(parsedNumber);
   }
 }
-
 
 int parseFlexibleNumber(dynamic value) {
   if (value == null) return 0;
@@ -203,7 +201,7 @@ sessionPage(BuildContext context, String token, typeAccount, roleAccount) {
       },
 
       // =>
-      // statusProfile == 'Group_Merchant'
+      // merchantType == 'Group_Merchant'
       //     ? SidebarXExampleApp(
       //         id: identifier.toString(),
       //         token: token,
@@ -244,7 +242,7 @@ sessionPageMobile(
         // }
 
         // Default: jika gagal dikenali
-        return DashboardPageMobile(token: checkToken,);
+        return DashboardPageMobile(token: token);
       },
     ),
     (Route<dynamic> route) => false,
@@ -372,14 +370,18 @@ dash() {
   );
 }
 
-String nameku = nameProfile;
-String getInitials() {
-  List<String> namekus = nameku.split(' ');
-  String initials = '';
-  int numWords = namekus.length > 1 ? 2 : 1;
+String nameku = nameProfile ?? 'Pengguna';
 
-  for (var i = 0; i < numWords; i++) {
-    initials += '${namekus[i][0]}';
+String getInitials() {
+  List<String> namekus = nameku.split(' ').where((e) => e.isNotEmpty).toList();
+  String initials = '';
+
+  if (namekus.isNotEmpty) {
+    int numWords = namekus.length > 1 ? 2 : 1;
+
+    for (var i = 0; i < numWords; i++) {
+      initials += namekus[i][0];
+    }
   }
 
   return initials;

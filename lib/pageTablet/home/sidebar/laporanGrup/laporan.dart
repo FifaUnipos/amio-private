@@ -630,7 +630,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                 widget.token,
                 _textvalueKeyword,
                 textvalueOrderByToko,
-                [''],
+                [''],""
               ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -931,7 +931,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                 widget.token,
                 _textvalueKeyword,
                 textvalueOrderByProduct,
-                [''],
+                [''],""
               ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {

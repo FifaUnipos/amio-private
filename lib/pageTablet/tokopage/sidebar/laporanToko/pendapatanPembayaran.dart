@@ -1035,7 +1035,7 @@ class LaporanPendapatanPerProdukState extends State<LaporanPembayaranPage> {
                                     widget.token,
                                     _textvalueOrderBy,
                                     _textvalueKeyword,
-                                    listToko,
+                                    listToko,""
                                   );
                                   Navigator.pop(context);
                                   initState();

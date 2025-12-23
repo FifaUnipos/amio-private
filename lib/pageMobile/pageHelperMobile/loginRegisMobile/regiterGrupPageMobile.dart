@@ -1,7 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import 'package:unipos_app_335/utils/component/component_snackbar.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/component/component_loading.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,8 +34,7 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
 
   refreshData() {
     if (phoneController.text.isNotEmpty &&
-        nameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty) {
+        nameController.text.isNotEmpty) {
       bttnValidate = true;
     } else {
       bttnValidate = false;
@@ -86,7 +89,9 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                         ],
                       ),
                       fieldMethod(
-                          'Cth : Muhammad Nabil Musyaffa', nameController),
+                        'Cth : Muhammad Nabil Musyaffa',
+                        nameController,
+                      ),
                       SizedBox(height: size16),
                       Row(
                         children: [
@@ -121,17 +126,21 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                             onTap: () => register(
                               context,
                               OtpPageMobile(
-                                  phone: phoneController.text,
-                                  name: nameController.text,
-                                  email: emailController.text,
-                                  pageidentify: 'register_page'),
+                                phone: phoneController.text,
+                                name: nameController.text,
+                                email: emailController.text,
+                                pageidentify: 'register_page',
+                              ),
                             ),
                             child: buttonXXLonOff(
                               Center(
                                 child: Text(
                                   'Daftar',
                                   style: heading2(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               double.infinity,
@@ -172,22 +181,13 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
           hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
           errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 2,
-              color: primary500,
-            ),
+            borderSide: BorderSide(width: 2, color: primary500),
           ),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 1,
-              color: bnw400,
-            ),
+            borderSide: BorderSide(width: 1, color: bnw400),
           ),
           focusedErrorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 2,
-              color: red500,
-            ),
+            borderSide: BorderSide(width: 2, color: red500),
           ),
         ),
       ),
@@ -216,22 +216,13 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
           hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
           errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 2,
-              color: primary500,
-            ),
+            borderSide: BorderSide(width: 2, color: primary500),
           ),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 1,
-              color: bnw400,
-            ),
+            borderSide: BorderSide(width: 1, color: bnw400),
           ),
           focusedErrorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              width: 2,
-              color: red500,
-            ),
+            borderSide: BorderSide(width: 2, color: red500),
           ),
         ),
       ),
@@ -239,29 +230,29 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
   }
 
   Future register(context, page) async {
+    whenLoading(context);
     try {
       final response = await http.post(
-        Uri.parse(registerbyotp),
+        Uri.parse(registerLink),
         body: {
-          'phonenumber': phoneController.text,
-          'fullname': nameController.text,
-          // 'password': passController.text,
-          'email': emailController.text,
           'deviceid': identifier,
+          'fullname': nameController.text,
+          'phonenumber': phoneController.text,
+          'email': emailController.text,
+          'type': "Group_Merchant", //Group_Merchant
+          // 'password': passController.text,
         },
       );
       var jsonResponse = jsonDecode(response.body);
 
+      print('response body ${response.body}');
       if (response.statusCode == 200) {
-        log(jsonResponse['data']);
+        closeLoading(context);
+        // log(jsonResponse['data']);
         print("succes");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       } else {
+        closeLoading(context);
         showSnackbar(context, jsonResponse);
       }
       return null;

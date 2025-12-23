@@ -69,7 +69,7 @@ class _SidebarXExampleAppTokoState extends State<SidebarXExampleAppToko> {
     dashboardKulasedaya(checkToken ?? '');
     myprofile(widget.token);
     nameProfile;
-    statusProfile;
+    merchantType;
     emailProfile;
     phoneProfile;
     imageProfile;
@@ -194,7 +194,7 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
           myprofile(widget.token);
 
           nameProfile;
-          statusProfile;
+          merchantType;
           emailProfile;
           phoneProfile;
           imageProfile;
@@ -216,7 +216,7 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
           myprofile(widget.token);
 
           nameProfile;
-          statusProfile;
+          merchantType;
           emailProfile;
           phoneProfile;
           imageProfile;
@@ -391,7 +391,7 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
                                                     'Outfit'),
                                               ),
                                               Text(
-                                                statusProfile ==
+                                                merchantType ==
                                                         'Group_Merchant'
                                                     ? 'Grup Toko'
                                                     : 'Toko',

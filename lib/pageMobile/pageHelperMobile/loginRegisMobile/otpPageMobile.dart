@@ -258,56 +258,77 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
           'deviceid': identifier.toString(),
         },
       );
+
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print("succes");
+        print("success");
+
         errorText = '';
-        // ignore: use_build_context_synchronously
-        myprofile(jsonResponse['token']);
-        late FirebaseMessaging messaging;
-        messaging = FirebaseMessaging.instance;
-        messaging.getToken().then((value) {
-          setState(() {
-            print("firebase token : $value");
-            firebaseToken(value, jsonResponse['token']);
-          });
-        });
-        final NotifFCM = FCM();
-        NotifFCM.setNotifiications();
-        // log(statusProfile);
-        showDialog(
-          barrierDismissible: true,
-          useRootNavigator: true,
-          context: context,
-          builder: (context) {
-            if (jsonResponse['token'] != null) {
+
+        // Menggunakan Future.delayed untuk navigasi setelah 3 detik
+        if (jsonResponse.containsKey('token') &&
+            jsonResponse['token'] != null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', jsonResponse['token']);
+          checkToken = jsonResponse['token'];
+          String token = jsonResponse['token'];
+
+          // Ignore: use_build_context_synchronously
+          myprofile(token);
+
+          // late FirebaseMessaging messaging;
+          // messaging = FirebaseMessaging.instance;
+
+          // messaging.getToken().then((value) {
+          //   setState(() {
+          //     print("firebase token : $value");
+          //     firebaseToken(value, token);
+          //   });
+          // });
+
+          // final NotifFCM = FCM();
+          // NotifFCM.setNotifiications();
+
+          showDialog(
+            barrierDismissible: true,
+            useRootNavigator: true,
+            context: context,
+            builder: (context) {
               Future.delayed(const Duration(seconds: 3), () {
-                // Navigator.of(context).pop(true);
+                // Navigasi setelah 3 detik
                 sessionPageMobile(
                   context,
-                  jsonResponse['token'].toString(),
+                  token,
                   jsonResponse['type_account'],
                   jsonResponse['type_role'],
                 );
               });
-            }
-            return const Center(
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
-        );
+
+              return const Center(
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            },
+          );
+        } else {
+          print("Token tidak ditemukan di response");
+          errorText = 'Token tidak ditemukan';
+        }
       } else {
-        // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
-        errorText = jsonResponse['message'];
+        print('HTTP error: ${response.statusCode}');
+        // Menampilkan error berdasarkan response message
+        errorText = jsonResponse['message'] ?? 'Terjadi kesalahan';
       }
+
       return null;
     } catch (e) {
-      throw Exception(e.toString());
+      // Menangani error dengan lebih jelas
+      print('Error: ${e.toString()}');
+      throw Exception('Terjadi kesalahan: ${e.toString()}');
     }
   }
 
@@ -382,6 +403,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', jsonResponse['token']);
         prefs.setString('deviceid', identifier.toString());
+        checkToken = jsonResponse['token'];
 
         myprofile(jsonResponse['token']);
 

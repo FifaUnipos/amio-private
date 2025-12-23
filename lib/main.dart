@@ -8,16 +8,15 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
+import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import '../utils/component/component_color.dart';
 import 'pagehelper/splashscreen.dart';
-import 'services/apimethod.dart';
 import 'utils/component/providerModel/refreshTampilanModel.dart';
 import 'utils/component/providerModel/timerModel.dart';
 
-// ✅ Tambahkan ini untuk deteksi ukuran layar tanpa package tambahan
 bool isTabletLayout(BuildContext context) =>
-    MediaQuery.of(context).size.shortestSide >= 60;
+    MediaQuery.of(context).size.shortestSide >= 600;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +24,8 @@ Future<void> main() async {
 
   var mytokenGet = prefs.getString('token');
   var onBoard = prefs.getString('onboard');
-  var role = prefs.getString('roleAccount');
-  var type = prefs.getString('typeAccount');
+  var role = prefs.getString('roleProfile');
+  var type = prefs.getString('merchantType');
 
   await FlutterDownloader.initialize(debug: true);
 
@@ -37,14 +36,14 @@ Future<void> main() async {
   log('myToken: $mytokenGet');
   log('onBoard: $onBoard');
   log('role: $role');
+  log('type: $type');
 
   sessCode = generateSessCode(16);
   await deviceDetails();
 
-  // 🔹 Panggil dashboard dan profile di background
-  myprofile(checkToken);
-  dashboard(identifier, checkToken);
-  statusProfile;
+  myprofile(prefs.getString('token') ?? '');
+  dashboard(identifier, checkToken ?? '');
+  merchantType;
 
   // Set status bar
   SystemChrome.setSystemUIOverlayStyle(

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:io' as Io;
@@ -155,7 +157,12 @@ class _DaftarAkunTokoPageState extends State<DaftarAkunTokoPage> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.of(context).pop();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MasukAkunPageMobile(),
+                                    ),
+                                  );
                                   setState(() {});
                                 },
                                 child: Icon(

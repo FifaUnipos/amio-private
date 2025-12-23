@@ -188,7 +188,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
           myprofile(widget.token);
 
           nameProfile;
-          statusProfile;
+          merchantType;
           emailProfile;
           phoneProfile;
           imageProfile;
@@ -210,7 +210,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
           myprofile(widget.token);
 
           nameProfile;
-          statusProfile;
+          merchantType;
           emailProfile;
           phoneProfile;
           imageProfile;
@@ -387,7 +387,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                                                     'Outfit'),
                                               ),
                                               Text(
-                                                statusProfile ==
+                                                merchantType ==
                                                         'Group_Merchant'
                                                     ? 'Grup Toko'
                                                     : 'Toko',

@@ -9,10 +9,17 @@ import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
 import 'package:unipos_app_335/models/tokomodel.dart';
+import 'package:unipos_app_335/pageMobile/bantuanPage.dart';
+import 'package:unipos_app_335/pageMobile/inventoryMobile/material_inventory_page.dart';
+import 'package:unipos_app_335/pageMobile/laporanMobile/laporan_page.dart';
+import 'package:unipos_app_335/pageMobile/memberPageMobile.dart';
+import 'package:unipos_app_335/pageMobile/pageProductMobile/merchantSelectionPage.dart';
 import 'package:unipos_app_335/pageMobile/pageProductMobile/pageProductMobile.dart';
 import 'package:unipos_app_335/pageMobile/pageTokoMobile/pageTokoMobile.dart'
     hide ProductMobilePage;
+import 'package:unipos_app_335/pageMobile/printerPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
+import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
@@ -102,6 +109,10 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   late WebViewController webController;
 
   late Future<List<KulasedayaMember>> futureMembers;
+  late Future<Map<String, dynamic>> futureBilling;
+  late Future<List<KulasedayaBinding>> futureKulasedayaBinding;
+  late Future<dynamic> futureDashboard;
+  late Future<dynamic> futureDashboardSide;
 
   int selectedAppBarIndex = 0;
 
@@ -111,7 +122,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     DashboardWithNotif(notifications: notifications),
     ProfilPageMobile(
       nama: nameProfile ?? '',
-      role: statusProfile ?? '',
+      role: merchantType ?? '',
       nomor: phoneProfile ?? '',
       inisial: imageProfile ?? '',
     ),
@@ -124,9 +135,14 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     checkConnection(context);
     checkEmail(context, setState);
     getKulasedaya(context, widget.token, '');
+    // myprofile(checkToken);
     // connectWeb();
     dashboardKulasedaya(widget.token);
     futureMembers = dashboardKulasedaya(widget.token);
+    futureBilling = getBilling(context, widget.token);
+    futureKulasedayaBinding = bindingKulasedaya(widget.token);
+    futureDashboard = dashboard(identifier ?? '', widget.token);
+    futureDashboardSide = dashboardSide(context, widget.token);
 
     // dashboard(identifier, widget.token);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -312,8 +328,11 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   }
 
   void showMenuBottomDialog(BuildContext context) {
+    myprofile(checkToken);
     print('identifier $identifier');
+    print('type $merchantType');
     print('token $checkToken');
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -331,42 +350,60 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.shopping_bag_open_fill,
             'text': 'Produk',
-            'page': ProductMobilePage(token: widget.token),
+            'page': MerchantSelectionPage(
+              token: checkToken,
+              featureTitle: 'Produk',
+              featureBuilder: (merchantId) => ProductMobilePage(
+                token: widget.token,
+                merchantId: merchantId,
+              ),
+            ),
+            // ProductMobilePage(token: widget.token, merchantId: ''),
           },
           {
             'icon': PhosphorIcons.archive_box_fill,
             'text': 'Inventori',
-            //    'page': const InventoriPage(),
+            'page': MaterialInventoryPage(token: widget.token, merchantId: ''),
           },
           {
             'icon': PhosphorIcons.shopping_cart_simple_fill,
             'text': 'Transaksi',
-            'page': TransaksiMobilePage(token: widget.token),
+            'page': TransaksiMobilePage(token: widget.token, merchantId: ''),
           },
           {
-            'icon': PhosphorIcons.users_three_fill,
-            'text': 'Akun',
-            // 'page': const AkunPage(),
+            'icon': PhosphorIcons.user_fill,
+            'text': 'Pelanggan',
+            'page': const MemberPageMobile(),
           },
           {
-            'icon': PhosphorIcons.money_fill,
-            'text': 'Keuangan',
-            // 'page': const KeuanganPage(),
+            'icon': PhosphorIcons.tag_fill,
+            'text': 'Promo',
+            'page': PromoPageMobile(token: widget.token, merchantId: ''),
           },
+          // {
+          //   'icon': PhosphorIcons.users_three_fill,
+          //   'text': 'Akun',
+          //   // 'page': const AkunPage(),
+          // },
+          // {
+          //   'icon': PhosphorIcons.money_fill,
+          //   'text': 'Keuangan',
+          //   // 'page': const KeuanganPage(),
+          // },
           {
             'icon': PhosphorIcons.file_text_fill,
             'text': 'Laporan',
-            // 'page': const LaporanPage(),
+            'page': LaporanPage(token: widget.token, merchantId: ''),
           },
           {
             'icon': PhosphorIcons.question_fill,
             'text': 'Bantuan',
-            // 'page': const BantuanPage(),
+            'page': const BantuanPageMobile(),
           },
           {
             'icon': PhosphorIcons.printer_fill,
             'text': 'Printer',
-            // 'page': const PrinterPage(),
+            'page': const PrinterPageMobile(),
           },
         ];
 
@@ -394,14 +431,14 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     children: [
                       IconButton(
                         onPressed: () {
+                          print(checkToken);
                           Navigator.pop(context); // tutup modal
                           // Ambil dulu halamannya ke variabel
                           final dynamic pageWidget = item['page'];
 
                           // Cek apakah variabel itu null atau tidak
                           if (pageWidget != null) {
-                            // Jika TIDAK null, baru pindah halaman
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
@@ -775,548 +812,418 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           child: SingleChildScrollView(
             padding: EdgeInsets.zero,
             physics: BouncingScrollPhysics(),
-            child: Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FutureBuilder<Map<String, dynamic>>(
-                    future: getBilling(
-                      context,
-                      widget.token,
-                    ), // Fetch data from API
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Billing Kadaluarsa'));
-                        // return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (snapshot.hasData) {
-                        var data = snapshot.data!['data'];
-                        var dueDate = data['due_date'] ?? 'Not Available';
-                        var name = data['name'] ?? 'Not Available';
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FutureBuilder<Map<String, dynamic>>(
+                  future: futureBilling, // Fetch data from API
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Billing Kadaluarsa'));
+                      // return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (snapshot.hasData) {
+                      var data = snapshot.data!['data'];
+                      var dueDate = data['due_date'] ?? 'Not Available';
+                      var name = data['name'] ?? 'Not Available';
 
-                        // Now, use the data to populate the UI
-                        return Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(size12),
-                            border: Border.all(color: bnw300),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: bnw200,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(size12),
-                                    topRight: Radius.circular(size12),
-                                  ),
+                      // Now, use the data to populate the UI
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(size12),
+                          border: Border.all(color: bnw300),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: bnw200,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(size12),
+                                  topRight: Radius.circular(size12),
                                 ),
-                                padding: EdgeInsets.all(size8),
-                                child: Row(
+                              ),
+                              padding: EdgeInsets.all(size8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Berlangganan: $name',
+                                    style: heading4(
+                                      FontWeight.w500,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(width: size56),
+                                  Icon(
+                                    Icons.alarm,
+                                    color: bnw900,
+                                  ), // Clock icon
+                                ],
+                              ),
+                            ),
+                            // Bottom section with white background
+                            Container(
+                              decoration: BoxDecoration(
+                                color: bnw100, // White background
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(size12),
+                                  bottomRight: Radius.circular(size12),
+                                ),
+                              ),
+                              padding: EdgeInsets.all(size8),
+                              child: Text(
+                                'Berlaku hingga : $dueDate', // Dynamic due date from API
+                                style: heading4(
+                                  FontWeight.w500,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return Center(
+                        child: Text('No data available.'),
+                      ); // No data state
+                    }
+                  },
+                ),
+
+                SizedBox(height: size16),
+                Container(
+                  // height: 330,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(size16),
+                    border: Border.all(color: bnw300),
+                  ),
+                  child: Column(
+                    children: [
+                      FutureBuilder<List<KulasedayaBinding>>(
+                        future: futureKulasedayaBinding,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Text('Gagal memuat data');
+                          }
+
+                          final data = snapshot.data!.first;
+
+                          return Container(
+                            padding: EdgeInsets.all(size12),
+                            decoration: BoxDecoration(
+                              color: primary100,
+                              borderRadius: BorderRadius.circular(size16),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
+                                    Row(
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/fifapaylogo.png',
+                                          height: 40,
+                                        ),
+                                        SizedBox(width: size12),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'FifaPay',
+                                              style: heading2(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            Text(
+                                              data.status
+                                                  ? 'Terhubung'
+                                                  : 'Belum Terhubung',
+                                              style: body1(
+                                                FontWeight.w300,
+                                                data.status
+                                                    ? primary500
+                                                    : red500,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                     Text(
-                                      'Berlangganan: $name',
-                                      style: heading4(
-                                        FontWeight.w500,
+                                      FormatCurrency.convertToIdr(
+                                        int.tryParse(data.saldo) ?? 0,
+                                      ),
+                                      style: heading1(
+                                        FontWeight.w700,
                                         bnw900,
                                         'Outfit',
                                       ),
                                     ),
-                                    SizedBox(width: size56),
-                                    Icon(
-                                      Icons.alarm,
-                                      color: bnw900,
-                                    ), // Clock icon
                                   ],
                                 ),
-                              ),
-                              // Bottom section with white background
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: bnw100, // White background
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(size12),
-                                    bottomRight: Radius.circular(size12),
-                                  ),
-                                ),
-                                padding: EdgeInsets.all(size8),
-                                child: Text(
-                                  'Berlaku hingga : $dueDate', // Dynamic due date from API
-                                  style: heading4(
-                                    FontWeight.w500,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return Center(
-                          child: Text('No data available.'),
-                        ); // No data state
-                      }
-                    },
-                  ),
-
-                  SizedBox(height: size16),
-                  Container(
-                    // height: 330,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(size16),
-                      border: Border.all(color: bnw300),
-                    ),
-                    child: Column(
-                      children: [
-                        FutureBuilder<List<KulasedayaBinding>>(
-                          future: bindingKulasedaya(widget.token),
-                          builder: (context, snapshot)
-                           {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            }
-                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return const Text('Gagal memuat data');
-                            }
-
-                            final data = snapshot.data!.first;
-
-                            return Container(
-                              padding: EdgeInsets.all(size12),
-                              decoration: BoxDecoration(
-                                color: primary100,
-                                borderRadius: BorderRadius.circular(size16),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Image.asset(
-                                            'assets/images/fifapaylogo.png',
-                                            height: 40,
-                                          ),
-                                          SizedBox(width: size12),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'FifaPay',
-                                                style: heading2(
-                                                  FontWeight.w600,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                              Text(
-                                                data.status
-                                                    ? 'Terhubung'
-                                                    : 'Belum Terhubung',
-                                                style: body1(
-                                                  FontWeight.w300,
-                                                  data.status
-                                                      ? primary500
-                                                      : red500,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        FormatCurrency.convertToIdr(
-                                          int.tryParse(data.saldo) ?? 0,
-                                        ),
-                                        style: heading1(
-                                          FontWeight.w700,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (!data.status) ...[
-                                    SizedBox(height: size16),
-                                    GestureDetector(
-                                      onTap: () =>
-                                          _pageController.jumpToPage(1),
-                                      child: SizedBox(
-                                        width: double.infinity,
-                                        child: buttonXL(
-                                          Center(
-                                            child: Text(
-                                              'Hubungkan FifaPay',
-                                              style: heading3(
-                                                FontWeight.w600,
-                                                bnw100,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                          ),
-                                          MediaQuery.of(context).size.width,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                        FutureBuilder(
-                          future: dashboard(identifier, widget.token),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Column(
-                                children: [
+                                if (!data.status) ...[
                                   SizedBox(height: size16),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: size16,
-                                      vertical: size16,
-                                    ),
-                                    decoration: BoxDecoration(color: bnw200),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons.info_fill,
-                                          size: size24,
-                                          color: bnw600,
-                                        ),
-                                        SizedBox(width: size12),
-                                        Flexible(
+                                  GestureDetector(
+                                    onTap: () => _pageController.jumpToPage(1),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: buttonXL(
+                                        Center(
                                           child: Text(
-                                            'Dibawah ini adalah data dalam kurun waktu (${snapshot.data['rangeDate']}).',
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              bnw600,
+                                            'Hubungkan FifaPay',
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw100,
                                               'Outfit',
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(height: size16),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      // vertical: size16,
-                                      horizontal: size16,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            frameDash(
-                                              'Pendapatan',
-                                              FormatCurrency.convertToIdr(
-                                                pendapatanDas,
-                                              ),
-                                              // 'Rp. $pendapatanDas',
-                                              '',
-                                              PhosphorIcons.money_fill,
-                                            ),
-                                            SizedBox(width: size16),
-                                            frameDash(
-                                              'Total Pelanggan',
-                                              membersDas,
-                                              'Pelanggan',
-                                              PhosphorIcons.users_three_fill,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: size16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            frameDash(
-                                              'Transaksi',
-                                              transaksiDas,
-                                              'Produk Terjual',
-                                              PhosphorIcons
-                                                  .shopping_cart_simple_fill,
-                                            ),
-                                            SizedBox(width: size16),
-                                            frameDash(
-                                              'Rata - rata Perhari',
-                                              FormatCurrency.convertToIdr(
-                                                rataTransaksiDas,
-                                              ),
-                                              'Transaksi',
-                                              PhosphorIcons
-                                                  .shopping_cart_simple_fill,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: size16),
-                                      ],
+                                        MediaQuery.of(context).size.width,
+                                      ),
                                     ),
                                   ),
                                 ],
-                              );
-                            }
-                            return Container(
-                              padding: EdgeInsets.fromLTRB(
-                                size8,
-                                0,
-                                size8,
-                                size8,
-                              ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(top: size8),
-                                    child: SkeletonLine(
-                                      style: SkeletonLineStyle(height: 60),
-                                    ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      FutureBuilder(
+                        future: futureDashboard,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Column(
+                              children: [
+                                SizedBox(height: size16),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: size16,
+                                    vertical: size16,
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.only(top: size8),
-                                    child: SkeletonLine(
-                                      style: SkeletonLineStyle(height: 60),
-                                    ),
+                                  decoration: BoxDecoration(color: bnw200),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        PhosphorIcons.info_fill,
+                                        size: size24,
+                                        color: bnw600,
+                                      ),
+                                      SizedBox(width: size12),
+                                      Flexible(
+                                        child: Text(
+                                          'Dibawah ini adalah data dalam kurun waktu (${snapshot.data?['rangeDate'] ?? 'N/A'}).',
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            bnw600,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                SizedBox(height: size16),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    // vertical: size16,
+                                    horizontal: size16,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          frameDash(
+                                            'Pendapatan',
+                                            FormatCurrency.convertToIdr(
+                                              pendapatanDas,
+                                            ),
+                                            // 'Rp. $pendapatanDas',
+                                            '',
+                                            PhosphorIcons.money_fill,
+                                          ),
+                                          SizedBox(width: size16),
+                                          frameDash(
+                                            'Total Pelanggan',
+                                            membersDas,
+                                            'Pelanggan',
+                                            PhosphorIcons.users_three_fill,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: size16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          frameDash(
+                                            'Transaksi',
+                                            transaksiDas,
+                                            'Produk Terjual',
+                                            PhosphorIcons
+                                                .shopping_cart_simple_fill,
+                                          ),
+                                          SizedBox(width: size16),
+                                          frameDash(
+                                            'Rata - rata Perhari',
+                                            FormatCurrency.convertToIdr(
+                                              rataTransaksiDas,
+                                            ),
+                                            'Transaksi',
+                                            PhosphorIcons
+                                                .shopping_cart_simple_fill,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: size16),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  ChartPage(token: widget.token),
-                  ChartPagePendapatan(token: widget.token),
-
-                  SizedBox(height: size16),
-                  SizedBox(
-                    child: FutureBuilder(
-                      future: dashboardSide(context, widget.token),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          List datatop =
-                              snapshot.data!['data']['product']['top-three'];
-                          List dataunder =
-                              snapshot.data!['data']['product']['under-three'];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  top: size8,
-                                  bottom: size12,
-                                ),
-                                child: Text(
-                                  'Penjualan Terlaris',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
+                          }
+                          return Container(
+                            padding: EdgeInsets.fromLTRB(
+                              size8,
+                              0,
+                              size8,
+                              size8,
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: size8),
+                                  child: SkeletonLine(
+                                    style: SkeletonLineStyle(height: 60),
                                   ),
                                 ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: size8),
+                                  child: SkeletonLine(
+                                    style: SkeletonLineStyle(height: 60),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                ChartPage(token: widget.token),
+                ChartPagePendapatan(token: widget.token),
+
+                SizedBox(height: size16),
+                SizedBox(
+                  child: FutureBuilder(
+                    future: futureDashboardSide,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData &&
+                          snapshot.data != null &&
+                          snapshot.data!['data'] != null) {
+                        List datatop =
+                            snapshot.data!['data']['product']?['top-three'] ??
+                            [];
+                        List dataunder =
+                            snapshot.data!['data']['product']?['under-three'] ??
+                            [];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: size8,
+                                bottom: size12,
                               ),
-                              datatop.isNotEmpty
-                                  ? ListView.builder(
-                                      shrinkWrap: true,
-                                      padding: EdgeInsets.zero,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: datatop.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          margin: EdgeInsets.only(
-                                            top: 4,
-                                            bottom: 4,
+                              child: Text(
+                                'Penjualan Terlaris',
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                            datatop.isNotEmpty
+                                ? ListView.builder(
+                                    shrinkWrap: true,
+                                    padding: EdgeInsets.zero,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: datatop.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.only(
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
+                                        padding: EdgeInsets.only(
+                                          left: size12,
+                                          right: size12,
+                                        ),
+                                        height: 80,
+                                        width: 240,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
                                           ),
-                                          padding: EdgeInsets.only(
-                                            left: size12,
-                                            right: size12,
+                                          color: bnw100,
+                                          border: Border.all(
+                                            color: bnw300,
+                                            width: 1.4,
                                           ),
-                                          height: 80,
-                                          width: 240,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            color: bnw100,
-                                            border: Border.all(
-                                              color: bnw300,
-                                              width: 1.4,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Container(
-                                                  width: 20,
-                                                  padding: EdgeInsets.all(4),
-                                                  child: Text(
-                                                    (index + 1).toString(),
-                                                    style: heading2(
-                                                      FontWeight.w700,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                    left: size8,
-                                                    right: size8,
-                                                  ),
-                                                  height: 48,
-                                                  width: 48,
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          size8,
-                                                        ),
-                                                    child: Image.network(
-                                                      datatop[index]['product_image'],
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => SizedBox(
-                                                            child: SvgPicture.asset(
-                                                              'assets/logoProduct.svg',
-                                                            ),
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 100,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          datatop[index]['name'],
-                                                          style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        datatop[index]['typeproducts'],
-                                                        style: body1(
-                                                          FontWeight.w400,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Spacer(),
-                                                Text(
-                                                  datatop[index]['qty'],
+                                        ),
+                                        child: Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Container(
+                                                width: 20,
+                                                padding: EdgeInsets.all(4),
+                                                child: Text(
+                                                  (index + 1).toString(),
                                                   style: heading2(
                                                     FontWeight.w700,
-                                                    primary500,
+                                                    bnw900,
                                                     'Outfit',
                                                   ),
+                                                  textAlign: TextAlign.center,
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : Text('Belum Melakukan Transaksi'),
-                              Padding(
-                                padding: EdgeInsets.only(top: size12),
-                                child: Text(
-                                  'Penjualan Terendah',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                              dataunder.isNotEmpty
-                                  ? ListView.builder(
-                                      physics: NeverScrollableScrollPhysics(),
-                                      padding: EdgeInsets.zero,
-                                      shrinkWrap: true,
-                                      itemCount: dataunder.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          margin: EdgeInsets.only(
-                                            top: 4,
-                                            bottom: 4,
-                                          ),
-                                          padding: EdgeInsets.only(
-                                            left: size12,
-                                            right: size12,
-                                          ),
-                                          height: 80,
-                                          width: 240,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            color: bnw100,
-                                            border: Border.all(
-                                              color: bnw300,
-                                              width: 1.4,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Container(
-                                                  width: 20,
-                                                  padding: EdgeInsets.all(4),
-                                                  child: Text(
-                                                    (index + 1).toString(),
-                                                    style: heading2(
-                                                      FontWeight.w700,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                  left: size8,
+                                                  right: size8,
                                                 ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                    left: size8,
-                                                    right: size8,
-                                                  ),
-                                                  height: 48,
-                                                  width: 48,
+                                                height: 48,
+                                                width: 48,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
                                                   child: Image.network(
-                                                    dataunder[index]['product_image'],
+                                                    datatop[index]['product_image'],
                                                     fit: BoxFit.cover,
                                                     errorBuilder:
                                                         (
@@ -1330,94 +1237,215 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                                         ),
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  width: 100,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          dataunder[index]['name'],
-                                                          style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        dataunder[index]['typeproducts'],
-                                                        style: body1(
-                                                          FontWeight.w400,
+                                              ),
+                                              SizedBox(
+                                                width: 100,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Flexible(
+                                                      child: Text(
+                                                        datatop[index]['name'],
+                                                        style: heading3(
+                                                          FontWeight.w600,
                                                           bnw900,
                                                           'Outfit',
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                    Text(
+                                                      datatop[index]['typeproducts'],
+                                                      style: body1(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                Spacer(),
-                                                Text(
-                                                  dataunder[index]['qty'],
-                                                  style: heading2(
-                                                    FontWeight.w700,
-                                                    primary500,
-                                                    'Outfit',
-                                                  ),
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                datatop[index]['qty'],
+                                                style: heading2(
+                                                  FontWeight.w700,
+                                                  primary500,
+                                                  'Outfit',
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
-                                        );
-                                      },
-                                    )
-                                  : Text('Belum Melakukan Transaksi'),
-                            ],
-                          );
-                        }
-                        return Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Penjualan Terlaris',
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Text('Belum Melakukan Transaksi'),
+                            Padding(
+                              padding: EdgeInsets.only(top: size12),
+                              child: Text(
+                                'Penjualan Terendah',
                                 style: heading2(
                                   FontWeight.w600,
                                   bnw900,
                                   'Outfit',
                                 ),
                               ),
-                              skeletonLinePenjualan(),
-                              skeletonLinePenjualan(),
-                              skeletonLinePenjualan(),
-                              Padding(
-                                padding: EdgeInsets.only(top: 8),
-                                child: Text(
-                                  'Penjualan Terendah',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
+                            ),
+                            dataunder.isNotEmpty
+                                ? ListView.builder(
+                                    physics: NeverScrollableScrollPhysics(),
+                                    padding: EdgeInsets.zero,
+                                    shrinkWrap: true,
+                                    itemCount: dataunder.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.only(
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
+                                        padding: EdgeInsets.only(
+                                          left: size12,
+                                          right: size12,
+                                        ),
+                                        height: 80,
+                                        width: 240,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          color: bnw100,
+                                          border: Border.all(
+                                            color: bnw300,
+                                            width: 1.4,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Container(
+                                                width: 20,
+                                                padding: EdgeInsets.all(4),
+                                                child: Text(
+                                                  (index + 1).toString(),
+                                                  style: heading2(
+                                                    FontWeight.w700,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                  left: size8,
+                                                  right: size8,
+                                                ),
+                                                height: 48,
+                                                width: 48,
+                                                child: Image.network(
+                                                  dataunder[index]['product_image'],
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => SizedBox(
+                                                        child: SvgPicture.asset(
+                                                          'assets/logoProduct.svg',
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 100,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Flexible(
+                                                      child: Text(
+                                                        dataunder[index]['name'],
+                                                        style: heading3(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      dataunder[index]['typeproducts'],
+                                                      style: body1(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                dataunder[index]['qty'],
+                                                style: heading2(
+                                                  FontWeight.w700,
+                                                  primary500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Text('Belum Melakukan Transaksi'),
+                          ],
+                        );
+                      }
+                      return Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Penjualan Terlaris',
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            skeletonLinePenjualan(),
+                            skeletonLinePenjualan(),
+                            skeletonLinePenjualan(),
+                            Padding(
+                              padding: EdgeInsets.only(top: 8),
+                              child: Text(
+                                'Penjualan Terendah',
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
                                 ),
                               ),
-                              skeletonLinePenjualan(),
-                              skeletonLinePenjualan(),
-                              skeletonLinePenjualan(),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                            ),
+                            skeletonLinePenjualan(),
+                            skeletonLinePenjualan(),
+                            skeletonLinePenjualan(),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  SizedBox(height: size64),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

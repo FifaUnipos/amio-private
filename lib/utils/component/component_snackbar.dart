@@ -1,3 +1,6 @@
+import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
+import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -115,6 +118,8 @@ Future<dynamic> showDialogBilling(BuildContext context, text) {
 }
 
 void showSnackbar(BuildContext context, jsonResponse) async {
+  final isTablet = isTabletLayout(context);
+  
   String? rc = jsonResponse['rc']?.toString();
   String? message = jsonResponse['message'] ?? jsonResponse['data'];
 
@@ -135,7 +140,7 @@ void showSnackbar(BuildContext context, jsonResponse) async {
       prefs.remove('deviceid');
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => isTablet ? LoginPage() : LoginPageMobile()),
         (Route<dynamic> route) => false,
       );
     }

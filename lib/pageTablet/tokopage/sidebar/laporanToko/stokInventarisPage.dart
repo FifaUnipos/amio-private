@@ -1109,7 +1109,7 @@ class LaporanPendapatanPerProdukState extends State<LaporanStokInventarisPage> {
                                     widget.token,
                                     _textvalueOrderBy,
                                     _textvalueKeyword,
-                                    listToko,
+                                    listToko,""
                                   );
                                   Navigator.pop(context);
                                   initState();

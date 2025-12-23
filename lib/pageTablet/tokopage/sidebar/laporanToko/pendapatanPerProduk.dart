@@ -326,7 +326,7 @@ class LaporanPendapatanPerProdukState
               ),
               child: FutureBuilder(
                 future: getLaporanPerProduk(context, widget.token,
-                    _textvalueKeyword, _textvalueOrderBy, listToko),
+                    _textvalueKeyword, _textvalueOrderBy, listToko,""),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     Map<String, dynamic>? data = snapshot.data!['data'];
@@ -337,7 +337,7 @@ class LaporanPendapatanPerProdukState
                       color: bnw100,
                       onRefresh: () async {
                         getLaporanPerProduk(context, widget.token,
-                            _textvalueKeyword, _textvalueOrderBy, listToko);
+                            _textvalueKeyword, _textvalueOrderBy, listToko,"");
                         setState(() {});
                       },
                       child: ListView.builder(
@@ -432,7 +432,7 @@ class LaporanPendapatanPerProdukState
           ),
           FutureBuilder(
               future: getLaporanPerProduk(context, widget.token,
-                  _textvalueKeyword, _textvalueOrderBy, listToko),
+                  _textvalueKeyword, _textvalueOrderBy, listToko,""),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -1051,7 +1051,7 @@ class LaporanPendapatanPerProdukState
                                     widget.token,
                                     _textvalueOrderBy,
                                     _textvalueKeyword,
-                                    listToko,
+                                    listToko,""
                                   );
                                   Navigator.pop(context);
                                   initState();

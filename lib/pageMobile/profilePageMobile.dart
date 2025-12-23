@@ -46,6 +46,7 @@ class _ProfilPageMobileState extends State<ProfilPageMobile> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('deviceid');
+    checkToken = '';
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -122,7 +123,7 @@ class _ProfilPageMobileState extends State<ProfilPageMobile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.nama,
+                          nameProfile ?? widget.nama,
                           style: heading1(FontWeight.w600, bnw900, 'Outfit'),
                         ),
                         Text(
@@ -150,10 +151,10 @@ class _ProfilPageMobileState extends State<ProfilPageMobile> {
                           builder: (context) => ProfilEditPageMobile(
                             inisial: widget.inisial,
                             namaLengkap: widget.nama,
-                            tipeAkun: statusProfile,
+                            tipeAkun: merchantType ?? '',
                             akses: "-",
                             // akses: "Administrator",
-                            email: emailProfile,
+                            email: emailProfile ?? '-',
                             telepon: widget.nomor,
                           ),
                         ),
@@ -229,6 +230,7 @@ class _ProfilPageMobileState extends State<ProfilPageMobile> {
                                   prefs.remove('roleAccount');
                                   prefs.remove('typeAccount');
                                   prefs.clear();
+                                  checkToken = '';
 
                                   Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(

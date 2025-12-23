@@ -143,7 +143,7 @@ class _SplashCheckerState extends State<SplashChecker> {
                     }
                     return LoginPage();
                   },
-                  // => statusProfile == 'Group_Merchant'
+                  // => merchantType == 'Group_Merchant'
                   //     ? SidebarXExampleApp(
                   //         id: identifier.toString(),
                   //         token: checkToken,

@@ -252,7 +252,7 @@ buttonM(Widget mywidget, Color color) {
 buttonMoutlineColor(Widget mywidget, colorBorder) {
   return Container(
     height: size44,
-    padding: EdgeInsets.symmetric(horizontal: size12),
+    padding: EdgeInsets.symmetric(horizontal: size12,),
     // padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
     decoration: BoxDecoration(
       border: Border.all(color: colorBorder),

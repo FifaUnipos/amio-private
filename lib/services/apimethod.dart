@@ -88,6 +88,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     headerTagihanUrl = '$url/api/transaction/create/reference/tagihan',
     deleteTagihanUrl = '$url/api/transaction/delete/reference/tagihan',
     getTransaksiRiwayatUrl = '$url/api/v2/transaction/',
+    getKategoriUrl = '$url/api/kategori/getdata',
     getPendapatanUrl = '$url/api/ppm/get',
     getRekonUrl = '$url/api/rekon/',
     saveRekonUrl = '$url/api/rekon/save',
@@ -157,6 +158,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     tambahKategoriLink = '$url/api/typeproduct/store',
     ubahKategoriLink = '$url/api/typeproduct/update',
     hapusKategoriLink = '$url/api/typeproduct/delete',
+    getKategoriLink = '$url/api/typeproduct',
     tipeUsaha = '$url/api/tipeusaha',
     diskonLink = '$url/api/discount',
     createDiskonLink = '$url/api/discount/store',
@@ -274,34 +276,52 @@ Future logout(token, id, context, page) async {
 //* profile *//
 var nameProfile,
     nameToko,
-    statusProfile,
+    merchantType,
     emailProfile,
     phoneProfile,
-    imageProfile;
+    imageProfile,
+    roleProfile;
 
-Future myprofile(token) async {
+var userid, merchantIdProfile, groupMerchantIdProfile;
+
+Future<void> myprofile(String token) async {
   try {
-    var response = await Dio().post(
-      myaccout,
-      data: {'deviceid': identifier},
-      options: Options(headers: {"token": token}),
+    final response = await http.post(
+      Uri.parse(myaccout),
+      headers: {"Content-Type": "application/json", "token": token},
+      body: jsonEncode({'deviceid': identifier}),
     );
 
+    print('response myprofile: ${response.body}');
     if (response.statusCode == 200) {
-      print("succes aman tentram di profile");
-      var responseValue = response.data['data'];
+      var result = jsonDecode(response.body);
+      if (result['rc'] == '00') {
+        var data = result['data'];
+        print("MYPROFILE DATA: $data");
 
-      print(responseValue);
-      nameProfile = responseValue['fullname'];
-      nameToko = responseValue['nama_toko'];
-      statusProfile = responseValue['usertype'];
-      emailProfile = responseValue['email'];
-      phoneProfile = responseValue['phonenumber'];
-      imageProfile = responseValue['account_image'];
+        nameProfile = data['fullname'];
+        nameToko = data['nama_toko'];
+        merchantType = data['usertype'];
+        emailProfile = data['email'];
+        phoneProfile = data['phonenumber'];
+        roleProfile = data['role'];
+        imageProfile = data['account_image'];
+        userid = data['userid'];
+        merchantIdProfile = data['merchantid'];
+        groupMerchantIdProfile = data['groupmerchantid'];
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('nameProfile', nameProfile ?? "");
+        await prefs.setString('nameMerchant', nameProfile ?? "");
+        await prefs.setString('merchantType', data['usertype'] ?? "");
+        await prefs.setString('emailProfile', data['email'] ?? "");
+        await prefs.setString('phoneProfile', phoneProfile ?? "");
+        await prefs.setString('imageProfile', imageProfile ?? "");
+        await prefs.setString('roleProfile', roleProfile ?? "");
+      }
     }
-    return null;
   } catch (e) {
-    throw Exception(e.toString());
+    print("Error myprofile: $e");
   }
 }
 
@@ -360,6 +380,24 @@ Future hapusKategoriForm(context, token, idkategori) async {
       // Navigator.pop(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future getTypeProduct(context, token) async {
+  try {
+    final response = await http.post(
+      Uri.parse(getKategoriLink),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({"deviceid": identifier}),
+    );
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      return decoded['data'];
+    } else {
+      return [];
     }
   } catch (e) {
     throw Exception(e.toString());
@@ -711,6 +749,8 @@ Future getAllToko(context, token, name, orderby) async {
     },
   );
 
+  print('response code toko: ${response.body}');
+
   if (response.statusCode == 200) {
     print('succes');
 
@@ -1030,7 +1070,7 @@ Future updateMerch(
     final response = await http.post(
       Uri.parse(updateMerchant),
       body: {
-        "deviceid": identifier,
+        "device_id": identifier,
         "merchantid": merchid,
         "name": nameMerch,
         "userid": "",
@@ -1049,7 +1089,7 @@ Future updateMerch(
       },
       headers: {"token": "$token"},
     );
-    // print(response.data['rc']);
+    print('response body update merchant: ${response.body}');
 
     var jsonResponse = jsonDecode(response.body);
     // print(jsonResponse['rc']);
@@ -1926,7 +1966,7 @@ Future getProduct(
 
   final body = {
     "deviceid": identifier,
-    "merchantid": merchid,
+    "merchant_id": merchid,
     "name": name,
     "order_by": orderby,
     // "is_active": false,
@@ -3074,6 +3114,44 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
   }
 }
 
+Future getLaporanDailyFull(
+  BuildContext context,
+  token,
+  date,
+  orderBy,
+  List merchid,
+  export,
+) async {
+  final String jsonMerch = json.encode(merchid);
+  final response = await http.post(
+    Uri.parse(getSinglePendapatanHarianLink),
+    headers: {'token': token},
+    body: {
+      "deviceid": identifier,
+      "date": date.toString(),
+      "orderby": orderBy.toString(),
+      "merchantid": jsonMerch,
+      "export": export,
+    },
+  );
+
+  var jsonResponse = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    print('success daily full');
+    if (export != "") {
+      // If it's an export, the API might return just the link or a JSON with data link
+      // Based on previous implementation it returns data link in 'data' field
+      return jsonResponse;
+    }
+    return jsonResponse;
+  } else {
+    print(jsonResponse['message'].toString());
+    showSnackbar(context, jsonResponse);
+    return null;
+  }
+}
+
 Future<Map<String, dynamic>> getSinglePendapatanHarian(
   token,
   date,
@@ -3276,6 +3354,7 @@ Future getLaporanMerchant(
   keyword,
   orderby,
   List merchid,
+  export,
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
@@ -3286,6 +3365,7 @@ Future getLaporanMerchant(
       "keyword": keyword.toString(),
       "orderby": orderby.toString(),
       "merchantid": jsonTest,
+      "export": export,
     },
   );
 
@@ -3351,6 +3431,7 @@ Future getLaporanPerProduk(
   keyword,
   orderby,
   List merchid,
+  export,
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
@@ -3361,6 +3442,7 @@ Future getLaporanPerProduk(
       "keyword": keyword.toString(),
       "orderby": orderby.toString(),
       "merchantid": jsonTest,
+      "export": "",
     },
   );
 
@@ -3462,7 +3544,7 @@ Future getLaporanStok(
   orderby,
   export,
 ) async {
-  print('export $export');
+  // print('export $export');
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
     Uri.parse(laporanStokUrl),
@@ -3499,14 +3581,27 @@ Future getLaporanPergerakanInventori(
   orderby,
   export,
 ) async {
-  final String jsonTest = json.encode(merchid);
+  // Parse keyword untuk mendapatkan start_date dan end_date
+  String startDate = "";
+  String endDate = "";
+
+  if (keyword.toString().contains(" s/d ")) {
+    // Format custom: "2024-03-11 s/d 2025-03-28"
+    final dates = keyword.toString().split(" s/d ");
+    startDate = dates[0].trim();
+    endDate = dates[1].trim();
+  }
+
   final response = await http.post(
     Uri.parse(laporanPergerakanInventoriUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: jsonEncode({
       "deviceid": identifier,
-      "merchant_id": merchid,
+      // "start_date": startDate,
+      // "end_date": endDate,
       "keyword": keyword.toString(),
+      "merchant_id": [],
+      "inventory_master_id": [],
       "order_by": orderby.toString(),
       "export": export,
     }),
@@ -4169,7 +4264,6 @@ Future getAdjustment(token, merchid, String name, orderby) async {
   );
 
   var jsonResponse = jsonDecode(response.body);
-
 
   if (response.statusCode == 200) {
     // print('kuontol');

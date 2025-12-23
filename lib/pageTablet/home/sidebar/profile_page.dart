@@ -124,7 +124,7 @@ class ProfilePageState extends State<ProfilePage> {
         myprofile(widget.token);
 
         nameProfile;
-        statusProfile;
+        merchantType;
         emailProfile;
         phoneProfile;
         imageProfile;
@@ -886,7 +886,7 @@ class ProfilePageState extends State<ProfilePage> {
                                             children: [
                                               SizedBox(
                                                 child: Text(
-                                                    statusProfile ==
+                                                    merchantType ==
                                                             'Group_Merchant'
                                                         ? 'Grup Toko'
                                                         : 'Toko',

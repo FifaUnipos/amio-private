@@ -120,7 +120,7 @@ class _LaporanTokoState extends State<LaporanToko> {
     List<ObjectLaporan> objects = [
       ObjectLaporan('Pendapatan Harian', 'Laporan Pendapatan Harian Toko',
           PhosphorIcons.calendar_fill),
-      if (statusProfile == 'Group_Merchant')
+      if (merchantType == 'Group_Merchant')
         ObjectLaporan('Pendapatan Toko', 'Laporan Pendapatan Keseluruhan Toko',
             PhosphorIcons.storefront_fill),
       ObjectLaporan('Pendapatan Per Produk', 'Laporan Pendapatan Per Produk',
@@ -170,7 +170,7 @@ class _LaporanTokoState extends State<LaporanToko> {
               lihatLaporanPage(objects),
               LaporanPendapatanHarianPage(
                   pageController: pageController, token: widget.token),
-              if (statusProfile == 'Group_Merchant')
+              if (merchantType == 'Group_Merchant')
                 LaporanPendapatanTokoPage(
                     pageController: pageController, token: widget.token),
               LaporanPendapatanPerProduk(

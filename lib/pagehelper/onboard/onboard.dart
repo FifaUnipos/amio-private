@@ -141,7 +141,7 @@ class _OnbordingState extends State<Onbording> {
                         MaterialPageRoute(
                           builder: (_) => widget.isTablet
                               ? MasukAkunPage()
-                              : LoginPageMobile(),
+                              : MasukAkunPageMobile(),
                         ),
                       );
                     }

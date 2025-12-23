@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:unipos_app_335/models/modelDataRegion.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
@@ -10,7 +13,8 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 
 class UbahTokoPageMobile extends StatefulWidget {
   final String token;
-  const UbahTokoPageMobile({super.key, required this.token});
+  final String? merchantId;
+  const UbahTokoPageMobile({super.key, required this.token, this.merchantId});
 
   @override
   State<UbahTokoPageMobile> createState() => _UbahTokoPageState();
@@ -33,6 +37,11 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
   List<WilayahModel> kecamatanList = [];
   List<WilayahModel> kelurahanList = [];
 
+  File? _image;
+  String? _imageUrl;
+  bool get isCreateMode =>
+      widget.merchantId == null || widget.merchantId!.isEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -46,14 +55,74 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
       tipeUsahaList = tipeUsaha;
       provinsiList = provinsi;
     });
+
+    if (!isCreateMode) {
+      final response = await getSingleMerch(
+          context, widget.token, widget.merchantId!);
+      // Assuming getSingleMerch updates globals or is modified to return data properly
+      // Based on viewed snippet, it returns jsonResponse and data is in jsonResponse['data']
+      if (response != null && response['rc'] == '00') {
+        final data = response['data'];
+        setState(() {
+          namaTokoController.text = data['name'] ?? '';
+          alamatController.text = data['address'] ?? '';
+          kodePosController.text = data['zipcode'] ?? '';
+          _imageUrl = data['logomerchant_url'];
+        });
+
+        // Trigger cascading loads
+        final provId = data['kode_province'];
+        if (provId != null) {
+          setState(() => selectedProvinsi =
+              WilayahModel(id: provId, name: data['nama_province']));
+          kabupatenList = await getKabupaten(widget.token, provId);
+
+          final regId = data['kode_regencies'];
+          if (regId != null) {
+            setState(() => selectedKabupaten =
+                WilayahModel(id: regId, name: data['nama_regencies']));
+            kecamatanList = await getKecamatan(widget.token, regId);
+
+            final distId = data['kode_district'];
+            if (distId != null) {
+              setState(() => selectedKecamatan =
+                  WilayahModel(id: distId, name: data['nama_district']));
+              kelurahanList = await getKelurahan(widget.token, distId);
+
+              final villId = data['kode_village'];
+              if (villId != null) {
+                setState(() => selectedKelurahan = WilayahModel(
+                    id: villId, name: data['nama_village']));
+              }
+            }
+          }
+        }
+        final tipeId = data['tipeusaha'];
+        if (tipeId != null) {
+          setState(() => selectedTipeUsaha =
+              TipeUsahaModel(id: tipeId, nama: data['nama_tipe_usaha']));
+        }
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Ubah Toko',
+        title: Text(
+          isCreateMode ? 'Tambah Toko' : 'Ubah Toko',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         backgroundColor: Colors.white,
@@ -66,6 +135,25 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.grey[200],
+                  backgroundImage: _image != null
+                      ? FileImage(_image!)
+                      : (_imageUrl != null && _imageUrl!.isNotEmpty
+                          ? NetworkImage(_imageUrl!)
+                          : null) as ImageProvider?,
+                  child: (_image == null &&
+                          (_imageUrl == null || _imageUrl!.isEmpty))
+                      ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                      : null,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
             buildInput('Nama Toko *', namaTokoController),
             const SizedBox(height: 16),
             buildModalSelector(
@@ -229,43 +317,56 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
                 final PageController pageController = PageController();
 
                 // ✅ Panggil API dari apimethod.dart
-                final result = await updateMerch(
-                  context,
-                  widget.token,
-                  merchid,
-                  nameMerch,
-                  address,
-                  province,
-                  regencies,
-                  district,
-                  village,
-                  zipcode,
-                  image,
-                  pageController,
-                  type,
-                );
+                String base64Image =
+                    _image != null ? base64Encode(_image!.readAsBytesSync()) : '';
 
-                // ✅ Setelah selesai, tutup loading
-                closeLoading(context);
-
-                // ✅ Jika sukses
-                if (result == "00") {
-                  showSnackbar(context, {
-                    "message": "Berhasil memperbarui data toko",
-                  });
-                  Navigator.pop(context, true);
+                String result;
+                if (isCreateMode) {
+                  result = await createMerch(
+                    context,
+                    widget.token,
+                    nameMerch,
+                    address,
+                    province,
+                    regencies,
+                    district,
+                    village,
+                    zipcode,
+                    base64Image,
+                    pageController,
+                    type,
+                  );
                 } else {
-                  showSnackbar(context, {
-                    "message": "Gagal memperbarui data toko",
-                  });
+                  // Ensure merchantId is passed correctly. widget.merchantId is the source of truth for existing ID.
+                  result = await updateMerch(
+                    context,
+                    widget.token,
+                    widget.merchantId, 
+                    nameMerch,
+                    address,
+                    province,
+                    regencies,
+                    district,
+                    village,
+                    zipcode,
+                    base64Image,
+                    pageController,
+                    type,
+                  );
                 }
+
+                // Success check (handle both String and int just in case)
+                if (result == '00' || result == 0 || result == '0') {
+                  Navigator.pop(context, true);
+                }
+
               },
               child: SizedBox(
                 width: double.infinity,
                 child: buttonM(
                   Center(
                     child: Text(
-                      'Simpan',
+                      isCreateMode ? 'Tambah' : 'Simpan',
                       style: body1(FontWeight.w600, bnw100, 'Outfit'),
                     ),
                   ),

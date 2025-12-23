@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+
 import '../masukakun.dart';
 
 import 'package:dio/dio.dart';
@@ -73,31 +75,34 @@ class _LoginPageState extends State<LoginPage> {
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: size12),
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MasukAkunPage())),
-                          child: Icon(
-                            PhosphorIcons.arrow_left,
-                            size: size40,
-                            color: bnw900,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MasukAkunPage(),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            helpQuestionShow(context);
-                          },
-                          child: Icon(
-                            PhosphorIcons.question,
-                            size: size40,
-                            color: bnw900,
-                          ),
+                        child: Icon(
+                          PhosphorIcons.arrow_left,
+                          size: size40,
+                          color: bnw900,
                         ),
-                      ]),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          helpQuestionShow(context);
+                        },
+                        child: Icon(
+                          PhosphorIcons.question,
+                          size: size40,
+                          color: bnw900,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -113,8 +118,9 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(width: size16),
                       Expanded(
                         child: ScrollConfiguration(
-                          behavior:
-                              ScrollBehavior().copyWith(overscroll: false),
+                          behavior: ScrollBehavior().copyWith(
+                            overscroll: false,
+                          ),
                           child: Container(
                             child: SingleChildScrollView(
                               keyboardDismissBehavior:
@@ -128,25 +134,37 @@ class _LoginPageState extends State<LoginPage> {
                                     Text(
                                       'Masuk',
                                       style: heading1(
-                                          FontWeight.w700, bnw900, 'Outfit'),
+                                        FontWeight.w700,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                     Text(
                                       'Masukkan nomor telepon atau email yang telah terdaftar.',
                                       style: heading3(
-                                          FontWeight.w500, bnw500, 'Outfit'),
+                                        FontWeight.w500,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
                                     ),
                                     SizedBox(height: size24),
                                     Row(
                                       children: [
                                         Text(
                                           'Nomor Telpon / Email ',
-                                          style: heading4(FontWeight.w500,
-                                              bnw900, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                         Text(
                                           '*',
-                                          style: heading4(FontWeight.w700,
-                                              red500, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w700,
+                                            red500,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -154,16 +172,20 @@ class _LoginPageState extends State<LoginPage> {
                                       child: IntrinsicHeight(
                                         child: TextFormField(
                                           // focusNode: _focusScopeNode,
-                                          style: heading2(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading2(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                           onChanged: (value) {
                                             setState(() {
                                               if (value.contains('@') ||
                                                   value.endsWith('.com')) {
                                                 validated = 'email';
                                                 onOffButton = primary500;
-                                              } else if (value
-                                                      .startsWith('08') ||
+                                              } else if (value.startsWith(
+                                                    '08',
+                                                  ) ||
                                                   value.length < 10) {
                                                 validated = 'number';
                                                 onOffButton = primary500;
@@ -173,10 +195,14 @@ class _LoginPageState extends State<LoginPage> {
                                           cursorColor: primary500,
                                           controller: phoneEmailController,
                                           decoration: InputDecoration(
-                                            errorText:
-                                                _validate ? errorText : null,
-                                            errorStyle: body1(FontWeight.w500,
-                                                red500, 'Outfit'),
+                                            errorText: _validate
+                                                ? errorText
+                                                : null,
+                                            errorStyle: body1(
+                                              FontWeight.w500,
+                                              red500,
+                                              'Outfit',
+                                            ),
                                             focusedBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
                                                 width: 2,
@@ -185,18 +211,22 @@ class _LoginPageState extends State<LoginPage> {
                                             ),
                                             focusedErrorBorder:
                                                 UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                width: 2,
-                                                color: red500,
-                                              ),
-                                            ),
+                                                  borderSide: BorderSide(
+                                                    width: 2,
+                                                    color: red500,
+                                                  ),
+                                                ),
                                             contentPadding:
                                                 EdgeInsets.symmetric(
-                                                    vertical: size12),
+                                                  vertical: size12,
+                                                ),
                                             hintText:
                                                 'Cth : 08123456789 / nabil@email.com ',
-                                            hintStyle: heading2(FontWeight.w600,
-                                                bnw400, 'Outfit'),
+                                            hintStyle: heading2(
+                                              FontWeight.w600,
+                                              bnw400,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -221,15 +251,16 @@ class _LoginPageState extends State<LoginPage> {
                                               );
                                             } else if (validated == 'email') {
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LoginWithEmail(
-                                                      email:
-                                                          phoneEmailController
-                                                              .text,
-                                                    ),
-                                                  ));
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      LoginWithEmail(
+                                                        email:
+                                                            phoneEmailController
+                                                                .text,
+                                                      ),
+                                                ),
+                                              );
                                               // getOtpEmail(
                                               // );
                                             }
@@ -237,9 +268,14 @@ class _LoginPageState extends State<LoginPage> {
                                         },
                                         child: buttonXXLonOff(
                                           Center(
-                                            child: Text('Masuk',
-                                                style: heading2(FontWeight.w600,
-                                                    bnw100, 'Outfit')),
+                                            child: Text(
+                                              'Masuk',
+                                              style: heading2(
+                                                FontWeight.w600,
+                                                bnw100,
+                                                'Outfit',
+                                              ),
+                                            ),
                                           ),
                                           double.infinity,
                                           onOffButton,
@@ -253,24 +289,30 @@ class _LoginPageState extends State<LoginPage> {
                                       children: [
                                         Text(
                                           'Belum Memiliki Akun?',
-                                          style: heading4(FontWeight.w500,
-                                              bnw900, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                         SizedBox(width: size12),
                                         GestureDetector(
                                           // onTap: () async => getOtp(),
                                           onTap: () =>
                                               Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DaftarAkunPage(),
-                                            ),
-                                          ),
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DaftarAkunPage(),
+                                                ),
+                                              ),
                                           child: Text(
                                             'Daftar',
-                                            style: heading4(FontWeight.w500,
-                                                primary500, 'Outfit'),
+                                            style: heading4(
+                                              FontWeight.w500,
+                                              primary500,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -311,12 +353,7 @@ class _LoginPageState extends State<LoginPage> {
       print("succes");
       _validate = false;
       // ignore: use_build_context_synchronously
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => page,
-        ),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => page));
     } else {
       setState(() {
         closeLoading(context);
@@ -328,20 +365,21 @@ class _LoginPageState extends State<LoginPage> {
 
   Future getOtpEmail(page) async {
     try {
-      var response = await Dio().post(checkpass, data: {
-        // 'phonenumber': '085947737725',
-        'deviceid': identifier.toString(),
-        'email': phoneEmailController.text,
-      });
+      var response = await Dio().post(
+        checkpass,
+        data: {
+          // 'phonenumber': '085947737725',
+          'deviceid': identifier.toString(),
+          'email': phoneEmailController.text,
+        },
+      );
       print(phoneEmailController);
       if (response.statusCode == 200) {
         print("succes");
         if (response.data['data'][1]) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => page,
-            ),
+            MaterialPageRoute(builder: (context) => page),
           );
         }
       }
@@ -356,10 +394,7 @@ class _LoginPageState extends State<LoginPage> {
 
 class LoginWithEmail extends StatefulWidget {
   String email;
-  LoginWithEmail({
-    Key? key,
-    required this.email,
-  }) : super(key: key);
+  LoginWithEmail({Key? key, required this.email}) : super(key: key);
 
   @override
   State<LoginWithEmail> createState() => _LoginWithEmailState();
@@ -393,28 +428,34 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: size12),
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(
-                          PhosphorIcons.arrow_left,
-                          size: size32,
-                          color: bnw900,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MasukAkunPageMobile(),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          helpQuestionShow(context);
-                        },
-                        child: Icon(
-                          PhosphorIcons.question,
-                          size: size32,
-                          color: bnw900,
-                        ),
+                      child: Icon(
+                        PhosphorIcons.arrow_left,
+                        size: size32,
+                        color: bnw900,
                       ),
-                    ]),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        helpQuestionShow(context);
+                      },
+                      child: Icon(
+                        PhosphorIcons.question,
+                        size: size32,
+                        color: bnw900,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -446,12 +487,18 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                   Text(
                                     'Masukkan Kata Sandi',
                                     style: heading1(
-                                        FontWeight.w700, bnw900, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                   Text(
                                     'Masukkan kata sandi anda.',
                                     style: heading3(
-                                        FontWeight.w500, bnw500, 'Outfit'),
+                                      FontWeight.w500,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
                                   ),
                                   SizedBox(height: size24),
                                   Row(
@@ -459,12 +506,18 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                       Text(
                                         'Kata Sandi ',
                                         style: heading4(
-                                            FontWeight.w500, bnw900, 'Outfit'),
+                                          FontWeight.w500,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                       Text(
                                         '*',
                                         style: heading4(
-                                            FontWeight.w700, red500, 'Outfit'),
+                                          FontWeight.w700,
+                                          red500,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -472,7 +525,10 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                     child: IntrinsicHeight(
                                       child: TextFormField(
                                         style: heading2(
-                                            FontWeight.w600, bnw900, 'Outfit'),
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                         cursorColor: primary500,
                                         controller: passController,
                                         obscureText: _obscureText,
@@ -481,10 +537,14 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                           setState(() {});
                                         },
                                         decoration: InputDecoration(
-                                          errorText:
-                                              _validate ? errorText : null,
-                                          errorStyle: body1(FontWeight.w500,
-                                              red500, 'Outfit'),
+                                          errorText: _validate
+                                              ? errorText
+                                              : null,
+                                          errorStyle: body1(
+                                            FontWeight.w500,
+                                            red500,
+                                            'Outfit',
+                                          ),
                                           focusedBorder: UnderlineInputBorder(
                                             borderSide: BorderSide(
                                               width: 2,
@@ -507,16 +567,20 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                           ),
                                           focusedErrorBorder:
                                               UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: red500,
-                                            ),
-                                          ),
+                                                borderSide: BorderSide(
+                                                  width: 2,
+                                                  color: red500,
+                                                ),
+                                              ),
                                           contentPadding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           hintText: 'Masukkan Kata Sandi',
-                                          hintStyle: heading2(FontWeight.w600,
-                                              bnw400, 'Outfit'),
+                                          hintStyle: heading2(
+                                            FontWeight.w600,
+                                            bnw400,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -536,8 +600,11 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                         ),
                                         child: Text(
                                           'Lupa Kata Sandi',
-                                          style: heading4(FontWeight.w500,
-                                              primary500, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            primary500,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -549,9 +616,14 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                                     },
                                     child: buttonXXL(
                                       Center(
-                                        child: Text('Masuk',
-                                            style: heading2(FontWeight.w600,
-                                                bnw100, 'Outfit')),
+                                        child: Text(
+                                          'Masuk',
+                                          style: heading2(
+                                            FontWeight.w600,
+                                            bnw100,
+                                            'Outfit',
+                                          ),
+                                        ),
                                       ),
                                       double.infinity,
                                       // onOffButton,
@@ -604,26 +676,23 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         // final NotifFCM = FCM();
 
         // NotifFCM.setNotifiications();
-        Future.delayed(
-          const Duration(seconds: 3),
-          () {
-            closeLoading(context);
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => statusProfile == 'Group_Merchant'
-                    ? SidebarXExampleApp(
-                        id: identifier.toString(),
-                        token: jsonResponse['token'],
-                      )
-                    : SidebarXExampleAppToko(
-                        token: jsonResponse['token'],
-                        id: identifier.toString(),
-                      ),
-              ),
-              (Route<dynamic> route) => false,
-            );
-          },
-        );
+        Future.delayed(const Duration(seconds: 3), () {
+          closeLoading(context);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => merchantType == 'Group_Merchant'
+                  ? SidebarXExampleApp(
+                      id: identifier.toString(),
+                      token: jsonResponse['token'],
+                    )
+                  : SidebarXExampleAppToko(
+                      token: jsonResponse['token'],
+                      id: identifier.toString(),
+                    ),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        });
 
         print(jsonResponse['data']);
 
