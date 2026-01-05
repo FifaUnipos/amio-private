@@ -52,3 +52,71 @@ class PaymentData {
     return result;
   }
 }
+
+class CoaModel {
+  String? idpaymentmethode;
+  String? paymentMethod;
+  String? paymentMethodReferenceId;
+  String? accountNumber;
+  String? category;
+  PaymentReferenceModel? paymentReference;
+
+  CoaModel({
+    this.idpaymentmethode,
+    this.paymentMethod,
+    this.paymentMethodReferenceId,
+    this.accountNumber,
+    this.category,
+    this.paymentReference,
+  });
+
+  CoaModel.fromJson(Map<String, dynamic> json) {
+    idpaymentmethode = json['idpaymentmethode'];
+    paymentMethod = json['payment_method'];
+    paymentMethodReferenceId = json['payment_method_reference_id'];
+    accountNumber = json['accountNumber'];
+    category = json['category'];
+    paymentReference = json['payment_reference'] != null
+        ? PaymentReferenceModel.fromJson(json['payment_reference'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['idpaymentmethode'] = idpaymentmethode;
+    data['payment_method'] = paymentMethod;
+    data['payment_method_reference_id'] = paymentMethodReferenceId;
+    data['accountNumber'] = accountNumber;
+    data['category'] = category;
+    if (paymentReference != null) {
+      data['payment_reference'] = paymentReference!.toJson();
+    }
+    return data;
+  }
+}
+
+class PaymentReferenceModel {
+  String? paymentReferenceId;
+  String? paymentReferenceName;
+  String? paymntReferenceImage;
+
+  PaymentReferenceModel({
+    this.paymentReferenceId,
+    this.paymentReferenceName,
+    this.paymntReferenceImage,
+  });
+
+  PaymentReferenceModel.fromJson(Map<String, dynamic> json) {
+    paymentReferenceId = json['paymentReferenceId'];
+    paymentReferenceName = json['paymentReferenceName'];
+    paymntReferenceImage = json['paymntReferenceImage'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['paymentReferenceId'] = paymentReferenceId;
+    data['paymentReferenceName'] = paymentReferenceName;
+    data['paymntReferenceImage'] = paymntReferenceImage;
+    return data;
+  }
+}

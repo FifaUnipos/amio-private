@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/discount_model.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/settings_tab.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/pageMobile/memberPageMobile.dart';
 import 'dart:convert';
@@ -120,9 +121,14 @@ class ProductVariantCategory {
 class TransaksiMobilePage extends StatefulWidget {
   final String token;
   final String merchantId;
+  final bool isEmbedded;
 
-  TransaksiMobilePage({Key? key, required this.token, required this.merchantId})
-    : super(key: key);
+  TransaksiMobilePage({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    this.isEmbedded = false,
+  }) : super(key: key);
 
   @override
   State<TransaksiMobilePage> createState() => _TransaksiMobilePageState();
@@ -168,11 +174,12 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   String? _selectedMemberName;
   String? _selectedMemberId;
   DiscountModel? _selectedDiscount;
+  int _currentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _currentTabIndex = _tabController.index;
@@ -199,7 +206,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
-          "merchantid": '',
+          "merchant_id": [widget.merchantId],
           "name": "",
           "is_active": true,
           "search": "",
@@ -208,7 +215,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       );
 
       // print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Response body cuy: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -355,7 +362,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                       (tapTrue == 2
                                           ? product.onlinePrice
                                           : (product.priceAfter ??
-                                              product.price)),
+                                                product.price)),
                                     ),
                                     style: heading3(
                                       FontWeight.w400,
@@ -385,10 +392,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                     Text(
                                       product.discountType == 'price'
                                           ? NumberFormat.currency(
-                                            locale: 'id',
-                                            symbol: 'Rp. ',
-                                            decimalDigits: 0,
-                                          ).format(product.discount ?? 0)
+                                              locale: 'id',
+                                              symbol: 'Rp. ',
+                                              decimalDigits: 0,
+                                            ).format(product.discount ?? 0)
                                           : '${product.discount ?? 0} %',
                                       style: heading4(
                                         FontWeight.w600,
@@ -1143,6 +1150,13 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                 memberId: _selectedMemberId, // Pass memberId
                 finalAmount: billAmount,
                 billData: mergedData,
+                onSuccess: () {
+                  setState(() {
+                    _cart.clear();
+                    _calculationData = null;
+                    _currentTransactionId = null;
+                  });
+                },
               ),
             ),
           );
@@ -1404,123 +1418,122 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bnw100,
-      appBar: AppBar(
-        backgroundColor: bnw100,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: bnw900),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPageMobile(token: widget.token),
-            ),
-          ),
-        ),
-        title: Text(
-          'Transaksi',
-          style: TextStyle(
-            color: bnw900,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(48),
-          child: Container(
-            alignment: Alignment.centerLeft,
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: false,
-              labelColor: primary500,
-              unselectedLabelColor: bnw500,
-              indicatorColor: primary500,
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelStyle: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                fontFamily: 'Outfit',
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-                fontFamily: 'Outfit',
-              ),
-              tabs: [
-                Tab(text: "Kasir"),
-                Tab(text: "Riwayat"),
-                // Tab(text: "Pengaturan"),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Tab 1: Kasir
-          Column(
-            children: [
-              Divider(height: 1, color: bnw300),
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: size12),
-                      decoration: BoxDecoration(
-                        color: bnw200,
-                        borderRadius: BorderRadius.circular(size8),
-                        border: Border.all(color: bnw300),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelStyle: heading2(
-                            FontWeight.w400,
-                            bnw500,
-                            'Outfit',
-                          ),
-                          hintText: 'Cari',
-                          icon: Icon(
-                            PhosphorIcons.magnifying_glass,
-                            color: bnw900,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: size12),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: _showSortModal,
-                          child: _buildDropdown(textOrderBy),
-                        ),
-                        // SizedBox(width: size12),
-                        // _buildDropdown('Semua Tipe'),
-                      ],
-                    ),
-                  ],
+      appBar: widget.isEmbedded
+          ? null
+          : AppBar(
+              backgroundColor: bnw100,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: bnw900),
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        DashboardPageMobile(token: widget.token),
+                  ),
                 ),
               ),
-              Expanded(child: _buildProductList()),
-            ],
-          ),
+              title: Text(
+                'Transaksi',
+                style: TextStyle(
+                  color: bnw900,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(48),
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: false,
+                    labelColor: primary500,
+                    unselectedLabelColor: bnw500,
+                    indicatorColor: primary500,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontFamily: 'Outfit',
+                    ),
+                    unselectedLabelStyle: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      fontFamily: 'Outfit',
+                    ),
+                    tabs: [
+                      Tab(text: "Kasir"),
+                      Tab(text: "Riwayat"),
+                      Tab(text: "Pengaturan"),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+      body: widget.isEmbedded
+          ? _buildKasirView()
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildKasirView(),
 
-          // Tab 2: Riwayat
-          HistoryTab(
-            token: widget.token,
-            merchantId: widget.merchantId,
-            baseUrl: url,
-          ),
+                // Tab 2: Riwayat
+                HistoryTab(
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  baseUrl: url,
+                ),
 
-          // Tab 3: Pengaturan
-          // SettingsTab(),
-        ],
-      ),
-      bottomNavigationBar: _currentTabIndex == 0
+                // Tab 3: Pengaturan
+                SettingsTab(token: widget.token, merchantId: widget.merchantId),
+              ],
+            ),
+      bottomNavigationBar: (widget.isEmbedded || _currentTabIndex == 0)
           ? _buildBottomBar()
           : null, // Only show on Kasir tab
+    );
+  }
+
+  Widget _buildKasirView() {
+    return Column(
+      children: [
+        Divider(height: 1, color: bnw300),
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: size12),
+                decoration: BoxDecoration(
+                  color: bnw200,
+                  borderRadius: BorderRadius.circular(size8),
+                  border: Border.all(color: bnw300),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelStyle: heading2(FontWeight.w400, bnw500, 'Outfit'),
+                    hintText: 'Cari',
+                    icon: Icon(PhosphorIcons.magnifying_glass, color: bnw900),
+                  ),
+                ),
+              ),
+              SizedBox(height: size12),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _showSortModal,
+                    child: _buildDropdown(textOrderBy),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: _buildProductList()),
+      ],
     );
   }
 
@@ -1617,10 +1630,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                         Text(
                           product.discountType == 'price'
                               ? NumberFormat.currency(
-                                locale: 'id',
-                                symbol: 'Rp. ',
-                                decimalDigits: 0,
-                              ).format(product.discount ?? 0)
+                                  locale: 'id',
+                                  symbol: 'Rp. ',
+                                  decimalDigits: 0,
+                                ).format(product.discount ?? 0)
                               : '${product.discount ?? 0} %',
                           style: heading4(FontWeight.w600, danger500, 'Outfit'),
                         ),
@@ -1642,7 +1655,6 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   }
 
   // Track tab index to hide bottom bar
-  int _currentTabIndex = 0;
 
   Widget _buildDropdown(String text) {
     return Container(
@@ -2423,144 +2435,6 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       debugPrint("Error fetching discounts: $e");
     }
     return [];
-  }
-}
-
-// -----------------------------------------------------
-// NEW TABS: History & Settings
-// -----------------------------------------------------
-
-class SettingsTab extends StatelessWidget {
-  SettingsTab({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Pengaturan Pembayaran Transaksi',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildCard(
-                  'FifaPay',
-                  'Belum Terhubung',
-                  'Hubungkan',
-                  danger500,
-                  true,
-                ),
-              ), // Mock color/icon logic
-              SizedBox(width: 16),
-              Expanded(
-                child: _buildCard(
-                  'QRIS',
-                  'Belum Terhubung',
-                  'Tambahkan',
-                  Colors.black,
-                  true,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24),
-          Text(
-            'Logo Pada Struk',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          SizedBox(height: 16),
-          SizedBox(
-            width:
-                MediaQuery.of(context).size.width /
-                2.2, // Rough half width fixed
-            child: _buildCard(
-              'Logo Struk',
-              'Belum Ada',
-              'Tambahkan',
-              Colors.black,
-              false,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCard(
-    String title,
-    String status,
-    String btnText,
-    Color color,
-    bool isPayment,
-  ) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bnw100,
-        borderRadius: BorderRadius.circular(size12),
-        border: Border.all(color: bnw300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isPayment) ...[
-            SizedBox(height: 20),
-            // Mock Icons
-            title == 'FifaPay'
-                ? Row(
-                    children: [
-                      Icon(Icons.diamond, color: Colors.pink),
-                      SizedBox(width: 4),
-                      Text(
-                        'FifaPay',
-                        style: TextStyle(
-                          color: Colors.pink,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  )
-                : Text(
-                    'QRIS',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                  ),
-            SizedBox(height: 40),
-          ] else ...[
-            Center(child: Icon(Icons.receipt, size: 60)),
-            SizedBox(height: 20),
-          ],
-
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Text(
-            status,
-            style: TextStyle(color: danger500, fontSize: size12),
-          ),
-          SizedBox(height: size12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary500,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(size8),
-                ),
-              ),
-              child: Text(btnText, style: TextStyle(color: bnw100)),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -4981,8 +4855,8 @@ class TransactionSuccessPage extends StatelessWidget {
                                           ).format(
                                             int.tryParse(
                                                   item['price_after']
-                                                      ?.toString() ??
-                                                  '0',
+                                                          ?.toString() ??
+                                                      '0',
                                                 ) ??
                                                 price,
                                           ),

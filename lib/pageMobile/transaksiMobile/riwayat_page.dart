@@ -379,7 +379,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
         },
         body: jsonEncode({
           "transaction_id": widget.transactionId,
-          "merchantid": widget.merchantId,
+          "merchant_id": widget.merchantId,
         }),
       );
 

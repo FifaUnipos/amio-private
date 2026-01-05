@@ -13,6 +13,7 @@ import 'package:unipos_app_335/models/inventoriModel/unitMasterModel.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/modelSingleTokoModel.dart';
 import 'package:unipos_app_335/models/productVariantModel.dart';
+import 'package:unipos_app_335/models/userModel.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/login_page.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
@@ -97,6 +98,7 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getMonthRekonUrl = '$url/api/rekon/month',
     getTransaksiSingleRiwayatUrl = '$url/api/v2/transaction/receipt',
     calculateTransaksiUrl = '$url/api/v2/transaction/calculating',
+    getAkunUrl = '$url/api/groupmerchant/users',
     updateAkunUrl = '$url/api/user/update',
     deleteAkunUrl = '$url/api/user/delete',
     deleteMerchan = '$url/api/merchant/delete',
@@ -1279,7 +1281,9 @@ Future deleteProduk(
 
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    isTabletLayout(context)
+        ? Navigator.of(context).popUntil((route) => route.isFirst)
+        : null;
     print('Sukses Delete Data');
     closeLoading(context);
     showSnackbar(context, jsonResponse);
@@ -1617,6 +1621,8 @@ Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
       data: {'deviceid': identifier},
       options: Options(headers: {"token": token}),
     );
+
+    print('ini adalah binding kulasedaya $response');
 
     if (response.statusCode == 200 &&
         response.data != null &&
@@ -3956,6 +3962,8 @@ Future uploadStruk(BuildContext context, token, imageStruk, merchantid) async {
     },
   );
 
+  print("response body: ${response.body}");
+
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     Navigator.pop(context);
@@ -5746,4 +5754,405 @@ Future<List<WilayahModel>> getKelurahan(String token, String kecID) async {
     }
   }
   return [];
+}
+
+Future<List<CoaModel>> getCoaList(context, token, category, orderby) async {
+  try {
+    final response = await http.post(
+      Uri.parse(getCoaMethodLink),
+      headers: {'token': token},
+      body: {"category": category, "orderby": orderby},
+    );
+    if (response.statusCode == 200) {
+      final List<CoaModel> result = [];
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['rc'] == '00' && decoded['data'] != null) {
+        for (Map<String, dynamic> item in decoded['data']) {
+          result.add(CoaModel.fromJson(item));
+        }
+      }
+      return result;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future<List<PaymentReferenceModel>> getCoaReferences(
+  context,
+  token,
+  category,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(getCoaRefLink),
+      headers: {'token': token},
+      body: {"category": category},
+    );
+    if (response.statusCode == 200) {
+      final List<PaymentReferenceModel> result = [];
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['rc'] == '00' && decoded['data'] != null) {
+        for (Map<String, dynamic> item in decoded['data']) {
+          result.add(PaymentReferenceModel.fromJson(item));
+        }
+      }
+      return result;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future createCoa(context, token, paymentMethod, accountNumber) async {
+  try {
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(addCoaLink),
+      headers: {'token': token},
+      body: {"paymentMethod": paymentMethod, "accountNumber": accountNumber},
+    );
+    closeLoading(context);
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    closeLoading(context);
+    throw Exception(e.toString());
+  }
+}
+
+Future updateCoa(
+  context,
+  token,
+  idPaymentMethod,
+  paymentMethod,
+  accountNumber,
+) async {
+  try {
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(updateCoaLink),
+      headers: {'token': token},
+      body: {
+        "idPaymentMethod": idPaymentMethod,
+        "paymentMethod": paymentMethod,
+        "accountNumber": accountNumber,
+      },
+    );
+    var jsonResponse = jsonDecode(response.body);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    closeLoading(context);
+    throw Exception(e.toString());
+  }
+}
+
+Future deleteCoa(context, token, idPaymentMethod) async {
+  try {
+    // Handling JSON array string format for ID as per request
+    String formattedId = "[\"$idPaymentMethod\"]";
+
+    final response = await http.post(
+      Uri.parse(deleteCoaLink),
+      headers: {'token': token},
+      body: {"idPaymentMethod": formattedId},
+    );
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future<CoaModel?> getSingleCoa(context, token, paymentMethodId) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$url/api/type/payment/single'),
+      headers: {'token': token},
+      body: {"payment_method_id": paymentMethodId},
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['rc'] == '00' && decoded['data'] != null) {
+        return CoaModel.fromJson(decoded['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future<List<UserModel>> getGroupUsers(context, token, orderby) async {
+  try {
+    final response = await http.get(
+      Uri.parse('$getAkunUrl?deviceid=$identifier&orderby=$orderby'),
+      headers: {'token': token},
+    );
+
+    print('Response getGroupUsers: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List<UserModel> result = [];
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['data'] != null) {
+        for (Map<String, dynamic> item in decoded['data']) {
+          result.add(UserModel.fromJson(item));
+        }
+      }
+      return result;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future createUserAccount(
+  context,
+  token,
+  merchantid,
+  fullname,
+  phonenumber,
+  email,
+  role,
+  image,
+) async {
+  try {
+    whenLoading(context);
+
+    // Ensure we have a prefix for the image if it's base64 and doesn't have one
+    String finalImage = image;
+    if (image.isNotEmpty && !image.startsWith("data:image")) {
+      finalImage = "data:image/png;base64,$image";
+    }
+
+    final response = await http.post(
+      Uri.parse(createMerchan),
+      headers: {'token': token},
+      body: {
+        "deviceid": identifier ?? "",
+        "merchantid":
+            merchantid ??
+            "", // If null, pass empty string to avoid ArgumentError
+        "fullname": fullname ?? "",
+        "usertype": "Merchant",
+        "role": role ?? "user",
+        "phonenumber": phonenumber ?? "",
+        "email": email ?? "",
+        "status": "1",
+        "image": finalImage,
+        // Added missing fields that createMerchan API might expect
+        "namemerchant": "",
+        "address": "",
+        "province": "",
+        "regencies": "",
+        "district": "",
+        "village": "",
+        "zipcode": "",
+        "businesstype": "",
+      },
+    );
+
+    print('Response createUserAccount: ${response.body}');
+
+    closeLoading(context);
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    print("Error createUserAccount: $e");
+    closeLoading(context);
+    // Return a dummy error RC so the UI doesn't hang
+    return 'XX';
+  }
+}
+
+Future updateUserAccount(
+  context,
+  token,
+  userid,
+  fullname,
+  phonenumber,
+  email,
+  role,
+  status,
+  image,
+) async {
+  try {
+    // print('test role $role');
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(updateAkunUrl),
+      headers: {'token': token},
+      body: {
+        "deviceid": identifier,
+        "userid": userid,
+        "fullname": fullname,
+        "email": email,
+        "phonenumber": phonenumber,
+        "status": status,
+        "role": role,
+        "image": image,
+      },
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    closeLoading(context);
+    throw Exception(e.toString());
+  }
+}
+
+Future deleteUserAccount(context, token, List<String> userids) async {
+  try {
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(deleteAkunUrl),
+      headers: {'token': token},
+      body: {"deviceid": identifier, "userid": jsonEncode(userids)},
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+    closeLoading(context);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    closeLoading(context);
+    throw Exception(e.toString());
+  }
+}
+
+Future<UserModel?> getSingleUserAccount(context, token, userid) async {
+  try {
+    final response = await http.post(
+      Uri.parse(getSingleAkunUrl),
+      headers: {'token': token},
+      body: {"deviceid": identifier, "userid": userid},
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['rc'] == '00' && decoded['data'] != null) {
+        return UserModel.fromJson(decoded['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+
+Future changeUserStatus(context, token, userid, status) async {
+  try {
+    final response = await http.post(
+      Uri.parse(changeActiveAkunUrl),
+      headers: {'token': token},
+      body: {"userid": userid, "status": status},
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
+// Receipt Logo API Methods
+
+Future<Map<String, dynamic>?> getReceiptLogo(
+  String token,
+  String merchantId,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse("$url/api/merchant/struk/view"),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({"deviceid": identifier, "merchantid": merchantId}),
+    );
+
+    print('Response getReceiptLogo: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['rc'] == '00') {
+        return decoded;
+      }
+    }
+    return null;
+  } catch (e) {
+    debugPrint("Error getReceiptLogo: $e");
+    return null;
+  }
+}
+
+Future<String> uploadReceiptLogo(
+  BuildContext context,
+  String token,
+  String merchantId,
+  String base64Image,
+) async {
+  try {
+    whenLoading(context);
+
+    var body = {
+      "deviceid": identifier,
+      "merchantid": merchantId,
+      "struk": "data:image/jpeg;base64,$base64Image",
+    };
+
+    final response = await http.post(
+      Uri.parse(uploadStrukLink),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    print('Response uploadReceiptLogo: ${response.body}');
+
+    closeLoading(context);
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    debugPrint("Error uploadReceiptLogo: $e");
+    closeLoading(context);
+    return 'XX';
+  }
+}
+
+Future<String> deleteReceiptLogo(
+  BuildContext context,
+  String token,
+  String merchantId,
+) async {
+  try {
+    whenLoading(context);
+
+    final response = await http.post(
+      Uri.parse("$url/api/merchant/struk/delete"),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({"deviceid": identifier, "merchantid": merchantId}),
+    );
+
+    closeLoading(context);
+    var jsonResponse = jsonDecode(response.body);
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc'];
+  } catch (e) {
+    debugPrint("Error deleteReceiptLogo: $e");
+    closeLoading(context);
+    return 'XX';
+  }
 }

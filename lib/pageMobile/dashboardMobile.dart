@@ -13,6 +13,8 @@ import 'package:unipos_app_335/pageMobile/bantuanPage.dart';
 import 'package:unipos_app_335/pageMobile/inventoryMobile/material_inventory_page.dart';
 import 'package:unipos_app_335/pageMobile/laporanMobile/laporan_page.dart';
 import 'package:unipos_app_335/pageMobile/memberPageMobile.dart';
+import 'package:unipos_app_335/pageMobile/pageAkunMobile/page_user_mobile.dart';
+import 'package:unipos_app_335/pageMobile/pageCOAMobile/page_coa_mobile.dart';
 import 'package:unipos_app_335/pageMobile/pageProductMobile/merchantSelectionPage.dart';
 import 'package:unipos_app_335/pageMobile/pageProductMobile/pageProductMobile.dart';
 import 'package:unipos_app_335/pageMobile/pageTokoMobile/pageTokoMobile.dart'
@@ -21,6 +23,8 @@ import 'package:unipos_app_335/pageMobile/printerPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/riwayat_page.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/settings_tab.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/checkConnection.dart';
@@ -114,19 +118,35 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   late Future<dynamic> futureDashboard;
   late Future<dynamic> futureDashboardSide;
 
+  bool get isCashier => roleProfile?.toLowerCase() == 'cashier';
+
   int selectedAppBarIndex = 0;
 
   // Daftar halaman
-  List<Widget> get pages => [
-    dasboardMobile(context),
-    DashboardWithNotif(notifications: notifications),
-    ProfilPageMobile(
-      nama: nameProfile ?? '',
-      role: merchantType ?? '',
-      nomor: phoneProfile ?? '',
-      inisial: imageProfile ?? '',
-    ),
-  ];
+  List<Widget> get pages => isCashier
+      ? [
+          TransaksiMobilePage(
+            token: widget.token,
+            merchantId: merchantIdProfile ?? '',
+            isEmbedded: true,
+          ),
+          HistoryTab(
+            token: widget.token,
+            merchantId: merchantIdProfile ?? '',
+            baseUrl: url,
+          ),
+          SettingsTab(token: widget.token, merchantId: merchantIdProfile ?? ''),
+        ]
+      : [
+          dasboardMobile(context),
+          DashboardWithNotif(notifications: notifications),
+          ProfilPageMobile(
+            nama: nameProfile ?? '',
+            role: merchantType ?? '',
+            nomor: phoneProfile ?? '',
+            inisial: imageProfile ?? '',
+          ),
+        ];
 
   @override
   void initState() {
@@ -214,30 +234,32 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        floatingActionButton: GestureDetector(
-          onTap: () {
-            showMenuBottomDialog(context);
-          },
-          child: buttonXL(
-            Center(
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIcons.squares_four_fill,
-                    color: bnw100,
-                    size: size32,
+        floatingActionButton: isCashier
+            ? null
+            : GestureDetector(
+                onTap: () {
+                  showMenuBottomDialog(context);
+                },
+                child: buttonXL(
+                  Center(
+                    child: Row(
+                      children: [
+                        Icon(
+                          PhosphorIcons.squares_four_fill,
+                          color: bnw100,
+                          size: size32,
+                        ),
+                        SizedBox(width: size16),
+                        Text(
+                          'Menu',
+                          style: heading1(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: size16),
-                  Text(
-                    'Menu',
-                    style: heading1(FontWeight.w600, bnw100, 'Outfit'),
-                  ),
-                ],
+                  double.infinity,
+                ),
               ),
-            ),
-            double.infinity,
-          ),
-        ),
         body: Column(
           children: [
             // 🔹 Navbar Atas
@@ -257,65 +279,96 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // Tombol Dashboard
-                  _navButton(
-                    index: 0,
-                    label: 'Dashboard',
-                    icon: Icons.speed,
-                    selectedIndex: selectedIndex,
-                    onTap: () => setState(() => selectedIndex = 0),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Tombol Notifikasi + badge
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      _navButton(
-                        index: 1,
-                        label: 'Notifikasi',
-                        icon: Icons.notifications,
-                        selectedIndex: selectedIndex,
-                        onTap: () => setState(() => selectedIndex = 1),
-                      ),
-                      if (notifications
-                          .isNotEmpty) // hanya tampil kalau ada notifikasi
-                        Positioned(
-                          top: -4,
-                          right: -4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${notifications.length}', // jumlah notifikasi dinamis
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                children: isCashier
+                    ? [
+                        // Tombol Transaksi
+                        _navButton(
+                          index: 0,
+                          label: 'Transaksi',
+                          icon: PhosphorIcons.shopping_cart_simple_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 0),
                         ),
-                    ],
-                  ),
-                  const SizedBox(width: 8),
+                        const SizedBox(width: 8),
 
-                  // Tombol Profil
-                  _navButton(
-                    index: 2,
-                    label: 'Profil',
-                    icon: Icons.account_circle,
-                    selectedIndex: selectedIndex,
-                    onTap: () => setState(() => selectedIndex = 2),
-                  ),
-                ],
+                        // Tombol Riwayat
+                        _navButton(
+                          index: 1,
+                          label: 'Riwayat',
+                          icon: PhosphorIcons.file_text_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 1),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Tombol Pengaturan
+                        _navButton(
+                          index: 2,
+                          label: 'Pengaturan',
+                          icon: PhosphorIcons.gear_six_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 2),
+                        ),
+                      ]
+                    : [
+                        // Tombol Dashboard
+                        _navButton(
+                          index: 0,
+                          label: 'Dashboard',
+                          icon: Icons.speed,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 0),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Tombol Notifikasi + badge
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _navButton(
+                              index: 1,
+                              label: 'Notifikasi',
+                              icon: Icons.notifications,
+                              selectedIndex: selectedIndex,
+                              onTap: () => setState(() => selectedIndex = 1),
+                            ),
+                            if (notifications
+                                .isNotEmpty) // hanya tampil kalau ada notifikasi
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '${notifications.length}', // jumlah notifikasi dinamis
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Tombol Profil
+                        _navButton(
+                          index: 2,
+                          label: 'Profil',
+                          icon: Icons.account_circle,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 2),
+                        ),
+                      ],
               ),
             ),
 
@@ -331,6 +384,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     myprofile(checkToken);
     print('identifier $identifier');
     print('type $merchantType');
+    print('type $merchantIdProfile');
     print('token $checkToken');
 
     showModalBottomSheet(
@@ -350,25 +404,48 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.shopping_bag_open_fill,
             'text': 'Produk',
-            'page': MerchantSelectionPage(
-              token: checkToken,
-              featureTitle: 'Produk',
-              featureBuilder: (merchantId) => ProductMobilePage(
-                token: widget.token,
-                merchantId: merchantId,
-              ),
-            ),
-            // ProductMobilePage(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Produk',
+                    featureBuilder: (merchantId) => ProductMobilePage(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : ProductMobilePage(
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                  ),
           },
           {
             'icon': PhosphorIcons.archive_box_fill,
             'text': 'Inventori',
             'page': MaterialInventoryPage(token: widget.token, merchantId: ''),
           },
+          if (merchantType == 'Group_Merchant')
+            {
+              'icon': PhosphorIcons.cardholder_fill,
+              'text': 'COA',
+              'page': PageCoaMobile(token: widget.token),
+            },
+
           {
             'icon': PhosphorIcons.shopping_cart_simple_fill,
             'text': 'Transaksi',
-            'page': TransaksiMobilePage(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Transaksi',
+                    featureBuilder: (merchantId) => TransaksiMobilePage(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : TransaksiMobilePage(
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                  ),
           },
           {
             'icon': PhosphorIcons.user_fill,
@@ -380,11 +457,17 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
             'text': 'Promo',
             'page': PromoPageMobile(token: widget.token, merchantId: ''),
           },
-          // {
-          //   'icon': PhosphorIcons.users_three_fill,
-          //   'text': 'Akun',
-          //   // 'page': const AkunPage(),
-          // },
+          if (merchantType == 'Group_Merchant')
+            {
+              'icon': PhosphorIcons.users_three_fill,
+              'text': 'Akun',
+              'page': MerchantSelectionPage(
+                token: checkToken,
+                featureTitle: 'Akun',
+                featureBuilder: (merchantId) =>
+                    PageUserMobile(token: checkToken, merchantId: merchantId),
+              ),
+            },
           // {
           //   'icon': PhosphorIcons.money_fill,
           //   'text': 'Keuangan',
@@ -438,7 +521,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
 
                           // Cek apakah variabel itu null atau tidak
                           if (pageWidget != null) {
-                            Navigator.pushReplacement(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
