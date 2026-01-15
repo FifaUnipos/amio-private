@@ -38,11 +38,22 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   String _selectedSortLabel = "Urutkan Bahan";
 
   late TabController _tabController;
+  bool get _isGroupMerchant =>
+      merchantType?.toLowerCase() == 'group' ||
+      merchantType?.toLowerCase() == 'grup';
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(
+      length: _isGroupMerchant ? 1 : 5,
+      vsync: this,
+    );
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
     _fetchMaterials();
   }
 
@@ -127,6 +138,26 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
       });
     } catch (e) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<Map<String, dynamic>?> _deleteMaterial(String itemId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$url/api/inventory/master/delete'),
+        headers: {
+          'token': widget.token,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "inventory_master_id": [itemId],
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error _deleteMaterial: $e');
+      return null;
     }
   }
 
@@ -247,6 +278,28 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                                 ),
                               ),
                             ],
+                          ),
+                          SizedBox(width: 12),
+                          IconButton(
+                            icon: Icon(PhosphorIcons.pencil, color: primary500),
+                            onPressed: () {
+                              Navigator.pop(context); // Close detail modal
+                              _navigateToAddEditMaterial(
+                                material: {
+                                  'id': detail['item_id'],
+                                  'name_item': detail['item_name'],
+                                  'unit_id': detail['unit_id'],
+                                  'unit_name': detail['unit_name'],
+                                },
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(PhosphorIcons.trash, color: Colors.red),
+                            onPressed: () {
+                              Navigator.pop(context); // Close detail modal
+                              _confirmDelete(detail['item_id']);
+                            },
                           ),
                         ],
                       ),
@@ -378,6 +431,116 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     }
   }
 
+  void _confirmDelete(String itemId) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (modalContext) {
+        return Container(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Icon(
+                PhosphorIcons.warning_circle,
+                size: 64,
+                color: Colors.orange,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Konfirmasi Hapus',
+                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Apakah Anda yakin ingin menghapus material ini?',
+                textAlign: TextAlign.center,
+                style: body1(FontWeight.w400, bnw600, 'Outfit'),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(modalContext),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: bnw300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Batal',
+                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(modalContext);
+                        final result = await _deleteMaterial(itemId);
+                        if (mounted) {
+                          if (result != null && result['rc'] == '00') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Berhasil menghapus material'),
+                              ),
+                            );
+                            _fetchMaterials();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  result?['message'] ??
+                                      'Gagal menghapus material',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Hapus',
+                        style: heading3(
+                          FontWeight.w600,
+                          Colors.white,
+                          'Outfit',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -395,38 +558,64 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           ),
         ),
         title: Text(
-          '$nameToko',
+          nameToko ?? 'Inventory Material',
           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelColor: primary500,
-          unselectedLabelColor: bnw500,
-          indicatorColor: primary500,
-          labelStyle: heading4(FontWeight.w600, primary500, 'Outfit'),
-          unselectedLabelStyle: heading4(FontWeight.w400, bnw500, 'Outfit'),
-          tabs: [
-            Tab(text: 'Material'),
-            Tab(text: 'Purchase'),
-            Tab(text: 'Adjustment'),
-            Tab(text: 'Product Material'),
-            Tab(text: 'Unit Conversi'),
-          ],
-        ),
+        bottom: _isGroupMerchant
+            ? null
+            : TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                labelColor: primary500,
+                unselectedLabelColor: bnw500,
+                indicatorColor: primary500,
+                labelStyle: heading4(FontWeight.w600, primary500, 'Outfit'),
+                unselectedLabelStyle: heading4(
+                  FontWeight.w400,
+                  bnw500,
+                  'Outfit',
+                ),
+                tabs: [
+                  Tab(text: 'Material'),
+                  Tab(text: 'Purchase'),
+                  Tab(text: 'Adjustment'),
+                  Tab(text: 'Product Material'),
+                  Tab(text: 'Unit Conversi'),
+                ],
+              ),
       ),
+      floatingActionButton: _tabController.index == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToAddEditMaterial(),
+              backgroundColor: primary500,
+              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              label: Text(
+                'Tambah Bahan',
+                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+              ),
+            )
+          : null,
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildMaterialTab(),
-          PurchaseTab(token: widget.token, merchantId: widget.merchantId),
-          AdjustmentTab(token: widget.token, merchantId: widget.merchantId),
-          ProductMaterialTab(
-            token: widget.token,
-            merchantId: widget.merchantId,
-          ),
-          UnitConversionTab(token: widget.token, merchantId: widget.merchantId),
-        ],
+        physics: _isGroupMerchant ? NeverScrollableScrollPhysics() : null,
+        children: _isGroupMerchant
+            ? [_buildMaterialTab()]
+            : [
+                _buildMaterialTab(),
+                PurchaseTab(token: widget.token, merchantId: widget.merchantId),
+                AdjustmentTab(
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                ),
+                ProductMaterialTab(
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                ),
+                UnitConversionTab(
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                ),
+              ],
       ),
     );
   }
@@ -562,7 +751,6 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           padding: EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
@@ -576,42 +764,431 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
               ),
               SizedBox(height: 20),
               Text(
-                'Urutkan',
+                'Urutkan Bahan',
                 style: heading2(FontWeight.w700, bnw900, 'Outfit'),
               ),
-              SizedBox(height: 16),
-              ListTile(
-                title: Text(
-                  'Nama A-Z',
-                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'name_asc';
-                    _selectedSortLabel = 'Nama A-Z';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'Nama Z-A',
-                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'name_desc';
-                    _selectedSortLabel = 'Nama Z-A';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
-                },
-              ),
+              SizedBox(height: 20),
+              _buildSortOption('Nama A-Z', 'name_asc'),
+              _buildSortOption('Nama Z-A', 'name_desc'),
+              _buildSortOption('Stok Terbanyak', 'qty_desc'),
+              _buildSortOption('Stok Terkecil', 'qty_asc'),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSortOption(String label, String value) {
+    bool isSelected = _selectedSortValue == value;
+    return ListTile(
+      title: Text(
+        label,
+        style: heading4(
+          isSelected ? FontWeight.w600 : FontWeight.w400,
+          isSelected ? primary500 : bnw900,
+          'Outfit',
+        ),
+      ),
+      trailing: isSelected ? Icon(Icons.check, color: primary500) : null,
+      onTap: () {
+        setState(() {
+          _selectedSortValue = value;
+          _selectedSortLabel = label;
+        });
+        Navigator.pop(context);
+        _fetchMaterials();
+      },
+    );
+  }
+
+  void _navigateToAddEditMaterial({Map<String, dynamic>? material}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditMaterialPage(
+          token: widget.token,
+          merchantId: widget.merchantId,
+          material: material,
+          onSuccess: _fetchMaterials,
+        ),
+      ),
+    );
+  }
+}
+
+class AddEditMaterialPage extends StatefulWidget {
+  final String token;
+  final String merchantId;
+  final Map<String, dynamic>? material;
+  final VoidCallback onSuccess;
+
+  const AddEditMaterialPage({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    this.material,
+    required this.onSuccess,
+  }) : super(key: key);
+
+  @override
+  _AddEditMaterialPageState createState() => _AddEditMaterialPageState();
+}
+
+class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
+  late TextEditingController _nameController;
+  Map<String, dynamic>? _selectedUnit;
+  bool _isLoading = false;
+
+  bool get isEdit => widget.material != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: isEdit ? widget.material!['name_item'] : '',
+    );
+    if (isEdit) {
+      _selectedUnit = {
+        'id': widget.material!['unit_id'],
+        'name': widget.material!['unit_name'],
+      };
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _showUnitPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return FutureBuilder(
+          future: http.post(
+            Uri.parse(getUnitMasterDataLink),
+            headers: {
+              'token': widget.token,
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({"deviceid": identifier}),
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (snapshot.hasData) {
+              final response = snapshot.data as http.Response;
+              final data = jsonDecode(response.body);
+              final List units = data['data'] ?? [];
+
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.6,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Pilih Unit/Satuan',
+                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: units.length,
+                        itemBuilder: (context, index) {
+                          final unit = units[index];
+                          return ListTile(
+                            title: Text(
+                              unit['name'],
+                              style: heading4(
+                                FontWeight.w500,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            subtitle: Text(
+                              unit['abbreviation'] ?? '',
+                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                _selectedUnit = {
+                                  'id': unit['id'],
+                                  'name': unit['name'],
+                                };
+                              });
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Center(child: Text('Gagal memuat data unit')),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _saveMaterial({bool addNew = false}) async {
+    final name = _nameController.text;
+    if (name.isEmpty || _selectedUnit == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nama dan Unit wajib diisi')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse(isEdit ? updateMasterDataLink : createMasterDataLink),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "inventory_master_id": widget.material!['id'],
+          "name_item": name,
+          "unit": _selectedUnit!['id'],
+          // "merchant_id": widget.merchantId,
+          if (isEdit) "item_id": widget.material!['id'],
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (data['rc'] == '00') {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Berhasil menyimpan material')));
+        widget.onSuccess();
+
+        if (addNew) {
+          setState(() {
+            _nameController.clear();
+            _selectedUnit = null;
+            _isLoading = false;
+          });
+        } else {
+          Navigator.pop(context);
+        }
+      } else {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Gagal')));
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: bnw900),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          isEdit ? 'Ubah Bahan' : 'Tambah Bahan',
+          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+        ),
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 12),
+                        RichText(
+                          text: TextSpan(
+                            text: 'Nama Barang',
+                            style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                            children: [
+                              TextSpan(
+                                text: ' *',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            hintText: 'Cth: Matcha',
+                            hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(color: bnw300),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        RichText(
+                          text: TextSpan(
+                            text: 'Unit/Satuan',
+                            style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                            children: [
+                              TextSpan(
+                                text: ' *',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        InkWell(
+                          onTap: _showUnitPicker,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blue[900]!),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _selectedUnit?['name'] ?? 'Pilih Unit/Satuan',
+                                  style: body1(
+                                    FontWeight.w500,
+                                    _selectedUnit == null ? bnw400 : bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Icon(
+                                  PhosphorIcons.caret_down,
+                                  size: 16,
+                                  color: bnw500,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        offset: Offset(0, -4),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      if (!isEdit)
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () => _saveMaterial(addNew: true),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primary500),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Save & Add New',
+                              style: heading3(
+                                FontWeight.w600,
+                                primary500,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (!isEdit) SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => _saveMaterial(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            isEdit ? 'Save Changes' : 'Create',
+                            style: heading3(
+                              FontWeight.w600,
+                              Colors.white,
+                              'Outfit',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

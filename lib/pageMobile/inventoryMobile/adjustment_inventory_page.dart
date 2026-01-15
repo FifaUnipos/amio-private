@@ -15,11 +15,8 @@ class AdjustmentTab extends StatefulWidget {
   final String token;
   final String merchantId;
 
-  AdjustmentTab({
-    Key? key,
-    required this.token,
-    required this.merchantId,
-  }) : super(key: key);
+  AdjustmentTab({Key? key, required this.token, required this.merchantId})
+    : super(key: key);
 
   @override
   _AdjustmentTabState createState() => _AdjustmentTabState();
@@ -60,10 +57,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
       final response = await http.post(
         Uri.parse('$url/api/inventory/adjustment/detail'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "deviceid": identifier,
-          "group_id": groupId,
-        }),
+        body: jsonEncode({"deviceid": identifier, "group_id": groupId}),
       );
 
       if (response.statusCode == 200) {
@@ -80,10 +74,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
       final response = await http.post(
         Uri.parse('$url/api/inventory/adjustment/delete'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "deviceid": identifier,
-          "group_id": groupIds,
-        }),
+        body: jsonEncode({"deviceid": identifier, "group_id": groupIds}),
       );
 
       if (response.statusCode == 200) {
@@ -133,7 +124,10 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
               SizedBox(height: 20),
               ListTile(
                 leading: Icon(PhosphorIcons.pencil, color: primary500),
-                title: Text('Update', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                title: Text(
+                  'Update',
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _navigateToUpdateAdjustment(groupId);
@@ -142,7 +136,10 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
               Divider(),
               ListTile(
                 leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                title: Text('Delete', style: heading3(FontWeight.w600, Colors.red, 'Outfit')),
+                title: Text(
+                  'Delete',
+                  style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(groupId);
@@ -178,7 +175,11 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                 ),
               ),
               SizedBox(height: 24),
-              Icon(PhosphorIcons.warning_circle, size: 64, color: Colors.orange),
+              Icon(
+                PhosphorIcons.warning_circle,
+                size: 64,
+                color: Colors.orange,
+              ),
               SizedBox(height: 16),
               Text(
                 'Konfirmasi Hapus',
@@ -203,7 +204,10 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Batal', style: heading3(FontWeight.w600, bnw600, 'Outfit')),
+                      child: Text(
+                        'Batal',
+                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
+                      ),
                     ),
                   ),
                   SizedBox(width: 12),
@@ -216,12 +220,22 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                         if (mounted) {
                           if (result != null && result['rc'] == '00') {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result['rm'] ?? 'Berhasil menghapus data')),
+                              SnackBar(
+                                content: Text(
+                                  result['rm'] ?? 'Berhasil menghapus data',
+                                ),
+                              ),
                             );
                             _fetchAdjustments();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result?['rm'] ?? result?['message'] ?? 'Gagal menghapus data')),
+                              SnackBar(
+                                content: Text(
+                                  result?['rm'] ??
+                                      result?['message'] ??
+                                      'Gagal menghapus data',
+                                ),
+                              ),
                             );
                           }
                         }
@@ -233,7 +247,14 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Hapus', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                      child: Text(
+                        'Hapus',
+                        style: heading3(
+                          FontWeight.w600,
+                          Colors.white,
+                          'Outfit',
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -280,61 +301,74 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _navigateToAddAdjustment,
-        backgroundColor: primary500,
-        icon: Icon(PhosphorIcons.plus, color: Colors.white),
-        label: Text('Sesuaikan', style: heading4(FontWeight.w600, Colors.white, 'Outfit')),
-      ),
+      floatingActionButton: merchantType == 'Group_Merchant'
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _navigateToAddAdjustment,
+              backgroundColor: primary500,
+              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              label: Text(
+                'Sesuaikan',
+                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+              ),
+            ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _adjustments.isEmpty
-              ? Center(
-                  child: Text(
-                    'Tidak ada data penyesuaian',
-                    style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                )
-              : ListView.builder(
+          ? Center(
+              child: Text(
+                'Tidak ada data penyesuaian',
+                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+            )
+          : ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: _adjustments.length,
+              itemBuilder: (context, index) {
+                final adjustment = _adjustments[index];
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
                   padding: EdgeInsets.all(16),
-                  itemCount: _adjustments.length,
-                  itemBuilder: (context, index) {
-                    final adjustment = _adjustments[index];
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: bnw200),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  adjustment['title'] ?? '',
-                                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  adjustment['activity_date'] ?? '',
-                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                                ),
-                              ],
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: bnw200),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              adjustment['title'] ?? '',
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
-                          ),
-                          InkWell(
-                            onTap: () => _showOptionsModal(adjustment['group_id']),
-                            child: Icon(PhosphorIcons.pencil_simple, color: bnw600, size: 20),
-                          ),
-                        ],
+                            SizedBox(height: 4),
+                            Text(
+                              adjustment['activity_date'] ?? '',
+                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  },
-                ),
+                      InkWell(
+                        onTap: () => _showOptionsModal(adjustment['group_id']),
+                        child: Icon(
+                          PhosphorIcons.pencil_simple,
+                          color: bnw600,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }
@@ -389,7 +423,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     // If editing, load existing data
     if (widget.existingData != null) {
       _titleController.text = widget.existingData!['title'] ?? '';
-      
+
       // Parse date
       try {
         final dateStr = widget.existingData!['date'];
@@ -417,10 +451,13 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
               'name': item['name_item'],
               'unit_name': item['unit_name'],
               'unit_abbreviation': item['unit_abbreviation'],
-              'qty': double.tryParse(item['qty_after_activity'].toString()) ?? 0,
+              'qty':
+                  double.tryParse(item['qty_after_activity'].toString()) ?? 0,
               'unit_conversion_id': item['unit_conversion_id'],
-              'unit_conversion_name': item['unit_conversion_name'] ?? item['unit_abbreviation'],
-              'conversion_factor': double.tryParse(item['conversion_factor'].toString()) ?? 1,
+              'unit_conversion_name':
+                  item['unit_conversion_name'] ?? item['unit_abbreviation'],
+              'conversion_factor':
+                  double.tryParse(item['conversion_factor'].toString()) ?? 1,
             };
           }).toList();
         });
@@ -510,8 +547,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                     itemCount: _allMaterials.length,
                     itemBuilder: (context, index) {
                       final material = _allMaterials[index];
-                      final isSelected = _selectedMaterials.any((m) => m['id'] == material['id']);
-                      
+                      final isSelected = _selectedMaterials.any(
+                        (m) => m['id'] == material['id'],
+                      );
+
                       return CheckboxListTile(
                         value: isSelected,
                         onChanged: (checked) {
@@ -520,7 +559,9 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           } else {
                             // Uncheck - remove from selected materials
                             setState(() {
-                              _selectedMaterials.removeWhere((m) => m['id'] == material['id']);
+                              _selectedMaterials.removeWhere(
+                                (m) => m['id'] == material['id'],
+                              );
                             });
                             setModalState(() {});
                           }
@@ -551,7 +592,14 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Batal', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                        child: Text(
+                          'Batal',
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(width: 12),
@@ -565,7 +613,14 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Simpan', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                        child: Text(
+                          'Simpan',
+                          style: heading3(
+                            FontWeight.w600,
+                            Colors.white,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -578,7 +633,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     );
   }
 
-  void _showMaterialDetailInput(Map<String, dynamic> material, Function setParentModalState) {
+  void _showMaterialDetailInput(
+    Map<String, dynamic> material,
+    Function setParentModalState,
+  ) {
     final TextEditingController qtyController = TextEditingController();
     String? selectedConversionId;
     String selectedConversionName = material['unit_abbreviation'] ?? '';
@@ -592,8 +650,9 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          double calculatedQty = (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
-          
+          double calculatedQty =
+              (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
+
           return Container(
             height: MediaQuery.of(context).size.height * 0.5,
             padding: EdgeInsets.only(
@@ -629,7 +688,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   SizedBox(height: 20),
                   Row(
                     children: [
-                      Icon(PhosphorIcons.check_circle, color: primary500, size: 24),
+                      Icon(
+                        PhosphorIcons.check_circle,
+                        color: primary500,
+                        size: 24,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -637,7 +700,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           children: [
                             Text(
                               material['name_item'] ?? '',
-                              style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               material['unit_name'] ?? '',
@@ -674,7 +741,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                                   border: InputBorder.none,
                                   hintText: '0',
                                 ),
-                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 onChanged: (value) => setModalState(() {}),
                               ),
                             ),
@@ -698,33 +769,44 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                             Expanded(
                               child: InkWell(
                                 onTap: () {
-                                  _showUnitConversionPicker(
-                                    context,
-                                    material,
-                                    (conversionId, conversionName, factor) {
-                                      setModalState(() {
-                                        selectedConversionId = conversionId;
-                                        selectedConversionName = conversionName;
-                                        conversionFactor = factor;
-                                      });
-                                    },
-                                  );
+                                  _showUnitConversionPicker(context, material, (
+                                    conversionId,
+                                    conversionName,
+                                    factor,
+                                  ) {
+                                    setModalState(() {
+                                      selectedConversionId = conversionId;
+                                      selectedConversionName = conversionName;
+                                      conversionFactor = factor;
+                                    });
+                                  });
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color: bnw300),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         selectedConversionName,
-                                        style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                                        style: heading4(
+                                          FontWeight.w500,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
-                                      Icon(Icons.arrow_drop_down, color: bnw900),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        color: bnw900,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -748,25 +830,35 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Batal', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                          child: Text(
+                            'Batal',
+                            style: heading3(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                       SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            final qty = double.tryParse(qtyController.text) ?? 0;
-                            
+                            final qty =
+                                double.tryParse(qtyController.text) ?? 0;
+
                             if (qty > 0) {
                               setState(() {
                                 _selectedMaterials.add({
                                   'id': material['id'],
                                   'name': material['name_item'],
                                   'unit_name': material['unit_name'],
-                                  'unit_abbreviation': material['unit_abbreviation'],
+                                  'unit_abbreviation':
+                                      material['unit_abbreviation'],
                                   'qty': qty,
                                   'unit_conversion_id': selectedConversionId,
-                                  'unit_conversion_name': selectedConversionName,
+                                  'unit_conversion_name':
+                                      selectedConversionName,
                                   'conversion_factor': conversionFactor,
                                 });
                               });
@@ -774,7 +866,9 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Material berhasil ditambahkan'),
+                                  content: Text(
+                                    'Material berhasil ditambahkan',
+                                  ),
                                   duration: Duration(seconds: 1),
                                 ),
                               );
@@ -787,7 +881,14 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Simpan', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                          child: Text(
+                            'Simpan',
+                            style: heading3(
+                              FontWeight.w600,
+                              Colors.white,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -861,7 +962,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                     onSelected(
                       conversion['id'],
                       conversion['conversion_name'] ?? '',
-                      double.tryParse(conversion['conversion_factor'].toString()) ?? 1.0,
+                      double.tryParse(
+                            conversion['conversion_factor'].toString(),
+                          ) ??
+                          1.0,
                     );
                     Navigator.pop(context);
                   },
@@ -875,10 +979,12 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   }
 
   Future<void> _saveAdjustment() async {
-    if (_titleController.text.isEmpty || _selectedDate == null || _selectedMaterials.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mohon lengkapi semua data')),
-      );
+    if (_titleController.text.isEmpty ||
+        _selectedDate == null ||
+        _selectedMaterials.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Mohon lengkapi semua data')));
       return;
     }
 
@@ -893,13 +999,21 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     }).toList();
 
     Map<String, dynamic>? result;
-    
+
     if (widget.groupId != null) {
       // Update
-      result = await _updateAdjustment(dateStr, _titleController.text, usageInventory);
+      result = await _updateAdjustment(
+        dateStr,
+        _titleController.text,
+        usageInventory,
+      );
     } else {
       // Create
-      result = await _createAdjustment(dateStr, _titleController.text, usageInventory);
+      result = await _createAdjustment(
+        dateStr,
+        _titleController.text,
+        usageInventory,
+      );
     }
 
     if (result != null && result['rc'] == '00') {
@@ -992,9 +1106,15 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           children: [
             Row(
               children: [
-                Text('Judul', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                Text(
+                  'Judul',
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 SizedBox(width: 4),
-                Text('*', style: heading4(FontWeight.w600, Colors.red, 'Outfit')),
+                Text(
+                  '*',
+                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
               ],
             ),
             SizedBox(height: 8),
@@ -1020,9 +1140,15 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
             SizedBox(height: 24),
             Row(
               children: [
-                Text('Tanggal', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                Text(
+                  'Tanggal',
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 SizedBox(width: 4),
-                Text('*', style: heading4(FontWeight.w600, Colors.red, 'Outfit')),
+                Text(
+                  '*',
+                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
               ],
             ),
             SizedBox(height: 8),
@@ -1050,7 +1176,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                       _selectedDate != null
                           ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
                           : 'Pilih tanggal',
-                      style: body1(FontWeight.w400, _selectedDate != null ? bnw900 : bnw400, 'Outfit'),
+                      style: body1(
+                        FontWeight.w400,
+                        _selectedDate != null ? bnw900 : bnw400,
+                        'Outfit',
+                      ),
                     ),
                     Icon(PhosphorIcons.calendar_blank, color: bnw600),
                   ],
@@ -1090,7 +1220,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
               ..._selectedMaterials.asMap().entries.map((entry) {
                 final index = entry.key;
                 final material = entry.value;
-                
+
                 return Container(
                   margin: EdgeInsets.only(bottom: 12),
                   padding: EdgeInsets.all(16),
@@ -1107,7 +1237,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           children: [
                             Text(
                               material['name'],
-                              style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               material['unit_conversion_name'],
@@ -1161,7 +1295,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                 ),
                 minimumSize: Size(double.infinity, 50),
               ),
-              child: Text('Penyesuaian', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+              child: Text(
+                'Penyesuaian',
+                style: heading3(FontWeight.w600, primary500, 'Outfit'),
+              ),
             ),
             SizedBox(height: 12),
             Row(
@@ -1176,7 +1313,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text('Save & Add New', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                    child: Text(
+                      'Save & Add New',
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    ),
                   ),
                 ),
                 SizedBox(width: 12),
@@ -1190,7 +1330,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text('Create', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                    child: Text(
+                      'Create',
+                      style: heading3(FontWeight.w600, Colors.white, 'Outfit'),
+                    ),
                   ),
                 ),
               ],

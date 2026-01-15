@@ -236,30 +236,32 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
       child: Scaffold(
         floatingActionButton: isCashier
             ? null
-            : GestureDetector(
-                onTap: () {
-                  showMenuBottomDialog(context);
-                },
-                child: buttonXL(
-                  Center(
-                    child: Row(
-                      children: [
-                        Icon(
-                          PhosphorIcons.squares_four_fill,
-                          color: bnw100,
-                          size: size32,
-                        ),
-                        SizedBox(width: size16),
-                        Text(
-                          'Menu',
-                          style: heading1(FontWeight.w600, bnw100, 'Outfit'),
-                        ),
-                      ],
+            : SafeArea(
+              child: GestureDetector(
+                  onTap: () {
+                    showMenuBottomDialog(context);
+                  },
+                  child: buttonXL(
+                    Center(
+                      child: Row(
+                        children: [
+                          Icon(
+                            PhosphorIcons.squares_four_fill,
+                            color: bnw100,
+                            size: size32,
+                          ),
+                          SizedBox(width: size16),
+                          Text(
+                            'Menu',
+                            style: heading1(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                        ],
+                      ),
                     ),
+                    double.infinity,
                   ),
-                  double.infinity,
                 ),
-              ),
+            ),
         body: Column(
           children: [
             // 🔹 Navbar Atas
@@ -348,8 +350,8 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                   ),
                                   child: Text(
                                     '${notifications.length}', // jumlah notifikasi dinamis
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: bnw100,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -421,7 +423,16 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.archive_box_fill,
             'text': 'Inventori',
-            'page': MaterialInventoryPage(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Produk',
+                    featureBuilder: (merchantId) => MaterialInventoryPage(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : MaterialInventoryPage(token: widget.token, merchantId: ''),
           },
           if (merchantType == 'Group_Merchant')
             {
@@ -490,103 +501,105 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           },
         ];
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: size24, vertical: size16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              dividerShowdialog(),
-              SizedBox(height: size16),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: menuItems.length,
-                itemBuilder: (context, index) {
-                  final item = menuItems[index];
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          print(checkToken);
-                          Navigator.pop(context); // tutup modal
-                          // Ambil dulu halamannya ke variabel
-                          final dynamic pageWidget = item['page'];
-
-                          // Cek apakah variabel itu null atau tidak
-                          if (pageWidget != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    pageWidget
-                                        as Widget, // Aman untuk di-cast di sini
-                              ),
-                            );
-                          } else {
-                            // Jika NULL, tangani errornya.
-                            // Misalnya, tampilkan pesan atau jangan lakukan apa-apa.
-                            print(
-                              'Error: Halaman tidak ditemukan untuk item: $item',
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Halaman sedang dalam pengembangan',
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: size24, vertical: size16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: menuItems.length,
+                  itemBuilder: (context, index) {
+                    final item = menuItems[index];
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            print(checkToken);
+                            Navigator.pop(context); // tutup modal
+                            // Ambil dulu halamannya ke variabel
+                            final dynamic pageWidget = item['page'];
+          
+                            // Cek apakah variabel itu null atau tidak
+                            if (pageWidget != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      pageWidget
+                                          as Widget, // Aman untuk di-cast di sini
                                 ),
-                              ),
-                            );
-                          }
-                        },
-                        icon: Icon(
-                          item['icon'] as IconData,
-                          color: primary500,
-                          size: size48,
+                              );
+                            } else {
+                              // Jika NULL, tangani errornya.
+                              // Misalnya, tampilkan pesan atau jangan lakukan apa-apa.
+                              print(
+                                'Error: Halaman tidak ditemukan untuk item: $item',
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Halaman sedang dalam pengembangan',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            item['icon'] as IconData,
+                            color: primary500,
+                            size: size48,
+                          ),
                         ),
-                      ),
-                      Text(
-                        item['text'] as String,
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: bnw300,
-                          shape: BoxShape.circle,
+                        Text(
+                          item['text'] as String,
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                         ),
-                        padding: EdgeInsets.all(size24),
-                        child: Icon(
-                          PhosphorIcons.x_fill,
-                          size: size32,
-                          color: bnw900,
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: bnw300,
+                            shape: BoxShape.circle,
+                          ),
+                          padding: EdgeInsets.all(size24),
+                          child: Icon(
+                            PhosphorIcons.x_fill,
+                            size: size32,
+                            color: bnw900,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: size12),
-                      Text(
-                        'Tutup',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                    ],
+                        SizedBox(height: size12),
+                        Text(
+                          'Tutup',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1671,17 +1684,17 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.15),
+          color: isSelected ? bnw100 : bnw100.withOpacity(0.15),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Colors.black : Colors.white),
+            Icon(icon, color: isSelected ? primary500 : bnw100),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.black : Colors.white,
+                color: isSelected ? primary500 : bnw100,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -1980,7 +1993,7 @@ class _RangePill extends StatelessWidget {
   Widget build(BuildContext context) {
     const blue = Color(0xFF2A63FF);
     final borderColor = selected ? blue : const Color(0xFFD1D5DB); // gray-300
-    final fill = selected ? const Color(0x1A2A63FF) : Colors.white; // ~10% blue
+    final fill = selected ? const Color(0x1A2A63FF) : bnw100; // ~10% blue
     final textColor = selected ? blue : const Color(0xFF374151); // gray-700
 
     return InkWell(
@@ -2194,7 +2207,7 @@ class _ChartCardState extends State<ChartCard> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: bnw100,
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: const [
                           BoxShadow(blurRadius: 12, color: Color(0x22000000)),
@@ -2391,7 +2404,7 @@ class _LineAreaChartPainter extends CustomPainter {
         Offset(p.dx, chartRect.bottom),
         guide,
       );
-      canvas.drawCircle(p, 5, Paint()..color = Colors.white);
+      canvas.drawCircle(p, 5, Paint()..color = bnw100);
       canvas.drawCircle(p, 4, Paint()..color = lineColor);
     }
   }

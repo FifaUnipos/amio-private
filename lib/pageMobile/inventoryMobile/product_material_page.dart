@@ -228,7 +228,9 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton:merchantType == 'Group_Merchant'
+          ? null
+          : FloatingActionButton.extended(
         onPressed: () => _navigateToAddPage(),
         backgroundColor: primary500,
         icon: Icon(PhosphorIcons.plus, color: Colors.white),

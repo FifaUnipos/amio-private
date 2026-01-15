@@ -143,134 +143,136 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
         backgroundColor: bnw100,
 
         body: isSwitched
-            ? Padding(
-                padding: EdgeInsets.fromLTRB(size32, 0, size32, size16),
-                child: Column(
-                  children: [
-                    appbar(context, false),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        physics: BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
+            ? SafeArea(
+              child: Padding(
+                  padding: EdgeInsets.fromLTRB(size32, 0, size32, size16),
+                  child: Column(
+                    children: [
+                      appbar(context, false),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          physics: BouncingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Daftar Sebagai Pemilik Toko',
+                                      style: heading1(
+                                          FontWeight.w700, bnw900, 'Outfit'),
+                                    ),
+                                    Text(
+                                      'Isikan data anda dengan lengkap',
+                                      style: heading3(
+                                          FontWeight.w500, bnw500, 'Outfit'),
+                                    ),
+                                    SizedBox(height: size12),
+                                    imagefieldXL(
+                                      myImage,
+                                      // getImage,
+                                      test,
+                                      'Logo/Foto Toko',
+                                      'Masukkan foto atau logo dari tokomu',
+                                      myImage == null
+                                          ? 'Tambah Gambar'
+                                          : 'Ubah Gambar',
+                                    ),
+                                    SizedBox(height: size16),
+                                    Column(
+                                      children: [
+                                        textfieldXLdaftar(
+                                          'Nama Toko',
+                                          'Cth: King Dragon Roll Jakarta',
+                                          'Form harus diisi!',
+                                          conNameMerch,
+                                          false,
+                                        ),
+                                        SizedBox(height: size32),
+                                        fieldTipeUsaha(),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: size16),
+                              textfieldXLdaftar(
+                                'Alamat',
+                                'Jl. Pramuka No.99, RT01/RW02, Marga Wisata',
+                                'Form harus diisi!',
+                                conAddress,
+                                false,
+                              ),
+                              SizedBox(height: size16),
+                              provinceField(context),
+                              SizedBox(height: size16),
+                              regenciesField(context),
+                              SizedBox(height: size16),
+                              districtField(context),
+                              SizedBox(height: size16),
+                              villageField(),
+                              SizedBox(height: size16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: textfieldXLdaftar(
+                                  'Kode Pos',
+                                  '1234',
+                                  'Form harus diisi!',
+                                  conCodePos,
+                                  false,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      bttnValidated
+                          ? SizedBox(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    'Daftar Sebagai Pemilik Toko',
-                                    style: heading1(
-                                        FontWeight.w700, bnw900, 'Outfit'),
-                                  ),
-                                  Text(
-                                    'Isikan data anda dengan lengkap',
-                                    style: heading3(
-                                        FontWeight.w500, bnw500, 'Outfit'),
-                                  ),
-                                  SizedBox(height: size12),
-                                  imagefieldXL(
-                                    myImage,
-                                    // getImage,
-                                    test,
-                                    'Logo/Foto Toko',
-                                    'Masukkan foto atau logo dari tokomu',
-                                    myImage == null
-                                        ? 'Tambah Gambar'
-                                        : 'Ubah Gambar',
-                                  ),
-                                  SizedBox(height: size16),
-                                  Column(
-                                    children: [
-                                      textfieldXLdaftar(
-                                        'Nama Toko',
-                                        'Cth: King Dragon Roll Jakarta',
-                                        'Form harus diisi!',
-                                        conNameMerch,
-                                        false,
+                                  SizedBox(height: size32),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(
+                                          () {
+                                            if (bttnValidated == true) {
+                                              isSwitched = false;
+                                            }
+              
+                                            print(
+                                                '$prov $kab $kec $bttnValidated');
+                                          },
+                                        );
+                                      },
+                                      child: buttonXXLonOff(
+                                        Center(
+                                          child: Text(
+                                            'Berikutnya',
+                                            style: heading2(FontWeight.w600,
+                                                bnw100, 'Outfit'),
+                                          ),
+                                        ),
+                                        double.infinity,
+                                        bttnValidated ? primary500 : bnw300,
                                       ),
-                                      SizedBox(height: size32),
-                                      fieldTipeUsaha(),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            SizedBox(height: size16),
-                            textfieldXLdaftar(
-                              'Alamat',
-                              'Jl. Pramuka No.99, RT01/RW02, Marga Wisata',
-                              'Form harus diisi!',
-                              conAddress,
-                              false,
-                            ),
-                            SizedBox(height: size16),
-                            provinceField(context),
-                            SizedBox(height: size16),
-                            regenciesField(context),
-                            SizedBox(height: size16),
-                            districtField(context),
-                            SizedBox(height: size16),
-                            villageField(),
-                            SizedBox(height: size16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: textfieldXLdaftar(
-                                'Kode Pos',
-                                '1234',
-                                'Form harus diisi!',
-                                conCodePos,
-                                false,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    bttnValidated
-                        ? SizedBox(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(height: size32),
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(
-                                        () {
-                                          if (bttnValidated == true) {
-                                            isSwitched = false;
-                                          }
-
-                                          print(
-                                              '$prov $kab $kec $bttnValidated');
-                                        },
-                                      );
-                                    },
-                                    child: buttonXXLonOff(
-                                      Center(
-                                        child: Text(
-                                          'Berikutnya',
-                                          style: heading2(FontWeight.w600,
-                                              bnw100, 'Outfit'),
-                                        ),
-                                      ),
-                                      double.infinity,
-                                      bttnValidated ? primary500 : bnw300,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : SizedBox(),
-                  ],
+                            )
+                          : SizedBox(),
+                    ],
+                  ),
                 ),
-              )
+            )
             : newRegis(context),
       ),
     );

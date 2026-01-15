@@ -19,6 +19,8 @@ import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'riwayat_page.dart';
 import 'bill_page.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Product {
   final String id;
@@ -176,6 +178,16 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   DiscountModel? _selectedDiscount;
   int _currentTabIndex = 0;
 
+  // Custom Product & Digital Product State
+  final TextEditingController _customProductNameController =
+      TextEditingController();
+  final TextEditingController _customProductPriceController =
+      TextEditingController();
+  final TextEditingController _conCatatanPreview = TextEditingController();
+  int _counterCart = 1;
+  bool _isItemAdded = false;
+  late final WebViewController _webController;
+
   @override
   void initState() {
     super.initState();
@@ -187,6 +199,93 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     });
     _searchController.addListener(_onSearchChanged);
     _fetchProducts();
+
+    // Custom Product & Digital Product Init
+    getKulasedaya(context, widget.token, widget.merchantId);
+    _customProductPriceController.addListener(_formatCustomProductPrice);
+
+    _webController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            _webController.runJavaScript(
+              "console.log('flutterCallback available:', typeof flutterCallback !== 'undefined');",
+            );
+          },
+        ),
+      )
+      ..addJavaScriptChannel(
+        'flutterCallback',
+        onMessageReceived: (JavaScriptMessage message) {
+          debugPrint("Message from web: ${message.message}");
+
+          // Clear existing digital products first
+          setState(() {
+            _cart.removeWhere(
+              (item) => (item['product'] as Product).id == 'digitalProduct',
+            );
+          });
+
+          try {
+            final List<dynamic> jsonData = jsonDecode(message.message);
+            for (var item in jsonData) {
+              final int price =
+                  int.tryParse(item['total']?.toString() ?? '0') ?? 0;
+              final String desc =
+                  "${item['id_request']}-${item['jenis']}-${item['nama_produk']}";
+
+              Product digitalProduct = Product(
+                id: 'digitalProduct',
+                name: item['nama_produk']?.toString() ?? 'Produk Digital',
+                price: price,
+                onlinePrice: 0,
+                category: 'Digital',
+                imageUrl:
+                    'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+              );
+
+              setState(() {
+                _cart.add({
+                  'product': digitalProduct,
+                  'quantity': 1,
+                  'notes': desc,
+                  'is_online': false,
+                  'variants': [],
+                  'id_request': item['id_request']?.toString(),
+                });
+              });
+            }
+          } catch (e) {
+            debugPrint("Error parsing JSON from WebView: $e");
+          }
+
+          // Go back to transaction page after adding
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        },
+      );
+  }
+
+  void _formatCustomProductPrice() {
+    String text = _customProductPriceController.text.replaceAll('.', '');
+    if (text.isEmpty) return;
+
+    int value = int.tryParse(text) ?? 0;
+    String formatted = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 0,
+    ).format(value).trim();
+
+    if (_customProductPriceController.text != formatted) {
+      _customProductPriceController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
   }
 
   void _onSearchChanged() {
@@ -1079,6 +1178,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           "description": item['notes'] ?? "",
           "is_online": item['is_online'] ?? false,
           "variants": item['variants'] ?? [],
+          "id_request": item['id_request'] ?? "",
         };
       }).toList();
 
@@ -1289,7 +1389,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
         return {
           "product_id": p.id,
-          "request_id": "",
+          "request_id": item['id_request'] ?? "",
           "is_online": false,
           "amount": (price * qty).toInt(),
           "name": p.name,
@@ -1441,6 +1541,18 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                   fontSize: 18,
                 ),
               ),
+              actions: [
+                if (!widget.isEmbedded)
+                  TextButton.icon(
+                    onPressed: _showKustomSelectionDialog,
+                    icon: Icon(PhosphorIcons.plus, color: primary500, size: 20),
+                    label: Text(
+                      'Kustom',
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    ),
+                  ),
+                SizedBox(width: 8),
+              ],
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(48),
                 child: Container(
@@ -1523,9 +1635,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
               SizedBox(height: size12),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: _showSortModal,
-                    child: _buildDropdown(textOrderBy),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _showSortModal,
+                      child: _buildDropdown(textOrderBy),
+                    ),
                   ),
                 ],
               ),
@@ -1658,6 +1772,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   Widget _buildDropdown(String text) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: size12, vertical: size8),
       decoration: BoxDecoration(
         border: Border.all(color: bnw300),
@@ -1665,12 +1780,309 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         color: bnw100,
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(text, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
-          SizedBox(width: size4),
           Icon(Icons.arrow_drop_down, size: size32),
         ],
+      ),
+    );
+  }
+
+  void _showKustomSelectionDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(size20),
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(size16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text(
+              'Pilih Kustom',
+              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+            ),
+            SizedBox(height: size16),
+            ListTile(
+              leading: Icon(PhosphorIcons.package_fill, color: primary500),
+              title: Text(
+                'Produk Kustom',
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              subtitle: Text(
+                'Tambah produk manual ke keranjang',
+                style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showCustomProductModal();
+              },
+            ),
+            Divider(height: 1, color: bnw300),
+            ListTile(
+              leading: Icon(
+                PhosphorIcons.device_mobile_fill,
+                color: primary500,
+              ),
+              title: Text(
+                'Produk Digital',
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+              ),
+              subtitle: Text(
+                'Pulsa, Paket Data, PLN, dll',
+                style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _openDigitalProductWebView();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCustomProductModal() {
+    _customProductNameController.clear();
+    _customProductPriceController.clear();
+    _conCatatanPreview.clear();
+    setState(() {
+      _counterCart = 1;
+    });
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateModal) => Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(size16)),
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(size20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Produk Kustom',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size16),
+
+                Text(
+                  'Nama Produk',
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size8),
+                TextFormField(
+                  controller: _customProductNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Contoh: Biaya Tambahan',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(size8),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+
+                Text(
+                  'Harga Satuan',
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size8),
+                TextFormField(
+                  controller: _customProductPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    prefixText: 'Rp ',
+                    hintText: '0',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(size8),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+
+                Text(
+                  'Catatan',
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: size8),
+                TextFormField(
+                  controller: _conCatatanPreview,
+                  decoration: InputDecoration(
+                    hintText: 'Tulis catatan di sini...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(size8),
+                    ),
+                  ),
+                ),
+                SizedBox(height: size16),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Jumlah',
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            if (_counterCart > 1)
+                              setStateModal(() => _counterCart--);
+                          },
+                          icon: Icon(
+                            Icons.remove_circle_outline,
+                            color: primary500,
+                          ),
+                        ),
+                        Text(
+                          '$_counterCart',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        IconButton(
+                          onPressed: () => setStateModal(() => _counterCart++),
+                          icon: Icon(
+                            Icons.add_circle_outline,
+                            color: primary500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: size24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_customProductPriceController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Harga wajib diisi')),
+                        );
+                        return;
+                      }
+
+                      final String name =
+                          _customProductNameController.text.isEmpty
+                          ? 'Produk Kustom'
+                          : _customProductNameController.text;
+                      final int price = int.parse(
+                        _customProductPriceController.text.replaceAll('.', ''),
+                      );
+
+                      Product customProduct = Product(
+                        id: 'custom',
+                        name: name,
+                        price: price,
+                        onlinePrice: 0,
+                        category: 'Kustom',
+                        imageUrl:
+                            'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+                      );
+
+                      setState(() {
+                        _cart.add({
+                          'product': customProduct,
+                          'quantity': _counterCart,
+                          'notes': _conCatatanPreview.text,
+                          'is_online': false,
+                          'variants': [],
+                        });
+                      });
+
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: size16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(size8),
+                      ),
+                    ),
+                    child: Text(
+                      'Tambah ke Keranjang',
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openDigitalProductWebView() {
+    if (bindingUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'URL Produk Digital belum tersedia. Silakan coba lagi.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    _webController.loadRequest(Uri.parse(bindingUrl));
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            backgroundColor: bnw100,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: bnw900),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              'Produk Digital',
+              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+            ),
+          ),
+          body: WebViewWidget(controller: _webController),
+        ),
       ),
     );
   }
@@ -2416,9 +2828,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   Future<List<DiscountModel>> _fetchDiscountsModal() async {
     try {
       final response = await http.post(
-        Uri.parse(
-          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount",
-        ),
+        Uri.parse(diskonLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"order_by": "upDownNama"}),
       );
@@ -2959,12 +3369,14 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                   color: bnw200,
                   borderRadius: BorderRadius.circular(size8),
                 ),
-                child: Image.network(
-                  product.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      SvgPicture.asset('assets/logoProduct.svg'),
-                ),
+                child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        product.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            SvgPicture.asset('assets/logoProduct.svg'),
+                      )
+                    : SvgPicture.asset('assets/logoProduct.svg'),
               ),
               SizedBox(width: size12),
               // Details
@@ -3017,34 +3429,35 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         ),
 
         // Varian Expansion Header
-        InkWell(
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-              if (_isExpanded && _variantFuture == null) {
-                _variantFuture = widget.fetchVariants(product.id);
-              }
-            });
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: size8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Varian",
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                Icon(
-                  _isExpanded
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  size: 20,
-                ),
-              ],
+        if (product.id != 'custom' && product.id != 'digitalProduct')
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+                if (_isExpanded && _variantFuture == null) {
+                  _variantFuture = widget.fetchVariants(product.id);
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: size8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Varian",
+                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
         // Expanded Area
         if (_isExpanded)
@@ -3152,6 +3565,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
           ),
           child: TextField(
             controller: _notesController,
+            enabled: product.id != 'digitalProduct',
             decoration: InputDecoration.collapsed(
               hintText: "Tambah catatan...",
               hintStyle: heading4(FontWeight.w600, bnw500, 'Outfit'),
@@ -3172,23 +3586,26 @@ class _CartItemWidgetState extends State<CartItemWidget> {
               onPressed: () => widget.onRemove(widget.index),
               icon: Icon(Icons.delete, color: danger500),
             ),
-            _qtyBtn(false, quantity, () {
-              if (quantity > 1) widget.onUpdateQty(widget.index, quantity - 1);
-            }),
-            // Restore Container width 32 layout
-            Container(
-              width: 32,
-              alignment: Alignment.center,
-              child: Text(
-                '$quantity',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            if (product.id != 'digitalProduct') ...[
+              _qtyBtn(false, quantity, () {
+                if (quantity > 1)
+                  widget.onUpdateQty(widget.index, quantity - 1);
+              }),
+              // Restore Container width 32 layout
+              Container(
+                width: 32,
+                alignment: Alignment.center,
+                child: Text(
+                  '$quantity',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            _qtyBtn(
-              true,
-              quantity,
-              () => widget.onUpdateQty(widget.index, quantity + 1),
-            ),
+              _qtyBtn(
+                true,
+                quantity,
+                () => widget.onUpdateQty(widget.index, quantity + 1),
+              ),
+            ],
           ],
         ),
       ],
@@ -3484,6 +3901,7 @@ class _PaymentPageState extends State<PaymentPage> {
           "description": item['notes'] ?? "",
           "is_online": false,
           "variants": item['variants'] ?? [],
+          "id_request": item['id_request'] ?? "",
         };
       }).toList();
 
@@ -3530,7 +3948,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
         return {
           "product_id": p.id,
-          "request_id": "",
+          "request_id": item['id_request'] ?? "",
           "is_online": false,
           "amount": ((price + variantTotal) * qty).toInt(),
           "name": p.name,
@@ -4456,9 +4874,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<List<DiscountModel>> _fetchDiscountsModal() async {
     try {
       final response = await http.post(
-        Uri.parse(
-          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount",
-        ),
+        Uri.parse(diskonLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"order_by": "upDownNama"}),
       );
@@ -4996,6 +5412,33 @@ class TransactionSuccessPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
+                  onPressed: () {
+                    final raw = data['raw']?.toString() ?? "";
+                    if (raw.isNotEmpty) {
+                      _shareWhatsApp(raw);
+                    }
+                  },
+                  icon: Icon(PhosphorIcons.whatsapp_logo_fill, color: bnw100),
+                  label: Text(
+                    "Bagikan ke WhatsApp",
+                    style: TextStyle(
+                      color: bnw100,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF25D366),
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(size8),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: size12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: Icon(Icons.print, color: bnw100),
                   label: Text(
@@ -5040,6 +5483,21 @@ class TransactionSuccessPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _shareWhatsApp(String text) async {
+    final uri = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(text)}");
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      // Fallback to web link if app not installed
+      final webUri = Uri.parse(
+        "https://wa.me/?text=${Uri.encodeComponent(text)}",
+      );
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+    }
   }
 
   Widget _rowInfo(String label, String value) {

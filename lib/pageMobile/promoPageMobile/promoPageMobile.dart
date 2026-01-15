@@ -28,10 +28,8 @@ class PromoPageMobile extends StatefulWidget {
 
 class _PromoPageMobileState extends State<PromoPageMobile> {
   // Constants
-  final String _listUrl =
-      "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount";
-  final String _toggleUrl =
-      "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount/change-is-active";
+  final String _listUrl = diskonLink;
+  final String _toggleUrl = aktifDiskonLink;
 
   List<DiscountModel> _discounts = [];
   List<DiscountModel> _filteredDiscounts = [];
@@ -144,9 +142,7 @@ class _PromoPageMobileState extends State<PromoPageMobile> {
   Future<void> _deleteDiscount(String id) async {
     try {
       final response = await http.post(
-        Uri.parse(
-          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount/delete",
-        ),
+        Uri.parse(deleteDiskonLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "id": jsonEncode([id]), // "[\"id\"]"
