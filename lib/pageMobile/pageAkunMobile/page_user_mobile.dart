@@ -44,8 +44,15 @@ class _PageUserMobileState extends State<PageUserMobile> {
     setState(() => _isLoading = true);
     try {
       final users = await getGroupUsers(context, widget.token, _selectedOrder);
+      final scopedUsers = users.where((u) {
+        if (widget.merchantId.isEmpty) return true;
+
+        final userMerchantId = (u.merchantid ?? '').trim();
+        return userMerchantId == widget.merchantId.trim();
+      }).toList();
+
       setState(() {
-        _allUsers = users;
+        _allUsers = scopedUsers;
         _applyFilter();
       });
     } catch (e) {

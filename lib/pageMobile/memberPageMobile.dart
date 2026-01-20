@@ -54,7 +54,7 @@ class MemberService {
     try {
       final response = await http.post(
         Uri.parse(getPelanggantUrl), // Common domain seen in printerPage
-       headers: {'token': checkToken, 'Content-Type': 'application/json'},
+        headers: {'token': checkToken, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier, // from main.dart
           "orderby": "upDownNama",
@@ -97,8 +97,6 @@ class MemberService {
         }),
       );
 
-
-
       debugPrint("Create Member Response: ${response.body}");
       final data = jsonDecode(response.body);
       if (data['message'] == 'success' || data['rc'] == '00') {
@@ -122,7 +120,7 @@ class MemberService {
     try {
       final response = await http.post(
         Uri.parse(editPelangganUrl),
-       headers: {'token': checkToken, 'Content-Type': 'application/json'},
+        headers: {'token': checkToken, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
           "memberid": memberId,
@@ -143,19 +141,27 @@ class MemberService {
     return false;
   }
 
-  static Future<bool> deleteMember(
+  static Future<bool> deleteMembers(
     BuildContext context,
-    String memberId,
+    List<String> memberIds,
   ) async {
     try {
       final response = await http.post(
         Uri.parse(deletePelangganUrl),
-       headers: {'token': checkToken, 'Content-Type': 'application/json'},
+        headers: {'token': checkToken, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
-          "memberid": [memberId],
+          "memberid": jsonEncode(memberIds.map((e) => e.toString()).toList()),
         }),
       );
+
+      final body = utf8.decode(response.bodyBytes);
+      debugPrint("DELETE status=${response.statusCode} body=$body");
+
+      if (!(body.trimLeft().startsWith('{') ||
+          body.trimLeft().startsWith('['))) {
+        return false;
+      }
 
       final data = jsonDecode(response.body);
       if (data['message'] == 'success' || data['rc'] == '00') {
@@ -165,6 +171,10 @@ class MemberService {
       print("Error delete member: $e");
     }
     return false;
+  }
+
+  static Future<bool> deleteMember(BuildContext context, String memberId) {
+    return deleteMembers(context, [memberId]);
   }
 }
 
@@ -183,6 +193,8 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
   List<MemberModel> members = [];
   bool isLoading = true;
   String searchQuery = "";
+  Set<String> selectedIds = {};
+  bool selectionMode = false;
 
   @override
   void initState() {
@@ -195,6 +207,7 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
     final data = await MemberService.getMembers(context);
     setState(() {
       members = data ?? [];
+      selectedIds.clear();
       isLoading = false;
     });
   }
@@ -203,6 +216,86 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
     setState(() {
       searchQuery = query;
     });
+  }
+
+  void _toggleSelect(String memberId) {
+    setState(() {
+      selectionMode = true;
+      if (selectedIds.contains(memberId)) {
+        selectedIds.remove(memberId);
+      } else {
+        selectedIds.add(memberId);
+      }
+      if (selectedIds.isEmpty) selectionMode = false;
+    });
+  }
+
+  void _toggleSelectAll(List<MemberModel> visibleList) {
+    final visibleIds = visibleList.map((e) => e.memberid).toSet();
+
+    setState(() {
+      selectionMode = true;
+
+      final selectedInViewCount = visibleIds
+          .where((id) => selectedIds.contains(id))
+          .length;
+
+      final allInViewSelected =
+          visibleList.isNotEmpty && selectedInViewCount == visibleList.length;
+
+      if (allInViewSelected) {
+        selectedIds.removeAll(visibleIds);
+      } else {
+        selectedIds.addAll(visibleIds);
+      }
+
+      if (selectedIds.isEmpty) selectionMode = false;
+    });
+  }
+
+  Future<void> _deleteSelected(List<MemberModel> filteredList) async {
+    if (selectedIds.isEmpty) return;
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Hapus Pelanggan"),
+        content: Text("Hapus ${selectedIds.length} pelanggan terpilih?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text("Hapus", style: TextStyle(color: red500)),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+
+    final pageContext = context;
+    final success = await MemberService.deleteMembers(
+      pageContext,
+      selectedIds.toList(),
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      selectedIds.clear();
+      selectionMode = false;
+      await _loadMembers();
+      ScaffoldMessenger.of(pageContext).showSnackBar(
+        const SnackBar(content: Text("Berhasil menghapus pelanggan terpilih")),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        pageContext,
+      ).showSnackBar(const SnackBar(content: Text("Gagal menghapus")));
+    }
   }
 
   @override
@@ -315,13 +408,19 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
   }
 
   Widget _buildListState(List<MemberModel> filteredList) {
+    final visibleIds = filteredList.map((e) => e.memberid).toSet();
+    final selectedInViewCount = visibleIds
+        .where((id) => selectedIds.contains(id))
+        .length;
+    final bool allSelected =
+        filteredList.isNotEmpty && selectedIds.length == filteredList.length;
     return Column(
       children: [
         // Search Bar
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: bnw200,
               borderRadius: BorderRadius.circular(8),
@@ -377,18 +476,104 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
         SizedBox(height: 16),
 
         // List Header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "Pilih Pelanggan",
-              style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        //   child: Align(
+        //     alignment: Alignment.centerLeft,
+        //     child: Text(
+        //       "Pilih Pelanggan",
+        //       style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+        //     ),
+        //   ),
+        // ),
+
+        // SizedBox(height: 8),
+        if (selectionMode)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: bnw300),
+              ),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: allSelected,
+                    onChanged: (_) => _toggleSelectAll(filteredList),
+                    activeColor: primary500,
+                  ),
+                  Expanded(
+                    child: Text(
+                      "${selectedIds.length}/${filteredList.length} Pelanggan Terpilih",
+                      style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+
+                  // const Spacer(),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       selectedIds.clear();
+                  //       selectionMode = false;
+                  //     });
+                  //   },
+                  //   child: Text(
+                  //     "Selesai",
+                  //     style: heading4(FontWeight.w400, primary500, 'Outfit'),
+                  //   ),
+                  // ),
+                  const SizedBox(width: 8),
+
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            selectedIds.clear();
+                            selectionMode = false;
+                          });
+                        },
+                        child: Text(
+                          "Selesai",
+                          style: heading4(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: bnw100,
+                      side: BorderSide(color: bnw100),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: selectedIds.isEmpty
+                        ? null
+                        : () => _deleteSelected(filteredList),
+                    icon: Icon(PhosphorIcons.trash, color: bnw900, size: 18),
+                    label: Text(
+                      "Hapus Semua",
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
-        SizedBox(height: 8),
+        if (selectionMode) const SizedBox(height: 8),
 
         // List
         Expanded(
@@ -398,69 +583,106 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
             separatorBuilder: (context, index) => Divider(height: 1),
             itemBuilder: (context, index) {
               final member = filteredList[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            member.namaMember,
-                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                PhosphorIcons.coin_vertical_fill,
-                                color: primary500,
-                                size: 16,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                "${member.saldo} Fifapay Coin",
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw500,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+              final isSelected = selectedIds.contains(member.memberid);
 
-                    // Buttons: "Pilih" and "Pencil"
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+              return InkWell(
+                onTap: () {
+                  if (selectionMode) {
+                    _toggleSelect(member.memberid);
+                  } else {
+                    Navigator.pop(context, member);
+                  }
+                },
+                onLongPress: () {
+                  if (!selectionMode) {
+                    setState(() {
+                      selectionMode = true;
+                      selectedIds.add(member.memberid);
+                    });
+                  } else {
+                    _toggleSelect(member.memberid);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    children: [
+                      if (selectionMode) ...[
+                        Checkbox(
+                          value: isSelected,
+                          onChanged: (_) => _toggleSelect(member.memberid),
+                          activeColor: primary500,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              member.namaMember,
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  PhosphorIcons.coin_vertical_fill,
+                                  color: primary500,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${member.saldo} Fifapay Coin",
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      onPressed: () {
-                        // Select logic if needed, typically returns member
-                        Navigator.pop(context, member);
-                      },
-                      child: Text(
-                        "Pilih",
-                        style: heading4(FontWeight.w600, primary500, 'Outfit'),
+
+                      // Buttons: "Pilih" and "Pencil"
+                      // OutlinedButton(
+                      //   style: OutlinedButton.styleFrom(
+                      //     side: BorderSide(color: primary500),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(8),
+                      //     ),
+                      //   ),
+                      //   onPressed: () {
+                      //     // Select logic if needed, typically returns member
+                      //     Navigator.pop(context, member);
+                      //   },
+                      //   child: Text(
+                      //     "Pilih",
+                      //     style: heading4(
+                      //       FontWeight.w600,
+                      //       primary500,
+                      //       'Outfit',
+                      //     ),
+                      //   ),
+                      // ),
+                      // SizedBox(width: 12),
+                      InkWell(
+                        onTap: () {
+                          _showEditDeleteOptions(context, member);
+                        },
+                        child: Icon(
+                          PhosphorIcons.pencil_simple_line,
+                          color: bnw500,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 12),
-                    InkWell(
-                      onTap: () {
-                        _showEditDeleteOptions(context, member);
-                      },
-                      child: Icon(
-                        PhosphorIcons.pencil_simple_line,
-                        color: bnw500,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
