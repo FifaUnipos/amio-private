@@ -177,8 +177,8 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   final List<Map<String, String>> _sortOptions = [
     {'label': 'Nama Produk (A ke Z)', 'value': 'upDownNama'},
     {'label': 'Nama Produk (Z ke A)', 'value': 'downUpNama'},
-    {'label': 'Produk Terbaru', 'value': 'downUpCreate'},
-    {'label': 'Produk Terlama', 'value': 'upDownCreate'},
+    {'label': 'Produk Terbaru', 'value': 'upDownCreate'},
+    {'label': 'Produk Terlama', 'value': 'downUpCreate'},
     {'label': 'Kategori (A ke Z)', 'value': 'upDownHarga'},
     {'label': 'Kategori (Z ke A)', 'value': 'downUpHarga'},
   ];
@@ -197,6 +197,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   }
 
   Future<void> loadData() async {
+    if (!mounted) return;
     setState(() => isLoading = true);
     final data = await getProduct(context, widget.token, search, [
       widget.merchantId,
@@ -205,6 +206,24 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
       listProduk = data ?? [];
       isLoading = false;
     });
+  }
+
+  Future<void> _openEditProduct(ModelDataProduk item) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UbahProdukPageMobile(
+          token: widget.token,
+          product: item,
+          merchantId: widget.merchantId,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    if (result == true) {
+      await loadData();
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -373,11 +392,11 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pushReplacement(
+          onPressed: () => Navigator.pop(
             context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPageMobile(token: widget.token),
-            ),
+            // MaterialPageRoute(
+            //   builder: (context) => DashboardPageMobile(token: widget.token),
+            // ),
           ),
         ),
         actions: [
@@ -622,21 +641,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                UbahProdukPageMobile(
-                                                  token: widget.token,
-                                                  product: item,
-                                                  merchantId: widget.merchantId,
-                                                ),
-                                          ),
-                                        ).then((value) {
-                                          if (value == true) loadData();
-                                        });
-                                      },
+                                      onPressed: () => _openEditProduct(item),
                                       icon: Icon(
                                         PhosphorIcons.pencil_line,
                                         size: 22,
