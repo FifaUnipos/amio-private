@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:unipos_app_335/main.dart';
@@ -19,12 +21,13 @@ class TokoPageMobile extends StatefulWidget {
 }
 
 class _TokoPageState extends State<TokoPageMobile> {
+  List<ModelDataToko> _allToko = [];
   List<ModelDataToko> listToko = [];
   bool isLoading = true;
   String search = '';
   // Default sort updated to user preference
   String orderby = 'downUpToko'; // Default sorting
-
+  final TextEditingController _searchController = TextEditingController();
   // Selection Mode State
   bool isSelectionMode = false;
   List<String> selectedMerchantIds = [];
@@ -35,20 +38,46 @@ class _TokoPageState extends State<TokoPageMobile> {
   @override
   void initState() {
     super.initState();
+    _searchController.text = search;
     loadData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> loadData() async {
     if (!mounted) return;
     setState(() => isLoading = true);
     // Passing search to both name and address as per requirement "Cari nama atau alamat"
-    final data = await getAllToko(context, checkToken, search, orderby);
+    final data = await getAllToko(context, checkToken, '', orderby);
     if (!mounted) return;
+
+    _allToko = data ?? [];
+    _applyLocalFilter(_searchController.text);
+
     setState(() {
-      listToko = data ?? [];
+      // listToko = data ?? [];
       isLoading = false;
       selectedMerchantIds.clear(); // Clear selection on reload
     });
+  }
+
+  void _applyLocalFilter(String keyword) {
+    final q = keyword.trim().toLowerCase();
+
+    if (q.isEmpty) {
+      listToko = List<ModelDataToko>.from(_allToko);
+      return;
+    }
+
+    listToko = _allToko.where((t) {
+      final name = (t.name ?? '').toLowerCase();
+      final addr = (t.address ?? '').toLowerCase();
+      return name.contains(q) || addr.contains(q);
+    }).toList();
   }
 
   void _toggleSelectionMode() {
@@ -291,6 +320,7 @@ class _TokoPageState extends State<TokoPageMobile> {
                 children: [
                   // 🔍 Search field
                   TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.search),
                       hintText: "Cari nama atau alamat",
@@ -301,9 +331,22 @@ class _TokoPageState extends State<TokoPageMobile> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: bnw300, width: 1),
                       ),
+                      suffixIcon: _searchController.text.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () {
+                                _searchController.clear();
+                                _applyLocalFilter('');
+                                FocusScope.of(context).unfocus();
+                                setState(() {});
+                              },
+                            ),
                     ),
-                    onChanged: (value) => search = value,
-                    onSubmitted: (_) => loadData(),
+                    onChanged: (value) {
+                      _applyLocalFilter(value);
+                      setState(() {});
+                    },
                   ),
                   SizedBox(height: size12),
 
