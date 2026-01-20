@@ -15,11 +15,8 @@ class PurchaseTab extends StatefulWidget {
   final String token;
   final String merchantId;
 
-  PurchaseTab({
-    Key? key,
-    required this.token,
-    required this.merchantId,
-  }) : super(key: key);
+  PurchaseTab({Key? key, required this.token, required this.merchantId})
+    : super(key: key);
 
   @override
   _PurchaseTabState createState() => _PurchaseTabState();
@@ -60,10 +57,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
       final response = await http.post(
         Uri.parse('$url/api/inventory/purchase/detail'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "deviceid": identifier,
-          "group_id": groupId,
-        }),
+        body: jsonEncode({"deviceid": identifier, "group_id": groupId}),
       );
 
       if (response.statusCode == 200) {
@@ -80,10 +74,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
       final response = await http.post(
         Uri.parse('$url/api/inventory/purchase/delete'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "deviceid": identifier,
-          "group_id": groupIds,
-        }),
+        body: jsonEncode({"deviceid": identifier, "group_id": groupIds}),
       );
 
       if (response.statusCode == 200) {
@@ -133,7 +124,10 @@ class _PurchaseTabState extends State<PurchaseTab> {
               SizedBox(height: 20),
               ListTile(
                 leading: Icon(PhosphorIcons.pencil, color: primary500),
-                title: Text('Update', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                title: Text(
+                  'Update',
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _navigateToUpdatePurchase(groupId);
@@ -142,7 +136,10 @@ class _PurchaseTabState extends State<PurchaseTab> {
               Divider(),
               ListTile(
                 leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                title: Text('Delete', style: heading3(FontWeight.w600, Colors.red, 'Outfit')),
+                title: Text(
+                  'Delete',
+                  style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(groupId);
@@ -178,7 +175,11 @@ class _PurchaseTabState extends State<PurchaseTab> {
                 ),
               ),
               SizedBox(height: 24),
-              Icon(PhosphorIcons.warning_circle, size: 64, color: Colors.orange),
+              Icon(
+                PhosphorIcons.warning_circle,
+                size: 64,
+                color: Colors.orange,
+              ),
               SizedBox(height: 16),
               Text(
                 'Konfirmasi Hapus',
@@ -203,7 +204,10 @@ class _PurchaseTabState extends State<PurchaseTab> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Batal', style: heading3(FontWeight.w600, bnw600, 'Outfit')),
+                      child: Text(
+                        'Batal',
+                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
+                      ),
                     ),
                   ),
                   SizedBox(width: 12),
@@ -215,7 +219,9 @@ class _PurchaseTabState extends State<PurchaseTab> {
                         if (mounted) {
                           if (result != null && result['rc'] == '00') {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Berhasil menghapus data')),
+                              SnackBar(
+                                content: Text('Berhasil menghapus data'),
+                              ),
                             );
                             _fetchPurchases();
                           }
@@ -228,7 +234,14 @@ class _PurchaseTabState extends State<PurchaseTab> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Hapus', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                      child: Text(
+                        'Hapus',
+                        style: heading3(
+                          FontWeight.w600,
+                          Colors.white,
+                          'Outfit',
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -256,6 +269,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
   void _navigateToUpdatePurchase(String groupId) async {
     final detail = await _getPurchaseDetail(groupId);
     if (detail != null && detail['rc'] == '00') {
+      // debugPrint('selectedmaterials: $detail');
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -272,8 +286,14 @@ class _PurchaseTabState extends State<PurchaseTab> {
   }
 
   String _formatCurrency(dynamic value) {
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return formatter.format(value is num ? value : (num.tryParse(value.toString()) ?? 0));
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(
+      value is num ? value : (num.tryParse(value.toString()) ?? 0),
+    );
   }
 
   @override
@@ -284,67 +304,79 @@ class _PurchaseTabState extends State<PurchaseTab> {
         onPressed: _navigateToAddPurchase,
         backgroundColor: primary500,
         icon: Icon(PhosphorIcons.plus, color: Colors.white),
-        label: Text('Persediaan', style: heading4(FontWeight.w600, Colors.white, 'Outfit')),
+        label: Text(
+          'Persediaan',
+          style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _purchases.isEmpty
-              ? Center(
-                  child: Text(
-                    'Tidak ada data persediaan',
-                    style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                )
-              : ListView.builder(
+          ? Center(
+              child: Text(
+                'Tidak ada data persediaan',
+                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+            )
+          : ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: _purchases.length,
+              itemBuilder: (context, index) {
+                final purchase = _purchases[index];
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
                   padding: EdgeInsets.all(16),
-                  itemCount: _purchases.length,
-                  itemBuilder: (context, index) {
-                    final purchase = _purchases[index];
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: bnw200),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  purchase['title'] ?? '',
-                                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  purchase['activity_date'] ?? '',
-                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                                ),
-                              ],
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: bnw200),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              purchase['title'] ?? '',
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
+                            SizedBox(height: 4),
+                            Text(
+                              purchase['activity_date'] ?? '',
+                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _formatCurrency(purchase['total_price']),
+                            style: heading3(FontWeight.w700, bnw900, 'Outfit'),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                _formatCurrency(purchase['total_price']),
-                                style: heading3(FontWeight.w700, bnw900, 'Outfit'),
-                              ),
-                              SizedBox(height: 8),
-                              InkWell(
-                                onTap: () => _showOptionsModal(purchase['group_id']),
-                                child: Icon(PhosphorIcons.pencil_simple, color: bnw600, size: 20),
-                              ),
-                            ],
+                          SizedBox(height: 8),
+                          InkWell(
+                            onTap: () =>
+                                _showOptionsModal(purchase['group_id']),
+                            child: Icon(
+                              PhosphorIcons.pencil_simple,
+                              color: bnw600,
+                              size: 20,
+                            ),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }
@@ -399,7 +431,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
     // If editing, load existing data
     if (widget.existingData != null) {
       _titleController.text = widget.existingData!['title'] ?? '';
-      
+
       // Parse date
       try {
         final dateStr = widget.existingData!['date'];
@@ -420,6 +452,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
       // Load existing materials
       final details = widget.existingData!['detail'] as List?;
       if (details != null) {
+        debugPrint('details: $details');
         setState(() {
           _selectedMaterials = details.map((item) {
             return {
@@ -430,12 +463,16 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
               'qty': double.tryParse(item['qty'].toString()) ?? 0,
               'price': double.tryParse(item['price'].toString()) ?? 0,
               'unit_conversion_id': item['unit_conversion_id'],
-              'unit_conversion_name': item['unit_conversion_name'] ?? item['unit_abbreviation'],
-              'conversion_factor': double.tryParse(item['conversion_factor'].toString()) ?? 1,
+              'unit_conversion_name':
+                  item['unit_conversion_name'] ?? item['unit_abbreviation'],
+              'conversion_factor':
+                  double.tryParse(item['conversion_factor'].toString()) ?? 1,
+              'total_price': item['total_price'],
             };
           }).toList();
         });
       }
+      // debugPrint('_selectedMaterials: $_selectedMaterials');
     }
   }
 
@@ -521,8 +558,10 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                     itemCount: _allMaterials.length,
                     itemBuilder: (context, index) {
                       final material = _allMaterials[index];
-                      final isSelected = _selectedMaterials.any((m) => m['id'] == material['id']);
-                      
+                      final isSelected = _selectedMaterials.any(
+                        (m) => m['id'] == material['id'],
+                      );
+
                       return CheckboxListTile(
                         value: isSelected,
                         onChanged: (checked) {
@@ -531,7 +570,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                           } else {
                             // Uncheck - remove from selected materials
                             setState(() {
-                              _selectedMaterials.removeWhere((m) => m['id'] == material['id']);
+                              _selectedMaterials.removeWhere(
+                                (m) => m['id'] == material['id'],
+                              );
                             });
                             setModalState(() {});
                           }
@@ -562,7 +603,14 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Batal', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                        child: Text(
+                          'Batal',
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(width: 12),
@@ -576,7 +624,14 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Simpan', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                        child: Text(
+                          'Simpan',
+                          style: heading3(
+                            FontWeight.w600,
+                            Colors.white,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -589,7 +644,10 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
     );
   }
 
-  void _showMaterialDetailInput(Map<String, dynamic> material, Function setParentModalState) {
+  void _showMaterialDetailInput(
+    Map<String, dynamic> material,
+    Function setParentModalState,
+  ) {
     final TextEditingController qtyController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
     String? selectedConversionId;
@@ -604,8 +662,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          double calculatedQty = (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
-          
+          double calculatedQty =
+              (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
+
           return Container(
             height: MediaQuery.of(context).size.height * 0.5,
             padding: EdgeInsets.only(
@@ -641,7 +700,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                   SizedBox(height: 20),
                   Row(
                     children: [
-                      Icon(PhosphorIcons.check_circle, color: primary500, size: 24),
+                      Icon(
+                        PhosphorIcons.check_circle,
+                        color: primary500,
+                        size: 24,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -649,7 +712,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                           children: [
                             Text(
                               material['name_item'] ?? '',
-                              style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               material['unit_name'] ?? '',
@@ -686,7 +753,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                                   border: InputBorder.none,
                                   hintText: '0',
                                 ),
-                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 onChanged: (value) => setModalState(() {}),
                               ),
                             ),
@@ -710,7 +781,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                                   border: InputBorder.none,
                                   hintText: '0',
                                 ),
-                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 onChanged: (value) => setModalState(() {}),
                               ),
                             ),
@@ -719,7 +794,8 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                         SizedBox(height: 12),
                         if (calculatedQty > 0)
                           Text(
-                            '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                            // '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                            '${qtyController.text} $selectedConversionName = ${_formatQtySmart(calculatedQty)} ${material['unit_abbreviation']}',
                             style: body2(FontWeight.w400, bnw600, 'Outfit'),
                           ),
                         Divider(height: 24),
@@ -734,33 +810,44 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                             Expanded(
                               child: InkWell(
                                 onTap: () {
-                                  _showUnitConversionPicker(
-                                    context,
-                                    material,
-                                    (conversionId, conversionName, factor) {
-                                      setModalState(() {
-                                        selectedConversionId = conversionId;
-                                        selectedConversionName = conversionName;
-                                        conversionFactor = factor;
-                                      });
-                                    },
-                                  );
+                                  _showUnitConversionPicker(context, material, (
+                                    conversionId,
+                                    conversionName,
+                                    factor,
+                                  ) {
+                                    setModalState(() {
+                                      selectedConversionId = conversionId;
+                                      selectedConversionName = conversionName;
+                                      conversionFactor = factor;
+                                    });
+                                  });
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color: bnw300),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         selectedConversionName,
-                                        style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                                        style: heading4(
+                                          FontWeight.w500,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
-                                      Icon(Icons.arrow_drop_down, color: bnw900),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        color: bnw900,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -784,27 +871,38 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Batal', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                          child: Text(
+                            'Batal',
+                            style: heading3(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                       SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            final qty = double.tryParse(qtyController.text) ?? 0;
-                            final price = double.tryParse(priceController.text) ?? 0;
-                            
+                            final qty =
+                                double.tryParse(qtyController.text) ?? 0;
+                            final price =
+                                double.tryParse(priceController.text) ?? 0;
+
                             if (qty > 0) {
                               setState(() {
                                 _selectedMaterials.add({
                                   'id': material['id'],
                                   'name': material['name_item'],
                                   'unit_name': material['unit_name'],
-                                  'unit_abbreviation': material['unit_abbreviation'],
+                                  'unit_abbreviation':
+                                      material['unit_abbreviation'],
                                   'qty': qty,
                                   'price': price,
                                   'unit_conversion_id': selectedConversionId,
-                                  'unit_conversion_name': selectedConversionName,
+                                  'unit_conversion_name':
+                                      selectedConversionName,
                                   'conversion_factor': conversionFactor,
                                 });
                               });
@@ -812,7 +910,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Material berhasil ditambahkan'),
+                                  content: Text(
+                                    'Material berhasil ditambahkan',
+                                  ),
                                   duration: Duration(seconds: 1),
                                 ),
                               );
@@ -825,7 +925,14 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Simpan', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                          child: Text(
+                            'Simpan',
+                            style: heading3(
+                              FontWeight.w600,
+                              Colors.white,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -847,76 +954,96 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Pilih Unit Konversi',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 20),
-              // Default unit
-              ListTile(
-                title: Text(
-                  material['unit_abbreviation'] ?? '',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                Text(
+                  'Pilih Unit Konversi',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                onTap: () {
-                  onSelected(null, material['unit_abbreviation'] ?? '', 1.0);
-                  Navigator.pop(context);
-                },
-              ),
-              Divider(),
-              // Unit conversions
-              ..._unitConversions.map((conversion) {
-                return ListTile(
-                  title: Text(
-                    conversion['conversion_name'] ?? '',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                const SizedBox(height: 20),
+                // Default unit
+                Flexible(
+                  child: ListView(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          material['unit_abbreviation'] ?? '',
+                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        onTap: () {
+                          onSelected(
+                            null,
+                            material['unit_abbreviation'] ?? '',
+                            1.0,
+                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const Divider(),
+                      // Unit conversions
+                      ..._unitConversions.map((conversion) {
+                        return ListTile(
+                          title: Text(
+                            conversion['conversion_name'] ?? '',
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          subtitle: Text(
+                            'Factor: ${conversion['conversion_factor']}',
+                            style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          onTap: () {
+                            onSelected(
+                              conversion['id'],
+                              conversion['conversion_name'] ?? '',
+                              double.tryParse(
+                                    conversion['conversion_factor'].toString(),
+                                  ) ??
+                                  1.0,
+                            );
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ],
                   ),
-                  subtitle: Text(
-                    'Factor: ${conversion['conversion_factor']}',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                  onTap: () {
-                    onSelected(
-                      conversion['id'],
-                      conversion['conversion_name'] ?? '',
-                      double.tryParse(conversion['conversion_factor'].toString()) ?? 1.0,
-                    );
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-            ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Future<void> _savePurchase() async {
-    if (_titleController.text.isEmpty || _selectedDate == null || _selectedMaterials.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mohon lengkapi semua data')),
-      );
+  Future<void> _savePurchase({bool addNew = false}) async {
+    if (_titleController.text.isEmpty ||
+        _selectedDate == null ||
+        _selectedMaterials.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Mohon lengkapi semua data')));
       return;
     }
 
@@ -931,25 +1058,42 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
     }).toList();
 
     Map<String, dynamic>? result;
-    
+
     if (widget.groupId != null) {
       // Update
-      result = await _updatePurchase(dateStr, _titleController.text, orderInventory);
+      result = await _updatePurchase(
+        dateStr,
+        _titleController.text,
+        orderInventory,
+      );
     } else {
       // Create
-      result = await _createPurchase(dateStr, _titleController.text, orderInventory);
+      result = await _createPurchase(
+        dateStr,
+        _titleController.text,
+        orderInventory,
+      );
     }
 
     if (result != null && result['rc'] == '00') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Berhasil menyimpan data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Berhasil menyimpan data')));
       widget.onSuccess();
-      Navigator.pop(context);
+
+      if (addNew) {
+        setState(() {
+          _titleController.clear();
+          _selectedDate = null;
+          _selectedMaterials.clear();
+        });
+      } else {
+        Navigator.pop(context);
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyimpan data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menyimpan data')));
     }
   }
 
@@ -1006,9 +1150,20 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
     return null;
   }
 
+  String _formatQtySmart(double v) {
+    final s = v.toStringAsFixed(3);
+    return s.replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+
   String _formatCurrency(dynamic value) {
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return formatter.format(value is num ? value : (num.tryParse(value.toString()) ?? 0));
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(
+      value is num ? value : (num.tryParse(value.toString()) ?? 0),
+    );
   }
 
   @override
@@ -1034,9 +1189,15 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
           children: [
             Row(
               children: [
-                Text('Judul', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                Text(
+                  'Judul',
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 SizedBox(width: 4),
-                Text('*', style: heading4(FontWeight.w600, Colors.red, 'Outfit')),
+                Text(
+                  '*',
+                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
               ],
             ),
             SizedBox(height: 8),
@@ -1062,9 +1223,15 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
             SizedBox(height: 24),
             Row(
               children: [
-                Text('Tanggal', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                Text(
+                  'Tanggal',
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
                 SizedBox(width: 4),
-                Text('*', style: heading4(FontWeight.w600, Colors.red, 'Outfit')),
+                Text(
+                  '*',
+                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
               ],
             ),
             SizedBox(height: 8),
@@ -1092,7 +1259,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                       _selectedDate != null
                           ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
                           : 'Pilih tanggal',
-                      style: body1(FontWeight.w400, _selectedDate != null ? bnw900 : bnw400, 'Outfit'),
+                      style: body1(
+                        FontWeight.w400,
+                        _selectedDate != null ? bnw900 : bnw400,
+                        'Outfit',
+                      ),
                     ),
                     Icon(PhosphorIcons.calendar_blank, color: bnw600),
                   ],
@@ -1137,8 +1308,8 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
               ..._selectedMaterials.asMap().entries.map((entry) {
                 final index = entry.key;
                 final material = entry.value;
-                final totalPrice = material['qty'] * material['price'] * material['conversion_factor'];
-                
+                final totalPrice = material['qty'] * material['price'];
+
                 return Container(
                   margin: EdgeInsets.only(bottom: 12),
                   padding: EdgeInsets.all(16),
@@ -1158,11 +1329,19 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                               children: [
                                 Text(
                                   material['name'],
-                                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   material['unit_conversion_name'],
-                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                                  style: body2(
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
                                 ),
                               ],
                             ),
@@ -1194,7 +1373,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                               ),
                               Text(
                                 _formatCurrency(totalPrice),
-                                style: heading3(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                             ],
                           ),
@@ -1232,14 +1415,17 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                 ),
                 minimumSize: Size(double.infinity, 50),
               ),
-              child: Text('Persediaan', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+              child: Text(
+                'Persediaan',
+                style: heading3(FontWeight.w600, primary500, 'Outfit'),
+              ),
             ),
             SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () => _savePurchase(addNew: true),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: primary500),
@@ -1247,13 +1433,16 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text('Save & Add New', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                    child: Text(
+                      'Save & Add New',
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    ),
                   ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _savePurchase,
+                    onPressed: () => _savePurchase(addNew: false),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary500,
                       padding: EdgeInsets.symmetric(vertical: 16),
@@ -1261,7 +1450,10 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text('Create', style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                    child: Text(
+                      'Create',
+                      style: heading3(FontWeight.w600, Colors.white, 'Outfit'),
+                    ),
                   ),
                 ),
               ],

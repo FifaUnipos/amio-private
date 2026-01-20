@@ -3,7 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:skeletons/skeletons.dart';
+// import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
@@ -421,7 +422,20 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.archive_box_fill,
             'text': 'Inventori',
-            'page': MaterialInventoryPage(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Inventori',
+                    featureBuilder: (merchantId) => MaterialInventoryPage(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : MaterialInventoryPage(
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                    merchantName: nameToko,
+                  ),
           },
           if (merchantType == 'Group_Merchant')
             {
@@ -455,7 +469,19 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.tag_fill,
             'text': 'Promo',
-            'page': PromoPageMobile(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Promo',
+                    featureBuilder: (merchantId) => PromoPageMobile(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : PromoPageMobile(
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                  ),
           },
           if (merchantType == 'Group_Merchant')
             {

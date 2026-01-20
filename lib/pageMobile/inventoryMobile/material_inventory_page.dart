@@ -18,11 +18,13 @@ import 'package:unipos_app_335/pageMobile/inventoryMobile/unit_conversion_page.d
 class MaterialInventoryPage extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String? merchantName;
 
   MaterialInventoryPage({
     Key? key,
     required this.token,
     required this.merchantId,
+    this.merchantName,
   }) : super(key: key);
 
   @override
@@ -114,19 +116,43 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   Future<void> _fetchMaterials() async {
     setState(() => _isLoading = true);
     try {
-      final data = await getMaterialInventory(
+      final res = await getMaterialInventory(
         context,
         widget.token,
         widget.merchantId,
         _searchQuery,
         _selectedSortValue,
       );
+
+      if (res == null) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal memuat data material')),
+        );
+        return;
+      }
+
+      if (res['rc'] != '00') {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(['message']?.toString() ?? 'Gagal memuat data'),
+          ),
+        );
+        return;
+      }
+
+      final list = (res['data'] as List?) ?? [];
+
       setState(() {
-        _materials = data?['data'] ?? [];
+        _materials = list;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terjadi kesalahan saat memuat data')),
+      );
     }
   }
 
@@ -387,15 +413,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         elevation: 0,
         leading: IconButton(
           icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPageMobile(token: widget.token),
-            ),
-          ),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '$nameToko',
+          widget.merchantName ?? nameToko ?? 'Inventori',
           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
         ),
         bottom: TabBar(
@@ -587,7 +608,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ),
                 onTap: () {
                   setState(() {
-                    _selectedSortValue = 'name_asc';
+                    _selectedSortValue = 'upDownName';
                     _selectedSortLabel = 'Nama A-Z';
                   });
                   _fetchMaterials();
@@ -601,7 +622,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ),
                 onTap: () {
                   setState(() {
-                    _selectedSortValue = 'name_desc';
+                    _selectedSortValue = 'downUpName';
                     _selectedSortLabel = 'Nama Z-A';
                   });
                   _fetchMaterials();
