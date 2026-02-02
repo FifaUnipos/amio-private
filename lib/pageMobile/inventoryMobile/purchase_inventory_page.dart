@@ -14,9 +14,14 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 class PurchaseTab extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
 
-  PurchaseTab({Key? key, required this.token, required this.merchantId})
-    : super(key: key);
+  PurchaseTab({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    required this.typeMerchant,
+  }) : super(key: key);
 
   @override
   _PurchaseTabState createState() => _PurchaseTabState();
@@ -25,10 +30,19 @@ class PurchaseTab extends StatefulWidget {
 class _PurchaseTabState extends State<PurchaseTab> {
   bool _isLoading = true;
   List<dynamic> _purchases = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+
+  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
 
   @override
   void initState() {
     super.initState();
+    debugPrint(
+      'PurchaseTab typeMerchant="${widget.typeMerchant}"'
+      'normalized="${_normalizeType(widget.typeMerchant)}"'
+      'canPurchase=$_canPurchase',
+    );
     _fetchPurchases();
   }
 
@@ -260,6 +274,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
         builder: (context) => AddPurchasePage(
           token: widget.token,
           merchantId: widget.merchantId,
+          typeMerchant: widget.typeMerchant,
           onSuccess: _fetchPurchases,
         ),
       ),
@@ -275,6 +290,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
         MaterialPageRoute(
           builder: (context) => AddPurchasePage(
             token: widget.token,
+            typeMerchant: widget.typeMerchant,
             merchantId: widget.merchantId,
             onSuccess: _fetchPurchases,
             groupId: groupId,
@@ -300,15 +316,17 @@ class _PurchaseTabState extends State<PurchaseTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _navigateToAddPurchase,
-        backgroundColor: primary500,
-        icon: Icon(PhosphorIcons.plus, color: Colors.white),
-        label: Text(
-          'Persediaan',
-          style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
-        ),
-      ),
+      floatingActionButton: _canPurchase
+          ? FloatingActionButton.extended(
+              onPressed: _navigateToAddPurchase,
+              backgroundColor: primary500,
+              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              label: Text(
+                'Persediaan',
+                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+              ),
+            )
+          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _purchases.isEmpty
@@ -361,15 +379,16 @@ class _PurchaseTabState extends State<PurchaseTab> {
                             style: heading3(FontWeight.w700, bnw900, 'Outfit'),
                           ),
                           SizedBox(height: 8),
-                          InkWell(
-                            onTap: () =>
-                                _showOptionsModal(purchase['group_id']),
-                            child: Icon(
-                              PhosphorIcons.pencil_simple,
-                              color: bnw600,
-                              size: 20,
+                          if (_canPurchase)
+                            InkWell(
+                              onTap: () =>
+                                  _showOptionsModal(purchase['group_id']),
+                              child: Icon(
+                                PhosphorIcons.pencil_simple,
+                                color: bnw600,
+                                size: 20,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -385,6 +404,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
 class AddPurchasePage extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
   final VoidCallback onSuccess;
   final String? groupId;
   final Map<String, dynamic>? existingData;
@@ -392,6 +412,7 @@ class AddPurchasePage extends StatefulWidget {
   AddPurchasePage({
     Key? key,
     required this.token,
+    required this.typeMerchant,
     required this.merchantId,
     required this.onSuccess,
     this.groupId,
@@ -408,6 +429,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   List<Map<String, dynamic>> _selectedMaterials = [];
   List<dynamic> _allMaterials = [];
   List<dynamic> _unitConversions = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
 
   @override
   void initState() {
@@ -1406,7 +1430,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             OutlinedButton(
-              onPressed: _showMaterialPicker,
+              onPressed: _canPurchase ? _showMaterialPicker : null,
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(color: primary500),
@@ -1425,7 +1449,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => _savePurchase(addNew: true),
+                    onPressed: _canPurchase
+                        ? () => _savePurchase(addNew: true)
+                        : null,
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: primary500),
@@ -1442,7 +1468,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _savePurchase(addNew: false),
+                    onPressed: _canPurchase
+                        ? () => _savePurchase(addNew: false)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary500,
                       padding: EdgeInsets.symmetric(vertical: 16),

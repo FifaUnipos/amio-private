@@ -5,7 +5,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
+import 'package:unipos_app_335/utils/component/component_loading.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -19,12 +22,14 @@ class MaterialInventoryPage extends StatefulWidget {
   final String token;
   final String merchantId;
   final String? merchantName;
+  final String typeMerchant;
 
   MaterialInventoryPage({
     Key? key,
     required this.token,
     required this.merchantId,
     this.merchantName,
+    required this.typeMerchant,
   }) : super(key: key);
 
   @override
@@ -38,19 +43,59 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   String _searchQuery = "";
   String _selectedSortValue = "";
   String _selectedSortLabel = "Urutkan Bahan";
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+
+  bool get _canInventory =>
+      _normalizeType(widget.typeMerchant) == 'group_merchant';
 
   late TabController _tabController;
+
+  // PageView
+  late final PageController _pageController;
+
+  // form tambah material
+  final TextEditingController namaBarangController = TextEditingController();
+
+  // Unit Master
+  List<dynamic> _unitList = [];
+  List<dynamic> _filteredUnitList = [];
+  String _selectedUnitId = "";
+  String _selectedUnitLabel = "";
+
+  final TextEditingController _searchUnitController = TextEditingController();
+  final FocusNode _unitSearchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    debugPrint(
+      'PurchaseTab typeMerchant="${widget.typeMerchant}"'
+      'normalized="${_normalizeType(widget.typeMerchant)}"'
+      'canPurchase=$_canInventory',
+    );
     _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      if (_tabController.index == 0) {
+        _fetchMaterials();
+      }
+    });
+    _pageController = PageController(initialPage: 0);
+
     _fetchMaterials();
+    _fetchUnitMaster();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _pageController.dispose();
+
+    namaBarangController.dispose();
+    _searchUnitController.dispose();
+    _unitSearchFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -114,7 +159,9 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   }
 
   Future<void> _fetchMaterials() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
+
     try {
       final res = await getMaterialInventory(
         context,
@@ -123,6 +170,8 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         _searchQuery,
         _selectedSortValue,
       );
+
+      if (!mounted) return;
 
       if (res == null) {
         setState(() => _isLoading = false);
@@ -136,7 +185,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(['message']?.toString() ?? 'Gagal memuat data'),
+            content: Text(res['message']?.toString() ?? 'Gagal memuat data'),
           ),
         );
         return;
@@ -156,6 +205,86 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     }
   }
 
+  // Unit Master
+
+  Future<void> _fetchUnitMaster() async {
+    try {
+      final response = await http.post(
+        Uri.parse(getUnitMasterDataLink),
+        headers: {'token': widget.token},
+        body: {"deviceid": identifier},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['rc'] == '00') {
+          final list = (jsonResponse['data'] as List?) ?? [];
+          if (!mounted) return;
+          setState(() {
+            _unitList = list;
+            _filteredUnitList = List.from(_unitList);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error _fetchUnitMaster: $e');
+    }
+  }
+
+  void _runSearchUnit(String value) {
+    final q = value.toLowerCase().trim();
+    setState(() {
+      if (q.isEmpty) {
+        _filteredUnitList = List.from(_unitList);
+      } else {
+        _filteredUnitList = _unitList.where((u) {
+          final name = (u['name'] ?? '').toString().toLowerCase();
+          final abbr = (u['abbreviation'] ?? '').toString().toLowerCase();
+          final type = (u['type'] ?? '').toString().toLowerCase();
+          return name.contains(q) || abbr.contains(q) || type.contains(q);
+        }).toList();
+      }
+    });
+  }
+
+  Future<void> _saveMaterial({required bool keepAdding}) async {
+    final name = namaBarangController.text.trim();
+
+    if (name.isEmpty) {
+      showSnackbar(context, {"message": "Nama barang wajib diisi"});
+      return;
+    }
+    if (_selectedUnitId.isEmpty) {
+      showSnackbar(context, {"message": "Unit/Satuan wajib dipilih"});
+      return;
+    }
+
+    whenLoading(context);
+    final rc = await createMasterData(
+      context,
+      widget.token,
+      widget.merchantId,
+      name,
+      _selectedUnitId,
+    );
+
+    if (!mounted) return;
+
+    if (rc == "00") {
+      if (keepAdding) {
+        setState(() {
+          namaBarangController.clear();
+        });
+      } else {
+        namaBarangController.clear();
+        await _fetchMaterials();
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(0);
+        }
+      }
+    }
+  }
+
   void _showMaterialDetail(String itemId, String itemName) async {
     showDialog(
       context: context,
@@ -170,12 +299,18 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         itemId,
       );
 
+      if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
 
       if (data != null && data['rc'] == '00') {
-        _showDetailBottomSheet(data['data']);
+        _showDetailBottomSheet(Map<String, dynamic>.from(data['data']));
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Gagal memuat detail')));
       }
     } catch (e) {
+      if (!mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(
         context,
@@ -224,7 +359,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: primary500.withOpacity(0.1),
+                              color: primary500.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -286,7 +421,9 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                     itemCount: (detail['detail'] as List?)?.length ?? 0,
                     itemBuilder: (context, index) {
                       final activity = detail['detail'][index];
-                      return _buildActivityCard(activity);
+                      return _buildActivityCard(
+                        Map<String, dynamic>.from(activity),
+                      );
                     },
                   ),
                 ),
@@ -298,8 +435,267 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     );
   }
 
+  Future<Map<String, dynamic>?> updateInventoryMaster(
+    BuildContext context,
+    String token,
+    String inventoryMasterId,
+    String nameItem,
+    int unitId,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(updateMasterDataLink),
+        headers: {'token': token, 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "inventory_master_id": inventoryMasterId,
+          "name_item": nameItem,
+          "unit": unitId,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      debugPrint('Error updateInventoryMaster: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> deleteInventoryMaster(
+    BuildContext context,
+    String token,
+    List<String> inventoryMasterIds,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(deleteMasterDataLink),
+        headers: {'token': token, 'Content-Type': 'application/json'},
+        body: jsonEncode({"inventory_master_id": inventoryMasterIds}),
+      );
+    } catch (e) {
+      debugPrint('Error deleteInventoryMaster: $e');
+      return null;
+    }
+  }
+
+  void _showLoader() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _hideLoader() {
+    if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+  }
+
+  Future<void> _openAturMaterial(Map<String, dynamic> material) async {
+    final itemId = (material['id'] ?? '').toString();
+
+    _showLoader();
+    final res = await getMaterialInventoryDetail(context, widget.token, itemId);
+    if (!mounted) return;
+    _hideLoader();
+
+    if (res == null || res['rc'] != '00') {
+      showSnackbar(context, {
+        "message": res?['message']?.toString() ?? "Gagal memuat detail",
+      });
+      return;
+    }
+
+    final data = Map<String, dynamic>.from(res['data'] ?? {});
+    final itemName = (data['item_name'] ?? '').toString();
+    final unitIdStr = (data['unit_id'] ?? '').toString();
+    final unitId = int.tryParse(unitIdStr) ?? 0;
+
+    final detailList = (data['detail'] as List?) ?? [];
+    final locked = detailList.isNotEmpty;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        Widget lockedTile({required IconData icon, required String title}) {
+          return ListTile(
+            enabled: false,
+            leading: Icon(icon, color: bnw500),
+            title: Text(title, style: body2(FontWeight.w500, bnw500, 'Outfit')),
+            subtitle: Text(
+              'Tidak bisa karena sudah ada riwayat',
+              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              Text(
+                itemName,
+                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+              const SizedBox(height: 12),
+
+              if (locked)
+                lockedTile(
+                  icon: PhosphorIcons.pencil_line,
+                  title: 'Ubah nama bahan',
+                )
+              else
+                ListTile(
+                  leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
+                  title: const Text('Ubah Nama Bahan'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showRenameDialog(
+                      itemId: itemId,
+                      currentName: itemName,
+                      unitId: unitId,
+                    );
+                  },
+                ),
+
+              if (locked)
+                lockedTile(icon: PhosphorIcons.trash, title: 'Hapus Bahan')
+              else
+                ListTile(
+                  leading: Icon(PhosphorIcons.trash, color: red500),
+                  title: const Text('Hapus Bahan'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _confirmDeleteMaterial(itemId: itemId, itemName: itemName);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRenameDialog({
+    required String itemId,
+    required String currentName,
+    required int unitId,
+  }) {
+    final controller = TextEditingController(text: currentName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Ubah Nama Bahan'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: 'Masukkan nama bahan'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newName = controller.text.trim();
+                if (newName.isEmpty) {
+                  showSnackbar(context, {"message": "Nama bahan wajib diisi"});
+                }
+                Navigator.pop(context);
+
+                _showLoader();
+                final res = await updateInventoryMaster(
+                  context,
+                  widget.token,
+                  itemId,
+                  newName,
+                  unitId,
+                );
+                if (!mounted) return;
+                _hideLoader();
+
+                if (res != null && res['rc'] == '00') {
+                  await _fetchMaterials();
+                  showSnackbar(context, {
+                    "message": "Nama bahan berhasil diubah",
+                  });
+                } else {
+                  showSnackbar(context, {
+                    "message": (res?['message'] ?? "Gagal mengubah nama")
+                        .toString(),
+                  });
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteMaterial({
+    required String itemId,
+    required String itemName,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Hapus Bahan?'),
+          content: Text('Yakin ingin menghapus "$itemName"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                _showLoader();
+
+                final res = await deleteInventoryMaster(context, widget.token, [
+                  itemId,
+                ]);
+                if (!mounted) return;
+                _hideLoader();
+
+                if (res != null && res['rc'] == '00') {
+                  await _fetchMaterials();
+                  showSnackbar(context, {"message": "Bahan berhasil dihapus"});
+                } else {
+                  showSnackbar(context, {
+                    "message": (res?['message'] ?? "Gagal menghapus bahan")
+                        .toString(),
+                  });
+                }
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildActivityCard(Map<String, dynamic> activity) {
-    final activityType = activity['activity_type'] ?? '';
+    final activityType = (activity['activity_type'] ?? '').toString();
     Color badgeColor;
     String badgeLabel;
 
@@ -358,10 +754,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           ),
           SizedBox(height: 12),
           _buildDetailRow('Jumlah', _formatQty(activity['qty'])),
-          SizedBox(height: 8),
-          _buildDetailRow('Harga Satuan', _formatCurrency(0)),
-          SizedBox(height: 8),
-          _buildDetailRow('Total', _formatCurrency(0)),
+          // SizedBox(height: 8),
+          // _buildDetailRow('Harga Satuan', _formatCurrency(0)),
+          // SizedBox(height: 8),
+          // _buildDetailRow('Total', _formatCurrency(0)),
         ],
       ),
     );
@@ -378,20 +774,72 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   }
 
   String _formatQty(dynamic qty) {
-    if (qty == null) return '0';
-    final num = double.tryParse(qty.toString()) ?? 0;
-    return num.toStringAsFixed(0);
+    final n = double.tryParse(qty?.toString() ?? '') ?? 0;
+    if (n == 0) return '0';
+    if (n < 1) return n.toStringAsFixed(3).replaceFirst(RegExp(r'\.?0+$'), '');
+    if (n % 1 == 0) return n.toStringAsFixed(0);
+    return n.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+
+  late final NumberFormat _idr = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp. ',
+    decimalDigits: 0,
+  );
+
+  num _toNum(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value;
+
+    var s = value.toString().trim();
+    if (s.isEmpty) return 0;
+
+    s = s
+        .replaceAll('Rp', '')
+        .replaceAll('rp', '')
+        .replaceAll('IDR', '')
+        .replaceAll(RegExp(r'\s+'), '');
+
+    bool isNegative = false;
+    if (s.startsWith('(') && s.endsWith(')')) {
+      isNegative = true;
+      s = s.substring(1, s.length - 1);
+    }
+
+    s = s.replaceAll(RegExp(r'[^0-9,.\-]'), '');
+
+    if (s.contains('-')) {
+      isNegative = isNegative || s.startsWith('-');
+      s = s.replaceAll('-', '');
+    }
+
+    final lastComma = s.lastIndexOf(',');
+    final lastDot = s.lastIndexOf('.');
+
+    if (lastComma != -1 && lastDot != -1) {
+      if (lastComma > lastDot) {
+        s = s.replaceAll('.', '').replaceAll(',', '');
+      } else {
+        s = s.replaceAll(',', '');
+      }
+    } else if (lastComma != -1) {
+      final digitsAfter = s.length - lastComma - 1;
+      if (digitsAfter <= 2) {
+        s = s.replaceAll('.', '').replaceAll(',', '.');
+      } else {
+        s = s.replaceAll(',', '');
+      }
+    } else {
+      final dotCount = '.'.allMatches(s).length;
+      if (dotCount > 1) s = s.replaceAll('.', '');
+    }
+    final n = double.tryParse(s) ?? 0;
+    return isNegative ? -n : n;
   }
 
   String _formatCurrency(dynamic value) {
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    return formatter.format(
-      value is num ? value : (num.tryParse(value.toString()) ?? 0),
-    );
+    final n = _toNum(value);
+    return _idr.format(n);
   }
 
   String _formatDateTime(String? dateTime) {
@@ -402,6 +850,46 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     } catch (e) {
       return dateTime;
     }
+  }
+
+  Widget fieldTambahBahan(
+    String label,
+    TextEditingController controller,
+    String hint,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(label, style: heading4(FontWeight.w400, bnw900, 'Outfit')),
+          ],
+        ),
+        SizedBox(height: size8),
+        TextField(
+          controller: controller,
+          cursorColor: primary500,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: heading3(FontWeight.w400, bnw500, 'Outfit'),
+            filled: true,
+            fillColor: bnw100,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: size16,
+              vertical: size16,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(size12),
+              borderSide: BorderSide(color: bnw300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(size12),
+              borderSide: BorderSide(width: 2, color: primary500),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -440,11 +928,20 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         controller: _tabController,
         children: [
           _buildMaterialTab(),
-          PurchaseTab(token: widget.token, merchantId: widget.merchantId),
-          AdjustmentTab(token: widget.token, merchantId: widget.merchantId),
+          PurchaseTab(
+            token: widget.token,
+            merchantId: widget.merchantId,
+            typeMerchant: typeAccount ?? '',
+          ),
+          AdjustmentTab(
+            token: widget.token,
+            merchantId: widget.merchantId,
+            typeMerchant: typeAccount ?? '',
+          ),
           ProductMaterialTab(
             token: widget.token,
             merchantId: widget.merchantId,
+            typeMerchant: typeAccount ?? '',
           ),
           UnitConversionTab(token: widget.token, merchantId: widget.merchantId),
         ],
@@ -453,6 +950,14 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   }
 
   Widget _buildMaterialTab() {
+    return PageView(
+      controller: _pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [_materialListPage(), _tambahMaterialPage()],
+    );
+  }
+
+  Widget _materialListPage() {
     return Column(
       children: [
         Container(
@@ -529,6 +1034,42 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                   },
                 ),
         ),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: _canInventory
+              ? GestureDetector(
+                  onTap: () async {
+                    namaBarangController.clear();
+                    setState(() {
+                      _selectedUnitId = "";
+                      _selectedUnitLabel = "";
+                    });
+
+                    if (_unitList.isEmpty) {
+                      await _fetchUnitMaster();
+                    }
+
+                    if (_pageController.hasClients) {
+                      _pageController.jumpToPage(1);
+                    }
+                  },
+                  child: buttonXL(
+                    Row(
+                      children: [
+                        Icon(PhosphorIcons.plus, color: bnw100),
+                        SizedBox(width: size16),
+                        Text(
+                          'Bahan',
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ],
+                    ),
+                    0,
+                  ),
+                )
+              : null,
+        ),
       ],
     );
   }
@@ -562,13 +1103,383 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ],
               ),
             ),
-            Text(
-              _formatQty(material['qty']),
-              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+
+            const SizedBox(width: 12),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _formatQty(material['qty']),
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                const SizedBox(height: 8),
+
+                if (_canInventory)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _openAturMaterial(material),
+                    child: buttonL(
+                      Row(
+                        children: [
+                          Icon(
+                            PhosphorIcons.pencil_line_fill,
+                            color: bnw900,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Atur',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                      bnw100,
+                      bnw300,
+                    ),
+                  ),
+              ],
             ),
+            // Text(
+            //   _formatQty(material['qty']),
+            //   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+            // ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _tambahMaterialPage() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  await _fetchMaterials();
+                  if (_pageController.hasClients) {
+                    _pageController.jumpToPage(0);
+                  }
+                },
+                child: Icon(
+                  PhosphorIcons.arrow_left,
+                  size: size48,
+                  color: bnw900,
+                ),
+              ),
+              SizedBox(width: size16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tambah Bahan',
+                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      'Penambahan bahan/material',
+                      style: heading3(FontWeight.w300, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: size16),
+          Expanded(
+            child: Column(
+              children: [
+                fieldTambahBahan('Nama Barang', namaBarangController, 'Matcha'),
+                SizedBox(height: size16),
+                _unitPickerField(),
+              ],
+            ),
+          ),
+          SizedBox(height: size16),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _saveMaterial(keepAdding: true),
+                  child: buttonXLoutline(
+                    Center(
+                      child: Text(
+                        'Simpan & Tambah Baru',
+                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                      ),
+                    ),
+                    double.infinity,
+                    primary500,
+                  ),
+                ),
+              ),
+              SizedBox(width: size12),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _saveMaterial(keepAdding: false),
+                  child: buttonXL(
+                    Center(
+                      child: Text(
+                        'Simpan',
+                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                    ),
+                    double.infinity,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _unitPickerField() {
+    return GestureDetector(
+      onTap: () async {
+        if (_unitList.isEmpty) {
+          await _fetchUnitMaster();
+        }
+        _showUnitBottomSheet();
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: bnw100,
+          border: Border(bottom: BorderSide(width: 1.5, color: bnw500)),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Unit/Satuan',
+                    style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  Text(
+                    ' *',
+                    style: heading4(FontWeight.w400, red500, 'Outfit'),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: size12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectedUnitId.isEmpty
+                            ? 'Pilih Unit/Satuan'
+                            : _selectedUnitLabel,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading2(
+                          FontWeight.w600,
+                          _selectedUnitId.isEmpty ? bnw500 : bnw900,
+                          'Outfit',
+                        ),
+                      ),
+                    ),
+                    Icon(PhosphorIcons.caret_down, color: bnw900),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<dynamic> _showUnitBottomSheet() {
+    bool isKeyboardActive = false;
+
+    _searchUnitController.text = '';
+    _runSearchUnit('');
+
+    return showModalBottomSheet(
+      constraints: const BoxConstraints(maxWidth: double.infinity),
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setModalState) => FractionallySizedBox(
+            heightFactor: isKeyboardActive ? 0.9 : 0.80,
+            child: GestureDetector(
+              onTap: () => _unitSearchFocusNode.unfocus(),
+              child: Container(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(size12),
+                    topLeft: Radius.circular(size12),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                  child: Column(
+                    children: [
+                      dividerShowdialog(),
+                      SizedBox(height: size16),
+                      FocusScope(
+                        child: Focus(
+                          onFocusChange: (value) {
+                            isKeyboardActive = value;
+                            setModalState(() {});
+                          },
+                          child: TextField(
+                            cursorColor: primary500,
+                            controller: _searchUnitController,
+                            focusNode: _unitSearchFocusNode,
+                            onChanged: (value) {
+                              _runSearchUnit(value);
+                              setModalState(() {});
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: size12,
+                              ),
+                              isDense: true,
+                              filled: true,
+                              fillColor: bnw200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(size8),
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(size8),
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                              suffixIcon: _searchUnitController.text.isNotEmpty
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        _searchUnitController.text = '';
+                                        _runSearchUnit('');
+                                        setModalState(() {});
+                                      },
+                                      child: Icon(
+                                        PhosphorIcons.x_fill,
+                                        size: size20,
+                                        color: bnw900,
+                                      ),
+                                    )
+                                  : null,
+                              prefixIcon: Icon(
+                                PhosphorIcons.magnifying_glass,
+                                color: bnw500,
+                              ),
+                              hintText: 'Cari unit / singkatan / tipe',
+                              hintStyle: heading3(
+                                FontWeight.w500,
+                                bnw500,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            await _fetchUnitMaster();
+                            setModalState(() {});
+                          },
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            padding: EdgeInsets.zero,
+                            physics: const BouncingScrollPhysics(),
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            itemCount: _filteredUnitList.length,
+                            itemBuilder: (context, index) {
+                              final unit = Map<String, dynamic>.from(
+                                _filteredUnitList[index],
+                              );
+                              final unitId = unit['id'].toString();
+                              final isSelected = unitId == _selectedUnitId;
+
+                              final label =
+                                  '${unit['name']}(${unit['abbreviation']})';
+
+                              return Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: bnw300,
+                                      width: width1,
+                                    ),
+                                  ),
+                                ),
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: size16,
+                                  ),
+                                  title: Text(label),
+                                  subtitle: Text(
+                                    (unit['type'] ?? '').toString(),
+                                    style: body2(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  trailing: Icon(
+                                    isSelected
+                                        ? PhosphorIcons.radio_button_fill
+                                        : PhosphorIcons.radio_button,
+                                    color: isSelected ? primary500 : bnw900,
+                                  ),
+                                  onTap: () {
+                                    _unitSearchFocusNode.unfocus();
+                                    this.setState(() {
+                                      _selectedUnitId = unitId;
+                                      _selectedUnitLabel = label;
+                                    });
+                                    setModalState(() {});
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: buttonXXL(
+                          Center(
+                            child: Text(
+                              'Selesai',
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                          double.infinity,
+                        ),
+                      ),
+                      SizedBox(height: size8),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
