@@ -42,6 +42,8 @@ Future<void> main() async {
   await deviceDetails();
 
   myprofile(prefs.getString('token') ?? '');
+  typeAccount = prefs.getString('merchantType');
+  roleAccount = prefs.getString('roleProfile');
   dashboard(identifier, checkToken ?? '');
   merchantType;
 

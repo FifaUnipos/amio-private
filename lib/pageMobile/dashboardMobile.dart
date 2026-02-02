@@ -427,11 +427,13 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     token: checkToken,
                     featureTitle: 'Inventori',
                     featureBuilder: (merchantId) => MaterialInventoryPage(
+                      typeMerchant: typeAccount ?? '',
                       token: widget.token,
                       merchantId: merchantId,
                     ),
                   )
                 : MaterialInventoryPage(
+                    typeMerchant: typeAccount ?? '',
                     token: widget.token,
                     merchantId: merchantIdProfile ?? '',
                     merchantName: nameToko,
