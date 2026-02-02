@@ -176,17 +176,31 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   DiscountModel? _selectedDiscount;
   int _currentTabIndex = 0;
 
+  // groupmerchant
+  late final bool _isGroupMerchant;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+
+    _isGroupMerchant = (typeAccount == 'Group_Merchant');
+
+    _tabController = TabController(
+      length: _isGroupMerchant ? 2 : 3,
+      vsync: this,
+    );
+
     _tabController.addListener(() {
       setState(() {
         _currentTabIndex = _tabController.index;
       });
     });
-    _searchController.addListener(_onSearchChanged);
-    _fetchProducts();
+    if (!_isGroupMerchant) {
+      _searchController.addListener(_onSearchChanged);
+      _fetchProducts();
+    } else {
+      _isLoading = false;
+    }
   }
 
   void _onSearchChanged() {
@@ -1416,6 +1430,32 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   @override
   Widget build(BuildContext context) {
+    final tabs = _isGroupMerchant
+        ? const [Tab(text: "Riwayat"), Tab(text: "Pengaturan")]
+        : const [
+            Tab(text: "Kasir"),
+            Tab(text: "Riwayat"),
+            Tab(text: "Pengaturan"),
+          ];
+
+    final views = _isGroupMerchant
+        ? [
+            HistoryTab(
+              token: widget.token,
+              merchantId: widget.merchantId,
+              baseUrl: url,
+            ),
+            SettingsTab(token: widget.token, merchantId: widget.merchantId),
+          ]
+        : [
+            _buildKasirView(),
+            HistoryTab(
+              token: widget.token,
+              merchantId: widget.merchantId,
+              baseUrl: url,
+            ),
+            SettingsTab(token: widget.token, merchantId: widget.merchantId),
+          ];
     return Scaffold(
       backgroundColor: bnw100,
       appBar: widget.isEmbedded
@@ -1462,11 +1502,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                       fontSize: 14,
                       fontFamily: 'Outfit',
                     ),
-                    tabs: [
-                      Tab(text: "Kasir"),
-                      Tab(text: "Riwayat"),
-                      Tab(text: "Pengaturan"),
-                    ],
+                    tabs: tabs,
                   ),
                 ),
               ),
@@ -1475,23 +1511,27 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           ? _buildKasirView()
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildKasirView(),
+              children: views,
+              // [
+              //   _buildKasirView(),
 
-                // Tab 2: Riwayat
-                HistoryTab(
-                  token: widget.token,
-                  merchantId: widget.merchantId,
-                  baseUrl: url,
-                ),
+              //   // Tab 2: Riwayat
+              //   HistoryTab(
+              //     token: widget.token,
+              //     merchantId: widget.merchantId,
+              //     baseUrl: url,
+              //   ),
 
-                // Tab 3: Pengaturan
-                SettingsTab(token: widget.token, merchantId: widget.merchantId),
-              ],
+              //   // Tab 3: Pengaturan
+              //   SettingsTab(token: widget.token, merchantId: widget.merchantId),
+              // ],
             ),
-      bottomNavigationBar: (widget.isEmbedded || _currentTabIndex == 0)
-          ? _buildBottomBar()
-          : null, // Only show on Kasir tab
+      bottomNavigationBar: (_isGroupMerchant || widget.isEmbedded)
+          ? null
+          // _buildBottomBar()
+          : (_currentTabIndex == 0
+                ? _buildBottomBar()
+                : null), // Only show on Kasir tab
     );
   }
 
