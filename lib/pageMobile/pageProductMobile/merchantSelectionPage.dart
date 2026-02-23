@@ -91,6 +91,44 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
           style: heading2(FontWeight.w700, bnw900, 'Outfit'),
         ),
         centerTitle: false,
+
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: Icon(PhosphorIcons.file_text, color: primary500),
+        //     style: IconButton.styleFrom(
+        //       side: BorderSide(color: primary500.withValues(alpha: 0.3)),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(8),
+        //       ),
+        //     ),
+        //   ),
+        //   SizedBox(width: 8),
+
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 16.0),
+        //     child: Center(
+        //       child: InkWell(
+        //         borderRadius: BorderRadius.circular(8),
+        //         onTap: () async {},
+        //         child: Container(
+        //           padding: const EdgeInsets.symmetric(
+        //             horizontal: 16,
+        //             vertical: 8,
+        //           ),
+        //           decoration: BoxDecoration(
+        //             color: primary500,
+        //             borderRadius: BorderRadius.circular(8),
+        //           ),
+        //           child: Text(
+        //             "Tambah",
+        //             style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +322,6 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                
                 Navigator.push(
                   context,
                   MaterialPageRoute(

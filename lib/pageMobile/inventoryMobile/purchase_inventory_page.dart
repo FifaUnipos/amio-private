@@ -14,9 +14,14 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 class PurchaseTab extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
 
-  PurchaseTab({Key? key, required this.token, required this.merchantId})
-    : super(key: key);
+  PurchaseTab({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    required this.typeMerchant,
+  }) : super(key: key);
 
   @override
   _PurchaseTabState createState() => _PurchaseTabState();
@@ -25,10 +30,19 @@ class PurchaseTab extends StatefulWidget {
 class _PurchaseTabState extends State<PurchaseTab> {
   bool _isLoading = true;
   List<dynamic> _purchases = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+
+  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
 
   @override
   void initState() {
     super.initState();
+    debugPrint(
+      'PurchaseTab typeMerchant="${widget.typeMerchant}"'
+      'normalized="${_normalizeType(widget.typeMerchant)}"'
+      'canPurchase=$_canPurchase',
+    );
     _fetchPurchases();
   }
 
@@ -260,6 +274,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
         builder: (context) => AddPurchasePage(
           token: widget.token,
           merchantId: widget.merchantId,
+          typeMerchant: widget.typeMerchant,
           onSuccess: _fetchPurchases,
         ),
       ),
@@ -269,11 +284,13 @@ class _PurchaseTabState extends State<PurchaseTab> {
   void _navigateToUpdatePurchase(String groupId) async {
     final detail = await _getPurchaseDetail(groupId);
     if (detail != null && detail['rc'] == '00') {
+      // debugPrint('selectedmaterials: $detail');
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => AddPurchasePage(
             token: widget.token,
+            typeMerchant: widget.typeMerchant,
             merchantId: widget.merchantId,
             onSuccess: _fetchPurchases,
             groupId: groupId,
@@ -299,10 +316,8 @@ class _PurchaseTabState extends State<PurchaseTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-
-      floatingActionButton: merchantType == 'Group_Merchant'
-          ? null
-          : FloatingActionButton.extended(
+      floatingActionButton: _canPurchase
+          ? FloatingActionButton.extended(
               onPressed: _navigateToAddPurchase,
               backgroundColor: primary500,
               icon: Icon(PhosphorIcons.plus, color: Colors.white),
@@ -310,7 +325,8 @@ class _PurchaseTabState extends State<PurchaseTab> {
                 'Persediaan',
                 style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
               ),
-            ),
+            )
+          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _purchases.isEmpty
@@ -363,15 +379,16 @@ class _PurchaseTabState extends State<PurchaseTab> {
                             style: heading3(FontWeight.w700, bnw900, 'Outfit'),
                           ),
                           SizedBox(height: 8),
-                          InkWell(
-                            onTap: () =>
-                                _showOptionsModal(purchase['group_id']),
-                            child: Icon(
-                              PhosphorIcons.pencil_simple,
-                              color: bnw600,
-                              size: 20,
+                          if (_canPurchase)
+                            InkWell(
+                              onTap: () =>
+                                  _showOptionsModal(purchase['group_id']),
+                              child: Icon(
+                                PhosphorIcons.pencil_simple,
+                                color: bnw600,
+                                size: 20,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -387,6 +404,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
 class AddPurchasePage extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
   final VoidCallback onSuccess;
   final String? groupId;
   final Map<String, dynamic>? existingData;
@@ -394,6 +412,7 @@ class AddPurchasePage extends StatefulWidget {
   AddPurchasePage({
     Key? key,
     required this.token,
+    required this.typeMerchant,
     required this.merchantId,
     required this.onSuccess,
     this.groupId,
@@ -410,6 +429,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   List<Map<String, dynamic>> _selectedMaterials = [];
   List<dynamic> _allMaterials = [];
   List<dynamic> _unitConversions = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
 
   @override
   void initState() {
@@ -454,6 +476,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
       // Load existing materials
       final details = widget.existingData!['detail'] as List?;
       if (details != null) {
+        debugPrint('details: $details');
         setState(() {
           _selectedMaterials = details.map((item) {
             return {
@@ -468,10 +491,12 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                   item['unit_conversion_name'] ?? item['unit_abbreviation'],
               'conversion_factor':
                   double.tryParse(item['conversion_factor'].toString()) ?? 1,
+              'total_price': item['total_price'],
             };
           }).toList();
         });
       }
+      // debugPrint('_selectedMaterials: $_selectedMaterials');
     }
   }
 
@@ -793,7 +818,8 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                         SizedBox(height: 12),
                         if (calculatedQty > 0)
                           Text(
-                            '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                            // '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                            '${qtyController.text} $selectedConversionName = ${_formatQtySmart(calculatedQty)} ${material['unit_abbreviation']}',
                             style: body2(FontWeight.w400, bnw600, 'Outfit'),
                           ),
                         Divider(height: 24),
@@ -952,75 +978,90 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Pilih Unit Konversi',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 20),
-              // Default unit
-              ListTile(
-                title: Text(
-                  material['unit_abbreviation'] ?? '',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                Text(
+                  'Pilih Unit Konversi',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                onTap: () {
-                  onSelected(null, material['unit_abbreviation'] ?? '', 1.0);
-                  Navigator.pop(context);
-                },
-              ),
-              Divider(),
-              // Unit conversions
-              ..._unitConversions.map((conversion) {
-                return ListTile(
-                  title: Text(
-                    conversion['conversion_name'] ?? '',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                const SizedBox(height: 20),
+                // Default unit
+                Flexible(
+                  child: ListView(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          material['unit_abbreviation'] ?? '',
+                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        onTap: () {
+                          onSelected(
+                            null,
+                            material['unit_abbreviation'] ?? '',
+                            1.0,
+                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const Divider(),
+                      // Unit conversions
+                      ..._unitConversions.map((conversion) {
+                        return ListTile(
+                          title: Text(
+                            conversion['conversion_name'] ?? '',
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          subtitle: Text(
+                            'Factor: ${conversion['conversion_factor']}',
+                            style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          onTap: () {
+                            onSelected(
+                              conversion['id'],
+                              conversion['conversion_name'] ?? '',
+                              double.tryParse(
+                                    conversion['conversion_factor'].toString(),
+                                  ) ??
+                                  1.0,
+                            );
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ],
                   ),
-                  subtitle: Text(
-                    'Factor: ${conversion['conversion_factor']}',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                  onTap: () {
-                    onSelected(
-                      conversion['id'],
-                      conversion['conversion_name'] ?? '',
-                      double.tryParse(
-                            conversion['conversion_factor'].toString(),
-                          ) ??
-                          1.0,
-                    );
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-            ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Future<void> _savePurchase() async {
+  Future<void> _savePurchase({bool addNew = false}) async {
     if (_titleController.text.isEmpty ||
         _selectedDate == null ||
         _selectedMaterials.isEmpty) {
@@ -1063,7 +1104,16 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Berhasil menyimpan data')));
       widget.onSuccess();
-      Navigator.pop(context);
+
+      if (addNew) {
+        setState(() {
+          _titleController.clear();
+          _selectedDate = null;
+          _selectedMaterials.clear();
+        });
+      } else {
+        Navigator.pop(context);
+      }
     } else {
       ScaffoldMessenger.of(
         context,
@@ -1122,6 +1172,11 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
       print('Error: $e');
     }
     return null;
+  }
+
+  String _formatQtySmart(double v) {
+    final s = v.toStringAsFixed(3);
+    return s.replaceFirst(RegExp(r'\.?0+$'), '');
   }
 
   String _formatCurrency(dynamic value) {
@@ -1277,10 +1332,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
               ..._selectedMaterials.asMap().entries.map((entry) {
                 final index = entry.key;
                 final material = entry.value;
-                final totalPrice =
-                    material['qty'] *
-                    material['price'] *
-                    material['conversion_factor'];
+                final totalPrice = material['qty'] * material['price'];
 
                 return Container(
                   margin: EdgeInsets.only(bottom: 12),
@@ -1378,7 +1430,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             OutlinedButton(
-              onPressed: _showMaterialPicker,
+              onPressed: _canPurchase ? _showMaterialPicker : null,
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(color: primary500),
@@ -1397,7 +1449,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: _canPurchase
+                        ? () => _savePurchase(addNew: true)
+                        : null,
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: primary500),
@@ -1414,7 +1468,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _savePurchase,
+                    onPressed: _canPurchase
+                        ? () => _savePurchase(addNew: false)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary500,
                       padding: EdgeInsets.symmetric(vertical: 16),

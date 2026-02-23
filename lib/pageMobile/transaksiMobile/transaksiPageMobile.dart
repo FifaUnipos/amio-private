@@ -178,113 +178,30 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   DiscountModel? _selectedDiscount;
   int _currentTabIndex = 0;
 
-  // Custom Product & Digital Product State
-  final TextEditingController _customProductNameController =
-      TextEditingController();
-  final TextEditingController _customProductPriceController =
-      TextEditingController();
-  final TextEditingController _conCatatanPreview = TextEditingController();
-  int _counterCart = 1;
-  bool _isItemAdded = false;
-  late final WebViewController _webController;
+  // groupmerchant
+  late final bool _isGroupMerchant;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+
+    _isGroupMerchant = (typeAccount == 'Group_Merchant');
+
+    _tabController = TabController(
+      length: _isGroupMerchant ? 2 : 3,
+      vsync: this,
+    );
+
     _tabController.addListener(() {
       setState(() {
         _currentTabIndex = _tabController.index;
       });
     });
-    _searchController.addListener(_onSearchChanged);
-    _fetchProducts();
-
-    // Custom Product & Digital Product Init
-    getKulasedaya(context, widget.token, widget.merchantId);
-    _customProductPriceController.addListener(_formatCustomProductPrice);
-
-    _webController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            _webController.runJavaScript(
-              "console.log('flutterCallback available:', typeof flutterCallback !== 'undefined');",
-            );
-          },
-        ),
-      )
-      ..addJavaScriptChannel(
-        'flutterCallback',
-        onMessageReceived: (JavaScriptMessage message) {
-          debugPrint("Message from web: ${message.message}");
-
-          // Clear existing digital products first
-          setState(() {
-            _cart.removeWhere(
-              (item) => (item['product'] as Product).id == 'digitalProduct',
-            );
-          });
-
-          try {
-            final List<dynamic> jsonData = jsonDecode(message.message);
-            for (var item in jsonData) {
-              final int price =
-                  int.tryParse(item['total']?.toString() ?? '0') ?? 0;
-              final String desc =
-                  "${item['id_request']}-${item['jenis']}-${item['nama_produk']}";
-
-              Product digitalProduct = Product(
-                id: 'digitalProduct',
-                name: item['nama_produk']?.toString() ?? 'Produk Digital',
-                price: price,
-                onlinePrice: 0,
-                category: 'Digital',
-                imageUrl:
-                    'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
-              );
-
-              setState(() {
-                _cart.add({
-                  'product': digitalProduct,
-                  'quantity': 1,
-                  'notes': desc,
-                  'is_online': false,
-                  'variants': [],
-                  'id_request': item['id_request']?.toString(),
-                });
-              });
-            }
-          } catch (e) {
-            debugPrint("Error parsing JSON from WebView: $e");
-          }
-
-          // Go back to transaction page after adding
-          if (mounted) {
-            Navigator.pop(context);
-          }
-        },
-      );
-  }
-
-  void _formatCustomProductPrice() {
-    String text = _customProductPriceController.text.replaceAll('.', '');
-    if (text.isEmpty) return;
-
-    int value = int.tryParse(text) ?? 0;
-    String formatted = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: '',
-      decimalDigits: 0,
-    ).format(value).trim();
-
-    if (_customProductPriceController.text != formatted) {
-      _customProductPriceController.value = TextEditingValue(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-      );
+    if (!_isGroupMerchant) {
+      _searchController.addListener(_onSearchChanged);
+      _fetchProducts();
+    } else {
+      _isLoading = false;
     }
   }
 
@@ -1516,6 +1433,32 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   @override
   Widget build(BuildContext context) {
+    final tabs = _isGroupMerchant
+        ? const [Tab(text: "Riwayat"), Tab(text: "Pengaturan")]
+        : const [
+            Tab(text: "Kasir"),
+            Tab(text: "Riwayat"),
+            Tab(text: "Pengaturan"),
+          ];
+
+    final views = _isGroupMerchant
+        ? [
+            HistoryTab(
+              token: widget.token,
+              merchantId: widget.merchantId,
+              baseUrl: url,
+            ),
+            SettingsTab(token: widget.token, merchantId: widget.merchantId),
+          ]
+        : [
+            _buildKasirView(),
+            HistoryTab(
+              token: widget.token,
+              merchantId: widget.merchantId,
+              baseUrl: url,
+            ),
+            SettingsTab(token: widget.token, merchantId: widget.merchantId),
+          ];
     return Scaffold(
       backgroundColor: bnw100,
       appBar: widget.isEmbedded
@@ -1574,11 +1517,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                       fontSize: 14,
                       fontFamily: 'Outfit',
                     ),
-                    tabs: [
-                      Tab(text: "Kasir"),
-                      Tab(text: "Riwayat"),
-                      Tab(text: "Pengaturan"),
-                    ],
+                    tabs: tabs,
                   ),
                 ),
               ),
@@ -1587,23 +1526,27 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           ? _buildKasirView()
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildKasirView(),
+              children: views,
+              // [
+              //   _buildKasirView(),
 
-                // Tab 2: Riwayat
-                HistoryTab(
-                  token: widget.token,
-                  merchantId: widget.merchantId,
-                  baseUrl: url,
-                ),
+              //   // Tab 2: Riwayat
+              //   HistoryTab(
+              //     token: widget.token,
+              //     merchantId: widget.merchantId,
+              //     baseUrl: url,
+              //   ),
 
-                // Tab 3: Pengaturan
-                SettingsTab(token: widget.token, merchantId: widget.merchantId),
-              ],
+              //   // Tab 3: Pengaturan
+              //   SettingsTab(token: widget.token, merchantId: widget.merchantId),
+              // ],
             ),
-      bottomNavigationBar: (widget.isEmbedded || _currentTabIndex == 0)
-          ? _buildBottomBar()
-          : null, // Only show on Kasir tab
+      bottomNavigationBar: (_isGroupMerchant || widget.isEmbedded)
+          ? null
+          // _buildBottomBar()
+          : (_currentTabIndex == 0
+                ? _buildBottomBar()
+                : null), // Only show on Kasir tab
     );
   }
 

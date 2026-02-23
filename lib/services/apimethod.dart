@@ -2831,17 +2831,36 @@ Future approveReference(
   BuildContext context,
   token,
   transactionid,
-  status,
-) async {
+  status, {
+  bool popToRoot = false,
+}) async {
   final response = await http.post(
     Uri.parse(approveTransaksiUrl),
-    headers: {'token': token},
-    body: {
+    headers: {
+      'token': token,
+      'DEVICE-ID': identifier!,
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
       "deviceid": identifier,
       "transactionid": transactionid,
-      "status": status,
-    },
+      "status": status.toString(),
+    }),
   );
+
+  final bodyStr = utf8.decode(response.bodyBytes);
+  debugPrint("ApproveReference status=${response.statusCode} body=$bodyStr");
+
+  final trimmed = bodyStr.trimLeft();
+  final isJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+  if (!isJson) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Server error")));
+    }
+    return null;
+  }
 
   var jsonResponse = jsonDecode(response.body);
 
