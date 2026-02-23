@@ -53,106 +53,108 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
         // resizeToAvoidBottomInset: false,
         backgroundColor: bnw100,
 
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: size32),
-          child: Column(
-            children: [
-              appbar(context, false),
-              Expanded(
-                child: SingleChildScrollView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  physics: BouncingScrollPhysics(),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Daftar Sebagai Pemilik Toko',
-                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                      ),
-                      Text(
-                        'Isikan data anda dengan lengkap',
-                        style: heading3(FontWeight.w500, bnw500, 'Outfit'),
-                      ),
-                      SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Text(
-                            'Nama Lengkap ',
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            '*',
-                            style: heading4(FontWeight.w700, red500, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      fieldMethod(
-                        'Cth : Muhammad Nabil Musyaffa',
-                        nameController,
-                      ),
-                      SizedBox(height: size16),
-                      Row(
-                        children: [
-                          Text(
-                            'Nomor Telepon ',
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            '*',
-                            style: heading4(FontWeight.w700, red500, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      fieldMethodPhone('08123456789', phoneController),
-                      SizedBox(height: size16),
-                      Text(
-                        'Email ',
-                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                      ),
-                      fieldMethod('Cth: nabil@gmail.com', emailController),
-                    ],
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: size32),
+            child: Column(
+              children: [
+                appbar(context, false),
+                Expanded(
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Daftar Sebagai Pemilik Toko',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          'Isikan data anda dengan lengkap',
+                          style: heading3(FontWeight.w500, bnw500, 'Outfit'),
+                        ),
+                        SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Text(
+                              'Nama Lengkap ',
+                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              '*',
+                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        fieldMethod(
+                          'Cth : Muhammad Nabil Musyaffa',
+                          nameController,
+                        ),
+                        SizedBox(height: size16),
+                        Row(
+                          children: [
+                            Text(
+                              'Nomor Telepon ',
+                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              '*',
+                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        fieldMethodPhone('08123456789', phoneController),
+                        SizedBox(height: size16),
+                        Text(
+                          'Email ',
+                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                        ),
+                        fieldMethod('Cth: nabil@gmail.com', emailController),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              bttnValidate
-                  ? Column(
-                      children: [
-                        SizedBox(height: size48),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: GestureDetector(
-                            onTap: () => register(
-                              context,
-                              OtpPageMobile(
-                                phone: phoneController.text,
-                                name: nameController.text,
-                                email: emailController.text,
-                                pageidentify: 'register_page',
-                              ),
-                            ),
-                            child: buttonXXLonOff(
-                              Center(
-                                child: Text(
-                                  'Daftar',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw100,
-                                    'Outfit',
-                                  ),
+                bttnValidate
+                    ? Column(
+                        children: [
+                          SizedBox(height: size48),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: GestureDetector(
+                              onTap: () => register(
+                                context,
+                                OtpPageMobile(
+                                  phone: phoneController.text,
+                                  name: nameController.text,
+                                  email: emailController.text,
+                                  pageidentify: 'register_page',
                                 ),
                               ),
-                              double.infinity,
-                              onOffButton,
+                              child: buttonXXLonOff(
+                                Center(
+                                  child: Text(
+                                    'Daftar',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                                double.infinity,
+                                onOffButton,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: size32),
-                      ],
-                    )
-                  : SizedBox(),
-            ],
+                          SizedBox(height: size32),
+                        ],
+                      )
+                    : SizedBox(),
+              ],
+            ),
           ),
         ),
       ),

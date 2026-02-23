@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/main.dart'; // For identifier
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 class HistoryTab extends StatefulWidget {
   final String token;
@@ -79,6 +81,24 @@ class _HistoryTabState extends State<HistoryTab> {
         if (data['rc'] == '00' && data['data'] != null) {
           setState(() {
             _historyList = data['data'];
+
+            // Pastikan raw diambil dengan benar dan diformat
+            for (var item in _historyList) {
+              if (item['raw'] != null) {
+                String rawData = item['raw'];
+
+                // Menghilangkan spasi berlebihan tanpa menghapus \n
+                rawData = rawData.replaceAll(
+                  RegExp(r'\s{2,}'),
+                  ' ',
+                ); // Ganti spasi berlebihan menjadi satu spasi
+
+                // Simpan raw yang sudah diformat
+                item['raw'] = rawData
+                    .trim(); // Trim untuk menghapus spasi di awal/akhir
+              }
+            }
+
             _isLoading = false;
           });
         } else {
@@ -288,7 +308,6 @@ class _HistoryTabState extends State<HistoryTab> {
                         ),
                       ),
                       trailing: Text(
-                        // Extract time from entry_date if possible, showing full date for now
                         item['entry_date'] != null
                             ? (item['entry_date'] as String).split(' ').last
                             : '',
@@ -384,12 +403,37 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
       );
 
       debugPrint('Detail response: ${response.body}');
+      final dataku = jsonDecode(response.body);
+      print('Detail data: $dataku');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         if (data['rc'] == '00' && data['data'] != null) {
           setState(() {
+            // Menyimpan data di _detailData
             _detailData = data['data'];
+
+            // Pastikan 'raw' ada dan ambil isinya
+            if (_detailData != null && _detailData!.containsKey('raw')) {
+              String rawData = _detailData!['raw']; // Ambil nilai raw
+
+              // Membersihkan hanya spasi berlebihan tanpa menghapus \n
+              rawData = rawData.replaceAll(
+                RegExp(r'\s{2,}'),
+                ' ',
+              ); // Ganti spasi berlebihan menjadi satu spasi
+
+              // Masukkan kembali raw yang sudah dibersihkan ke _detailData
+              _detailData!['raw'] = rawData.trim();
+
+              // Debugging: Cek raw data setelah dibersihkan
+              print("Cleaned raw data: ${_detailData!['raw']}");
+            } else {
+              print("Raw data tidak ditemukan dalam _detailData");
+            }
+
+            // Update loading state
             _isLoading = false;
           });
         } else {
@@ -540,47 +584,104 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                   ),
           ),
           const SizedBox(height: 20),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {}, // Print Logic
-                  icon: Icon(Icons.print, color: primary500),
-                  label: Text(
-                    'Cetak Struk',
-                    style: TextStyle(color: primary500),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final raw = _detailData?['raw']?.toString() ?? "";
+                    print('Raw data to share : ${_detailData!['raw']}');
+                    if (raw.isNotEmpty) {
+                      _shareToWhatsApp(raw);
+                    }
+                  },
+                  icon: Icon(
+                    PhosphorIcons.whatsapp_logo_fill,
+                    color: Colors.white,
                   ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primary500),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  label: const Text(
+                    'Bagikan ke WhatsApp',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF25D366),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {}, // Print Logic
+                      icon: Icon(Icons.print, color: primary500),
+                      label: Text(
+                        'Cetak Struk',
+                        style: TextStyle(
+                          color: primary500,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: primary500),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Selesai',
-                    style: TextStyle(color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary500,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Selesai',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _shareToWhatsApp(String text) async {
+    final uri = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(text)}");
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      // Fallback to web link if app not installed
+      final webUri = Uri.parse(
+        "https://wa.me/?text=${Uri.encodeComponent(text)}",
+      );
+      // print('Launching web WhatsApp URL: $webUri');
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+    }
   }
 
   double _parseAmount(dynamic value) {
@@ -705,9 +806,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                         symbol: 'Rp. ',
                         decimalDigits: 0,
                       ).format(
-                        _parseAmount(
-                          item['price_after'] ?? item['price'],
-                        ),
+                        _parseAmount(item['price_after'] ?? item['price']),
                       ),
                       style: const TextStyle(
                         fontSize: 12,

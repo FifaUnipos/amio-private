@@ -29,53 +29,55 @@ class _DaftarAkunPageMobileState extends State<DaftarAkunPageMobile> {
       ),
       child: Scaffold(
         backgroundColor: bnw100,
-        body: Container(
-          padding: EdgeInsets.symmetric(horizontal: size32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              appbarMobile(context, true),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Daftar',
-                    style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  Text(
-                    'Pilih tipe akun yang cocok dengan jenis usaha kamu',
-                    style: heading3(FontWeight.w500, bnw500, 'Outfit'),
-                  ),
-                ],
-              ),
-              SizedBox(height: size16),
-              Expanded(
-                child: Column(
+        body: SafeArea(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: size32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                appbarMobile(context, true),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: cardDaftarAkun(
-                        context,
-                        'Toko',
-                        'Mendaftar sebagai seorang pemilik Toko yang hanya memiliki 1 Toko saja.',
-                        'SignUpToko',
-                        DaftarAkunTokoPageMobile(),
-                      ),
+                    Text(
+                      'Daftar',
+                      style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                     ),
-                    SizedBox(height: size16),
-                    Expanded(
-                      child: cardDaftarAkun(
-                        context,
-                        'Grup Toko',
-                        'Mendaftar sebagai seorang pemilik usaha yang memiliki lebih dari 1 toko cabang.',
-                        'SignUpGrupToko',
-                        RegisterGrupPageMobile(),
-                      ),
+                    Text(
+                      'Pilih tipe akun yang cocok dengan jenis usaha kamu',
+                      style: heading3(FontWeight.w500, bnw500, 'Outfit'),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: size16),
-            ],
+                SizedBox(height: size16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: cardDaftarAkun(
+                          context,
+                          'Toko',
+                          'Mendaftar sebagai seorang pemilik Toko yang hanya memiliki 1 Toko saja.',
+                          'SignUpToko',
+                          DaftarAkunTokoPageMobile(),
+                        ),
+                      ),
+                      SizedBox(height: size16),
+                      Expanded(
+                        child: cardDaftarAkun(
+                          context,
+                          'Grup Toko',
+                          'Mendaftar sebagai seorang pemilik usaha yang memiliki lebih dari 1 toko cabang.',
+                          'SignUpGrupToko',
+                          RegisterGrupPageMobile(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: size16),
+              ],
+            ),
           ),
         ),
       ),
