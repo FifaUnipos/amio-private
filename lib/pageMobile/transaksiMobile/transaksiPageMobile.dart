@@ -17,7 +17,7 @@ import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
-import 'riwayat_page.dart';
+import 'history/riwayat_page.dart';
 import 'bill_page.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -181,6 +181,12 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   // groupmerchant
   late final bool _isGroupMerchant;
 
+  int _counterCart = 1;
+  final TextEditingController _customProductNameController = TextEditingController();
+  final TextEditingController _customProductPriceController = TextEditingController();
+  final TextEditingController _conCatatanPreview = TextEditingController();
+  late final WebViewController _webController;
+
   @override
   void initState() {
     super.initState();
@@ -191,6 +197,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       length: _isGroupMerchant ? 2 : 3,
       vsync: this,
     );
+
+    _webController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000));
 
     _tabController.addListener(() {
       setState(() {

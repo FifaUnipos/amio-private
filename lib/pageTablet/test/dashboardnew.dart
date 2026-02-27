@@ -23,7 +23,7 @@ import '../../services/apimethod.dart';
 
 import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_button.dart';
 

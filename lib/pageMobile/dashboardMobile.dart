@@ -24,7 +24,7 @@ import 'package:unipos_app_335/pageMobile/printerPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
-import 'package:unipos_app_335/pageMobile/transaksiMobile/riwayat_page.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/riwayat_page.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/settings_tab.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/services/apimethod.dart';

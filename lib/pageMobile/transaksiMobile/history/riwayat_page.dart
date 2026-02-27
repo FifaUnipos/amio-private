@@ -1,12 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button_option.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button_status.dart';
+import 'package:unipos_app_335/components/atoms/fields/unipos_text_field.dart';
+import 'package:unipos_app_335/components/atoms/unipos_detail_row.dart';
+import 'package:unipos_app_335/components/atoms/unipos_information.dart';
+import 'package:unipos_app_335/components/moleculs/unipos_modal.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_delete.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_view_deleted_history.dart';
+import 'package:unipos_app_335/data/model/transaction/history/view_deleted_history_response.dart';
+import 'package:unipos_app_335/data/static/transaction/history/delete_reasons_state.dart';
+import 'package:unipos_app_335/data/static/transaction/history/view_deleted_history_state.dart';
+import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'dart:convert';
+import 'package:skeletons_forked/skeletons_forked.dart';
+import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/main.dart'; // For identifier
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:unipos_app_335/utils/component/component_size.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/component/unipos_size.dart';
+import 'package:unipos_app_335/utils/status_transaction.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class HistoryTab extends StatefulWidget {
   final String token;
@@ -27,7 +51,6 @@ class HistoryTab extends StatefulWidget {
 class _HistoryTabState extends State<HistoryTab> {
   List<dynamic> _historyList = [];
   bool _isLoading = true;
-
   // Sorting State
   String _selectedSortText = "Riwayat Terbaru";
   String _selectedSortTag = "upDownCreate";
@@ -289,36 +312,71 @@ class _HistoryTabState extends State<HistoryTab> {
                     final item = _historyList[index];
                     final amount =
                         double.tryParse(item['amount'].toString()) ?? 0;
-                    return ListTile(
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () => _showDetail(item['transaction_id']),
-                      title: Text(
-                        item['customer'] ?? 'Pelanggan',
-                        style: const TextStyle(fontWeight: FontWeight.w400),
-                      ),
-                      subtitle: Text(
-                        NumberFormat.currency(
-                          locale: 'id',
-                          symbol: 'Rp. ',
-                          decimalDigits: 0,
-                        ).format(amount),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['customer'] ?? 'Pelanggan',
+                                  style: const TextStyle(fontWeight: FontWeight.w400),
+                                ),
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: 'id',
+                                    symbol: 'Rp. ',
+                                    decimalDigits: 0,
+                                  ).format(amount),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              spacing: 4,
+                              children: [
+                                
+                                Text(
+                                  item['entry_date'] != null
+                                      ? (item['entry_date'] as String)
+                                            .split(' ')
+                                            .last
+                                      : '',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                UniposInformation(
+                                  size: UniposInformationSize.extraSmall,
+                                  variant:
+                                      statusTransactionCancel.contains(
+                                        item['isPaid'],
+                                      )
+                                      ? UniposInformationVariant.danger
+                                      : statusTransactionProcessCancel.contains(
+                                          item['isPaid'],
+                                        )
+                                      ? UniposInformationVariant.warning
+                                      : UniposInformationVariant.success,
+                                  text: '${item['status_transactions'] ?? '-'}',
+                                  showIcon: false,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      trailing: Text(
-                        item['entry_date'] != null
-                            ? (item['entry_date'] as String).split(' ').last
-                            : '',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
                       ),
                     );
                   },
@@ -328,8 +386,8 @@ class _HistoryTabState extends State<HistoryTab> {
     );
   }
 
-  void _showDetail(String transactionId) {
-    showModalBottomSheet(
+  void _showDetail(String transactionId) async {
+    final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -340,6 +398,10 @@ class _HistoryTabState extends State<HistoryTab> {
         baseUrl: widget.baseUrl,
       ),
     );
+
+    if (result == true) {
+      _fetchHistory();
+    }
   }
 
   Widget _outlineBtn(String text) {
@@ -379,6 +441,7 @@ class TransactionDetailModal extends StatefulWidget {
 class _TransactionDetailModalState extends State<TransactionDetailModal> {
   bool _isLoading = true;
   Map<String, dynamic>? _detailData;
+  bool isDropdownOpen = false;
 
   @override
   void initState() {
@@ -492,8 +555,73 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                 ? const Center(child: Text("Gagal memuat detail"))
                 : SingleChildScrollView(
                     child: Column(
+                      spacing: 16,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          'Status',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Row(
+                          spacing: 16,
+                          children: [
+                            Expanded(
+                              child: UniposInformation(
+                                isFullWidth: true,
+                                variant:
+                                    statusTransactionCancel.contains(
+                                      _detailData!['isPaid'],
+                                    )
+                                    ? UniposInformationVariant.danger
+                                    : statusTransactionProcessCancel.contains(
+                                        _detailData!['isPaid'],
+                                      )
+                                    ? UniposInformationVariant.warning
+                                    : UniposInformationVariant.success,
+                                text:
+                                    '${_detailData!['status_transactions'] ?? '-'}',
+                              ),
+                            ),
+                            if (statusTransactionCancel.contains(
+                                  _detailData!['isPaid'],
+                                ) ||
+                                statusTransactionProcessCancel.contains(
+                                  _detailData!['isPaid'],
+                                ))
+                              UniposButton(
+                                text: 'Lihat Riwayat',
+                                variant: UniposButtonVariant.tertiary,
+                                onTap: () {
+                                  if (_detailData == null ||
+                                      _detailData!['transactionid'] == null) {
+                                    showSnackbar(context, {
+                                      'rc': '99',
+                                      'message': 'ID Transaksi belum dimuat',
+                                    });
+                                    return;
+                                  }
+                                  context
+                                      .read<
+                                        TransactionViewDeletedHistoryProvider
+                                      >()
+                                      .fetchViewDeletedHistory(
+                                        widget.token,
+                                        _detailData!['transactionid']
+                                            .toString(),
+                                        widget.merchantId,
+                                      );
+
+                                  ModalTransactionViewDeletedHistory.show(
+                                    context,
+                                    _detailData,
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
                         const Text(
                           'Informasi Transaksi',
                           style: TextStyle(
@@ -501,7 +629,6 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 12),
                         _buildInfoRow(
                           'Nomor Transaksi',
                           '#${_detailData!['transactionid'] ?? '-'}',
@@ -511,8 +638,6 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                           _detailData!['customer'] ?? 'Walking Customer',
                         ),
                         _buildInfoRow('Kasir', _detailData!['pic'] ?? '-'),
-
-                        const SizedBox(height: 24),
                         const Text(
                           'Rincian Pesanan',
                           style: TextStyle(
@@ -520,14 +645,11 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 12),
                         const Divider(height: 1),
                         if (_detailData!['detail'] != null)
                           ...(_detailData!['detail'] as List).map((item) {
                             return _buildProductItem(item);
                           }).toList(),
-
-                        const SizedBox(height: 24),
                         const Text(
                           'Rincian Pembayaran',
                           style: TextStyle(
@@ -583,86 +705,122 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                     ),
                   ),
           ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    final raw = _detailData?['raw']?.toString() ?? "";
-                    print('Raw data to share : ${_detailData!['raw']}');
-                    if (raw.isNotEmpty) {
-                      _shareToWhatsApp(raw);
-                    }
-                  },
-                  icon: Icon(
-                    PhosphorIcons.whatsapp_logo_fill,
-                    color: Colors.white,
-                  ),
-                  label: const Text(
-                    'Bagikan ke WhatsApp',
-                    style: TextStyle(
+          if (_detailData != null) ...[
+            const SizedBox(height: 20),
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final raw = _detailData?['raw']?.toString() ?? "";
+                      print('Raw data to share : ${_detailData!['raw']}');
+                      if (raw.isNotEmpty) {
+                        _shareToWhatsApp(raw);
+                      }
+                    },
+                    icon: Icon(
+                      PhosphorIcons.whatsapp_logo_fill,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF25D366),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    label: const Text(
+                      'Bagikan ke WhatsApp',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {}, // Print Logic
-                      icon: Icon(Icons.print, color: primary500),
-                      label: Text(
-                        'Cetak Struk',
-                        style: TextStyle(
-                          color: primary500,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(height: 12),
+                Row(
+                  spacing: 8,
+                  children: [
+                    if (statusTransactionSuccess.contains(
+                      _detailData!['isPaid'],
+                    ))
+                      UniposButtonStatus(
+                        variant: UniposButtonStatusVariant.danger,
+                        hierarchy: UniposButtonStatusHierarchy.secondary,
+                        icon: PhosphorIcons.trash_simple_fill,
+                        textShow: false,
+                        onTap: () {
+                          if (_detailData == null ||
+                              _detailData!['transactionid'] == null) {
+                            showSnackbar(context, {
+                              'rc': '99',
+                              'message': 'ID Transaksi belum dimuat',
+                            });
+                            return;
+                          }
+                          context
+                              .read<TransactionHistoryDeleteReasonsProvider>()
+                              .fetchDeleteListReasons(
+                                _detailData!['transactionid'].toString(),
+                                widget.token,
+                              );
+                          ModalTransactionDelete.show(
+                            context,
+                            _detailData,
+                            widget.token,
+                          ).then((success) {
+                            if (success == true) {
+                              Navigator.pop(context, true); // Menutup detail modal, teruskan true ke hal utama!
+                            }
+                          });
+                        },
                       ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: primary500),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {}, // Print Logic
+                        icon: Icon(Icons.print, color: primary500),
+                        label: Text(
+                          'Cetak Struk',
+                          style: TextStyle(
+                            color: primary500,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primary500),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Selesai',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        child: const Text(
+                          'Selesai',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

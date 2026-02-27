@@ -430,6 +430,8 @@ class _TransactionPageState extends State<TransactionPage>
           "variants": jsonDecode(
             item['variants'] ?? '[]',
           ), // ✅ ubah string ke array JSON
+        "is_customize": true,
+
         });
       }
 
