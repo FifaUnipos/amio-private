@@ -14,6 +14,7 @@ import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/modelSingleTokoModel.dart';
 import 'package:unipos_app_335/models/productVariantModel.dart';
 import 'package:unipos_app_335/models/userModel.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/pesananPage.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/login_page.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
@@ -304,6 +305,8 @@ Future<void> myprofile(String token) async {
         nameProfile = data['fullname'];
         nameToko = data['nama_toko'];
         merchantType = data['usertype'];
+        typeAccount = data['usertype'];
+        roleAccount = data['role'];
         emailProfile = data['email'];
         phoneProfile = data['phonenumber'];
         roleProfile = data['role'];
@@ -2495,7 +2498,7 @@ var subTotal,
 Future calculateTransaction(
   BuildContext context,
   token,
-  List<Map<String, String>> details,
+  List<Map<String, dynamic>> details,
   StateSetter setState,
   memberid,
   typePrice,
@@ -2503,61 +2506,76 @@ Future calculateTransaction(
   transactionid,
 ) async {
   whenLoading(context);
-  print('🧾 detail cart: $details');
 
-  // 🔄 Ubah kembali field yang string ke tipe sesuai kebutuhan API
-  List<Map<String, dynamic>> preparedDetails = details.map((item) {
-    return {
-      "product_id": item["product_id"],
-      "request_id": item["id_request"] ?? "",
-      "is_online": item["is_online"] == "true",
-      "amount": num.tryParse(item["amount"] ?? "0") ?? 0,
-      "name": item["name"],
-      "quantity": item["quantity"],
-      "description": item["description"],
-      "variants": jsonDecode(item["variants"] ?? "[]"),
-    };
-  }).toList();
+  try {
+    debugPrint('🧾 detail cart (raw): $details');
 
-  print('🧾 preparedDetails: $preparedDetails');
+    final preparedDetails = buildDetailForCalculateFromDynamicMaps(details);
 
-  final response = await http.post(
-    Uri.parse(calculateTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode({
+    final body = {
+      "device_id": identifier,
       "deviceid": identifier,
+
+      "transaction_id": transactionid ?? "",
+      "discount_id": discount ?? "",
       "member_id": memberid,
-      "transaction_id": transactionid,
-      "discount_id": discount,
-      "typePrice": typePrice,
+      "value": 0, // ✅ calculate jangan isi dari amount barang
+      "payment_method": "001",
+      "payment_reference": "",
       "detail": preparedDetails,
-    }),
-  );
+    };
 
-  var jsonResponse = jsonDecode(response.body);
-  var data = jsonResponse['data'];
-  debugPrint('🧾 Response Calculate: $jsonResponse');
+    log("REQ CALC: ${jsonEncode(body)}");
 
-  if (response.statusCode == 200) {
+    final response = await http.post(
+      Uri.parse(calculateTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    Map<String, dynamic> jsonResponse;
+    try {
+      jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      showSnackbar(context, {"rc": "99", "message": "Invalid response: $e"});
+      return "99";
+    }
+
+    debugPrint('Response Calculate: $jsonResponse');
+
+    final data = jsonResponse['data'];
+    if (response.statusCode == 200 && data is Map) {
+      totalTransaksi = asInt(data['amount']); // contoh: 850
+      subTotal = asInt(data['total_before_dsc_tax']);
+      ppnTransaksi = asInt(data['ppn']);
+      discountProduct = asInt(data['discount']);
+      discountProductUmum = asInt(data['discount_umum']);
+
+      namaCustomerCalculate = (data['customer_name'] ?? data['customer'] ?? '')
+          .toString();
+
+      final tmpId =
+          (data['transactionid'] ?? data['transaction_id'] ?? data['id'] ?? '')
+              .toString();
+
+      if (tmpId.isNotEmpty) {
+        transactionidValue = tmpId;
+      }
+
+      setState(() {});
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {
+      "rc": "99",
+      "message": "calculateTransaction error: $e",
+    });
+    return "99";
+  } finally {
     closeLoading(context);
-    // print('✅ Success');
-    // log(jsonResponse.toString());
-
-    totalTransaksi = data['amount'] ?? 0;
-    subTotal = data['total_before_dsc_tax'] ?? 0;
-    ppnTransaksi = data['ppn'] ?? 0;
-    namaCustomerCalculate = data['customer_name'] ?? '';
-    discountProduct = data['discount'] ?? 0;
-    discountProductUmum = data['discount'] ?? 0;
-
-    setState(() {});
-    return jsonResponse['rc'];
-  } else {
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
-
-    // log(jsonResponse.toString());
-    return jsonResponse['rc'];
   }
 }
 
@@ -2581,84 +2599,59 @@ Future createTransaction(
   memberid,
 ) async {
   whenLoading(context);
-  List<Map<String, String>> mapCalculate = List.empty(growable: true);
 
-  for (var detail in details) {
-    Map<String, String> map1 = {};
-    map1['name'] = detail['name'] ?? '';
-    map1['product_id'] = detail['product_id'] ?? '';
-    map1['quantity'] = detail['quantity'] ?? '';
-    map1['image'] = detail['image'] ?? '';
-    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
-    map1['description'] = detail['description'] ?? '';
-    map1['id_request'] = detail['id_request'] ?? '';
-    map1['is_online'] = detail['is_online'] ?? '';
-    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
-    mapCalculate.add(map1);
-  }
+  try {
+    final detailFinal = buildDetailForCreateFromStringMaps(details);
 
-  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
-  // agar is_online jadi bool dan variants jadi array JSON
-  List<Map<String, dynamic>> mapCalculateFinal = [];
+    final bodyJson = {
+      "deviceid": identifier,
+      "device_id": identifier,
 
-  for (var item in mapCalculate) {
-    mapCalculateFinal.add({
-      "name": item['name'],
-      "product_id": item['product_id'],
-      "quantity": item['quantity'],
-      "image": item['image'],
-      "amount": item['amount'],
-      "description": item['description'],
-      "id_request": item['id_request'],
-      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
-      "variants": jsonDecode(
-        item['variants'] ?? '[]',
-      ), // ✅ ubah string ke array JSON
+      "discount_id": "",
+      "member_id": memberid,
+      "transaction_id": transactionid ?? "",
+      "value": value ?? "",
+      "payment_method": method ?? "",
+      "payment_reference": reference ?? "",
+      "detail": detailFinal,
+    };
+
+    log("REQ CREATE: ${jsonEncode(bodyJson)}");
+
+    final response = await http.post(
+      Uri.parse(createTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(bodyJson),
+    );
+
+    final jsonResponse = jsonDecode(response.body);
+    final data = jsonResponse['data'];
+
+    if (response.statusCode == 200) {
+      showSnackbar(context, jsonResponse);
+
+      // kalau kamu butuh update UI:
+      if (data != null && setState != null) {
+        setState(() {
+          // contoh (sesuaikan variabel global kamu):
+          // printext = data['raw'] ?? '';
+          // transaksiPesanan = data['transactionid'] ?? '';
+        });
+      }
+
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {
+      "rc": "99",
+      "message": "createTransaction error: $e",
     });
-  }
-
-  // 🧩 Kirim ke server
-  final bodyJson = {
-    "deviceid": identifier,
-    "discount_id": "",
-    "member_id": memberid,
-    "transaction_id": transactionid,
-    "value": value,
-    "payment_method": method,
-    "payment_reference": reference,
-    "detail": mapCalculateFinal,
-  };
-
-  // final String detailBaru = json.encode(mapCalculate);
-
-  final response = await http.post(
-    Uri.parse(createTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode(bodyJson),
-  );
-
-  var jsonResponse = jsonDecode(response.body);
-  var data = jsonResponse['data'];
-  if (response.statusCode == 200) {
-    print(jsonResponse);
+    return "99";
+  } finally {
     closeLoading(context);
-    showSnackbar(context, jsonResponse);
-    // pageController.jumpTo(0);
-    // print(jsonResponse['data'].toString());
-    setState(() {
-      // subTotal = 0;
-      printext = jsonResponse['data']['raw'];
-      transaksiNama = data['customer'];
-      transaksiMetode = data['payment_method'];
-      transaksiPesanan = data['transactionid'];
-      transaksiKasir = data['pic'];
-
-      // cart.clear();
-      // closeLoading(context);
-    });
-  } else {
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2675,72 +2668,47 @@ Future saveTransaction(
   memberid,
 ) async {
   whenLoading(context);
-  List<Map<String, String>> mapCalculate = List.empty(growable: true);
 
-  for (var detail in details) {
-    Map<String, String> map1 = {};
-    map1['name'] = detail['name'] ?? '';
-    map1['product_id'] = detail['product_id'] ?? '';
-    map1['quantity'] = detail['quantity'] ?? '';
-    map1['image'] = detail['image'] ?? '';
-    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
-    map1['description'] = detail['description'] ?? '';
-    map1['id_request'] = detail['id_request'] ?? '';
-    map1['is_online'] = detail['is_online'] ?? '';
-    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
-    mapCalculate.add(map1);
-  }
+  try {
+    final detailFinal = buildDetailForCreateFromStringMaps(details);
 
-  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
-  // agar is_online jadi bool dan variants jadi array JSON
-  List<Map<String, dynamic>> mapCalculateFinal = [];
+    final bodyJson = {
+      // createTransaksiUrl kamu selama ini pakai "deviceid"
+      "deviceid": identifier,
+      // optional: kalau BE kamu kadang pakai device_id juga, aman taruh sama
+      "device_id": identifier,
 
-  for (var item in mapCalculate) {
-    mapCalculateFinal.add({
-      "name": item['name'],
-      "product_id": item['product_id'],
-      "quantity": item['quantity'],
-      "image": item['image'],
-      "amount": item['amount'],
-      "description": item['description'],
-      "id_request": item['id_request'],
-      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
-      "variants": jsonDecode(
-        item['variants'] ?? '[]',
-      ), // ✅ ubah string ke array JSON
-    });
-  }
+      "discount_id": "",
+      "member_id": memberid,
+      "transaction_id": "", // ✅ bikin baru
+      "value": "", // ✅ belum bayar
+      "payment_method": "", // boleh kosong untuk tagihan
+      "payment_reference": reference ?? "",
+      "detail": detailFinal,
+    };
 
-  final bodyJson = {
-    "deviceid": identifier,
-    "discount_id": "",
-    "member_id": memberid,
-    "transaction_id": '',
-    "value": '',
-    "payment_method": '',
-    "payment_reference": reference,
-    "detail": mapCalculateFinal,
-  };
+    log("REQ SAVE: ${jsonEncode(bodyJson)}");
 
-  final response = await http.post(
-    Uri.parse(createTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode(bodyJson),
-  );
+    final response = await http.post(
+      Uri.parse(createTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(bodyJson),
+    );
 
-  // print('🧾 Response Save Transaction: ${response.body}');
-
-  // log("Payload ke server: ${json.encode(bodyJson)}");
-
-  var jsonResponse = jsonDecode(response.body);
-  if (response.statusCode == 200) {
-    showSnackbar(context, jsonResponse);
-    closeLoading(context);
-  } else {
-    showSnackbar(context, jsonResponse);
+    final jsonResponse = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {"rc": "99", "message": "saveTransaction error: $e"});
+    return "99";
+  } finally {
     closeLoading(context);
   }
-  return jsonResponse['rc'];
 }
 
 Future deletePesanan(BuildContext context, token, transactionid) async {
@@ -2787,6 +2755,48 @@ Future headerTagihan(
   } else {
     print(jsonResponse['rc'].toString());
     showSnackbar(context, jsonResponse);
+  }
+}
+
+Future<String?> deleteTagihanTablet(
+  BuildContext context, {
+  required String token,
+  required String transactionId,
+  required String idkategori,
+  required String detailAlasan,
+}) async {
+  final tx = transactionId.trim();
+  final cat = idkategori.trim();
+  final alasan = detailAlasan.trim();
+
+  if (tx.isEmpty) return "99";
+  if (cat.isEmpty) return "99";
+  if (alasan.length < 15) return "99";
+
+  final body = <String, String>{
+    "deviceid": identifier ?? "",
+    "transactionid": tx,
+    "idkategori": cat,
+    "detail_alasan": alasan,
+  };
+
+  print("REQ DELETE(TAB): $body");
+
+  final response = await http.post(
+    Uri.parse(deleteTagihanUrl),
+    headers: {'token': token},
+    body: body, // form-urlencoded, tapi isinya sesuai BE
+  );
+
+  final jsonResponse = jsonDecode(response.body);
+  print("RESP DELETE(TAB): $jsonResponse");
+
+  if (response.statusCode == 200) {
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc']?.toString();
+  } else {
+    errorText = jsonResponse['message']?.toString() ?? '';
+    return jsonResponse['rc']?.toString();
   }
 }
 
@@ -2862,17 +2872,32 @@ Future approveReference(
     return null;
   }
 
-  var jsonResponse = jsonDecode(response.body);
+  final jsonResponse = jsonDecode(bodyStr);
 
-  print(jsonResponse['data']);
   if (response.statusCode == 200) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (!context.mounted) return jsonResponse['rc']?.toString();
+
     showSnackbar(context, jsonResponse);
-    return jsonResponse['rc'];
+    if (popToRoot) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+
+    return jsonResponse['rc']?.toString();
   } else {
-    print(jsonResponse['rc'].toString());
-    return jsonResponse['message'];
+    return jsonResponse['message']?.toString();
   }
+
+  // var jsonResponse = jsonDecode(response.body);
+
+  // print(jsonResponse['data']);
+  // if (response.statusCode == 200) {
+  //   Navigator.of(context).popUntil((route) => route.isFirst);
+  //   showSnackbar(context, jsonResponse);
+  //   return jsonResponse['rc'];
+  // } else {
+  //   print(jsonResponse['rc'].toString());
+  //   return jsonResponse['message'];
+  // }
 }
 
 Future getPendapatan(BuildContext context, token, condition, merchantid) async {
