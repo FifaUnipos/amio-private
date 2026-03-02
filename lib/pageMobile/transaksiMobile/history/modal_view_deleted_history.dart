@@ -68,7 +68,7 @@ class ModalTransactionViewDeletedHistory {
                               children: [
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 16,
+                                  spacing: 8,
                                   children: [
                                     Row(
                                       mainAxisAlignment:
@@ -182,7 +182,9 @@ class ModalTransactionViewDeletedHistory {
                                         spacing: 16,
                                         children: [
                                          
-                                          Row(
+                                          Column(
+                                            spacing: 8,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
@@ -202,14 +204,14 @@ class ModalTransactionViewDeletedHistory {
                                                           .danger
                                                     : statusTransactionProcessCancel
                                                           .contains(
-                                                            dataDetailProduct!['isPaid'],
+                                                            dataDetailProduct['isPaid'],
                                                           )
                                                     ? UniposInformationVariant
                                                           .warning
                                                     : UniposInformationVariant
                                                           .success,
                                                 text:
-                                                    '${dataDetailProduct!['status_transactions'] ?? '-'}',
+                                                    '${dataDetailProduct['status_transactions'] ?? '-'}',
                                                 size: UniposInformationSize.small,
                                               ),
                                             ],
@@ -264,7 +266,7 @@ class ModalTransactionViewDeletedHistory {
                                               UniposDetailRow(
                                                 label: 'Nomor Transaksi',
                                                 value:
-                                                    '#${dataDetailProduct!['transactionid']}',
+                                                    '#${dataDetailProduct['transactionid']}',
                                               ),
                                             ],
                                           ),

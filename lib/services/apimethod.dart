@@ -1611,13 +1611,21 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
     if (response.statusCode == 200 &&
         response.data != null &&
         response.data['data'] != null) {
-      List<dynamic> dataList = response.data['data'];
+      var responseData = response.data['data'];
+
+      // API returns a Map like {"status":false,"message":"..."} when not connected
+      if (responseData is Map && responseData['status'] == false) {
+        messageKulasedaya = responseData['message'] ?? '';
+        return [];
+      }
+
+      List<dynamic> dataList = responseData is List ? responseData : [responseData];
       List<KulasedayaMember> members = dataList
           .map((item) => KulasedayaMember.fromJson(item))
           .toList();
       return members;
     } else {
-      throw Exception("Failed to load data: ${response.statusCode}");
+      return [];
     }
   } catch (e) {
     throw Exception(e.toString());
@@ -1637,13 +1645,28 @@ Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
     if (response.statusCode == 200 &&
         response.data != null &&
         response.data['data'] != null) {
-      List<dynamic> dataList = response.data['data'];
+      var responseData = response.data['data'];
+
+      // API returns a Map like {"status":false,"message":"..."} when not connected
+      if (responseData is Map && responseData['status'] == false) {
+        messageKulasedaya = responseData['message'] ?? '';
+        return [
+          KulasedayaBinding(
+            nextUrl: '',
+            status: false,
+            saldo: '0',
+            message: responseData['message'] ?? 'Merchant belum terhubung',
+          ),
+        ];
+      }
+
+      List<dynamic> dataList = responseData is List ? responseData : [responseData];
       List<KulasedayaBinding> members = dataList
           .map((item) => KulasedayaBinding.fromJson(item))
           .toList();
       return members;
     } else {
-      throw Exception("Failed to load data: ${response.statusCode}");
+      return [];
     }
   } catch (e) {
     throw Exception(e.toString());

@@ -1,25 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+final StreamController<String?> selectNotificationStream =
+    StreamController<String?>.broadcast();
+
 class UniposNotificationService {
   Future<void> init() async {
-    const InitializationSettingsAndroid = AndroidInitializationSettings(
-      'app_icon',
+    const initializationSettingsAndroid = AndroidInitializationSettings(
+      'defaultIcon',
     );
-    const initializationSettingDarwin = DarwinInitializationSettings(
+    const initializationSettingsDarwin = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
-    const initializationSettings = InitializationSettings(
-      android: InitializationSettingsAndroid,
-      iOS: initializationSettingDarwin,
+    const initilizationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
     );
     await flutterLocalNotificationsPlugin.initialize(
-      settings: initializationSettings,
+      settings: initilizationSettings,
+      onDidReceiveNotificationResponse: (notificationResponse) {
+        final payload = notificationResponse.payload;
+        if (payload != null && payload.isNotEmpty) {
+          selectNotificationStream.add(payload);
+        }
+      },
     );
   }
 
@@ -32,7 +43,7 @@ class UniposNotificationService {
         false;
   }
 
-  Future<bool> _requestAndroidNotificationPermission() async {
+  Future<bool> _requestAndroidNotificationsPermission() async {
     return await flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin
@@ -56,7 +67,7 @@ class UniposNotificationService {
       final notificationEnabled = await _isAndroidPermissionGranted();
       if (!notificationEnabled) {
         final requestNotificationsPermission =
-            await _requestAndroidNotificationPermission();
+            await _requestAndroidNotificationsPermission();
         return requestNotificationsPermission;
       }
       return notificationEnabled;
@@ -73,16 +84,18 @@ class UniposNotificationService {
     String channelId = "1",
     String channelName = "Simple Notification",
   }) async {
-    final androidPlatformChannelSpesifics = AndroidNotificationDetails(
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channelId,
       channelName,
       importance: Importance.max,
       priority: Priority.high,
     );
-    const iOSPlatformChannelSpesifics = DarwinNotificationDetails();
+    const iOSPlatformChannelSpecifics = DarwinNotificationDetails(
+      presentSound: true,
+    );
     final notificationDetails = NotificationDetails(
-      android: androidPlatformChannelSpesifics,
-      iOS: iOSPlatformChannelSpesifics,
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
     );
     await flutterLocalNotificationsPlugin.show(
       id: id,

@@ -11,7 +11,7 @@ import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
-import 'package:unipos_app_335/providers/unipos_notification_provider.dart';
+import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
 import 'package:unipos_app_335/services/api/transaction/history/delete.dart';
 
 import 'package:unipos_app_335/services/api/transaction/history/delete_get_reasons.dart';
@@ -106,6 +106,12 @@ class UniPOSApp extends StatelessWidget {
           create: (context) => TransactionHistoryDeleteProvider(
             context.read<TransactionHistoryDeleteService>(),
           ),
+        ),
+        Provider(create: (context) => UniposNotificationService()),
+        ChangeNotifierProvider(
+          create: (context) => UniposNotificationProvider(
+            context.read<UniposNotificationService>(),
+          )..requestPermissions(),
         ),
       ],
       child: MaterialApp(

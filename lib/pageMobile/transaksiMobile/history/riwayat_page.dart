@@ -5,33 +5,22 @@ import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
-import 'package:unipos_app_335/components/atoms/button/unipos_button_option.dart';
 import 'package:unipos_app_335/components/atoms/button/unipos_button_status.dart';
-import 'package:unipos_app_335/components/atoms/fields/unipos_text_field.dart';
-import 'package:unipos_app_335/components/atoms/unipos_detail_row.dart';
 import 'package:unipos_app_335/components/atoms/unipos_information.dart';
-import 'package:unipos_app_335/components/moleculs/unipos_modal.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_delete.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_view_deleted_history.dart';
-import 'package:unipos_app_335/data/model/transaction/history/view_deleted_history_response.dart';
-import 'package:unipos_app_335/data/static/transaction/history/delete_reasons_state.dart';
-import 'package:unipos_app_335/data/static/transaction/history/view_deleted_history_state.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'dart:convert';
-import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/main.dart'; // For identifier
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
-import 'package:unipos_app_335/utils/component/unipos_size.dart';
 import 'package:unipos_app_335/utils/status_transaction.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 class HistoryTab extends StatefulWidget {
@@ -1481,7 +1470,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                       final raw = _detailData?['raw']?.toString() ?? "";
                       print('Raw data to share : ${_detailData!['raw']}');
                       if (raw.isNotEmpty) {
-                        _shareToWhatsApp(raw);
+                        // _shareToWhatsApp(raw);
                       }
                     },
                     icon: Icon(

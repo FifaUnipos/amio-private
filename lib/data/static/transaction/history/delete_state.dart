@@ -1,6 +1,3 @@
-import 'package:unipos_app_335/data/model/transaction/history/delete_reasons.dart';
-import 'package:unipos_app_335/data/model/transaction/history/delete_reasons_response.dart';
-import 'package:unipos_app_335/data/model/transaction/history/delete_response.dart';
 
 sealed class TransactionHistoryDeleteResultState {}
 
