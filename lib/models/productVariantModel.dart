@@ -28,7 +28,8 @@ class ProductVariantCategory {
       isRequired: json['is_required'] ?? 0,
       productId: json['productid'] ?? '',
       name: json['name'] ?? '',
-      productVariants: (json['product_variants'] as List<dynamic>?)
+      productVariants:
+          (json['product_variants'] as List<dynamic>?)
               ?.map((v) => ProductVariant.fromJson(v))
               .toList() ??
           [],
@@ -43,6 +44,7 @@ class ProductVariant {
   final String priceOnlineShop;
   final int isActive;
   final String variantCategoryId;
+  bool isVariantCustomize;
 
   ProductVariant({
     required this.id,
@@ -51,6 +53,7 @@ class ProductVariant {
     required this.priceOnlineShop,
     required this.isActive,
     required this.variantCategoryId,
+    this.isVariantCustomize = false,
   });
 
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
