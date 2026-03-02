@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' as services;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -19,8 +21,189 @@ import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'riwayat_page.dart';
 import 'bill_page.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+enum DetailMode { calculate, create }
+
+int _toIntSafe(dynamic v, {int def = 0}) {
+  if (v == null) return def;
+  if (v is int) return v;
+
+  if (v is num) return v.round();
+
+  final s = v.toString().trim();
+  final normalized = s.replaceAll(RegExp(r'[^0-9\.\-]'), '');
+  if (normalized.isEmpty) return def;
+
+  final i = int.tryParse(normalized);
+  if (i != null) return i;
+
+  final d = double.tryParse(normalized);
+  return d?.round() ?? def;
+}
+
+bool _toBoolSafe(dynamic v) {
+  if (v == null) return false;
+  if (v == true) return true;
+  if (v is bool) return v;
+  if (v is int) return v == 1;
+
+  final s = v.toString().trim().toLowerCase();
+  return s == '1' || s == 'true' || s == 'yes';
+}
+
+int _variantTotalFromApi(List<dynamic> variants) {
+  int total = 0;
+  for (final cat in variants) {
+    if (cat is! Map) continue;
+    final list = (cat['variant'] as List?) ?? [];
+    for (final v in list) {
+      if (v is! Map) continue;
+      total += _toIntSafe(v['variant_price']);
+    }
+  }
+  return total;
+}
+
+int cartSubTotal(List<Map<String, dynamic>> cart) {
+  int sum = 0;
+
+  for (final item in cart) {
+    final int qty = _toIntSafe(item['quantity'], def: 0);
+
+    final num? totalAmount = item['total_amount'] as num?;
+    if (totalAmount != null) {
+      sum += totalAmount.round();
+      continue;
+    }
+
+    final Product p = item['product'] as Product;
+    final bool isOnline = item['is_online'] == true;
+    final bool isCustomize = _toBoolSafe(item['is_customize']);
+    final int? customAmount = item['custom_amount'] as int?;
+
+    final int baseDefault = isOnline
+        ? p.onlinePrice
+        : (p.priceAfter ?? p.price);
+    final int baseUsed = (isCustomize && customAmount != null)
+        ? customAmount
+        : baseDefault;
+
+    final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+    final int variantTotal = _toIntSafe(
+      item['variant_total'],
+      def: _variantTotalFromApi(rawVariants),
+    );
+
+    final num? unitNum = item['unit_amount'] as num?;
+    final int unitAmount = unitNum?.round() ?? (baseUsed + variantTotal);
+
+    sum += unitAmount * qty;
+  }
+  return sum;
+}
+
+List<Map<String, dynamic>> buildTransactionDetails(
+  List<Map<String, dynamic>> cart, {
+  required DetailMode mode,
+  bool quantityAsString = false,
+}) {
+  return cart.map((item) {
+    final Product p = item['product'] as Product;
+    // print(object)
+    final int qty = _toIntSafe(item['quantity'], def: 0);
+    final bool isOnline = item['is_online'] == true;
+    final bool isCustomize = _toBoolSafe(item['is_customize']);
+    final int? customAmount = item['custom_amount'] as int?;
+    final String notes = item['notes']?.toString() ?? "";
+    // print("custom amount: $customAmount");
+    final int baseDefault = isOnline
+        ? p.onlinePrice
+        : (p.priceAfter ?? p.price);
+    final int baseUsed = (isCustomize && customAmount != null)
+        ? customAmount
+        : baseDefault;
+
+    final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+
+    final int varianTotal = _toIntSafe(
+      item['variant_total'],
+      def: _variantTotalFromApi(rawVariants),
+    );
+
+    final num? unitNum = item['unit_amount'] as num?;
+    // final int unitAmount = unitNum?.round() ?? (baseUsed + varianTotal);
+    final int amountToSend = baseUsed;
+    final List<Map<String, dynamic>> variants = rawVariants
+        .map((cat) {
+          if (cat is! Map) return <String, dynamic>{};
+
+          final String catId = cat['variant_category_id']?.toString() ?? '';
+
+          List<dynamic> rawVarList = [];
+          if (cat['variant'] is List) {
+            rawVarList = cat['variant'] as List;
+          } else if (cat['variant_id'] is List) {
+            rawVarList = (cat['variant_id'] as List)
+                .map((id) => {"variant_id": id})
+                .toList();
+          } else if (cat['variant_id'] != null) {
+            rawVarList = [
+              {"variant_id": cat['variant_id']},
+            ];
+          }
+
+          final mappedVarList = rawVarList.map((v) {
+            if (v is Map) {
+              return {
+                "variant_id": v['variant_id']?.toString() ?? '',
+                "variant_price": _toIntSafe(v['variant_price'] ?? v['price']),
+                "is_variant_customize": _toBoolSafe(v['is_variant_customize'])
+                    ? 1
+                    : 0,
+              };
+            }
+            return {
+              "variant_id": v.toString(),
+              "variant_price": 0,
+              "is_variant_customize": 0,
+            };
+          }).toList();
+
+          return {"variant_category_id": catId, "variant": mappedVarList};
+        })
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    if (mode == DetailMode.calculate) {
+      return {
+        "product_id": p.id,
+        "name": p.name,
+        "amount": "${amountToSend}.00",
+        "quantity": qty,
+        "description": notes,
+        "is_online": isOnline,
+        "is_customize": isCustomize,
+        "variants": variants,
+      };
+    }
+
+    print(
+      "data: ${jsonEncode({"product_id": p.id.toString(), "request_id": "", "is_online": isOnline, "is_customize": isCustomize, "amount": amountToSend, "name": p.name, "quantity": quantityAsString ? qty.toString() : qty, "description": notes, "variants": variants})}",
+    );
+
+    return {
+      "product_id": p.id.toString(),
+      "request_id": "",
+      "is_online": isOnline,
+      "is_customize": isCustomize,
+      "amount": amountToSend,
+      "name": p.name,
+      "quantity": quantityAsString ? qty.toString() : qty,
+      "description": notes,
+      "variants": variants,
+    };
+  }).toList();
+}
 
 class Product {
   final String id;
@@ -32,6 +215,7 @@ class Product {
   final String? discountType;
   final String category;
   final String? imageUrl;
+  final bool? isCustomize;
 
   Product({
     required this.id,
@@ -43,25 +227,33 @@ class Product {
     this.discountType,
     required this.category,
     this.imageUrl,
+    this.isCustomize,
   });
+
+  static int _toInt(dynamic v, {int def = 0}) {
+    if (v == null) return def;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? def;
+  }
+
+  static int? _toNullableInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    return int.tryParse(v.toString());
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? 'Unknown',
-      price: json['price'] is int
-          ? json['price']
-          : int.tryParse(json['price'].toString()) ?? 0,
-      onlinePrice: json['price_online_shop'] is int
-          ? json['price_online_shop']
-          : int.tryParse(json['price_online_shop']?.toString() ?? '0') ?? 0,
-      priceAfter: json['price_after'] is int
-          ? json['price_after']
-          : int.tryParse(json['price_after']?.toString() ?? '0') ?? 0,
+      price: _toInt(json['price']),
+      onlinePrice: _toInt(json['price_online_shop']),
+      priceAfter: _toNullableInt(json['price_after']),
       discount: (json['discount'] as num?)?.toDouble(),
       discountType: json['discount_type'],
       category: json['typeproducts'] ?? '',
       imageUrl: json['product_image'],
+      isCustomize: json['is_customize'],
     );
   }
 }
@@ -205,6 +397,23 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     }
   }
 
+  bool _toBool(dynamic v) {
+    if (v == null) return false;
+    if (v is bool) return v;
+    if (v is int) return v == 1;
+    if (v is String) {
+      final s = v.trim().toLowerCase();
+      return s == '1' || s == 'true' || s == 'yes';
+    }
+    return false;
+  }
+
+  // int _toIntSafe(dynamic v) {
+  //   if (v == null) return 0;
+  //   if (v is int) return v;
+  //   return int.tryParse(v.toString()) ?? 0;
+  // }
+
   void _onSearchChanged() {
     String query = _searchController.text.toLowerCase();
     setState(() {
@@ -294,8 +503,75 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     lastVariantData = [];
     variantCategoryKeys.clear();
     tapTrue = 1;
+
     int qty = 1;
     TextEditingController notesController = TextEditingController();
+
+    bool showCustomPrice = false;
+
+    final TextEditingController customPriceContoller = TextEditingController();
+    int? customAmount;
+    String? customPriceError;
+    bool customEdited = false;
+
+    final Map<String, int> variantCustomCache = {};
+
+    void _setVariantCache(String vid, int price, int defPrice) {
+      if (price == defPrice) {
+        variantCustomCache.remove(vid);
+      } else {
+        variantCustomCache[vid] = price;
+      }
+    }
+
+    int _baseAmount() {
+      return (tapTrue == 2)
+          ? product.onlinePrice
+          : (product.priceAfter ?? product.price);
+    }
+
+    Map<String, dynamic>? _findSelectedDetail({
+      required String pid,
+      required String catId,
+      required String vid,
+    }) {
+      final sels = selectedVariantsByProduct[pid];
+      if (sels == null) return null;
+
+      final catIndex = sels.indexWhere(
+        (e) => e['variant_category_id'].toString() == catId,
+      );
+      if (catIndex == -1) return null;
+
+      final details = List<Map<String, dynamic>>.from(
+        (sels[catIndex]['variant_detail'] ?? []) as List,
+      );
+
+      final dIndex = details.indexWhere(
+        (d) => d['variant_id'].toString() == vid,
+      );
+      if (dIndex == -1) return null;
+
+      return details[dIndex];
+    }
+
+    void _syncCustomWithBaseIfNeeded() {
+      // if (!isCustomize) return;
+      if (!showCustomPrice) return;
+
+      if (customEdited) return;
+
+      final base = _baseAmount();
+      customAmount = base;
+      customPriceContoller.text = NumberFormat.decimalPattern(
+        'id',
+      ).format(base);
+    }
+
+    bool _isCustomizeNow() {
+      final base = _baseAmount();
+      return customEdited && customAmount != null && customAmount != base;
+    }
 
     // Create Future ONCE
     final Future<List<ProductVariantCategory>?> variantFuture =
@@ -309,6 +585,12 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateModal) {
+            final int baseAmt = _baseAmount();
+            final bool isCustomize = _isCustomizeNow();
+            final int shownAmt = isCustomize
+                ? (customAmount ?? baseAmt)
+                : baseAmt;
+
             return Container(
               height: MediaQuery.of(context).size.height * 0.9,
               padding: EdgeInsets.only(
@@ -369,25 +651,50 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                       'Outfit',
                                     ),
                                   ),
-                                  Text(
-                                    NumberFormat.currency(
-                                      locale: 'id',
-                                      symbol: 'Rp ',
-                                      decimalDigits: 0,
-                                    ).format(
-                                      (tapTrue == 2
-                                          ? product.onlinePrice
-                                          : (product.priceAfter ??
-                                                product.price)),
-                                    ),
-                                    style: heading3(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
+
+                                  Row(
+                                    children: [
+                                      Text(
+                                        NumberFormat.currency(
+                                          locale: 'id',
+                                          symbol: 'Rp ',
+                                          decimalDigits: 0,
+                                        ).format(shownAmt),
+                                        style: heading3(
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                      if (isCustomize) ...[
+                                        SizedBox(width: size8),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: primary100,
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Custom',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              primary500,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
+
                                   if (tapTrue == 1 &&
-                                      product.discountType != null)
+                                      product.discountType != null &&
+                                      !isCustomize)
                                     Text(
                                       NumberFormat.currency(
                                         locale: 'id',
@@ -432,30 +739,66 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                             ),
 
                             // Quantity
-                            Row(
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove_circle_outline),
-                                  color: primary500,
-                                  onPressed: () {
-                                    if (qty > 1) {
-                                      setStateModal(() => qty--);
-                                    }
-                                  },
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove_circle_outline),
+                                      color: primary500,
+                                      onPressed: () {
+                                        if (qty > 1) {
+                                          setStateModal(() => qty--);
+                                        }
+                                      },
+                                    ),
+                                    Text(
+                                      '$qty',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add_circle_outline),
+                                      color: primary500,
+                                      onPressed: () {
+                                        setStateModal(() => qty++);
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '$qty',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                SizedBox(height: 4),
+                                OutlinedButton(
+                                  onPressed: () {
+                                    setStateModal(() {
+                                      showCustomPrice = !showCustomPrice;
+                                      customPriceError = null;
+
+                                      _syncCustomWithBaseIfNeeded();
+                                    });
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    side: BorderSide(color: primary500),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.add_circle_outline),
-                                  color: primary500,
-                                  onPressed: () {
-                                    setStateModal(() => qty++);
-                                  },
+                                  child: Text(
+                                    showCustomPrice ? 'Tutup' : 'Ubah Harga',
+                                    style: heading4(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -475,7 +818,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                           children: [
                             Expanded(
                               child: InkWell(
-                                onTap: () => setStateModal(() => tapTrue = 1),
+                                onTap: () => setStateModal(() {
+                                  tapTrue = 1;
+                                  customPriceError = null;
+                                  _syncCustomWithBaseIfNeeded();
+                                }),
                                 child: Container(
                                   padding: EdgeInsets.all(size12),
                                   decoration: BoxDecoration(
@@ -505,8 +852,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                 ? SizedBox()
                                 : Expanded(
                                     child: InkWell(
-                                      onTap: () =>
-                                          setStateModal(() => tapTrue = 2),
+                                      onTap: () => setStateModal(() {
+                                        tapTrue = 2;
+                                        customPriceError = null;
+                                        _syncCustomWithBaseIfNeeded();
+                                      }),
                                       child: Container(
                                         padding: EdgeInsets.all(size12),
                                         decoration: BoxDecoration(
@@ -539,11 +889,70 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                           ],
                         ),
 
+                        if (showCustomPrice) ...[
+                          SizedBox(height: 16),
+                          Text(
+                            'Harga',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: customPriceContoller,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              services.FilteringTextInputFormatter.digitsOnly,
+                              RupiahInputFormatter(),
+                            ],
+                            decoration: InputDecoration(
+                              prefixText: 'Rp. ',
+                              hintText: 'Masukkan Harga',
+                              errorText: customPriceError,
+                              border: UnderlineInputBorder(),
+                            ),
+                            onChanged: (v) {
+                              final digits = v.replaceAll(
+                                RegExp(r'[^0-9]'),
+                                '',
+                              );
+                              setStateModal(() {
+                                customEdited = true;
+                                customPriceError = null;
+                                customAmount = digits.isEmpty
+                                    ? null
+                                    : int.tryParse(digits);
+                              });
+                            },
+                          ),
+                          SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                setStateModal(() {
+                                  customEdited = false;
+                                  customPriceError = null;
+                                  // customAmount = null;
+                                  _syncCustomWithBaseIfNeeded();
+                                });
+                              },
+                              child: Text(
+                                'Reset ke harga normal',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  primary500,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+
                         SizedBox(height: 16),
 
                         // Variants FutureBuilder
                         FutureBuilder<List<ProductVariantCategory>?>(
-                          future: _fetchProductVariants(product.id),
+                          future: variantFuture,
+                          // _fetchProductVariants(product.id),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -566,10 +975,13 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                               children: categories.map((category) {
                                 final String catId = category.id;
 
+                                variantCategoryKeys[catId] ??= GlobalKey();
+
                                 // Validation error if any
                                 final error = variantErrorByCategory[catId];
 
                                 return Column(
+                                  key: variantCategoryKeys[catId],
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SizedBox(height: size12),
@@ -626,6 +1038,34 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                         );
                                       });
 
+                                      final pid = product.id.toString();
+                                      final catIdStr = catId.toString();
+                                      final vid = variant.id.toString();
+
+                                      final detail = _findSelectedDetail(
+                                        pid: pid,
+                                        catId: catIdStr,
+                                        vid: vid,
+                                      );
+
+                                      final int defaultVPrice =
+                                          (double.tryParse(variant.price) ?? 0)
+                                              .toInt();
+
+                                      final int cachedPrice =
+                                          variantCustomCache[vid] ??
+                                          defaultVPrice;
+
+                                      final int shownVPrice = detail != null
+                                          ? _toIntSafe(detail['variant_price'])
+                                          : cachedPrice;
+
+                                      final bool isVCustomize = detail != null
+                                          ? _toBoolSafe(
+                                              detail['is_variant_customize'],
+                                            )
+                                          : variantCustomCache.containsKey(vid);
+
                                       return CheckboxListTile(
                                         activeColor: primary500,
                                         title: Row(
@@ -642,18 +1082,297 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                 ),
                                               ),
                                             ),
-                                            Text(
-                                              FormatCurrency.convertToIdr(
-                                                double.tryParse(
-                                                      variant.price,
-                                                    ) ??
-                                                    0,
-                                              ),
-                                              style: heading4(
-                                                FontWeight.w400,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  FormatCurrency.convertToIdr(
+                                                    shownVPrice.toDouble(),
+                                                  ),
+                                                  style: heading4(
+                                                    FontWeight.w400,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                                if (isVCustomize) ...[
+                                                  SizedBox(width: 6),
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 6,
+                                                          vertical: 2,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color: primary100,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                    ),
+                                                    child: Text(
+                                                      'Custom',
+                                                      style: heading4(
+                                                        FontWeight.w400,
+                                                        primary500,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                                SizedBox(width: 8),
+                                                OutlinedButton(
+                                                  onPressed: () {
+                                                    if (!isSelected) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Pilih variannya dulu',
+                                                          ),
+                                                        ),
+                                                      );
+                                                      return;
+                                                    }
+                                                    final pid = product.id
+                                                        .toString();
+                                                    final catIdStr = catId
+                                                        .toString();
+
+                                                    final sels =
+                                                        selectedVariantsByProduct[pid] ??
+                                                        [];
+                                                    final catIndex = sels
+                                                        .indexWhere(
+                                                          (e) =>
+                                                              e['variant_category_id']
+                                                                  .toString() ==
+                                                              catIdStr,
+                                                        );
+                                                    if (catIndex == -1) return;
+
+                                                    final details =
+                                                        List<
+                                                          Map<String, dynamic>
+                                                        >.from(
+                                                          sels[catIndex]['variant_detail']
+                                                              as List,
+                                                        );
+                                                    final dIndex = details
+                                                        .indexWhere(
+                                                          (d) =>
+                                                              d['variant_id']
+                                                                  .toString() ==
+                                                              variant.id
+                                                                  .toString(),
+                                                        );
+                                                    if (dIndex == -1) return;
+
+                                                    final int
+                                                    defPrice = _toIntSafe(
+                                                      details[dIndex]['variant_price_default'],
+                                                    );
+                                                    int
+                                                    currentPrice = _toIntSafe(
+                                                      details[dIndex]['variant_price'],
+                                                    );
+
+                                                    final ctrl =
+                                                        TextEditingController(
+                                                          text:
+                                                              NumberFormat.decimalPattern(
+                                                                'id',
+                                                              ).format(
+                                                                currentPrice,
+                                                              ),
+                                                        );
+
+                                                    showModalBottomSheet(
+                                                      context: context,
+                                                      isScrollControlled: true,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      builder: (context) {
+                                                        return StatefulBuilder(
+                                                          builder: (context, setM) {
+                                                            return Container(
+                                                              padding: EdgeInsets.only(
+                                                                left: 16,
+                                                                right: 16,
+                                                                top: 16,
+                                                                bottom:
+                                                                    MediaQuery.of(
+                                                                          context,
+                                                                        )
+                                                                        .viewInsets
+                                                                        .bottom +
+                                                                    16,
+                                                              ),
+                                                              decoration: BoxDecoration(
+                                                                color: bnw100,
+                                                                borderRadius:
+                                                                    BorderRadius.vertical(
+                                                                      top:
+                                                                          Radius.circular(
+                                                                            16,
+                                                                          ),
+                                                                    ),
+                                                              ),
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    'Ubah Harga Varian',
+                                                                    style: heading2(
+                                                                      FontWeight
+                                                                          .w700,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 8,
+                                                                  ),
+                                                                  Text(
+                                                                    variant
+                                                                        .name,
+                                                                    style: heading3(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw600,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 12,
+                                                                  ),
+                                                                  TextField(
+                                                                    controller:
+                                                                        ctrl,
+                                                                    keyboardType:
+                                                                        TextInputType
+                                                                            .number,
+                                                                    inputFormatters: [
+                                                                      services
+                                                                          .FilteringTextInputFormatter
+                                                                          .digitsOnly,
+                                                                      RupiahInputFormatter(),
+                                                                    ],
+                                                                    decoration: InputDecoration(
+                                                                      prefixText:
+                                                                          'Rp. ',
+                                                                      border:
+                                                                          UnderlineInputBorder(),
+                                                                    ),
+                                                                    onChanged: (value) {
+                                                                      final digits = value.replaceAll(
+                                                                        RegExp(
+                                                                          r'[^0-9]',
+                                                                        ),
+                                                                        '',
+                                                                      );
+                                                                      setM(() {
+                                                                        currentPrice =
+                                                                            digits.isEmpty
+                                                                            ? 0
+                                                                            : (int.tryParse(
+                                                                                    digits,
+                                                                                  ) ??
+                                                                                  0);
+                                                                      });
+                                                                    },
+                                                                  ),
+                                                                  Align(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .centerRight,
+                                                                    child: TextButton(
+                                                                      onPressed: () {
+                                                                        setM(() {
+                                                                          currentPrice =
+                                                                              defPrice;
+                                                                          _setVariantCache(
+                                                                            variant.id.toString(),
+                                                                            defPrice,
+                                                                            defPrice,
+                                                                          );
+                                                                          ctrl.text =
+                                                                              NumberFormat.decimalPattern(
+                                                                                'id',
+                                                                              ).format(
+                                                                                defPrice,
+                                                                              );
+                                                                        });
+                                                                      },
+                                                                      child: Text(
+                                                                        'Reset ke harga normal',
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 12,
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: double
+                                                                        .infinity,
+                                                                    child: ElevatedButton(
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        backgroundColor:
+                                                                            primary500,
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        details[dIndex]['variant_price'] =
+                                                                            currentPrice;
+                                                                        details[dIndex]['is_variant_customize'] =
+                                                                            (currentPrice !=
+                                                                            defPrice);
+
+                                                                        _setVariantCache(
+                                                                          variant
+                                                                              .id
+                                                                              .toString(),
+                                                                          currentPrice,
+                                                                          defPrice,
+                                                                        );
+
+                                                                        setStateModal(() {
+                                                                          sels[catIndex]['variant_detail'] =
+                                                                              details;
+                                                                          selectedVariantsByProduct[pid] =
+                                                                              sels;
+                                                                        });
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        );
+                                                                      },
+                                                                      child: Text(
+                                                                        'Simpan',
+                                                                        style: heading3(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw100,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Text('Ubah Harga'),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
@@ -715,17 +1434,28 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                 currentDetails.removeAt(0);
                                               }
 
+                                              final int defaultVPrice =
+                                                  (double.tryParse(
+                                                            variant.price,
+                                                          ) ??
+                                                          0)
+                                                      .toInt();
+                                              final String vid = variant.id
+                                                  .toString();
+                                              final int usedPrice =
+                                                  variantCustomCache[vid] ??
+                                                  defaultVPrice;
+
                                               // Add new
                                               currentIds.add(variant.id);
                                               currentDetails.add({
                                                 "variant_id": variant.id,
                                                 "variant_name": variant.name,
-                                                "variant_price":
-                                                    (double.tryParse(
-                                                              variant.price,
-                                                            ) ??
-                                                            0)
-                                                        .toInt(),
+                                                "variant_price_default":
+                                                    defaultVPrice,
+                                                "variant_price": usedPrice,
+                                                "is_variant_customize":
+                                                    usedPrice != defaultVPrice,
                                                 "is_online": tapTrue == 2,
                                               });
                                             } else {
@@ -849,14 +1579,14 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                     });
 
                                     // Auto Scroll to error
-                                    final key = variantCategoryKeys[cat.id];
-                                    if (key?.currentContext != null) {
-                                      Scrollable.ensureVisible(
-                                        key!.currentContext!,
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut,
-                                      );
-                                    }
+                                    // final key = variantCategoryKeys[cat.id];
+                                    // if (key?.currentContext != null) {
+                                    //   Scrollable.ensureVisible(
+                                    //     key!.currentContext!,
+                                    //     duration: Duration(milliseconds: 300),
+                                    //     curve: Curves.easeOut,
+                                    //   );
+                                    // }
 
                                     valid = false;
 
@@ -888,12 +1618,38 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                 return;
                               }
 
+                              final bool isCustomizeFinal = _isCustomizeNow();
+
+                              if (isCustomizeFinal) {
+                                final amt = customAmount ?? 0;
+                                if (amt <= 0) {
+                                  setStateModal(() {
+                                    customPriceError = 'Harga wajib diisi';
+                                  });
+                                  return;
+                                }
+                              }
+                              // if (isCustomize) {
+                              //   final amt = customAmount ?? 0;
+                              //   if (amt <= 0) {
+                              //     setStateModal(() {
+                              //       customPriceError =
+                              //           'Harga custom wajib diisi';
+                              //     });
+                              //     return;
+                              //   }
+                              // }
+
                               // Add to Cart
                               _addToCartWithVariants(
                                 product,
                                 qty,
                                 notesController.text,
                                 tapTrue == 2,
+                                customAmount: isCustomizeFinal
+                                    ? customAmount
+                                    : null,
+                                isCustomize: isCustomizeFinal,
                               );
                               Navigator.pop(context);
                             },
@@ -931,10 +1687,1188 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     Product product,
     int quantity,
     String notes,
-    bool isOnline,
-  ) {
+    bool isOnline, {
+    int? customAmount,
+    bool isCustomize = false,
+  }) {
     final productId = product.id.toString();
     final variantList = selectedVariantsByProduct[productId] ?? [];
+    void _showPreviewCart(Product product) {
+      // Reset state
+      selectedVariantsByProduct.clear();
+      variantErrorByCategory.clear();
+      lastVariantData = [];
+      variantCategoryKeys.clear();
+      tapTrue = 1;
+
+      int qty = 1;
+      TextEditingController notesController = TextEditingController();
+
+      bool showCustomPrice = false;
+
+      final TextEditingController customPriceContoller =
+          TextEditingController();
+      int? customAmount;
+      String? customPriceError;
+      bool customEdited = false;
+
+      int _baseAmount() {
+        return (tapTrue == 2)
+            ? product.onlinePrice
+            : (product.priceAfter ?? product.price);
+      }
+
+      Map<String, dynamic>? _findSelectedDetail({
+        required String pid,
+        required String catId,
+        required String vid,
+      }) {
+        final sels = selectedVariantsByProduct[pid];
+        if (sels == null) return null;
+
+        final catIndex = sels.indexWhere(
+          (e) => e['variant_category_id'].toString() == catId,
+        );
+        if (catIndex == -1) return null;
+
+        final details = List<Map<String, dynamic>>.from(
+          (sels[catIndex]['variant_detail'] ?? []) as List,
+        );
+
+        final dIndex = details.indexWhere(
+          (d) => d['variant_id'].toString() == vid,
+        );
+        if (dIndex == -1) return null;
+
+        return details[dIndex];
+      }
+
+      void _syncCustomWithBaseIfNeeded() {
+        // if (!isCustomize) return;
+        if (!showCustomPrice) return;
+
+        if (customEdited) return;
+
+        final base = _baseAmount();
+        customAmount = base;
+        customPriceContoller.text = NumberFormat.decimalPattern(
+          'id',
+        ).format(base);
+      }
+
+      bool _isCustomizeNow() {
+        final base = _baseAmount();
+        return customEdited && customAmount != null && customAmount != base;
+      }
+
+      // Create Future ONCE
+      final Future<List<ProductVariantCategory>?> variantFuture =
+          _fetchProductVariants(product.id);
+      final ScrollController scrollController = ScrollController();
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setStateModal) {
+              final int baseAmt = _baseAmount();
+              final bool isCustomize = _isCustomizeNow();
+              final int shownAmt = isCustomize
+                  ? (customAmount ?? baseAmt)
+                  : baseAmt;
+
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.9,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Column(
+                  children: [
+                    // Handle Bar
+                    Center(
+                      child: Container(
+                        margin: EdgeInsets.only(top: size8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        padding: EdgeInsets.all(16),
+                        children: [
+                          // Product Info
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: bnw200,
+                                  borderRadius: BorderRadius.circular(size8),
+                                ),
+                                child: Image.network(
+                                  product.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      SvgPicture.asset(
+                                        'assets/logoProduct.svg',
+                                      ),
+                                ),
+                              ),
+                              SizedBox(width: size12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      style: heading2(
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+
+                                    Row(
+                                      children: [
+                                        Text(
+                                          NumberFormat.currency(
+                                            locale: 'id',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0,
+                                          ).format(shownAmt),
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        if (isCustomize) ...[
+                                          SizedBox(width: size8),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: primary100,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              'Custom',
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                primary500,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+
+                                    if (tapTrue == 1 &&
+                                        product.discountType != null &&
+                                        !isCustomize)
+                                      Text(
+                                        NumberFormat.currency(
+                                          locale: 'id',
+                                          symbol: 'Rp ',
+                                          decimalDigits: 0,
+                                        ).format(product.price),
+                                        style: TextStyle(
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          fontFamily: 'Outfit',
+                                          color: bnw500,
+                                          fontSize: sp14,
+                                          height: 1.22,
+                                        ),
+                                      ),
+                                    if (tapTrue == 1 &&
+                                        product.discount != null &&
+                                        product.discount! > 0)
+                                      Text(
+                                        product.discountType == 'price'
+                                            ? NumberFormat.currency(
+                                                locale: 'id',
+                                                symbol: 'Rp. ',
+                                                decimalDigits: 0,
+                                              ).format(product.discount ?? 0)
+                                            : '${product.discount ?? 0} %',
+                                        style: heading4(
+                                          FontWeight.w600,
+                                          danger500,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    Text(
+                                      product.category,
+                                      style: heading3(
+                                        FontWeight.w400,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Quantity
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove_circle_outline),
+                                        color: primary500,
+                                        onPressed: () {
+                                          if (qty > 1) {
+                                            setStateModal(() => qty--);
+                                          }
+                                        },
+                                      ),
+                                      Text(
+                                        '$qty',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add_circle_outline),
+                                        color: primary500,
+                                        onPressed: () {
+                                          setStateModal(() => qty++);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  OutlinedButton(
+                                    onPressed: () {
+                                      setStateModal(() {
+                                        showCustomPrice = !showCustomPrice;
+                                        customPriceError = null;
+
+                                        _syncCustomWithBaseIfNeeded();
+                                      });
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      side: BorderSide(color: primary500),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          size8,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      showCustomPrice ? 'Tutup' : 'Ubah Harga',
+                                      style: heading4(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 16),
+                          Divider(),
+
+                          // Price Type Toggle (Offline vs Online)
+                          Text(
+                            'Jenis Harga',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: size8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => setStateModal(() {
+                                    tapTrue = 1;
+                                    customPriceError = null;
+                                    _syncCustomWithBaseIfNeeded();
+                                  }),
+                                  child: Container(
+                                    padding: EdgeInsets.all(size12),
+                                    decoration: BoxDecoration(
+                                      color: tapTrue == 1 ? primary100 : bnw100,
+                                      border: Border.all(
+                                        color: tapTrue == 1
+                                            ? primary500
+                                            : bnw300,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Harga Offline',
+                                        style: heading3(
+                                          FontWeight.w600,
+                                          tapTrue == 1 ? primary500 : bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              product.onlinePrice == 0
+                                  ? SizedBox()
+                                  : SizedBox(width: size12),
+                              product.onlinePrice == 0
+                                  ? SizedBox()
+                                  : Expanded(
+                                      child: InkWell(
+                                        onTap: () => setStateModal(() {
+                                          tapTrue = 2;
+                                          customPriceError = null;
+                                          _syncCustomWithBaseIfNeeded();
+                                        }),
+                                        child: Container(
+                                          padding: EdgeInsets.all(size12),
+                                          decoration: BoxDecoration(
+                                            color: tapTrue == 2
+                                                ? primary100
+                                                : bnw100,
+                                            border: Border.all(
+                                              color: tapTrue == 2
+                                                  ? primary500
+                                                  : bnw300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Harga Online',
+                                              style: TextStyle(
+                                                color: tapTrue == 2
+                                                    ? primary500
+                                                    : Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                            ],
+                          ),
+
+                          if (showCustomPrice) ...[
+                            SizedBox(height: 16),
+                            Text(
+                              'Harga',
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            TextField(
+                              controller: customPriceContoller,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                services.FilteringTextInputFormatter.digitsOnly,
+                                RupiahInputFormatter(),
+                              ],
+                              decoration: InputDecoration(
+                                prefixText: 'Rp. ',
+                                hintText: 'Masukkan Harga',
+                                errorText: customPriceError,
+                                border: UnderlineInputBorder(),
+                              ),
+                              onChanged: (v) {
+                                final digits = v.replaceAll(
+                                  RegExp(r'[^0-9]'),
+                                  '',
+                                );
+                                setStateModal(() {
+                                  customEdited = true;
+                                  customPriceError = null;
+                                  customAmount = digits.isEmpty
+                                      ? null
+                                      : int.tryParse(digits);
+                                });
+                              },
+                            ),
+                            SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  setStateModal(() {
+                                    customEdited = false;
+                                    customPriceError = null;
+                                    // customAmount = null;
+                                    _syncCustomWithBaseIfNeeded();
+                                  });
+                                },
+                                child: Text(
+                                  'Reset ke harga normal',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    primary500,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          SizedBox(height: 16),
+
+                          // Variants FutureBuilder
+                          FutureBuilder<List<ProductVariantCategory>?>(
+                            future: variantFuture,
+                            // _fetchProductVariants(product.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(size8),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return SizedBox();
+                              }
+
+                              final categories = snapshot.data!;
+                              lastVariantData = categories;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: categories.map((category) {
+                                  final String catId = category.id;
+
+                                  variantCategoryKeys[catId] ??= GlobalKey();
+
+                                  // Validation error if any
+                                  final error = variantErrorByCategory[catId];
+
+                                  return Column(
+                                    key: variantCategoryKeys[catId],
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: size12),
+                                      Text(
+                                        category.title,
+                                        style: heading4(
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                      Text(
+                                        category.isRequired == 1
+                                            ? "Wajib dipilih - Maks pilih ${category.maximumSelected}"
+                                            : "Opsional - Maks pilih ${category.maximumSelected}",
+                                        style: body2(
+                                          FontWeight.w600,
+                                          category.isRequired == 1
+                                              ? danger500
+                                              : bnw400,
+                                          'Outfit',
+                                        ),
+                                      ),
+
+                                      if (error != null)
+                                        Padding(
+                                          padding: EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            error,
+                                            style: TextStyle(
+                                              color: danger500,
+                                              fontSize: size12,
+                                            ),
+                                          ),
+                                        ),
+
+                                      SizedBox(height: size8),
+
+                                      ...category.productVariants.map((
+                                        variant,
+                                      ) {
+                                        final productId = product.id.toString();
+                                        final currentSelected =
+                                            selectedVariantsByProduct[productId] ??
+                                            [];
+
+                                        // Check if this variant is selected
+                                        final isSelected = currentSelected.any((
+                                          e,
+                                        ) {
+                                          final ids = (e['variant_id'] as List)
+                                              .map((id) => id.toString())
+                                              .toList();
+                                          return ids.contains(
+                                            variant.id.toString(),
+                                          );
+                                        });
+
+                                        final pid = product.id.toString();
+                                        final catIdStr = catId.toString();
+                                        final vid = variant.id.toString();
+
+                                        final detail = _findSelectedDetail(
+                                          pid: pid,
+                                          catId: catIdStr,
+                                          vid: vid,
+                                        );
+
+                                        final int defaultVPrice =
+                                            (double.tryParse(variant.price) ??
+                                                    0)
+                                                .toInt();
+                                        final int shownVPrice = detail == null
+                                            ? defaultVPrice
+                                            : _toIntSafe(
+                                                detail['variant_price'],
+                                                def: defaultVPrice,
+                                              );
+
+                                        final bool isVCustomize =
+                                            detail != null &&
+                                            _toBoolSafe(
+                                              detail['is_variant_customize'],
+                                            );
+
+                                        return CheckboxListTile(
+                                          activeColor: primary500,
+                                          title: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  variant.name,
+                                                  style: heading3(
+                                                    FontWeight.w400,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    FormatCurrency.convertToIdr(
+                                                      shownVPrice.toDouble(),
+                                                    ),
+                                                    style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  if (isVCustomize) ...[
+                                                    SizedBox(width: 6),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 6,
+                                                            vertical: 2,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: primary100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              6,
+                                                            ),
+                                                      ),
+                                                      child: Text(
+                                                        'Custom',
+                                                        style: heading4(
+                                                          FontWeight.w400,
+                                                          primary500,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                  SizedBox(width: 8),
+                                                  OutlinedButton(
+                                                    onPressed: () {
+                                                      if (!isSelected) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Pilih variannya dulu',
+                                                            ),
+                                                          ),
+                                                        );
+                                                        return;
+                                                      }
+                                                      final pid = product.id
+                                                          .toString();
+                                                      final catIdStr = catId
+                                                          .toString();
+
+                                                      final sels =
+                                                          selectedVariantsByProduct[pid] ??
+                                                          [];
+                                                      final catIndex = sels
+                                                          .indexWhere(
+                                                            (e) =>
+                                                                e['variant_category_id']
+                                                                    .toString() ==
+                                                                catIdStr,
+                                                          );
+                                                      if (catIndex == -1)
+                                                        return;
+
+                                                      final details =
+                                                          List<
+                                                            Map<String, dynamic>
+                                                          >.from(
+                                                            sels[catIndex]['variant_detail']
+                                                                as List,
+                                                          );
+                                                      final dIndex = details
+                                                          .indexWhere(
+                                                            (d) =>
+                                                                d['variant_id']
+                                                                    .toString() ==
+                                                                variant.id
+                                                                    .toString(),
+                                                          );
+                                                      if (dIndex == -1) return;
+
+                                                      final int
+                                                      defPrice = _toIntSafe(
+                                                        details[dIndex]['variant_price_default'],
+                                                      );
+                                                      int
+                                                      currentPrice = _toIntSafe(
+                                                        details[dIndex]['variant_price'],
+                                                      );
+
+                                                      final ctrl =
+                                                          TextEditingController(
+                                                            text:
+                                                                NumberFormat.decimalPattern(
+                                                                  'id',
+                                                                ).format(
+                                                                  currentPrice,
+                                                                ),
+                                                          );
+
+                                                      showModalBottomSheet(
+                                                        context: context,
+                                                        isScrollControlled:
+                                                            true,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        builder: (context) {
+                                                          return StatefulBuilder(
+                                                            builder: (context, setM) {
+                                                              return Container(
+                                                                padding: EdgeInsets.only(
+                                                                  left: 16,
+                                                                  right: 16,
+                                                                  top: 16,
+                                                                  bottom:
+                                                                      MediaQuery.of(
+                                                                        context,
+                                                                      ).viewInsets.bottom +
+                                                                      16,
+                                                                ),
+                                                                decoration: BoxDecoration(
+                                                                  color: bnw100,
+                                                                  borderRadius:
+                                                                      BorderRadius.vertical(
+                                                                        top: Radius.circular(
+                                                                          16,
+                                                                        ),
+                                                                      ),
+                                                                ),
+                                                                child: Column(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      'Ubah Harga Varian',
+                                                                      style: heading2(
+                                                                        FontWeight
+                                                                            .w700,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 8,
+                                                                    ),
+                                                                    Text(
+                                                                      variant
+                                                                          .name,
+                                                                      style: heading3(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw600,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          12,
+                                                                    ),
+                                                                    TextField(
+                                                                      controller:
+                                                                          ctrl,
+                                                                      keyboardType:
+                                                                          TextInputType
+                                                                              .number,
+                                                                      inputFormatters: [
+                                                                        services
+                                                                            .FilteringTextInputFormatter
+                                                                            .digitsOnly,
+                                                                        RupiahInputFormatter(),
+                                                                      ],
+                                                                      decoration: InputDecoration(
+                                                                        prefixText:
+                                                                            'Rp. ',
+                                                                        border:
+                                                                            UnderlineInputBorder(),
+                                                                      ),
+                                                                      onChanged: (value) {
+                                                                        final digits = value.replaceAll(
+                                                                          RegExp(
+                                                                            r'[^0-9]',
+                                                                          ),
+                                                                          '',
+                                                                        );
+                                                                        setM(() {
+                                                                          currentPrice =
+                                                                              digits.isEmpty
+                                                                              ? 0
+                                                                              : (int.tryParse(
+                                                                                      digits,
+                                                                                    ) ??
+                                                                                    0);
+                                                                        });
+                                                                      },
+                                                                    ),
+                                                                    Align(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .centerRight,
+                                                                      child: TextButton(
+                                                                        onPressed: () {
+                                                                          setM(() {
+                                                                            currentPrice =
+                                                                                defPrice;
+
+                                                                            ctrl.text =
+                                                                                NumberFormat.decimalPattern(
+                                                                                  'id',
+                                                                                ).format(
+                                                                                  defPrice,
+                                                                                );
+                                                                          });
+                                                                        },
+                                                                        child: Text(
+                                                                          'Reset ke harga normal',
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          12,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: double
+                                                                          .infinity,
+                                                                      child: ElevatedButton(
+                                                                        style: ElevatedButton.styleFrom(
+                                                                          backgroundColor:
+                                                                              primary500,
+                                                                        ),
+                                                                        onPressed: () {
+                                                                          details[dIndex]['variant_price'] =
+                                                                              currentPrice;
+                                                                          details[dIndex]['is_variant_customize'] =
+                                                                              (currentPrice !=
+                                                                              defPrice);
+
+                                                                          setStateModal(() {
+                                                                            sels[catIndex]['variant_detail'] =
+                                                                                details;
+                                                                            selectedVariantsByProduct[pid] =
+                                                                                sels;
+                                                                          });
+                                                                          Navigator.pop(
+                                                                            context,
+                                                                          );
+                                                                        },
+                                                                        child: Text(
+                                                                          'Simpan',
+                                                                          style: heading3(
+                                                                            FontWeight.w600,
+                                                                            bnw100,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                    child: Text('Ubah Harga'),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          value: isSelected,
+                                          contentPadding: EdgeInsets.zero,
+                                          controlAffinity:
+                                              ListTileControlAffinity.leading,
+                                          onChanged: (bool? val) {
+                                            setStateModal(() {
+                                              selectedVariantsByProduct[productId] ??=
+                                                  [];
+                                              List<Map<String, dynamic>>
+                                              productVariants =
+                                                  selectedVariantsByProduct[productId]!;
+
+                                              // Find entry for this category
+                                              int catIndex = productVariants
+                                                  .indexWhere(
+                                                    (e) =>
+                                                        e['variant_category_id'] ==
+                                                        catId,
+                                                  );
+
+                                              List<String> currentIds = [];
+                                              List<Map<String, dynamic>>
+                                              currentDetails = [];
+
+                                              if (catIndex != -1) {
+                                                currentIds = List<String>.from(
+                                                  productVariants[catIndex]['variant_id'],
+                                                );
+                                                currentDetails =
+                                                    List<
+                                                      Map<String, dynamic>
+                                                    >.from(
+                                                      productVariants[catIndex]['variant_detail'],
+                                                    );
+                                              }
+
+                                              if (val == true) {
+                                                // Logic for selection
+
+                                                // Radio logic (max 1)
+                                                if (category.maximumSelected ==
+                                                    1) {
+                                                  currentIds.clear();
+                                                  currentDetails.clear();
+                                                }
+                                                // Limit logic
+                                                else if (category
+                                                            .maximumSelected >
+                                                        1 &&
+                                                    currentIds.length >=
+                                                        category
+                                                            .maximumSelected) {
+                                                  currentIds.removeAt(
+                                                    0,
+                                                  ); // Remove oldest
+                                                  currentDetails.removeAt(0);
+                                                }
+
+                                                final int defaultVPrice =
+                                                    (double.tryParse(
+                                                              variant.price,
+                                                            ) ??
+                                                            0)
+                                                        .toInt();
+
+                                                // Add new
+                                                currentIds.add(variant.id);
+                                                currentDetails.add({
+                                                  "variant_id": variant.id,
+                                                  "variant_name": variant.name,
+                                                  "variant_price_default":
+                                                      defaultVPrice,
+                                                  "variant_price":
+                                                      defaultVPrice,
+                                                  "is_variant_customize": false,
+                                                  "is_online": tapTrue == 2,
+                                                });
+                                              } else {
+                                                // Uncheck
+                                                int removeIdx = currentIds
+                                                    .indexOf(variant.id);
+                                                if (removeIdx != -1) {
+                                                  currentIds.removeAt(
+                                                    removeIdx,
+                                                  );
+                                                  currentDetails.removeAt(
+                                                    removeIdx,
+                                                  );
+                                                }
+                                              }
+
+                                              // Update Map
+                                              if (catIndex != -1) {
+                                                if (currentIds.isEmpty) {
+                                                  productVariants.removeAt(
+                                                    catIndex,
+                                                  );
+                                                } else {
+                                                  productVariants[catIndex]['variant_id'] =
+                                                      currentIds;
+                                                  productVariants[catIndex]['variant_detail'] =
+                                                      currentDetails;
+                                                }
+                                              } else if (currentIds
+                                                  .isNotEmpty) {
+                                                productVariants.add({
+                                                  "variant_category_id": catId,
+                                                  "variant_id": currentIds,
+                                                  "variant_detail":
+                                                      currentDetails,
+                                                });
+                                              }
+
+                                              // Remove error if any selection exists
+                                              if (currentIds.isNotEmpty) {
+                                                variantErrorByCategory.remove(
+                                                  catId,
+                                                );
+                                              }
+                                            });
+                                          },
+                                        );
+                                      }).toList(),
+                                    ],
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+
+                          SizedBox(height: 16),
+                          Text(
+                            "Catatan :",
+                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                          TextField(
+                            controller: notesController,
+                            decoration: InputDecoration(
+                              hintText: 'Contoh: Kurangi es, cabe dipisah',
+                              border: UnderlineInputBorder(),
+                              hintStyle: heading3(
+                                FontWeight.w600,
+                                bnw400,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 100), // Spacing for button
+                        ],
+                      ),
+                    ),
+
+                    // Buttons
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                side: BorderSide(color: primary500),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                ),
+                              ),
+                              child: Text(
+                                'Batalkan',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  primary500,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: size12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Validation
+                                bool valid = true;
+                                for (var cat in lastVariantData) {
+                                  if (cat.isRequired == 1) {
+                                    final pid = product.id.toString();
+                                    final sels =
+                                        selectedVariantsByProduct[pid] ?? [];
+                                    final catSel = sels.firstWhere(
+                                      (e) => e['variant_category_id'] == cat.id,
+                                      orElse: () => {},
+                                    );
+
+                                    if (catSel.isEmpty ||
+                                        (catSel['variant_id'] as List)
+                                            .isEmpty) {
+                                      setStateModal(() {
+                                        variantErrorByCategory[cat.id] =
+                                            'Wajib dipilih';
+                                      });
+
+                                      // Auto Scroll to error
+                                      // final key = variantCategoryKeys[cat.id];
+                                      // if (key?.currentContext != null) {
+                                      //   Scrollable.ensureVisible(
+                                      //     key!.currentContext!,
+                                      //     duration: Duration(milliseconds: 300),
+                                      //     curve: Curves.easeOut,
+                                      //   );
+                                      // }
+
+                                      valid = false;
+
+                                      // Break to focus on first error? or show all.
+                                      // If we want scroll to *first*, we should track it.
+                                      // Current loop marks all. Scroll to the last one encountered or logic needs adjustment.
+                                      // Better to find FIRST invalid and scroll, but mark ALL.
+                                    }
+                                  }
+                                }
+
+                                if (!valid) {
+                                  // Find first error key
+                                  for (var cat in lastVariantData) {
+                                    if (variantErrorByCategory.containsKey(
+                                      cat.id,
+                                    )) {
+                                      final key = variantCategoryKeys[cat.id];
+                                      if (key?.currentContext != null) {
+                                        Scrollable.ensureVisible(
+                                          key!.currentContext!,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut,
+                                        );
+                                        break; // Scroll to first
+                                      }
+                                    }
+                                  }
+                                  return;
+                                }
+
+                                final bool isCustomizeFinal = _isCustomizeNow();
+
+                                if (isCustomizeFinal) {
+                                  final amt = customAmount ?? 0;
+                                  if (amt <= 0) {
+                                    setStateModal(() {
+                                      customPriceError = 'Harga wajib diisi';
+                                    });
+                                    return;
+                                  }
+                                }
+                                // if (isCustomize) {
+                                //   final amt = customAmount ?? 0;
+                                //   if (amt <= 0) {
+                                //     setStateModal(() {
+                                //       customPriceError =
+                                //           'Harga custom wajib diisi';
+                                //     });
+                                //     return;
+                                //   }
+                                // }
+
+                                // Add to Cart
+                                _addToCartWithVariants(
+                                  product,
+                                  qty,
+                                  notesController.text,
+                                  tapTrue == 2,
+                                  customAmount: isCustomizeFinal
+                                      ? customAmount
+                                      : null,
+                                  isCustomize: isCustomizeFinal,
+                                );
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary500,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                ),
+                              ),
+                              child: Text(
+                                'Tambah Ke Keranjang',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: size12),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
 
     // Calculate extra price
     double variantTotal = 0;
@@ -942,25 +2876,68 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     List<Map<String, dynamic>> apiVariants = [];
 
     for (var cat in variantList) {
+      final catId = cat['variant_category_id'];
       // API Structure
-      List<String> ids = (cat['variant_id'] as List)
-          .map((e) => e.toString())
-          .toList();
-      apiVariants.add({
-        "variant_category_id": cat['variant_category_id'],
-        "variant_id": ids,
-      });
+      // List<String> ids = (cat['variant_id'] as List)
+      //     .map((e) => e.toString())
+      //     .toList();
+      // apiVariants.add({
+      //   "variant_category_id": cat['variant_category_id'],
+      //   "variant_id": ids,
+      // });
 
-      // UI Structure
-      for (var v in (cat['variant_detail'] as List)) {
-        variantTotal += (v['variant_price'] as int).toDouble();
+      // // UI Structure
+      // for (var v in (cat['variant_detail'] as List)) {
+      //   variantTotal += (v['variant_price'] as int).toDouble();
+      //   flattenedVariants.add({
+      //     "variant_id": v['variant_id'],
+      //     "name": v['variant_name'],
+      //     "price": v['variant_price'],
+      //   });
+      // }
+
+      final List<Map<String, dynamic>> details =
+          List<Map<String, dynamic>>.from(cat['variant_detail'] as List);
+
+      for (var v in details) {
+        final int vprice = _toIntSafe(v['variant_price']);
+        variantTotal += vprice.toDouble();
+
         flattenedVariants.add({
           "variant_id": v['variant_id'],
           "name": v['variant_name'],
-          "price": v['variant_price'],
+          "price": vprice,
         });
       }
+
+      final variantItems = details.map((v) {
+        final int vprice = _toIntSafe(v['variant_price']);
+        final bool vCustom = v['is_variant_customize'] == true;
+
+        return {
+          "variant_id": v['variant_id'].toString(),
+          "variant_price": vprice,
+          "is_variant_customize": vCustom,
+        };
+      }).toList();
+
+      apiVariants.add({
+        "variant_category_id": catId.toString(),
+        "variant": variantItems,
+      });
     }
+
+    final int baseDefault = isOnline
+        ? product.onlinePrice
+        : (product.priceAfter ?? product.price);
+
+    final double baseUsed = (isCustomize && customAmount != null)
+        ? customAmount.toDouble()
+        : baseDefault.toDouble();
+
+    final double unitAmount = baseUsed + variantTotal;
+    final double totalAmount = unitAmount * quantity;
+    final Map<String, int> variantCustomCache = {};
 
     setState(() {
       _cart.add({
@@ -970,7 +2947,15 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         'variants': apiVariants, // API Structure
         'variants_ui': flattenedVariants, // UI Structure
         'variant_total': variantTotal,
+        'variant_custom_cache': variantCustomCache,
         'is_online': isOnline,
+
+        'is_customize': isCustomize,
+        'custom_amount': isCustomize ? customAmount : null,
+
+        'base_amount': baseUsed,
+        'unit_amount': unitAmount,
+        'total_amount': totalAmount,
       });
 
       ScaffoldMessenger.of(
@@ -995,11 +2980,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   void _updateCartQty(int index, int newQty) {
     setState(() {
-      if (newQty < 1) {
-        // Confirm delete or just delete? Assuming delete for now or min 1
-        return;
-      }
+      if (newQty < 1) return;
       _cart[index]['quantity'] = newQty;
+      final num unit = _cart[index]['unit_amount'] as num? ?? 0;
+      _cart[index]['total_amount'] = unit * newQty;
     });
   }
 
@@ -1011,11 +2995,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   int get _totalItems =>
       _cart.fold(0, (sum, item) => sum + (item['quantity'] as int));
-  int get _subTotal => _cart.fold(
-    0,
-    (sum, item) =>
-        sum + ((item['quantity'] as int) * (item['product'] as Product).price),
-  );
+  int get _subTotal => cartSubTotal(_cart);
 
   void _showProductDetail(Product product) {
     showModalBottomSheet(
@@ -1082,24 +3062,13 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       barrierDismissible: false,
       builder: (context) => Center(child: CircularProgressIndicator()),
     );
-
     try {
-      // Prepare detail for calculating
-      List<Map<String, dynamic>> details = _cart.map((item) {
-        Product p = item['product'];
-        return {
-          "product_id": p.id,
-          "name": p.name,
-          "price": p.price,
-          "quantity": item['quantity'],
-          "description": item['notes'] ?? "",
-          "is_online": item['is_online'] ?? false,
-          "variants": item['variants'] ?? [],
-          "id_request": item['id_request'] ?? "",
-        };
-      }).toList();
-
-      print('=== CALCULATING API DEBUG ===');
+      final details = buildTransactionDetails(
+        _cart,
+        mode: DetailMode.calculate,
+      );
+      print('cart: $_cart');
+      print('=== CALCULATING API DEBUG 1===');
       print('Transaction ID: $transactionId');
       print('Merchant ID: ${widget.merchantId}');
       print('Cart items count: ${_cart.length}');
@@ -1140,7 +3109,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           if (!mounted) return;
 
           // Autoritative data from calculation
-          final calculationResult = data['data'] ?? data;
+          final calculationResult =
+              data['data'] ?? data as Map<String, dynamic>;
+          final calcAmount =
+              double.tryParse(calculationResult['amount'].toString()) ?? 0;
 
           // Merge with original bill data so we don't lose fields like total_before_dsc_tax
           final Map<String, dynamic> mergedData = Map<String, dynamic>.from(
@@ -1165,8 +3137,8 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                 merchantId: widget.merchantId,
                 transactionId: transactionId,
                 memberId: _selectedMemberId, // Pass memberId
-                finalAmount: billAmount,
-                billData: mergedData,
+                finalAmount: calcAmount,
+                billData: billData,
                 onSuccess: () {
                   setState(() {
                     _cart.clear();
@@ -1207,17 +3179,22 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         // Try to find product in loaded products, else create temp Product
         Product product;
         try {
-          // ruct a Product from the bill item data
+          final isCustomize = _toBool(item['is_customize']);
+
           product = Product(
             id:
                 item['productid']?.toString() ??
                 item['product_id']?.toString() ??
                 '',
             name: item['name'] ?? '',
-            price: (double.tryParse(item['price'].toString()) ?? 0).toInt(),
-            onlinePrice: 0,
-            category: '',
+            price: (double.tryParse(item['price']?.toString() ?? '0') ?? 0)
+                .toInt(),
+            onlinePrice:
+                (double.tryParse(item['online_price']?.toString() ?? '0') ?? 0)
+                    .toInt(),
+            category: item['typeproducts'],
             imageUrl: item['product_image'],
+            isCustomize: isCustomize,
           );
         } catch (e) {
           continue;
@@ -1231,13 +3208,26 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         if (item['variants'] != null) {
           for (var variant in (item['variants'] as List)) {
             // API structure
-            if (variant['variant_category_id'] != null &&
-                variant['variant_id'] != null) {
+            if (variant['variant_category_id'] != null) {
+              final List<dynamic> vpList =
+                  (variant['variant_products'] as List?) ?? [];
+
               apiVariants.add({
-                'variant_category_id': variant['variant_category_id'],
-                'variant_id': variant['variant_id'] is List
-                    ? variant['variant_id']
-                    : [variant['variant_id']],
+                'variant_category_id': variant['variant_category_id']
+                    .toString(),
+                'variant': vpList.map((vp) {
+                  final id =
+                      (vp['variant_product_id'] ?? vp['variant_id'] ?? vp['id'])
+                          .toString();
+                  final price = _toIntSafe(vp['price'] ?? vp['variant_price']);
+                  final isCust = _toBool(vp['is_variant_customize']);
+
+                  return {
+                    "variant_id": id,
+                    "variant_price": price,
+                    "is_variant_customize": isCust,
+                  };
+                }).toList(),
               });
             }
 
@@ -1246,8 +3236,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
               for (var vp in (variant['variant_products'] as List)) {
                 print('Variant product data: $vp');
                 final price =
-                    double.tryParse(vp['variant_price']?.toString() ?? '0') ??
-                    0;
+                    double.tryParse(vp['price']?.toString() ?? '0') ?? 0;
                 variantTotal += price;
                 uiVariants.add({
                   'variant_id':
@@ -1261,6 +3250,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           }
         }
 
+        final bool isCustomize = _toBoolSafe(item['is_customize']);
+        final bool isOnline = _toBoolSafe(item['is_online']);
+        final int restoredAmount =
+            (double.tryParse(item['price']?.toString() ?? '0') ?? 0).round();
+
         newCart.add({
           'product': product,
           'quantity': int.tryParse(item['quantity'].toString()) ?? 1,
@@ -1268,7 +3262,9 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           'variants': apiVariants,
           'variants_ui': uiVariants,
           'variant_total': variantTotal,
-          'is_online': item['is_online'] ?? false,
+          'is_online': isOnline,
+          'is_customize': isCustomize,
+          'custom_amount': restoredAmount,
         });
 
         print('Restored cart item for ${product.name}:');
@@ -1299,35 +3295,85 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     try {
       final url = Uri.parse(createTransaksiUrl);
 
-      List<Map<String, dynamic>> details = _cart.map((item) {
-        Product p = item['product'];
-        int qty = item['quantity'];
-        double price = p.price.toDouble();
+      // List<Map<String, dynamic>> details = _cart.map((item) {
+      //   Product p = item['product'];
 
-        return {
-          "product_id": p.id,
-          "request_id": item['id_request'] ?? "",
-          "is_online": false,
-          "amount": (price * qty).toInt(),
-          "name": p.name,
-          "quantity": qty.toString(),
-          "description": item['notes'] ?? "",
-          "variants": item['variants'] ?? [],
-        };
-      }).toList();
+      //   final int qty = (item['quantity'] as int?) ?? 0;
+      //   final bool isOnline = item['is_online'] == true;
+      //   final bool isCustomize = item['is_customize'] == true;
+      //   final int? customAmount = item['custom_amount'] as int?;
+      //   final int variantTotal = (item['variant_total'] as num? ?? 0).toInt();
+
+      //   final int baseDefault = isOnline
+      //       ? (p.onlinePrice)
+      //       : (p.priceAfter ?? p.price);
+
+      //   final int baseUsed = (isCustomize && customAmount != null)
+      //       ? customAmount
+      //       : baseDefault;
+
+      //   final int unitAmount =
+      //       (item['unit_amount'] as num?)?.round() ?? (baseUsed + variantTotal);
+
+      //   final int totalAmount =
+      //       (item['total_amount'] as num?)?.round() ?? (unitAmount * qty);
+
+      //   final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+
+      //   final List<Map<String, dynamic>> variants = rawVariants.map((cat) {
+      //     final String catId = cat['variant_category_id']?.toString() ?? '';
+
+      //     final List<dynamic> rawVarList = (cat['variant'] ?? []) as List;
+
+      //     final mappedVarList = rawVarList.map((v) {
+      //       final Map<String, dynamic> mapped = {
+      //         "variant_id": v['variant_id']?.toString() ?? '',
+      //       };
+
+      //       if (isCustomize) {
+      //         final dynamic priceVal = v['variant_price'] ?? v['price'] ?? 0;
+
+      //         mapped["variant_price"] = priceVal;
+      //         mapped["is_variant_customize"] = true;
+      //       }
+
+      //       return mapped;
+      //     }).toList();
+
+      //     return {"variant_category_id": catId, "variant": mappedVarList};
+      //   }).toList();
+
+      //   return {
+      //     "product_id": p.id.toString(),
+      //     "request_id": "",
+      //     "is_online": isOnline,
+      //     "is_customize": isCustomize,
+      //     "amount": unitAmount,
+      //     "name": p.name,
+      //     "quantity": qty,
+      //     "description": item['notes'] ?? "",
+      //     "variants": variants,
+      //   };
+      // }).toList();
+      final details = buildTransactionDetails(
+        _cart,
+        mode: DetailMode.create,
+        quantityAsString: false,
+      );
 
       final body = {
         "deviceid": identifier,
-        "discount_id": _selectedDiscount?.id ?? "",
-        "member_id": _selectedMemberId ?? "",
-        "transaction_id": "",
-        "value": "",
-        "payment_method": "",
-        "payment_reference": "", // Default empty as requested
+        "device_id": identifier,
+        "discount_id": _selectedDiscount?.id ?? null,
+        "member_id": _selectedMemberId ?? null,
+        "transaction_id": null,
+        "value": null,
+        "payment_method": null,
+        "payment_reference": null, // Default empty as requested
         "detail": details,
       };
 
-      debugPrint("Sending save bill: $body");
+      debugPrint("Sending save bill: ${jsonEncode(body)}");
 
       final response = await http.post(
         url,
@@ -1387,6 +3433,24 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
             _cart[index]['variants'] = apiVariants;
             _cart[index]['variants_ui'] = uiVariants;
             _cart[index]['variant_total'] = total;
+
+            final Product p = _cart[index]['product'];
+            final bool isOnline = _cart[index]['is_online'] == true;
+            final bool isCustomize = _cart[index]['is_customize'] == true;
+            final int? customAmount = _cart[index]['custom_amount'] as int?;
+            final int qty = _cart[index]['quantity'] as int;
+
+            final int baseDefault = isOnline
+                ? p.onlinePrice
+                : (p.priceAfter ?? p.price);
+
+            final double baseUsed = (isCustomize && customAmount != null)
+                ? customAmount.toDouble()
+                : baseDefault.toDouble();
+
+            final double unitAmount = baseUsed + total;
+            _cart[index]['unit_amount'] = unitAmount;
+            _cart[index]['total_amount'] = unitAmount * qty;
           });
         },
         fetchVariants: _fetchProductVariants,
@@ -1484,18 +3548,6 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                   fontSize: 18,
                 ),
               ),
-              actions: [
-                if (!widget.isEmbedded)
-                  TextButton.icon(
-                    onPressed: _showKustomSelectionDialog,
-                    icon: Icon(PhosphorIcons.plus, color: primary500, size: 20),
-                    label: Text(
-                      'Kustom',
-                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                    ),
-                  ),
-                SizedBox(width: 8),
-              ],
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(48),
                 child: Container(
@@ -1578,11 +3630,9 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
               SizedBox(height: size12),
               Row(
                 children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _showSortModal,
-                      child: _buildDropdown(textOrderBy),
-                    ),
+                  GestureDetector(
+                    onTap: _showSortModal,
+                    child: _buildDropdown(textOrderBy),
                   ),
                 ],
               ),
@@ -1715,7 +3765,6 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
 
   Widget _buildDropdown(String text) {
     return Container(
-      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: size12, vertical: size8),
       decoration: BoxDecoration(
         border: Border.all(color: bnw300),
@@ -1723,309 +3772,12 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         color: bnw100,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(text, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
+          SizedBox(width: size4),
           Icon(Icons.arrow_drop_down, size: size32),
         ],
-      ),
-    );
-  }
-
-  void _showKustomSelectionDialog() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(size20),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(size16)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Text(
-              'Pilih Kustom',
-              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: size16),
-            ListTile(
-              leading: Icon(PhosphorIcons.package_fill, color: primary500),
-              title: Text(
-                'Produk Kustom',
-                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              subtitle: Text(
-                'Tambah produk manual ke keranjang',
-                style: heading4(FontWeight.w400, bnw500, 'Outfit'),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showCustomProductModal();
-              },
-            ),
-            Divider(height: 1, color: bnw300),
-            ListTile(
-              leading: Icon(
-                PhosphorIcons.device_mobile_fill,
-                color: primary500,
-              ),
-              title: Text(
-                'Produk Digital',
-                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              subtitle: Text(
-                'Pulsa, Paket Data, PLN, dll',
-                style: heading4(FontWeight.w400, bnw500, 'Outfit'),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _openDigitalProductWebView();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showCustomProductModal() {
-    _customProductNameController.clear();
-    _customProductPriceController.clear();
-    _conCatatanPreview.clear();
-    setState(() {
-      _counterCart = 1;
-    });
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setStateModal) => Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(size16)),
-          ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(size20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Produk Kustom',
-                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: size16),
-
-                Text(
-                  'Nama Produk',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: size8),
-                TextFormField(
-                  controller: _customProductNameController,
-                  decoration: InputDecoration(
-                    hintText: 'Contoh: Biaya Tambahan',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                ),
-                SizedBox(height: size16),
-
-                Text(
-                  'Harga Satuan',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: size8),
-                TextFormField(
-                  controller: _customProductPriceController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    prefixText: 'Rp ',
-                    hintText: '0',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                ),
-                SizedBox(height: size16),
-
-                Text(
-                  'Catatan',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: size8),
-                TextFormField(
-                  controller: _conCatatanPreview,
-                  decoration: InputDecoration(
-                    hintText: 'Tulis catatan di sini...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                ),
-                SizedBox(height: size16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Jumlah',
-                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (_counterCart > 1)
-                              setStateModal(() => _counterCart--);
-                          },
-                          icon: Icon(
-                            Icons.remove_circle_outline,
-                            color: primary500,
-                          ),
-                        ),
-                        Text(
-                          '$_counterCart',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        IconButton(
-                          onPressed: () => setStateModal(() => _counterCart++),
-                          icon: Icon(
-                            Icons.add_circle_outline,
-                            color: primary500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: size24),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_customProductPriceController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Harga wajib diisi')),
-                        );
-                        return;
-                      }
-
-                      final String name =
-                          _customProductNameController.text.isEmpty
-                          ? 'Produk Kustom'
-                          : _customProductNameController.text;
-                      final int price = int.parse(
-                        _customProductPriceController.text.replaceAll('.', ''),
-                      );
-
-                      Product customProduct = Product(
-                        id: 'custom',
-                        name: name,
-                        price: price,
-                        onlinePrice: 0,
-                        category: 'Kustom',
-                        imageUrl:
-                            'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
-                      );
-
-                      setState(() {
-                        _cart.add({
-                          'product': customProduct,
-                          'quantity': _counterCart,
-                          'notes': _conCatatanPreview.text,
-                          'is_online': false,
-                          'variants': [],
-                        });
-                      });
-
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary500,
-                      padding: EdgeInsets.symmetric(vertical: size16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                    ),
-                    child: Text(
-                      'Tambah ke Keranjang',
-                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openDigitalProductWebView() {
-    if (bindingUrl.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'URL Produk Digital belum tersedia. Silakan coba lagi.',
-          ),
-        ),
-      );
-      return;
-    }
-
-    _webController.loadRequest(Uri.parse(bindingUrl));
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            backgroundColor: bnw100,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: bnw900),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              'Produk Digital',
-              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-            ),
-          ),
-          body: WebViewWidget(controller: _webController),
-        ),
       ),
     );
   }
@@ -2548,19 +4300,52 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         barrierDismissible: false,
         builder: (context) => Center(child: CircularProgressIndicator()),
       );
-
+      print('=== CALCULATING API DEBUG 2===');
       final url = Uri.parse(calculateTransaksiUrl);
 
       List<Map<String, dynamic>> details = _cart.map((item) {
         Product p = item['product'];
+        final bool isOnlineItem = item['is_online'] ?? false;
+        final int priceUsed = (item['custom_amount'] is int)
+            ? item['custom_amount'] as int
+            : ((isOnlineItem ? (p.onlinePrice) : (p.priceAfter ?? p.price))
+                      as num)
+                  .toInt();
+
+        final bool isCustomize = item['is_customize'] == true;
+        final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+
+        final List<Map<String, dynamic>> variants = rawVariants.map((cat) {
+          final String catId = cat['variant_category_id']?.toString() ?? '';
+
+          final List<dynamic> rawVarList = (cat['variant'] ?? []) as List;
+
+          final mappedVarList = rawVarList.map((v) {
+            final Map<String, dynamic> mapped = {
+              "variant_id": v['variant_id']?.toString() ?? '',
+            };
+
+            if (isCustomize) {
+              final dynamic priceVal = v['variant_price'] ?? v['price'] ?? 0;
+
+              mapped["variant_price"] = priceVal;
+              mapped["is_variant_customize"] = true;
+            }
+
+            return mapped;
+          }).toList();
+
+          return {"variant_category_id": catId, "variant": mappedVarList};
+        }).toList();
         return {
           "product_id": p.id,
           "name": p.name,
-          "price": p.price,
+          "price": priceUsed,
           "quantity": item['quantity'],
           "description": item['notes'] ?? "",
-          "is_online": item['is_online'] ?? false,
-          "variants": item['variants'] ?? [],
+          "is_online": isOnlineItem,
+          "is_customize": item['is_customize'] ?? false,
+          "variants": variants,
         };
       }).toList();
 
@@ -2771,7 +4556,9 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   Future<List<DiscountModel>> _fetchDiscountsModal() async {
     try {
       final response = await http.post(
-        Uri.parse(diskonLink),
+        Uri.parse(
+          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount",
+        ),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"order_by": "upDownNama"}),
       );
@@ -2953,16 +4740,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       0,
       (sum, item) => sum + (item['quantity'] as int),
     );
-    int subTotal = widget.cart.fold(0, (sum, item) {
-      final isOnline = item['is_online'] == true;
-      final Product product = item['product'];
-      int price = isOnline
-          ? product.onlinePrice
-          : (product.priceAfter ?? product.price);
-      int variantTotal = (item['variant_total'] as num? ?? 0).toInt();
-      int qty = item['quantity'] as int;
-      return sum + ((price + variantTotal) * qty);
-    });
+    final int subTotal = cartSubTotal(widget.cart);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
@@ -3104,44 +4882,10 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                       ],
                     ),
                     SizedBox(height: 16),
-                    // OutlinedButton(
-                    //   onPressed: () {},
-                    //   style: OutlinedButton.styleFrom(
-                    //     minimumSize: Size(double.infinity, 48),
-                    //     side: BorderSide(color: bnw300),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(size8),
-                    //     ),
-                    //   ),
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       Icon(Icons.people_outline, color: bnw900),
-                    //       SizedBox(width: size8),
-                    //       Text(
-                    //         'Pilih Pembeli',
-                    //         style: TextStyle(color: bnw900),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
+
                     SizedBox(height: size12),
                     Row(
                       children: [
-                        // Container(
-                        //   decoration: BoxDecoration(
-                        //     borderRadius: BorderRadius.circular(size8),
-                        //     border: Border.all(color: primary500),
-                        //   ),
-                        //   child: IconButton(
-                        //     icon: Icon(
-                        //       PhosphorIcons.notebook_fill,
-                        //       color: primary500,
-                        //     ),
-                        //     onPressed: () {},
-                        //   ),
-                        // ),
-                        // SizedBox(width: size8),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: widget.onSaveBill,
@@ -3270,11 +5014,15 @@ class _CartItemWidgetState extends State<CartItemWidget> {
   void initState() {
     super.initState();
     _notesController = TextEditingController(text: widget.item['notes'] ?? '');
+    _seedCustomCacheFromCurrentVariants();
   }
 
   @override
   void didUpdateWidget(CartItemWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.item['variants'] != widget.item['variants']) {
+      _seedCustomCacheFromCurrentVariants();
+    }
     if (oldWidget.item['notes'] != widget.item['notes']) {
       if (_notesController.text != widget.item['notes']) {
         _notesController.text = widget.item['notes'] ?? '';
@@ -3288,12 +5036,119 @@ class _CartItemWidgetState extends State<CartItemWidget> {
     super.dispose();
   }
 
+  Map<String, dynamic>? _findVariantEntry(
+    List<dynamic> currentVariants,
+    String catId,
+    String variantId,
+  ) {
+    for (final cat in currentVariants) {
+      if (cat is! Map) continue;
+      if (cat['variant_category_id']?.toString() != catId) continue;
+
+      final list =
+          (cat['variant'] as List?) ?? (cat['variant_detail'] as List?) ?? [];
+
+      for (final v in list) {
+        if (v is! Map) continue;
+        if (v['variant_id']?.toString() == variantId) {
+          return Map<String, dynamic>.from(v);
+        }
+      }
+    }
+    return null;
+  }
+
+  List<String> _selectedIdsFromApi(dynamic apiVar) {
+    if (apiVar is! Map) return [];
+
+    if (apiVar['variant'] is List) {
+      return (apiVar['variant'] as List)
+          .map((e) => (e as Map)['variant_id'].toString())
+          .toList();
+    }
+
+    if (apiVar['variant_id'] is List) {
+      return (apiVar['variant_id'] as List).map((e) => e.toString()).toList();
+    }
+    if (apiVar['variant_id'] != null) return [apiVar['variant_id'].toString()];
+
+    return [];
+  }
+
+  Map<String, int> _customCache() {
+    final raw = widget.item['variant_custom_cache'];
+
+    if (raw is Map<String, int>) return raw;
+
+    final Map<String, int> m = {};
+    if (raw is Map) {
+      raw.forEach((key, value) => m[key.toString()] = _toIntSafe(value));
+    }
+
+    widget.item['variant_custom_cache'] = m;
+    return m;
+  }
+
+  void _setCache(String variantId, int price, int defPrice) {
+    final cache = _customCache();
+    if (price == defPrice) {
+      cache.remove(variantId);
+    } else {
+      cache[variantId] = price;
+    }
+  }
+
+  void _seedCustomCacheFromCurrentVariants() {
+    final rawVars = widget.item['variants'];
+    if (rawVars is! List) return;
+
+    final cache = _customCache();
+
+    for (final cat in rawVars) {
+      if (cat is! Map) continue;
+
+      final list =
+          (cat['variant'] as List?) ?? (cat['variant_detail'] as List?) ?? [];
+
+      for (final v in list) {
+        if (v is! Map) continue;
+
+        final String vid = v['variant_id']?.toString() ?? '';
+        if (vid.isEmpty) continue;
+
+        final bool isCust = _toBoolSafe(v['is_variant_customize']);
+        if (!isCust) continue;
+
+        final int price = _toIntSafe(v['variant_price'] ?? v['price']);
+        cache[vid] = price;
+      }
+    }
+
+    widget.item['variant_custom_cache'] = cache;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Product product = widget.item['product'];
     final int quantity = widget.item['quantity'];
     final String notes = widget.item['notes'] ?? '';
     final List<dynamic> currentVariants = widget.item['variants'] ?? [];
+
+    final bool isOnline = widget.item['is_online'] == true;
+    final bool isCustomize = widget.item['is_customize'] == true;
+    final int? customAmount = widget.item['custom_amount'] as int?;
+    final int variantTotal = (widget.item['variant_total'] as num? ?? 0)
+        .toInt();
+
+    final int baseDefault = isOnline
+        ? product.onlinePrice
+        : (product.priceAfter ?? product.price);
+
+    final int baseUsed = (isCustomize && customAmount != null)
+        ? customAmount
+        : baseDefault;
+
+    final int unitPrice = baseUsed + variantTotal;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3312,14 +5167,12 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                   color: bnw200,
                   borderRadius: BorderRadius.circular(size8),
                 ),
-                child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                    ? Image.network(
-                        product.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            SvgPicture.asset('assets/logoProduct.svg'),
-                      )
-                    : SvgPicture.asset('assets/logoProduct.svg'),
+                child: Image.network(
+                  product.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      SvgPicture.asset('assets/logoProduct.svg'),
+                ),
               ),
               SizedBox(width: size12),
               // Details
@@ -3338,14 +5191,32 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                             locale: 'id',
                             symbol: 'Rp. ',
                             decimalDigits: 0,
-                          ).format(
-                            widget.item['is_online'] == true
-                                ? product.onlinePrice
-                                : (product.priceAfter ?? product.price),
-                          ),
+                          ).format(baseUsed),
                           style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                         ),
-                        if (widget.item['is_online'] != true &&
+                        if (isCustomize) ...[
+                          SizedBox(width: size8),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: primary100,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Custom',
+                              style: heading4(
+                                FontWeight.w600,
+                                primary500,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (!isCustomize &&
+                            widget.item['is_online'] != true &&
                             product.discountType != null) ...[
                           SizedBox(width: size8),
                           Text(
@@ -3353,7 +5224,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                               locale: 'id',
                               symbol: 'Rp. ',
                               decimalDigits: 0,
-                            ).format(product.price),
+                            ).format(unitPrice),
                             style: TextStyle(
                               decoration: TextDecoration.lineThrough,
                               fontFamily: 'Outfit',
@@ -3372,35 +5243,34 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         ),
 
         // Varian Expansion Header
-        if (product.id != 'custom' && product.id != 'digitalProduct')
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-                if (_isExpanded && _variantFuture == null) {
-                  _variantFuture = widget.fetchVariants(product.id);
-                }
-              });
-            },
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: size8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Varian",
-                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 20,
-                  ),
-                ],
-              ),
+        InkWell(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+              if (_isExpanded && _variantFuture == null) {
+                _variantFuture = widget.fetchVariants(product.id);
+              }
+            });
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: size8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Varian",
+                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                Icon(
+                  _isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  size: 20,
+                ),
+              ],
             ),
           ),
+        ),
 
         // Expanded Area
         if (_isExpanded)
@@ -3451,27 +5321,96 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                         bool isSelected = false;
                         for (var apiVar in currentVariants) {
                           // apiVar is {variant_category_id: ..., variant_id: [id, id]}
-                          final ids = (apiVar['variant_id'] as List)
-                              .map((e) => e.toString())
-                              .toList();
-                          if (ids.contains(v.id)) isSelected = true;
+                          if (apiVar is! Map) continue;
+                          if (apiVar['variant_category_id']?.toString() !=
+                              cat.id.toString())
+                            continue;
+
+                          final ids = _selectedIdsFromApi(apiVar);
+                          if (ids.contains(v.id.toString())) {
+                            isSelected = true;
+                            break;
+                          }
                         }
+
+                        final String catId = cat.id.toString();
+                        final String vid = v.id.toString();
+
+                        final entry = _findVariantEntry(
+                          currentVariants,
+                          catId,
+                          vid,
+                        );
+
+                        final int defaultVPrice =
+                            (double.tryParse(v.price) ?? 0).toInt();
+
+                        final cache = _customCache();
+                        final int cachedPrice = cache[vid] ?? defaultVPrice;
+
+                        final int shownVPrice = entry != null
+                            ? _toIntSafe(entry['variant_price'])
+                            : cachedPrice;
+
+                        final bool isVCustomize = entry != null
+                            ? _toBoolSafe(entry['is_variant_customize'])
+                            : cache.containsKey(vid);
 
                         return CheckboxListTile(
                           activeColor: primary500,
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(v.name),
-                              Text(
-                                FormatCurrency.convertToIdr(
-                                  double.tryParse(v.price) ?? 0,
-                                ),
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
+                              Expanded(child: Text(v.name)),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    FormatCurrency.convertToIdr(
+                                      shownVPrice.toDouble(),
+                                    ),
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  if (isVCustomize) ...[
+                                    SizedBox(width: 6),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: primary100,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'Custom',
+                                        style: heading4(
+                                          FontWeight.w400,
+                                          primary500,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  SizedBox(width: 8),
+                                  OutlinedButton(
+                                    onPressed: isSelected
+                                        ? () {
+                                            _showEditVariantPriceDialog(
+                                              cat: cat,
+                                              variant: v,
+                                              allCategories: categories,
+                                              currentVariants: currentVariants,
+                                            );
+                                          }
+                                        : null,
+                                    child: Text('Ubah Harga'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -3508,7 +5447,6 @@ class _CartItemWidgetState extends State<CartItemWidget> {
           ),
           child: TextField(
             controller: _notesController,
-            enabled: product.id != 'digitalProduct',
             decoration: InputDecoration.collapsed(
               hintText: "Tambah catatan...",
               hintStyle: heading4(FontWeight.w600, bnw500, 'Outfit'),
@@ -3529,26 +5467,23 @@ class _CartItemWidgetState extends State<CartItemWidget> {
               onPressed: () => widget.onRemove(widget.index),
               icon: Icon(Icons.delete, color: danger500),
             ),
-            if (product.id != 'digitalProduct') ...[
-              _qtyBtn(false, quantity, () {
-                if (quantity > 1)
-                  widget.onUpdateQty(widget.index, quantity - 1);
-              }),
-              // Restore Container width 32 layout
-              Container(
-                width: 32,
-                alignment: Alignment.center,
-                child: Text(
-                  '$quantity',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+            _qtyBtn(false, quantity, () {
+              if (quantity > 1) widget.onUpdateQty(widget.index, quantity - 1);
+            }),
+            // Restore Container width 32 layout
+            Container(
+              width: 32,
+              alignment: Alignment.center,
+              child: Text(
+                '$quantity',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              _qtyBtn(
-                true,
-                quantity,
-                () => widget.onUpdateQty(widget.index, quantity + 1),
-              ),
-            ],
+            ),
+            _qtyBtn(
+              true,
+              quantity,
+              () => widget.onUpdateQty(widget.index, quantity + 1),
+            ),
           ],
         ),
       ],
@@ -3562,29 +5497,70 @@ class _CartItemWidgetState extends State<CartItemWidget> {
     List<ProductVariantCategory> allCategories,
     List<dynamic> currentVariants,
   ) {
+    final bool isCustomize = widget.item['is_customize'] == true;
     // 1. Deep copy currentVariants (API structure)
     // It is List<Map<String, dynamic>>, but values inside map might be lists too.
     List<Map<String, dynamic>> newApiVariants = [];
     for (var m in currentVariants) {
-      newApiVariants.add({
-        "variant_category_id": m['variant_category_id'],
-        "variant_id": List<String>.from(m['variant_id']),
-      });
+      if (m is! Map) continue;
+
+      final String catId = m['variant_category_id']?.toString() ?? '';
+
+      final List<Map<String, dynamic>> items = [];
+      if (m['variant'] is List) {
+        for (var it in (m['variant'] as List)) {
+          if (it is Map) {
+            items.add({
+              "variant_id": it['variant_id']?.toString() ?? '',
+              "variant_price": _toIntSafe(it['variant_price'] ?? it['price']),
+              "is_variant_customize": _toBoolSafe(it['is_variant_customize']),
+            });
+          }
+        }
+      } else if (m['variant_id'] is List) {
+        for (var id in (m['variant_id'] as List)) {
+          items.add({
+            "variant_id": id.toString(),
+            "variant_price": 0,
+            "is_variant_customize": false,
+          });
+        }
+      } else if (m['variant_id'] != null) {
+        items.add({
+          "variant_id": m['variant_id'].toString(),
+          "variant_price": 0,
+          "is_variant_customize": false,
+        });
+      }
+
+      if (items.isNotEmpty) {
+        newApiVariants.add({"variant_category_id": catId, "variant": items});
+      }
     }
+
+    final String catIdStr = cat.id.toString();
+    final String varIdStr = variant.id.toString();
 
     // Find or create category entry
     int catIndex = newApiVariants.indexWhere(
-      (e) => e['variant_category_id'] == cat.id,
+      (e) => e['variant_category_id'].toString() == catIdStr,
     );
-    List<String> currentIds = [];
+
+    List<Map<String, dynamic>> pickedItems = [];
     if (catIndex != -1) {
-      currentIds = (newApiVariants[catIndex]['variant_id'] as List)
-          .cast<String>();
+      pickedItems = List<Map<String, dynamic>>.from(
+        (newApiVariants[catIndex]['variant'] as List? ?? []),
+      );
     }
+
+    List<String> currentIds = pickedItems
+        .map((e) => e['variant_id'].toString())
+        .toList();
 
     if (val == true) {
       // Selection Logic matching _showPreviewCart
       if (cat.maximumSelected == 1) {
+        pickedItems.clear();
         currentIds.clear();
       } else if (cat.maximumSelected > 1 &&
           currentIds.length >= cat.maximumSelected) {
@@ -3594,7 +5570,17 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         );
         return;
       }
-      currentIds.add(variant.id);
+      if (!currentIds.contains(varIdStr)) {
+        final cache = _customCache();
+        final int defPrice = (double.tryParse(variant.price) ?? 0).toInt();
+        final int usedPrice = cache[varIdStr] ?? defPrice;
+        pickedItems.add({
+          "variant_id": varIdStr,
+          "variant_price": usedPrice,
+          "is_variant_customize": usedPrice != defPrice,
+        });
+        currentIds.add(varIdStr);
+      }
     } else {
       // Deselection
       // Guard: If Required and this is the last item, prevent deselection?
@@ -3604,47 +5590,87 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         ).showSnackBar(SnackBar(content: Text("Varian ini wajib dipilih")));
         return;
       }
-      currentIds.remove(variant.id);
+      pickedItems.removeWhere(
+        (element) => element['variant_id'].toString() == varIdStr,
+      );
+      currentIds.remove(varIdStr);
     }
+
+    // final rebuiltVariantList = currentIds.map((id) {
+    //   String? priceStr;
+    //   if (isCustomize) {
+    //     final pv = cat.productVariants.firstWhere(
+    //       (x) => x.id.toString() == id,
+    //       orElse: () =>
+    //           ProductVariant(id: '', name: '', price: '0', isActive: '0'),
+    //     );
+    //     final double p = double.tryParse(pv.price) ?? 0;
+    //     priceStr = p.toInt().toString();
+    //   }
+    //   return {
+    //     "variant_id": id,
+    //     "variant_price": _toIntSafe(priceStr),
+    //     "is_variant_customize": false,
+    //   };
+    // }).toList();
 
     // Update newApiVariants
     if (catIndex != -1) {
-      if (currentIds.isEmpty) {
+      if (pickedItems.isEmpty) {
         newApiVariants.removeAt(catIndex);
       } else {
-        newApiVariants[catIndex]['variant_id'] = currentIds;
+        newApiVariants[catIndex]['variant'] = pickedItems;
       }
     } else {
-      if (currentIds.isNotEmpty) {
+      if (pickedItems.isNotEmpty) {
         newApiVariants.add({
-          "variant_category_id": cat.id,
-          "variant_id": currentIds,
+          "variant_category_id": catIdStr,
+          "variant": pickedItems,
         });
       }
     }
 
     // 2. Recalculate UI Variants and Total
+
+    final Map<String, int> customPriceById = {};
+    for (final c in newApiVariants) {
+      final List<dynamic> vars = (c['variant'] as List? ?? []);
+      for (final v in vars) {
+        if (v is! Map) continue;
+        final id = v['variant_id']?.toString() ?? '';
+        final bool isCust = v['is_variant_customize'] == true;
+        final int vp = _toIntSafe(v['variant_price']);
+        if (isCust) customPriceById[id] = vp;
+      }
+    }
+
     List<Map<String, dynamic>> newUiVariants = [];
     double newTotal = 0;
 
     for (var c in allCategories) {
       // Find selection for this category in newApiVariants
-      var sel = newApiVariants.firstWhere(
-        (e) => e['variant_category_id'] == c.id,
+      final sel = newApiVariants.firstWhere(
+        (e) => e['variant_category_id'].toString() == c.id.toString(),
         orElse: () => {},
       );
-      if (sel.isNotEmpty) {
-        List<String> ids = (sel['variant_id'] as List).cast<String>();
-        for (var v in c.productVariants) {
-          if (ids.contains(v.id)) {
-            newTotal += double.tryParse(v.price) ?? 0;
-            newUiVariants.add({
-              "variant_id": v.id,
-              "name": v.name,
-              "price": (double.tryParse(v.price) ?? 0).toInt(),
-            });
-          }
-        }
+      if (sel.isEmpty) continue;
+
+      final picked = (sel['variant'] as List? ?? []);
+      final ids = picked
+          .whereType<Map>()
+          .map((e) => e['variant_id']?.toString() ?? '')
+          .toList();
+
+      // List<String> ids = (sel['variant_id'] as List).cast<String>();
+      for (var v in c.productVariants) {
+        final vid = v.id.toString();
+        if (!ids.contains(vid)) continue;
+
+        final int def = (double.tryParse(v.price) ?? 0).toInt();
+        final int used = customPriceById[vid] ?? def;
+
+        newTotal += used.toDouble();
+        newUiVariants.add({"variant_id": v.id, "name": v.name, "price": used});
       }
     }
 
@@ -3654,6 +5680,219 @@ class _CartItemWidgetState extends State<CartItemWidget> {
       newApiVariants,
       newUiVariants,
       newTotal,
+    );
+  }
+
+  void _showEditVariantPriceDialog({
+    required ProductVariantCategory cat,
+    required ProductVariant variant,
+    required List<ProductVariantCategory> allCategories,
+    required List<dynamic> currentVariants,
+  }) {
+    final String catIdStr = cat.id.toString();
+    final String varIdStr = variant.id.toString();
+
+    List<Map<String, dynamic>> newApiVariants = [];
+    for (var m in currentVariants) {
+      if (m is! Map) continue;
+      final String cid = m['variant_category_id']?.toString() ?? '';
+      final List<Map<String, dynamic>> items = [];
+
+      if (m['variant'] is List) {
+        for (var it in (m['variant'] as List)) {
+          if (it is Map) {
+            items.add({
+              "variant_id": it['variant_id']?.toString() ?? '',
+              "variant_price": _toIntSafe(it['variant_price'] ?? it['price']),
+              "is_variant_customize": _toBoolSafe(it['is_variant_customize']),
+            });
+          }
+        }
+      } else if (m['variant_id'] is List) {
+        for (var id in (m['variant_id'] as List)) {
+          items.add({
+            "variant_id": id.toString(),
+            "variant_price": 0,
+            "is_variant_customize": false,
+          });
+        }
+      }
+      if (items.isNotEmpty) {
+        newApiVariants.add({"variant_category_id": cid, "variant": items});
+      }
+    }
+
+    final int defPrice = (double.tryParse(variant.price) ?? 0).toInt();
+
+    int catIndex = newApiVariants.indexWhere(
+      (element) => element['variant_category_id'].toString() == catIdStr,
+    );
+    if (catIndex == -1) return;
+
+    final items = List<Map<String, dynamic>>.from(
+      (newApiVariants[catIndex]['variant'] as List? ?? []),
+    );
+    final int vIndex = items.indexWhere(
+      (element) => element['variant_id'].toString() == varIdStr,
+    );
+    if (vIndex == -1) return;
+
+    int currentPrice = _toIntSafe(items[vIndex]['variant_price']);
+    final ctrl = TextEditingController(
+      text: NumberFormat.decimalPattern('id').format(currentPrice),
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setM) {
+            return Container(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              ),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ubah Harga Varian',
+                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    variant.name,
+                    style: heading3(FontWeight.w400, bnw600, 'Outfit'),
+                  ),
+                  SizedBox(height: 12),
+                  TextField(
+                    controller: ctrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      services.FilteringTextInputFormatter.digitsOnly,
+                      RupiahInputFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      prefixText: 'Rp. ',
+                      border: UnderlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                      setM(() {
+                        currentPrice = digits.isEmpty
+                            ? 0
+                            : (int.tryParse(digits) ?? 0);
+                      });
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        setM(() {
+                          currentPrice = defPrice;
+
+                          ctrl.text = NumberFormat.decimalPattern(
+                            'id',
+                          ).format(defPrice);
+                        });
+                      },
+                      child: Text('Reset ke harga normal'),
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary500,
+                      ),
+                      onPressed: () {
+                        items[vIndex]['variant_price'] = currentPrice;
+                        items[vIndex]['is_variant_customize'] =
+                            (currentPrice != defPrice);
+                        _setCache(varIdStr, currentPrice, defPrice);
+
+                        newApiVariants[catIndex]['variant'] = items;
+
+                        final Map<String, int> customPriceById = {};
+                        for (final c in newApiVariants) {
+                          final vars = (c['variant'] as List? ?? []);
+                          for (final vv in vars) {
+                            if (vv is! Map) continue;
+                            final id = vv['variant_id']?.toString() ?? '';
+                            if (vv['is_variant_customize'] == true) {
+                              customPriceById[id] = _toIntSafe(
+                                vv['variant_price'],
+                              );
+                            }
+                          }
+                        }
+
+                        List<Map<String, dynamic>> newUiVariants = [];
+                        double newTotal = 0;
+
+                        for (var c in allCategories) {
+                          final sel = newApiVariants.firstWhere(
+                            (element) =>
+                                element['variant_category_id'].toString() ==
+                                c.id.toString(),
+                            orElse: () => {},
+                          );
+                          if (sel.isEmpty) continue;
+
+                          final picked = (sel['variant'] as List? ?? []);
+                          final ids = picked
+                              .whereType<Map>()
+                              .map((e) => e['variant_id']?.toString() ?? '')
+                              .toList();
+
+                          for (var pv in c.productVariants) {
+                            final vid = pv.id.toString();
+                            if (!ids.contains(vid)) continue;
+                            final int def = (double.tryParse(pv.price) ?? 0)
+                                .toInt();
+                            final int used = customPriceById[vid] ?? def;
+
+                            newTotal += used.toDouble();
+                            newUiVariants.add({
+                              "variant_id": pv.id,
+                              "name": pv.name,
+                              "price": used,
+                            });
+                          }
+                        }
+
+                        widget.onUpdateVariants(
+                          widget.index,
+                          newApiVariants,
+                          newUiVariants,
+                          newTotal,
+                        );
+
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Simpan',
+                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -3757,7 +5996,9 @@ class _PaymentPageState extends State<PaymentPage> {
     _selectedDiscount = widget.selectedDiscount;
 
     // Skip calculating if finalAmount is already provided (from bill)
-    if (widget.finalAmount != null) {
+    if (widget.finalAmount != null &&
+        !_hasCustomInCart &&
+        _hasBreakdownEnough) {
       setState(() {
         _isLoadingCalculation = false;
       });
@@ -3776,6 +6017,39 @@ class _PaymentPageState extends State<PaymentPage> {
         });
       }
     });
+  }
+
+  bool get _hasCustomInCart =>
+      widget.cart.any((e) => e['is_customize'] == true);
+
+  int _baseUsedFromItem(Map<String, dynamic> item) {
+    final Product p = item['product'];
+    final bool isOnline = item['is_online'] == true;
+    final bool isCustomize = item['is_customize'] == true;
+    final int? customAmount = item['custom_amount'] as int?;
+
+    final int baseDefault = isOnline
+        ? (p.onlinePrice)
+        : (p.priceAfter ?? p.price);
+
+    return (isCustomize && customAmount != null) ? customAmount : baseDefault;
+  }
+
+  int _variantTotalFromItem(Map<String, dynamic> item) {
+    return (item['variant_total'] as num? ?? 0).toInt();
+  }
+
+  int _unitAmountFromItem(Map<String, dynamic> item) {
+    final num? unit = item['unit_amount'] as num?;
+    if (unit != null) return unit.round();
+    return _baseUsedFromItem(item) + _variantTotalFromItem(item);
+  }
+
+  int _totalAmountFromItem(Map<String, dynamic> item) {
+    final int qty = (item['quantity'] as int?) ?? 0;
+    final num? total = item['total_amount'] as num?;
+    if (total != null) return total.round();
+    return _unitAmountFromItem(item) * qty;
   }
 
   Future<void> _fetchSubMethods(String categoryLabel) async {
@@ -3827,33 +6101,71 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
+  String? _calcError;
   Future<void> _fetchCalculation() async {
     setState(() {
       _isLoadingCalculation = true;
+      _calcError = null;
+      _calculationData = null;
     });
     try {
       final url = Uri.parse(calculateTransaksiUrl);
+      print('=== CALCULATING API DEBUG 3===');
 
-      List<Map<String, dynamic>> details = widget.cart.map((item) {
-        Product p = item['product'];
-        return {
-          "product_id": p.id,
-          "name": p.name,
-          "price": p.price,
-          "quantity": item['quantity'],
-          "description": item['notes'] ?? "",
-          "is_online": false,
-          "variants": item['variants'] ?? [],
-          "id_request": item['id_request'] ?? "",
-        };
-      }).toList();
+      // List<Map<String, dynamic>> details = widget.cart.map((item) {
+      //   Product p = item['product'];
+
+      //   final int baseUsed = _baseUsedFromItem(item);
+      //   final bool isOnline = item['is_online'] == true;
+
+      //   final bool isCustomize = item['is_customize'] == true;
+      //   final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+
+      //   final List<Map<String, dynamic>> variants = rawVariants.map((cat) {
+      //     final String catId = cat['variant_category_id']?.toString() ?? '';
+
+      //     final List<dynamic> rawVarList = (cat['variant'] ?? []) as List;
+
+      //     final mappedVarList = rawVarList.map((v) {
+      //       final Map<String, dynamic> mapped = {
+      //         "variant_id": v['variant_id']?.toString() ?? '',
+      //       };
+
+      //       if (isCustomize) {
+      //         final dynamic priceVal = v['variant_price'] ?? v['price'] ?? 0;
+
+      //         mapped["variant_price"] = priceVal;
+      //         mapped["is_variant_customize"] = true;
+      //       }
+
+      //       return mapped;
+      //     }).toList();
+
+      //     return {"variant_category_id": catId, "variant": mappedVarList};
+      //   }).toList();
+
+      //   return {
+      //     "product_id": p.id,
+      //     "name": p.name,
+      //     "price": baseUsed,
+      //     "quantity": item['quantity'],
+      //     "description": item['notes'] ?? "",
+      //     "is_online": isOnline,
+      //     "variants": variants,
+      //   };
+      // }).toList();
+
+      final details = buildTransactionDetails(
+        widget.cart,
+        mode: DetailMode.calculate,
+      );
 
       final response = await http.post(
         url,
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "merchantid": widget.merchantId,
-          "device_id": identifier,
+          "deviceid": identifier,
           "discount_id": _selectedDiscount?.id ?? "",
           "member_id": widget.memberId ?? "", // Use widget.memberId
           "transaction_id": "",
@@ -3861,18 +6173,39 @@ class _PaymentPageState extends State<PaymentPage> {
         }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _calculationData = data;
-          _isLoadingCalculation = false;
-        });
-      } else {
-        setState(() => _isLoadingCalculation = false);
+      debugPrint('CALC status: ${response.statusCode}');
+      debugPrint('CALC body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        setState(() => _calcError = 'HTTP ${response.statusCode}');
+        return;
       }
+
+      // if (response.statusCode == 200) {
+      //   final data = jsonDecode(response.body);
+      //   setState(() {
+      //     _calculationData = data;
+      //     _isLoadingCalculation = false;
+      //   });
+      // } else {
+      //   setState(() => _isLoadingCalculation = false);
+      // }
+
+      final json = jsonDecode(response.body);
+      if (json['rc'] != '00' || json['data'] == null || json['data'] is! Map) {
+        setState(() => _calcError = json['message'] ?? 'Gagal hitung total');
+        return;
+      }
+
+      setState(() {
+        _calculationData =
+            (json['data'] as Map<String, dynamic>); // simpan hanya data-nya
+      });
     } catch (e) {
       debugPrint("Error calculating: $e");
-      setState(() => _isLoadingCalculation = false);
+      setState(() => _calcError = 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _isLoadingCalculation = false);
     }
   }
 
@@ -3882,27 +6215,14 @@ class _PaymentPageState extends State<PaymentPage> {
 
     try {
       final url = Uri.parse(createTransaksiUrl);
-
-      List<Map<String, dynamic>> details = widget.cart.map((item) {
-        Product p = item['product'];
-        int qty = item['quantity'];
-        double price = (p.priceAfter ?? p.price).toDouble();
-        double variantTotal = (item['variant_total'] as num? ?? 0).toDouble();
-
-        return {
-          "product_id": p.id,
-          "request_id": item['id_request'] ?? "",
-          "is_online": false,
-          "amount": ((price + variantTotal) * qty).toInt(),
-          "name": p.name,
-          "quantity": qty.toString(),
-          "description": item['notes'] ?? "",
-          "variants": item['variants'] ?? [],
-        };
-      }).toList();
+      final details = buildTransactionDetails(
+        widget.cart,
+        mode: DetailMode.create,
+        quantityAsString: true,
+      );
 
       final body = {
-        "device_id": identifier,
+        "deviceid": identifier,
         "discount_id": _selectedDiscount?.id ?? "",
         "member_id": widget.memberId, // Use widget.memberId
         "transaction_id": widget.transactionId ?? "",
@@ -3913,32 +6233,47 @@ class _PaymentPageState extends State<PaymentPage> {
         "detail": details,
       };
 
+      debugPrint("PAYMENT request: ${jsonEncode(body)}");
+
       final response = await http.post(
         url,
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['rc'] == '00') {
-          widget.onSuccess?.call();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TransactionSuccessPage(
-                data: data['data'],
-                localCart: widget.cart,
-              ),
+      debugPrint('PAYMent status: ${response.statusCode}');
+      debugPrint('PAYMEent body: ${response.body}');
+      debugPrint('breakdown: $_breakdown');
+      debugPrint('billdata raw: ${widget.billData}');
+      debugPrint('ppn raw: ${_breakdown?['ppn']}');
+
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error ${response.statusCode}: ${response.body}'),
+          ),
+        );
+        return;
+      }
+
+      final data = jsonDecode(response.body);
+      if (data['rc'] == '00') {
+        widget.onSuccess?.call();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransactionSuccessPage(
+              data: data['data'],
+              localCart: widget.cart,
             ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'Gagal memproses transaksi'),
-            ),
-          );
-        }
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Gagal memproses transaksi'),
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -3950,41 +6285,16 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   int get _subTotal {
-    if (widget.billData != null &&
-        widget.billData!['total_before_dsc_tax'] != null) {
-      return (double.tryParse(
-                widget.billData!['total_before_dsc_tax'].toString(),
-              ) ??
-              0)
-          .toInt();
-    }
-    if (_calculationData != null && _calculationData!['data'] != null) {
-      final data = _calculationData!['data'];
-      if (data is Map<String, dynamic> &&
-          data['total_before_dsc_tax'] != null) {
-        return (double.tryParse(data['total_before_dsc_tax'].toString()) ?? 0)
-            .toInt();
-      }
-    }
-    return widget.cart.fold(0, (sum, item) {
-      Product product = item['product'] as Product;
-      int price = product.priceAfter ?? product.price;
-      int variantTotal = (item['variant_total'] as num? ?? 0).toInt();
-      return sum + ((price + variantTotal) * (item['quantity'] as int));
-    });
+    final b = _breakdown;
+    final st = _toIntSafe(b?['total_before_dsc_tax']);
+    if (st > 0) return st;
+
+    return cartSubTotal(widget.cart);
   }
 
   int get _ppn {
-    if (widget.billData != null && widget.billData!['ppn'] != null) {
-      return (double.tryParse(widget.billData!['ppn'].toString()) ?? 0).toInt();
-    }
-    if (_calculationData != null && _calculationData!['data'] != null) {
-      final data = _calculationData!['data'];
-      if (data is Map<String, dynamic> && data['ppn'] != null) {
-        return (double.tryParse(data['ppn'].toString()) ?? 0).toInt();
-      }
-    }
-    return 0;
+    final b = _breakdown;
+    return _toIntSafe(b?['ppn']);
   }
 
   int get _discount {
@@ -4002,19 +6312,37 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   int get _totalPay {
-    if (widget.finalAmount != null && widget.finalAmount! > 0)
+    final b = _breakdown;
+
+    final amt = _toIntSafe(b?['amount']);
+    if (amt > 0) return amt;
+
+    if (widget.finalAmount != null &&
+        widget.finalAmount! > 0 &&
+        !_hasCustomInCart) {
       return widget.finalAmount!.toInt();
-    if (widget.billData != null && widget.billData!['amount'] != null) {
-      return (double.tryParse(widget.billData!['amount'].toString()) ?? 0)
-          .toInt();
-    }
-    if (_calculationData != null && _calculationData!['data'] != null) {
-      final data = _calculationData!['data'];
-      if (data is Map<String, dynamic> && data['amount'] != null) {
-        return (double.tryParse(data['amount'].toString()) ?? 0).toInt();
-      }
     }
     return _subTotal + _ppn;
+  }
+
+  Map<String, dynamic>? get _breakdown {
+    final bd = widget.billData;
+    if (bd is Map<String, dynamic>) {
+      final d = bd['data'];
+      if (d is Map<String, dynamic>) return d;
+      return bd;
+    }
+
+    if (_calculationData is Map<String, dynamic>) return _calculationData;
+    return null;
+  }
+
+  bool get _hasBreakdownEnough {
+    final b = _breakdown;
+    if (b == null) return false;
+    return b['amount'] != null &&
+        b['ppn'] != null &&
+        b['total_before_dsc_tax'] != null;
   }
 
   String get _customerName {
@@ -4074,6 +6402,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 itemBuilder: (context, index) {
                   final item = widget.cart[index];
                   final Product p = item['product'];
+                  final int unitPrice = _unitAmountFromItem(item);
+                  final bool isCustomize = item['is_customize'] == true;
                   return Padding(
                     padding: EdgeInsets.symmetric(vertical: size8),
                     child: Row(
@@ -4112,13 +6442,34 @@ class _PaymentPageState extends State<PaymentPage> {
                                   locale: 'id',
                                   symbol: 'Rp. ',
                                   decimalDigits: 0,
-                                ).format(p.priceAfter ?? p.price),
+                                ).format(unitPrice),
                                 style: heading2(
                                   FontWeight.w600,
                                   bnw900,
                                   'Outfit',
                                 ),
                               ),
+                              if (isCustomize) ...[
+                                SizedBox(width: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: primary100,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Custom',
+                                    style: heading4(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                              ],
                               if (p.discountType != null)
                                 Text(
                                   NumberFormat.currency(
@@ -4817,7 +7168,9 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<List<DiscountModel>> _fetchDiscountsModal() async {
     try {
       final response = await http.post(
-        Uri.parse(diskonLink),
+        Uri.parse(
+          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount",
+        ),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"order_by": "upDownNama"}),
       );
@@ -5213,8 +7566,7 @@ class TransactionSuccessPage extends StatelessWidget {
                                             decimalDigits: 0,
                                           ).format(
                                             int.tryParse(
-                                                  item['price_after']
-                                                          ?.toString() ??
+                                                  item['amount']?.toString() ??
                                                       '0',
                                                 ) ??
                                                 price,
@@ -5251,7 +7603,7 @@ class TransactionSuccessPage extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: uiVariants.map<Widget>((v) {
                                             return Text(
-                                              "+ ${v['name']} (${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(v['price'])})",
+                                              "+ ${v['name']} (${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(v['amount'])})",
                                               style: heading4(
                                                 FontWeight.w600,
                                                 bnw600,
@@ -5355,33 +7707,6 @@ class TransactionSuccessPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    final raw = data['raw']?.toString() ?? "";
-                    if (raw.isNotEmpty) {
-                      _shareWhatsApp(raw);
-                    }
-                  },
-                  icon: Icon(PhosphorIcons.whatsapp_logo_fill, color: bnw100),
-                  label: Text(
-                    "Bagikan ke WhatsApp",
-                    style: TextStyle(
-                      color: bnw100,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF25D366),
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: size12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: Icon(Icons.print, color: bnw100),
                   label: Text(
@@ -5428,21 +7753,6 @@ class TransactionSuccessPage extends StatelessWidget {
     );
   }
 
-  Future<void> _shareWhatsApp(String text) async {
-    final uri = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(text)}");
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      // Fallback to web link if app not installed
-      final webUri = Uri.parse(
-        "https://wa.me/?text=${Uri.encodeComponent(text)}",
-      );
-      if (await canLaunchUrl(webUri)) {
-        await launchUrl(webUri, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
-
   Widget _rowInfo(String label, String value) {
     return Padding(
       padding: EdgeInsets.only(bottom: size8),
@@ -5453,6 +7763,31 @@ class TransactionSuccessPage extends StatelessWidget {
           Text(value, style: heading3(FontWeight.w600, bnw900, 'Outfit')),
         ],
       ),
+    );
+  }
+}
+
+class RupiahInputFormatter extends services.TextInputFormatter {
+  final NumberFormat _nf = NumberFormat.decimalPattern('id');
+
+  @override
+  services.TextEditingValue formatEditUpdate(
+    services.TextEditingValue oldValue,
+    services.TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) {
+      return const services.TextEditingValue(
+        text: '',
+        selection: services.TextSelection.collapsed(offset: 0),
+      );
+    }
+    final number = int.tryParse(digits) ?? 0;
+    final formatted = _nf.format(number);
+
+    return services.TextEditingValue(
+      text: formatted,
+      selection: services.TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
-import 'package:unipos_app_335/main.dart'; // For identifier
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/utils/component/component_size.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/utilities.dart'; // For identifier
 
 class HistoryTab extends StatefulWidget {
   final String token;
@@ -32,22 +36,31 @@ class _HistoryTabState extends State<HistoryTab> {
   String _selectedSortText = "Riwayat Terbaru";
   String _selectedSortTag = "upDownCreate";
 
-  List<String> orderByRiwayatText = [
-    "Riwayat Terbaru",
-    "Riwayat Terlama",
-    "Nama Pembeli A ke Z",
-    "Nama Pembeli Z ke A",
-    "Total Tertinggi",
-    "Total Terendah",
-  ];
+  // List<String> orderByRiwayatText = [
+  //   "Riwayat Terbaru",
+  //   "Riwayat Terlama",
+  //   "Nama Pembeli A ke Z",
+  //   "Nama Pembeli Z ke A",
+  //   "Total Tertinggi",
+  //   "Total Terendah",
+  // ];
 
-  List<String> orderByRiwayatTagihan = [
-    "upDownCreate",
-    "downUpCreate",
-    "upDownNama",
-    "downUpNama",
-    "downUpAmount",
-    "upDownAmount",
+  // List<String> orderByRiwayatTagihan = [
+  //   "downUpCreate",
+  //   "downUpCreate",
+  //   "upDownName",
+  //   "downUpName",
+  //   "downUpAmount",
+  //   "upDownAmount",
+  // ];
+
+  final sortOptions = [
+    {"label": "Riwayat Terbaru", "tag": "upDownCreate"},
+    {"label": "Riwayat Terlama", "tag": "downUpCreate"},
+    {"label": "Nama Pembeli A ke Z", "tag": "upDownName"},
+    {"label": "Nama Pembeli Z ke A", "tag": "downUpName"},
+    {"label": "Total Tertinggi", "tag": "downUpAmount"},
+    {"label": "Total Terendah", "tag": "upDownAmount"},
   ];
 
   @override
@@ -68,7 +81,7 @@ class _HistoryTabState extends State<HistoryTab> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "condition": "1",
+          "condition": "",
           "order_by": _selectedSortTag,
           "merchant_id": widget.merchantId,
         }),
@@ -169,9 +182,9 @@ class _HistoryTabState extends State<HistoryTab> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: List.generate(orderByRiwayatText.length, (index) {
-                  final label = orderByRiwayatText[index];
-                  final tag = orderByRiwayatTagihan[index];
+                children: List.generate(sortOptions.length, (index) {
+                  final label = sortOptions[index]["label"]!;
+                  final tag = sortOptions[index]["tag"]!;
                   bool isSelected = _selectedSortTag == tag;
 
                   return InkWell(
@@ -379,12 +392,60 @@ class TransactionDetailModal extends StatefulWidget {
 class _TransactionDetailModalState extends State<TransactionDetailModal> {
   bool _isLoading = true;
   Map<String, dynamic>? _detailData;
+  bool get _isGroupMerchant {
+    final t = (typeAccount ?? '').toLowerCase();
+    return t == 'group_merchant' || t == 'group merchant';
+  }
+
+  bool get _showRiwayatPerubahanButton {
+    if (!_isGroupMerchant || _detailData == null) return false;
+    final d = _detailData!;
+    final status = (d['status_transactions'] ?? d['status_transaction'] ?? '')
+        .toString()
+        .toLowerCase();
+    final reason = (d['reason'] ?? '').toString().trim();
+    final statusColor = (d['status_color'] ?? d['is_color'] ?? '').toString();
+
+    final isSuccess = status.contains('berhasil') || statusColor == '1';
+    final isCancelFlow =
+        status.contains('batal') ||
+        status.contains('dibatalkan') ||
+        reason.isNotEmpty;
+
+    return !isSuccess && isCancelFlow;
+  }
 
   @override
   void initState() {
     super.initState();
     _fetchDetail();
   }
+
+  String _pickStr(
+    Map<String, dynamic> m,
+    List<String> keys, {
+    String fallback = '-',
+  }) {
+    for (final k in keys) {
+      final v = m[k];
+      if (v != null && v.toString().trim().isNotEmpty) return v.toString();
+    }
+    return fallback;
+  }
+
+  double _parseAmount(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    final s = value.toString().replaceAll(',', '').trim();
+    return double.tryParse(s) ?? 0.0;
+  }
+
+  double _pickAmount(Map<String, dynamic> m, List<String> keys) {
+    final s = _pickStr(m, keys, fallback: '0');
+    return _parseAmount(s);
+  }
+
+  bool _isZeroDate(String s) => s.trim().isEmpty || s == '0000-00-00 00:00:00';
 
   Future<void> _fetchDetail() async {
     try {
@@ -448,6 +509,730 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
     }
   }
 
+  Future<dynamic> _showBottomRiwayatPerubahan(Map<String, dynamic> data) {
+    return showModalBottomSheet(
+      // constraints: const BoxConstraints(maxWidth: double.infinity),
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.9,
+          child: FutureBuilder(
+            future: transaksiViewReference(
+              context,
+              widget.token,
+              _pickStr(data, [
+                'transactionid',
+                'transaction_id',
+              ], fallback: widget.transactionId),
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final dataPerubahan = snapshot.data['data'];
+                final detail = dataPerubahan['detail'] ?? [];
+
+                bool isDropdownOpen = false;
+                bool isApproving = false;
+
+                return StatefulBuilder(
+                  builder: (context, setStateModal) => Container(
+                    margin: EdgeInsets.only(top: size32),
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size12),
+                        topLeft: Radius.circular(size12),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Riwayat Perubahan',
+                                style: heading1(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Text(
+                                'Rincian riwayat perubahan transaksi',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw500,
+                                  'Outfit',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: size32),
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            setStateModal(() {
+                              isDropdownOpen = !isDropdownOpen;
+                            });
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: size16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: size12,
+                              horizontal: size16,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(size16),
+                              border: Border.all(color: bnw300),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: size8,
+                                          horizontal: size12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          color: danger100,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                'Pengisian Terakhir',
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: size16),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: size12,
+                                                vertical: size8,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      size8,
+                                                    ),
+                                                color: danger500,
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  dataPerubahan['estimate'] ??
+                                                      '-',
+                                                  style: heading3(
+                                                    FontWeight.w400,
+                                                    bnw100,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: size12),
+                                    Icon(
+                                      PhosphorIcons.caret_down,
+                                      color: bnw900,
+                                      size: size24,
+                                    ),
+                                  ],
+                                ),
+                                AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  margin: EdgeInsets.only(
+                                    top: isDropdownOpen ? size16 : 0,
+                                  ),
+                                  child: isDropdownOpen
+                                      ? Column(
+                                          children: [
+                                            Container(
+                                              height:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.height /
+                                                  2,
+                                              width: double.infinity,
+                                              padding: EdgeInsets.all(size16),
+                                              decoration: BoxDecoration(
+                                                color: bnw200,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      size16,
+                                                    ),
+                                              ),
+                                              child: ListView(
+                                                padding: EdgeInsets.zero,
+                                                physics:
+                                                    BouncingScrollPhysics(),
+                                                children: [
+                                                  Text(
+                                                    'Status Transaksi',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size12),
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    child:
+                                                        buttonStatusTransaksi(
+                                                          data,
+                                                        ),
+                                                  ),
+                                                  SizedBox(height: size16),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        'Informasi Transaksi',
+                                                        style: heading3(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: size12),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                'Waktu Tagihan',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                'Nomor Tagihan',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                'Kasir',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                'Alasan Batal',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .end,
+                                                            children: [
+                                                              Text(
+                                                                dataPerubahan['entrydate'] ??
+                                                                    '-',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                dataPerubahan['transactionid'] ??
+                                                                    '-',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                dataPerubahan['pic'] ??
+                                                                    '-',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: size8,
+                                                              ),
+                                                              Text(
+                                                                dataPerubahan['reference']['alasan_reference'] ??
+                                                                    '-',
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: size16),
+                                                      Text(
+                                                        'Detail Alasan',
+                                                        style: heading3(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: size8),
+                                                      Wrap(
+                                                        children: [
+                                                          for (final paragraph
+                                                              in (dataPerubahan['reference']['detail_alasan_reference'] ??
+                                                                      '')
+                                                                  .split('\n'))
+                                                            Text(
+                                                              paragraph,
+                                                              style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: size16),
+                                                      Text(
+                                                        'Rincian Produk',
+                                                        style: heading3(
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        child: ListView.builder(
+                                                          shrinkWrap: true,
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          physics:
+                                                              NeverScrollableScrollPhysics(),
+                                                          itemCount:
+                                                              detail.length,
+                                                          itemBuilder: (context, index) {
+                                                            return SizedBox(
+                                                              child: Column(
+                                                                children: [
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'x${detail[index]['quantity']}',
+                                                                        style: heading3(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw900,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            size8,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            size48,
+                                                                        width:
+                                                                            size48,
+                                                                        child: AspectRatio(
+                                                                          aspectRatio:
+                                                                              1,
+                                                                          child: Container(
+                                                                            child: Image.network(
+                                                                              detail[index]['product_image'],
+                                                                              fit: BoxFit.cover,
+                                                                              errorBuilder:
+                                                                                  (
+                                                                                    context,
+                                                                                    error,
+                                                                                    stackTrace,
+                                                                                  ) => SvgPicture.asset(
+                                                                                    'assets/logoProduct.svg',
+                                                                                    fit: BoxFit.cover,
+                                                                                  ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            size8,
+                                                                      ),
+                                                                      Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            detail[index]['name'] ??
+                                                                                '-',
+                                                                            style: heading3(
+                                                                              FontWeight.w600,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                          Text(
+                                                                            FormatCurrency.convertToIdr(
+                                                                              detail[index]['amount'] ??
+                                                                                  '-',
+                                                                            ).toString(),
+                                                                            style: body1(
+                                                                              FontWeight.w400,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                          Text(
+                                                                            'Catatan : ${detail[index]['description']}',
+                                                                            style: body1(
+                                                                              FontWeight.w400,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  Divider(),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            dataPerubahan['isApprove'] ==
+                                                    'false'
+                                                ? Column(
+                                                    children: [
+                                                      SizedBox(height: size16),
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: GestureDetector(
+                                                              onTap: () async {
+                                                                if (isApproving)
+                                                                  return;
+                                                                setStateModal(
+                                                                  () =>
+                                                                      isApproving =
+                                                                          true,
+                                                                );
+                                                                try {
+                                                                  await approveReference(
+                                                                    context,
+                                                                    widget
+                                                                        .token,
+                                                                    data['transactionid'],
+                                                                    'true',
+                                                                  );
+                                                                  if (!mounted)
+                                                                    return;
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        'Pembatalan disetujui',
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                  setStateModal(() {
+                                                                    dataPerubahan['isApprove'] =
+                                                                        'true';
+                                                                    data['status_transactions'] =
+                                                                        'Pembatalan Tagihan Disetujui';
+                                                                    data['is_color'] =
+                                                                        '1';
+                                                                  });
+                                                                } catch (e) {
+                                                                  if (!mounted)
+                                                                    return;
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    SnackBar(
+                                                                      content: Text(
+                                                                        'Gagal approve: $e',
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                } finally {
+                                                                  if (mounted) {
+                                                                    setStateModal(
+                                                                      () => isApproving =
+                                                                          false,
+                                                                    );
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: isApproving
+                                                                  ? SizedBox(
+                                                                      height:
+                                                                          size48,
+                                                                      child: Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(),
+                                                                      ),
+                                                                    )
+                                                                  : buttonXL(
+                                                                      Center(
+                                                                        child: Text(
+                                                                          'Setuju',
+                                                                          style: heading2(
+                                                                            FontWeight.w600,
+                                                                            bnw100,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      double
+                                                                          .infinity,
+                                                                    ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: size16,
+                                                          ),
+                                                          Expanded(
+                                                            child: GestureDetector(
+                                                              onTap: () async {
+                                                                if (isApproving)
+                                                                  return;
+                                                                setStateModal(
+                                                                  () =>
+                                                                      isApproving =
+                                                                          true,
+                                                                );
+                                                                try {
+                                                                  approveReference(
+                                                                    context,
+                                                                    widget
+                                                                        .token,
+                                                                    data['transactionid'],
+                                                                    'false',
+                                                                  );
+                                                                  if (!mounted)
+                                                                    return;
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        'Pembatalan tidak disetujui',
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                  setStateModal(() {
+                                                                    dataPerubahan['isApprove'] =
+                                                                        'true';
+                                                                    data['status_transactions'] =
+                                                                        'Pembatalan Tagihan Tidak Disetujui';
+                                                                    data['is_color'] =
+                                                                        '2';
+                                                                  });
+                                                                } catch (e) {
+                                                                  if (!mounted)
+                                                                    return;
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    SnackBar(
+                                                                      content: Text(
+                                                                        'Gagal approve: $e',
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                } finally {
+                                                                  if (mounted)
+                                                                    setStateModal(
+                                                                      () => isApproving =
+                                                                          false,
+                                                                    );
+                                                                }
+                                                              },
+                                                              child: isApproving
+                                                                  ? SizedBox(
+                                                                      height:
+                                                                          size48,
+                                                                      child: Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(),
+                                                                      ),
+                                                                    )
+                                                                  : buttonXLoutline(
+                                                                      Center(
+                                                                        child: Text(
+                                                                          'Tidak Setuju',
+                                                                          style: heading2(
+                                                                            FontWeight.w600,
+                                                                            danger500,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      double
+                                                                          .infinity,
+                                                                      danger500,
+                                                                    ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  )
+                                                : const SizedBox(),
+                                          ],
+                                        )
+                                      : SizedBox(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buttonStatusTransaksi(Map<String, dynamic> data) {
+    final colorCode = _pickStr(data, [
+      'status_color',
+      'is_color',
+    ], fallback: '3');
+    final statusText = _pickStr(data, [
+      'status_transactions',
+      'status_transaction',
+      'status',
+    ], fallback: '-');
+
+    Color bg;
+    Color fg;
+
+    if (colorCode == '1') {
+      bg = succes100;
+      fg = succes500;
+    } else if (colorCode == '2') {
+      bg = danger100;
+      fg = danger500;
+    } else {
+      bg = waring100;
+      fg = waring500;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: size12, vertical: size16),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(size8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              statusText,
+              overflow: TextOverflow.ellipsis,
+              style: body1(FontWeight.w400, fg, 'Outfit'),
+            ),
+          ),
+          Icon(PhosphorIcons.info_fill, color: fg, size: size24),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -491,95 +1276,149 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                 : _detailData == null
                 ? const Center(child: Text("Gagal memuat detail"))
                 : SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Informasi Transaksi',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(
-                          'Nomor Transaksi',
-                          '#${_detailData!['transactionid'] ?? '-'}',
-                        ),
-                        _buildInfoRow(
-                          'Nama Pembeli',
-                          _detailData!['customer'] ?? 'Walking Customer',
-                        ),
-                        _buildInfoRow('Kasir', _detailData!['pic'] ?? '-'),
+                    child: Builder(
+                      builder: (_) {
+                        final d = _detailData!;
+                        final txId = _pickStr(d, [
+                          'transactionid',
+                          'transaction_id',
+                        ]);
+                        final customer = _pickStr(d, [
+                          'customer',
+                        ], fallback: 'Walking Customer');
+                        final pic = _pickStr(d, ['pic']);
+                        final entryDate = _pickStr(d, [
+                          'entrydate',
+                          'entry_date',
+                        ]);
+                        final paymentDateRaw = _pickStr(d, [
+                          'paymentdate',
+                          'payment_date',
+                        ]);
+                        final paymentDate = _isZeroDate(paymentDateRaw)
+                            ? '-'
+                            : paymentDateRaw;
+                        final antrian = _pickStr(d, ['antrian'], fallback: '-');
+                        final reason = _pickStr(d, [
+                          'reason',
+                        ], fallback: '').trim();
+                        final detailList = (d['detail'] as List?) ?? [];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Informasi Transaksi',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                if (_showRiwayatPerubahanButton)
+                                  TextButton(
+                                    onPressed: () {
+                                      if (_detailData == null) return;
+                                      _showBottomRiwayatPerubahan(_detailData!);
+                                    },
+                                    child: const Text('Riwayat Perubahan'),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _buildInfoRow('Nomor Transaksi', '#$txId'),
+                            _buildInfoRow('Nama Pembeli', customer),
+                            _buildInfoRow('Kasir', pic),
+                            _buildInfoRow('Waktu Tagihan', entryDate),
+                            _buildInfoRow('Waktu Pembayaran', paymentDate),
+                            _buildInfoRow('Antrian', antrian),
+                            if (reason.isNotEmpty)
+                              _buildInfoRow('Alasan', reason),
 
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Rincian Pesanan',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(height: 1),
-                        if (_detailData!['detail'] != null)
-                          ...(_detailData!['detail'] as List).map((item) {
-                            return _buildProductItem(item);
-                          }).toList(),
+                            const SizedBox(height: 12),
+                            buttonStatusTransaksi(d),
 
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Rincian Pembayaran',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSummaryRow(
-                          'Metode Pembayaran',
-                          _detailData!['payment_name'] ?? '-',
-                        ),
-                        _buildSummaryRow(
-                          'Sub Total',
-                          _detailData!['total_before_dsc_tax'],
-                          isCurrency: true,
-                        ),
-                        if (_parseAmount(_detailData!['discount']) > 0)
-                          _buildSummaryRow(
-                            'Diskon',
-                            '- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_parseAmount(_detailData!['discount']))}',
-                            isCurrency: false,
-                          ),
-                        if (_parseAmount(_detailData!['ppn']) > 0)
-                          _buildSummaryRow(
-                            'PPN',
-                            _detailData!['ppn'],
-                            isCurrency: true,
-                          ),
-                        const Divider(
-                          height: 24,
-                          thickness: 1,
-                        ), // dashed mimic skipped for simplicity
-                        _buildSummaryRow(
-                          'Uang Tunai',
-                          _detailData!['money_paid'],
-                          isCurrency: true,
-                        ),
-                        _buildSummaryRow(
-                          'Kembalian',
-                          _detailData!['change_money'],
-                          isCurrency: true,
-                          isBlue: true,
-                        ),
-                        const Divider(),
-                        _buildSummaryRow(
-                          'Total Bayar',
-                          _detailData!['amount'],
-                          isCurrency: true,
-                          isBold: true,
-                        ),
-                      ],
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Rincian Pesanan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(height: 1),
+                            if (detailList.isNotEmpty)
+                              ...detailList
+                                  .map(
+                                    (e) => _buildProductItem(
+                                      Map<String, dynamic>.from(e),
+                                    ),
+                                  )
+                                  .toList()
+                            else
+                              const Padding(
+                                padding: EdgeInsets.only(top: 12.0),
+                                child: Text('Tidak ada detail produk'),
+                              ),
+
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Rincian Pembayaran',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryRow(
+                              'Metode Pembayaran',
+                              _pickStr(d, ['payment_name'], fallback: '-'),
+                            ),
+                            _buildSummaryRow(
+                              'Sub Total',
+                              _pickAmount(d, ['total_before_dsc_tax']),
+                              isCurrency: true,
+                            ),
+
+                            if (_pickAmount(d, ['dicsount']) > 0)
+                              _buildSummaryRow(
+                                'Diskon',
+                                '- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_pickAmount(d, ['discount']))}',
+                                isCurrency: false,
+                              ),
+                            if (_pickAmount(d, ['ppn']) > 0)
+                              _buildSummaryRow(
+                                'PPN',
+                                _pickAmount(d, ['ppn']),
+                                isCurrency: true,
+                              ),
+                            const Divider(
+                              height: 24,
+                              thickness: 1,
+                            ), // dashed mimic skipped for simplicity
+                            _buildSummaryRow(
+                              'Uang Tunai',
+                              _pickAmount(d, ['money_paid']),
+                              isCurrency: true,
+                            ),
+                            _buildSummaryRow(
+                              'Kembalian',
+                              _pickAmount(d, ['change_money']),
+                              isCurrency: true,
+                              isBlue: true,
+                            ),
+                            const Divider(),
+                            _buildSummaryRow(
+                              'Total Bayar',
+                              _pickAmount(d, ['amount']),
+                              isCurrency: true,
+                              isBold: true,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
           ),
@@ -593,7 +1432,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                     final raw = _detailData?['raw']?.toString() ?? "";
                     print('Raw data to share : ${_detailData!['raw']}');
                     if (raw.isNotEmpty) {
-                      _shareToWhatsApp(raw);
+                      // _shareToWhatsApp(raw);
                     }
                   },
                   icon: Icon(
@@ -668,26 +1507,10 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
     );
   }
 
-  Future<void> _shareToWhatsApp(String text) async {
-    final uri = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(text)}");
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      // Fallback to web link if app not installed
-      final webUri = Uri.parse(
-        "https://wa.me/?text=${Uri.encodeComponent(text)}",
-      );
-      // print('Launching web WhatsApp URL: $webUri');
-      if (await canLaunchUrl(webUri)) {
-        await launchUrl(webUri, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
-
-  double _parseAmount(dynamic value) {
-    if (value == null) return 0.0;
-    return double.tryParse(value.toString()) ?? 0.0;
-  }
+  // double _parseAmount(dynamic value) {
+  //   if (value == null) return 0.0;
+  //   return double.tryParse(value.toString()) ?? 0.0;
+  // }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
@@ -696,7 +1519,13 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ],
       ),
     );
@@ -746,13 +1575,23 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
 
   Widget _buildProductItem(Map<String, dynamic> item) {
     print('Product item: $item');
-    final variants = item['variants'] as List? ?? [];
-    List<String> variantTexts = [];
+    final qty = _pickStr(item, ['quantity'], fallback: '1');
+    final name = _pickStr(item, ['name'], fallback: '-');
+    final image = _pickStr(item, ['product_image'], fallback: '');
+    final note = _pickStr(item, ['description'], fallback: '').trim();
 
-    for (var v in variants) {
-      if (v['variant_products'] != null) {
-        for (var vp in (v['variant_products'] as List)) {
-          variantTexts.add(vp['variant_product_name']);
+    final price = _parseAmount(item['price'] ?? item['price_after'] ?? 0);
+
+    final variants = item['variants'] as List? ?? [];
+    final List<String> variantTexts = [];
+    for (final v in variants) {
+      if (v is Map && v['variant_products'] is List) {
+        for (final vp in (v['variant_products'] as List)) {
+          if (vp is Map) {
+            final vn = vp['variant_product_name']?.toString();
+            if (vn != null && vn.isNotEmpty) variantTexts.add(vn);
+          }
+          // variantTexts.add(vp['variant_product_name']);
         }
       }
     }
@@ -765,10 +1604,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'x${item['quantity']}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text('x$qty', style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(width: 12),
           Container(
             width: 50,
@@ -792,52 +1628,63 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['name'] ?? '',
+                  name,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      NumberFormat.currency(
-                        locale: 'id',
-                        symbol: 'Rp. ',
-                        decimalDigits: 0,
-                      ).format(
-                        _parseAmount(item['price_after'] ?? item['price']),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (item['discount_type'] != null) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        NumberFormat.currency(
-                          locale: 'id',
-                          symbol: 'Rp. ',
-                          decimalDigits: 0,
-                        ).format(_parseAmount(item['price'])),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  NumberFormat.currency(
+                    locale: 'id',
+                    symbol: 'Rp. ',
+                    decimalDigits: 0,
+                  ).format(price),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (variantTexts.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      'Catatan : ${variantTexts.join(', ')}',
+                      'Varian: ${variantTexts.join(',')}',
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
+                if (note.isEmpty && note != '-')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Catatan: $note',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                if (item['discount_type'] != null) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    NumberFormat.currency(
+                      locale: 'id',
+                      symbol: 'Rp. ',
+                      decimalDigits: 0,
+                    ).format(_parseAmount(item['price'])),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                ],
+
+                // if (variantTexts.isNotEmpty)
+                //   Padding(
+                //     padding: const EdgeInsets.only(top: 4.0),
+                //     child: Text(
+                //       'Catatan : ${variantTexts.join(', ')}',
+                //       style: const TextStyle(fontSize: 12, color: Colors.grey),
+                //     ),
+                //   ),
               ],
             ),
           ),

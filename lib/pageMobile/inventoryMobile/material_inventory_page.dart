@@ -292,10 +292,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     try {
       final response = await http.post(
         Uri.parse('$url/api/inventory/master/delete'),
-        headers: {
-          'token': widget.token,
-          'Content-Type': 'application/json',
-        },
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "inventory_master_id": [itemId],
         }),
@@ -451,7 +448,14 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                             icon: Icon(PhosphorIcons.trash, color: Colors.red),
                             onPressed: () {
                               Navigator.pop(context); // Close detail modal
-                              _confirmDelete(detail['item_id']);
+                              _confirmDeleteMaterial(
+                                itemId: detail['item_id'].toString(),
+                                itemName:
+                                    (detail['name_item'] ??
+                                            detail['item_name'] ??
+                                            '-')
+                                        .toString(),
+                              );
                             },
                           ),
                         ],
@@ -1673,47 +1677,81 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return FutureBuilder(
-          future: http.post(
-            Uri.parse(getUnitMasterDataLink),
-            headers: {
-              'token': widget.token,
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({"deviceid": identifier}),
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                height: 300,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: FutureBuilder<http.Response>(
+                future: http.post(
+                  Uri.parse(getUnitMasterDataLink),
+                  headers: {
+                    'token': widget.token,
+                    'Content-type': 'application/json',
+                  },
+                  body: jsonEncode({"deviceid": identifier}),
                 ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'upDownName';
-                    _selectedSortLabel = 'Nama A-Z';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return const Center(child: Text('Gagal memuat data unit'));
+                  }
+
+                  final res = snapshot.data!;
+                  Map<String, dynamic> decoded;
+
+                  try {
+                    decoded = jsonDecode(res.body) as Map<String, dynamic>;
+                  } catch (_) {
+                    return const Center(
+                      child: Text('Response unit tidak valid'),
+                    );
+                  }
+
+                  final List units =
+                      (decoded['data'] ?? decoded['units'] ?? []) as List;
+
+                  if (units.isEmpty) {
+                    return const Center(child: Text('Data unit kosong'));
+                  }
+
+                  return ListView.separated(
+                    controller: scrollController,
+                    itemCount: units.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final u = units[index] as Map<String, dynamic>;
+
+                      final unitId = u['id'] ?? u['unit_id'];
+                      final unitName = u['name'] ?? u['unit_name'] ?? '-';
+                      final isSelected = _selectedUnit?['id'] == unitId;
+
+                      return ListTile(
+                        title: Text(
+                          unitName.toString(),
+                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check, color: primary500, size: 18)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _selectedUnit = {'id': unitId, 'name': unitName};
+                          });
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  );
                 },
               ),
-              ListTile(
-                title: Text(
-                  'Nama Z-A',
-                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'downUpName';
-                    _selectedSortLabel = 'Nama Z-A';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
-                },
-              ),
-              child: Center(child: Text('Gagal memuat data unit')),
             );
           },
         );
