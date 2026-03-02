@@ -484,6 +484,59 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     );
   }
 
+  void _confirmDelete(String itemId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Hapus Material'),
+          content: Text('Apakah Anda yakin ingin menghapus material ini?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  final response = await http.post(
+                    Uri.parse(deleteMasterDataLink),
+                    headers: {
+                      'token': widget.token,
+                      'Content-Type': 'application/json',
+                    },
+                    body: jsonEncode({"item_id": itemId}),
+                  );
+                  final data = jsonDecode(response.body);
+                  if (data['rc'] == '00') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Berhasil menghapus material')),
+                    );
+                    _fetchMaterials();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          data['message'] ?? 'Gagal menghapus material',
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal menghubungkan ke server')),
+                  );
+                }
+              },
+              child: Text('Hapus', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<Map<String, dynamic>?> updateInventoryMaster(
     BuildContext context,
     String token,

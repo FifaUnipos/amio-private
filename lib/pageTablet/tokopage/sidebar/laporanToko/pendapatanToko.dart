@@ -6,7 +6,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../models/tokomodel.dart';
