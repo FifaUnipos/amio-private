@@ -19,6 +19,7 @@ import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'history/riwayat_page.dart';
 import 'bill_page.dart';
 

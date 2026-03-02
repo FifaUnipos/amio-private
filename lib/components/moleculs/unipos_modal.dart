@@ -18,7 +18,7 @@ class UniposModal extends StatelessWidget {
   final VoidCallback? onTapClose;
 
   const UniposModal({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     this.prefixButtonShow = true,
@@ -29,7 +29,7 @@ class UniposModal extends StatelessWidget {
     this.onTapSuffixButton,
     this.child,
     this.onTapClose,
-  }) : super(key: key);
+  });
 
   static Future<T?> show<T>(
     BuildContext context, {
