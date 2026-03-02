@@ -1,3 +1,26 @@
+int _toInt(dynamic v, {int defaultValue = 0}) {
+  if (v == null) return defaultValue;
+  if (v is int) return v;
+  if (v is double) return v.toInt();
+  if (v is bool) return v ? 1 : 0;
+  if (v is String) {
+    final s = v.trim().toLowerCase();
+    if (s == 'true') return 1;
+    if (s == 'false') return 0;
+    return int.tryParse(s) ?? double.tryParse(s)?.toInt() ?? defaultValue;
+  }
+  return defaultValue;
+}
+
+num _toNum(dynamic v, {num defaultValue = 0}) {
+  if (v == null) return defaultValue;
+  if (v is num) return v;
+  if (v is String) return num.tryParse(v.trim()) ?? defaultValue;
+  return defaultValue;
+}
+
+String? _toStr(dynamic v) => v?.toString();
+
 class ModelDataProduk {
   String? productid;
   String? name;
@@ -16,6 +39,9 @@ class ModelDataProduk {
     this.productid,
     this.name,
     this.price,
+    this.price_after,
+    this.price_online_shop,
+    this.price_online_shop_after,
     this.isActive,
     this.isPPN,
     this.typeproducts,
@@ -25,18 +51,18 @@ class ModelDataProduk {
   });
 
   ModelDataProduk.fromJson(Map<String, dynamic> json) {
-    productid = json['productid'];
-    name = json['name'];
-    price = json['price'];
-    price_after = json['price_after'];
-    price_online_shop = json['price_online_shop'];
-    price_online_shop_after = json['price_online_shop_after'];
-    isActive = json['isActive'];
-    isPPN = json['isPPN'];
-    typeproducts = json['typeproducts'];
-    productImage = json['product_image'];
-    discount_type = json['discount_type'];
-    discount = json['discount'];
+    productid = _toStr(json['productid']);
+    name = _toStr(json['name']);
+    price = _toNum(json['price']);
+    price_after = _toNum(json['price_after']);
+    price_online_shop = _toNum(json['price_online_shop']);
+    price_online_shop_after = _toNum(json['price_online_shop_after']);
+    isActive = _toInt(json['isActive']);
+    isPPN = _toInt(json['isPPN']);
+    typeproducts = _toStr(json['typeproducts']);
+    productImage = _toStr(json['product_image']);
+    discount_type = _toStr(json['discount_type']);
+    discount = _toInt(json['discount']);
   }
 
   Map<String, dynamic> toJson() {
@@ -76,28 +102,32 @@ class ModelDataProdukGrup {
     this.productid,
     this.name,
     this.price,
+    this.price_after,
+    this.price_online_shop,
+    this.price_online_shop_after,
     this.isActive,
     this.isPPN,
     this.typeproducts,
     this.productImage,
     required this.discount_type,
     required this.discount,
+    this.kodeProduct,
   });
 
   ModelDataProdukGrup.fromJson(Map<String, dynamic> json) {
-    productid = json['productid'];
-    name = json['name'];
-    price = json['price'];
-    price_after = json['price_after'];
-    price_online_shop = json['price_online_shop'];
-    price_online_shop_after = json['price_online_shop_after'];
-    isActive = json['isActive'];
-    isPPN = json['isPPN'];
-    typeproducts = json['typeproducts'];
-    productImage = json['product_image'];
-    discount_type = json['discount_type'];
-    discount = json['discount'];
-    kodeProduct = json['kodeproduct'];
+    productid = _toStr(json['productid']);
+    name = _toStr(json['name']);
+    price = _toNum(json['price']);
+    price_after = _toNum(json['price_after']);
+    price_online_shop = _toNum(json['price_online_shop']);
+    price_online_shop_after = _toNum(json['price_online_shop_after']);
+    isActive = _toInt(json['isActive']);
+    isPPN = _toInt(json['isPPN']);
+    typeproducts = _toStr(json['typeproducts']);
+    productImage = _toStr(json['product_image']);
+    discount_type = _toStr(json['discount_type']);
+    discount = _toInt(json['discount']);
+    kodeProduct = _toStr(json['kodeproduct']);
   }
 
   Map<String, dynamic> toJson() {
@@ -114,7 +144,7 @@ class ModelDataProdukGrup {
     ModelDataProdukGrup['typeproducts'] = this.typeproducts;
     ModelDataProdukGrup['product_image'] = this.productImage;
     ModelDataProdukGrup['discount_type'] = this.discount_type;
-    ModelDataProdukGrup['discount'] = this.discount_type;
+    ModelDataProdukGrup['discount'] = this.discount;
     ModelDataProdukGrup['kodeproduct'] = this.kodeProduct;
     return ModelDataProdukGrup;
   }
