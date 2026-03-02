@@ -320,6 +320,13 @@ class _BillListPageState extends State<BillListPage> {
       ),
     );
 
+    if (!mounted || result == null) return;
+
+    if (result == 'refresh') {
+      await _fetchBills();
+      return;
+    }
+
     print('Bill detail modal closed with result: $result');
 
     if (result != null) {
