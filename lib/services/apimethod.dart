@@ -217,6 +217,13 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getDistrictLink = '$url/api/district',
     getVillageLink = '$url/api/village',
     getTipeUsahaLink = '$url/api/tipeusaha';
+    
+// TRANSACTION HISTORY DELETE
+abstract class ApiTransactionHistory {
+  static String get getReasons => '$url/api/transaction/create/reference/tagihan';
+  static String get deleteTransaction => '$url/api/transaction/delete/reference/tagihan';
+  static String get viewDeletedHistory => '$url/api/transaction/view/reference';
+}
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';

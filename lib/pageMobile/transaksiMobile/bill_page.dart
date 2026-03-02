@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:unipos_app_335/components/atoms/unipos_information.dart';
 import 'dart:convert';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
-import 'package:unipos_app_335/main.dart'; // For identifier
+import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/utils/status_transaction.dart'; // For identifier
 
 class BillListPage extends StatefulWidget {
   final String token;
@@ -232,71 +234,75 @@ class _BillListPageState extends State<BillListPage> {
                       final item = _billList[index];
                       final amount =
                           double.tryParse(item['amount'].toString()) ?? 0;
-                      return ListTile(
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => _showDetail(item['transaction_id']),
-                        title: Text(
-                          item['customer'] ?? 'Pelanggan',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          NumberFormat.currency(
-                            locale: 'id',
-                            symbol: 'Rp. ',
-                            decimalDigits: 0,
-                          ).format(amount),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                        ),
-                        trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              item['entry_date'] != null
-                                  ? DateFormat(
-                                      'dd MMM yy',
-                                    ).format(DateTime.parse(item['entry_date']))
-                                  : '',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(
-                                  item['status_color']?.toString(),
-                                ).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: _getStatusColor(
-                                    item['status_color']?.toString(),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['customer'] ?? 'Pelanggan',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
-                                ),
-                              ),
-                              child: Text(
-                                item['status_transactions'] ?? '-',
-                                style: TextStyle(
-                                  color: _getStatusColor(
-                                    item['status_color']?.toString(),
+                                  Text(
+                                    NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp. ',
+                                      decimalDigits: 0,
+                                    ).format(amount),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 4,
+                                children: [
+                                  Text(
+                                    item['entry_date'] != null
+                                        ? (item['entry_date'] as String)
+                                              .split(' ')
+                                              .last
+                                        : '',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  UniposInformation(
+                                    size: UniposInformationSize.extraSmall,
+                                    variant:
+                                        statusTransactionCancel.contains(
+                                          item['isPaid'],
+                                        )
+                                        ? UniposInformationVariant.danger
+                                        : statusTransactionProcessCancel
+                                              .contains(item['isPaid'])
+                                        ? UniposInformationVariant.warning
+                                        : UniposInformationVariant.success,
+                                    text:
+                                        '${item['status_transactions'] ?? '-'}',
+                                    showIcon: false,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
