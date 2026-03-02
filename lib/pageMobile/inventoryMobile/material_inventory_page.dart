@@ -480,6 +480,54 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     );
   }
 
+  void _confirmDelete(String itemId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Hapus Material'),
+          content: Text('Apakah Anda yakin ingin menghapus material ini?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  final response = await http.post(
+                    Uri.parse(deleteMasterDataLink),
+                    headers: {'token': widget.token, 'Content-Type': 'application/json'},
+                    body: jsonEncode({
+                      "item_id": itemId,
+                    }),
+                  );
+                  final data = jsonDecode(response.body);
+                  if (data['rc'] == '00') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Berhasil menghapus material')),
+                    );
+                    _fetchMaterials();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(data['message'] ?? 'Gagal menghapus material')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal menghubungkan ke server')),
+                  );
+                }
+              },
+              child: Text('Hapus', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<Map<String, dynamic>?> updateInventoryMaster(
     BuildContext context,
     String token,
@@ -1676,11 +1724,8 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
         return FutureBuilder(
           future: http.post(
             Uri.parse(getUnitMasterDataLink),
-            headers: {
-              'token': widget.token,
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({"deviceid": identifier}),
+            headers: {'token': widget.token},
+            body: {"deviceid": identifier},
           ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -1690,30 +1735,66 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'upDownName';
-                    _selectedSortLabel = 'Nama A-Z';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'Nama Z-A',
-                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (!snapshot.hasData || snapshot.hasError) {
+              return Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                onTap: () {
-                  setState(() {
-                    _selectedSortValue = 'downUpName';
-                    _selectedSortLabel = 'Nama Z-A';
-                  });
-                  _fetchMaterials();
-                  Navigator.pop(context);
-                },
+                child: Center(child: Text('Gagal memuat data unit')),
+              );
+            }
+            final res = jsonDecode(snapshot.data!.body);
+            final unitList = (res['data'] as List?) ?? [];
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              child: Center(child: Text('Gagal memuat data unit')),
+              child: Column(
+                children: [
+                  SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text('Pilih Unit/Satuan', style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                  SizedBox(height: 12),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: unitList.length,
+                      itemBuilder: (context, index) {
+                        final unit = unitList[index];
+                        return ListTile(
+                          title: Text(
+                            '${unit['name']} (${unit['abbreviation']})',
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedUnit = {
+                                'id': unit['id'].toString(),
+                                'name': unit['name'],
+                              };
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );

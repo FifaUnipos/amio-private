@@ -13,6 +13,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'component_size.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'component_color.dart';
 
 Future<dynamic> showDialogBilling(BuildContext context, text) {
@@ -148,10 +149,15 @@ void showSnackbar(BuildContext context, jsonResponse) async {
 }
 
 void showSnackBarComponent(BuildContext context, String text, String rc) {
-  final snackBar = SnackBar(
-    content: Container(
-      margin: const EdgeInsets.all(20),
+  try {
+    final fToast = FToast();
+    fToast.init(context);
+
+    Widget toast = Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 128),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 60,
+      width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size8),
         color: (rc == '00') ? succes600 : red500, // ✅ rc sudah dicek
@@ -159,21 +165,13 @@ void showSnackBarComponent(BuildContext context, String text, String rc) {
       child: Center(
         child: Text(text, style: heading2(FontWeight.w700, bnw100, 'Outfit')),
       ),
-    ),
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    behavior: SnackBarBehavior.floating,
-    duration: const Duration(seconds: 2),
-  );
+    );
 
-  try {
-    final messenger =
-        ScaffoldMessenger.maybeOf(context) ??
-        ScaffoldMessenger.of(
-          Navigator.of(context, rootNavigator: true).context,
-        );
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(snackBar);
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.SNACKBAR,
+      toastDuration: const Duration(seconds: 2),
+    );
   } catch (e) {
     debugPrint('⚠️ showSnackBarComponent gagal: $e');
   }

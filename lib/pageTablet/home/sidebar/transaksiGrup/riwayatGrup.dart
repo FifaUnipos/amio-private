@@ -1,7 +1,14 @@
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/atoms/unipos_information.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+import 'package:unipos_app_335/utils/component/providerModel/refreshTampilanModel.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
 import 'package:unipos_app_335/utils/printer/printerPage.dart';
 import 'package:flutter/services.dart';
+import 'package:unipos_app_335/utils/status_transaction.dart';
 
 import '../../../../utils/component/skeletons.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
@@ -21,6 +28,9 @@ import '../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_orderBy.dart';
 import '../../../../utils/component/component_loading.dart';
+
+String? transactionidValue;
+bool isTagihan = false;
 
 class RiwayatPageGrup extends StatefulWidget {
   String token, merchid, namemerch;
@@ -47,6 +57,11 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
   bool isDropdownOpen = false;
   String textOrderBy = 'Riwayat Terbaru';
   String textvalueOrderBy = 'upDownCreate';
+
+  TextEditingController textController = TextEditingController();
+
+  String? nameSingle, transaksiReference, idKategori;
+  final ScrollController _scrollController = ScrollController();
 
   late Uint8List imageStruk;
 
@@ -90,6 +105,474 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void scrollToTextField() {
+    setState(() {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  aturTransaksi(BuildContext context) {
+    final refreshSelectedProvider = Provider.of<RefreshSelected>(
+      context,
+      listen: false,
+    );
+    showModalBottom(
+      context,
+      MediaQuery.of(context).size.height,
+      IntrinsicHeight(
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Atur Transaksi',
+                        style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                      Text(
+                        transactionidValue ?? '',
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(PhosphorIcons.x_fill, color: bnw900),
+                  ),
+                ],
+              ),
+              SizedBox(height: size24),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  refreshSelectedProvider.valueSelected = null;
+                  hapusAlasan(context);
+                },
+                behavior: HitTestBehavior.translucent,
+                child: modalBottomValue('Hapus Tagihan', PhosphorIcons.trash),
+              ),
+              // Container(
+              //   width: double.infinity,
+              //   child: Row(
+              //     spacing: 16,
+              //     children: [
+              //       Expanded(
+              //         child: UniposButton(
+              //           text: 'Selesai',
+              //           onTap: () => Navigator.pop(context),
+              //           variant: UniposButtonVariant.secondary,
+              //         ),
+              //       ),
+              //       SizedBox(height: size12),
+              //       Expanded(
+              //         child: UniposButton(
+              //           text: 'Selesai',
+              //           onTap: () => Navigator.pop(context),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  hapusAlasan(BuildContext context) {
+    errorText = '';
+    final refreshSelectedProvider = Provider.of<RefreshSelected>(
+      context,
+      listen: false,
+    );
+    return showModalBottomSheet(
+      constraints: const BoxConstraints(maxWidth: double.infinity),
+      isScrollControlled: true,
+      barrierColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      context: context,
+      builder: (context) {
+        return FutureBuilder(
+          future: headerTagihan(
+            context,
+            widget.token,
+            transactionidValue,
+            'hapus',
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  transaksiReference = snapshot.data['transaksiid_reference'];
+                  return Container(
+                    // padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size16),
+                        topLeft: Radius.circular(size16),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  if (isTagihan == true) {
+                                    isTagihan = false;
+                                    cart.clear();
+                                    cartMap.clear();
+
+                                    // isItemAdded = false;
+
+                                    total = [];
+                                    subTotal = 0;
+                                    sumTotal = 0;
+
+                                    cartProductIds.clear();
+                                    conCatatan.clear();
+                                    // conCounterPreview.clear();
+                                    // refreshTampilan();
+                                    transactionidValue = "";
+
+                                    // refreshColor();
+                                    setState(() {});
+                                  }
+                                  refreshSelectedProvider.valueSelected = null;
+                                },
+                                child: Icon(
+                                  PhosphorIcons.arrow_left,
+                                  color: bnw900,
+                                  size: 28,
+                                ),
+                              ),
+                              SizedBox(width: size16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Batalkan Tagihan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    'Pilih alasan yang sesuai',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: size16),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.5,
+                            ),
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              physics: BouncingScrollPhysics(),
+                              child: Container(
+                                width: double.infinity,
+                                color: bnw100,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Alasan Tidak Sesuai',
+                                          style: heading3(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        Text(
+                                          '*',
+                                          style: heading3(
+                                            FontWeight.w400,
+                                            danger500,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: size16),
+                                    Consumer<RefreshSelected>(
+                                      builder: (context, value, _) {
+                                        return Container(
+                                          child: Wrap(
+                                            spacing: size16,
+                                            runSpacing: size16,
+                                            children: List<Widget>.generate(
+                                              snapshot.data['alasan'].length,
+                                              (int index) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      transaksiReference = snapshot
+                                                          .data['transaksiid_reference'];
+
+                                                      value.refreshTampilan(
+                                                        index,
+                                                      );
+                                                      print(
+                                                        value.valueSelected,
+                                                      );
+                                                      idKategori = snapshot
+                                                          .data['alasan'][index]['idkategori'];
+                                                    });
+                                                  },
+                                                  child: buttonL(
+                                                    Center(
+                                                      child: Text(
+                                                        snapshot
+                                                            .data['alasan'][index]['namakategori'],
+                                                        style: heading4(
+                                                          FontWeight.w400,
+                                                          value.valueSelected ==
+                                                                  index
+                                                              ? primary500
+                                                              : bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    value.valueSelected == index
+                                                        ? primary100
+                                                        : bnw100,
+                                                    value.valueSelected == index
+                                                        ? primary500
+                                                        : bnw300,
+                                                  ),
+                                                );
+                                              },
+                                            ).toList(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    SizedBox(height: size16),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Detail Alasan',
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        Text(
+                                          '*',
+                                          style: heading4(
+                                            FontWeight.w700,
+                                            red500,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    IntrinsicHeight(
+                                      child: TextFormField(
+                                        keyboardType: TextInputType.multiline,
+                                        maxLines: null,
+                                        style: heading2(
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            value.isEmpty
+                                                ? errorText = ''
+                                                : null;
+                                          });
+                                        },
+                                        cursorColor: primary500,
+                                        controller: textController,
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: size16,
+                                          ),
+                                          hintText:
+                                              'Cth : Transakasi salah karena ada kesalahan penginputan.',
+                                          hintStyle: heading2(
+                                            FontWeight.w600,
+                                            bnw400,
+                                            'Outfit',
+                                          ),
+                                          errorText: errorText.isNotEmpty
+                                              ? errorText
+                                              : null,
+                                          errorStyle: body1(
+                                            FontWeight.w500,
+                                            red500,
+                                            'Outfit',
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              width: 2,
+                                              color: primary500,
+                                            ),
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              width: 1,
+                                              color: bnw400,
+                                            ),
+                                          ),
+                                          focusedErrorBorder:
+                                              UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  width: 2,
+                                                  color: red500,
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          textController.text.isEmpty
+                              ? SizedBox()
+                              : Column(
+                                  children: [
+                                    SizedBox(height: size32),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            whenLoading(context);
+                                            print(
+                                              '$transaksiReference $idKategori ${textController.text}',
+                                            );
+
+                                            print(
+                                              snapshot
+                                                  .data['transaksiid_reference'],
+                                            );
+                                            cartProductIds.clear();
+                                            width = null;
+                                            widtValue = 120;
+                                            heightInformation = 0;
+                                            widthInformation = 0;
+
+                                            cart.clear();
+                                            cartMap.clear();
+
+                                            deleteReference(
+                                              context,
+                                              widget.token,
+                                              snapshot
+                                                  .data['transaksiid_reference'],
+                                              idKategori,
+                                              textController.text,
+                                              transactionidValue,
+                                            ).then((value) {
+                                              if (value != '00') {
+                                                setState(() async {
+                                                  datasRiwayat =
+                                                      await getRiwayatTransaksi(
+                                                        context,
+                                                        widget.token,
+                                                        '0',
+                                                        '',
+                                                        textvalueOrderBy,
+                                                      );
+                                                  Future.delayed(
+                                                    Duration(seconds: 1),
+                                                  );
+                                                  WidgetsBinding.instance
+                                                      .addPostFrameCallback((
+                                                        _,
+                                                      ) {
+                                                        scrollToTextField();
+                                                        closeLoading(context);
+                                                      });
+                                                  initState();
+                                                  setState(() {});
+                                                });
+                                              }
+                                              closeLoading(context);
+                                            });
+                                            setState(() {});
+                                            initState();
+                                          });
+                                        },
+                                        child: buttonXL(
+                                          Center(
+                                            child: Text(
+                                              'Batalkan Tagihan',
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                bnw100,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                          double.infinity,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+            return SizedBox();
+          },
+        );
+      },
+    );
   }
 
   // double width = MediaQuery.of(context).size.width;
@@ -476,6 +959,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                 border: Border.all(color: bnw300),
                               ),
                               child: Column(
+                                spacing: 8,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -500,74 +984,51 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                             ),
                                             SizedBox(height: size16),
                                             Row(
+                                              spacing: 16,
                                               children: [
                                                 Expanded(
-                                                  child: buttonStatusTransaksi(
-                                                    data,
+                                                  child: UniposInformation(
+                                                    text:
+                                                        data['status_transactions'] ??
+                                                        '-',
+                                                    variant:
+                                                        UniposInformationVariantExt.fromIsPaid(
+                                                          data['isPaid'],
+                                                        ),
                                                   ),
                                                 ),
-
-                                                // data['is_color'] == '1'
-                                                //     ? SizedBox()
-                                                //     : Column(
-                                                //         children: [
-                                                //           SizedBox(
-                                                //             width: size16,
-                                                //           ),
-                                                //           GestureDetector(
-                                                //             onTap: () {
-                                                //               whenLoading(
-                                                //                 context,
-                                                //               );
-
-                                                //               transaksiViewReference(
-                                                //                 context,
-                                                //                 widget
-                                                //                     .token,
-                                                //                 data['transactionid'],
-                                                //               ).then((
-                                                //                 value,
-                                                //               ) {
-                                                //                 if (value['rc'] ==
-                                                //                     '00') {
-                                                //                   Navigator.of(
-                                                //                     context,
-                                                //                     rootNavigator:
-                                                //                         true,
-                                                //                   ).pop();
-                                                //                   showBottomRiwayatPerubahan(
-                                                //                     context,
-                                                //                     data,
-                                                //                   );
-                                                //                 } else {
-                                                //                   Navigator.of(
-                                                //                     context,
-                                                //                     rootNavigator:
-                                                //                         true,
-                                                //                   ).pop();
-                                                //                 }
-                                                //               });
-                                                //             },
-                                                //             child: Container(
-                                                //               padding: EdgeInsets.symmetric(
-                                                //                 horizontal:
-                                                //                     size12,
-                                                //                 vertical:
-                                                //                     size16,
-                                                //               ),
-                                                //               child: Text(
-                                                //                 'Lihat Riwayat',
-                                                //                 style: heading3(
-                                                //                   FontWeight
-                                                //                       .w600,
-                                                //                   primary500,
-                                                //                   'Outfit',
-                                                //                 ),
-                                                //               ),
-                                                //             ),
-                                                //           ),
-                                                //         ],
-                                                //       ),
+                                                if (statusTransactionCancel
+                                                        .contains(
+                                                          data['isPaid'],
+                                                        ) ||
+                                                    statusTransactionProcessCancel
+                                                        .contains(
+                                                          data['isPaid'],
+                                                        ))
+                                                  UniposButton(
+                                                    onTap: () {
+                                                      whenLoading(context);
+                                                      transaksiViewReference(
+                                                        context,
+                                                        widget.token,
+                                                        data['transactionid'],
+                                                      ).then((value) {
+                                                        if (value['rc'] ==
+                                                            '00') {
+                                                          closeLoading(context);
+                                                          showBottomRiwayatPerubahan(
+                                                            context,
+                                                            data,
+                                                          );
+                                                        } else {
+                                                          closeLoading(context);
+                                                        }
+                                                      });
+                                                    },
+                                                    variant: UniposButtonVariant
+                                                        .tertiary,
+                                                    text: 'Lihat Riwayat',
+                                                  ),
                                               ],
                                             ),
                                             SizedBox(height: size16),
@@ -1030,32 +1491,33 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                       ],
                                     ),
                                   ),
+                                  // CTA BUTTON
                                   SizedBox(height: size8),
                                   Row(
+                                    spacing: 8,
                                     children: [
-                                      data['is_color'] == '1'
-                                          ? GestureDetector(
-                                              onTap: () {
-                                                // hapusAlasan(context);
-                                              },
-                                              child: Text(
-                                                'Transaksi Tidak Sesuai',
-                                                style: heading3(
-                                                  FontWeight.w600,
-                                                  danger500,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            )
-                                          : SizedBox(),
-                                      SizedBox(width: size12),
+                                      // data['isPaid'] == '1'
+                                      //     ? GestureDetector(
+                                      //         onTap: () {
+                                      //           // hapusAlasan(context);
+                                      //         },
+                                      //         child: Text(
+                                      //           'Transaksi Tidak Sesuai',
+                                      //           style: heading3(
+                                      //             FontWeight.w600,
+                                      //             danger500,
+                                      //             'Outfit',
+                                      //           ),
+                                      //         ),
+                                      //       )
+                                      //     : SizedBox(),
+                                      // SizedBox(width: size12),
                                       Expanded(
-                                        child: GestureDetector(
+                                        child: UniposButton(
                                           onTap: () {
                                             // if (logoStrukPrinter != '') {
                                             //   getStrukPhoto();
                                             // }
-
                                             // log("ini adalah struk ${printext}");
 
                                             widget.bluetooth.isConnected.then((
@@ -1098,69 +1560,44 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                             });
                                             setState(() {});
                                           },
-                                          child: buttonXLoutline(
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  PhosphorIcons.printer_fill,
-                                                  color: primary500,
-                                                  size: size24,
-                                                ),
-                                                SizedBox(width: size12),
-                                                Text(
-                                                  'Cetak Struk',
-                                                  style: heading3(
-                                                    FontWeight.w600,
-                                                    primary500,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            MediaQuery.of(context).size.width,
-                                            primary500,
-                                          ),
+                                          text: 'Cetak Struk',
+                                          icon: PhosphorIcons.printer_fill,
+                                          variant:
+                                              UniposButtonVariant.secondary,
                                         ),
                                       ),
-                                      data['is_color'] == '1'
-                                          ? SizedBox()
-                                          : Expanded(
-                                              child: Row(
-                                                children: [
-                                                  SizedBox(width: size12),
-                                                  Expanded(
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        width = null;
-                                                        widtValue = 120;
-                                                        heightInformation = 0;
-                                                        widthInformation = 0;
-                                                        printext = '';
-                                                        cartProductIds.clear();
-                                                        setState(() {});
-                                                      },
-                                                      child: buttonXL(
-                                                        Center(
-                                                          child: Text(
-                                                            'Selesai',
-                                                            style: heading3(
-                                                              FontWeight.w600,
-                                                              bnw100,
-                                                              'Outfit',
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        MediaQuery.of(
-                                                          context,
-                                                        ).size.width,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                      if (statusTransactionSuccess.contains(
+                                        data['isPaid'],
+                                      ))
+                                        Expanded(
+                                          child: UniposButton(
+                                            onTap: () {
+                                              width = null;
+                                              widtValue = 120;
+                                              heightInformation = 0;
+                                              widthInformation = 0;
+                                              printext = '';
+                                              cartProductIds.clear();
+                                              setState(() {});
+                                            },
+                                            text: 'Selesai',
+                                            size: UniposButtonSize.large,
+                                          ),
+                                        ),
+                                      if (statusTransactionSuccess.contains(
+                                        data['isPaid'],
+                                      ))
+                                        UniposButton(
+                                          onTap: () => {
+                                            setState(() {
+                                              aturTransaksi(context);
+                                            }),
+                                          },
+                                          textShow: false,
+                                          variant: UniposButtonVariant.tertiary,
+                                          icon: (PhosphorIcons
+                                              .dots_three_vertical_bold),
+                                        ),
                                     ],
                                   ),
                                 ],
@@ -1201,8 +1638,8 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
           ),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              var dataPerubahan = snapshot.data['data'];
-              var detail = dataPerubahan['detail'];
+              var dataPerubahan = snapshot.data['data'] ?? {};
+              var detail = dataPerubahan['detail'] ?? [];
               return StatefulBuilder(
                 builder: (context, setState) => Container(
                   margin: EdgeInsets.only(top: size32),
@@ -1264,61 +1701,78 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                           child: Column(
                             children: [
                               Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Spacer(),
-                                  Container(
-                                    height: size40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        size8,
-                                      ),
-                                      color: danger100,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size16,
-                                            vertical: size12,
-                                          ),
-                                          child: Text(
-                                            'Pengisian Terakhir',
-                                            style: heading3(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size12,
-                                            vertical: size8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            color: danger500,
-                                          ),
-                                          child: Text(
-                                            dataPerubahan['estimate'] ?? '-',
-                                            style: heading3(
-                                              FontWeight.w400,
-                                              bnw100,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  Text(
+                                    'Perubahan 1x',
+                                    style: heading2(
+                                      FontWeight.normal,
+                                      bnw900,
+                                      'Outfit',
                                     ),
                                   ),
-                                  SizedBox(width: size16),
-                                  Icon(
-                                    PhosphorIcons.caret_down,
-                                    color: bnw900,
-                                    size: size24,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        height: size40,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          color: danger100,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: size16,
+                                                vertical: size12,
+                                              ),
+                                              child: Text(
+                                                'Pengisian Terakhir',
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: size16),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: size12,
+                                                vertical: size8,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      size8,
+                                                    ),
+                                                color: danger500,
+                                              ),
+                                              child: Text(
+                                                dataPerubahan['estimate'] ??
+                                                    '-',
+                                                style: heading3(
+                                                  FontWeight.w400,
+                                                  bnw100,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: size16),
+                                      Icon(
+                                        PhosphorIcons.caret_down,
+                                        color: bnw900,
+                                        size: size24,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -1358,8 +1812,14 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                 SizedBox(height: size12),
                                                 SizedBox(
                                                   width: double.infinity,
-                                                  child: buttonStatusTransaksi(
-                                                    data,
+                                                  child: UniposInformation(
+                                                    text:
+                                                        data['status_transactions'] ??
+                                                        '-',
+                                                    variant:
+                                                        UniposInformationVariantExt.fromIsPaid(
+                                                          data['isPaid'],
+                                                        ),
                                                   ),
                                                 ),
                                                 SizedBox(height: size16),
@@ -1713,45 +2173,45 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
     );
   }
 
-  buttonStatusTransaksi(Map<String, dynamic> data) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: size12, vertical: size16),
-      decoration: BoxDecoration(
-        color: data['is_color'] == '1'
-            ? succes100
-            : data['is_color'] == '2'
-            ? danger100
-            : waring100,
-        borderRadius: BorderRadius.circular(size8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            data['status_transactions'] ?? '-',
-            style: body1(
-              FontWeight.w400,
-              data['is_color'] == '1'
-                  ? succes500
-                  : data['is_color'] == '2'
-                  ? danger500
-                  : waring500,
-              'Outfit',
-            ),
-          ),
-          Icon(
-            PhosphorIcons.info_fill,
-            color: data['is_color'] == '1'
-                ? succes500
-                : data['is_color'] == '2'
-                ? danger500
-                : waring500,
-            size: size24,
-          ),
-        ],
-      ),
-    );
-  }
+  // buttonStatusTransaksi(Map<String, dynamic> data) {
+  //   return Container(
+  //     padding: EdgeInsets.symmetric(horizontal: size12, vertical: size16),
+  //     decoration: BoxDecoration(
+  //       color: data['isPaid'] == '1'
+  //           ? succes100
+  //           : data['isPaid'] == '2'
+  //           ? danger100
+  //           : waring100,
+  //       borderRadius: BorderRadius.circular(size8),
+  //     ),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Text(
+  //           data['status_transactions'] ?? '-',
+  //           style: body1(
+  //             FontWeight.w400,
+  //             data['isPaid'] == '1'
+  //                 ? succes500
+  //                 : data['isPaid'] == '2'
+  //                 ? danger500
+  //                 : waring500,
+  //             'Outfit',
+  //           ),
+  //         ),
+  //         Icon(
+  //           PhosphorIcons.info_fill,
+  //           color: data['isPaid'] == '1'
+  //               ? succes500
+  //               : data['isPaid'] == '2'
+  //               ? danger500
+  //               : waring500,
+  //           size: size24,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   orderBy(BuildContext context) {
     return IntrinsicWidth(
