@@ -16,6 +16,8 @@ import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/main.dart'; // For identifier and other globals if needed
 import 'package:unipos_app_335/utils/currency_formatter.dart';
+import 'package:unipos_app_335/utils/repository/product_repository.dart';
+
 
 // -----------------------------------------------------------------------------
 // UI Helpers & Global Style BottomSheets
@@ -171,6 +173,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   String orderby = 'upDownNama';
   String orderLabel = 'Nama Produk (A ke Z)';
   Timer? _debounce;
+  final ProductRepository _productRepository = ProductRepository();
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -197,14 +200,29 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   }
 
   Future<void> loadData() async {
-    setState(() => isLoading = true);
-    final data = await getProduct(context, widget.token, search, [
-      widget.merchantId,
-    ], orderby);
-    setState(() {
-      listProduk = data ?? [];
-      isLoading = false;
-    });
+    setState(() => isLoading = listProduk.isEmpty);
+    
+    final data = await _productRepository.getProducts(
+      token: widget.token,
+      name: search,
+      merchid: [widget.merchantId],
+      orderby: orderby,
+      onSyncUpdate: (syncedData) {
+        if (mounted) {
+          setState(() {
+            listProduk = syncedData;
+            isLoading = false;
+          });
+        }
+      },
+    );
+
+    if (mounted) {
+      setState(() {
+        listProduk = data;
+        isLoading = false;
+      });
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -373,12 +391,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPageMobile(token: widget.token),
-            ),
-          ),
+          onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPageMobile(token: widget.token),)),
         ),
         actions: [
           IconButton(
@@ -1617,9 +1630,24 @@ class _UbahProdukPageMobileState extends State<UbahProdukPageMobile> {
     );
 
     if (rc == '00') {
-      // Navigator.of(context).popUntil((route) => route.isFirst);
       Navigator.pop(context, true);
     }
+  }
+
+  Future<void> _delete() async {
+    _showConfirmBottomSheet(
+      context: context,
+      title: "Yakin Ingin Menghapus Produk?",
+      message: "Produk yang telah dihapus tidak dapat dikembalikan.",
+      confirmText: "Iya, Hapus",
+      cancelText: "Batalkan",
+      onConfirm: () async {
+        final rc = await deleteProduk(context, widget.token, [
+          widget.product.productid,
+        ], widget.merchantId);
+        if (rc == "00") Navigator.pop(context, true);
+      },
+    );
   }
 
   @override
@@ -1637,6 +1665,12 @@ class _UbahProdukPageMobileState extends State<UbahProdukPageMobile> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            onPressed: _delete,
+            icon: Icon(PhosphorIcons.trash, color: Colors.red),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),

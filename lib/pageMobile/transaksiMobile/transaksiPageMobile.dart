@@ -3918,6 +3918,10 @@ class _PaymentPageState extends State<PaymentPage> {
         }),
       );
 
+      final responseBody = jsonDecode(response.body);
+      final message = responseBody['message'] ?? "Unknown error";
+      debugPrint("ERROR API: $message");
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {

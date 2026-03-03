@@ -22,7 +22,7 @@ import '../models/diskonModel.dart';
 import '../models/inventoriModel/produkMaterialModel.dart';
 import '../models/lihatakunmodel.dart';
 import '../models/modelDataRegion.dart';
-import '../models/produkmodel.dart';
+import '../models/produkmodel.dart' hide ProductModel;
 import '../models/tokoModel/calculateCart.dart';
 import '../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../models/tokoModel/singletokomodel.dart';
@@ -1988,11 +1988,11 @@ Future getProduct(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     // print('succes');
+    final Map<String, dynamic> decoded = jsonDecode(response.body);
 
     // productIdVariant = jsonResponse['data']['productid'].toString();
     final List<ModelDataProduk> result = [];
 
-    final Map<String, dynamic> decoded = jsonDecode(response.body);
     for (Map<String, dynamic> item in decoded['data']) {
       // print(item);
 

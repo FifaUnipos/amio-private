@@ -1,0 +1,46 @@
+import 'package:unipos_app_335/models/produkmodel.dart';
+import 'package:unipos_app_335/services/checkConnection.dart';
+import 'package:unipos_app_335/services/database_helper.dart';
+import 'package:unipos_app_335/services/product_api_service.dart';
+
+class ProductRepository {
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final ConnectionChecker _connectionChecker = ConnectionChecker();
+  final ProductApiService _apiService = ProductApiService();
+
+  Future<List<ModelDataProduk>> getProducts({
+    required String token,
+    required String name,
+    required List<String> merchid,
+    required String orderby,
+    required Function(List<ModelDataProduk>) onSyncUpdate,
+  }) async {
+    // 1. Ambil data dari local database (sqflite) agar UI langsung tampil
+    final localProducts = await _dbHelper.getProducts();
+    
+    // 2. Cek koneksi internet
+    bool isOnline = await _connectionChecker.checkInternet();
+
+    if (isOnline) {
+      // 3. Jika ADA internet, fetch data terbaru dari API
+      final remoteProducts = await _apiService.fetchProducts(
+        token: token,
+        name: name,
+        merchid: merchid,
+        orderby: orderby,
+      );
+
+      if (remoteProducts != null) {
+        // 4. Simpan / replace ke database (sqflite)
+        await _dbHelper.saveProducts(remoteProducts);
+        
+        // 5. Update UI dengan data terbaru via callback
+        onSyncUpdate(remoteProducts);
+        return remoteProducts;
+      }
+    }
+
+    // Jika TIDAK ADA internet atau fetch gagal, tetap gunakan data dari database
+    return localProducts;
+  }
+}

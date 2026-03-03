@@ -22,100 +22,87 @@ class ModelDataProduk {
     this.productImage,
     required this.discount_type,
     required this.discount,
+    this.price_after,
+    this.price_online_shop,
+    this.price_online_shop_after,
   });
 
   ModelDataProduk.fromJson(Map<String, dynamic> json) {
-    productid = json['productid'];
+    productid = json['productid']?.toString();
     name = json['name'];
     price = json['price'];
     price_after = json['price_after'];
     price_online_shop = json['price_online_shop'];
     price_online_shop_after = json['price_online_shop_after'];
-    isActive = json['isActive'];
-    isPPN = json['isPPN'];
+    isActive = json['isActive'] is int ? json['isActive'] : int.tryParse(json['isActive']?.toString() ?? '1');
+    isPPN = json['isPPN'] is int ? json['isPPN'] : int.tryParse(json['isPPN']?.toString() ?? '0');
     typeproducts = json['typeproducts'];
-    productImage = json['product_image'];
+    productImage = json['product_image'] ?? json['productImage'];
     discount_type = json['discount_type'];
-    discount = json['discount'];
+    discount = json['discount'] is int ? json['discount'] : int.tryParse(json['discount']?.toString() ?? '0');
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> ModelDataProduk = new Map<String, dynamic>();
-    ModelDataProduk['productid'] = this.productid;
-    ModelDataProduk['name'] = this.name;
-    ModelDataProduk['price'] = this.price;
-    ModelDataProduk['price_after'] = this.price_after;
-    ModelDataProduk['price_online_shop'] = this.price_online_shop;
-    ModelDataProduk['price_online_shop_after'] = this.price_online_shop_after;
-    ModelDataProduk['isActive'] = this.isActive;
-    ModelDataProduk['isPPN'] = this.isPPN;
-    ModelDataProduk['typeproducts'] = this.typeproducts;
-    ModelDataProduk['product_image'] = this.productImage;
-    ModelDataProduk['discount_type'] = this.discount_type;
-    ModelDataProduk['discount'] = this.discount_type;
-    return ModelDataProduk;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['productid'] = this.productid;
+    data['name'] = this.name;
+    data['price'] = this.price;
+    data['price_after'] = this.price_after;
+    data['price_online_shop'] = this.price_online_shop;
+    data['price_online_shop_after'] = this.price_online_shop_after;
+    data['isActive'] = this.isActive;
+    data['isPPN'] = this.isPPN;
+    data['typeproducts'] = this.typeproducts;
+    data['product_image'] = this.productImage;
+    data['discount_type'] = this.discount_type;
+    data['discount'] = this.discount;
+    return data;
   }
+
+  // Define toMap for SQLite compatibility as used in DatabaseHelper
+  Map<String, dynamic> toMap() => toJson();
 }
 
-class ModelDataProdukGrup {
-  String? productid;
-  String? name;
-  num? price;
-  num? price_after;
-  num? price_online_shop;
-  num? price_online_shop_after;
-  int? isActive;
-  int? isPPN;
-  String? typeproducts;
-  String? productImage;
-  String? discount_type;
-  int? discount;
+// Keeping these for existing references in the codebase
+typedef ProductModel = ModelDataProduk;
+
+class ModelDataProdukGrup extends ModelDataProduk {
   String? kodeProduct;
 
   ModelDataProdukGrup({
-    this.productid,
-    this.name,
-    this.price,
-    this.isActive,
-    this.isPPN,
-    this.typeproducts,
-    this.productImage,
-    required this.discount_type,
-    required this.discount,
-  });
+    String? productid,
+    String? name,
+    num? price,
+    int? isActive,
+    int? isPPN,
+    String? typeproducts,
+    String? productImage,
+    required String discount_type,
+    required int discount,
+    this.kodeProduct,
+  }) : super(
+          productid: productid,
+          name: name,
+          price: price,
+          isActive: isActive,
+          isPPN: isPPN,
+          typeproducts: typeproducts,
+          productImage: productImage,
+          discount_type: discount_type,
+          discount: discount,
+        );
 
-  ModelDataProdukGrup.fromJson(Map<String, dynamic> json) {
-    productid = json['productid'];
-    name = json['name'];
-    price = json['price'];
-    price_after = json['price_after'];
-    price_online_shop = json['price_online_shop'];
-    price_online_shop_after = json['price_online_shop_after'];
-    isActive = json['isActive'];
-    isPPN = json['isPPN'];
-    typeproducts = json['typeproducts'];
-    productImage = json['product_image'];
-    discount_type = json['discount_type'];
-    discount = json['discount'];
+  ModelDataProdukGrup.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     kodeProduct = json['kodeproduct'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> ModelDataProdukGrup = new Map<String, dynamic>();
-    ModelDataProdukGrup['productid'] = this.productid;
-    ModelDataProdukGrup['name'] = this.name;
-    ModelDataProdukGrup['price'] = this.price;
-    ModelDataProdukGrup['price_after'] = this.price_after;
-    ModelDataProdukGrup['price_online_shop'] = this.price_online_shop;
-    ModelDataProdukGrup['price_online_shop_after'] =
-        this.price_online_shop_after;
-    ModelDataProdukGrup['isActive'] = this.isActive;
-    ModelDataProdukGrup['isPPN'] = this.isPPN;
-    ModelDataProdukGrup['typeproducts'] = this.typeproducts;
-    ModelDataProdukGrup['product_image'] = this.productImage;
-    ModelDataProdukGrup['discount_type'] = this.discount_type;
-    ModelDataProdukGrup['discount'] = this.discount_type;
-    ModelDataProdukGrup['kodeproduct'] = this.kodeProduct;
-    return ModelDataProdukGrup;
+    final data = super.toJson();
+    data['kodeproduct'] = kodeProduct;
+    return data;
   }
+
+  @override
+  Map<String, dynamic> toMap() => toJson();
 }

@@ -75,7 +75,7 @@ Future<dynamic> dialogNoConnection(context, VoidCallback retryCallback) {
                   onTap: () async {
                     Navigator.pop(context);
                     await Future.delayed(Duration(seconds: 2));
-                    retryCallback();
+                    // retryCallback();
                   },
                   child: buttonXL(
                     Center(
