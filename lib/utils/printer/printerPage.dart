@@ -6,7 +6,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 
 import '../../main.dart';
 import '../../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';

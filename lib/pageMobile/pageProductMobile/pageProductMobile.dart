@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/models/produkmodel.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -180,8 +180,8 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   final List<Map<String, String>> _sortOptions = [
     {'label': 'Nama Produk (A ke Z)', 'value': 'upDownNama'},
     {'label': 'Nama Produk (Z ke A)', 'value': 'downUpNama'},
-    {'label': 'Produk Terbaru', 'value': 'downUpCreate'},
-    {'label': 'Produk Terlama', 'value': 'upDownCreate'},
+    {'label': 'Produk Terbaru', 'value': 'upDownCreate'},
+    {'label': 'Produk Terlama', 'value': 'downUpCreate'},
     {'label': 'Kategori (A ke Z)', 'value': 'upDownHarga'},
     {'label': 'Kategori (Z ke A)', 'value': 'downUpHarga'},
   ];
@@ -200,28 +200,31 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   }
 
   Future<void> loadData() async {
-    setState(() => isLoading = listProduk.isEmpty);
-    
-    final data = await _productRepository.getProducts(
-      token: widget.token,
-      name: search,
-      merchid: [widget.merchantId],
-      orderby: orderby,
-      onSyncUpdate: (syncedData) {
-        if (mounted) {
-          setState(() {
-            listProduk = syncedData;
-            isLoading = false;
-          });
-        }
-      },
+    setState(() => isLoading = true);
+    final data = await getProduct(context, widget.token, search, [
+      widget.merchantId,
+    ], orderby);
+    setState(() {
+      listProduk = data ?? [];
+      isLoading = false;
+    });
+  }
+
+  Future<void> _openEditProduct(ModelDataProduk item) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UbahProdukPageMobile(
+          token: widget.token,
+          product: item,
+          merchantId: widget.merchantId,
+        ),
+      ),
     );
 
-    if (mounted) {
-      setState(() {
-        listProduk = data;
-        isLoading = false;
-      });
+    if (!mounted) return;
+    if (result == true) {
+      await loadData();
     }
   }
 
@@ -391,7 +394,12 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPageMobile(token: widget.token),)),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardPageMobile(token: widget.token),
+            ),
+          ),
         ),
         actions: [
           IconButton(
@@ -635,21 +643,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                UbahProdukPageMobile(
-                                                  token: widget.token,
-                                                  product: item,
-                                                  merchantId: widget.merchantId,
-                                                ),
-                                          ),
-                                        ).then((value) {
-                                          if (value == true) loadData();
-                                        });
-                                      },
+                                      onPressed: () => _openEditProduct(item),
                                       icon: Icon(
                                         PhosphorIcons.pencil_line,
                                         size: 22,

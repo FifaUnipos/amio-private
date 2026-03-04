@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
@@ -16,7 +18,7 @@ import '../../../../utils/component/component_orderBy.dart';
 import '../../../../models/keranjangModel.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../models/tokoModel/singleRiwayatModel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import '../../../../utils/printer/printerPage.dart';
@@ -31,6 +33,17 @@ import 'package:http/http.dart' as http;
 
 String? transactionidValue;
 bool isTagihan = false;
+
+double asDouble(dynamic v, {double def = 0}) {
+  if (v == null) return def;
+  return double.tryParse(v.toString()) ?? def;
+}
+
+String moneyString(dynamic v, {bool isThousandUnit = false}) {
+  double n = asDouble(v);
+  if (isThousandUnit) n = n * 1000;
+  return n.toStringAsFixed(2);
+}
 
 class SimpanPage extends StatefulWidget {
   String token;
@@ -89,6 +102,7 @@ class _SimpanPageState extends State<SimpanPage> {
 
   @override
   void initState() {
+    super.initState();
     checkConnection(context);
 
     isTagihan = true;
@@ -111,7 +125,6 @@ class _SimpanPageState extends State<SimpanPage> {
       print(datasRiwayat.toString());
       datasRiwayat;
     });
-    super.initState();
   }
 
   @override
@@ -152,8 +165,6 @@ class _SimpanPageState extends State<SimpanPage> {
                       onTap: () {
                         widget.pageController.jumpToPage(0);
                         transactionidValue = '';
-                        cart.clear();
-                        cartMap.clear();
                         setState(() {});
                       },
                       child: Icon(
@@ -181,7 +192,6 @@ class _SimpanPageState extends State<SimpanPage> {
                 Padding(
                   padding: EdgeInsets.only(top: size16, bottom: size16),
                   child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       orderBy(context),
@@ -310,17 +320,10 @@ class _SimpanPageState extends State<SimpanPage> {
                                     child: ListView.builder(
                                       padding: EdgeInsets.zero,
                                       itemCount: datasRiwayat!.length,
-                                      // physics:  BouncingScrollPhysics(),
                                       itemBuilder: (builder, index) {
                                         return GestureDetector(
                                           behavior: HitTestBehavior.translucent,
                                           onTap: () {
-                                            // width = MediaQuery.of(context)
-                                            //         .size
-                                            //         .width /
-                                            //     2.6;
-                                            // widtValue = 100;
-
                                             widthInformation = MediaQuery.of(
                                               context,
                                             ).size.width;
@@ -330,25 +333,10 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                             transactionidValue =
                                                 datasRiwayat![index]
-                                                    .transactionid;
+                                                    .transactionid
+                                                    .toString();
 
                                             print(transactionidValue);
-
-                                            // getSingleRiwayatTransaksi(
-                                            //     widget.token,
-                                            //     datasRiwayat![index]
-                                            //         .transactionid);
-
-                                            // cart.add(
-                                            //   CartTransaksi(
-                                            //     name: name,
-                                            //     productid: productid,
-                                            //     image: image,
-                                            //     price: price,
-                                            //     quantity: 1,
-                                            // quantity: cart[i].quantity,
-                                            //   ),
-                                            // );
 
                                             String productId =
                                                 transactionidValue.toString();
@@ -356,7 +344,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                             if (cartProductIds.contains(
                                               productId,
                                             )) {
-                                              // cartProductIds.remove(productId);
                                               cartProductIds.clear();
                                               width = null;
                                               widtValue = 120;
@@ -523,7 +510,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                               padding: EdgeInsets.zero,
                                               physics: BouncingScrollPhysics(),
                                               children: [
-                                                //! error
                                                 Text(
                                                   'Status Tagihan',
                                                   style: heading3(
@@ -573,20 +559,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                                         ),
                                                       ),
                                                     ),
-                                                    // SizedBox(width: size16),
-                                                    // Container(
-                                                    //   padding:
-                                                    //       EdgeInsets.symmetric(
-                                                    //           horizontal: size12,
-                                                    //           vertical: size16),
-                                                    //   child: Text(
-                                                    //     'Lihat Riwayat',
-                                                    //     style: heading3(
-                                                    //         FontWeight.w600,
-                                                    //         primary500,
-                                                    //         'Outfit'),
-                                                    //   ),
-                                                    // )
                                                   ],
                                                 ),
                                                 SizedBox(height: size16),
@@ -1050,52 +1022,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                           SizedBox(height: size16),
                                           Row(
                                             children: [
-                                              // Expanded(
-                                              //   child: GestureDetector(
-                                              //     onTap: () async {
-                                              //       width = null;
-                                              //       widtValue = 120;
-                                              //       heightInformation = 0;
-                                              //       widthInformation = 0;
-
-                                              //       cart.clear();
-                                              //       cartMap.clear();
-
-                                              //       await deletePesanan(
-                                              //         context,
-                                              //         widget.token,
-                                              //         transactionidValue,
-                                              //       );
-                                              //       setState(() {});
-                                              //       initState();
-                                              //     },
-                                              //     child: buttonXLoutline(
-                                              //         Row(
-                                              //           mainAxisAlignment:
-                                              //               MainAxisAlignment
-                                              //                   .center,
-                                              //           children: [
-                                              //             Icon(
-                                              //               PhosphorIcons
-                                              //                   .trash_fill,
-                                              //               color: danger500,
-                                              //             ),
-                                              //              SizedBox(
-                                              //                 width: size12),
-                                              //             Text(
-                                              //               'Hapus',
-                                              //               style: heading3(
-                                              //                 FontWeight.w600,
-                                              //                 danger500,
-                                              //                 'Outfit',
-                                              //               ),
-                                              //             ),
-                                              //           ],
-                                              //         ),
-                                              //         180,
-                                              //         danger500),
-                                              //   ),
-                                              // ),
                                               Expanded(
                                                 child: GestureDetector(
                                                   onTap: () {
@@ -1194,156 +1120,295 @@ class _SimpanPageState extends State<SimpanPage> {
                                               Expanded(
                                                 child: GestureDetector(
                                                   onTap: () async {
-                                                    // Clear previous data
-                                                    cart.clear();
-                                                    cartMap.clear();
-
-                                                    int newtotal = 0;
-
-                                                    // Menghitung total berdasarkan cartMap
-                                                    for (var element
-                                                        in cartMap) {
-                                                      var myelement = int.parse(
-                                                        element['amount']!,
-                                                      );
-                                                      newtotal =
-                                                          newtotal + myelement;
+                                                    final List<
+                                                      Map<String, dynamic>
+                                                    >
+                                                    mapCalculateFinal = [];
+                                                    for (final item
+                                                        in mapCalculateFinal) {
+                                                      cartMap.add({
+                                                        "request_id":
+                                                            (item["request_id"] ??
+                                                                    "")
+                                                                .toString(),
+                                                        "product_id":
+                                                            (item["product_id"] ??
+                                                                    "")
+                                                                .toString(),
+                                                        "is_online":
+                                                            (item["is_online"] ??
+                                                                    false)
+                                                                .toString(),
+                                                        "is_customize":
+                                                            (item["is_customize"] ??
+                                                                    false)
+                                                                .toString(),
+                                                        "amount":
+                                                            (item["amount"] ??
+                                                                    "0")
+                                                                .toString(),
+                                                        "name":
+                                                            (item["name"] ?? "")
+                                                                .toString(),
+                                                        "quantity":
+                                                            (item["quantity"] ??
+                                                                    1)
+                                                                .toString(),
+                                                        "description":
+                                                            (item["description"] ??
+                                                                    "")
+                                                                .toString(),
+                                                        // variants bentuknya list/map, tapi cartMap kamu Map<String,String> → simpan sebagai string JSON
+                                                        "variants": jsonEncode(
+                                                          item["variants"] ??
+                                                              [],
+                                                        ),
+                                                      });
                                                     }
 
-                                                    sumTotal = newtotal;
-                                                    total = [];
-                                                    subTotal = 0;
-                                                    sumTotal = 0;
-                                                    transactionidValue;
-                                                    printext = '';
-                                                    pelangganName = '';
-                                                    pelangganId = '';
-                                                    namaCustomerCalculate = '';
+                                                    print(
+                                                      "PAYLOAD cartMap(FIX): ${jsonEncode(cartMap)}",
+                                                    );
+                                                    for (final d in detail) {
+                                                      final bool isCustom =
+                                                          asBool(
+                                                            d['is_customize'],
+                                                          );
+                                                      final bool isOnline =
+                                                          asBool(
+                                                            d['is_online'],
+                                                          );
 
-                                                    // Iterasi melalui detail untuk memasukkan data ke dalam cartMap
-                                                    for (
-                                                      int i = 0;
-                                                      i < detail.length;
-                                                      i++
-                                                    ) {
-                                                      Map<String, String> map1 =
-                                                          {};
+                                                      final dynamic
+                                                      basePriceSource = isCustom
+                                                          ? (d['amount_display'] ??
+                                                                d['custom_amount'] ??
+                                                                d['price'] ??
+                                                                d['amount'])
+                                                          : (d['price'] ??
+                                                                d['amount']);
 
-                                                      // Menambahkan nilai-nilai ke dalam map1
-                                                      map1['name'] =
-                                                          detail[i]['name']
-                                                              .toString();
-                                                      map1['product_id'] =
-                                                          detail[i]['productid']
-                                                              .toString();
-                                                      map1['quantity'] =
-                                                          detail[i]['quantity']
-                                                              .toString();
-                                                      map1['image'] =
-                                                          detail[i]['product_image']
-                                                              .toString();
+                                                      final String baseAmount =
+                                                          moneyString(
+                                                            basePriceSource,
+                                                            isThousandUnit:
+                                                                false,
+                                                          );
 
-                                                      // Menambahkan amount dari response API
-                                                      map1['amount'] =
-                                                          detail[i]['amount']
-                                                              .toString();
+                                                      final List variantsReq =
+                                                          [];
+                                                      final variants =
+                                                          (d['variants']
+                                                              as List?) ??
+                                                          [];
 
-                                                      map1['description'] =
-                                                          detail[i]['description'] ??
-                                                          '';
-                                                      map1['id_request'] =
-                                                          detail[i]['id_request'] ??
-                                                          '';
-                                                      map1['is_online'] =
-                                                          detail[i]['is_online']
-                                                              .toString();
+                                                      for (final cat
+                                                          in variants) {
+                                                        final catId =
+                                                            (cat['variant_category_id'] ??
+                                                                    '')
+                                                                .toString();
+                                                        final variantProduct =
+                                                            (cat['variant_products']
+                                                                as List?) ??
+                                                            [];
 
-                                                      // Periksa apakah variants ada dan tidak kosong
-                                                      var variants =
-                                                          detail[i]['variants'];
-                                                      if (variants != null &&
-                                                          variants.isNotEmpty) {
-                                                        // Membuat array untuk variant_id
-                                                        var variantData = variants.map((
-                                                          variant,
-                                                        ) {
-                                                          return {
-                                                            'variant_category_id':
-                                                                variant['variant_category_id'],
-                                                            'variant_id': [
-                                                              ...variant['variant_products']
-                                                                  .map(
-                                                                    (product) =>
-                                                                        product['variant_product_id'],
-                                                                  ),
-                                                            ],
-                                                          };
-                                                        }).toList();
+                                                        final List<
+                                                          Map<String, dynamic>
+                                                        >
+                                                        variantArr = [];
 
-                                                        // Set variants hanya jika ada data
-                                                        map1['variants'] =
-                                                            jsonEncode(
-                                                              variantData,
-                                                            );
+                                                        for (final vp
+                                                            in variantProduct) {
+                                                          final bool
+                                                          isVariantCustom = asBool(
+                                                            vp['is_variant_customize'],
+                                                          );
+
+                                                          final double
+                                                          vpPriceDouble =
+                                                              double.tryParse(
+                                                                (vp['price'] ??
+                                                                        vp['variant_price'] ??
+                                                                        '0')
+                                                                    .toString(),
+                                                              ) ??
+                                                              0.0;
+
+                                                          final int varPrice =
+                                                              vpPriceDouble
+                                                                  .round();
+
+                                                          variantArr.add({
+                                                            "variant_id":
+                                                                (vp['variant_product_id'] ??
+                                                                        '')
+                                                                    .toString(),
+                                                            "variant_price":
+                                                                varPrice,
+                                                            "is_variant_customize":
+                                                                isVariantCustom
+                                                                ? 1
+                                                                : 0,
+                                                          });
+                                                        }
+                                                        variantsReq.add({
+                                                          "variant_category_id":
+                                                              catId,
+                                                          "variant": variantArr,
+                                                        });
+                                                      }
+                                                      mapCalculateFinal.add({
+                                                        "request_id":
+                                                            (d['request_id'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        "product_id":
+                                                            (d['product_id'] ??
+                                                                    d['productid'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        "is_online": isOnline,
+                                                        "is_customize":
+                                                            isCustom,
+                                                        "amount": baseAmount,
+                                                        "name":
+                                                            (d['name'] ?? '')
+                                                                .toString(),
+                                                        "quantity": asInt(
+                                                          d['quantity'],
+                                                          fallback: 1,
+                                                        ),
+                                                        "description":
+                                                            d['description'],
+                                                        "variants": variantsReq,
+                                                      });
+
+                                                      cartMap.clear();
+
+                                                      for (final item
+                                                          in mapCalculateFinal) {
+                                                        cartMap.add({
+                                                          "request_id":
+                                                              (item["request_id"] ??
+                                                                      "")
+                                                                  .toString(),
+                                                          "product_id":
+                                                              (item["product_id"] ??
+                                                                      "")
+                                                                  .toString(),
+                                                          "is_online": asBool(
+                                                            item["is_online"],
+                                                          ).toString(),
+                                                          "is_customize": asBool(
+                                                            item["is_customize"],
+                                                          ).toString(),
+                                                          "amount":
+                                                              (item["amount"] ??
+                                                                      "0")
+                                                                  .toString(),
+                                                          "name":
+                                                              (item["name"] ??
+                                                                      "")
+                                                                  .toString(),
+                                                          "quantity":
+                                                              (item["quantity"] ??
+                                                                      1)
+                                                                  .toString(),
+                                                          "description":
+                                                              (item["description"] ??
+                                                                      "")
+                                                                  .toString(),
+                                                          // ✅ simpan variants sebagai JSON string (biar cartMap tetap Map<String,String>)
+                                                          "variants": jsonEncode(
+                                                            item["variants"] ??
+                                                                [],
+                                                          ),
+                                                        });
                                                       }
 
-                                                      cartMap.add(map1);
-
-                                                      // Lanjutkan dengan operasi lainnya, misalnya menghitung total
-                                                      String name =
-                                                          detail[i]['name']
-                                                              .toString()
-                                                              .trim();
-                                                      String productid =
-                                                          detail[i]['productid']
-                                                              .toString()
-                                                              .trim();
-                                                      String image =
-                                                          detail[i]['product_image']
-                                                              .toString()
-                                                              .trim();
-                                                      double? price = double.tryParse(
-                                                        detail[i]['price']
-                                                            .toString(),
-                                                      );
-                                                      int quantity = int.parse(
-                                                        detail[i]['quantity']
-                                                            .toString(),
-                                                      );
-
-                                                      sumTotal =
-                                                          sumTotal +
-                                                          price!; // Update total berdasarkan harga produk
-                                                      total.add(price);
-
-                                                      cart.add(
-                                                        CartTransaksi(
-                                                          name: name,
-                                                          productid: productid,
-                                                          image: image,
-                                                          price: price,
-                                                          quantity: quantity,
-                                                          desc:
-                                                              detail[i]['description']
-                                                                  .toString(),
-                                                          idRequest: '',
-                                                        ),
+                                                      print(
+                                                        "PAYLOAD cartMap(FINAL): ${jsonEncode(cartMap)}",
                                                       );
                                                     }
 
-                                                    // Lakukan pengecekan apakah cartMap sudah terisi
-                                                    if (cartMap.isNotEmpty) {
+                                                    print(
+                                                      "PAYLOAD cartMap: ${jsonEncode(mapCalculateFinal)}",
+                                                    );
+                                                    if (mapCalculateFinal
+                                                        .isNotEmpty) {
                                                       isTagihan = true;
+
+                                                      final cartForPayment = detail.map<CartTransaksi>((
+                                                        d,
+                                                      ) {
+                                                        final m =
+                                                            d
+                                                                as Map<
+                                                                  String,
+                                                                  dynamic
+                                                                >;
+                                                        final qty = asInt(
+                                                          m['quantity'],
+                                                          fallback: 1,
+                                                        );
+                                                        final priceDouble =
+                                                            double.tryParse(
+                                                              (m['price'] ??
+                                                                      m['amount'] ??
+                                                                      '0')
+                                                                  .toString(),
+                                                            ) ??
+                                                            0;
+
+                                                        return CartTransaksi(
+                                                          name:
+                                                              (m['name'] ?? '')
+                                                                  .toString(),
+                                                          productid:
+                                                              (m['product_id'] ??
+                                                                      m['productid'] ??
+                                                                      '')
+                                                                  .toString(),
+                                                          image:
+                                                              (m['product_image'] ??
+                                                                      m['image'] ??
+                                                                      '')
+                                                                  .toString(),
+                                                          price: priceDouble,
+                                                          quantity: qty,
+                                                          desc:
+                                                              (m['description'] ??
+                                                                      '')
+                                                                  .toString(),
+                                                          idRequest:
+                                                              (m['request_id'] ??
+                                                                      '')
+                                                                  .toString(),
+                                                          variants: jsonEncode(
+                                                            m['variants'] ?? [],
+                                                          ),
+                                                        );
+                                                      }).toList();
+
+                                                      // penting: update state utama
+                                                      this.setState(() {
+                                                        cart
+                                                          ..clear()
+                                                          ..addAll(
+                                                            cartForPayment,
+                                                          );
+                                                      });
 
                                                       await calculateTransaction(
                                                         context,
                                                         widget.token,
-                                                        cartMap,
-                                                        setState,
+                                                        mapCalculateFinal,
+                                                        this.setState,
                                                         pelangganId,
+                                                        '', // typePrice (kalau gak dipakai isi kosong / "price")
                                                         data['discountid'] ??
-                                                            '',
-                                                        "",
+                                                            '', // ✅ discount yang bener
                                                         transactionidValue,
                                                       ).then((value) {
                                                         if (value == '00') {
@@ -1489,102 +1554,7 @@ class _SimpanPageState extends State<SimpanPage> {
                 ],
               ),
               SizedBox(height: size24),
-              // GestureDetector(
-              //   behavior: HitTestBehavior.translucent,
-              //   onTap: () async {
-              //     setState(() async {
-              //       refreshSelectedProvider.valueSelected = null;
-              //       widget.pageController.jumpToPage(0);
-              //       cart.clear();
-              //       cartMap.clear();
 
-              //       int newtotal = 0;
-              //       for (var element in cartMap) {
-              //         var myelement = int.parse(element['amount']!);
-
-              //         newtotal = newtotal + myelement;
-              //       }
-
-              //       sumTotal = newtotal;
-              //       total = [];
-              //       subTotal = 0;
-              //       sumTotal = 0;
-              //       transactionidValue;
-              //       printext = '';
-              //       pelangganName = '';
-              //       pelangganId = '';
-              //       namaCustomerCalculate = '';
-
-              //       int i;
-              //       for (i = 0; i < detailUbah.length; i++) {
-              //         // print(detailUbah[i]['name']);
-
-              //         Map<String, String> map1 = {};
-              //         map1['name'] = detailUbah[i]['name'].toString();
-              //         map1['productid'] =
-              //             detailUbah![i]['productid'].toString();
-              //         map1['quantity'] = detailUbah[i]['quantity'].toString();
-              //         map1['image'] = detailUbah[i]['product_image'].toString();
-              //         map1['amount'] = detailUbah[i]['amount'].toString();
-              //         map1['description'] = 'berhasil';
-
-              //         cartMap.add(map1);
-
-              //         String name = detailUbah[i]['name'].toString().trim();
-              //         String productid =
-              //             detailUbah[i]['productid'].toString().trim();
-              //         String image =
-              //             detailUbah![i]['product_image'].toString().trim();
-              //         int? price = detailUbah[i]['amount'];
-              //         int quantity = detailUbah[i]['quantity'];
-              //         String desc =
-              //             detailUbah![i]['description'].toString().trim();
-
-              //         sumTotal = sumTotal + price!.toInt();
-              //         // subTotal =
-              //         //     subTotal + price.toInt();
-              //         total.add(price);
-
-              //         cart.add(
-              //           CartTransaksi(
-              //             name: name,
-              //             productid: productid,
-              //             image: image,
-              //             price: price,
-              //             quantity: quantity,
-              //             desc: desc,
-              //             // desc: 'berhasil',
-              //             // quantity:
-              //             //     cart[i].quantity,
-              //           ),
-              //         );
-              //       }
-
-              //       if (cartMap.isNotEmpty) {
-              //         // initState();
-              //         widget.pageController.jumpToPage(0);
-              //         setState(() {
-              //           transactionidValue;
-              //           subTotal;
-              //           printext;
-              //           transaksiNama;
-              //           transaksiMetode;
-              //           transaksiPesanan;
-              //           transaksiKasir;
-              //         });
-              //       }
-
-              //       transactionidValue == '' ? log("kosong") : log("ada");
-
-              //       setState(() {});
-              //     });
-              //   },
-              //   child: modalBottomValue(
-              //     'Ubah Produk',
-              //     PhosphorIcons.pencil_line,
-              //   ),
-              // ),
-              // SizedBox(height: size12),
               GestureDetector(
                 onTap: () {
                   refreshSelectedProvider.valueSelected = null;
@@ -1606,6 +1576,11 @@ class _SimpanPageState extends State<SimpanPage> {
       context,
       listen: false,
     );
+    final String txId = (transactionidValue ?? '').toString().trim();
+    if (txId.isEmpty) {
+      showSnackbar(context, {"rc": "99", "message": "Pilih tagihan dulu"});
+      return;
+    }
     return showModalBottomSheet(
       constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
@@ -1614,12 +1589,7 @@ class _SimpanPageState extends State<SimpanPage> {
       context: context,
       builder: (context) {
         return FutureBuilder(
-          future: headerTagihan(
-            context,
-            widget.token,
-            transactionidValue,
-            'hapus',
-          ),
+          future: headerTagihan(context, widget.token, txId, 'hapus'),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return StatefulBuilder(
@@ -1659,19 +1629,14 @@ class _SimpanPageState extends State<SimpanPage> {
                                       cart.clear();
                                       cartMap.clear();
 
-                                      // isItemAdded = false;
-
                                       total = [];
                                       subTotal = 0;
                                       sumTotal = 0;
 
                                       cartProductIds.clear();
                                       conCatatan.clear();
-                                      // conCounterPreview.clear();
-                                      // refreshTampilan();
                                       transactionidValue = "";
 
-                                      // refreshColor();
                                       setState(() {});
                                     }
                                     refreshSelectedProvider.valueSelected =
@@ -1895,61 +1860,59 @@ class _SimpanPageState extends State<SimpanPage> {
                                           context,
                                         ).size.width,
                                         child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              whenLoading(context);
-                                              // print(
-                                              //     '$transaksiReference $idKategori ${textController.text}');
+                                          onTap: () async {
+                                            final String txId =
+                                                (transactionidValue ?? '')
+                                                    .toString()
+                                                    .trim();
+                                            final String cat =
+                                                (idKategori ?? '')
+                                                    .toString()
+                                                    .trim();
+                                            final String alasan = textController
+                                                .text
+                                                .trim();
 
-                                              // print(snapshot
-                                              //     .data['transaksiid_reference']);
-                                              //cartProductIds.clear();
-                                              width = null;
-                                              widtValue = 120;
-                                              heightInformation = 0;
-                                              widthInformation = 0;
-
-                                              //cart.clear();
-                                              //cartMap.clear();
-
-                                              deleteReference(
-                                                context,
-                                                widget.token,
-                                                snapshot
-                                                    .data['transaksiid_reference'],
-                                                idKategori,
-                                                textController.text,
-                                                transactionidValue,
-                                              ).then((value) {
-                                                if (value != '00') {
-                                                  setState(() async {
-                                                    datasRiwayat =
-                                                        await getRiwayatTransaksi(
-                                                          context,
-                                                          widget.token,
-                                                          '0',
-                                                          '',
-                                                          textvalueOrderBy,
-                                                        );
-                                                    Future.delayed(
-                                                      Duration(seconds: 1),
-                                                    );
-                                                    WidgetsBinding.instance
-                                                        .addPostFrameCallback((
-                                                          _,
-                                                        ) {
-                                                          scrollToTextField();
-                                                          closeLoading(context);
-                                                        });
-                                                    initState();
-                                                    setState(() {});
-                                                  });
-                                                }
-                                                closeLoading(context);
+                                            if (txId.isEmpty) {
+                                              showSnackbar(context, {
+                                                "rc": "99",
+                                                "message": "Pilih tagihan dulu",
                                               });
-                                              setState(() {});
-                                              initState();
-                                            });
+                                              return;
+                                            }
+                                            if (cat.isEmpty) {
+                                              setState(
+                                                () => errorText =
+                                                    "Alasan wajib dipilih",
+                                              );
+                                              return;
+                                            }
+                                            if (alasan.length < 15) {
+                                              setState(
+                                                () => errorText =
+                                                    "Minimal lima belas karakter",
+                                              );
+                                              return;
+                                            }
+
+                                            whenLoading(context);
+
+                                            final rc =
+                                                await deleteTagihanTablet(
+                                                  context,
+                                                  token: widget.token,
+                                                  transactionId: txId,
+                                                  idkategori: cat,
+                                                  detailAlasan: alasan,
+                                                );
+
+                                            closeLoading(context);
+
+                                            if (rc == '00') {
+                                              Navigator.of(context).popUntil(
+                                                (route) => route.isFirst,
+                                              );
+                                            }
                                           },
                                           child: buttonXL(
                                             Center(

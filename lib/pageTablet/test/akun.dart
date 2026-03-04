@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 
 Color maainColor = const Color.fromARGB(255, 255, 255, 255);
 

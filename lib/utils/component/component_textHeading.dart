@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'component_size.dart';
 
-heading1(FontWeight fontWeight, Color color, String family) {
+TextStyle heading1(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -15,7 +15,7 @@ heading1(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-heading2(FontWeight fontWeight, Color color, String family) {
+TextStyle heading2(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -25,7 +25,7 @@ heading2(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-heading3(FontWeight fontWeight, Color color, String family) {
+TextStyle heading3(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -35,7 +35,7 @@ heading3(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-heading4(FontWeight fontWeight, Color color, String family) {
+TextStyle heading4(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -45,7 +45,7 @@ heading4(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-heading4lineThrough(FontWeight fontWeight, Color color, String family) {
+TextStyle heading4lineThrough(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -56,7 +56,7 @@ heading4lineThrough(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-body3lineThrough(FontWeight fontWeight, Color color, String family) {
+TextStyle body3lineThrough(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -67,7 +67,7 @@ body3lineThrough(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-body1(FontWeight fontWeight, Color color, String family) {
+TextStyle body1(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -77,7 +77,7 @@ body1(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-body2(FontWeight fontWeight, Color color, String family) {
+TextStyle body2(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -87,7 +87,7 @@ body2(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-body3(FontWeight fontWeight, Color color, String family) {
+TextStyle body3(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,
@@ -97,7 +97,7 @@ body3(FontWeight fontWeight, Color color, String family) {
   );
 }
 
-body4(FontWeight fontWeight, Color color, String family) {
+TextStyle body4(FontWeight fontWeight, Color color, String family) {
   return TextStyle(
     fontFamily: family,
     color: color,

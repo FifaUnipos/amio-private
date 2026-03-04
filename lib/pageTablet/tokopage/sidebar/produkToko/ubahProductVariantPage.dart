@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';

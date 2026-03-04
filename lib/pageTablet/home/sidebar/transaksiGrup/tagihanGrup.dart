@@ -16,7 +16,7 @@ import '../../../../utils/printer/printerenum.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../models/tokoModel/riwayatTransaksiTokoModel.dart';
 import '../../../../models/tokoModel/singleRiwayatModel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import 'package:http/http.dart' as http;
 

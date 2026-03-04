@@ -5,11 +5,11 @@ import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../utils/component/component_button.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';

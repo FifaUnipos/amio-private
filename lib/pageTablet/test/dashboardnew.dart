@@ -19,11 +19,11 @@ import '../../../../utils/component/component_size.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../main.dart';
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 
 import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_button.dart';
 

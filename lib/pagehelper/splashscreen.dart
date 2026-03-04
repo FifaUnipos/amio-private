@@ -15,7 +15,7 @@ import 'onboard/onboard.dart';
 import '../main.dart';
 import '../pageTablet/home/dashboard.dart';
 import '../pageTablet/tokopage/dashboardtoko.dart';
-import '../services/apimethod.dart';
+import '../services/config/apimethod.dart';
 
 //? just splashScreen
 class SplashScreen extends StatefulWidget {

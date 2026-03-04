@@ -1,7 +1,7 @@
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 
 class TambahBarangInventori extends StatefulWidget {
   const TambahBarangInventori({super.key});

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 
 import '../masukakun.dart';
 
@@ -24,7 +25,7 @@ import 'package:unipos_app_335/main.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
@@ -338,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
   Future getOtp(page) async {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(loginbyotp),
+      Uri.parse(ApiEndpoints.loginbyotp),
       body: {
         // 'phonenumber': '085947737725',
         'phonenumber': phoneEmailController.text,
@@ -366,7 +367,7 @@ class _LoginPageState extends State<LoginPage> {
   Future getOtpEmail(page) async {
     try {
       var response = await Dio().post(
-        checkpass,
+        ApiEndpoints.checkpass,
         data: {
           // 'phonenumber': '085947737725',
           'deviceid': identifier.toString(),
@@ -652,7 +653,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
       whenLoading(context);
 
       final response = await http.post(
-        Uri.parse(loginEmailLink),
+        Uri.parse(ApiEndpoints.loginEmailLink),
         body: {
           'deviceid': identifier,
           'email': widget.email,

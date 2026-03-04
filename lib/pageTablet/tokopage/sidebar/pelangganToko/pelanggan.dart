@@ -19,7 +19,7 @@ import '../../../../utils/component/component_orderBy.dart';
 import '../../../../main.dart';
 import '../../../../models/pelangganDataModel.dart';
 import '../../../../models/produkmodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';

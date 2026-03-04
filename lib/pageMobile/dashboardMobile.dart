@@ -1,10 +1,13 @@
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:skeletons/skeletons.dart';
+// import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
@@ -23,11 +26,14 @@ import 'package:unipos_app_335/pageMobile/printerPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
-import 'package:unipos_app_335/pageMobile/transaksiMobile/riwayat_page.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/riwayat_page.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/settings_tab.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
+import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/services/checkConnection.dart';
+import 'package:unipos_app_335/services/unipos_notification_service.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -237,7 +243,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
         floatingActionButton: isCashier
             ? null
             : SafeArea(
-              child: GestureDetector(
+                child: GestureDetector(
                   onTap: () {
                     showMenuBottomDialog(context);
                   },
@@ -261,7 +267,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     double.infinity,
                   ),
                 ),
-            ),
+              ),
         body: Column(
           children: [
             // 🔹 Navbar Atas
@@ -426,13 +432,19 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
             'page': merchantType == 'Group_Merchant'
                 ? MerchantSelectionPage(
                     token: checkToken,
-                    featureTitle: 'Produk',
+                    featureTitle: 'Inventori',
                     featureBuilder: (merchantId) => MaterialInventoryPage(
+                      typeMerchant: typeAccount ?? '',
                       token: widget.token,
                       merchantId: merchantId,
                     ),
                   )
-                : MaterialInventoryPage(token: widget.token, merchantId: ''),
+                : MaterialInventoryPage(
+                    typeMerchant: typeAccount ?? '',
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                    merchantName: nameToko,
+                  ),
           },
           if (merchantType == 'Group_Merchant')
             {
@@ -466,7 +478,19 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           {
             'icon': PhosphorIcons.tag_fill,
             'text': 'Promo',
-            'page': PromoPageMobile(token: widget.token, merchantId: ''),
+            'page': merchantType == 'Group_Merchant'
+                ? MerchantSelectionPage(
+                    token: checkToken,
+                    featureTitle: 'Promo',
+                    featureBuilder: (merchantId) => PromoPageMobile(
+                      token: widget.token,
+                      merchantId: merchantId,
+                    ),
+                  )
+                : PromoPageMobile(
+                    token: widget.token,
+                    merchantId: merchantIdProfile ?? '',
+                  ),
           },
           if (merchantType == 'Group_Merchant')
             {
@@ -530,7 +554,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                             Navigator.pop(context); // tutup modal
                             // Ambil dulu halamannya ke variabel
                             final dynamic pageWidget = item['page'];
-          
+
                             // Cek apakah variabel itu null atau tidak
                             if (pageWidget != null) {
                               Navigator.push(
@@ -2601,10 +2625,34 @@ class InfoCard extends StatelessWidget {
   }
 }
 
-class DashboardWithNotif extends StatelessWidget {
+class DashboardWithNotif extends StatefulWidget {
   final List<NotificationModel> notifications;
 
   const DashboardWithNotif({super.key, required this.notifications});
+
+  @override
+  State<DashboardWithNotif> createState() => _DashboardWithNotifState();
+}
+
+class _DashboardWithNotifState extends State<DashboardWithNotif> {
+  void _configureSelectNotificationSubject() {
+    selectNotificationStream.stream.listen((String? payload) {
+      context.read<PayloadProvider>().payload = payload;
+      // Navigator.pushNamed(context, MyRoute.detail.name, arguments: payload);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _configureSelectNotificationSubject();
+  }
+
+  @override
+  void dispose() {
+    selectNotificationStream.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2655,7 +2703,7 @@ class DashboardWithNotif extends StatelessWidget {
               border: Border.all(color: bnw300),
               borderRadius: BorderRadius.circular(size16),
             ),
-            child: notifications.isEmpty
+            child: widget.notifications.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -2669,13 +2717,19 @@ class DashboardWithNotif extends StatelessWidget {
                           'Tidak ada Notifikasi baru',
                           style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                         ),
+                        UniposButton(
+                          text: 'Test',
+                          onTap: () async {
+                            await _showNotification();
+                          },
+                        ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    itemCount: notifications.length,
+                    itemCount: widget.notifications.length,
                     itemBuilder: (context, index) {
-                      final notif = notifications[index];
+                      final notif = widget.notifications[index];
                       return Container(
                         padding: EdgeInsets.symmetric(
                           vertical: size16,
@@ -2787,5 +2841,8 @@ class DashboardWithNotif extends StatelessWidget {
         ),
       ],
     );
+  }
+  Future<void> _showNotification() async {
+    context.read<UniposNotificationProvider>().showNotification();
   }
 }

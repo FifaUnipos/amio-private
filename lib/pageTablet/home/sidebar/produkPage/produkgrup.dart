@@ -14,7 +14,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import '../../../../main.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component/skeletons.dart';
 import 'tambahProduk.dart';

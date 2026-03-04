@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import '../../../../utils/component/component_size.dart';
@@ -14,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../utils/component/component_color.dart';
 import '../../../main.dart';
-import '../../../services/apimethod.dart';
+import '../../../services/config/apimethod.dart';
 import '../../../services/notification.dart';
 
 import '../../../utils/component/component_appbar.dart';
@@ -251,7 +252,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
   Future registErentryOtp(pin) async {
     try {
       final response = await http.post(
-        Uri.parse(registerentryotp),
+        Uri.parse(ApiEndpoints.registerentryotp),
         body: {
           'phonenumber': widget.phone,
           'otp': pin,
@@ -335,7 +336,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
   Future getOtpAgain() async {
     try {
       var response = await Dio().post(
-        loginbyotp,
+        ApiEndpoints.loginbyotp,
         data: {'phonenumber': widget.phone, 'deviceid': identifier},
       );
       print(widget.phone);
@@ -351,7 +352,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
   Future registerAgain() async {
     try {
       var response = await Dio().post(
-        registerbyotp,
+        ApiEndpoints.registerbyotp,
         data: {
           'phonenumber': widget.phone,
           'fullname': widget.name,
@@ -388,7 +389,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
       );
 
       final response = await http.post(
-        Uri.parse(loginentryotp),
+        Uri.parse(ApiEndpoints.loginentryotp),
         body: {
           'phonenumber': widget.phone,
           'otp': otp,
@@ -433,7 +434,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
   Future globalRegisterEntry(pin) async {
     try {
       final response = await http.post(
-        Uri.parse(registerGlobalMerchEntry),
+        Uri.parse(ApiEndpoints.registerGlobalMerchEntry),
         body: {'phonenumber': widget.phone, 'otp': pin, 'deviceid': identifier},
       );
       var jsonResponse = jsonDecode(response.body);

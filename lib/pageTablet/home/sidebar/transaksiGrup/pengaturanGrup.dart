@@ -10,7 +10,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
 
 import '../../../tokopage/sidebar/transaksiToko/transaksi.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:unipos_app_335/models/userModel.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'form_user_mobile.dart';
@@ -44,8 +44,15 @@ class _PageUserMobileState extends State<PageUserMobile> {
     setState(() => _isLoading = true);
     try {
       final users = await getGroupUsers(context, widget.token, _selectedOrder);
+      final scopedUsers = users.where((u) {
+        if (widget.merchantId.isEmpty) return true;
+
+        final userMerchantId = (u.merchantid ?? '').trim();
+        return userMerchantId == widget.merchantId.trim();
+      }).toList();
+
       setState(() {
-        _allUsers = users;
+        _allUsers = scopedUsers;
         _applyFilter();
       });
     } catch (e) {

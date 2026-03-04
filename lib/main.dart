@@ -8,8 +8,17 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
+import 'package:unipos_app_335/providers/transactions/history/delete_provider.dart';
+import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
+import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
+import 'package:unipos_app_335/services/api/transaction/history/delete.dart';
+
+import 'package:unipos_app_335/services/api/transaction/history/delete_get_reasons.dart';
+import 'package:unipos_app_335/services/api/transaction/history/view_deleted_history.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/services/provider.dart';
+import 'package:unipos_app_335/services/unipos_notification_service.dart';
 import '../utils/component/component_color.dart';
 import 'pagehelper/splashscreen.dart';
 import 'utils/component/providerModel/refreshTampilanModel.dart';
@@ -42,6 +51,8 @@ Future<void> main() async {
   await deviceDetails();
 
   myprofile(prefs.getString('token') ?? '');
+  typeAccount = prefs.getString('merchantType');
+  roleAccount = prefs.getString('roleProfile');
   dashboard(identifier, checkToken ?? '');
   merchantType;
 
@@ -68,10 +79,40 @@ class UniPOSApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider(create: (context) => UniposNotificationService()..init()),
+        ChangeNotifierProvider(
+          create: (context) => UniposNotificationProvider(
+            context.read<UniposNotificationService>()..requestPermissions(),
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => ProductVariantProvider()),
         ChangeNotifierProvider(create: (_) => TimerProvider()),
         ChangeNotifierProvider(create: (_) => RefreshTampilan()),
         ChangeNotifierProvider(create: (_) => RefreshSelected()),
+        Provider(create: (context) => TransactionHistoryDeleteReasonsService()),
+        ChangeNotifierProvider(
+          create: (context) => TransactionHistoryDeleteReasonsProvider(
+            context.read<TransactionHistoryDeleteReasonsService>(),
+          ),
+        ),
+        Provider(create: (context) => TransactionViewDeletedHistoryService()),
+        ChangeNotifierProvider(
+          create: (context) => TransactionViewDeletedHistoryProvider(
+            context.read<TransactionViewDeletedHistoryService>(),
+          ),
+        ),
+        Provider(create: (context) => TransactionHistoryDeleteService()),
+        ChangeNotifierProvider(
+          create: (context) => TransactionHistoryDeleteProvider(
+            context.read<TransactionHistoryDeleteService>(),
+          ),
+        ),
+        Provider(create: (context) => UniposNotificationService()),
+        ChangeNotifierProvider(
+          create: (context) => UniposNotificationProvider(
+            context.read<UniposNotificationService>(),
+          )..requestPermissions(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

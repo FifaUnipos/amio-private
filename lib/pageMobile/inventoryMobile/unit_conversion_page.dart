@@ -3,7 +3,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/main.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 

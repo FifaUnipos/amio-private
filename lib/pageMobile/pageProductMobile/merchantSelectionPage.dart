@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -91,6 +91,44 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
           style: heading2(FontWeight.w700, bnw900, 'Outfit'),
         ),
         centerTitle: false,
+
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: Icon(PhosphorIcons.file_text, color: primary500),
+        //     style: IconButton.styleFrom(
+        //       side: BorderSide(color: primary500.withValues(alpha: 0.3)),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(8),
+        //       ),
+        //     ),
+        //   ),
+        //   SizedBox(width: 8),
+
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 16.0),
+        //     child: Center(
+        //       child: InkWell(
+        //         borderRadius: BorderRadius.circular(8),
+        //         onTap: () async {},
+        //         child: Container(
+        //           padding: const EdgeInsets.symmetric(
+        //             horizontal: 16,
+        //             vertical: 8,
+        //           ),
+        //           decoration: BoxDecoration(
+        //             color: primary500,
+        //             borderRadius: BorderRadius.circular(8),
+        //           ),
+        //           child: Text(
+        //             "Tambah",
+        //             style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +322,6 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                
                 Navigator.push(
                   context,
                   MaterialPageRoute(

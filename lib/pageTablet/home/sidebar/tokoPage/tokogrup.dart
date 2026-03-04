@@ -20,7 +20,7 @@ import '../../../../utils/component/component_loading.dart';
 import '../../../../main.dart';
 import '../../../../models/tokoModel/singletokomodel.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component/skeletons.dart';
 import '../../../tokopage/sidebar/produkToko/produk.dart';

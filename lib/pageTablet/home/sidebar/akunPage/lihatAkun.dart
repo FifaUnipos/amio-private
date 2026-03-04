@@ -15,7 +15,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 
 import '../../../../models/lihatakunmodel.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import '../../../../utils/component/component_color.dart';

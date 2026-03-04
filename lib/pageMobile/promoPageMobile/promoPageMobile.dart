@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/main.dart'; // import identifier
 import 'package:unipos_app_335/pageMobile/promoPageMobile/discount_model.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'addPromoPageMobile.dart'; // Same directory
-import 'package:unipos_app_335/services/apimethod.dart'; // Assuming base URLs might be here, or I define local
+import 'package:unipos_app_335/services/config/apimethod.dart'; // Assuming base URLs might be here, or I define local
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -28,8 +29,8 @@ class PromoPageMobile extends StatefulWidget {
 
 class _PromoPageMobileState extends State<PromoPageMobile> {
   // Constants
-  final String _listUrl = diskonLink;
-  final String _toggleUrl = aktifDiskonLink;
+  final String _listUrl = ApiEndpoints.diskonLink;
+  final String _toggleUrl = ApiEndpoints.aktifDiskonLink;
 
   List<DiscountModel> _discounts = [];
   List<DiscountModel> _filteredDiscounts = [];
@@ -142,7 +143,7 @@ class _PromoPageMobileState extends State<PromoPageMobile> {
   Future<void> _deleteDiscount(String id) async {
     try {
       final response = await http.post(
-        Uri.parse(deleteDiskonLink),
+        Uri.parse(ApiEndpoints.deleteDiskonLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "id": jsonEncode([id]), // "[\"id\"]"

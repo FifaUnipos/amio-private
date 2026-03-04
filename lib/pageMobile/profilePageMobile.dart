@@ -12,7 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/pageHelperMobile/loginRegisMobile/loginPageMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/akunPage/lihatAkun.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
@@ -822,7 +823,7 @@ class ProfilEditPageMobile extends StatelessWidget {
                                   onTap: () async {
                                     timerProvider.startTimeout();
                                     final response = await http.post(
-                                      Uri.parse(valOtpEmailLink),
+                                      Uri.parse(ApiEndpoints.valOtpEmailLink),
                                       headers: {
                                         'token': checkToken,
                                         'Content-Type': 'application/json',
@@ -2175,7 +2176,7 @@ class ProfilEditPageMobile extends StatelessWidget {
                                   onTap: () async {
                                     timerProvider.startTimeout();
                                     final response = await http.post(
-                                      Uri.parse(getOtpSandiLink),
+                                      Uri.parse(ApiEndpoints.getOtpSandiLink),
                                       headers: {
                                         'token': checkToken,
                                         'Content-Type':

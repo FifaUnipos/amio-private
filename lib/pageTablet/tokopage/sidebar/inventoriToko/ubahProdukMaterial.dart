@@ -1,7 +1,7 @@
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/inventoriModel/detailPembelianModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/unitConvertionModel.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';

@@ -15,7 +15,7 @@ import '../../../../main.dart';
 import '../../../../utils/component/component_loading.dart';
 import '../../../../models/tokomodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import '../../../tokopage/sidebar/produkToko/produk.dart';

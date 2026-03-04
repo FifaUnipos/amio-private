@@ -17,11 +17,11 @@ import '../../../../utils/component/component_showModalBottom.dart';
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
 

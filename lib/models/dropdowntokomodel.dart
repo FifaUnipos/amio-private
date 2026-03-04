@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 
-import '../services/apimethod.dart';
+import '../services/config/apimethod.dart';
 
 class DataProvince {
   String? id;
@@ -44,8 +45,8 @@ class DataTipeUsaha {
 
 Future getTipeUsaha(token, id) async {
   final response = await http.post(
-    Uri.parse(tipeUsaha),
-    // Uri.parse('http://103.155.26.20:8000/api/groupmerchant/user'),
+    Uri.parse(ApiEndpoints.tipeUsaha),
+    // Uri.parse(ApiEndpoints.'http://103.155.26.20:8000/api/groupmerchant/user'),
     headers: {
       'token': token,
     },

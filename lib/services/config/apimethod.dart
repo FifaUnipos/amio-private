@@ -14,22 +14,23 @@ import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/modelSingleTokoModel.dart';
 import 'package:unipos_app_335/models/productVariantModel.dart';
 import 'package:unipos_app_335/models/userModel.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/pesananPage.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/login_page.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
-import '../main.dart';
-import '../models/diskonModel.dart';
-import '../models/inventoriModel/produkMaterialModel.dart';
-import '../models/lihatakunmodel.dart';
-import '../models/modelDataRegion.dart';
-import '../models/produkmodel.dart' hide ProductModel;
-import '../models/tokoModel/calculateCart.dart';
-import '../models/tokoModel/riwayatTransaksiTokoModel.dart';
-import '../models/tokoModel/singletokomodel.dart';
-import '../models/tokoModel/tokomodel.dart';
-import '../models/tokoModel/transaksiTokoModel.dart';
-import '../pagehelper/loginregis/lupaSandiPage/buat_sandi_baru.dart';
-import 'modelBloc.dart';
+import '../../main.dart';
+import '../../models/diskonModel.dart';
+import '../../models/inventoriModel/produkMaterialModel.dart';
+import '../../models/lihatakunmodel.dart';
+import '../../models/modelDataRegion.dart';
+import '../../models/produkmodel.dart' hide ProductModel;
+import '../../models/tokoModel/calculateCart.dart';
+import '../../models/tokoModel/riwayatTransaksiTokoModel.dart';
+import '../../models/tokoModel/singletokomodel.dart';
+import '../../models/tokoModel/tokomodel.dart';
+import '../../models/tokoModel/transaksiTokoModel.dart';
+import '../../pagehelper/loginregis/lupaSandiPage/buat_sandi_baru.dart';
+import '../modelBloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
@@ -43,179 +44,35 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/chartModelData.dart';
-import '../models/dashboardItemModel.dart';
-import '../models/dropdowntokomodel.dart';
-import '../models/pelangganDataModel.dart';
-import '../models/promosiModel.dart';
-import '../models/tokoModel/keuanganModel.dart';
-import '../models/tokoModel/rekonModel.dart';
-import '../models/tokoModel/singleRiwayatModel.dart';
-import '../models/tokomodel.dart';
-import '../pageTablet/home/sidebar/profile_page.dart';
-import '../pageTablet/tokopage/dashboardtoko.dart';
-import '../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import '../../models/chartModelData.dart';
+import '../../models/dashboardItemModel.dart';
+import '../../models/dropdowntokomodel.dart';
+import '../../models/pelangganDataModel.dart';
+import '../../models/promosiModel.dart';
+import '../../models/tokoModel/keuanganModel.dart';
+import '../../models/tokoModel/rekonModel.dart';
+import '../../models/tokoModel/singleRiwayatModel.dart';
+import '../../models/tokomodel.dart';
+import '../../pageTablet/home/sidebar/profile_page.dart';
+import '../../pageTablet/tokopage/dashboardtoko.dart';
+import '../../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 
-import '../utils/component/component_color.dart';
-import '../utils/component/component_loading.dart';
-import '../utils/component/providerModel/refreshTampilanModel.dart';
+import '../../utils/component/component_color.dart';
+import '../../utils/component/component_loading.dart';
+import '../../utils/component/providerModel/refreshTampilanModel.dart';
+import 'app_endpoints.dart';
 
 // String url = 'https://api.prod.amio.my.id';
 String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
-String registerbyotp = '$url/api/user/registerbyotp',
-    registerentryotp = '$url/api/register/verify',
-    registerLink = '$url/api/register',
-    loginEmailLink = '$url/api/login',
-    loginbyotp = '$url/api/user/loginbyotp',
-    loginentryotp = '$url/api/user/loginentryotp',
-    checkpass = '$url/api/user/checkPassword',
-    forgotPassRequestLink = '$url/api/forgot-password/request',
-    forgotPassRequestOtpLink = '$url/api/forgot-password/request/otp',
-    forgotPassVerifyLink = '$url/api/forgot-password/verify',
-    forgotPassChangeLink = '$url/api/forgot-password/change',
-    myaccout = '$url/api/profile/myaccount',
-    dashboardNumber = '$url/api/user/dashboardNumber',
-    dashboardChart = '$url/api/v2/user/dashboard/gross',
-    dashboardCheckBilling = '$url/api/v2/billing/check',
-    dashboardChartPendapatan = '$url/api/v2/user/dashboard/nett',
-    createMerchan = '$url/api/merchant/create',
-    createProdukUrl = '$url/api/product/create',
-    createVoucherUrl = '$url/api/voucher/create',
-    updateVoucherUrl = '$url/api/voucher/update',
-    approveTransaksiUrl = '$url/api/transaction/approve/reference',
-    createTransaksiUrl = '$url/api/v2/transaction/create',
-    deleteTransaksiUrl = '$url/api/transaction/delete',
-    headerTagihanUrl = '$url/api/transaction/create/reference/tagihan',
-    deleteTagihanUrl = '$url/api/transaction/delete/reference/tagihan',
-    getTransaksiRiwayatUrl = '$url/api/v2/transaction/',
-    getKategoriUrl = '$url/api/kategori/getdata',
-    getPendapatanUrl = '$url/api/ppm/get',
-    getRekonUrl = '$url/api/rekon/',
-    saveRekonUrl = '$url/api/rekon/save',
-    postingRekonUrl = '$url/api/rekon/posting',
-    getYearRekonUrl = '$url/api/rekon/year',
-    getMonthRekonUrl = '$url/api/rekon/month',
-    getTransaksiSingleRiwayatUrl = '$url/api/v2/transaction/receipt',
-    calculateTransaksiUrl = '$url/api/v2/transaction/calculating',
-    getAkunUrl = '$url/api/groupmerchant/users',
-    updateAkunUrl = '$url/api/user/update',
-    deleteAkunUrl = '$url/api/user/delete',
-    deleteMerchan = '$url/api/merchant/delete',
-    uploadProdukUrl = '$url/api/product/upload',
-    deleteProdukUrl = '$url/api/product/delete',
-    deletePelangganUrl = '$url/api/member/delete',
-    createPelangganUrl = '$url/api/member/create',
-    createPemasukanUrl = '$url/api/ppm/create',
-    ubahPemasukanUrl = '$url/api/ppm/update',
-    editPelangganUrl = '$url/api/member/edit',
-    changeProfileName = '$url/api/profile/change',
-    changeImage = '$url/api/profile/upload/image',
-    changeProfilePhone = '$url/api/profile/changephonenumber',
-    changeProfilePhoneOtp = '$url/api/profile/changenumberentryotp',
-    getMerch = '$url/api/merchant',
-    getSingleProductUrl = '$url/api/product/single',
-    getSinglePromosiUrl = '$url/api/voucher/single',
-    getSingleAkunUrl = '$url/api/user/single',
-    getProductUrl = '$url/api/v2/product',
-    getVoucherUrl = '$url/api/voucher',
-    getPelanggantUrl = '$url/api/member/',
-    getAllAkun = '$url/api/merchant/account',
-    getSingleMerchant = '$url/api/merchant/single',
-    checkEmailVerified = '$url/api/user/isEmailVerified',
-    verifiedEmailLink = '$url/api/user/email/verfied',
-    verifiedEmailOtpLink = '$url/api/user/email/verfied/otp',
-    registerGlobalMerchbyOtp = '$url/api/register/single',
-    registerGlobalMerchEntry = '$url/api/register/single/entry',
-    updateMerchant = '$url/api/merchant/update',
-    updateProdukUrl = '$url/api/product/update',
-    changeActiveUrl = '$url/api/product/changeActive',
-    changePpnUrl = '$url/api/product/changePPN',
-    changeActiveAkunUrl = '$url/api/user/changeStatus',
-    laporanDailyUrl = '$url/api/report/income/daily',
-    laporanMerchUrl = '$url/api/report/income/merchant',
-    laporanProdukUrl = '$url/api/report/income/product',
-    laporanPembayaranUrl = '$url/api/report/coa',
-    laporanStokUrl = '$url/api/report/inventory/stock',
-    laporanPergerakanInventoriUrl = '$url/api/report/inventory/movement',
-    laporanPenggunaanProdukUrl = '$url/api/report/bom',
-    laporanBOMUsageUrl = '$url/api/report/bom',
-    laporanProdukExportUrl = '$url/api/export/report/income/product',
-    laporanTokoExportUrl = '$url/api/export/report/income/merchant',
-    laporanPendapatanHarianExportUrl = '$url/api/export/report/income/daily',
-    transaksiViewReferenceLink = '$url/api/transaction/view/reference',
-    uploadQrisLink = '$url/api/merchant/qris/save',
-    deleteQrisLink = '$url/api/merchant/qris/delete',
-    getQrisLink = '$url/api/merchant/qris/view',
-    getStrukLink = '$url/api/merchant/struk/view',
-    uploadStrukLink = '$url/api/merchant/struk/save',
-    deleteStrukLink = '$url/api/merchant/struk/delete',
-    getOtpSandiLink = '$url/api/user/password/otp',
-    validasiOtpSandiLink = '$url/api/user/password/otp/verified',
-    changeSandiLink = '$url/api/user/password/change',
-    valOtpEmailLink = '$url/api/user/email/otp',
-    valOtpEmailTahap1Link = '$url/api/user/email/otp/verified',
-    changeEmailLink = '$url/api/user/email/change',
-    changeEmailTahap2Link = '$url/api/user/email/change/verified',
-    tambahKategoriLink = '$url/api/typeproduct/store',
-    ubahKategoriLink = '$url/api/typeproduct/update',
-    hapusKategoriLink = '$url/api/typeproduct/delete',
-    getKategoriLink = '$url/api/typeproduct',
-    tipeUsaha = '$url/api/tipeusaha',
-    diskonLink = '$url/api/discount',
-    createDiskonLink = '$url/api/discount/store',
-    deleteDiskonLink = '$url/api/discount/delete',
-    updateDiskonLink = '$url/api/discount/update',
-    getSingleDiskonLink = '$url/api/discount/show',
-    getProdukDiskonLink = '$url/api/discount/get-products',
-    getVariantLink = '$url/api/product-variant',
-    createVariantLink = '$url/api/product-variant/resource',
-    aktifDiskonLink = '$url/api/discount/change-is-active',
-    getSinglePendapatanHarianLink = '$url/api/report/income/daily/full',
-    diskonTransaksiLink = '$url/api/discount/transaction',
-    getCoaRefLink = '$url/api/type/payment/references',
-    getCoaMethodLink = '$url/api/type/payment',
-    addCoaLink = '$url/api/type/payment/create',
-    updateCoaLink = '$url/api/type/payment/update',
-    deleteCoaLink = '$url/api/type/payment/delete',
-    getBOMLink = '$url/api/product-material/',
-    getUnitConvertionLink = '$url/api/unit-conversion/',
-    createUnitConvertionLink = '$url/api/unit-conversion/create',
-    getSingleUnitConvertionLink = '$url/api/unit-conversion/single',
-    deleteUnitConvertionLink = '$url/api/unit-conversion/delete',
-    updateUnitConvertionLink = '$url/api/unit-conversion/update',
-    getSingleBOMLink = '$url/api/product-material/single',
-    createBOMLink = '$url/api/product-material/create',
-    updateBOMLink = '$url/api/product-material/update',
-    deleteBOMLink = '$url/api/product-material/delete',
-    getAdjustmentLink = '$url/api/inventory/adjustment',
-    getDetailAdjustmentLink = '$url/api/inventory/adjustment/detail',
-    createAdjustmentLink = '$url/api/inventory/adjustment/create',
-    deleteAdjustmentLink = '$url/api/inventory/adjustment/delete',
-    updateAdjustmentLink = '$url/api/inventory/adjustment/update',
-    getPurchaseLink = '$url/api/inventory/purchase',
-    getDetailPurchaseLink = '$url/api/inventory/purchase/detail',
-    createDetailPurchaseLink = '$url/api/inventory/purchase/create',
-    updateDetailPurchaseLink = '$url/api/inventory/purchase/update',
-    deleteDetailPurchaseLink = '$url/api/inventory/purchase/delete',
-    getMasterDataLink = '$url/api/inventory/master',
-    createMasterDataLink = '$url/api/inventory/master/create',
-    getMasterDataSingleLink = '$url/api/inventory/master/single',
-    getMasterDataSingleDetailLink = '$url/api/inventory/master/detail',
-    getUnitMasterDataLink = '$url/api/unit',
-    copyMasterDataLink = '$url/api/inventory/master/copy',
-    updateMasterDataLink = '$url/api/inventory/master/update',
-    deleteMasterDataLink = '$url/api/inventory/master/delete',
-    getkulasedayaLink = '$url/api/merchant/binding/kulasedaya',
-    bindingKulasedayaLink = '$url/api/binding/kulasedaya',
-    getkulasedayaMerchantLink = '$url/api/merchant/binding/kulasedaya',
-    deletekulasedayaTagihanLink =
-        '$url/api/transaction/delete/reference/tagihan/kulasedaya',
-    getProvinsiLink = '$url/api/province',
-    getRegenciesLink = '$url/api/regencies',
-    getDistrictLink = '$url/api/district',
-    getVillageLink = '$url/api/village',
-    getTipeUsahaLink = '$url/api/tipeusaha';
+// TRANSACTION HISTORY DELETE
+abstract class ApiTransactionHistory {
+  static String get getReasons =>
+      '$url/api/transaction/create/reference/tagihan';
+  static String get deleteTransaction =>
+      '$url/api/transaction/delete/reference/tagihan';
+  static String get viewDeletedHistory => '$url/api/transaction/view/reference';
+}
 
 String out = '$url/api/logout';
 String firebaseTokenUrl = '$url/api/user/update/firebasetoken';
@@ -252,7 +109,7 @@ Future firebaseToken(tokenFirebase, token) async {
 Future logout(token, id, context, page) async {
   try {
     final response = await http.post(
-      Uri.parse(changeProfileName),
+      Uri.parse(ApiEndpoints.changeProfileName),
       body: {'deviceid': identifier},
       headers: {'token': token},
     );
@@ -289,7 +146,7 @@ var userid, merchantIdProfile, groupMerchantIdProfile;
 Future<void> myprofile(String token) async {
   try {
     final response = await http.post(
-      Uri.parse(myaccout),
+      Uri.parse(ApiEndpoints.myaccout),
       headers: {"Content-Type": "application/json", "token": token},
       body: jsonEncode({'deviceid': identifier}),
     );
@@ -304,6 +161,8 @@ Future<void> myprofile(String token) async {
         nameProfile = data['fullname'];
         nameToko = data['nama_toko'];
         merchantType = data['usertype'];
+        typeAccount = data['usertype'];
+        roleAccount = data['role'];
         emailProfile = data['email'];
         phoneProfile = data['phonenumber'];
         roleProfile = data['role'];
@@ -331,7 +190,7 @@ Future tambahKategoriForm(context, name, token) async {
   try {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(tambahKategoriLink),
+      Uri.parse(ApiEndpoints.tambahKategoriLink),
       body: {'name': name},
       headers: {
         'Content-Type':
@@ -364,7 +223,7 @@ Future tambahKategoriForm(context, name, token) async {
 Future hapusKategoriForm(context, token, idkategori) async {
   try {
     final response = await http.post(
-      Uri.parse(hapusKategoriLink),
+      Uri.parse(ApiEndpoints.hapusKategoriLink),
       body: {'id': idkategori},
       headers: {'token': token},
     );
@@ -391,7 +250,7 @@ Future hapusKategoriForm(context, token, idkategori) async {
 Future getTypeProduct(context, token) async {
   try {
     final response = await http.post(
-      Uri.parse(getKategoriLink),
+      Uri.parse(ApiEndpoints.getKategoriLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode({"deviceid": identifier}),
     );
@@ -409,7 +268,7 @@ Future getTypeProduct(context, token) async {
 Future ubahKategoriForm(context, token, idkategori, name) async {
   try {
     final response = await http.post(
-      Uri.parse(ubahKategoriLink),
+      Uri.parse(ApiEndpoints.ubahKategoriLink),
       body: {'id': idkategori, 'name': name},
       headers: {'token': token},
     );
@@ -435,7 +294,7 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
 Future changeName(token, id, context, mycontroller) async {
   try {
     final response = await http.post(
-      Uri.parse(changeProfileName),
+      Uri.parse(ApiEndpoints.changeProfileName),
       body: {'fullname': mycontroller, 'deviceid': id.toString()},
       headers: {'token': token},
     );
@@ -461,7 +320,7 @@ Future changePasswordRequest(context, type, id) async {
   whenLoading(context);
   try {
     final response = await http.post(
-      Uri.parse(forgotPassRequestLink),
+      Uri.parse(ApiEndpoints.forgotPassRequestLink),
       body: {'type': type, 'identifier': id},
     );
     var jsonResponse = jsonDecode(response.body);
@@ -489,7 +348,7 @@ Future changePasswordRequest(context, type, id) async {
 Future changePasswordRequestOtp(context, type, id) async {
   try {
     final response = await http.post(
-      Uri.parse(forgotPassRequestOtpLink),
+      Uri.parse(ApiEndpoints.forgotPassRequestOtpLink),
       body: {'type': type, 'id': id},
     );
     var jsonResponse = jsonDecode(response.body);
@@ -513,7 +372,7 @@ Future changePasswordRequestOtp(context, type, id) async {
 Future changePasswordVerify(context, id, otp) async {
   try {
     final response = await http.post(
-      Uri.parse(forgotPassVerifyLink),
+      Uri.parse(ApiEndpoints.forgotPassVerifyLink),
       body: {'id': id, 'otp': otp},
     );
     var jsonResponse = jsonDecode(response.body);
@@ -538,7 +397,7 @@ Future changePasswordChange(context, id, pass, conPass) async {
   try {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(forgotPassChangeLink),
+      Uri.parse(ApiEndpoints.forgotPassChangeLink),
       body: {'id': id, 'passsword': pass, 'password_confirmation': conPass},
     );
     var jsonResponse = jsonDecode(response.body);
@@ -562,7 +421,7 @@ Future changePasswordChange(context, id, pass, conPass) async {
 Future changePhoneByOtp(token, context, mycontroller, password) async {
   try {
     var response = await Dio().post(
-      changeProfilePhone,
+      ApiEndpoints.changeProfilePhone,
       data: {
         "deviceid": identifier,
         "phonenumber": mycontroller,
@@ -588,7 +447,7 @@ Future changePhoneByOtp(token, context, mycontroller, password) async {
 Future changePhoneEntryOtp(token, id, context, fieldController, pin) async {
   try {
     var response = await Dio().post(
-      changeProfilePhoneOtp,
+      ApiEndpoints.changeProfilePhoneOtp,
       data: {
         'phonenumber': fieldController.text,
         'otp': pin,
@@ -615,7 +474,7 @@ var statusVerified, statusPw;
 Future checkEmail(token, setState) async {
   try {
     var response = await Dio().post(
-      checkEmailVerified,
+      ApiEndpoints.checkEmailVerified,
       data: {'email': emailProfile, 'deviceid': identifier},
       options: Options(headers: {"token": "$token"}),
     );
@@ -638,7 +497,7 @@ Future valOtpEmail(context, token, typeotp) async {
   try {
     whenLoading(context);
     var response = await Dio().post(
-      valOtpEmailLink,
+      ApiEndpoints.valOtpEmailLink,
       data: {'deviceid': identifier, 'typeotp': typeotp},
       options: Options(headers: {"token": token}),
     );
@@ -658,7 +517,7 @@ Future valOtpEmail(context, token, typeotp) async {
 
 Future valOtpEmailtahap1(context, token, typeotp, otp) async {
   var response = await http.post(
-    Uri.parse(valOtpEmailTahap1Link),
+    Uri.parse(ApiEndpoints.valOtpEmailTahap1Link),
     body: {'deviceid': identifier, 'otp': otp, 'typeotp': typeotp},
     headers: {"token": token},
   );
@@ -678,7 +537,7 @@ Future valOtpEmailtahap1(context, token, typeotp, otp) async {
 Future changeEmail(context, token, email, typeotp) async {
   try {
     var response = await Dio().post(
-      changeEmailLink,
+      ApiEndpoints.changeEmailLink,
       data: {"deviceid": identifier, "email": email, "typeotp": typeotp},
       options: Options(headers: {"token": "$token"}),
     );
@@ -694,7 +553,7 @@ Future changeEmail(context, token, email, typeotp) async {
 
 Future changeEmailtahap2(context, token, typeotp, otp) async {
   var response = await http.post(
-    Uri.parse(changeEmailTahap2Link),
+    Uri.parse(ApiEndpoints.changeEmailTahap2Link),
     body: {'deviceid': identifier, 'otp': otp, 'typeotp': typeotp},
     headers: {"token": token},
   );
@@ -716,7 +575,7 @@ Future changeEmailtahap2(context, token, typeotp, otp) async {
 Future changePhoto(token, id, context, imageCon, reload) async {
   try {
     var response = await Dio().post(
-      changeImage,
+      ApiEndpoints.changeImage,
       data: {
         'deviceid': id.toString(),
         'image': "data:image/png;base64," + imageCon.toString(),
@@ -741,7 +600,7 @@ String merchantId = '';
 Future getAllToko(context, token, name, orderby) async {
   await Future.delayed(Duration(milliseconds: 150));
   final response = await http.post(
-    Uri.parse(getMerch),
+    Uri.parse(ApiEndpoints.getMerch),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -774,8 +633,8 @@ Future getAllToko(context, token, name, orderby) async {
 
 Future<TokoModelToko> getToko(token) async {
   final response = await http.post(
-    Uri.parse(getMerch),
-    // Uri.parse('$url/api/groupmerchant/user'),
+    Uri.parse(ApiEndpoints.getMerch),
+    // Uri.parse(ApiEndpoints.'$url/api/groupmerchant/user'),
     headers: {'token': token},
     body: {"deviceid": identifier},
   );
@@ -789,7 +648,7 @@ Future<TokoModelToko> getToko(token) async {
 
 Future getUserAkun(token, id, orderby) async {
   final response = await http.post(
-    Uri.parse(getAllAkun),
+    Uri.parse(ApiEndpoints.getAllAkun),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": id, 'orderby': orderby},
   );
@@ -831,7 +690,7 @@ late String nameMerchantUbah = '',
 
 Future getSingleMerch(context, token, String merchid) async {
   final response = await http.post(
-    Uri.parse(getSingleMerchant),
+    Uri.parse(ApiEndpoints.getSingleMerchant),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchid},
   );
@@ -870,7 +729,7 @@ Future<MerchantDetailModel?> getSingleMerchMobile(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(getSingleMerchant),
+      Uri.parse(ApiEndpoints.getSingleMerchant),
       headers: {'token': token},
       body: {"deviceid": identifier, "merchantid": merchid},
     );
@@ -908,7 +767,7 @@ Future createMerch(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(createMerchan),
+      Uri.parse(ApiEndpoints.createMerchan),
       body: {
         "deviceid": identifier,
         "merchantid": "",
@@ -970,7 +829,7 @@ Future createAkun(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(createMerchan),
+      Uri.parse(ApiEndpoints.createMerchan),
       body: {
         "deviceid": identifier,
         "merchantid": merchId,
@@ -1023,7 +882,7 @@ Future updateAkun(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(updateAkunUrl),
+    Uri.parse(ApiEndpoints.updateAkunUrl),
     body: {
       "deviceid": identifier,
       "userid": userId,
@@ -1070,7 +929,7 @@ Future updateMerch(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(updateMerchant),
+      Uri.parse(ApiEndpoints.updateMerchant),
       body: {
         "device_id": identifier,
         "merchantid": merchid,
@@ -1153,7 +1012,7 @@ Future updateProduk(
     // print('ini adalah body ${jsonEncode(body)}');
 
     final response = await http.post(
-      Uri.parse(updateProdukUrl),
+      Uri.parse(ApiEndpoints.updateProdukUrl),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
@@ -1193,7 +1052,7 @@ Future deleteMerchant(
   final String jsonTest = json.encode(merchid);
 
   final response = await http.post(
-    Uri.parse(deleteMerchan),
+    Uri.parse(ApiEndpoints.deleteMerchan),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": jsonTest},
   );
@@ -1216,7 +1075,7 @@ Future deleteAkun(BuildContext context, token, List userid) async {
   final String jsonTest = json.encode(userid);
 
   final response = await http.post(
-    Uri.parse(deleteAkunUrl),
+    Uri.parse(ApiEndpoints.deleteAkunUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "userid": jsonTest},
   );
@@ -1240,7 +1099,7 @@ Future deletePurchase(BuildContext context, var token, List group_id) async {
   String jsonData = jsonEncode(group_id);
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(deleteDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.deleteDetailPurchaseLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "group_id": jsonData},
   );
@@ -1269,7 +1128,7 @@ Future deleteProduk(
   String jsonData = jsonEncode(productid);
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(deleteProdukUrl),
+    Uri.parse(ApiEndpoints.deleteProdukUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1300,7 +1159,7 @@ Future deletePelanggan(BuildContext context, var token, List memberid) async {
   var jsonData = jsonEncode(memberid);
 
   final response = await http.post(
-    Uri.parse(deletePelangganUrl),
+    Uri.parse(ApiEndpoints.deletePelangganUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "memberid": jsonData},
   );
@@ -1319,7 +1178,7 @@ Future changeActiveAkun(BuildContext context, token, status, userid) async {
   whenLoading(context);
   final String jsonTest = json.encode(userid);
   final response = await http.put(
-    Uri.parse('$url/api/user/changeStatus'),
+    Uri.parse(ApiEndpoints.changeActiveAkunUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "userid": jsonTest, "status": status},
   );
@@ -1349,7 +1208,7 @@ Future changePpn(
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
-    Uri.parse(changePpnUrl),
+    Uri.parse(ApiEndpoints.changePpnUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1387,7 +1246,7 @@ Future changeActive(
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
-    Uri.parse(changeActiveUrl),
+    Uri.parse(ApiEndpoints.changeActiveUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1425,7 +1284,7 @@ Future changeActiveDiskon(
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
-    Uri.parse(aktifDiskonLink),
+    Uri.parse(ApiEndpoints.aktifDiskonLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1453,7 +1312,7 @@ Future changeActiveDiskon(
 
 Future getAllProvince(token, id) async {
   final response = await http.post(
-    Uri.parse('$url/api/province'),
+    Uri.parse(ApiEndpoints.getProvinsiLink),
     headers: {'token': token},
     body: {"deviceid": id},
   );
@@ -1479,7 +1338,7 @@ Future getAllProvince(token, id) async {
 
 Future verifiedEmail(context, token, emailCon, passCon) async {
   final response = await http.post(
-    Uri.parse(verifiedEmailLink),
+    Uri.parse(ApiEndpoints.verifiedEmailLink),
     headers: {
       'token': token,
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -1510,7 +1369,7 @@ Future verifiedEmail(context, token, emailCon, passCon) async {
 
 Future verifiedEmailbyOTP(context, token, otp) async {
   final response = await http.post(
-    Uri.parse(verifiedEmailOtpLink),
+    Uri.parse(ApiEndpoints.verifiedEmailOtpLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "otp": otp},
   );
@@ -1536,7 +1395,7 @@ Future changePassword(
   typeotp,
 ) async {
   var response = await http.post(
-    Uri.parse(changeSandiLink),
+    Uri.parse(ApiEndpoints.changeSandiLink),
     headers: {"token": "$token"},
     body: {
       "deviceid": identifier,
@@ -1563,7 +1422,7 @@ int? pendapatanDas, membersDas, transaksiDas, rataTransaksiDas;
 Future dashboard(id, token) async {
   try {
     var response = await Dio().post(
-      dashboardNumber,
+      ApiEndpoints.dashboardNumber,
       // dashboardValue,
       data: {'deviceid': id.toString()},
       options: Options(headers: {"token": token}),
@@ -1591,7 +1450,7 @@ String? saldoKulasedaya, statusKulasedaya, messageKulasedaya = '';
 Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
   try {
     var response = await Dio().post(
-      bindingKulasedayaLink,
+      ApiEndpoints.bindingKulasedayaLink,
       data: {'deviceid': identifier},
       options: Options(headers: {"token": token}),
     );
@@ -1601,13 +1460,23 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
     if (response.statusCode == 200 &&
         response.data != null &&
         response.data['data'] != null) {
-      List<dynamic> dataList = response.data['data'];
+      var responseData = response.data['data'];
+
+      // API returns a Map like {"status":false,"message":"..."} when not connected
+      if (responseData is Map && responseData['status'] == false) {
+        messageKulasedaya = responseData['message'] ?? '';
+        return [];
+      }
+
+      List<dynamic> dataList = responseData is List
+          ? responseData
+          : [responseData];
       List<KulasedayaMember> members = dataList
           .map((item) => KulasedayaMember.fromJson(item))
           .toList();
       return members;
     } else {
-      throw Exception("Failed to load data: ${response.statusCode}");
+      return [];
     }
   } catch (e) {
     throw Exception(e.toString());
@@ -1617,7 +1486,7 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
 Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
   try {
     var response = await Dio().post(
-      bindingKulasedayaLink,
+      ApiEndpoints.bindingKulasedayaLink,
       data: {'deviceid': identifier},
       options: Options(headers: {"token": token}),
     );
@@ -1627,13 +1496,30 @@ Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
     if (response.statusCode == 200 &&
         response.data != null &&
         response.data['data'] != null) {
-      List<dynamic> dataList = response.data['data'];
+      var responseData = response.data['data'];
+
+      // API returns a Map like {"status":false,"message":"..."} when not connected
+      if (responseData is Map && responseData['status'] == false) {
+        messageKulasedaya = responseData['message'] ?? '';
+        return [
+          KulasedayaBinding(
+            nextUrl: '',
+            status: false,
+            saldo: '0',
+            message: responseData['message'] ?? 'Merchant belum terhubung',
+          ),
+        ];
+      }
+
+      List<dynamic> dataList = responseData is List
+          ? responseData
+          : [responseData];
       List<KulasedayaBinding> members = dataList
           .map((item) => KulasedayaBinding.fromJson(item))
           .toList();
       return members;
     } else {
-      throw Exception("Failed to load data: ${response.statusCode}");
+      return [];
     }
   } catch (e) {
     throw Exception(e.toString());
@@ -1642,7 +1528,7 @@ Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
 
 Future<Map<String, dynamic>> dashboardSide(BuildContext context, token) async {
   final response = await http.post(
-    Uri.parse(dashboardNumber),
+    Uri.parse(ApiEndpoints.dashboardNumber),
     headers: {'token': token},
     body: {"deviceid": identifier},
   );
@@ -1666,7 +1552,7 @@ Future<Map<String, dynamic>> getBilling(
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   final response = await http.post(
-    Uri.parse(dashboardCheckBilling),
+    Uri.parse(ApiEndpoints.dashboardCheckBilling),
     headers: {'token': token},
     body: {"deviceid": identifier},
   );
@@ -1687,7 +1573,7 @@ Future<Map<String, dynamic>> getValueDataChart(
 ) async {
   print('tipe chart $tipe');
   final response = await http.post(
-    Uri.parse(dashboardChart),
+    Uri.parse(ApiEndpoints.dashboardChart),
     headers: {'token': token},
     body: {"deviceid": identifier, "type": tipe},
   );
@@ -1714,7 +1600,7 @@ Future<Map<String, dynamic>> getValueDataChartPendapatan(
 ) async {
   // print('tipe chart pendapatan $tipe');
   final response = await http.post(
-    Uri.parse(dashboardChartPendapatan),
+    Uri.parse(ApiEndpoints.dashboardChartPendapatan),
     headers: {'token': token},
     body: {"deviceid": identifier, "type": tipe},
   );
@@ -1734,7 +1620,7 @@ Future<Map<String, dynamic>> getValueDataChartPendapatan(
 
 Future getPelanggan(BuildContext context, token, orderby) async {
   final response = await http.post(
-    Uri.parse(getPelanggantUrl),
+    Uri.parse(ApiEndpoints.getPelanggantUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "orderby": orderby},
   );
@@ -1772,7 +1658,7 @@ Future getPelanggan(BuildContext context, token, orderby) async {
 
 Future getVoucher(context, token, orderby, merchantid) async {
   final response = await http.post(
-    Uri.parse(getVoucherUrl),
+    Uri.parse(ApiEndpoints.getVoucherUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1804,7 +1690,7 @@ Future getVoucher(context, token, orderby, merchantid) async {
 
 Future getDiskon(context, token, merchantid, orderby) async {
   final response = await http.post(
-    Uri.parse(diskonLink),
+    Uri.parse(ApiEndpoints.diskonLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1856,7 +1742,7 @@ Future tambahDiskon(
   }
   final String merchantidList = json.encode(merchantid);
   final response = await http.post(
-    Uri.parse(createDiskonLink),
+    Uri.parse(ApiEndpoints.createDiskonLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1906,7 +1792,7 @@ Future ubahDiskon(
   final String merchantidList = json.encode(merchantid);
   final String productidList = json.encode(productid);
   final response = await http.post(
-    Uri.parse(updateDiskonLink),
+    Uri.parse(ApiEndpoints.updateDiskonLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -1942,7 +1828,7 @@ Future deleteDiskon(BuildContext context, token, id) async {
   whenLoading(context);
   final String productidList = json.encode(id);
   final response = await http.post(
-    Uri.parse(deleteDiskonLink),
+    Uri.parse(ApiEndpoints.deleteDiskonLink),
     headers: {'token': token},
     body: {"deviceid": identifier, 'id': productidList},
   );
@@ -1979,7 +1865,7 @@ Future getProduct(
   };
 
   final response = await http.post(
-    Uri.parse(getProductUrl),
+    Uri.parse(ApiEndpoints.getProductUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: json.encode(body),
   );
@@ -2025,7 +1911,7 @@ Future getProductGrup(
   };
 
   final response = await http.post(
-    Uri.parse(getProductUrl),
+    Uri.parse(ApiEndpoints.getProductUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: json.encode(body),
   );
@@ -2067,7 +1953,7 @@ Future createPelanggan(
   instagram,
 ) async {
   final response = await http.post(
-    Uri.parse(createPelangganUrl),
+    Uri.parse(ApiEndpoints.createPelangganUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2114,7 +2000,7 @@ Future createPendapatan(
   };
 
   final response = await http.post(
-    Uri.parse(createPemasukanUrl),
+    Uri.parse(ApiEndpoints.createPemasukanUrl),
     headers: {'token': token},
     body: body,
   );
@@ -2151,7 +2037,7 @@ Future ubahPendapatan(
   };
 
   final response = await http.post(
-    Uri.parse(ubahPemasukanUrl),
+    Uri.parse(ApiEndpoints.ubahPemasukanUrl),
     headers: {'token': token},
     body: body,
   );
@@ -2190,7 +2076,7 @@ Future editPelanggan(
   };
 
   final response = await http.post(
-    Uri.parse(editPelangganUrl),
+    Uri.parse(ApiEndpoints.editPelangganUrl),
     headers: {'token': token},
     body: body,
   );
@@ -2224,7 +2110,7 @@ Future createVoucher(
   final String jsonTest = json.encode(merchid);
 
   final response = await http.post(
-    Uri.parse(createVoucherUrl),
+    Uri.parse(ApiEndpoints.createVoucherUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2274,7 +2160,7 @@ Future updateVoucher(
   };
 
   final response = await http.post(
-    Uri.parse(updateVoucherUrl),
+    Uri.parse(ApiEndpoints.updateVoucherUrl),
     headers: {'token': token},
     body: body,
   );
@@ -2308,13 +2194,13 @@ Future<Map<String, dynamic>?> getProductVariant(
     };
 
     final response = await http.post(
-      Uri.parse(getVariantLink),
+      Uri.parse(ApiEndpoints.getVariantLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: json.encode(body),
     );
 
     // Log buat debugging
-    print('🔹 [API Request] $getVariantLink');
+    print('🔹 [API Request] ${ApiEndpoints.getVariantLink}');
     print('🔹 [Request Body] $body');
     print('🔹 [Status Code] ${response.statusCode}');
     print('🔹 [Response Body] ${response.body}');
@@ -2359,12 +2245,12 @@ Future<List<ProductVariantCategory>?> getProductVariantTransaksi(
     };
 
     final response = await http.post(
-      Uri.parse(getVariantLink),
+      Uri.parse(ApiEndpoints.getVariantLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: json.encode(body),
     );
 
-    print('🔹 [API Request] $getVariantLink');
+    print('🔹 [API Request] ${ApiEndpoints.getVariantLink}');
     print('🔹 [Request Body] $body');
     print('🔹 [Status Code] ${response.statusCode}');
     print('🔹 [Response Body] ${response.body}');
@@ -2412,7 +2298,7 @@ Future createProductVariant(
   };
 
   final response = await http.post(
-    Uri.parse(createVariantLink),
+    Uri.parse(ApiEndpoints.createVariantLink),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: json.encode(body),
   );
@@ -2466,7 +2352,7 @@ Future createProduct(
   // debugPrint(body.toString());
 
   final response = await http.post(
-    Uri.parse(createProdukUrl),
+    Uri.parse(ApiEndpoints.createProdukUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: jsonEncode(body),
   );
@@ -2495,7 +2381,7 @@ var subTotal,
 Future calculateTransaction(
   BuildContext context,
   token,
-  List<Map<String, String>> details,
+  List<Map<String, dynamic>> details,
   StateSetter setState,
   memberid,
   typePrice,
@@ -2503,61 +2389,76 @@ Future calculateTransaction(
   transactionid,
 ) async {
   whenLoading(context);
-  print('🧾 detail cart: $details');
 
-  // 🔄 Ubah kembali field yang string ke tipe sesuai kebutuhan API
-  List<Map<String, dynamic>> preparedDetails = details.map((item) {
-    return {
-      "product_id": item["product_id"],
-      "request_id": item["id_request"] ?? "",
-      "is_online": item["is_online"] == "true",
-      "amount": num.tryParse(item["amount"] ?? "0") ?? 0,
-      "name": item["name"],
-      "quantity": item["quantity"],
-      "description": item["description"],
-      "variants": jsonDecode(item["variants"] ?? "[]"),
-    };
-  }).toList();
+  try {
+    debugPrint('🧾 detail cart (raw): $details');
 
-  print('🧾 preparedDetails: $preparedDetails');
+    final preparedDetails = buildDetailForCalculateFromDynamicMaps(details);
 
-  final response = await http.post(
-    Uri.parse(calculateTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode({
+    final body = {
+      "device_id": identifier,
       "deviceid": identifier,
+
+      "transaction_id": transactionid ?? "",
+      "discount_id": discount ?? "",
       "member_id": memberid,
-      "transaction_id": transactionid,
-      "discount_id": discount,
-      "typePrice": typePrice,
+      "value": 0, // ✅ calculate jangan isi dari amount barang
+      "payment_method": "001",
+      "payment_reference": "",
       "detail": preparedDetails,
-    }),
-  );
+    };
 
-  var jsonResponse = jsonDecode(response.body);
-  var data = jsonResponse['data'];
-  debugPrint('🧾 Response Calculate: $jsonResponse');
+    log("REQ CALC: ${jsonEncode(body)}");
 
-  if (response.statusCode == 200) {
+    final response = await http.post(
+      Uri.parse(ApiEndpoints.calculateTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    Map<String, dynamic> jsonResponse;
+    try {
+      jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      showSnackbar(context, {"rc": "99", "message": "Invalid response: $e"});
+      return "99";
+    }
+
+    debugPrint('Response Calculate: $jsonResponse');
+
+    final data = jsonResponse['data'];
+    if (response.statusCode == 200 && data is Map) {
+      totalTransaksi = asInt(data['amount']); // contoh: 850
+      subTotal = asInt(data['total_before_dsc_tax']);
+      ppnTransaksi = asInt(data['ppn']);
+      discountProduct = asInt(data['discount']);
+      discountProductUmum = asInt(data['discount_umum']);
+
+      namaCustomerCalculate = (data['customer_name'] ?? data['customer'] ?? '')
+          .toString();
+
+      final tmpId =
+          (data['transactionid'] ?? data['transaction_id'] ?? data['id'] ?? '')
+              .toString();
+
+      if (tmpId.isNotEmpty) {
+        transactionidValue = tmpId;
+      }
+
+      setState(() {});
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {
+      "rc": "99",
+      "message": "calculateTransaction error: $e",
+    });
+    return "99";
+  } finally {
     closeLoading(context);
-    // print('✅ Success');
-    // log(jsonResponse.toString());
-
-    totalTransaksi = data['amount'] ?? 0;
-    subTotal = data['total_before_dsc_tax'] ?? 0;
-    ppnTransaksi = data['ppn'] ?? 0;
-    namaCustomerCalculate = data['customer_name'] ?? '';
-    discountProduct = data['discount'] ?? 0;
-    discountProductUmum = data['discount'] ?? 0;
-
-    setState(() {});
-    return jsonResponse['rc'];
-  } else {
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
-
-    // log(jsonResponse.toString());
-    return jsonResponse['rc'];
   }
 }
 
@@ -2581,84 +2482,59 @@ Future createTransaction(
   memberid,
 ) async {
   whenLoading(context);
-  List<Map<String, String>> mapCalculate = List.empty(growable: true);
 
-  for (var detail in details) {
-    Map<String, String> map1 = {};
-    map1['name'] = detail['name'] ?? '';
-    map1['product_id'] = detail['product_id'] ?? '';
-    map1['quantity'] = detail['quantity'] ?? '';
-    map1['image'] = detail['image'] ?? '';
-    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
-    map1['description'] = detail['description'] ?? '';
-    map1['id_request'] = detail['id_request'] ?? '';
-    map1['is_online'] = detail['is_online'] ?? '';
-    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
-    mapCalculate.add(map1);
-  }
+  try {
+    final detailFinal = buildDetailForCreateFromStringMaps(details);
 
-  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
-  // agar is_online jadi bool dan variants jadi array JSON
-  List<Map<String, dynamic>> mapCalculateFinal = [];
+    final bodyJson = {
+      "deviceid": identifier,
+      "device_id": identifier,
 
-  for (var item in mapCalculate) {
-    mapCalculateFinal.add({
-      "name": item['name'],
-      "product_id": item['product_id'],
-      "quantity": item['quantity'],
-      "image": item['image'],
-      "amount": item['amount'],
-      "description": item['description'],
-      "id_request": item['id_request'],
-      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
-      "variants": jsonDecode(
-        item['variants'] ?? '[]',
-      ), // ✅ ubah string ke array JSON
+      "discount_id": "",
+      "member_id": memberid,
+      "transaction_id": transactionid ?? "",
+      "value": value ?? "",
+      "payment_method": method ?? "",
+      "payment_reference": reference ?? "",
+      "detail": detailFinal,
+    };
+
+    log("REQ CREATE: ${jsonEncode(bodyJson)}");
+
+    final response = await http.post(
+      Uri.parse(ApiEndpoints.createTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(bodyJson),
+    );
+
+    final jsonResponse = jsonDecode(response.body);
+    final data = jsonResponse['data'];
+
+    if (response.statusCode == 200) {
+      showSnackbar(context, jsonResponse);
+
+      // kalau kamu butuh update UI:
+      if (data != null && setState != null) {
+        setState(() {
+          // contoh (sesuaikan variabel global kamu):
+          // printext = data['raw'] ?? '';
+          // transaksiPesanan = data['transactionid'] ?? '';
+        });
+      }
+
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {
+      "rc": "99",
+      "message": "createTransaction error: $e",
     });
-  }
-
-  // 🧩 Kirim ke server
-  final bodyJson = {
-    "deviceid": identifier,
-    "discount_id": "",
-    "member_id": memberid,
-    "transaction_id": transactionid,
-    "value": value,
-    "payment_method": method,
-    "payment_reference": reference,
-    "detail": mapCalculateFinal,
-  };
-
-  // final String detailBaru = json.encode(mapCalculate);
-
-  final response = await http.post(
-    Uri.parse(createTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode(bodyJson),
-  );
-
-  var jsonResponse = jsonDecode(response.body);
-  var data = jsonResponse['data'];
-  if (response.statusCode == 200) {
-    print(jsonResponse);
+    return "99";
+  } finally {
     closeLoading(context);
-    showSnackbar(context, jsonResponse);
-    // pageController.jumpTo(0);
-    // print(jsonResponse['data'].toString());
-    setState(() {
-      // subTotal = 0;
-      printext = jsonResponse['data']['raw'];
-      transaksiNama = data['customer'];
-      transaksiMetode = data['payment_method'];
-      transaksiPesanan = data['transactionid'];
-      transaksiKasir = data['pic'];
-
-      // cart.clear();
-      // closeLoading(context);
-    });
-  } else {
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
   }
 }
 
@@ -2675,77 +2551,52 @@ Future saveTransaction(
   memberid,
 ) async {
   whenLoading(context);
-  List<Map<String, String>> mapCalculate = List.empty(growable: true);
 
-  for (var detail in details) {
-    Map<String, String> map1 = {};
-    map1['name'] = detail['name'] ?? '';
-    map1['product_id'] = detail['product_id'] ?? '';
-    map1['quantity'] = detail['quantity'] ?? '';
-    map1['image'] = detail['image'] ?? '';
-    map1['amount'] = detail['amount_display'] ?? detail['amount'] ?? '0';
-    map1['description'] = detail['description'] ?? '';
-    map1['id_request'] = detail['id_request'] ?? '';
-    map1['is_online'] = detail['is_online'] ?? '';
-    map1['variants'] = detail['variants'] ?? '[]'; // string JSON
-    mapCalculate.add(map1);
-  }
+  try {
+    final detailFinal = buildDetailForCreateFromStringMaps(details);
 
-  // 🧩 Langkah 2: konversi ke format final (Map<String, dynamic>)
-  // agar is_online jadi bool dan variants jadi array JSON
-  List<Map<String, dynamic>> mapCalculateFinal = [];
+    final bodyJson = {
+      // createTransaksiUrl kamu selama ini pakai "deviceid"
+      "deviceid": identifier,
+      // optional: kalau BE kamu kadang pakai device_id juga, aman taruh sama
+      "device_id": identifier,
 
-  for (var item in mapCalculate) {
-    mapCalculateFinal.add({
-      "name": item['name'],
-      "product_id": item['product_id'],
-      "quantity": item['quantity'],
-      "image": item['image'],
-      "amount": item['amount'],
-      "description": item['description'],
-      "id_request": item['id_request'],
-      "is_online": item['is_online'] == 'true', // ✅ ubah string ke bool
-      "variants": jsonDecode(
-        item['variants'] ?? '[]',
-      ), // ✅ ubah string ke array JSON
-    });
-  }
+      "discount_id": "",
+      "member_id": memberid,
+      "transaction_id": "", // ✅ bikin baru
+      "value": "", // ✅ belum bayar
+      "payment_method": "", // boleh kosong untuk tagihan
+      "payment_reference": reference ?? "",
+      "detail": detailFinal,
+    };
 
-  final bodyJson = {
-    "deviceid": identifier,
-    "discount_id": "",
-    "member_id": memberid,
-    "transaction_id": '',
-    "value": '',
-    "payment_method": '',
-    "payment_reference": reference,
-    "detail": mapCalculateFinal,
-  };
+    log("REQ SAVE: ${jsonEncode(bodyJson)}");
 
-  final response = await http.post(
-    Uri.parse(createTransaksiUrl),
-    headers: {'token': token, 'Content-Type': 'application/json'},
-    body: json.encode(bodyJson),
-  );
+    final response = await http.post(
+      Uri.parse(ApiEndpoints.createTransaksiUrl),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode(bodyJson),
+    );
 
-  // print('🧾 Response Save Transaction: ${response.body}');
-
-  // log("Payload ke server: ${json.encode(bodyJson)}");
-
-  var jsonResponse = jsonDecode(response.body);
-  if (response.statusCode == 200) {
-    showSnackbar(context, jsonResponse);
-    closeLoading(context);
-  } else {
-    showSnackbar(context, jsonResponse);
+    final jsonResponse = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    } else {
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc']?.toString();
+    }
+  } catch (e) {
+    showSnackbar(context, {"rc": "99", "message": "saveTransaction error: $e"});
+    return "99";
+  } finally {
     closeLoading(context);
   }
-  return jsonResponse['rc'];
 }
 
 Future deletePesanan(BuildContext context, token, transactionid) async {
   final response = await http.post(
-    Uri.parse(deleteTransaksiUrl),
+    Uri.parse(ApiEndpoints.deleteTransaksiUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2770,7 +2621,7 @@ Future headerTagihan(
   typetransaksi,
 ) async {
   final response = await http.post(
-    Uri.parse(headerTagihanUrl),
+    Uri.parse(ApiEndpoints.headerTagihanUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2790,6 +2641,48 @@ Future headerTagihan(
   }
 }
 
+Future<String?> deleteTagihanTablet(
+  BuildContext context, {
+  required String token,
+  required String transactionId,
+  required String idkategori,
+  required String detailAlasan,
+}) async {
+  final tx = transactionId.trim();
+  final cat = idkategori.trim();
+  final alasan = detailAlasan.trim();
+
+  if (tx.isEmpty) return "99";
+  if (cat.isEmpty) return "99";
+  if (alasan.length < 15) return "99";
+
+  final body = <String, String>{
+    "deviceid": identifier ?? "",
+    "transactionid": tx,
+    "idkategori": cat,
+    "detail_alasan": alasan,
+  };
+
+  print("REQ DELETE(TAB): $body");
+
+  final response = await http.post(
+    Uri.parse(ApiEndpoints.deleteTagihanUrl),
+    headers: {'token': token},
+    body: body, // form-urlencoded, tapi isinya sesuai BE
+  );
+
+  final jsonResponse = jsonDecode(response.body);
+  print("RESP DELETE(TAB): $jsonResponse");
+
+  if (response.statusCode == 200) {
+    showSnackbar(context, jsonResponse);
+    return jsonResponse['rc']?.toString();
+  } else {
+    errorText = jsonResponse['message']?.toString() ?? '';
+    return jsonResponse['rc']?.toString();
+  }
+}
+
 Future deleteReference(
   BuildContext context,
   token,
@@ -2799,7 +2692,7 @@ Future deleteReference(
   transactionidValue,
 ) async {
   final response = await http.post(
-    Uri.parse(deleteTagihanUrl),
+    Uri.parse(ApiEndpoints.deleteTagihanUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2831,34 +2724,68 @@ Future approveReference(
   BuildContext context,
   token,
   transactionid,
-  status,
-) async {
+  status, {
+  bool popToRoot = false,
+}) async {
   final response = await http.post(
-    Uri.parse(approveTransaksiUrl),
-    headers: {'token': token},
-    body: {
+    Uri.parse(ApiEndpoints.approveTransaksiUrl),
+    headers: {
+      'token': token,
+      'DEVICE-ID': identifier!,
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
       "deviceid": identifier,
       "transactionid": transactionid,
-      "status": status,
-    },
+      "status": status.toString(),
+    }),
   );
 
-  var jsonResponse = jsonDecode(response.body);
+  final bodyStr = utf8.decode(response.bodyBytes);
+  debugPrint("ApproveReference status=${response.statusCode} body=$bodyStr");
 
-  print(jsonResponse['data']);
-  if (response.statusCode == 200) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    showSnackbar(context, jsonResponse);
-    return jsonResponse['rc'];
-  } else {
-    print(jsonResponse['rc'].toString());
-    return jsonResponse['message'];
+  final trimmed = bodyStr.trimLeft();
+  final isJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+  if (!isJson) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Server error")));
+    }
+    return null;
   }
+
+  final jsonResponse = jsonDecode(bodyStr);
+
+  if (response.statusCode == 200) {
+    if (!context.mounted) return jsonResponse['rc']?.toString();
+
+    showSnackbar(context, jsonResponse);
+    if (popToRoot) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+
+    return jsonResponse['rc']?.toString();
+  } else {
+    return jsonResponse['message']?.toString();
+  }
+
+  // var jsonResponse = jsonDecode(response.body);
+
+  // print(jsonResponse['data']);
+  // if (response.statusCode == 200) {
+  //   Navigator.of(context).popUntil((route) => route.isFirst);
+  //   showSnackbar(context, jsonResponse);
+  //   return jsonResponse['rc'];
+  // } else {
+  //   print(jsonResponse['rc'].toString());
+  //   return jsonResponse['message'];
+  // }
 }
 
 Future getPendapatan(BuildContext context, token, condition, merchantid) async {
   final response = await http.post(
-    Uri.parse(getPendapatanUrl),
+    Uri.parse(ApiEndpoints.getPendapatanUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2889,7 +2816,7 @@ Future getPendapatan(BuildContext context, token, condition, merchantid) async {
 
 Future getYearRekon(token, merchantid) async {
   final response = await http.post(
-    Uri.parse(getYearRekonUrl),
+    Uri.parse(ApiEndpoints.getYearRekonUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchantid},
   );
@@ -2908,7 +2835,7 @@ Future getYearRekon(token, merchantid) async {
 
 Future getMonthRekon(token, year, merchid) async {
   final response = await http.post(
-    Uri.parse(getMonthRekonUrl),
+    Uri.parse(ApiEndpoints.getMonthRekonUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "tahun": year, "merchantid": merchid},
   );
@@ -2927,7 +2854,7 @@ Future getMonthRekon(token, year, merchid) async {
 
 Future getPengeluaran(BuildContext context, token, condition) async {
   final response = await http.post(
-    Uri.parse(getPendapatanUrl),
+    Uri.parse(ApiEndpoints.getPendapatanUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "jenis": condition},
   );
@@ -2946,7 +2873,7 @@ Future getPengeluaran(BuildContext context, token, condition) async {
 
 Future getRekon(token, tahun, bulan, merchantid) async {
   final response = await http.post(
-    Uri.parse(getRekonUrl),
+    Uri.parse(ApiEndpoints.getRekonUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2967,7 +2894,7 @@ Future getRekon(token, tahun, bulan, merchantid) async {
 
 Future saveRekon(context, token, id, status, keterangan) async {
   final response = await http.post(
-    Uri.parse(saveRekonUrl),
+    Uri.parse(ApiEndpoints.saveRekonUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -2993,7 +2920,7 @@ Future saveRekon(context, token, id, status, keterangan) async {
 
 Future postingRekon(context, token, tahun, bulan, merchantid) async {
   final response = await http.post(
-    Uri.parse(postingRekonUrl),
+    Uri.parse(ApiEndpoints.postingRekonUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3025,7 +2952,7 @@ Future getRiwayatTransaksi(
   orderby,
 ) async {
   final response = await http.post(
-    Uri.parse(getTransaksiRiwayatUrl),
+    Uri.parse(ApiEndpoints.getTransaksiRiwayatUrl),
     headers: {
       'token': token,
       'DEVICE-ID': identifier!,
@@ -3063,7 +2990,7 @@ Future getDetailRiwayatTransaksi(
   transactionid,
 ) async {
   final response = await http.post(
-    Uri.parse(getTransaksiSingleRiwayatUrl),
+    Uri.parse(ApiEndpoints.getTransaksiSingleRiwayatUrl),
     headers: {'token': token, "DEVICE-ID": identifier!},
     body: {"transaction_id": transactionid, "merchantid": ''},
   );
@@ -3097,7 +3024,7 @@ Future<Map<String, dynamic>> getSingleRiwayatTransaksi(
   final body = {"transaction_id": transactionid, "merchant_id": merchantid};
 
   final response = await http.post(
-    Uri.parse(getTransaksiSingleRiwayatUrl),
+    Uri.parse(ApiEndpoints.getTransaksiSingleRiwayatUrl),
 
     headers: {
       'token': token,
@@ -3130,7 +3057,7 @@ Future getLaporanDailyFull(
 ) async {
   final String jsonMerch = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(getSinglePendapatanHarianLink),
+    Uri.parse(ApiEndpoints.getSinglePendapatanHarianLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3175,7 +3102,7 @@ Future<Map<String, dynamic>> getSinglePendapatanHarian(
   };
 
   final response = await http.post(
-    Uri.parse(getSinglePendapatanHarianLink),
+    Uri.parse(ApiEndpoints.getSinglePendapatanHarianLink),
     body: body,
     headers: {'token': token},
   );
@@ -3203,7 +3130,7 @@ Future<List<ProductModel>> getProductTransaksi(
 
     // Kirim request POST
     final response = await http.post(
-      Uri.parse(getProductUrl),
+      Uri.parse(ApiEndpoints.getProductUrl),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: json.encode({
         "deviceid": identifier,
@@ -3259,7 +3186,7 @@ Future getCoinTransaksi(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(getProductUrl),
+    Uri.parse(ApiEndpoints.getProductUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3294,7 +3221,7 @@ Future getLaporanDaily(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanDailyUrl),
+    Uri.parse(ApiEndpoints.laporanDailyUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3329,7 +3256,7 @@ Future getLaporanDailyExport(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanDailyUrl),
+    Uri.parse(ApiEndpoints.laporanDailyUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3364,7 +3291,7 @@ Future getLaporanMerchant(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanMerchUrl),
+    Uri.parse(ApiEndpoints.laporanMerchUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3403,7 +3330,7 @@ Future getLaporanMerchantExport(
   whenLoading(context);
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanTokoExportUrl),
+    Uri.parse(ApiEndpoints.laporanTokoExportUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3441,7 +3368,7 @@ Future getLaporanPerProduk(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanProdukUrl),
+    Uri.parse(ApiEndpoints.laporanProdukUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3478,7 +3405,7 @@ Future getLaporanPerProdukExport(
   whenLoading(context);
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanProdukExportUrl),
+    Uri.parse(ApiEndpoints.laporanProdukExportUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3516,7 +3443,7 @@ Future getLaporanPembayaran(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanPembayaranUrl),
+    Uri.parse(ApiEndpoints.laporanPembayaranUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3553,7 +3480,7 @@ Future getLaporanStok(
   // print('export $export');
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanStokUrl),
+    Uri.parse(ApiEndpoints.laporanStokUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3599,7 +3526,7 @@ Future getLaporanPergerakanInventori(
   }
 
   final response = await http.post(
-    Uri.parse(laporanPergerakanInventoriUrl),
+    Uri.parse(ApiEndpoints.laporanPergerakanInventoriUrl),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: jsonEncode({
       "deviceid": identifier,
@@ -3636,7 +3563,7 @@ Future getPenggunaanProduk(
 ) async {
   final String jsonTest = json.encode(merchid);
   final response = await http.post(
-    Uri.parse(laporanPenggunaanProdukUrl),
+    Uri.parse(ApiEndpoints.laporanPenggunaanProdukUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3679,7 +3606,7 @@ Future getSingleProduct(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(getSingleProductUrl),
+    Uri.parse(ApiEndpoints.getSingleProductUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3729,7 +3656,7 @@ List<String> productIdDiskon = [];
 Future getSingleDiskon(context, token, id) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(getSingleDiskonLink),
+    Uri.parse(ApiEndpoints.getSingleDiskonLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "id": id},
   );
@@ -3779,7 +3706,7 @@ late String namaEditAkun,
     imageEditAkun;
 Future getSingleAkun(BuildContext context, token, String userid) async {
   final response = await http.post(
-    Uri.parse(getSingleAkunUrl),
+    Uri.parse(ApiEndpoints.getSingleAkunUrl),
     headers: {'token': token},
     body: {"deviceid": identifier, "userid": userid},
   );
@@ -3821,7 +3748,7 @@ Future getSinglePromosi(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(getSinglePromosiUrl),
+    Uri.parse(ApiEndpoints.getSinglePromosiUrl),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3851,7 +3778,7 @@ Future getSinglePromosi(
 Future getOtpSandi(BuildContext context, token, typeotp) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(getOtpSandiLink),
+    Uri.parse(ApiEndpoints.getOtpSandiLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "typeotp": typeotp},
   );
@@ -3870,7 +3797,7 @@ Future getOtpSandi(BuildContext context, token, typeotp) async {
 
 Future validasiOtpSandi(BuildContext context, token, otp, typeotp) async {
   final response = await http.post(
-    Uri.parse(validasiOtpSandiLink),
+    Uri.parse(ApiEndpoints.validasiOtpSandiLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "otp": otp, "typeotp": typeotp},
   );
@@ -3890,7 +3817,7 @@ Future validasiOtpSandi(BuildContext context, token, otp, typeotp) async {
 
 Future deleteQris(BuildContext context, token, merchantid) async {
   final response = await http.post(
-    Uri.parse(deleteQrisLink),
+    Uri.parse(ApiEndpoints.deleteQrisLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchantid},
   );
@@ -3917,7 +3844,7 @@ Future deleteQris(BuildContext context, token, merchantid) async {
 
 Future uploadQris(BuildContext context, token, imageQris, merchantid) async {
   final response = await http.post(
-    Uri.parse(uploadQrisLink),
+    Uri.parse(ApiEndpoints.uploadQrisLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3953,7 +3880,7 @@ Future uploadQris(BuildContext context, token, imageQris, merchantid) async {
 
 Future uploadStruk(BuildContext context, token, imageStruk, merchantid) async {
   final response = await http.post(
-    Uri.parse(uploadStrukLink),
+    Uri.parse(ApiEndpoints.uploadStrukLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -3989,7 +3916,7 @@ Future uploadStruk(BuildContext context, token, imageStruk, merchantid) async {
 
 Future getStruk(BuildContext context, token, merchantid) async {
   final response = await http.post(
-    Uri.parse(getStrukLink),
+    Uri.parse(ApiEndpoints.getStrukLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchantid},
   );
@@ -4018,7 +3945,7 @@ Future getStruk(BuildContext context, token, merchantid) async {
 
 Future deleteStruk(BuildContext context, token, merchantid) async {
   final response = await http.post(
-    Uri.parse(deleteStrukLink),
+    Uri.parse(ApiEndpoints.deleteStrukLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchantid},
   );
@@ -4047,7 +3974,7 @@ Future transaksiViewReference(
   transactionid,
 ) async {
   final response = await http.post(
-    Uri.parse(transaksiViewReferenceLink),
+    Uri.parse(ApiEndpoints.transaksiViewReferenceLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "transactionid": transactionid},
   );
@@ -4065,7 +3992,7 @@ Future transaksiViewReference(
 
 Future getQris(BuildContext context, token, merchantid) async {
   final response = await http.post(
-    Uri.parse(getQrisLink),
+    Uri.parse(ApiEndpoints.getQrisLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchantid": merchantid},
   );
@@ -4108,7 +4035,7 @@ Future<void> downloadFile(String link) async {
 
 Future getCOAPayment(BuildContext context, token, category, orderby) async {
   final response = await http.post(
-    Uri.parse(getCoaMethodLink),
+    Uri.parse(ApiEndpoints.getCoaMethodLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4150,7 +4077,7 @@ Future createCOA(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(addCoaLink),
+    Uri.parse(ApiEndpoints.addCoaLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4181,7 +4108,7 @@ Future updateCOA(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(updateCoaLink),
+    Uri.parse(ApiEndpoints.updateCoaLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4208,7 +4135,7 @@ Future deleteCOA(BuildContext context, token, idPaymentMethod) async {
   whenLoading(context);
   String jsonData = jsonEncode(idPaymentMethod);
   final response = await http.post(
-    Uri.parse(deleteCoaLink),
+    Uri.parse(ApiEndpoints.deleteCoaLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "idPaymentMethod": jsonData},
   );
@@ -4232,7 +4159,7 @@ String coaValueKredit = '',
     coaValueLainya = '';
 Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
   final response = await http.post(
-    Uri.parse(getCoaMethodLink),
+    Uri.parse(ApiEndpoints.getCoaMethodLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "category": category},
   );
@@ -4261,7 +4188,7 @@ Future<List<PaymentMethod>> fetchPaymentMethods(token, category) async {
 
 Future getAdjustment(token, merchid, String name, orderby) async {
   final response = await http.post(
-    Uri.parse(getAdjustmentLink),
+    Uri.parse(ApiEndpoints.getAdjustmentLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4293,7 +4220,7 @@ Future getAdjustment(token, merchid, String name, orderby) async {
 
 Future getMasterData(token, merchid, String name, orderby) async {
   final response = await http.post(
-    Uri.parse(getMasterDataLink),
+    Uri.parse(ApiEndpoints.getMasterDataLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4325,7 +4252,7 @@ Future getMasterData(token, merchid, String name, orderby) async {
 
 Future createMasterData(context, token, merchid, nameItem, unit) async {
   final response = await http.post(
-    Uri.parse(createMasterDataLink),
+    Uri.parse(ApiEndpoints.createMasterDataLink),
     headers: {'token': token},
     body: {
       "name_item": nameItem,
@@ -4350,7 +4277,7 @@ Future createMasterData(context, token, merchid, nameItem, unit) async {
 
 Future updateMasterData(context, token, id, nameItem) async {
   final response = await http.post(
-    Uri.parse(updateMasterDataLink),
+    Uri.parse(ApiEndpoints.updateMasterDataLink),
     headers: {'token': token},
     body: {"inventory_master_id": id, "name_item": nameItem},
   );
@@ -4382,7 +4309,7 @@ Future deleteMasterData(
 
   try {
     final response = await http.post(
-      Uri.parse(deleteMasterDataLink),
+      Uri.parse(ApiEndpoints.deleteMasterDataLink),
       headers: {
         'Content-Type': 'application/json', // Wajib ada untuk JSON
         'token': token,
@@ -4422,7 +4349,7 @@ Future deleteAdjustment(
   };
 
   final response = await http.post(
-    Uri.parse(deleteAdjustmentLink),
+    Uri.parse(ApiEndpoints.deleteAdjustmentLink),
     headers: {
       'Content-Type': 'application/json', // Tambahkan Content-Type
       'token': token,
@@ -4458,7 +4385,7 @@ Future deletePembelian(
   };
 
   final response = await http.post(
-    Uri.parse(deleteDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.deleteDetailPurchaseLink),
     headers: {
       'Content-Type': 'application/json', // Pastikan ini ada
       'token': token,
@@ -4485,7 +4412,7 @@ Future deletePembelian(
 Future<List<Unit>> getUnitMaster(String token) async {
   try {
     final response = await http.post(
-      Uri.parse(getUnitMasterDataLink),
+      Uri.parse(ApiEndpoints.getUnitMasterDataLink),
       headers: {'token': token},
       body: {"deviceid": identifier},
     );
@@ -4509,7 +4436,7 @@ Future<List<Unit>> getUnitMaster(String token) async {
 
 Future getBOM(token, merchid, String name, orderby) async {
   final response = await http.post(
-    Uri.parse(getBOMLink),
+    Uri.parse(ApiEndpoints.getBOMLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -4562,7 +4489,7 @@ Future<Map<String, Map<String, dynamic>>> getSingleBOMSelected(
   };
 
   final response = await http.post(
-    Uri.parse(getSingleBOMLink),
+    Uri.parse(ApiEndpoints.getSingleBOMLink),
     headers: {'token': token},
     body: body,
   );
@@ -4619,7 +4546,7 @@ Future<List<UnitConvertionModel>> getUnitConvertion(
     };
 
     final response = await http.post(
-      Uri.parse(getUnitConvertionLink),
+      Uri.parse(ApiEndpoints.getUnitConvertionLink),
       headers: {'token': token},
       body: body,
     );
@@ -4671,7 +4598,7 @@ Future<List<UnitConvertionModel>> getSingleUnitConvertion(
     // log('Request Body: $body');
 
     final response = await http.post(
-      Uri.parse(getSingleUnitConvertionLink),
+      Uri.parse(ApiEndpoints.getSingleUnitConvertionLink),
       headers: {'token': token},
       body: body,
     );
@@ -4718,7 +4645,7 @@ Future createUnitConvertion(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(createUnitConvertionLink),
+    Uri.parse(ApiEndpoints.createUnitConvertionLink),
     headers: {
       // 'Content-Type': 'application/json',
       'token': token,
@@ -4764,7 +4691,7 @@ Future updateUnitConvertion(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(updateUnitConvertionLink),
+    Uri.parse(ApiEndpoints.updateUnitConvertionLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody),
   );
@@ -4802,7 +4729,7 @@ Future deleteUNIT(
   };
 
   final response = await http.post(
-    Uri.parse(deleteUnitConvertionLink),
+    Uri.parse(ApiEndpoints.deleteUnitConvertionLink),
     headers: {
       'Content-Type': 'application/json', // Tambahkan Content-Type
       'token': token,
@@ -4847,7 +4774,7 @@ Future createBOM(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(createBOMLink),
+    Uri.parse(ApiEndpoints.createBOMLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody), // Encode seluruh requestBody di sini
   );
@@ -4890,7 +4817,7 @@ Future updateBOM(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(updateBOMLink),
+    Uri.parse(ApiEndpoints.updateBOMLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody), // Encode seluruh requestBody di sini
   );
@@ -4926,7 +4853,7 @@ Future deleteBOM(
   };
 
   final response = await http.post(
-    Uri.parse(deleteBOMLink),
+    Uri.parse(ApiEndpoints.deleteBOMLink),
     headers: {
       'Content-Type': 'application/json', // Tambahkan Content-Type
       'token': token,
@@ -4954,7 +4881,7 @@ late String idBahan, name_itemBahan, unit_idBahan, unit_nameBahan;
 
 Future getSingleMasterData(context, token, productid) async {
   final response = await http.post(
-    Uri.parse(getMasterDataSingleLink),
+    Uri.parse(ApiEndpoints.getMasterDataSingleLink),
     headers: {'token': token},
     body: {'inventory_master_id': productid},
   );
@@ -4984,7 +4911,7 @@ Future<Map<String, dynamic>?> getSingleDetailMasterData(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(getMasterDataSingleDetailLink),
+      Uri.parse(ApiEndpoints.getMasterDataSingleDetailLink),
       headers: {'token': token},
       body: {'item_id': productid},
     );
@@ -5015,7 +4942,7 @@ Future<Map<String, dynamic>?> getSingleDetailMasterData(
 
 Future getPembelian(token, merchid, name, orderby) async {
   final response = await http.post(
-    Uri.parse(getPurchaseLink),
+    Uri.parse(ApiEndpoints.getPurchaseLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -5056,7 +4983,7 @@ Future<Map<String, Map<String, dynamic>>> getSelectedDataPenyesuaian(
 ) async {
   whenLoading(context);
   final response = await http.post(
-    Uri.parse(getDetailAdjustmentLink),
+    Uri.parse(ApiEndpoints.getDetailAdjustmentLink),
     headers: {
       'token': token,
       'Accept': 'application/json',
@@ -5123,7 +5050,7 @@ Future<List<DetailItem>> getDetailPenyesuian(
 ) async {
   // whenLoading(context);
   final response = await http.post(
-    Uri.parse(getDetailAdjustmentLink),
+    Uri.parse(ApiEndpoints.getDetailAdjustmentLink),
     headers: {
       'token': token,
       // 'Accept': 'application/json',
@@ -5160,7 +5087,7 @@ Future<List<ProdukMaterialModel>> getDetailBom(
   String productId,
 ) async {
   final response = await http.post(
-    Uri.parse(getSingleBOMLink),
+    Uri.parse(ApiEndpoints.getSingleBOMLink),
     headers: {
       'token': token,
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -5216,7 +5143,7 @@ Future<List<DetailItem>> getDetailPembelian(
   String groupid,
 ) async {
   final response = await http.post(
-    Uri.parse(getDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.getDetailPurchaseLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "group_id": groupid},
   );
@@ -5251,7 +5178,7 @@ Future<Map<String, Map<String, dynamic>>> getSelectedDataPemakaian(
   String groupid,
 ) async {
   final response = await http.post(
-    Uri.parse(getDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.getDetailPurchaseLink),
     headers: {
       'token': token,
       'Accept': 'application/json',
@@ -5317,7 +5244,7 @@ Future<List<Map<String, dynamic>>> getMasterDataToko(
   orderby,
 ) async {
   final response = await http.post(
-    Uri.parse(getMasterDataLink),
+    Uri.parse(ApiEndpoints.getMasterDataLink),
     headers: {'token': token},
     body: {
       "merchant_id": merchid,
@@ -5368,7 +5295,7 @@ Future createPembelian(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(createDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.createDetailPurchaseLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody),
   );
@@ -5411,7 +5338,7 @@ Future updatePembelian(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(updateDetailPurchaseLink),
+    Uri.parse(ApiEndpoints.updateDetailPurchaseLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody), // Encode seluruh requestBody di sini
   );
@@ -5454,7 +5381,7 @@ Future updatePenyesuaian(
 
   // Kirim POST request dengan body dalam format JSON
   final response = await http.post(
-    Uri.parse(updateAdjustmentLink),
+    Uri.parse(ApiEndpoints.updateAdjustmentLink),
     headers: {'Content-Type': 'application/json', 'token': token},
     body: jsonEncode(requestBody), // Encode seluruh requestBody di sini
   );
@@ -5495,7 +5422,7 @@ Future createPenyesuaian(
 
   // Kirim POST request
   final response = await http.post(
-    Uri.parse(createAdjustmentLink),
+    Uri.parse(ApiEndpoints.createAdjustmentLink),
     headers: {'token': token, 'Content-Type': 'application/json'},
     body: jsonEncode(requestBody),
   );
@@ -5538,7 +5465,7 @@ Future upadatePenyesuaian(
 
   // Kirim POST request
   final response = await http.post(
-    Uri.parse(updateAdjustmentLink),
+    Uri.parse(ApiEndpoints.updateAdjustmentLink),
     headers: {'token': token},
     body: {
       "deviceid": identifier,
@@ -5573,7 +5500,7 @@ Future getSinglePenyesuaian(context, token, groupId) async {
 
   // Kirim POST request
   final response = await http.post(
-    Uri.parse(updateAdjustmentLink),
+    Uri.parse(ApiEndpoints.updateAdjustmentLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "group_id": groupId},
   );
@@ -5639,7 +5566,7 @@ Future getKulasedaya(
   merchid,
 ) async {
   final response = await http.post(
-    Uri.parse(getkulasedayaLink),
+    Uri.parse(ApiEndpoints.getkulasedayaLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "merchant_id": merchid},
   );
@@ -5656,7 +5583,7 @@ Future getKulasedaya(
 Future deleteTagihanKulasedaya(context, token, idRequest) async {
   final String jsonTest = json.encode(idRequest);
   final response = await http.post(
-    Uri.parse(deletekulasedayaTagihanLink),
+    Uri.parse(ApiEndpoints.deletekulasedayaTagihanLink),
     headers: {'token': token},
     body: {"deviceid": identifier, "idRequest": jsonTest},
   );
@@ -5671,7 +5598,7 @@ Future deleteTagihanKulasedaya(context, token, idRequest) async {
 
 Future<List<TipeUsahaModel>> getTipeUsaha(String token) async {
   final res = await http.post(
-    Uri.parse(getTipeUsahaLink),
+    Uri.parse(ApiEndpoints.getTipeUsahaLink),
     headers: {'token': token},
     body: {'deviceid': identifier},
   );
@@ -5689,7 +5616,7 @@ Future<List<TipeUsahaModel>> getTipeUsaha(String token) async {
 
 Future<List<WilayahModel>> getProvinsi(String token) async {
   final res = await http.post(
-    Uri.parse(getProvinsiLink),
+    Uri.parse(ApiEndpoints.getProvinsiLink),
     headers: {'token': token},
     body: {'deviceid': identifier},
   );
@@ -5707,7 +5634,7 @@ Future<List<WilayahModel>> getProvinsi(String token) async {
 
 Future<List<WilayahModel>> getKabupaten(String token, String provID) async {
   final res = await http.post(
-    Uri.parse(getRegenciesLink),
+    Uri.parse(ApiEndpoints.getRegenciesLink),
     headers: {'token': token},
     body: {'deviceid': identifier, 'province': provID},
   );
@@ -5724,7 +5651,7 @@ Future<List<WilayahModel>> getKabupaten(String token, String provID) async {
 
 Future<List<WilayahModel>> getKecamatan(String token, String kabID) async {
   final res = await http.post(
-    Uri.parse(getDistrictLink),
+    Uri.parse(ApiEndpoints.getDistrictLink),
     headers: {'token': token},
     body: {'deviceid': identifier, 'regencies': kabID},
   );
@@ -5741,7 +5668,7 @@ Future<List<WilayahModel>> getKecamatan(String token, String kabID) async {
 
 Future<List<WilayahModel>> getKelurahan(String token, String kecID) async {
   final res = await http.post(
-    Uri.parse(getVillageLink),
+    Uri.parse(ApiEndpoints.getVillageLink),
     headers: {'token': token},
     body: {'deviceid': identifier, 'district': kecID},
   );
@@ -5759,7 +5686,7 @@ Future<List<WilayahModel>> getKelurahan(String token, String kecID) async {
 Future<List<CoaModel>> getCoaList(context, token, category, orderby) async {
   try {
     final response = await http.post(
-      Uri.parse(getCoaMethodLink),
+      Uri.parse(ApiEndpoints.getCoaMethodLink),
       headers: {'token': token},
       body: {"category": category, "orderby": orderby},
     );
@@ -5787,7 +5714,7 @@ Future<List<PaymentReferenceModel>> getCoaReferences(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse(getCoaRefLink),
+      Uri.parse(ApiEndpoints.getCoaRefLink),
       headers: {'token': token},
       body: {"category": category},
     );
@@ -5812,7 +5739,7 @@ Future createCoa(context, token, paymentMethod, accountNumber) async {
   try {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(addCoaLink),
+      Uri.parse(ApiEndpoints.addCoaLink),
       headers: {'token': token},
       body: {"paymentMethod": paymentMethod, "accountNumber": accountNumber},
     );
@@ -5836,7 +5763,7 @@ Future updateCoa(
   try {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(updateCoaLink),
+      Uri.parse(ApiEndpoints.updateCoaLink),
       headers: {'token': token},
       body: {
         "idPaymentMethod": idPaymentMethod,
@@ -5860,7 +5787,7 @@ Future deleteCoa(context, token, idPaymentMethod) async {
     String formattedId = "[\"$idPaymentMethod\"]";
 
     final response = await http.post(
-      Uri.parse(deleteCoaLink),
+      Uri.parse(ApiEndpoints.deleteCoaLink),
       headers: {'token': token},
       body: {"idPaymentMethod": formattedId},
     );
@@ -5875,7 +5802,7 @@ Future deleteCoa(context, token, idPaymentMethod) async {
 Future<CoaModel?> getSingleCoa(context, token, paymentMethodId) async {
   try {
     final response = await http.post(
-      Uri.parse('$url/api/type/payment/single'),
+      Uri.parse(ApiEndpoints.getCoaMethodSingleLink),
       headers: {'token': token},
       body: {"payment_method_id": paymentMethodId},
     );
@@ -5894,7 +5821,9 @@ Future<CoaModel?> getSingleCoa(context, token, paymentMethodId) async {
 Future<List<UserModel>> getGroupUsers(context, token, orderby) async {
   try {
     final response = await http.get(
-      Uri.parse('$getAkunUrl?deviceid=$identifier&orderby=$orderby'),
+      Uri.parse(
+        ApiEndpoints.getAkunUrl + '?deviceid=$identifier&orderby=$orderby',
+      ),
       headers: {'token': token},
     );
 
@@ -5937,7 +5866,7 @@ Future createUserAccount(
     }
 
     final response = await http.post(
-      Uri.parse(createMerchan),
+      Uri.parse(ApiEndpoints.createMerchan),
       headers: {'token': token},
       body: {
         "deviceid": identifier ?? "",
@@ -5992,7 +5921,7 @@ Future updateUserAccount(
     // print('test role $role');
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(updateAkunUrl),
+      Uri.parse(ApiEndpoints.updateAkunUrl),
       headers: {'token': token},
       body: {
         "deviceid": identifier,
@@ -6020,7 +5949,7 @@ Future deleteUserAccount(context, token, List<String> userids) async {
   try {
     whenLoading(context);
     final response = await http.post(
-      Uri.parse(deleteAkunUrl),
+      Uri.parse(ApiEndpoints.deleteAkunUrl),
       headers: {'token': token},
       body: {"deviceid": identifier, "userid": jsonEncode(userids)},
     );
@@ -6038,7 +5967,7 @@ Future deleteUserAccount(context, token, List<String> userids) async {
 Future<UserModel?> getSingleUserAccount(context, token, userid) async {
   try {
     final response = await http.post(
-      Uri.parse(getSingleAkunUrl),
+      Uri.parse(ApiEndpoints.getSingleAkunUrl),
       headers: {'token': token},
       body: {"deviceid": identifier, "userid": userid},
     );
@@ -6058,7 +5987,7 @@ Future<UserModel?> getSingleUserAccount(context, token, userid) async {
 Future changeUserStatus(context, token, userid, status) async {
   try {
     final response = await http.post(
-      Uri.parse(changeActiveAkunUrl),
+      Uri.parse(ApiEndpoints.changeActiveAkunUrl),
       headers: {'token': token},
       body: {"userid": userid, "status": status},
     );
@@ -6078,7 +6007,7 @@ Future<Map<String, dynamic>?> getReceiptLogo(
 ) async {
   try {
     final response = await http.post(
-      Uri.parse("$url/api/merchant/struk/view"),
+      Uri.parse(ApiEndpoints.getStrukLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode({"deviceid": identifier, "merchantid": merchantId}),
     );
@@ -6114,7 +6043,7 @@ Future<String> uploadReceiptLogo(
     };
 
     final response = await http.post(
-      Uri.parse(uploadStrukLink),
+      Uri.parse(ApiEndpoints.uploadStrukLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
@@ -6141,7 +6070,7 @@ Future<String> deleteReceiptLogo(
     whenLoading(context);
 
     final response = await http.post(
-      Uri.parse("$url/api/merchant/struk/delete"),
+      Uri.parse(ApiEndpoints.deleteStrukLink),
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode({"deviceid": identifier, "merchantid": merchantId}),
     );

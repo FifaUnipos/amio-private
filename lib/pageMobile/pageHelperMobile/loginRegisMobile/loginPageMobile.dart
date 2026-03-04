@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
+
 import '../../../main.dart';
 import 'otpPageMobile.dart';
 import 'package:http/http.dart' as http;
@@ -10,7 +12,7 @@ import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/util
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_color.dart';
-import '../../../services/apimethod.dart';
+import '../../../services/config/apimethod.dart';
 import '../../../utils/component/component_appbar.dart';import '../../../../../utils/component/component_button.dart';
 
 class LoginPageMobile extends StatefulWidget {
@@ -182,7 +184,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
   Future getOtp(page) async {
     try {
       final response = await http.post(
-        Uri.parse(loginbyotp),
+        Uri.parse(ApiEndpoints.loginbyotp),
         body: {
           // 'phonenumber': '085947737725',
           'phonenumber': phoneEmailCon.text,

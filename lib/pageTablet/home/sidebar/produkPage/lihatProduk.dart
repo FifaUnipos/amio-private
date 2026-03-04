@@ -27,12 +27,12 @@ import '../../../../utils/component/component_orderBy.dart';
 import '../../../../utils/component/component_loading.dart';
 import '../../../../models/tokoModel/transaksiTokoModel.dart';
 import 'package:provider/provider.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 import '../../../../utils/component/component_button.dart';
 import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../utils/component/component_orderBy.dart';
 

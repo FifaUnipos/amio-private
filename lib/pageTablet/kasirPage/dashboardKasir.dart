@@ -27,7 +27,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sidebarx/sidebarx.dart';
 import '../../pagehelper/loginregis/login_page.dart';
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 import '../../services/notification.dart';
 import '../../../../utils/component/component_orderBy.dart';
 import '../test/akun.dart';

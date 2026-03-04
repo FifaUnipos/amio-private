@@ -17,7 +17,7 @@ import '../../../../utils/component/component_color.dart';
 import '../../../../main.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
 import '../../../../models/tokomodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../utils/component/component_orderBy.dart';
 import '../../../../utils/component/skeletons.dart';
 import '../../../../utils/component/component_button.dart';

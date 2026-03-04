@@ -17,7 +17,7 @@ import '../../../../utils/component/component_loading.dart';
 import '../../../../../main.dart';
 import '../../../../../models/tokoModel/singletokomodel.dart';
 import '../../../../../models/tokomodel.dart';
-import '../../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../tokopage/sidebar/laporanToko/classLaporan.dart';
 import '../../../tokopage/sidebar/laporanToko/pendapatanHarian.dart';import '../../../../utils/component/component_color.dart';

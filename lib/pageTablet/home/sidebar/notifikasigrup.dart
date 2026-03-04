@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:flutter/material.dart';

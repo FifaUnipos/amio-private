@@ -6,8 +6,9 @@ import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/coaModel.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/daftar_akun_toko.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/services/checkConnection.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/component/component_button.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
@@ -1488,7 +1489,7 @@ class _COAPageState extends State<COAPage> {
 
   // String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProductList(category) async {
-    await http.post(Uri.parse(getCoaRefLink), body: {
+    await http.post(Uri.parse(ApiEndpoints.getCoaRefLink), body: {
       "deviceid": identifier,
       "category": category,
     }, headers: {

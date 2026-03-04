@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/util
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import '../../../../utils/component/component_button.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../utils/component/component_color.dart';
 
 class UbahPromosiGrupPage extends StatefulWidget {

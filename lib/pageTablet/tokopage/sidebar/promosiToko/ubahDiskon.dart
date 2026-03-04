@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
+
 import '../produkToko/produk.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
@@ -9,7 +11,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import '../../../../main.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 
 import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
@@ -1279,7 +1281,7 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
   Future<void> _getProductList() async {
     try {
       final response = await http.post(
-        Uri.parse(getProdukDiskonLink),
+        Uri.parse(ApiEndpoints.getProdukDiskonLink),
         body: {"deviceid": identifier},
         headers: {"token": widget.token},
       );

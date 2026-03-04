@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/discount_model.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'promoPageMobile.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
@@ -32,10 +33,10 @@ class AddPromoPageMobile extends StatefulWidget {
 
 class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
   // Constants
-  final String _createUrl = createDiskonLink;
-  final String _updateUrl = updateDiskonLink;
-  final String _getProductsUrl = getProdukDiskonLink;
-  final String _showUrl = getSingleDiskonLink;
+  final String _createUrl = ApiEndpoints.createDiskonLink;
+  final String _updateUrl = ApiEndpoints.updateDiskonLink;
+  final String _getProductsUrl = ApiEndpoints.getProdukDiskonLink;
+  final String _showUrl = ApiEndpoints.getSingleDiskonLink;
 
   // Form State
   final _formKey = GlobalKey<FormState>();

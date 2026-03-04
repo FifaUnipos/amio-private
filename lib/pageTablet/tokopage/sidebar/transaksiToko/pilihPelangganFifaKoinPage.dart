@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../../../utils/component/component_orderBy.dart';
 import '../../../../models/pelangganDataModel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import 'pilihPelangganPage.dart';

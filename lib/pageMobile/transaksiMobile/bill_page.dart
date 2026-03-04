@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:unipos_app_335/components/atoms/unipos_information.dart';
 import 'dart:convert';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
-import 'package:unipos_app_335/main.dart'; // For identifier
+import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/utils/status_transaction.dart'; // For identifier
 
 class BillListPage extends StatefulWidget {
   final String token;
@@ -25,6 +28,15 @@ class BillListPage extends StatefulWidget {
 class _BillListPageState extends State<BillListPage> {
   List<dynamic> _billList = [];
   bool _isLoading = true;
+  String _orderBy = "upDownCreate";
+  String _orderLabel = "Terbaru";
+
+  final List<Map<String, String>> _sortOptions = [
+    {"label": "Terbaru", "value": "upDownCreate"},
+    {"label": "Terlama", "value": "downUpCreate"},
+    {"label": "Nama(A-Z)", "value": "upDownNama"},
+    {"label": "Nama(Z-A)", "value": "downUpNama"},
+  ];
 
   Color _getStatusColor(String? code) {
     if (code == '1') return Colors.green;
@@ -40,7 +52,7 @@ class _BillListPageState extends State<BillListPage> {
 
   Future<void> _fetchBills() async {
     try {
-      final url = Uri.parse(getTransaksiRiwayatUrl);
+      final url = Uri.parse(ApiEndpoints.getTransaksiRiwayatUrl);
       final response = await http.post(
         url,
         headers: {
@@ -50,7 +62,7 @@ class _BillListPageState extends State<BillListPage> {
         },
         body: jsonEncode({
           "condition": "0", // 0 for Unpaid/Saved bills
-          "order_by": "upDownCreate",
+          "order_by": _orderBy,
           "merchant_id": widget.merchantId,
         }),
       );
@@ -74,6 +86,49 @@ class _BillListPageState extends State<BillListPage> {
       print('Error fetching bills: $e');
       setState(() => _isLoading = false);
     }
+  }
+
+  void _showSortModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Urutkan",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ..._sortOptions.map((opt) {
+                final selected = _orderBy == opt["value"];
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(opt["label"]!),
+                  trailing: selected ? const Icon(Icons.check) : null,
+                  onTap: () async {
+                    setState(() {
+                      _orderBy = opt["value"]!;
+                      _orderLabel = opt["label"]!;
+                    });
+                    Navigator.pop(context);
+                    await _fetchBills();
+                  },
+                );
+              }).toList(),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -119,27 +174,37 @@ class _BillListPageState extends State<BillListPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    InkWell(
+                      onTap: _showSortModal,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: bnw300),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Urutkan : $_orderLabel",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.arrow_drop_down, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: bnw300),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text("Urutkan", style: TextStyle(fontSize: 14)),
-                          SizedBox(width: 4),
-                          Icon(Icons.arrow_drop_down, size: 20),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.pink[50],
                         borderRadius: BorderRadius.circular(8),
@@ -155,20 +220,6 @@ class _BillListPageState extends State<BillListPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Pilih Sekaligus',
-                      style: TextStyle(
-                        color: primary500,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -176,70 +227,87 @@ class _BillListPageState extends State<BillListPage> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _billList.isEmpty
-                    ? const Center(child: Text("Tidak ada tagihan tersimpan"))
-                    : ListView.separated(
-                        itemCount: _billList.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final item = _billList[index];
-                          final amount =
-                              double.tryParse(item['amount'].toString()) ?? 0;
-                          return ListTile(
-                            onTap: () => _showDetail(item['transaction_id']),
-                            title: Text(
-                              item['customer'] ?? 'Pelanggan',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              NumberFormat.currency(
-                                locale: 'id',
-                                symbol: 'Rp. ',
-                                decimalDigits: 0,
-                              ).format(amount),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                            trailing: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                   item['entry_date'] != null
-                                       ? DateFormat('dd MMM yy').format(DateTime.parse(item['entry_date']))
-                                       : '',
-                                   style: const TextStyle(
-                                     color: Colors.black,
-                                     fontSize: 12,
-                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(item['status_color']?.toString()).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(color: _getStatusColor(item['status_color']?.toString())),
-                                  ),
-                                  child: Text(
-                                    item['status_transactions'] ?? '-',
-                                    style: TextStyle(
-                                      color: _getStatusColor(item['status_color']?.toString()),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                ? const Center(child: Text("Tidak ada tagihan tersimpan"))
+                : ListView.separated(
+                    itemCount: _billList.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = _billList[index];
+                      final amount =
+                          double.tryParse(item['amount'].toString()) ?? 0;
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _showDetail(item['transaction_id']),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['customer'] ?? 'Pelanggan',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                          );
-                        },
-                      ),
+                                  Text(
+                                    NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp. ',
+                                      decimalDigits: 0,
+                                    ).format(amount),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 4,
+                                children: [
+                                  Text(
+                                    item['entry_date'] != null
+                                        ? (item['entry_date'] as String)
+                                              .split(' ')
+                                              .last
+                                        : '',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  UniposInformation(
+                                    size: UniposInformationSize.extraSmall,
+                                    variant:
+                                        statusTransactionCancel.contains(
+                                          item['isPaid'],
+                                        )
+                                        ? UniposInformationVariant.danger
+                                        : statusTransactionProcessCancel
+                                              .contains(item['isPaid'])
+                                        ? UniposInformationVariant.warning
+                                        : UniposInformationVariant.success,
+                                    text:
+                                        '${item['status_transactions'] ?? '-'}',
+                                    showIcon: false,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -259,15 +327,23 @@ class _BillListPageState extends State<BillListPage> {
       ),
     );
 
+    if (!mounted || result == null) return;
+
+    if (result == 'refresh') {
+      await _fetchBills();
+      return;
+    }
+
     print('Bill detail modal closed with result: $result');
-    
+
     if (result != null) {
       // Check if result is a String first (for 'refresh')
       if (result == 'refresh') {
         print('Refreshing bill list...');
         await _fetchBills();
         print('Bill list refreshed');
-      } else if (result is Map && (result['action'] == 'pay' || result['action'] == 'edit')) {
+      } else if (result is Map &&
+          (result['action'] == 'pay' || result['action'] == 'edit')) {
         // Handle pay/edit actions
         Navigator.pop(context, result);
       }
@@ -315,7 +391,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
 
   Future<void> _fetchDetail() async {
     try {
-      final url = Uri.parse(getTransaksiSingleRiwayatUrl);
+      final url = Uri.parse(ApiEndpoints.getTransaksiSingleRiwayatUrl);
       final response = await http.post(
         url,
         headers: {
@@ -325,7 +401,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
         },
         body: jsonEncode({
           "transaction_id": widget.transactionId,
-          "merchantid": widget.merchantId,
+          "merchant_id": widget.merchantId,
         }),
       );
 
@@ -363,7 +439,9 @@ class _BillDetailModalState extends State<BillDetailModal> {
   Future<void> _fetchReasons() async {
     setState(() => _isLoadingReasons = true);
     try {
-      final url = Uri.parse(getKategoriUrl); // Ensure this is imported/available
+      final url = Uri.parse(
+        ApiEndpoints.getKategoriUrl,
+      ); // Ensure this is imported/available
       final response = await http.post(
         url,
         headers: {
@@ -371,9 +449,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
           'DEVICE-ID': identifier!, // Ensure identifier is imported
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "deviceid": identifier,
-        }),
+        body: jsonEncode({"deviceid": identifier}),
       );
 
       if (response.statusCode == 200) {
@@ -415,7 +491,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
     );
 
     try {
-      final url = Uri.parse(deleteTagihanUrl);
+      final url = Uri.parse(ApiEndpoints.deleteTagihanUrl);
       final response = await http.post(
         url,
         headers: {
@@ -430,9 +506,9 @@ class _BillDetailModalState extends State<BillDetailModal> {
           "detail_alasan": notes,
         }),
       );
-      
+
       if (!mounted) return;
-      
+
       // Pop loading dialog
       Navigator.pop(context);
 
@@ -453,22 +529,22 @@ class _BillDetailModalState extends State<BillDetailModal> {
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Terjadi kesalahan sistem')),
+          const SnackBar(content: Text('Terjadi kesalahan sistem')),
         );
       }
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-     return Container(
+    return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -490,7 +566,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
               ),
             ),
           ),
-          
+
           // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -506,7 +582,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // Content
           Expanded(
             child: _isLoading
@@ -535,18 +611,32 @@ class _BillDetailModalState extends State<BillDetailModal> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Status', style: TextStyle(color: Colors.grey)),
+                              const Text(
+                                'Status',
+                                style: TextStyle(color: Colors.grey),
+                              ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: _getStatusColor(_detailData!['status_color']?.toString()).withOpacity(0.1),
+                                  color: _getStatusColor(
+                                    _detailData!['status_color']?.toString(),
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: _getStatusColor(_detailData!['status_color']?.toString())),
+                                  border: Border.all(
+                                    color: _getStatusColor(
+                                      _detailData!['status_color']?.toString(),
+                                    ),
+                                  ),
                                 ),
                                 child: Text(
                                   _detailData!['status_transactions'] ?? '-',
                                   style: TextStyle(
-                                    color: _getStatusColor(_detailData!['status_color']?.toString()),
+                                    color: _getStatusColor(
+                                      _detailData!['status_color']?.toString(),
+                                    ),
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -560,7 +650,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
                           _detailData!['customer'] ?? 'Walking Customer',
                         ),
                         _buildInfoRow('Kasir', _detailData!['pic'] ?? '-'),
-          
+
                         const SizedBox(height: 24),
                         const Text(
                           'Rincian Pesanan',
@@ -575,7 +665,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
                           ...(_detailData!['detail'] as List).map((item) {
                             return _buildProductItem(item);
                           }).toList(),
-          
+
                         const SizedBox(height: 24),
                         const Text(
                           'Rincian Biaya Tagihan',
@@ -596,10 +686,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
                             _detailData!['ppn'],
                             isCurrency: true,
                           ),
-                         const Divider(
-                          height: 24,
-                          thickness: 1,
-                        ),
+                        const Divider(height: 24, thickness: 1),
                         _buildSummaryRow(
                           'Total', // As per image
                           _detailData!['amount'],
@@ -610,7 +697,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
                     ),
                   ),
           ),
-          
+
           const SizedBox(height: 20),
           // Actions: Hapus, Ubah, Bayar
           Row(
@@ -618,29 +705,29 @@ class _BillDetailModalState extends State<BillDetailModal> {
               // Hapus Button (Icon)
               Container(
                 decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red),
-                    borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
-                    onPressed: _showDeleteDialog,
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: _showDeleteDialog,
+                  icon: const Icon(Icons.delete, color: Colors.red),
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Ubah Button
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                     Navigator.pop(context, {'action': 'edit', 'data': _detailData});
+                    Navigator.pop(context, {
+                      'action': 'edit',
+                      'data': _detailData,
+                    });
                   },
-                  icon:  Icon(Icons.edit, size: 16, color: primary500),
-                  label: Text(
-                    'Ubah',
-                    style: TextStyle(color: primary500),
-                  ),
+                  icon: Icon(Icons.edit, size: 16, color: primary500),
+                  label: Text('Ubah', style: TextStyle(color: primary500)),
                   style: OutlinedButton.styleFrom(
-                    side:  BorderSide(color: primary500),
+                    side: BorderSide(color: primary500),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -649,15 +736,18 @@ class _BillDetailModalState extends State<BillDetailModal> {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Bayar Button
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {
-                     Navigator.pop(context, {'action': 'pay', 'data': _detailData});
+                    Navigator.pop(context, {
+                      'action': 'pay',
+                      'data': _detailData,
+                    });
                   },
                   icon: const Icon(Icons.wallet, size: 16, color: Colors.white),
-                   label: const Text(
+                  label: const Text(
                     'Bayar',
                     style: TextStyle(color: Colors.white),
                   ),
@@ -747,7 +837,7 @@ class _BillDetailModalState extends State<BillDetailModal> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: bnw300)),
       ),
       child: Row(
@@ -802,13 +892,13 @@ class _BillDetailModalState extends State<BillDetailModal> {
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
-                 if (item['note'] != null && item['note'] != '')
+                if (item['note'] != null && item['note'] != '')
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
-                     child: Text(
+                    child: Text(
                       'Catatan : ${item['note']}',
-                       style: const TextStyle(fontSize: 12, color: Colors.grey),
-                     ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ),
               ],
             ),
@@ -893,7 +983,9 @@ class _DeleteReasonDialogState extends State<_DeleteReasonDialog> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.white,
+                      color: isSelected
+                          ? Colors.blue.withOpacity(0.1)
+                          : Colors.white,
                       border: Border.all(
                         color: isSelected ? Colors.blue : Colors.grey[300]!,
                       ),
@@ -927,6 +1019,7 @@ class _DeleteReasonDialogState extends State<_DeleteReasonDialog> {
             TextField(
               controller: _notesController,
               maxLines: 2,
+              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
                 hintText: 'Cth : Kurang 2 pesanan dan catatan 1 sendok gula',
                 hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
@@ -942,11 +1035,15 @@ class _DeleteReasonDialogState extends State<_DeleteReasonDialog> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _selectedReasonId == null || _notesController.text.isEmpty
+                onPressed:
+                    _selectedReasonId == null || _notesController.text.isEmpty
                     ? null
                     : () {
                         Navigator.pop(context); // Pop dialog first
-                        widget.onConfirm(_selectedReasonId!, _notesController.text);
+                        widget.onConfirm(
+                          _selectedReasonId!,
+                          _notesController.text,
+                        );
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE91E63), // Pink/Red color

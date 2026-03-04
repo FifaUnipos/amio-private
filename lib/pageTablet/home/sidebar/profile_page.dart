@@ -26,7 +26,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../main.dart';
 import '../../../pagehelper/loginregis/login_page.dart';
-import '../../../services/apimethod.dart';
+import '../../../services/config/apimethod.dart';
 import '../../../services/checkConnection.dart';
 import '../../../utils/component/component_loading.dart';
 import '../../../utils/component/providerModel/timerModel.dart';

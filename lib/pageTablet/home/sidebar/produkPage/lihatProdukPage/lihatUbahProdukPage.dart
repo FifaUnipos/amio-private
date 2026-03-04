@@ -21,7 +21,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../../main.dart';
 import '../../../../../pagehelper/loginregis/daftar_akun_toko.dart';
-import '../../../../../services/apimethod.dart';
+import '../../../../../services/config/apimethod.dart';
 import '../../../../../services/checkConnection.dart';
 
 import '../../../../../utils/component/component_button.dart';

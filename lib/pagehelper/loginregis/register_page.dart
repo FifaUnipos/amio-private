@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../main.dart';
 import 'package:http/http.dart' as http;
-import '../../services/apimethod.dart';
+import '../../services/config/apimethod.dart';
 import '../../utils/component/component_appbar.dart';
 import 'login_page.dart';
 import '../../../../utils/component/component_loading.dart';
@@ -325,7 +326,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     final response = await http.post(
-      Uri.parse(registerLink),
+      Uri.parse(ApiEndpoints.registerLink),
       body: bodyEmail,
     );
     var jsonResponse = jsonDecode(response.body);

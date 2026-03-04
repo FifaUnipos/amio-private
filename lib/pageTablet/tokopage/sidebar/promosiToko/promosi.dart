@@ -20,7 +20,7 @@ import '../../../../models/tokoModel/transaksiTokoModel.dart';
 import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../models/promosiModel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
 import '../../../home/sidebar/tokoPage/ubahToko.dart';import '../../../../utils/component/component_button.dart';

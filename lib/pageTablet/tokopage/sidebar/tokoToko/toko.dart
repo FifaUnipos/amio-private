@@ -17,7 +17,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../../main.dart';
 import '../../../../../models/tokomodel.dart';
-import '../../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../home/sidebar/tokoPage/ubahToko.dart';
 import '../produkToko/produk.dart';

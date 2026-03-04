@@ -7,7 +7,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../../../utils/component/component_showModalBottom.dart';
-import '../../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 
 import '../../../../../utils/component/component_button.dart';
 import '../../../../main.dart';

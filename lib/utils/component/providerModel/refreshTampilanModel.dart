@@ -4,7 +4,7 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../../models/produkmodel.dart';
 import '../../../pageTablet/tokopage/sidebar/transaksiToko/pilihPelangganPage.dart';
 import '../../../pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
-import '../../../services/apimethod.dart';
+import '../../../services/config/apimethod.dart';
 
 import '../component_color.dart';
 

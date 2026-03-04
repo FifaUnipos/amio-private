@@ -1,5 +1,5 @@
 import 'package:unipos_app_335/models/inventoriModel/detailPembelianModel.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';

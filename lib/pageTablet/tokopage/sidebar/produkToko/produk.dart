@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produkVariantPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/ubahProductVariantPage.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,7 +30,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
-import '../../../../services/apimethod.dart';
+import '../../../../services/config/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../../services/modelBloc.dart';
 
@@ -211,7 +212,7 @@ class _ProdukTokoState extends State<ProdukToko> {
       if (!mounted) return;
       setState(() => isUploading = true);
 
-      final uri = Uri.parse(uploadProdukUrl);
+      final uri = Uri.parse(ApiEndpoints.uploadProdukUrl);
       final request = http.MultipartRequest('POST', uri);
       request.headers['token'] = widget.token;
       request.files.add(await http.MultipartFile.fromPath('file', filePath!));

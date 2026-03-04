@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/main.dart';
-import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
@@ -14,9 +15,14 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 class AdjustmentTab extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
 
-  AdjustmentTab({Key? key, required this.token, required this.merchantId})
-    : super(key: key);
+  AdjustmentTab({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    required this.typeMerchant,
+  }) : super(key: key);
 
   @override
   _AdjustmentTabState createState() => _AdjustmentTabState();
@@ -25,6 +31,10 @@ class AdjustmentTab extends StatefulWidget {
 class _AdjustmentTabState extends State<AdjustmentTab> {
   bool _isLoading = true;
   List<dynamic> _adjustments = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
+
+  bool get _canAdjust => _normalizeType(widget.typeMerchant) == 'merchant';
 
   @override
   void initState() {
@@ -35,7 +45,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Future<Map<String, dynamic>?> _getAdjustmentList() async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment'),
+        Uri.parse(ApiEndpoints.getAdjustmentLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -55,7 +65,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Future<Map<String, dynamic>?> _getAdjustmentDetail(String groupId) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/detail'),
+        Uri.parse(ApiEndpoints.getDetailAdjustmentLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"deviceid": identifier, "group_id": groupId}),
       );
@@ -72,7 +82,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Future<Map<String, dynamic>?> _deleteAdjustment(List<String> groupIds) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/delete'),
+        Uri.parse(ApiEndpoints.deleteAdjustmentLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"deviceid": identifier, "group_id": groupIds}),
       );
@@ -274,6 +284,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
           token: widget.token,
           merchantId: widget.merchantId,
           onSuccess: _fetchAdjustments,
+          typeMerchant: typeAccount ?? '',
         ),
       ),
     );
@@ -288,6 +299,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
           builder: (context) => AddAdjustmentPage(
             token: widget.token,
             merchantId: widget.merchantId,
+            typeMerchant: typeAccount ?? '',
             onSuccess: _fetchAdjustments,
             groupId: groupId,
             existingData: detail['data'],
@@ -301,9 +313,8 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: merchantType == 'Group_Merchant'
-          ? null
-          : FloatingActionButton.extended(
+      floatingActionButton: _canAdjust
+          ? FloatingActionButton.extended(
               onPressed: _navigateToAddAdjustment,
               backgroundColor: primary500,
               icon: Icon(PhosphorIcons.plus, color: Colors.white),
@@ -311,7 +322,8 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                 'Sesuaikan',
                 style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
               ),
-            ),
+            )
+          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _adjustments.isEmpty
@@ -356,14 +368,16 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                           ],
                         ),
                       ),
-                      InkWell(
-                        onTap: () => _showOptionsModal(adjustment['group_id']),
-                        child: Icon(
-                          PhosphorIcons.pencil_simple,
-                          color: bnw600,
-                          size: 20,
+                      if (_canAdjust)
+                        InkWell(
+                          onTap: () =>
+                              _showOptionsModal(adjustment['group_id']),
+                          child: Icon(
+                            PhosphorIcons.pencil_simple,
+                            color: bnw600,
+                            size: 20,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 );
@@ -377,6 +391,8 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
 class AddAdjustmentPage extends StatefulWidget {
   final String token;
   final String merchantId;
+  final String typeMerchant;
+
   final VoidCallback onSuccess;
   final String? groupId;
   final Map<String, dynamic>? existingData;
@@ -385,6 +401,7 @@ class AddAdjustmentPage extends StatefulWidget {
     Key? key,
     required this.token,
     required this.merchantId,
+    required this.typeMerchant,
     required this.onSuccess,
     this.groupId,
     this.existingData,
@@ -400,7 +417,10 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   List<Map<String, dynamic>> _selectedMaterials = [];
   List<dynamic> _allMaterials = [];
   List<dynamic> _unitConversions = [];
+  String _normalizeType(String t) =>
+      t.trim().toLowerCase().replaceAll(' ', '_');
 
+  bool get _canAdjust => _normalizeType(widget.typeMerchant) == 'merchant';
   @override
   void initState() {
     super.initState();
@@ -468,7 +488,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   Future<Map<String, dynamic>?> _getMaterialInventory() async {
     try {
       final response = await http.post(
-        Uri.parse(getMasterDataLink),
+        Uri.parse(ApiEndpoints.getMasterDataLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -491,7 +511,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   Future<Map<String, dynamic>?> _getUnitConversions() async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/unit-conversion/'),
+        Uri.parse(ApiEndpoints.getUnitConvertionLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -1037,7 +1057,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/create'),
+        Uri.parse(ApiEndpoints.createAdjustmentLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -1063,7 +1083,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/update'),
+        Uri.parse(ApiEndpoints.updateAdjustmentLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -1286,7 +1306,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             OutlinedButton(
-              onPressed: _showMaterialPicker,
+              onPressed: _canAdjust ? _showMaterialPicker : null,
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(color: primary500),
@@ -1305,7 +1325,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: _canAdjust ? () {} : null,
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: primary500),
@@ -1322,7 +1342,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _saveAdjustment,
+                    onPressed: _canAdjust ? _saveAdjustment : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary500,
                       padding: EdgeInsets.symmetric(vertical: 16),

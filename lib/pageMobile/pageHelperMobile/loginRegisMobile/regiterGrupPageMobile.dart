@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
@@ -12,7 +13,7 @@ import 'package:http/http.dart' as http;
 import '../../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../main.dart';
-import '../../../services/apimethod.dart';
+import '../../../services/config/apimethod.dart';
 
 import '../../../utils/component/component_appbar.dart';
 import 'otpPageMobile.dart';
@@ -33,8 +34,7 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
   bool bttnValidate = false;
 
   refreshData() {
-    if (phoneController.text.isNotEmpty &&
-        nameController.text.isNotEmpty) {
+    if (phoneController.text.isNotEmpty && nameController.text.isNotEmpty) {
       bttnValidate = true;
     } else {
       bttnValidate = false;
@@ -81,11 +81,19 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                           children: [
                             Text(
                               'Nama Lengkap ',
-                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               '*',
-                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                red500,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -98,11 +106,19 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                           children: [
                             Text(
                               'Nomor Telepon ',
-                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               '*',
-                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                red500,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -235,7 +251,7 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
     whenLoading(context);
     try {
       final response = await http.post(
-        Uri.parse(registerLink),
+        Uri.parse(ApiEndpoints.registerLink),
         body: {
           'deviceid': identifier,
           'fullname': nameController.text,
