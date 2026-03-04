@@ -19,9 +19,23 @@ class UniposNotificationProvider extends ChangeNotifier {
     _notificationId += 1;
     flutterNotificationService.showNotification(
       id: _notificationId,
-      title: "Hidup Jokowi",
-      body: "Hidup Jokowi Hidup Jokowi! $_notificationId",
+      title: "Title",
+      body: "description $_notificationId",
       payload: "this is payload from notification with id $_notificationId",
+    );
+  }
+
+  void showNotificationWith({
+    required String title,
+    required String body,
+    String? payload,
+  }) {
+    _notificationId += 1;
+    flutterNotificationService.showNotification(
+      id: _notificationId,
+      title: title,
+      body: body,
+      payload: payload ?? '',
     );
   }
 }
