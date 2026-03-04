@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:unipos_app_335/main.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -12,7 +12,7 @@ final StreamController<String?> selectNotificationStream =
 class UniposNotificationService {
   Future<void> init() async {
     const initializationSettingsAndroid = AndroidInitializationSettings(
-      'defaultIcon',
+      ('@mipmap/ic_launcher'),
     );
     const initializationSettingsDarwin = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -28,7 +28,14 @@ class UniposNotificationService {
       onDidReceiveNotificationResponse: (notificationResponse) {
         final payload = notificationResponse.payload;
         if (payload != null && payload.isNotEmpty) {
-          selectNotificationStream.add(payload);
+          final context = navigatorKey.currentContext;
+          final isTablet = context != null ? isTabletLayout(context) : false;
+
+          if (isTablet) {
+            sidebarController.selectIndex(1);
+          } else {
+            mobileTabIndex.value = 1;
+          }
         }
       },
     );
@@ -89,6 +96,7 @@ class UniposNotificationService {
       channelName,
       importance: Importance.max,
       priority: Priority.high,
+      icon: 'ic_notification',
     );
     const iOSPlatformChannelSpecifics = DarwinNotificationDetails(
       presentSound: true,

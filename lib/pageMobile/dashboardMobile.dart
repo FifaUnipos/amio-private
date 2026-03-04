@@ -1,13 +1,13 @@
+import 'dart:async';
+
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 // import 'package:skeletons/skeletons.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
-import 'package:socket_io_client/socket_io_client.dart';
-import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
@@ -16,6 +16,7 @@ import 'package:unipos_app_335/pageMobile/bantuanPage.dart';
 import 'package:unipos_app_335/pageMobile/inventoryMobile/material_inventory_page.dart';
 import 'package:unipos_app_335/pageMobile/laporanMobile/laporan_page.dart';
 import 'package:unipos_app_335/pageMobile/memberPageMobile.dart';
+import 'package:unipos_app_335/pageMobile/notifikasiScreenMobile.dart';
 import 'package:unipos_app_335/pageMobile/pageAkunMobile/page_user_mobile.dart';
 import 'package:unipos_app_335/pageMobile/pageCOAMobile/page_coa_mobile.dart';
 import 'package:unipos_app_335/pageMobile/pageProductMobile/merchantSelectionPage.dart';
@@ -28,12 +29,9 @@ import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/history/riwayat_page.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/settings_tab.dart';
-import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
-import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
-import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/checkConnection.dart';
-import 'package:unipos_app_335/services/unipos_notification_service.dart';
+import 'package:unipos_app_335/services/websocket_service.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -45,7 +43,9 @@ import '../../../../utils/component/component_color.dart';
 
 class DashboardPageMobile extends StatefulWidget {
   String token;
-  DashboardPageMobile({Key? key, required this.token}) : super(key: key);
+  final int initialIndex;
+  DashboardPageMobile({Key? key, required this.token, this.initialIndex = 0})
+    : super(key: key);
 
   @override
   State<DashboardPageMobile> createState() => _DashboardPageMobileState();
@@ -64,56 +64,6 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     ).join();
   }
 
-  List<NotificationModel> notifications = [];
-  IO.Socket? socket;
-
-  void connectWebSocket() {
-    socket = IO.io(
-      'https://unipos-dev-notification-service-dev.yi8k7d.easypanel.host/',
-      <String, dynamic>{
-        'transports': ['websocket'],
-        'autoConnect': false,
-        'extraHeaders': {'token': checkToken, 'deviceid': identifier},
-        'path': '/socket.io',
-      },
-    );
-
-    socket?.connect();
-
-    socket?.on('connect', (_) {
-      debugPrint('✅ Connected to WebSocket');
-      socket?.emit('joinRoom');
-    });
-
-    socket?.on('notificationData', (data) {
-      debugPrint('📩 Received notificationData: $data');
-      if (data is List) {
-        setState(() {
-          notifications = data
-              .map((item) => NotificationModel.fromJson(item))
-              .toList()
-              .cast<NotificationModel>();
-        });
-      }
-    });
-
-    socket?.on('newNotifications', (data) {
-      debugPrint('🆕 New notification: $data');
-      if (data is List) {
-        setState(() {
-          for (var item in data) {
-            notifications.add(NotificationModel.fromJson(item));
-          }
-        });
-      }
-    });
-
-    socket?.on(
-      'disconnect',
-      (_) => debugPrint('❌ Disconnected from WebSocket'),
-    );
-  }
-
   PageController _pageController = PageController();
   List<ModelDataToko>? datas;
   late WebViewController webController;
@@ -127,9 +77,8 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   bool get isCashier => roleProfile?.toLowerCase() == 'cashier';
 
   int selectedAppBarIndex = 0;
-
   // Daftar halaman
-  List<Widget> get pages => isCashier
+  List<Widget> _buildPages(List<NotificationModel> notifications) => isCashier
       ? [
           TransaksiMobilePage(
             token: widget.token,
@@ -157,44 +106,29 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   @override
   void initState() {
     print("token $checkToken");
-    connectWebSocket();
+    selectedIndex = widget.initialIndex;
     checkConnection(context);
     checkEmail(context, setState);
     getKulasedaya(context, widget.token, '');
-    // myprofile(checkToken);
-    // connectWeb();
     dashboardKulasedaya(widget.token);
     futureMembers = dashboardKulasedaya(widget.token);
     futureBilling = getBilling(context, widget.token);
     futureKulasedayaBinding = bindingKulasedaya(widget.token);
     futureDashboard = dashboard(identifier ?? '', widget.token);
     futureDashboardSide = dashboardSide(context, widget.token);
+    context.read<WebSocketService>().connect(checkToken, identifier);
 
-    // dashboard(identifier, widget.token);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      datas = await getAllToko(context, widget.token, '', '');
-
-      //   datas;
-      setState(() {});
-
-      _pageController = PageController(
-        initialPage: 0,
-        keepPage: true,
-        viewportFraction: 1,
-      );
-    });
-    pendapatanDas;
-    membersDas;
-    transaksiDas;
-    rataTransaksiDas;
-    // rangeDate;
-
+    mobileTabIndex.addListener(_onTabChanged);
     super.initState();
+  }
+
+  void _onTabChanged() {
+    if (mounted) setState(() => selectedIndex = mobileTabIndex.value);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    mobileTabIndex.removeListener(_onTabChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -237,6 +171,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
 
   @override
   Widget build(BuildContext context) {
+    final wsNotifications = context.watch<WebSocketService>().notifications;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -340,7 +275,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                               selectedIndex: selectedIndex,
                               onTap: () => setState(() => selectedIndex = 1),
                             ),
-                            if (notifications
+                            if (wsNotifications
                                 .isNotEmpty) // hanya tampil kalau ada notifikasi
                               Positioned(
                                 top: -4,
@@ -355,7 +290,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    '${notifications.length}', // jumlah notifikasi dinamis
+                                    '${wsNotifications.length}', // jumlah notifikasi dinamis
                                     style: TextStyle(
                                       color: bnw100,
                                       fontSize: 10,
@@ -381,7 +316,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
             ),
 
             // 🔹 Isi halaman (berubah sesuai tombol yang diklik)
-            Expanded(child: pages[selectedIndex]),
+            Expanded(child: _buildPages(wsNotifications)[selectedIndex]),
           ],
         ),
       ),
@@ -1580,60 +1515,6 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     );
   }
 
-  // Container frame70(String title, value, subtitle, double width, Color color) {
-  //   return Container(
-  //     padding:  EdgeInsets.all(size16),
-  //     height: 100,
-  //     width: width,
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(size16),
-  //       border: Border.all(color: bnw300),
-  //       color: bnw100,
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           title,
-  //           style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-  //         ),
-  //         Text(
-  //           value,
-  //           style: heading2(FontWeight.w700, color, 'Outfit'),
-  //         ),
-  //         Text(
-  //           subtitle,
-  //           style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // SizedBox analisisBttn(String title) {
-  //   return SizedBox(
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           margin: EdgeInsets.only(left: 6),
-  //           width: 42,
-  //           height: 38,
-  //           decoration: BoxDecoration(
-  //             borderRadius: BorderRadius.circular(8),
-  //             border: Border.all(color: bnw900),
-  //           ),
-  //           child: Center(
-  //             child: Text(
-  //               title,
-  //               style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   frameDash(String title, value, desc, IconData icon) {
     return Expanded(
       child: Container(
@@ -2555,294 +2436,4 @@ String _formatThousands(int n) {
     if (i % 3 == 2 && i != s.length - 1) b.write('.');
   }
   return b.toString().split('').reversed.join();
-}
-
-class InfoCard extends StatelessWidget {
-  final String title; // "Tagihan"
-  final String value; // "12"
-  final IconData icon; // Icons.shopping_cart
-  final Color iconColor; // Warna background icon (merah muda, biru, dll)
-  final Color textColor; // Warna value (misal merah atau biru)
-  final VoidCallback? onTap;
-
-  const InfoCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-    required this.textColor,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: size12, vertical: size12),
-        margin: EdgeInsets.symmetric(horizontal: size16, vertical: size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: bnw900.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 🔹 Icon Box
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-            SizedBox(width: size12),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: heading2(FontWeight.w900, bnw900, 'Outfit')),
-                Text(
-                  value,
-                  style: heading2(FontWeight.w900, textColor, 'Outfit'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DashboardWithNotif extends StatefulWidget {
-  final List<NotificationModel> notifications;
-
-  const DashboardWithNotif({super.key, required this.notifications});
-
-  @override
-  State<DashboardWithNotif> createState() => _DashboardWithNotifState();
-}
-
-class _DashboardWithNotifState extends State<DashboardWithNotif> {
-  void _configureSelectNotificationSubject() {
-    selectNotificationStream.stream.listen((String? payload) {
-      context.read<PayloadProvider>().payload = payload;
-      // Navigator.pushNamed(context, MyRoute.detail.name, arguments: payload);
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _configureSelectNotificationSubject();
-  }
-
-  @override
-  void dispose() {
-    selectNotificationStream.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 🔹 Info Card Section
-        // Row(
-        //   children: [
-        //     InfoCard(
-        //       title: 'Tagihan',
-        //       value: '12',
-        //       icon: PhosphorIcons.shopping_cart_simple_fill,
-        //       iconColor: danger500,
-        //       textColor: danger500,
-        //       onTap: () {
-        //         print('Tagihan diklik');
-        //       },
-        //     ),
-        //     InfoCard(
-        //       title: 'Persediaan Habis',
-        //       value: '0',
-        //       icon: PhosphorIcons.archive_box_fill,
-        //       iconColor: primary500,
-        //       textColor: primary500,
-        //       onTap: () {
-        //         print('Persediaan diklik');
-        //       },
-        //     ),
-        //   ],
-        // ),
-        SizedBox(height: size16),
-        // 🔹 Notifikasi Section
-        Padding(
-          padding: EdgeInsets.only(left: size16),
-          child: Text(
-            'Pemberitahuan',
-            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-          ),
-        ),
-        SizedBox(height: size12),
-
-        Expanded(
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: size16),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: bnw300),
-              borderRadius: BorderRadius.circular(size16),
-            ),
-            child: widget.notifications.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/illustration/imageHelp.svg',
-                          height: 120,
-                        ),
-                        SizedBox(height: size12),
-                        Text(
-                          'Tidak ada Notifikasi baru',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        UniposButton(
-                          text: 'Test',
-                          onTap: () async {
-                            await _showNotification();
-                          },
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: widget.notifications.length,
-                    itemBuilder: (context, index) {
-                      final notif = widget.notifications[index];
-                      return Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: size16,
-                          horizontal: size16,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: bnw900.withOpacity(0.3),
-                              width: 0.5,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // 🔹 Isi teks
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  notif.title,
-                                  style: heading4(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  notif.type,
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw700,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // 🔹 Tombol lihat detail
-                            GestureDetector(
-                              onTap: () {
-                                showModalBottom(
-                                  context,
-                                  MediaQuery.of(context).size.height * 0.5,
-                                  IntrinsicHeight(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(28.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            notif.title,
-                                            style: heading2(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            notif.description,
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            notif.date,
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              bnw700,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: size16,
-                                  vertical: size8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: primary500,
-                                  borderRadius: BorderRadius.circular(size8),
-                                ),
-                                child: Text(
-                                  'Lihat',
-                                  style: body1(
-                                    FontWeight.w600,
-                                    bnw100,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-  Future<void> _showNotification() async {
-    context.read<UniposNotificationProvider>().showNotification();
-  }
 }

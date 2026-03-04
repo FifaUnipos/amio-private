@@ -63,6 +63,7 @@ dependencies:
   syncfusion_flutter_charts: ^26.2.9
   url_launcher: ^6.1.9
   webview_flutter: null
+  workmanager: ^0.9.0+3
 
 
 dev_dependencies:
