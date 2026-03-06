@@ -27,6 +27,8 @@ import 'bill_page.dart';
 import 'package:unipos_app_335/utils/repository/transaction_repository.dart';
 import 'package:unipos_app_335/utils/repository/product_repository.dart';
 import 'package:unipos_app_335/models/produkmodel.dart';
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/providers/transactions/transaction_provider.dart';
 
 enum DetailMode { calculate, create }
 
@@ -186,26 +188,22 @@ List<Map<String, dynamic>> buildTransactionDetails(
         "name": p.name,
         "amount": "${amountToSend}.00",
         "quantity": qty,
-        "description": notes,
+        "description": notes.isEmpty ? null : notes,
         "is_online": isOnline,
         "is_customize": isCustomize,
         "variants": variants,
       };
     }
 
-    print(
-      "data: ${jsonEncode({"product_id": p.id.toString(), "request_id": "", "is_online": isOnline, "is_customize": isCustomize, "amount": amountToSend, "name": p.name, "quantity": quantityAsString ? qty.toString() : qty, "description": notes, "variants": variants})}",
-    );
-
     return {
       "product_id": p.id.toString(),
       "request_id": "",
       "is_online": isOnline,
       "is_customize": isCustomize,
-      "amount": amountToSend,
+      "amount": "${amountToSend}.00", // Ensure string with .00 as per sample
       "name": p.name,
       "quantity": quantityAsString ? qty.toString() : qty,
-      "description": notes,
+      "description": notes.isEmpty ? null : notes,
       "variants": variants,
     };
   }).toList();
@@ -414,7 +412,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       _fetchProducts();
 
       // Auto sync pending transactions
-      _transactionRepository.syncPendingTransactions(token: widget.token);
+      _transactionRepository.syncPendingTransactions(token: widget.token, merchantId: widget.merchantId);
     } else {
       _isLoading = false;
     }
@@ -3323,122 +3321,54 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     );
 
     try {
-      final url = Uri.parse(ApiEndpoints.createTransaksiUrl);
-
-      // List<Map<String, dynamic>> details = _cart.map((item) {
-      //   Product p = item['product'];
-
-      //   final int qty = (item['quantity'] as int?) ?? 0;
-      //   final bool isOnline = item['is_online'] == true;
-      //   final bool isCustomize = item['is_customize'] == true;
-      //   final int? customAmount = item['custom_amount'] as int?;
-      //   final int variantTotal = (item['variant_total'] as num? ?? 0).toInt();
-
-      //   final int baseDefault = isOnline
-      //       ? (p.onlinePrice)
-      //       : (p.priceAfter ?? p.price);
-
-      //   final int baseUsed = (isCustomize && customAmount != null)
-      //       ? customAmount
-      //       : baseDefault;
-
-      //   final int unitAmount =
-      //       (item['unit_amount'] as num?)?.round() ?? (baseUsed + variantTotal);
-
-      //   final int totalAmount =
-      //       (item['total_amount'] as num?)?.round() ?? (unitAmount * qty);
-
-      //   final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
-
-      //   final List<Map<String, dynamic>> variants = rawVariants.map((cat) {
-      //     final String catId = cat['variant_category_id']?.toString() ?? '';
-
-      //     final List<dynamic> rawVarList = (cat['variant'] ?? []) as List;
-
-      //     final mappedVarList = rawVarList.map((v) {
-      //       final Map<String, dynamic> mapped = {
-      //         "variant_id": v['variant_id']?.toString() ?? '',
-      //       };
-
-      //       if (isCustomize) {
-      //         final dynamic priceVal = v['variant_price'] ?? v['price'] ?? 0;
-
-      //         mapped["variant_price"] = priceVal;
-      //         mapped["is_variant_customize"] = true;
-      //       }
-
-      //       return mapped;
-      //     }).toList();
-
-      //     return {"variant_category_id": catId, "variant": mappedVarList};
-      //   }).toList();
-
-      //   return {
-      //     "product_id": p.id.toString(),
-      //     "request_id": "",
-      //     "is_online": isOnline,
-      //     "is_customize": isCustomize,
-      //     "amount": unitAmount,
-      //     "name": p.name,
-      //     "quantity": qty,
-      //     "description": item['notes'] ?? "",
-      //     "variants": variants,
-      //   };
-      // }).toList();
       final details = buildTransactionDetails(
         _cart,
         mode: DetailMode.create,
         quantityAsString: false,
       );
 
-      final body = {
-        "deviceid": identifier,
-        "device_id": identifier,
-        "discount_id": _selectedDiscount?.id ?? null,
-        "member_id": _selectedMemberId ?? null,
-        "transaction_id": null,
-        "value": null,
-        "payment_method": null,
-        "payment_reference": null, // Default empty as requested
-        "detail": details,
+      final transaction = {
+        "member_id": _selectedMemberId,
+        "discount_id": _selectedDiscount?.id,
+        "amount": cartSubTotal(_cart).toDouble(),
       };
 
-      debugPrint("Sending save bill: ${jsonEncode(body)}");
-
-      final response = await http.post(
-        url,
-        headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode(body),
+      final success = await context.read<TransactionProvider>().saveBill(
+        token: widget.token,
+        merchantId: widget.merchantId,
+        transaction: transaction,
+        details: details,
       );
 
-      Navigator.pop(context);
-      debugPrint("Save bill response: ${response.body}");
+      if (mounted) Navigator.pop(context); // Close loading
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['rc'] == '00') {
-          if (closeOnSuccess) Navigator.pop(context);
-          showSnackbar(context, jsonDecode(response.body));
-          setState(() {
-            _cart.clear();
-          });
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'Gagal menyimpan tagihan'),
-            ),
-          );
+      if (success) {
+        if (closeOnSuccess && mounted) {
+          Navigator.pop(context); // Close cart sheet
         }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tagihan berhasil disimpan')),
+        );
+
+        setState(() {
+          _cart.clear();
+          _selectedMemberId = null;
+          _selectedMemberName = null;
+          _selectedDiscount = null;
+          _calculationData = null;
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.statusCode}')),
+          const SnackBar(content: Text('Gagal menyimpan tagihan')),
         );
       }
     } catch (e) {
-      Navigator.pop(context); // Close loading dialog if error
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted && Navigator.canPop(context)) Navigator.pop(context);
+      debugPrint("Error in _processSaveBill: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
     }
   }
 

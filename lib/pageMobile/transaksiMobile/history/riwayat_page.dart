@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
-import 'package:unipos_app_335/components/atoms/button/unipos_button_status.dart';
-import 'package:unipos_app_335/components/atoms/unipos_information.dart';
-import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_delete.dart';
-import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_view_deleted_history.dart';
-import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
-import 'dart:convert';
-import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
-import 'package:unipos_app_335/services/config/apimethod.dart';
-import 'package:unipos_app_335/services/config/app_endpoints.dart';
-import 'package:unipos_app_335/utils/component/component_button.dart';
-import 'package:unipos_app_335/utils/component/component_color.dart';
-import 'package:unipos_app_335/main.dart'; // For identifier
-import 'package:unipos_app_335/utils/component/component_size.dart';
-import 'package:unipos_app_335/utils/component/component_snackbar.dart';
-import 'package:unipos_app_335/utils/component/component_textHeading.dart';
-import 'package:unipos_app_335/utils/status_transaction.dart';
-import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/atoms/unipos_information.dart';
+import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
+import 'package:unipos_app_335/providers/transactions/transaction_provider.dart';
+import 'package:unipos_app_335/utils/component/component_color.dart';
+import 'package:unipos_app_335/utils/status_transaction.dart';
+import 'package:unipos_app_335/utils/component/component_size.dart';
+import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:unipos_app_335/services/config/apimethod.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_view_deleted_history.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_delete.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button_status.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
+import 'package:unipos_app_335/utils/component/component_button.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
 
 class HistoryTab extends StatefulWidget {
   final String token;
@@ -41,29 +36,9 @@ class HistoryTab extends StatefulWidget {
 }
 
 class _HistoryTabState extends State<HistoryTab> {
-  List<dynamic> _historyList = [];
-  bool _isLoading = true;
   // Sorting State
   String _selectedSortText = "Riwayat Terbaru";
   String _selectedSortTag = "upDownCreate";
-
-  // List<String> orderByRiwayatText = [
-  //   "Riwayat Terbaru",
-  //   "Riwayat Terlama",
-  //   "Nama Pembeli A ke Z",
-  //   "Nama Pembeli Z ke A",
-  //   "Total Tertinggi",
-  //   "Total Terendah",
-  // ];
-
-  // List<String> orderByRiwayatTagihan = [
-  //   "downUpCreate",
-  //   "downUpCreate",
-  //   "upDownName",
-  //   "downUpName",
-  //   "downUpAmount",
-  //   "upDownAmount",
-  // ];
 
   final sortOptions = [
     {"label": "Riwayat Terbaru", "tag": "upDownCreate"},
@@ -77,64 +52,17 @@ class _HistoryTabState extends State<HistoryTab> {
   @override
   void initState() {
     super.initState();
-    _fetchHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchHistory();
+    });
   }
 
-  Future<void> _fetchHistory() async {
-    setState(() => _isLoading = true);
-    try {
-      final url = Uri.parse(ApiEndpoints.getTransaksiRiwayatUrl);
-      final response = await http.post(
-        url,
-        headers: {
-          'token': widget.token,
-          'DEVICE-ID': identifier!,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "condition": "",
-          "order_by": _selectedSortTag,
-          "merchant_id": widget.merchantId,
-        }),
-      );
-
-      print('History response: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['rc'] == '00' && data['data'] != null) {
-          setState(() {
-            _historyList = data['data'];
-
-            // Pastikan raw diambil dengan benar dan diformat
-            for (var item in _historyList) {
-              if (item['raw'] != null) {
-                String rawData = item['raw'];
-
-                // Menghilangkan spasi berlebihan tanpa menghapus \n
-                rawData = rawData.replaceAll(
-                  RegExp(r'\s{2,}'),
-                  ' ',
-                ); // Ganti spasi berlebihan menjadi satu spasi
-
-                // Simpan raw yang sudah diformat
-                item['raw'] = rawData
-                    .trim(); // Trim untuk menghapus spasi di awal/akhir
-              }
-            }
-
-            _isLoading = false;
-          });
-        } else {
-          setState(() => _isLoading = false);
-        }
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      print('Error fetching history: $e');
-      setState(() => _isLoading = false);
-    }
+  void _fetchHistory() {
+    context.read<TransactionProvider>().fetchHistory(
+      token: widget.token,
+      merchantId: widget.merchantId,
+      orderBy: _selectedSortTag,
+    );
   }
 
   void _showSortRiwayatModal() {
@@ -244,6 +172,10 @@ class _HistoryTabState extends State<HistoryTab> {
 
   @override
   Widget build(BuildContext context) {
+    final transactionProvider = context.watch<TransactionProvider>();
+    final historyList = transactionProvider.historyList;
+    final isLoading = transactionProvider.isLoadingHistory;
+
     return Column(
       children: [
         Divider(height: 1, color: bnw300),
@@ -295,27 +227,25 @@ class _HistoryTabState extends State<HistoryTab> {
                       ),
                     ),
                   ),
-                  _outlineBtn('Total : ${_historyList.length}'),
+                  _outlineBtn('Total : ${historyList.length}'),
                 ],
               ),
             ],
           ),
         ),
         Expanded(
-          child: _isLoading
+          child: isLoading && historyList.isEmpty
               ? const Center(child: CircularProgressIndicator())
-              : _historyList.isEmpty
+              : historyList.isEmpty
               ? const Center(child: Text("Belum ada riwayat transaksi"))
               : ListView.separated(
-                  itemCount: _historyList.length,
+                  itemCount: historyList.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
-                    final item = _historyList[index];
-                    final amount =
-                        double.tryParse(item['amount'].toString()) ?? 0;
+                    final item = historyList[index];
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: () => _showDetail(item['transaction_id']),
+                      onTap: () => _showDetail(item.transactionId),
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,
@@ -329,7 +259,7 @@ class _HistoryTabState extends State<HistoryTab> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  item['customer'] ?? 'Pelanggan',
+                                  item.customer ?? 'Pelanggan',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -339,7 +269,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                     locale: 'id',
                                     symbol: 'Rp. ',
                                     decimalDigits: 0,
-                                  ).format(amount),
+                                  ).format(item.amount),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -353,10 +283,8 @@ class _HistoryTabState extends State<HistoryTab> {
                               spacing: 4,
                               children: [
                                 Text(
-                                  item['entry_date'] != null
-                                      ? (item['entry_date'] as String)
-                                            .split(' ')
-                                            .last
+                                  item.entryDate != null
+                                      ? item.entryDate!.split(' ').last
                                       : '',
                                   style: const TextStyle(
                                     color: Colors.black,
@@ -367,15 +295,15 @@ class _HistoryTabState extends State<HistoryTab> {
                                   size: UniposInformationSize.extraSmall,
                                   variant:
                                       statusTransactionCancel.contains(
-                                        item['isPaid'],
+                                        item.isPaid,
                                       )
                                       ? UniposInformationVariant.danger
                                       : statusTransactionProcessCancel.contains(
-                                          item['isPaid'],
+                                          item.isPaid,
                                         )
                                       ? UniposInformationVariant.warning
                                       : UniposInformationVariant.success,
-                                  text: '${item['status_transactions'] ?? '-'}',
+                                  text: '${item.statusTransactions ?? '-'}',
                                   showIcon: false,
                                 ),
                               ],
@@ -420,7 +348,6 @@ class _HistoryTabState extends State<HistoryTab> {
     );
   }
 }
-
 // -----------------------------------------------------
 // Transaction Detail Modal
 // -----------------------------------------------------
@@ -444,8 +371,6 @@ class TransactionDetailModal extends StatefulWidget {
 }
 
 class _TransactionDetailModalState extends State<TransactionDetailModal> {
-  bool _isLoading = true;
-  Map<String, dynamic>? _detailData;
   bool isDropdownOpen = false;
 
   @override
@@ -480,66 +405,12 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
 
   bool _isZeroDate(String s) => s.trim().isEmpty || s == '0000-00-00 00:00:00';
 
-  Future<void> _fetchDetail() async {
-    try {
-      final url = Uri.parse(ApiEndpoints.getTransaksiSingleRiwayatUrl);
-      final response = await http.post(
-        url,
-        headers: {
-          'token': widget.token,
-          'DEVICE-ID': identifier!,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "transaction_id": widget.transactionId,
-          "merchant_id": widget.merchantId,
-        }),
-      );
-
-      debugPrint('Detail response: ${response.body}');
-      final dataku = jsonDecode(response.body);
-      print('Detail data: $dataku');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['rc'] == '00' && data['data'] != null) {
-          setState(() {
-            // Menyimpan data di _detailData
-            _detailData = data['data'];
-
-            // Pastikan 'raw' ada dan ambil isinya
-            if (_detailData != null && _detailData!.containsKey('raw')) {
-              String rawData = _detailData!['raw']; // Ambil nilai raw
-
-              // Membersihkan hanya spasi berlebihan tanpa menghapus \n
-              rawData = rawData.replaceAll(
-                RegExp(r'\s{2,}'),
-                ' ',
-              ); // Ganti spasi berlebihan menjadi satu spasi
-
-              // Masukkan kembali raw yang sudah dibersihkan ke _detailData
-              _detailData!['raw'] = rawData.trim();
-
-              // Debugging: Cek raw data setelah dibersihkan
-              print("Cleaned raw data: ${_detailData!['raw']}");
-            } else {
-              print("Raw data tidak ditemukan dalam _detailData");
-            }
-
-            // Update loading state
-            _isLoading = false;
-          });
-        } else {
-          setState(() => _isLoading = false);
-        }
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      print('Error fetching detail: $e');
-      setState(() => _isLoading = false);
-    }
+  void _fetchDetail() {
+    context.read<TransactionProvider>().fetchTransactionDetail(
+      token: widget.token,
+      merchantId: widget.merchantId,
+      transactionId: widget.transactionId,
+    );
   }
 
   Future<dynamic> _showBottomRiwayatPerubahan(Map<String, dynamic> data) {
@@ -1267,7 +1138,12 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final transactionProvider = context.watch<TransactionProvider>();
+    final isLoading = transactionProvider.isLoadingDetail;
+    final detail = transactionProvider.transactionDetail;
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -1304,163 +1180,144 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: _isLoading
+            child: isLoading && detail == null
                 ? const Center(child: CircularProgressIndicator())
-                : _detailData == null
-                ? const Center(child: Text("Gagal memuat detail"))
-                : SingleChildScrollView(
-                    child: Column(
-                      spacing: 16,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Status',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Row(
+                : detail == null
+                    ? const Center(child: Text("Gagal memuat detail"))
+                    : SingleChildScrollView(
+                        child: Column(
                           spacing: 16,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: UniposInformation(
-                                isFullWidth: true,
-                                variant:
-                                    statusTransactionCancel.contains(
-                                      _detailData!['isPaid'],
+                            const Text(
+                              'Status',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Row(
+                              spacing: 16,
+                              children: [
+                                Expanded(
+                                  child: UniposInformation(
+                                    isFullWidth: true,
+                                    variant: statusTransactionCancel.contains(
+                                      detail.isPaid,
                                     )
                                     ? UniposInformationVariant.danger
                                     : statusTransactionProcessCancel.contains(
-                                        _detailData!['isPaid'],
+                                        detail.isPaid,
                                       )
                                     ? UniposInformationVariant.warning
                                     : UniposInformationVariant.success,
-                                text:
-                                    '${_detailData!['status_transactions'] ?? '-'}',
+                                    text: '${detail.statusTransactions ?? '-'}',
+                                  ),
+                                ),
+                                if (statusTransactionCancel.contains(
+                                      detail.isPaid,
+                                    ) ||
+                                    statusTransactionProcessCancel.contains(
+                                      detail.isPaid,
+                                    ))
+                                  UniposButton(
+                                    text: 'Lihat Riwayat',
+                                    variant: UniposButtonVariant.tertiary,
+                                    onTap: () {
+                                      context
+                                          .read<TransactionViewDeletedHistoryProvider>()
+                                          .fetchViewDeletedHistory(
+                                            widget.token,
+                                            detail.transactionId,
+                                            widget.merchantId,
+                                          );
+
+                                      ModalTransactionViewDeletedHistory.show(
+                                        context,
+                                        detail.fullData,
+                                      );
+                                    },
+                                  ),
+                              ],
+                            ),
+                            const Text(
+                              'Informasi Transaksi',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                            if (statusTransactionCancel.contains(
-                                  _detailData!['isPaid'],
-                                ) ||
-                                statusTransactionProcessCancel.contains(
-                                  _detailData!['isPaid'],
-                                ))
-                              UniposButton(
-                                text: 'Lihat Riwayat',
-                                variant: UniposButtonVariant.tertiary,
-                                onTap: () {
-                                  if (_detailData == null ||
-                                      _detailData!['transactionid'] == null) {
-                                    showSnackbar(context, {
-                                      'rc': '99',
-                                      'message': 'ID Transaksi belum dimuat',
-                                    });
-                                    return;
-                                  }
-                                  context
-                                      .read<
-                                        TransactionViewDeletedHistoryProvider
-                                      >()
-                                      .fetchViewDeletedHistory(
-                                        widget.token,
-                                        _detailData!['transactionid']
-                                            .toString(),
-                                        widget.merchantId,
-                                      );
-
-                                  ModalTransactionViewDeletedHistory.show(
-                                    context,
-                                    _detailData,
-                                  );
-                                },
+                            _buildInfoRow('Nomor Transaksi', '#${detail.transactionId}'),
+                            _buildInfoRow('Nama Pembeli', detail.customer ?? 'Walking Customer'),
+                            _buildInfoRow('Kasir', detail.pic ?? '-'),
+                            const Text(
+                              'Rincian Pesanan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
+                            ),
+                            const Divider(height: 1),
+                            if (detail.detailProducts != null)
+                              ...detail.detailProducts!.map((item) {
+                                return _buildProductItem(item.toJson());
+                              }).toList(),
+                            const Text(
+                              'Rincian Pembayaran',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSummaryRow(
+                              'Metode Pembayaran',
+                              detail.paymentName ?? '-',
+                            ),
+                            _buildSummaryRow(
+                              'Sub Total',
+                              detail.totalBeforeDscTax,
+                              isCurrency: true,
+                            ),
+                            if (detail.discount > 0)
+                              _buildSummaryRow(
+                                'Diskon',
+                                '- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(detail.discount)}',
+                                isCurrency: false,
+                              ),
+                            if (detail.ppn > 0)
+                              _buildSummaryRow(
+                                'PPN',
+                                detail.ppn,
+                                isCurrency: true,
+                              ),
+                            const Divider(
+                              height: 24,
+                              thickness: 1,
+                            ),
+                            _buildSummaryRow(
+                              'Uang Tunai',
+                              detail.moneyPaid,
+                              isCurrency: true,
+                            ),
+                            _buildSummaryRow(
+                              'Kembalian',
+                              detail.changeMoney,
+                              isCurrency: true,
+                              isBlue: true,
+                            ),
+                            const Divider(),
+                            _buildSummaryRow(
+                              'Total Bayar',
+                              detail.amount,
+                              isCurrency: true,
+                              isBold: true,
+                            ),
                           ],
                         ),
-                        const Text(
-                          'Informasi Transaksi',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        _buildInfoRow(
-                          'Nomor Transaksi',
-                          '#${_detailData!['transactionid'] ?? '-'}',
-                        ),
-                        _buildInfoRow(
-                          'Nama Pembeli',
-                          _detailData!['customer'] ?? 'Walking Customer',
-                        ),
-                        _buildInfoRow('Kasir', _detailData!['pic'] ?? '-'),
-                        const Text(
-                          'Rincian Pesanan',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        if (_detailData!['detail'] != null)
-                          ...(_detailData!['detail'] as List).map((item) {
-                            return _buildProductItem(item);
-                          }).toList(),
-                        const Text(
-                          'Rincian Pembayaran',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSummaryRow(
-                          'Metode Pembayaran',
-                          _detailData!['payment_name'] ?? '-',
-                        ),
-                        _buildSummaryRow(
-                          'Sub Total',
-                          _detailData!['total_before_dsc_tax'],
-                          isCurrency: true,
-                        ),
-                        if (_parseAmount(_detailData!['discount']) > 0)
-                          _buildSummaryRow(
-                            'Diskon',
-                            '- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_parseAmount(_detailData!['discount']))}',
-                            isCurrency: false,
-                          ),
-                        if (_parseAmount(_detailData!['ppn']) > 0)
-                          _buildSummaryRow(
-                            'PPN',
-                            _detailData!['ppn'],
-                            isCurrency: true,
-                          ),
-                        const Divider(
-                          height: 24,
-                          thickness: 1,
-                        ), // dashed mimic skipped for simplicity
-                        _buildSummaryRow(
-                          'Uang Tunai',
-                          _detailData!['money_paid'],
-                          isCurrency: true,
-                        ),
-                        _buildSummaryRow(
-                          'Kembalian',
-                          _detailData!['change_money'],
-                          isCurrency: true,
-                          isBlue: true,
-                        ),
-                        const Divider(),
-                        _buildSummaryRow(
-                          'Total Bayar',
-                          _detailData!['amount'],
-                          isCurrency: true,
-                          isBold: true,
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
           ),
-          if (_detailData != null) ...[
+          if (detail != null) ...[
             const SizedBox(height: 20),
             Column(
               children: [
@@ -1468,8 +1325,8 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      final raw = _detailData?['raw']?.toString() ?? "";
-                      print('Raw data to share : ${_detailData!['raw']}');
+                      final raw = detail.raw ?? "";
+                      print('Raw data to share : $raw');
                       if (raw.isNotEmpty) {
                         // _shareToWhatsApp(raw);
                       }
@@ -1499,7 +1356,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                   spacing: 8,
                   children: [
                     if (statusTransactionSuccess.contains(
-                      _detailData!['isPaid'],
+                      detail.isPaid,
                     ))
                       UniposButtonStatus(
                         variant: UniposButtonStatusVariant.danger,
@@ -1507,30 +1364,19 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                         icon: PhosphorIcons.trash_simple_fill,
                         textShow: false,
                         onTap: () {
-                          if (_detailData == null ||
-                              _detailData!['transactionid'] == null) {
-                            showSnackbar(context, {
-                              'rc': '99',
-                              'message': 'ID Transaksi belum dimuat',
-                            });
-                            return;
-                          }
                           context
                               .read<TransactionHistoryDeleteReasonsProvider>()
                               .fetchDeleteListReasons(
-                                _detailData!['transactionid'].toString(),
+                                detail.transactionId,
                                 widget.token,
                               );
                           ModalTransactionDelete.show(
                             context,
-                            _detailData,
+                            detail.fullData,
                             widget.token,
                           ).then((success) {
                             if (success == true) {
-                              Navigator.pop(
-                                context,
-                                true,
-                              ); // Menutup detail modal, teruskan true ke hal utama!
+                              Navigator.pop(context, true);
                             }
                           });
                         },

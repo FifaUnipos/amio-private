@@ -49,6 +49,14 @@ class ModalTransactionDelete {
           return;
         }
 
+        if (noteController.text.trim().length < 15) {
+          showSnackbar(context, {
+            'rc': '99',
+            'message': 'Detail alasan minimal 15 karakter',
+          });
+          return;
+        }
+
         final provider = context.read<TransactionHistoryDeleteProvider>();
         await provider.deleteTransactionHistory(
           noteController.text,
