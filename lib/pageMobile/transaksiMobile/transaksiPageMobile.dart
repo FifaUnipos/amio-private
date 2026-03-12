@@ -22,20 +22,22 @@ import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/logger.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'history/riwayat_page.dart';
-import 'bill_page.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/history/riwayat_page.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/bill_page.dart';
 import 'package:unipos_app_335/utils/repository/transaction_repository.dart';
 import 'package:unipos_app_335/utils/repository/product_repository.dart';
 import 'package:unipos_app_335/models/produkmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:unipos_app_335/providers/transactions/transaction_provider.dart';
+import 'package:unipos_app_335/models/product_transaksi_model.dart';
+import 'package:unipos_app_335/models/transactionModel.dart';
 
 enum DetailMode { calculate, create }
 
-int _toIntSafe(dynamic v, {int def = 0}) {
+int toIntSafe(dynamic v, {int def = 0}) {
   if (v == null) return def;
   if (v is int) return v;
-
+  if (v is bool) return v ? 1 : 0;
   if (v is num) return v.round();
 
   final s = v.toString().trim();
@@ -49,7 +51,8 @@ int _toIntSafe(dynamic v, {int def = 0}) {
   return d?.round() ?? def;
 }
 
-bool _toBoolSafe(dynamic v) {
+
+bool toBoolSafe(dynamic v) {
   if (v == null) return false;
   if (v == true) return true;
   if (v is bool) return v;
@@ -59,6 +62,165 @@ bool _toBoolSafe(dynamic v) {
   return s == '1' || s == 'true' || s == 'yes';
 }
 
+List<Map<String, dynamic>> restoreCart(Map<String, dynamic> data) {
+  final String txId =
+      (data['transactionid'] ?? data['transaction_id'] ?? '').toString();
+  final bool isTxOnline = txId.isNotEmpty && !txId.startsWith("OFFLINE-");
+
+  List<Map<String, dynamic>> newCart = [];
+  print("[DIAGNOSTIC] restoreCart called with keys: ${data.keys}");
+  if (data['detail'] != null) {
+    print("[DIAGNOSTIC] data['detail'] is List? ${data['detail'] is List}. Length: ${(data['detail'] as List).length}");
+    for (var itemRaw in (data['detail'] as List)) {
+      print("[DIAGNOSTIC] Processing itemRaw of type: ${itemRaw.runtimeType}");
+      Map<String, dynamic> item;
+      if (itemRaw is Map) {
+        item = Map<String, dynamic>.from(itemRaw);
+      } else if (itemRaw is TransactionProductItem) {
+        item = itemRaw.toJson();
+      } else {
+        AppLogger.d("Cart", "Unknown item type in detail: ${itemRaw.runtimeType}");
+        continue;
+      }
+
+      ProductTransaksi product;
+      try {
+        product = ProductTransaksi.fromJson(item);
+        AppLogger.d("Cart", "Parsed product: ${product.name} (ID: ${product.id})");
+      } catch (e) {
+        AppLogger.d(
+          "Cart",
+          "CRITICAL: FAILED to parse Product from JSON: $e. item: $item",
+        );
+        continue;
+      }
+
+      List<Map<String, dynamic>> apiVariants = [];
+      List<Map<String, dynamic>> uiVariants = [];
+      double variantTotal = 0;
+
+      try {
+        final dynVariants = item['variants'];
+        if (dynVariants is List) {
+          for (var vRaw in dynVariants) {
+            final variant = Map<String, dynamic>.from(vRaw);
+
+            // API structure
+            final catId =
+                (variant['variant_category_id'] ??
+                        variant['id_variant_category'])
+                    ?.toString() ??
+                "";
+            if (catId.isNotEmpty) {
+              final List<dynamic> vpList =
+                  (variant['variant_products'] as List?) ??
+                  (variant['variant'] as List?) ??
+                  [];
+
+              apiVariants.add({
+                'variant_category_id': catId,
+                'variant': vpList.map((vpRaw) {
+                  final vp = Map<String, dynamic>.from(vpRaw);
+                  final vid =
+                      (vp['variant_product_id'] ?? vp['variant_id'] ?? vp['id'])
+                          ?.toString() ??
+                      "";
+                  final vprice = toIntSafe(vp['price'] ?? vp['variant_price']);
+                  final visCust = toBoolSafe(vp['is_variant_customize']);
+
+                  return {
+                    "variant_id": vid,
+                    "variant_price": vprice,
+                    "is_variant_customize": visCust,
+                  };
+                }).toList(),
+              });
+            }
+
+            // UI structure - extract from variant_products or variant
+            final List<dynamic> vpListForUI =
+                (variant['variant_products'] as List?) ??
+                (variant['variant'] as List?) ??
+                [];
+            for (var vpRaw in vpListForUI) {
+              final vp = Map<String, dynamic>.from(vpRaw);
+              final vprice =
+                  double.tryParse(
+                    (vp['price'] ?? vp['variant_price'] ?? '0').toString(),
+                  ) ??
+                  0;
+              variantTotal += vprice;
+              uiVariants.add({
+                'variant_id':
+                    (vp['variant_product_id'] ?? vp['variant_id'] ?? vp['id'])
+                        ?.toString() ??
+                    "",
+                'name':
+                    (vp['variant_product_name'] ??
+                            vp['variant_name'] ??
+                            vp['name'])
+                        ?.toString() ??
+                    "",
+                'price': vprice.toInt(),
+              });
+            }
+          }
+        }
+      } catch (e) {
+        AppLogger.d("Cart", "Error processing variants for ${product.name}: $e");
+      }
+
+      final bool isCustomize = toBoolSafe(item['is_customize']);
+      final bool isOnline = toBoolSafe(item['is_online']);
+
+      final double unitAmount =
+          (double.tryParse((item['unit_amount'] ?? item['price'] ?? '0').toString()) ??
+              0);
+      final double totalAmount =
+          (double.tryParse((item['amount'] ?? item['total_amount'] ?? item['total'] ?? '0').toString()) ??
+              0);
+
+      final int restoredPrice = unitAmount.round();
+      final bool isPpn =
+          toIntSafe(item['is_ppn'] ?? item['isPPN'] ?? product.isPPN) == 1;
+
+      newCart.add({
+        'product': product,
+        'quantity': int.tryParse(item['quantity']?.toString() ?? '1') ?? 1,
+        'notes': item['note'] ?? item['description'] ?? '',
+        'variants': apiVariants,
+        'variants_ui': uiVariants,
+        'variant_total': variantTotal,
+        'is_online': isTxOnline || isOnline,
+        'is_customize': isCustomize,
+        'is_ppn': isPpn,
+        'custom_amount': restoredPrice > 0 ? restoredPrice : null,
+        'unit_amount': unitAmount > 0 ? unitAmount : null,
+        'total_amount': totalAmount > 0 ? totalAmount : null,
+      });
+
+      AppLogger.d(
+        "Cart",
+        "RESTORED: ${product.name} (QTY: ${item['quantity']}, Total: $totalAmount)",
+      );
+    }
+  }
+
+  AppLogger.d("Cart", "Total cart items restored: ${newCart.length}");
+  return newCart;
+}
+
+extension Restorer on _TransaksiMobilePageState {
+  void restoreCartToState(Map<String, dynamic> data) {
+    final newCart = restoreCart(data);
+    setState(() {
+      _cart.clear();
+      _cart.addAll(newCart);
+    });
+    AppLogger.d("Cart", "Total cart items restored to state: ${_cart.length}");
+  }
+}
+
 int _variantTotalFromApi(List<dynamic> variants) {
   int total = 0;
   for (final cat in variants) {
@@ -66,7 +228,7 @@ int _variantTotalFromApi(List<dynamic> variants) {
     final list = (cat['variant'] as List?) ?? [];
     for (final v in list) {
       if (v is! Map) continue;
-      total += _toIntSafe(v['variant_price']);
+      total += toIntSafe(v['variant_price']);
     }
   }
   return total;
@@ -76,7 +238,7 @@ int cartSubTotal(List<Map<String, dynamic>> cart) {
   int sum = 0;
 
   for (final item in cart) {
-    final int qty = _toIntSafe(item['quantity'], def: 0);
+    final int qty = toIntSafe(item['quantity'], def: 0);
 
     final num? totalAmount = item['total_amount'] as num?;
     if (totalAmount != null) {
@@ -84,9 +246,9 @@ int cartSubTotal(List<Map<String, dynamic>> cart) {
       continue;
     }
 
-    final Product p = item['product'] as Product;
+    final ProductTransaksi p = item['product'] as ProductTransaksi;
     final bool isOnline = item['is_online'] == true;
-    final bool isCustomize = _toBoolSafe(item['is_customize']);
+    final bool isCustomize = toBoolSafe(item['is_customize']);
     final int? customAmount = item['custom_amount'] as int?;
 
     final int baseDefault = isOnline
@@ -97,7 +259,7 @@ int cartSubTotal(List<Map<String, dynamic>> cart) {
         : baseDefault;
 
     final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
-    final int variantTotal = _toIntSafe(
+    final int variantTotal = toIntSafe(
       item['variant_total'],
       def: _variantTotalFromApi(rawVariants),
     );
@@ -115,12 +277,19 @@ List<Map<String, dynamic>> buildTransactionDetails(
   required DetailMode mode,
   bool quantityAsString = false,
 }) {
+  print("[DIAGNOSTIC] buildTransactionDetails called with cart length: ${cart.length}, mode: $mode");
   return cart.map((item) {
-    final Product p = item['product'] as Product;
+    final prod = item['product'];
+    // Use more robust check that works even with library duplication
+    if (prod == null || (prod.runtimeType.toString() != 'ProductTransaksi' && prod is! ProductTransaksi)) {
+      print("[DIAGNOSTIC] SKIP ITEM: product is invalid. Type: ${prod?.runtimeType}. Item keys: ${item.keys}");
+      return <String, dynamic>{};
+    }
+    final dynamic p = prod; // Cast to dynamic to access properties safely
     // print(object)
-    final int qty = _toIntSafe(item['quantity'], def: 0);
+    final int qty = toIntSafe(item['quantity'], def: 0);
     final bool isOnline = item['is_online'] == true;
-    final bool isCustomize = _toBoolSafe(item['is_customize']);
+    final bool isCustomize = toBoolSafe(item['is_customize']);
     final int? customAmount = item['custom_amount'] as int?;
     final String notes = item['notes']?.toString() ?? "";
     // print("custom amount: $customAmount");
@@ -133,14 +302,20 @@ List<Map<String, dynamic>> buildTransactionDetails(
 
     final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
 
-    final int varianTotal = _toIntSafe(
+    final int varianTotal = toIntSafe(
       item['variant_total'],
       def: _variantTotalFromApi(rawVariants),
     );
 
     final num? unitNum = item['unit_amount'] as num?;
-    // final int unitAmount = unitNum?.round() ?? (baseUsed + varianTotal);
-    final int amountToSend = baseUsed;
+    final num? totalNum = item['total_amount'] as num?;
+
+    // Use final amount from bill if available, otherwise fallback to unit or base
+    final double amountValue = (totalNum != null && qty > 0)
+        ? (totalNum / qty)
+        : (unitNum?.toDouble() ?? baseUsed.toDouble());
+
+    final String amountToSend = amountValue.toStringAsFixed(0);
     final List<Map<String, dynamic>> variants = rawVariants
         .map((cat) {
           if (cat is! Map) return <String, dynamic>{};
@@ -164,8 +339,8 @@ List<Map<String, dynamic>> buildTransactionDetails(
             if (v is Map) {
               return {
                 "variant_id": v['variant_id']?.toString() ?? '',
-                "variant_price": _toIntSafe(v['variant_price'] ?? v['price']),
-                "is_variant_customize": _toBoolSafe(v['is_variant_customize'])
+                "variant_price": toIntSafe(v['variant_price'] ?? v['price']),
+                "is_variant_customize": toBoolSafe(v['is_variant_customize'])
                     ? 1
                     : 0,
               };
@@ -184,137 +359,33 @@ List<Map<String, dynamic>> buildTransactionDetails(
 
     if (mode == DetailMode.calculate) {
       return {
-        "product_id": p.id,
-        "name": p.name,
-        "amount": "${amountToSend}.00",
-        "quantity": qty,
-        "description": notes.isEmpty ? null : notes,
+        "request_id": null,
+        "product_id": p.id.toString(),
         "is_online": isOnline,
         "is_customize": isCustomize,
+        "amount": amountValue.toStringAsFixed(0),
+        "name": p.name,
+        "quantity": qty,
+        "description": notes.isEmpty ? null : notes,
         "variants": variants,
       };
     }
 
     return {
-      "product_id": p.id.toString(),
       "request_id": "",
+      "product_id": p.id.toString(),
       "is_online": isOnline,
       "is_customize": isCustomize,
-      "amount": "${amountToSend}.00", // Ensure string with .00 as per sample
+      "amount": amountToSend,
       "name": p.name,
-      "quantity": quantityAsString ? qty.toString() : qty,
+      "quantity": qty, // Use int as per sample
       "description": notes.isEmpty ? null : notes,
       "variants": variants,
     };
-  }).toList();
+  }).where((e) => e.isNotEmpty).toList();
 }
 
-class Product {
-  final String id;
-  final String name;
-  final int price;
-  final int onlinePrice;
-  final int? priceAfter;
-  final double? discount;
-  final String? discountType;
-  final String category;
-  final String? imageUrl;
-  final bool? isCustomize;
-
-  Product({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.onlinePrice,
-    this.priceAfter,
-    this.discount,
-    this.discountType,
-    required this.category,
-    this.imageUrl,
-    this.isCustomize,
-  });
-
-  static int _toInt(dynamic v, {int def = 0}) {
-    if (v == null) return def;
-    if (v is int) return v;
-    return int.tryParse(v.toString()) ?? def;
-  }
-
-  static int? _toNullableInt(dynamic v) {
-    if (v == null) return null;
-    if (v is int) return v;
-    return int.tryParse(v.toString());
-  }
-
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? 'Unknown',
-      price: _toInt(json['price']),
-      onlinePrice: _toInt(json['price_online_shop']),
-      priceAfter: _toNullableInt(json['price_after']),
-      discount: (json['discount'] as num?)?.toDouble(),
-      discountType: json['discount_type'],
-      category: json['typeproducts'] ?? '',
-      imageUrl: json['product_image'],
-      isCustomize: json['is_customize'],
-    );
-  }
-}
-
-class ProductVariant {
-  final String id;
-  final String name;
-  final String price;
-  final String isActive;
-
-  ProductVariant({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.isActive,
-  });
-
-  factory ProductVariant.fromJson(Map<String, dynamic> json) {
-    return ProductVariant(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      price: json['price']?.toString() ?? '0',
-      isActive: json['is_active']?.toString() ?? '0',
-    );
-  }
-}
-
-class ProductVariantCategory {
-  final String id;
-  final String title;
-  final int isRequired;
-  final int maximumSelected;
-  final List<ProductVariant> productVariants;
-
-  ProductVariantCategory({
-    required this.id,
-    required this.title,
-    required this.isRequired,
-    required this.maximumSelected,
-    required this.productVariants,
-  });
-
-  factory ProductVariantCategory.fromJson(Map<String, dynamic> json) {
-    var list = json['product_variants'] as List? ?? [];
-    List<ProductVariant> variantList = list
-        .map((i) => ProductVariant.fromJson(i))
-        .toList();
-
-    return ProductVariantCategory(
-      id: json['id']?.toString() ?? '',
-      title: json['name'] ?? '',
-      isRequired: int.tryParse(json['is_required'].toString()) ?? 0,
-      maximumSelected: int.tryParse(json['maximum_selected'].toString()) ?? 0,
-      productVariants: variantList,
-    );
-  }
-}
+// Shared product models moved to product_transaksi_model.dart
 
 class TransaksiMobilePage extends StatefulWidget {
   final String token;
@@ -335,8 +406,8 @@ class TransaksiMobilePage extends StatefulWidget {
 class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Product> _products = [];
-  List<Product> _filteredProducts = [];
+  List<ProductTransaksi> _products = [];
+  List<ProductTransaksi> _filteredProducts = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
   List<Map<String, dynamic>> _cart = [];
@@ -429,7 +500,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     return false;
   }
 
-  // int _toIntSafe(dynamic v) {
+  // int toIntSafe(dynamic v) {
   //   if (v == null) return 0;
   //   if (v is int) return v;
   //   return int.tryParse(v.toString()) ?? 0;
@@ -444,12 +515,12 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     });
   }
 
-  Product _mapModelToProduct(ModelDataProduk e) {
-    return Product(
+  ProductTransaksi _mapModelToProduct(ModelDataProduk e) {
+    return ProductTransaksi(
       id: e.productid ?? '',
       name: e.name ?? '',
       price: e.price?.toInt() ?? 0,
-      priceAfter: e.price_after?.toInt() ?? 0,
+      priceAfter: e.price_after?.toInt(), // Remove ?? 0 to allow fallback to price
       onlinePrice:
           (double.tryParse(e.price_online_shop?.toString() ?? '0') ?? 0)
               .toInt(),
@@ -457,6 +528,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       category: e.typeproducts ?? '',
       discount: (e.discount as num?)?.toDouble(),
       discountType: e.discount_type,
+      isPPN: e.isPPN,
     );
   }
 
@@ -466,6 +538,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       final List<ModelDataProduk> result = await _productRepository.getProducts(
         token: widget.token,
         name: "",
+        isactive: "1",
         merchid: [widget.merchantId],
         orderby: textvalueOrderBy,
         onSyncUpdate: (updatedList) {
@@ -517,7 +590,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     }
   }
 
-  void _showPreviewCart(Product product) {
+  void _showPreviewCart(ProductTransaksi product) {
     // Reset state
     selectedVariantsByProduct.clear();
     variantErrorByCategory.clear();
@@ -1078,11 +1151,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                           defaultVPrice;
 
                                       final int shownVPrice = detail != null
-                                          ? _toIntSafe(detail['variant_price'])
+                                          ? toIntSafe(detail['variant_price'])
                                           : cachedPrice;
 
                                       final bool isVCustomize = detail != null
-                                          ? _toBoolSafe(
+                                          ? toBoolSafe(
                                               detail['is_variant_customize'],
                                             )
                                           : variantCustomCache.containsKey(vid);
@@ -1191,11 +1264,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                     if (dIndex == -1) return;
 
                                                     final int
-                                                    defPrice = _toIntSafe(
+                                                    defPrice = toIntSafe(
                                                       details[dIndex]['variant_price_default'],
                                                     );
                                                     int
-                                                    currentPrice = _toIntSafe(
+                                                    currentPrice = toIntSafe(
                                                       details[dIndex]['variant_price'],
                                                     );
 
@@ -1705,7 +1778,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   }
 
   void _addToCartWithVariants(
-    Product product,
+    ProductTransaksi product,
     int quantity,
     String notes,
     bool isOnline, {
@@ -1714,7 +1787,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   }) {
     final productId = product.id.toString();
     final variantList = selectedVariantsByProduct[productId] ?? [];
-    void _showPreviewCart(Product product) {
+    void _showPreviewCart(ProductTransaksi product) {
       // Reset state
       selectedVariantsByProduct.clear();
       variantErrorByCategory.clear();
@@ -2276,14 +2349,14 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                 .toInt();
                                         final int shownVPrice = detail == null
                                             ? defaultVPrice
-                                            : _toIntSafe(
+                                            : toIntSafe(
                                                 detail['variant_price'],
                                                 def: defaultVPrice,
                                               );
 
                                         final bool isVCustomize =
                                             detail != null &&
-                                            _toBoolSafe(
+                                            toBoolSafe(
                                               detail['is_variant_customize'],
                                             );
 
@@ -2392,11 +2465,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                       if (dIndex == -1) return;
 
                                                       final int
-                                                      defPrice = _toIntSafe(
+                                                      defPrice = toIntSafe(
                                                         details[dIndex]['variant_price_default'],
                                                       );
                                                       int
-                                                      currentPrice = _toIntSafe(
+                                                      currentPrice = toIntSafe(
                                                         details[dIndex]['variant_price'],
                                                       );
 
@@ -2921,7 +2994,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           List<Map<String, dynamic>>.from(cat['variant_detail'] as List);
 
       for (var v in details) {
-        final int vprice = _toIntSafe(v['variant_price']);
+        final int vprice = toIntSafe(v['variant_price']);
         variantTotal += vprice.toDouble();
 
         flattenedVariants.add({
@@ -2932,7 +3005,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       }
 
       final variantItems = details.map((v) {
-        final int vprice = _toIntSafe(v['variant_price']);
+        final int vprice = toIntSafe(v['variant_price']);
         final bool vCustom = v['is_variant_customize'] == true;
 
         return {
@@ -2992,7 +3065,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     super.dispose();
   }
 
-  void _addToCart(Product product, int quantity, String notes) {
+  void _addToCart(ProductTransaksi product, int quantity, String notes) {
     setState(() {
       _cart.add({'product': product, 'quantity': quantity, 'notes': notes});
     });
@@ -3018,7 +3091,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       _cart.fold(0, (sum, item) => sum + (item['quantity'] as int));
   int get _subTotal => cartSubTotal(_cart);
 
-  void _showProductDetail(Product product) {
+  void _showProductDetail(ProductTransaksi product) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -3042,23 +3115,72 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       ),
     );
 
+    if (result == true) {
+      setState(() {
+        _cart.clear();
+        _selectedDiscount = null;
+        // _selectedCustomer = null;
+        _currentTransactionId = null;
+      });
+      return;
+    }
+
     if (result != null && result is Map<String, dynamic>) {
       if (result['action'] == 'edit' || result['action'] == 'pay') {
-        _restoreCart(result['data']);
+        Map<String, dynamic> billData = Map<String, dynamic>.from(result['data']);
+        final String txId = (billData['transactionid'] ?? billData['transaction_id'] ?? '').toString();
+        
+        // If details are missing, try to fetch them (handles offline/cache internally)
+        if (billData['detail'] == null || (billData['detail'] as List).isEmpty) {
+          if (txId.isNotEmpty) {
+             final fullDetail = await _transactionRepository.getTransactionDetail(
+               token: widget.token,
+               merchantId: widget.merchantId,
+               transactionId: txId,
+             );
+             if (fullDetail != null) {
+               billData = Map<String, dynamic>.from(fullDetail.fullData);
+             }
+          }
+        }
+
+        restoreCartToState(billData);
+        
+        // Priority for numeric member ID, EXCLUDE 'customer' which is usually the name.
+        final String? rawId = (billData['memberid'] ?? 
+                               billData['member_id'] ?? 
+                               billData['id_member'])?.toString();
+        
+        // Only use if it looks like an ID (not empty and not a placeholder name)
+        String? custId;
+        if (rawId != null && 
+            rawId.isNotEmpty && 
+            !rawId.toLowerCase().contains("walking") &&
+            !rawId.toLowerCase().contains("pelanggan")) {
+          custId = rawId;
+        }
+
+        final String? custName = billData['customer_name']?.toString() ?? 
+                                 billData['nama_member']?.toString() ??
+                                 billData['customer']?.toString();
+
+        setState(() {
+          _currentTransactionId = txId.isNotEmpty ? txId : null;
+          if (custId != null && custId.isNotEmpty) {
+            _selectedMemberId = custId;
+            _selectedMemberName = custName ?? 'Pilih Pelanggan';
+          }
+        });
 
         if (result['action'] == 'pay') {
-          // Wait for cart to be restored
-          await Future.delayed(Duration(milliseconds: 100));
-
-          // Get final amount from bill detail
+          // Revert to "Calculate then Push" flow as requested
           final billAmount =
-              double.tryParse(result['data']['amount']?.toString() ?? '0') ?? 0;
+              double.tryParse(billData['amount']?.toString() ?? '0') ?? 0;
 
-          // Call calculating API before payment
           await _calculateBeforePayment(
-            result['data']['transactionid']?.toString(),
+            txId.isNotEmpty ? txId : null,
             billAmount,
-            result['data'], // Pass complete bill data
+            billData,
           );
         }
       }
@@ -3071,17 +3193,47 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
     Map<String, dynamic> billData,
   ) async {
     if (_cart.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Keranjang kosong')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Keranjang kosong')),
+      );
       return;
     }
 
-    // Show loading
+    // ── Offline path: skip calculate API ──────────────────────────────────
+    final isOnline = await _transactionRepository.checkIsOnline();
+    if (!isOnline) {
+      final localBreakdown = _computeLocalBreakdown();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentPage(
+            cart: List<Map<String, dynamic>>.from(_cart),
+            token: widget.token,
+            merchantId: widget.merchantId,
+            transactionId: transactionId,
+            memberId: _selectedMemberId,
+            memberName: _selectedMemberName,
+            finalAmount: (localBreakdown['amount'] as int).toDouble(),
+            billData: localBreakdown,
+            isOffline: true,
+            onSuccess: () {
+              setState(() {
+                _cart.clear();
+                _calculationData = null;
+                _currentTransactionId = null;
+              });
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    // ── Online path: call calculate API ───────────────────────────────────
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
     try {
       final details = buildTransactionDetails(
@@ -3089,43 +3241,27 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         mode: DetailMode.calculate,
       );
 
-      AppLogger.d('TransaksiPage', 'cart: $_cart');
-      AppLogger.api('CalculateAPI', 'Transaction ID: $transactionId');
-      AppLogger.api('CalculateAPI', 'Merchant ID: ${widget.merchantId}');
-      AppLogger.api('CalculateAPI', 'Cart items count: ${_cart.length}');
-      for (var i = 0; i < _cart.length; i++) {
-        AppLogger.d(
-          'CalculateAPI',
-          'Cart item $i - Product: ${_cart[i]['product'].name}',
-        );
-        AppLogger.d(
-          'CalculateAPI',
-          'Cart item $i - Variants (API): ${_cart[i]['variants']}',
-        );
-        AppLogger.d(
-          'CalculateAPI',
-          'Cart item $i - Variants (UI): ${_cart[i]['variants_ui']}',
-        );
-      }
-      AppLogger.api('CalculateAPI', 'Details being sent: $details');
+      final String mId = widget.merchantId.isNotEmpty ? widget.merchantId : (merchantIdProfile ?? "");
+      
+      final payload = {
+        "merchantid": mId,
+        "deviceid": identifier,
+        "discount_id": (_selectedDiscount?.id != null && _selectedDiscount!.id.isNotEmpty) ? _selectedDiscount!.id : null,
+        "member_id": (_selectedMemberId != null && _selectedMemberId!.isNotEmpty) ? _selectedMemberId : null,
+        "transaction_id": (transactionId != null && transactionId.isNotEmpty) ? transactionId : null,
+        "detail": details,
+      };
+
+      AppLogger.d("Transaction", "CALCULATE PAYLOAD: ${jsonEncode(payload)}");
 
       final response = await http.post(
         Uri.parse(ApiEndpoints.calculateTransaksiUrl),
         headers: {
           'token': widget.token,
-          'DEVICE-ID': identifier!,
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "merchantid": widget.merchantId,
-          "discount_id": _selectedDiscount?.id ?? "",
-          "member_id": _selectedMemberId ?? "",
-          "transaction_id": transactionId ?? "",
-          "detail": details,
-        }),
+        body: jsonEncode(payload),
       );
-
-      print('Calculating response: ${response.body}');
 
       if (!mounted) return;
       Navigator.pop(context); // Close loading
@@ -3133,40 +3269,27 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['rc'] == '00') {
-          // Calculating successful, proceed to payment
-          if (!mounted) return;
-
-          // Autoritative data from calculation
-          final calculationResult =
-              data['data'] ?? data as Map<String, dynamic>;
-          final calcAmount =
-              double.tryParse(calculationResult['amount'].toString()) ?? 0;
-
-          // Merge with original bill data so we don't lose fields like total_before_dsc_tax
-          final Map<String, dynamic> mergedData = Map<String, dynamic>.from(
-            billData,
-          );
+          final calculationResult = data['data'] ?? data as Map<String, dynamic>;
+          final calcAmount = double.tryParse(calculationResult['amount'].toString()) ?? 0;
+          final Map<String, dynamic> mergedData = Map<String, dynamic>.from(billData);
           if (calculationResult is Map<String, dynamic>) {
             mergedData.addAll(calculationResult);
           }
-
-          print('=== PAYMENT PAGE DATA ===');
-          print('Calculation Result: $calculationResult');
-          print('Merged Data: $mergedData');
-          print('Bill Amount: $billAmount');
-          print('========================');
-
-          Navigator.push(
+          if (!mounted) return;
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PaymentPage(
                 cart: _cart,
                 token: widget.token,
-                merchantId: widget.merchantId,
+                merchantId: merchantIdProfile ?? "",
+                selectedDiscount: _selectedDiscount,
+                memberId: _selectedMemberId,
+                memberName: _selectedMemberName ?? 'Pilih Pelanggan',
                 transactionId: transactionId,
-                memberId: _selectedMemberId, // Pass memberId
                 finalAmount: calcAmount,
-                billData: billData,
+                billData: mergedData,
+                isOffline: false,
                 onSuccess: () {
                   setState(() {
                     _cart.clear();
@@ -3180,9 +3303,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'Gagal menghitung total'),
-            ),
+            SnackBar(content: Text(data['message'] ?? 'Gagal menghitung total')),
           );
         }
       } else {
@@ -3193,122 +3314,58 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       }
     } catch (e) {
       if (!mounted) return;
-      Navigator.pop(context); // Close loading
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
-  void _restoreCart(Map<String, dynamic> data) {
-    List<Map<String, dynamic>> newCart = [];
-    if (data['detail'] != null) {
-      for (var item in (data['detail'] as List)) {
-        // Try to find product in loaded products, else create temp Product
-        Product product;
-        try {
-          final isCustomize = _toBool(item['is_customize']);
+  /// Compute subtotal, PPN (11% per item with isPPN), and total locally from cart.
+  Map<String, dynamic> _computeLocalBreakdown() {
+    int subTotal = 0;
+    int ppn = 0;
 
-          product = Product(
-            id:
-                item['productid']?.toString() ??
-                item['product_id']?.toString() ??
-                '',
-            name: item['name'] ?? '',
-            price: (double.tryParse(item['price']?.toString() ?? '0') ?? 0)
-                .toInt(),
-            onlinePrice:
-                (double.tryParse(item['online_price']?.toString() ?? '0') ?? 0)
-                    .toInt(),
-            category: item['typeproducts'],
-            imageUrl: item['product_image'],
-            isCustomize: isCustomize,
-          );
-        } catch (e) {
-          continue;
+    for (final item in _cart) {
+      final ProductTransaksi p = item['product'] as ProductTransaksi;
+      final int qty = toIntSafe(item['quantity'], def: 1);
+      final bool isCustomize = item['is_customize'] == true;
+      final int? customAmount = item['custom_amount'] as int?;
+      final bool isOnline = item['is_online'] == true;
+
+      final int baseDefault = isOnline ? p.onlinePrice : (p.priceAfter ?? p.price);
+      final int baseUsed = (isCustomize && customAmount != null) ? customAmount : baseDefault;
+
+      final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
+      int variantTotal = 0;
+      for (final cat in rawVariants) {
+        if (cat is! Map) continue;
+        for (final v in (cat['variant'] as List? ?? [])) {
+          if (v is! Map) continue;
+          variantTotal += toIntSafe(v['variant_price']);
         }
+      }
 
-        // Reruct variants from bill detail structure
-        List<Map<String, dynamic>> apiVariants = [];
-        List<Map<String, dynamic>> uiVariants = [];
-        double variantTotal = 0;
-
-        if (item['variants'] != null) {
-          for (var variant in (item['variants'] as List)) {
-            // API structure
-            if (variant['variant_category_id'] != null) {
-              final List<dynamic> vpList =
-                  (variant['variant_products'] as List?) ?? [];
-
-              apiVariants.add({
-                'variant_category_id': variant['variant_category_id']
-                    .toString(),
-                'variant': vpList.map((vp) {
-                  final id =
-                      (vp['variant_product_id'] ?? vp['variant_id'] ?? vp['id'])
-                          .toString();
-                  final price = _toIntSafe(vp['price'] ?? vp['variant_price']);
-                  final isCust = _toBool(vp['is_variant_customize']);
-
-                  return {
-                    "variant_id": id,
-                    "variant_price": price,
-                    "is_variant_customize": isCust,
-                  };
-                }).toList(),
-              });
-            }
-
-            // UI structure - extract from variant_products
-            if (variant['variant_products'] != null) {
-              for (var vp in (variant['variant_products'] as List)) {
-                print('Variant product data: $vp');
-                final price =
-                    double.tryParse(vp['price']?.toString() ?? '0') ?? 0;
-                variantTotal += price;
-                uiVariants.add({
-                  'variant_id':
-                      vp['variant_product_id'] ?? vp['variant_id'] ?? vp['id'],
-                  'name':
-                      vp['variant_product_name'] ?? vp['variant_name'] ?? '',
-                  'price': price.toInt(),
-                });
-              }
-            }
-          }
-        }
-
-        final bool isCustomize = _toBoolSafe(item['is_customize']);
-        final bool isOnline = _toBoolSafe(item['is_online']);
-        final int restoredAmount =
-            (double.tryParse(item['price']?.toString() ?? '0') ?? 0).round();
-
-        newCart.add({
-          'product': product,
-          'quantity': int.tryParse(item['quantity'].toString()) ?? 1,
-          'notes': item['note'] ?? item['description'] ?? '',
-          'variants': apiVariants,
-          'variants_ui': uiVariants,
-          'variant_total': variantTotal,
-          'is_online': isOnline,
-          'is_customize': isCustomize,
-          'custom_amount': restoredAmount,
-        });
-
-        print('Restored cart item for ${product.name}:');
-        print('  - API Variants: $apiVariants');
-        print('  - UI Variants: $uiVariants');
-        print('  - Variant Total: $variantTotal');
+      final int lineTotal = (baseUsed + variantTotal) * qty;
+      subTotal += lineTotal;
+      
+      // Calculate PPN if is_ppn is true for this item or its product
+      final bool hasPpn = toIntSafe(item['is_ppn'] ?? p.isPPN) == 1;
+      // final bool hasPpn = toIntSafe(item['is_ppn'] ?? p.isPPN) == 1;
+      if (hasPpn) {
+        ppn += (lineTotal * 0.11).round();
       }
     }
 
-    setState(() {
-      _cart.clear();
-      _cart.addAll(newCart);
-    });
-
-    print('Total cart items restored: ${newCart.length}');
+    final int total = subTotal + ppn;
+    return {
+      'total_before_dsc_tax': subTotal,
+      'ppn': ppn,
+      'amount': total,
+      'discount': 0,
+    };
   }
+
 
   Future<void> _processSaveBill({bool closeOnSuccess = false}) async {
     if (_cart.isEmpty) return;
@@ -3378,7 +3435,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => CartBottomSheet(
-        cart: _cart,
+        cart: List<Map<String, dynamic>>.from(_cart),
         onUpdateQty: (index, qty) {
           _updateCartQty(index, qty);
         },
@@ -3394,7 +3451,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
             _cart[index]['variants_ui'] = uiVariants;
             _cart[index]['variant_total'] = total;
 
-            final Product p = _cart[index]['product'];
+            final ProductTransaksi p = _cart[index]['product'];
             final bool isOnline = _cart[index]['is_online'] == true;
             final bool isCustomize = _cart[index]['is_customize'] == true;
             final int? customAmount = _cart[index]['custom_amount'] as int?;
@@ -3428,7 +3485,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
             context,
             MaterialPageRoute(
               builder: (context) => PaymentPage(
-                cart: _cart,
+                cart: List<Map<String, dynamic>>.from(_cart),
                 token: widget.token,
                 merchantId: widget.merchantId,
                 transactionId: _currentTransactionId,
@@ -3605,8 +3662,8 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   }
 
   // Helper to check if product is selected to highlight it
-  bool _isInCart(Product p) {
-    return _cart.any((element) => (element['product'] as Product).id == p.id);
+  bool _isInCart(ProductTransaksi p) {
+    return _cart.any((element) => (element['product'] as ProductTransaksi).id == p.id);
   }
 
   Widget _buildProductList() {
@@ -4264,7 +4321,7 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       final url = Uri.parse(ApiEndpoints.calculateTransaksiUrl);
 
       List<Map<String, dynamic>> details = _cart.map((item) {
-        Product p = item['product'];
+        ProductTransaksi p = item['product'];
         final bool isOnlineItem = item['is_online'] ?? false;
         final int priceUsed = (item['custom_amount'] is int)
             ? item['custom_amount'] as int
@@ -4671,7 +4728,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
 
   void _showEditItemModal(int index) {
     final item = widget.cart[index];
-    final Product product = item['product'];
+    final ProductTransaksi product = item['product'];
     final int quantity = item['quantity'];
     final String notes = item['notes'];
 
@@ -4754,7 +4811,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                   separatorBuilder: (_, __) => Divider(),
                   itemBuilder: (context, index) {
                     final item = widget.cart[index];
-                    final Product product = item['product'];
+                    final ProductTransaksi product = item['product'];
                     final int quantity = item['quantity'];
                     final String notes = item['notes'];
 
@@ -5040,7 +5097,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
 
     final Map<String, int> m = {};
     if (raw is Map) {
-      raw.forEach((key, value) => m[key.toString()] = _toIntSafe(value));
+      raw.forEach((key, value) => m[key.toString()] = toIntSafe(value));
     }
 
     widget.item['variant_custom_cache'] = m;
@@ -5074,10 +5131,10 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         final String vid = v['variant_id']?.toString() ?? '';
         if (vid.isEmpty) continue;
 
-        final bool isCust = _toBoolSafe(v['is_variant_customize']);
+        final bool isCust = toBoolSafe(v['is_variant_customize']);
         if (!isCust) continue;
 
-        final int price = _toIntSafe(v['variant_price'] ?? v['price']);
+        final int price = toIntSafe(v['variant_price'] ?? v['price']);
         cache[vid] = price;
       }
     }
@@ -5087,7 +5144,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Product product = widget.item['product'];
+    final ProductTransaksi product = widget.item['product'];
     final int quantity = widget.item['quantity'];
     final String notes = widget.item['notes'] ?? '';
     final List<dynamic> currentVariants = widget.item['variants'] ?? [];
@@ -5307,11 +5364,11 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                         final int cachedPrice = cache[vid] ?? defaultVPrice;
 
                         final int shownVPrice = entry != null
-                            ? _toIntSafe(entry['variant_price'])
+                            ? toIntSafe(entry['variant_price'])
                             : cachedPrice;
 
                         final bool isVCustomize = entry != null
-                            ? _toBoolSafe(entry['is_variant_customize'])
+                            ? toBoolSafe(entry['is_variant_customize'])
                             : cache.containsKey(vid);
 
                         return CheckboxListTile(
@@ -5470,8 +5527,8 @@ class _CartItemWidgetState extends State<CartItemWidget> {
           if (it is Map) {
             items.add({
               "variant_id": it['variant_id']?.toString() ?? '',
-              "variant_price": _toIntSafe(it['variant_price'] ?? it['price']),
-              "is_variant_customize": _toBoolSafe(it['is_variant_customize']),
+              "variant_price": toIntSafe(it['variant_price'] ?? it['price']),
+              "is_variant_customize": toBoolSafe(it['is_variant_customize']),
             });
           }
         }
@@ -5567,7 +5624,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
     //   }
     //   return {
     //     "variant_id": id,
-    //     "variant_price": _toIntSafe(priceStr),
+    //     "variant_price": toIntSafe(priceStr),
     //     "is_variant_customize": false,
     //   };
     // }).toList();
@@ -5597,7 +5654,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
         if (v is! Map) continue;
         final id = v['variant_id']?.toString() ?? '';
         final bool isCust = v['is_variant_customize'] == true;
-        final int vp = _toIntSafe(v['variant_price']);
+        final int vp = toIntSafe(v['variant_price']);
         if (isCust) customPriceById[id] = vp;
       }
     }
@@ -5661,8 +5718,8 @@ class _CartItemWidgetState extends State<CartItemWidget> {
           if (it is Map) {
             items.add({
               "variant_id": it['variant_id']?.toString() ?? '',
-              "variant_price": _toIntSafe(it['variant_price'] ?? it['price']),
-              "is_variant_customize": _toBoolSafe(it['is_variant_customize']),
+              "variant_price": toIntSafe(it['variant_price'] ?? it['price']),
+              "is_variant_customize": toBoolSafe(it['is_variant_customize']),
             });
           }
         }
@@ -5695,7 +5752,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
     );
     if (vIndex == -1) return;
 
-    int currentPrice = _toIntSafe(items[vIndex]['variant_price']);
+    int currentPrice = toIntSafe(items[vIndex]['variant_price']);
     final ctrl = TextEditingController(
       text: NumberFormat.decimalPattern('id').format(currentPrice),
     );
@@ -5789,7 +5846,7 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                             if (vv is! Map) continue;
                             final id = vv['variant_id']?.toString() ?? '';
                             if (vv['is_variant_customize'] == true) {
-                              customPriceById[id] = _toIntSafe(
+                              customPriceById[id] = toIntSafe(
                                 vv['variant_price'],
                               );
                             }
@@ -5882,11 +5939,13 @@ class PaymentPage extends StatefulWidget {
   final String merchantId;
   final String? transactionId;
   final String? memberId; // Add memberId
+  final String? memberName; // Add memberName
   final double? finalAmount; // Amount from bill/calculating API
   final Map<String, dynamic>?
   billData; // Complete bill data for PPN, subtotal, etc.
   final VoidCallback? onSuccess;
   final DiscountModel? selectedDiscount;
+  final bool isOffline;
 
   PaymentPage({
     Key? key,
@@ -5895,10 +5954,12 @@ class PaymentPage extends StatefulWidget {
     required this.merchantId,
     this.transactionId,
     this.memberId,
+    this.memberName,
     this.finalAmount,
     this.billData,
     this.onSuccess,
     this.selectedDiscount,
+    this.isOffline = false,
   }) : super(key: key);
 
   @override
@@ -5906,6 +5967,7 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
+  final TransactionRepository _transactionRepository = TransactionRepository();
   String? _selectedMethod; // Initially null
   int _cashGiven = 0;
   final TextEditingController _cashController = TextEditingController();
@@ -5944,25 +6006,18 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   void initState() {
     super.initState();
-
-    AppLogger.d(
-      'Transaction',
-      'Initializing PaymentPage with the following data:',
-    );
-    AppLogger.d(
-      'Transaction',
-      'finalAmount: ${widget.finalAmount}, billData: ${widget.billData}, transactionId: ${widget.transactionId}',
-    );
-
+    AppLogger.d("Payment", "PaymentPage initialized. Cart count: ${widget.cart.length}");
     _selectedDiscount = widget.selectedDiscount;
 
-    // Skip calculating if finalAmount is already provided (from bill)
-    if (widget.finalAmount != null &&
-        !_hasCustomInCart &&
-        _hasBreakdownEnough) {
-      setState(() {
-        _isLoadingCalculation = false;
-      });
+    // Offline → always skip calculate API, use local breakdown from cart
+    if (widget.isOffline) {
+      setState(() => _isLoadingCalculation = false);
+    } else if (widget.transactionId != null && widget.transactionId!.isNotEmpty) {
+      // Online bill payment → must call calculate API to get accurate totals
+      _fetchCalculation();
+    } else if (widget.finalAmount != null && _hasBreakdownEnough) {
+      // Normal online transaction with already-computed breakdown → skip
+      setState(() => _isLoadingCalculation = false);
     } else {
       _fetchCalculation();
     }
@@ -5970,13 +6025,8 @@ class _PaymentPageState extends State<PaymentPage> {
     _cashController.addListener(() {
       String text = _cashController.text.replaceAll(RegExp(r'[^0-9]'), '');
       if (text.isEmpty) text = '0';
-
-      int val = int.parse(text);
-      if (_cashGiven != val) {
-        setState(() {
-          _cashGiven = val;
-        });
-      }
+      final int val = int.parse(text);
+      if (_cashGiven != val) setState(() => _cashGiven = val);
     });
   }
 
@@ -5984,7 +6034,7 @@ class _PaymentPageState extends State<PaymentPage> {
       widget.cart.any((e) => e['is_customize'] == true);
 
   int _baseUsedFromItem(Map<String, dynamic> item) {
-    final Product p = item['product'];
+    final ProductTransaksi p = item['product'];
     final bool isOnline = item['is_online'] == true;
     final bool isCustomize = item['is_customize'] == true;
     final int? customAmount = item['custom_amount'] as int?;
@@ -6121,17 +6171,22 @@ class _PaymentPageState extends State<PaymentPage> {
         mode: DetailMode.calculate,
       );
 
+      final String mId = widget.merchantId.isNotEmpty ? widget.merchantId : (merchantIdProfile ?? "");
+
+      final payload = {
+        "device_id": identifier,
+        "transaction_id": (widget.transactionId != null && widget.transactionId!.isNotEmpty) ? widget.transactionId : null,
+        "discount_id": (_selectedDiscount?.id != null && _selectedDiscount!.id.isNotEmpty) ? _selectedDiscount!.id : null,
+        "member_id": (widget.memberId != null && widget.memberId!.isNotEmpty) ? widget.memberId : null,
+        "detail": details,
+      };
+
+      AppLogger.d("Transaction", "PAYMENT PAGE CALCULATE PAYLOAD: ${jsonEncode(payload)}");
+
       final response = await http.post(
         url,
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "merchantid": widget.merchantId,
-          "deviceid": identifier,
-          "discount_id": _selectedDiscount?.id ?? "",
-          "member_id": widget.memberId ?? "", // Use widget.memberId
-          "transaction_id": "",
-          "detail": details,
-        }),
+        body: jsonEncode(payload),
       );
 
       final responseBody = jsonDecode(response.body);
@@ -6166,8 +6221,10 @@ class _PaymentPageState extends State<PaymentPage> {
       }
 
       setState(() {
-        _calculationData =
-            (json['data'] as Map<String, dynamic>); // simpan hanya data-nya
+        final Map<String, dynamic> apiData = (json['data'] as Map<String, dynamic>);
+        final Map<String, dynamic> merged = Map<String, dynamic>.from(widget.billData ?? {});
+        merged.addAll(apiData);
+        _calculationData = merged;
       });
     } catch (e) {
       debugPrint("Error calculating: $e");
@@ -6182,44 +6239,79 @@ class _PaymentPageState extends State<PaymentPage> {
     setState(() => _isProcessing = true);
 
     try {
-      final url = Uri.parse(ApiEndpoints.createTransaksiUrl);
+      final isOnline = await _transactionRepository.checkIsOnline();
+      // Always send quantity as int, NOT string (avoids 400 bad request)
       final details = buildTransactionDetails(
         widget.cart,
         mode: DetailMode.create,
-        quantityAsString: true,
+        quantityAsString: false,
       );
 
+      final String mId = widget.merchantId.isNotEmpty ? widget.merchantId : (merchantIdProfile ?? "");
+      
       final body = {
         "deviceid": identifier,
-        "discount_id": _selectedDiscount?.id ?? "",
-        "member_id": widget.memberId, // Use widget.memberId
-        "transaction_id": widget.transactionId ?? "",
-        "value": _selectedMethod == 'Uang Tunai' ? _cashGiven : _totalPay,
-        "payment_method": _selectedMethod == 'Uang Tunai'
-            ? "001"
-            : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
+        "merchantid": mId,
+        "discount_id": _selectedDiscount?.id,
+        "member_id": widget.memberId,
+        "transaction_id": (widget.transactionId != null && widget.transactionId!.isNotEmpty) ? widget.transactionId : null,
+        "is_partial_payment": true,
+        "amount": _totalPay,
+        "payment_method": _selectedMethod == 'Uang Tunai' ? "001" : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
+        "payments": [
+          {
+            "payment_method_id": _selectedMethod == 'Uang Tunai'
+                ? "001"
+                : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
+            "payment_reference_id": null,
+            "payment_value": _selectedMethod == 'Uang Tunai' ? _cashGiven : _totalPay,
+          }
+        ],
         "detail": details,
       };
 
-      debugPrint("PAYMENT request: ${jsonEncode(body)}");
+      AppLogger.d("Payment", "PROCESS PAYMENT PAYLOAD: ${jsonEncode(body)}");
+      AppLogger.d("Payment", "Payload ready (Offline: ${!isOnline}). Details count: ${details.length}. MerchantId: $mId. TxId: ${widget.transactionId}");
+      
+      if (details.isEmpty) {
+        AppLogger.d("Payment", "CRITICAL ERROR: details list is empty before save/send!");
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('Error: List produk kosong, silahkan isi keranjang kembali.')),
+           );
+        }
+        setState(() => _isProcessing = false);
+        return;
+      }
 
+      if (!isOnline) {
+        // ── Offline Flow ─────────────────────────────────────────────────────
+        final syntheticResponse = await _saveOfflineTransaction(body);
+        if (!mounted) return;
+        widget.onSuccess?.call();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransactionSuccessPage(
+              data: syntheticResponse,
+              localCart: widget.cart,
+            ),
+          ),
+        );
+        return;
+      }
+
+      // ── Online Flow ──────────────────────────────────────────────────────
+      debugPrint("PAYMENT request: ${jsonEncode(body)}");
       final response = await http.post(
-        url,
+        Uri.parse(ApiEndpoints.createTransaksiUrl),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
 
-      debugPrint('PAYMent status: ${response.statusCode}');
-      debugPrint('PAYMEent body: ${response.body}');
-      debugPrint('breakdown: $_breakdown');
-      debugPrint('billdata raw: ${widget.billData}');
-      debugPrint('ppn raw: ${_breakdown?['ppn']}');
-
       if (response.statusCode != 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error ${response.statusCode}: ${response.body}'),
-          ),
+          SnackBar(content: Text('Error ${response.statusCode}: ${response.body}')),
         );
         return;
       }
@@ -6227,6 +6319,7 @@ class _PaymentPageState extends State<PaymentPage> {
       final data = jsonDecode(response.body);
       if (data['rc'] == '00') {
         widget.onSuccess?.call();
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -6237,32 +6330,77 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'Gagal memproses transaksi'),
-          ),
+          SnackBar(content: Text(data['message'] ?? 'Gagal memproses transaksi')),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
   }
 
+  Future<Map<String, dynamic>> _saveOfflineTransaction(Map<String, dynamic> body) async {
+    await _transactionRepository.saveOfflineTransaction(body);
+
+    final List<dynamic> details = body['detail'] ?? [];
+    final payments = body['payments'] as List;
+    final firstPayment = payments.isNotEmpty ? payments[0] : {};
+
+    // Create synthetic response for TransactionSuccessPage
+    return {
+      'customer_name': widget.memberName ?? '-',
+      'payment_name': _selectedMethod ?? 'Offline',
+      'payment_method': firstPayment['payment_method_id'],
+      'transactionid': 'OFFLINE-${DateTime.now().millisecondsSinceEpoch}',
+      'pic_name': 'Offline Cashier',
+      'detail': details,
+      'total_before_dsc_tax': _subTotal,
+      'ppn': _ppn,
+      'amount': _totalPay,
+      'discount': _discount,
+      'money_paid': _selectedMethod == 'Uang Tunai' ? _cashGiven : _totalPay,
+      'change_money': _selectedMethod == 'Uang Tunai' ? (_cashGiven - _totalPay) : 0,
+    };
+  }
+
   int get _subTotal {
     final b = _breakdown;
-    final st = _toIntSafe(b?['total_before_dsc_tax']);
-    if (st > 0) return st;
+    final st = toIntSafe(b?['total_before_dsc_tax']);
+    final bool isBillPayment = widget.transactionId != null && widget.transactionId!.isNotEmpty;
+    if ((widget.isOffline == false || isBillPayment) && st > 0) return st;
 
     return cartSubTotal(widget.cart);
   }
 
   int get _ppn {
     final b = _breakdown;
-    return _toIntSafe(b?['ppn']);
+    final serverPpn = toIntSafe(b?['ppn']);
+    
+    // If online and we have a breakdown, use server PPN (even if 0)
+    final isOnline = widget.isOffline == false;
+    final bool isBillPayment = widget.transactionId != null && widget.transactionId!.isNotEmpty;
+    if ((isOnline || isBillPayment) && b != null) return serverPpn;
+    
+    // Offline mode or no breakdown: calculate PPN per-product
+    double totalPpn = 0;
+    for (var item in widget.cart) {
+      final ProductTransaksi p = item['product'];
+      // Use is_ppn from item map or product model
+      final bool hasPpn = toIntSafe(item['is_ppn'] ?? p.isPPN) == 1;
+      
+      if (hasPpn) {
+        final double itemTotal = _totalAmountFromItem(item).toDouble();
+        totalPpn += itemTotal * 0.11;
+      }
+    }
+    
+    return totalPpn.round();
   }
 
   int get _discount {
@@ -6282,18 +6420,32 @@ class _PaymentPageState extends State<PaymentPage> {
   int get _totalPay {
     final b = _breakdown;
 
-    final amt = _toIntSafe(b?['amount']);
+    final amt = toIntSafe(b?['amount']);
     if (amt > 0) return amt;
 
+    // Offline: always compute from cart (subTotal - discount + ppn)
+    if (widget.isOffline) {
+      return _subTotal - _discount + _ppn;
+    }
+
+    // Online with finalAmount from server breakdown
     if (widget.finalAmount != null &&
         widget.finalAmount! > 0 &&
         !_hasCustomInCart) {
       return widget.finalAmount!.toInt();
     }
-    return _subTotal + _ppn;
+    
+    return _subTotal - _discount + _ppn;
   }
 
   Map<String, dynamic>? get _breakdown {
+    // For offline new transactions, use calculationData (usually null).
+    // But for offline BILL payments, we MUST use billData if available.
+    final bool isBillPayment = widget.transactionId != null && widget.transactionId!.isNotEmpty;
+    if (widget.isOffline && !isBillPayment) {
+      return _calculationData;
+    }
+
     final bd = widget.billData;
     if (bd is Map<String, dynamic>) {
       final d = bd['data'];
@@ -6369,7 +6521,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 itemCount: widget.cart.length,
                 itemBuilder: (context, index) {
                   final item = widget.cart[index];
-                  final Product p = item['product'];
+                  final ProductTransaksi p = item['product'];
                   final int unitPrice = _unitAmountFromItem(item);
                   final bool isCustomize = item['is_customize'] == true;
                   return Padding(
@@ -6712,7 +6864,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             color: succes500,
                           ),
                         _rowSummary(
-                          'PPN',
+                          widget.isOffline ? 'PPN (11%)' : 'PPN',
                           NumberFormat.currency(
                             locale: 'id',
                             symbol: 'Rp. ',
@@ -7157,7 +7309,7 @@ class _PaymentPageState extends State<PaymentPage> {
 }
 
 class ProductDetailModal extends StatefulWidget {
-  final Product product;
+  final ProductTransaksi product;
   final int? initialQty;
   final String? initialNotes;
   final Function(int qty, String notes) onAddToCart;
@@ -7430,6 +7582,8 @@ class TransactionSuccessPage extends StatelessWidget {
     final int cashGiven = int.tryParse(data['money_paid'].toString()) ?? 0;
     final int change = int.tryParse(data['change_money'].toString()) ?? 0;
 
+    final bool isOffline = transactionId.startsWith('OFFLINE-');
+
     return Scaffold(
       backgroundColor: bnw100,
       appBar: AppBar(
@@ -7606,7 +7760,7 @@ class TransactionSuccessPage extends StatelessWidget {
                         ).format(subTotal),
                       ),
                       _rowInfo(
-                        "PPN",
+                        isOffline ? "PPN (11%)" : "PPN",
                         NumberFormat.currency(
                           locale: 'id',
                           symbol: 'Rp. ',
@@ -7641,8 +7795,8 @@ class TransactionSuccessPage extends StatelessWidget {
                               decimalDigits: 0,
                             ).format(change),
                             style: TextStyle(
-                              color: primary500,
-                              fontWeight: FontWeight.bold,
+                                color: primary500,
+                                fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -7660,7 +7814,7 @@ class TransactionSuccessPage extends StatelessWidget {
                               locale: 'id',
                               symbol: 'Rp. ',
                               decimalDigits: 0,
-                            ).format(totalPay),
+                            ).format(isOffline ? (subTotal + ppn) : totalPay),
                             style: heading1(FontWeight.w600, bnw900, 'Outfit'),
                           ),
                         ],
@@ -7695,7 +7849,7 @@ class TransactionSuccessPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context, true),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: primary500),

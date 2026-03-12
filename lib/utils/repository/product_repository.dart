@@ -11,15 +11,26 @@ class ProductRepository {
   Future<List<ModelDataProduk>> getProducts({
     required String token,
     required String name,
+    required String isactive,
     required List<String> merchid,
     required String orderby,
     required Function(List<ModelDataProduk>) onSyncUpdate,
   }) async {
-    // Ambil data dari local database
-    final localProducts = await _dbHelper.getProducts();
-  
+    // Ambil data dari local database, filter by isActive
+    final allLocalProducts = await _dbHelper.getProducts();
+    final localProducts = isactive == "1"
+        ? allLocalProducts.where((p) => p.isActive == 1).toList()
+        : allLocalProducts;
+
     // Cek koneksi internet dan sync di background
-    _syncProductsInBackground(token, name, merchid, orderby, onSyncUpdate);
+    _syncProductsInBackground(
+      token,
+      name,
+      isactive,
+      merchid,
+      orderby,
+      onSyncUpdate,
+    );
 
     return localProducts;
   }
@@ -27,6 +38,7 @@ class ProductRepository {
   Future<void> _syncProductsInBackground(
     String token,
     String name,
+    String isactive,
     List<String> merchid,
     String orderby,
     Function(List<ModelDataProduk>) onSyncUpdate,
@@ -37,6 +49,7 @@ class ProductRepository {
       final remoteProducts = await _apiService.fetchProducts(
         token: token,
         name: name,
+        isactive: isactive,
         merchid: merchid,
         orderby: orderby,
       );

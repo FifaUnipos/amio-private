@@ -11,6 +11,10 @@ class TransactionRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final ConnectionChecker _connectionChecker = ConnectionChecker();
 
+  Future<bool> checkIsOnline() async {
+    return await _connectionChecker.checkInternet();
+  }
+
   Future<void> syncPendingTransactions({
     required String token,
     required String merchantId,
@@ -23,23 +27,115 @@ class TransactionRepository {
         try {
           AppLogger.d("Sync", "Syncing offline bill ID: ${tx['id']} (Deleted: ${tx['is_deleted']})");
           
+          Map<String, dynamic> syncBody;
+          final decodedPayload = tx['payload'] != null ? jsonDecode(tx['payload']) : null;
+          
+          if (decodedPayload is Map<String, dynamic>) {
+            syncBody = Map<String, dynamic>.from(decodedPayload);
+            
+            // Only overwrite if provided merchantId is not empty
+            if (merchantId.isNotEmpty) {
+              syncBody['merchantid'] = merchantId;
+            } else if ((syncBody['merchantid'] == null || syncBody['merchantid'].toString().isEmpty) && (merchantId ?? "").isNotEmpty) {
+               syncBody['merchantid'] = merchantId;
+            }
+            
+            // Fix for empty detail in payload - try to get from tx['details'] which comes from DB separate table
+            final List<dynamic> currentDetails = syncBody['detail'] is List ? syncBody['detail'] : [];
+            if (currentDetails.isEmpty && tx['details'] != null) {
+              final List<Map<String, dynamic>> dbDetails = List<Map<String, dynamic>>.from(tx['details']);
+              if (dbDetails.isNotEmpty) {
+                syncBody['detail'] = dbDetails;
+                AppLogger.d("Sync", "Recovered ${dbDetails.length} details from DB for bill ${tx['id']}");
+              }
+            }
+            
+            syncBody['transaction_id'] = syncBody['transaction_id'] ?? null;
+
+            // Ensure root amount is captured from whichever is non-zero
+            final int dbValue = _toIntSafe(tx['value']);
+            final int payloadAmount = _toIntSafe(syncBody['amount'] ?? syncBody['value']);
+            final int finalTotal = payloadAmount > 0 ? payloadAmount : dbValue;
+            syncBody['amount'] = finalTotal;
+
+            // Sanitize 001 to 001 as per user request
+            if (syncBody['payment_method'] == '001') {
+              syncBody['payment_method'] = '001';
+            }
+            if (syncBody['payments'] is List) {
+              for (var p in (syncBody['payments'] as List)) {
+                if (p is Map) {
+                  if (p['payment_method_id'] == '001') {
+                    p['payment_method_id'] = '001';
+                  }
+                  // Sanitize and MATCH payment_value to finalTotal to avoid "Bill" status
+                  p['payment_value'] = finalTotal;
+                }
+              }
+              // If payments list is empty but we have a total, add a dummy 001 payment to avoid Bill status
+              if (syncBody['payments'].isEmpty && finalTotal > 0) {
+                syncBody['payment_method'] = syncBody['payment_method'] ?? "001";
+                syncBody['payments'].add({
+                  "payment_method_id": syncBody['payment_method'],
+                  "payment_reference_id": null,
+                  "payment_value": finalTotal,
+                });
+              }
+            }
+
+            // Sanitize Detail Detail amounts (remove .00)
+            if (syncBody['detail'] is List) {
+              for (var d in (syncBody['detail'] as List)) {
+                if (d is Map && d['amount'] != null) {
+                  d['amount'] = _toIntSafe(d['amount']);
+                }
+              }
+            }
+          } else {
+            final String pm = (tx['payment_method'] == '001') ? "001" : (tx['payment_method'] ?? "001");
+            final int fallbackVal = _toIntSafe(tx['value']);
+            final List<dynamic> details = tx['details'] is List ? tx['details'] : [];
+            
+            if (details.isEmpty) {
+              AppLogger.d("Sync", "WARNING: details list is empty for bill ${tx['id']} in fallback block");
+            }
+
+            syncBody = {
+              "deviceid": identifier,
+              "merchantid": merchantId.isNotEmpty ? merchantId : (tx['merchantid'] ?? ""),
+              "transaction_id": null,
+              "member_id": tx['member_id'],
+              "discount_id": tx['discount_id'],
+              "amount": fallbackVal,
+              "payment_method": pm,
+              "is_partial_payment": true,
+              "payments": [
+                {
+                  "payment_method_id": pm,
+                  "payment_reference_id": null,
+                  "payment_value": fallbackVal,
+                }
+              ],
+              "detail": details,
+            };
+          }
+
+          final List<dynamic> finalDetails = syncBody['detail'] is List ? syncBody['detail'] : [];
+          if (finalDetails.isEmpty) {
+            AppLogger.d("Sync", "Aborting sync for bill ${tx['id']}: No details found in payload or DB.");
+            await _dbHelper.updateOfflineTransactionStatus(tx['id'], 'SYNC_FAILED_NO_DETAIL');
+            continue;
+          }
+
+          AppLogger.d("Sync", "Request payload for bill ${tx['id']}: ${jsonEncode(syncBody)}");
           final response = await http.post(
             Uri.parse(ApiEndpoints.createTransaksiUrl),
             headers: {
               'token': token,
-              'DEVICE-ID': identifier ?? '',
               'Content-Type': 'application/json',
             },
-            body: jsonEncode({
-              "merchant_id": merchantId,
-              "transaction_id": null,
-              "member_id": tx['member_id'],
-              "discount_id": tx['discount_id'],
-              "is_partial_payment": false,
-              "payments": [],
-              "detail": tx['details'],
-            }),
-          );
+            body: jsonEncode(syncBody),
+          ).timeout(const Duration(seconds: 15));
 
           if (response.statusCode == 200) {
             final data = jsonDecode(response.body);
@@ -48,9 +144,7 @@ class TransactionRepository {
               AppLogger.d("Sync", "Successfully created offline bill: ${tx['id']} -> Server ID: $serverId");
               
               if (tx['is_deleted'] == 1 && serverId.isNotEmpty) {
-                // SEQUENTIAL SYNC: If it was deleted offline, delete it on server now!
-                AppLogger.d("Sync", "Bill ${tx['id']} was deleted offline. Syncing deletion for server ID $serverId...");
-                
+                // SEQUENTIAL SYNC: Deletion logic
                 final queue = await _dbHelper.getSyncQueue();
                 final deleteAction = queue.firstWhere(
                   (q) => q['transaction_id'] == "OFFLINE-${tx['id']}" && q['action'] == 'DELETE_BILL',
@@ -58,26 +152,27 @@ class TransactionRepository {
                 );
 
                 if (deleteAction.isNotEmpty) {
-                  final payload = jsonDecode(deleteAction['payload']);
+                  final payloadJson = jsonDecode(deleteAction['payload']);
                   final delSuccess = await _deleteBillOnServer(
                     token: token,
                     transactionId: serverId,
-                    reasonId: payload['reasonId'],
-                    notes: payload['notes'],
+                    reasonId: payloadJson['reasonId'],
+                    notes: payloadJson['notes'],
                   );
                   if (delSuccess) {
                     await _dbHelper.deleteFromSyncQueue(deleteAction['id']);
-                  } else {
-                    AppLogger.d("Sync", "Failed to sync sequential deletion for $serverId. Will retry via sync_queue.");
                   }
                 }
               }
               await _dbHelper.deleteOfflineTransaction(tx['id']);
             } else {
-              AppLogger.d("Sync", "Failed to create bill ${tx['id']}: ${data['rc']} - ${data['message']}");
+              AppLogger.d("Sync", "API failure (RC: ${data['rc']}) for bill ${tx['id']}. Message: ${data['message']}. Body: ${response.body}");
+              // DO NOT DELETE on permanent error yet, or update its status so it doesn't try again but user can see it
+              await _dbHelper.updateOfflineTransactionStatus(tx['id'], 'SYNC_FAILED');
             }
           } else {
-            AppLogger.d("Sync", "Server error creating bill ${tx['id']}: ${response.statusCode} - ${response.body}");
+            AppLogger.d("Sync", "Server error (Status: ${response.statusCode}) for bill ${tx['id']}. Body: ${response.body}");
+            // Stay as Menunggu Sinkronisasi for later retry
           }
         } catch (e) {
           AppLogger.d("Sync", "Exception syncing transaction ${tx['id']}: $e");
@@ -167,6 +262,10 @@ class TransactionRepository {
           .toList();
     }
 
+    // 4. Combine Offline & Cached Online
+    final List<TransactionHistoryModel> offlineList = await _getOfflineAsHistoryModels();
+    final combinedList = [...offlineList, ...localList];
+
     // 2. Background Sync
     _syncTransactions(
       type: 'history',
@@ -177,7 +276,7 @@ class TransactionRepository {
       onSyncUpdate: onSyncUpdate,
     );
 
-    return localList;
+    return combinedList;
   }
 
   Future<List<TransactionHistoryModel>> getBills({
@@ -273,8 +372,23 @@ class TransactionRepository {
 
     // If offline or online fails, save locally
     AppLogger.d("Tagihan", "Saving bill offline...");
-    await _dbHelper.saveOfflineTransaction(transaction, details);
+    
+    // Ensure detail is in the transaction map for persistence
+    final Map<String, dynamic> fullTransaction = Map<String, dynamic>.from(transaction);
+    fullTransaction['detail'] = details;
+    fullTransaction['merchantid'] = merchantId;
+    fullTransaction['transaction_id'] = null; // New offline bill
+
+    await _dbHelper.saveOfflineTransaction(fullTransaction, details);
     return true; // Return true because it's "saved" (locally)
+  }
+
+  Future<bool> saveOfflineTransaction(Map<String, dynamic> body) async {
+    // We pass the whole body as 'transaction' to DB helper
+    // and extract details from it there.
+    final List<Map<String, dynamic>> details = List<Map<String, dynamic>>.from(body['detail'] ?? []);
+    await _dbHelper.saveOfflineTransaction(body, details);
+    return true;
   }
 
   Future<void> _syncTransactions({
@@ -321,7 +435,7 @@ class TransactionRepository {
                 .map((e) => TransactionHistoryModel.fromJson(e))
                 .toList();
             
-            if (type == 'bill') {
+            if (type == 'bill' || type == 'history') {
               final offlineList = await _getOfflineAsHistoryModels();
               updatedList = [...offlineList, ...updatedList];
             }
@@ -549,17 +663,45 @@ class TransactionRepository {
     final offlineTx = await _dbHelper.getOfflineTransactions();
     return offlineTx.map((ot) {
       final isDeleted = ot['is_deleted'] == 1;
+      double amount = (ot['value'] as num?)?.toDouble() ?? 0.0;
+      if (amount == 0 && ot['payload'] != null) {
+        try {
+          final decoded = jsonDecode(ot['payload']);
+          if (decoded is Map) {
+            amount = _toIntSafe(decoded['amount'] ?? decoded['value']).toDouble();
+            if (amount == 0 && decoded['payments'] != null && (decoded['payments'] as List).isNotEmpty) {
+              amount = _toIntSafe(decoded['payments'][0]['payment_value']).toDouble();
+            }
+          }
+        } catch (_) {}
+      }
+
+      final isFailed = ot['status'] == 'SYNC_FAILED';
       return TransactionHistoryModel(
         transactionId: "OFFLINE-${ot['id']}",
         customer: ot['member_id'] ?? 'OFFLINE',
-        amount: (ot['value'] as num?)?.toDouble() ?? 0.0,
+        amount: amount,
         entryDate: DateTime.fromMillisecondsSinceEpoch(
           ot['timestamp'],
         ).toString().split('.').first,
-        isPaid: isDeleted ? '2' : '3', // 2 for Canceled, 3 for Success/Pending
-        statusTransactions: isDeleted ? 'Dibatalkan' : 'Menunggu Sinkronisasi',
-        statusColor: isDeleted ? '2' : '3',
+        isPaid: isDeleted ? '2' : (isFailed ? '4' : '3'), // 2: Canceled, 4: Warning (Failed), 3: Success (Pending)
+        statusTransactions:
+            isDeleted ? 'Dibatalkan' : (isFailed ? 'Gagal Sinkronisasi' : 'Menunggu Sinkronisasi'),
+        statusColor: isDeleted ? '2' : (isFailed ? '4' : '3'),
       );
     }).toList();
+  }
+
+  int _toIntSafe(dynamic v, {int def = 0}) {
+    if (v == null) return def;
+    if (v is int) return v;
+    if (v is num) return v.round();
+    final s = v.toString().trim();
+    final normalized = s.replaceAll(RegExp(r'[^0-9\.\-]'), '');
+    if (normalized.isEmpty) return def;
+    final i = int.tryParse(normalized);
+    if (i != null) return i;
+    final d = double.tryParse(normalized);
+    return d?.round() ?? def;
   }
 }

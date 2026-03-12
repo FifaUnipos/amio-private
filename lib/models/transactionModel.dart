@@ -19,7 +19,8 @@ class TransactionHistoryModel {
 
   factory TransactionHistoryModel.fromJson(Map<String, dynamic> json) {
     return TransactionHistoryModel(
-      transactionId: json['transaction_id']?.toString() ?? json['transactionid']?.toString() ?? '',
+      // transactionId: json['transaction_id']?.toString() ?? json['transactionid']?.toString(),
+      transactionId: json['transaction_id']?.toString() ?? '',
       customer: json['customer'],
       amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
       entryDate: json['entry_date'],
@@ -53,7 +54,7 @@ class TransactionDetailModel {
 
   factory TransactionDetailModel.fromJson(Map<String, dynamic> json) {
     return TransactionDetailModel(
-      transactionId: json['transactionid']?.toString() ?? json['transaction_id']?.toString() ?? '',
+      transactionId: json['transaction_id']?.toString() ?? '',
       fullData: json,
     );
   }
@@ -95,6 +96,7 @@ class TransactionDetailModel {
 }
 
 class TransactionProductItem {
+  final String? productId;
   final String? name;
   final double price;
   final int quantity;
@@ -103,6 +105,7 @@ class TransactionProductItem {
   final List<dynamic>? variants;
 
   TransactionProductItem({
+    this.productId,
     this.name,
     required this.price,
     required this.quantity,
@@ -113,16 +116,30 @@ class TransactionProductItem {
 
   factory TransactionProductItem.fromJson(Map<String, dynamic> json) {
     return TransactionProductItem(
-      name: json['name'],
-      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
-      quantity: int.tryParse(json['quantity']?.toString() ?? '1') ?? 1,
-      productImage: json['product_image'],
+      productId: (json['product_id'] ?? 
+                 json['product_id'] ?? 
+                 json['productid'] ?? 
+                 json['idproduct'] ?? 
+                 json['id_product'] ?? 
+                 json['id_produk'] ?? 
+                 json['idproduk'] ?? 
+                 json['id'])?.toString(),
+      name: json['name'] ?? json['nama_produk'] ?? json['nama'],
+      price: double.tryParse((json['price'] ?? 
+                            json['amount'] ?? 
+                            json['total_amount'] ?? 
+                            json['total'] ?? 
+                            json['harga'] ?? 
+                            '0').toString()) ?? 0.0,
+      quantity: int.tryParse((json['quantity'] ?? json['qty'] ?? '1').toString()) ?? 1,
+      productImage: json['product_image'] ?? json['image'] ?? json['thumbnail'],
       note: json['note'],
       variants: json['variants'],
     );
   }
 
   Map<String, dynamic> toJson() => {
+    'product_id': productId,
     'name': name,
     'price': price,
     'quantity': quantity,

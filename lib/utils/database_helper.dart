@@ -288,11 +288,17 @@ class DatabaseHelper {
       int offlineId = await txn.insert('offline_transactions', {
         'member_id': transaction['member_id'],
         'discount_id': transaction['discount_id'],
-        'payment_method': transaction['payment_method'] ?? 'bill',
-        'value': transaction['amount'] ?? 0.0,
+        'payment_method': transaction['payment_method'],
+        'value': _toIntSafe(
+          transaction['amount'] ?? 
+          transaction['value'] ?? 
+          (transaction['payments'] != null && (transaction['payments'] as List).isNotEmpty 
+              ? transaction['payments'][0]['payment_value'] 
+              : 0)
+        ),
         'status': 'OFFLINE',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'payload': jsonEncode(details),
+        'payload': jsonEncode(transaction), // Store whole body here
       });
 
       for (var item in details) {
@@ -300,8 +306,8 @@ class DatabaseHelper {
           'offline_transaction_id': offlineId,
           'product_id': item['product_id'],
           'name': item['name'],
-          'price': item['price'],
-          'quantity': item['quantity'],
+          'price': _toIntSafe(item['price'] ?? item['amount']),
+          'quantity': _toIntSafe(item['quantity']),
           'description': item['description'],
         });
       }
@@ -316,14 +322,24 @@ class DatabaseHelper {
     for (var tx in transactions) {
       List<dynamic> details = [];
       if (tx['payload'] != null) {
-        details = jsonDecode(tx['payload']);
-      } else {
-        // Fallback to separate table for old data
-        details = await db.query(
+        final decoded = jsonDecode(tx['payload']);
+        if (decoded is Map) {
+          details = decoded['detail'] ?? [];
+        } else {
+          details = decoded;
+        }
+      }
+      
+      // If payload details are empty, try falling back to the separate table
+      if (details.isEmpty) {
+        final List<Map<String, dynamic>> dbDetails = await db.query(
           'offline_transaction_details',
           where: 'offline_transaction_id = ?',
           whereArgs: [tx['id']],
         );
+        if (dbDetails.isNotEmpty) {
+           details = dbDetails;
+        }
       }
       
       Map<String, dynamic> txMap = Map<String, dynamic>.from(tx);
@@ -337,6 +353,16 @@ class DatabaseHelper {
     final db = await database;
     await db.delete('offline_transactions');
     await db.delete('offline_transaction_details');
+  }
+
+  Future<void> updateOfflineTransactionStatus(int id, String status) async {
+    final db = await database;
+    await db.update(
+      'offline_transactions',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> deleteOfflineTransaction(int id) async {
@@ -395,5 +421,18 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getDeletionReasons() async {
     final db = await database;
     return await db.query('deletion_reasons');
+  }
+
+  int _toIntSafe(dynamic v, {int def = 0}) {
+    if (v == null) return def;
+    if (v is int) return v;
+    if (v is num) return v.round();
+    final s = v.toString().trim();
+    final normalized = s.replaceAll(RegExp(r'[^0-9\.\-]'), '');
+    if (normalized.isEmpty) return def;
+    final i = int.tryParse(normalized);
+    if (i != null) return i;
+    final d = double.tryParse(normalized);
+    return d?.round() ?? def;
   }
 }

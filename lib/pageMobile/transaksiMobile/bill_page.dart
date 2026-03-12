@@ -8,11 +8,16 @@ import 'package:unipos_app_335/providers/transactions/transaction_provider.dart'
 import 'package:unipos_app_335/models/transactionModel.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
+import 'package:unipos_app_335/utils/logger.dart';
 import 'package:unipos_app_335/utils/status_transaction.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:unipos_app_335/services/config/app_endpoints.dart';
 import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/models/product_transaksi_model.dart';
+import 'package:unipos_app_335/pageMobile/transaksiMobile/transaksiPageMobile.dart';
+import 'package:unipos_app_335/utils/connection_checker.dart';
+
 
 class BillListPage extends StatefulWidget {
   final String token;
@@ -33,6 +38,8 @@ class BillListPage extends StatefulWidget {
 class _BillListPageState extends State<BillListPage> {
   String _orderBy = "upDownCreate";
   String _orderLabel = "Terbaru";
+  final ConnectionChecker _connectionChecker = ConnectionChecker();
+
 
   final List<Map<String, String>> _sortOptions = [
     {"label": "Terbaru", "value": "upDownCreate"},
@@ -181,89 +188,95 @@ class _BillListPageState extends State<BillListPage> {
             child: isLoading && billList.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : billList.isEmpty
-                    ? const Center(child: Text("Tidak ada tagihan tersimpan"))
-                    : ListView.separated(
-                        itemCount: billList.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final item = billList[index];
-                          return GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => _showDetail(item.transactionId),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              child: Row(
+                ? const Center(child: Text("Tidak ada tagihan tersimpan"))
+                : ListView.separated(
+                    itemCount: billList.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = billList[index];
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _showDetail(item.transactionId),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.customer ?? 'Pelanggan',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      Text(
-                                        NumberFormat.currency(
-                                          locale: 'id',
-                                          symbol: 'Rp. ',
-                                          decimalDigits: 0,
-                                        ).format(item.amount),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    item.customer ?? 'Pelanggan',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    spacing: 4,
-                                    children: [
-                                      Text(
-                                        item.entryDate != null
-                                            ? item.entryDate!.split(' ').last
-                                            : '',
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      UniposInformation(
-                                        size: UniposInformationSize.extraSmall,
-                                        variant:
-                                            statusTransactionCancel.contains(
-                                              item.isPaid,
-                                            )
-                                            ? UniposInformationVariant.danger
-                                            : statusTransactionProcessCancel
-                                                .contains(item.isPaid)
-                                            ? UniposInformationVariant.warning
-                                            : UniposInformationVariant.success,
-                                        text:
-                                            '${item.statusTransactions ?? '-'}',
-                                        showIcon: false,
-                                      ),
-                                    ],
+                                  Text(
+                                    NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp. ',
+                                      decimalDigits: 0,
+                                    ).format(item.amount),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 4,
+                                children: [
+                                  Text(
+                                    item.entryDate != null
+                                        ? item.entryDate!.split(' ').last
+                                        : '',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  UniposInformation(
+                                    size: UniposInformationSize.extraSmall,
+                                    variant:
+                                        statusTransactionCancel.contains(
+                                          item.isPaid,
+                                        )
+                                        ? UniposInformationVariant.danger
+                                        : statusTransactionProcessCancel
+                                              .contains(item.isPaid)
+                                        ? UniposInformationVariant.warning
+                                        : UniposInformationVariant.success,
+                                    text: '${item.statusTransactions ?? '-'}',
+                                    showIcon: false,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
+  }
+
+  int _toIntSafe(dynamic v, {int def = 0}) {
+    if (v == null) return def;
+    if (v is int) return v;
+    if (v is num) return v.round();
+    final s = v.toString().trim();
+    if (s.isEmpty) return def;
+    return int.tryParse(s) ?? double.tryParse(s)?.round() ?? def;
   }
 
   void _showDetail(String transactionId) async {
@@ -276,13 +289,231 @@ class _BillListPageState extends State<BillListPage> {
         merchantId: widget.merchantId,
         transactionId: transactionId,
         baseUrl: widget.baseUrl,
+        onRefresh: _fetchBills,
       ),
     );
 
     if (result == true || result == 'refresh') {
       _fetchBills();
+      return;
+    }
+
+    if (result is Map && result['action'] == 'pay' && result['data'] != null) {
+      final billData = result['data'] as Map<String, dynamic>;
+      _calculateBeforePayment(billData);
     }
   }
+
+  void _calculateBeforePayment(Map<String, dynamic> billData) async {
+    final String txId =
+        (billData['transactionid'] ?? billData['transaction_id'] ?? '')
+            .toString();
+
+    final bool isOnline = await _connectionChecker.checkInternet();
+
+    if (!isOnline) {
+      _navigateToPayment(billData, isOffline: true);
+      return;
+    }
+
+    // Show loading (Online only)
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // 1. Restore cart items from bill detail
+      final List<Map<String, dynamic>> restoredCart = restoreCart(billData);
+
+      // 2. Build details payload for calculation
+      final details = buildTransactionDetails(
+        restoredCart,
+        mode: DetailMode.calculate,
+      );
+
+      // 3. Prepare payload
+      final String? deviceId = identifier;
+
+      // Extract numeric member ID
+      final String? rawId =
+          (billData['memberid'] ??
+                  billData['member_id'] ??
+                  billData['id_member'])
+              ?.toString();
+
+      String? custId;
+      if (rawId != null &&
+          rawId.isNotEmpty &&
+          !rawId.toLowerCase().contains("walking") &&
+          !rawId.toLowerCase().contains("pelanggan")) {
+        custId = rawId;
+      }
+
+      final String? custName =
+          billData['customer_name']?.toString() ??
+          billData['nama_member']?.toString() ??
+          billData['customer']?.toString() ??
+          'Pilih Pelanggan';
+
+      final payload = {
+        "device_id": deviceId,
+        "transaction_id": txId.isNotEmpty ? txId : null,
+        "discount_id": null,
+        "member_id": custId,
+        "detail": details,
+      };
+
+      AppLogger.d(
+        "Transaction",
+        "DIRECT CALCULATE PAYLOAD: ${jsonEncode(payload)}",
+      );
+
+      final response = await http.post(
+        Uri.parse(ApiEndpoints.calculateTransaksiUrl),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      ).timeout(const Duration(seconds: 10));
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['rc'] == '00') {
+          final calculationResult =
+              data['data'] ?? data as Map<String, dynamic>;
+          final calcAmount =
+              double.tryParse(calculationResult['amount'].toString()) ?? 0;
+
+          final Map<String, dynamic> mergedData = Map<String, dynamic>.from(
+            billData,
+          );
+          if (calculationResult is Map<String, dynamic>) {
+            mergedData.addAll(calculationResult);
+          }
+
+          if (!mounted) return;
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentPage(
+                cart: restoredCart,
+                token: widget.token,
+                merchantId: widget.merchantId,
+                transactionId: txId.isNotEmpty ? txId : null,
+                memberId: custId,
+                memberName: custName ?? 'Pilih Pelanggan',
+                finalAmount: calcAmount,
+                billData: mergedData,
+                isOffline: false,
+                onSuccess: () {
+                  _fetchBills();
+                },
+              ),
+            ),
+          );
+
+          if (result == true) {
+            // After successful payment and returning from PaymentPage/SuccessPage,
+            // we might want to pop the BillListPage too to return to cashier.
+            if (!mounted) return;
+            Navigator.pop(context, true); 
+          }
+        } else {
+          AppLogger.d(
+            "Transaction",
+            "CALCULATE ERROR (RC ${data['rc']}): ${response.body}",
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Gagal menghitung total'),
+            ),
+          );
+        }
+      } else {
+        AppLogger.d(
+          "Transaction",
+          "CALCULATE HTTP ERROR ${response.statusCode}: ${response.body}",
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      AppLogger.e("Transaction", "Direct calculate failed: $e. Falling back to offline mode.");
+      if (!mounted) return;
+      if (Navigator.canPop(context)) Navigator.pop(context); // Close loading
+      
+      // FALLBACK TO OFFLINE
+      _navigateToPayment(billData, isOffline: true);
+    }
+  }
+
+  void _navigateToPayment(Map<String, dynamic> billData, {bool isOffline = false}) async {
+    final String txId =
+        (billData['transactionid'] ?? billData['transaction_id'] ?? '')
+            .toString();
+    final List<Map<String, dynamic>> restoredCart = restoreCart(billData);
+    if (restoredCart.isEmpty) {
+      AppLogger.e("Transaction", "CRITICAL ERROR: restoreCart returned empty for bill $txId. Keys: ${billData.keys}");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Gagal memulihkan rincian belanja.')),
+        );
+      }
+      return;
+    }
+
+
+    // Extract numeric member ID
+    final String? rawId = (billData['memberid'] ??
+            billData['member_id'] ??
+            billData['id_member'])
+        ?.toString();
+
+    String? custId;
+    if (rawId != null &&
+        rawId.isNotEmpty &&
+        !rawId.toLowerCase().contains("walking") &&
+        !rawId.toLowerCase().contains("pelanggan")) {
+      custId = rawId;
+    }
+
+    final String? custName = billData['customer_name']?.toString() ??
+        billData['nama_member']?.toString() ??
+        billData['customer']?.toString() ??
+        'Pilih Pelanggan';
+
+    if (!mounted) return;
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentPage(
+          cart: restoredCart,
+          token: widget.token,
+          merchantId: widget.merchantId,
+          transactionId: txId.isNotEmpty ? txId : null,
+          memberId: custId,
+          memberName: custName ?? 'Pilih Pelanggan',
+          finalAmount: double.tryParse(billData['amount']?.toString() ?? '0'),
+          billData: billData,
+          isOffline: isOffline,
+          onSuccess: () {
+            _fetchBills();
+          },
+        ),
+      ),
+    );
+
+    if (result == true) {
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    }
+  }
+
 }
 
 // -----------------------------------------------------
@@ -294,6 +525,7 @@ class BillDetailModal extends StatefulWidget {
   final String merchantId;
   final String transactionId;
   final String baseUrl;
+  final VoidCallback onRefresh;
 
   const BillDetailModal({
     Key? key,
@@ -301,6 +533,7 @@ class BillDetailModal extends StatefulWidget {
     required this.merchantId,
     required this.transactionId,
     required this.baseUrl,
+    required this.onRefresh,
   }) : super(key: key);
 
   @override
@@ -340,10 +573,9 @@ class _BillDetailModalState extends State<BillDetailModal> {
     };
 
     // Fetch reasons first as per user's example
-    context.read<TransactionHistoryDeleteReasonsProvider>().fetchDeleteListReasons(
-          detail.transactionId,
-          widget.token,
-        );
+    context
+        .read<TransactionHistoryDeleteReasonsProvider>()
+        .fetchDeleteListReasons(detail.transactionId, widget.token);
 
     final success = await ModalTransactionDelete.show(
       context,
@@ -357,7 +589,6 @@ class _BillDetailModalState extends State<BillDetailModal> {
       }
     }
   }
-
 
   Color _getStatusColor(String? code) {
     if (code == '1') return Colors.green;
@@ -410,73 +641,111 @@ class _BillDetailModalState extends State<BillDetailModal> {
             child: isLoading && detail == null
                 ? const Center(child: CircularProgressIndicator())
                 : detail == null
-                    ? const Center(child: Text("Gagal memuat detail"))
-                    : SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Informasi Tagihan',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                ? const Center(child: Text("Gagal memuat detail"))
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Informasi Tagihan',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          'Nomor Transaksi',
+                          '#${detail.transactionId}',
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Status',
+                                style: TextStyle(color: Colors.grey),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildInfoRow('Nomor Transaksi', '#${detail.transactionId}'),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Status', style: TextStyle(color: Colors.grey)),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(detail.statusColor?.toString()).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(color: _getStatusColor(detail.statusColor?.toString())),
-                                    ),
-                                    child: Text(
-                                      detail.statusTransactions ?? '-',
-                                      style: TextStyle(
-                                        color: _getStatusColor(detail.statusColor?.toString()),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(
+                                    detail.statusColor?.toString(),
+                                  ).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: _getStatusColor(
+                                      detail.statusColor?.toString(),
                                     ),
                                   ),
-                                ],
+                                ),
+                                child: Text(
+                                  detail.statusTransactions ?? '-',
+                                  style: TextStyle(
+                                    color: _getStatusColor(
+                                      detail.statusColor?.toString(),
+                                    ),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                            _buildInfoRow('Nama Pembeli', detail.customer ?? 'Walking Customer'),
-                            _buildInfoRow('Kasir', detail.pic ?? '-'),
-                            const SizedBox(height: 24),
-                            const Text(
-                              'Rincian Pesanan',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 12),
-                            const Divider(height: 1),
-                            if (detail.detailProducts != null)
-                              ...detail.detailProducts!.map((item) => _buildProductItem(item.toJson())).toList(),
-                            const SizedBox(height: 24),
-                            const Text(
-                              'Rincian Biaya Tagihan',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildSummaryRow('Sub Total', detail.totalBeforeDscTax, isCurrency: true),
-                            if (detail.ppn > 0)
-                              _buildSummaryRow('PPN', detail.ppn, isCurrency: true),
-                            const Divider(height: 24, thickness: 1),
-                            _buildSummaryRow('Total', detail.amount, isCurrency: true, isBold: true),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
+                        _buildInfoRow(
+                          'Nama Pembeli',
+                          detail.customer ?? 'Walking Customer',
+                        ),
+                        _buildInfoRow('Kasir', detail.pic ?? '-'),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Rincian Pesanan',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1),
+                        if (detail.detailProducts != null)
+                          ...detail.detailProducts!
+                              .map((item) => _buildProductItem(item.toJson()))
+                              .toList(),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Rincian Biaya Tagihan',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildSummaryRow(
+                          'Sub Total',
+                          detail.totalBeforeDscTax,
+                          isCurrency: true,
+                        ),
+                        if (detail.ppn > 0)
+                          _buildSummaryRow('PPN', detail.ppn, isCurrency: true),
+                        const Divider(height: 24, thickness: 1),
+                        _buildSummaryRow(
+                          'Total',
+                          detail.amount,
+                          isCurrency: true,
+                          isBold: true,
+                        ),
+                      ],
+                    ),
+                  ),
           ),
           const SizedBox(height: 20),
-          if (detail != null && !statusTransactionCancel.contains(detail.isPaid))
+          if (detail != null &&
+              !statusTransactionCancel.contains(detail.isPaid))
             Row(
               children: [
                 Container(
@@ -490,28 +759,37 @@ class _BillDetailModalState extends State<BillDetailModal> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context, {'action': 'edit', 'data': detail.toJson()}),
-                    icon: Icon(Icons.edit, size: 16, color: primary500),
-                    label: Text('Ubah', style: TextStyle(color: primary500)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: primary500),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
+                // Expanded(
+                //   child: OutlinedButton.icon(
+                //     onPressed: () => Navigator.pop(context, {'action': 'edit', 'data': detail.toJson()}),
+                //     icon: Icon(Icons.edit, size: 16, color: primary500),
+                //     label: Text('Ubah', style: TextStyle(color: primary500)),
+                //     style: OutlinedButton.styleFrom(
+                //       side: BorderSide(color: primary500),
+                //       padding: const EdgeInsets.symmetric(vertical: 12),
+                //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context, {'action': 'pay', 'data': detail.toJson()}),
-                    icon: const Icon(Icons.wallet, size: 16, color: Colors.white),
-                    label: const Text('Bayar', style: TextStyle(color: Colors.white)),
+                    icon: const Icon(
+                      Icons.wallet,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      'Bayar',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary500,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -535,18 +813,42 @@ class _BillDetailModalState extends State<BillDetailModal> {
     );
   }
 
-  Widget _buildSummaryRow(String label, dynamic value, {bool isCurrency = false, bool isBlue = false, bool isBold = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    dynamic value, {
+    bool isCurrency = false,
+    bool isBlue = false,
+    bool isBold = false,
+  }) {
     String displayValue = value.toString();
     if (isCurrency) {
-      displayValue = NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_parseAmount(value));
+      displayValue = NumberFormat.currency(
+        locale: 'id',
+        symbol: 'Rp. ',
+        decimalDigits: 0,
+      ).format(_parseAmount(value));
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.black, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, fontSize: isBold ? 16 : 14)),
-          Text(displayValue, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.w500, fontSize: isBold ? 16 : 14, color: isBlue ? primary500 : Colors.black)),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              fontSize: isBold ? 16 : 14,
+            ),
+          ),
+          Text(
+            displayValue,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              fontSize: isBold ? 16 : 14,
+              color: isBlue ? primary500 : Colors.black,
+            ),
+          ),
         ],
       ),
     );
@@ -564,18 +866,31 @@ class _BillDetailModalState extends State<BillDetailModal> {
     }
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: bnw300))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: bnw300)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('x${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            'x${item['quantity']}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(width: 12),
           Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
             clipBehavior: Clip.antiAlias,
             child: item['product_image'] != null && item['product_image'] != ''
-                ? Image.network(item['product_image'], fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image))
+                ? Image.network(
+                    item['product_image'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.image),
+                  )
                 : const Icon(Icons.image),
           ),
           const SizedBox(width: 12),
@@ -583,12 +898,37 @@ class _BillDetailModalState extends State<BillDetailModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text(NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_parseAmount(item['price'])), style: const TextStyle(fontSize: 12)),
+                Text(
+                  item['name'] ?? '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  NumberFormat.currency(
+                    locale: 'id',
+                    symbol: 'Rp. ',
+                    decimalDigits: 0,
+                  ).format(_parseAmount(item['price'])),
+                  style: const TextStyle(fontSize: 12),
+                ),
                 if (variantTexts.isNotEmpty)
-                  Padding(padding: const EdgeInsets.only(top: 4.0), child: Text('Varian : ${variantTexts.join(', ')}', style: const TextStyle(fontSize: 12, color: Colors.grey))),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Varian : ${variantTexts.join(', ')}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
                 if (item['note'] != null && item['note'] != '')
-                  Padding(padding: const EdgeInsets.only(top: 4.0), child: Text('Catatan : ${item['note']}', style: const TextStyle(fontSize: 12, color: Colors.grey))),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Catatan : ${item['note']}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -596,4 +936,6 @@ class _BillDetailModalState extends State<BillDetailModal> {
       ),
     );
   }
+
+  // Method removed - moved to BillListPageState
 }

@@ -9,6 +9,7 @@ class ProductApiService {
   Future<List<ModelDataProduk>?> fetchProducts({
     required String token,
     required String name,
+    required String isactive,
     required List<String> merchid,
     required String orderby,
   }) async {
@@ -17,6 +18,7 @@ class ProductApiService {
         "deviceid": identifier,
         "merchant_id": merchid,
         "name": name,
+        "is_active": isactive,
         "order_by": orderby,
       };
 

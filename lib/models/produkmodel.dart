@@ -58,7 +58,7 @@ class ModelDataProduk {
     price_online_shop = _toNum(json['price_online_shop']);
     price_online_shop_after = _toNum(json['price_online_shop_after']);
     isActive = _toInt(json['isActive']);
-    isPPN = _toInt(json['isPPN']);
+    isPPN = _toInt(json['isPPN'] ?? json['is_ppn']);
     typeproducts = _toStr(json['typeproducts']);
     productImage = _toStr(json['product_image']);
     discount_type = _toStr(json['discount_type']);
@@ -124,7 +124,7 @@ class ModelDataProdukGrup {
     price_online_shop = _toNum(json['price_online_shop']);
     price_online_shop_after = _toNum(json['price_online_shop_after']);
     isActive = _toInt(json['isActive']);
-    isPPN = _toInt(json['isPPN']);
+    isPPN = _toInt(json['isPPN'] ?? json['is_ppn']);
     typeproducts = _toStr(json['typeproducts']);
     productImage = _toStr(json['product_image']);
     discount_type = _toStr(json['discount_type']);
