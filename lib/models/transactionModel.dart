@@ -19,8 +19,7 @@ class TransactionHistoryModel {
 
   factory TransactionHistoryModel.fromJson(Map<String, dynamic> json) {
     return TransactionHistoryModel(
-      // transactionId: json['transaction_id']?.toString() ?? json['transactionid']?.toString(),
-      transactionId: json['transaction_id']?.toString() ?? '',
+      transactionId: (json['transaction_id'] ?? json['transactionid'])?.toString() ?? '',
       customer: json['customer'],
       amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
       entryDate: json['entry_date'],
@@ -54,7 +53,7 @@ class TransactionDetailModel {
 
   factory TransactionDetailModel.fromJson(Map<String, dynamic> json) {
     return TransactionDetailModel(
-      transactionId: json['transaction_id']?.toString() ?? '',
+      transactionId: (json['transaction_id'] ?? json['transactionid'])?.toString() ?? '',
       fullData: json,
     );
   }

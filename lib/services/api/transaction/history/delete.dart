@@ -27,10 +27,11 @@ class TransactionHistoryDeleteService {
           Uri.parse(ApiTransactionHistory.deleteTransaction),
           headers: {
             'token': token,
+            'DEVICE-ID': identifier ?? '',
             'Content-Type': 'application/json',
           },
           body: jsonEncode({
-            "deviceid": identifier,
+            "deviceid": identifier ?? '',
             "detail_alasan": detailAlasan,
             "idkategori": idKategori,
             "transactionid": transactionId,
@@ -38,12 +39,28 @@ class TransactionHistoryDeleteService {
         );
 
         if (response.statusCode == 200) {
-          return TransactionHistoryDeleteResponse.fromJson(
-            jsonDecode(response.body),
+          final decoded = jsonDecode(response.body);
+          if (decoded['rc'] == '00') {
+             return TransactionHistoryDeleteResponse.fromJson(decoded);
+          } else {
+             return TransactionHistoryDeleteResponse(
+               rc: decoded['rc'],
+               message: decoded['message'] ?? 'Gagal membatalkan tagihan',
+             );
+          }
+        } else {
+          AppLogger.e("DeleteService", "API Error ${response.statusCode}: ${response.body}");
+          return TransactionHistoryDeleteResponse(
+            rc: "99",
+            message: "Gagal membatalkan tagihan (Error ${response.statusCode})",
           );
         }
       } catch (e) {
         AppLogger.e("DeleteService", "Error deleting online: $e");
+        return TransactionHistoryDeleteResponse(
+          rc: "99",
+          message: "Koneksi terputus atau server bermasalah.",
+        );
       }
     }
 

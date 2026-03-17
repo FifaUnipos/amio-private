@@ -20,17 +20,19 @@ class TransactionHistoryDeleteReasonsService {
     String device,
   ) async {
     bool isOnline = await _connectionChecker.checkInternet();
+    bool isOfflineId = transactionId.startsWith("OFFLINE-");
 
-    if (isOnline) {
+    if (isOnline && !isOfflineId) {
       try {
         final response = await http.post(
           Uri.parse(ApiTransactionHistory.getReasons),
           headers: {
             'token': token,
+            'DEVICE-ID': identifier ?? '',
             'Content-Type': 'application/json',
           },
           body: jsonEncode({
-            "deviceid": identifier,
+            "deviceid": identifier ?? '',
             "transactionid": transactionId,
             "typetransaksi": "hapus",
           }),

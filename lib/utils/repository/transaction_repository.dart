@@ -262,9 +262,21 @@ class TransactionRepository {
           .toList();
     }
 
-    // 4. Combine Offline & Cached Online
-    final List<TransactionHistoryModel> offlineList = await _getOfflineAsHistoryModels();
+    // 4. Combine Offline & Cached Online (History only)
+    final List<TransactionHistoryModel> offlineList = await _getOfflineAsHistoryModels(isBill: false);
     final combinedList = [...offlineList, ...localList];
+
+    // Sort by time
+    combinedList.sort((a, b) {
+      final dateA = DateTime.tryParse(a.entryDate ?? '') ?? DateTime(2000);
+      final dateB = DateTime.tryParse(b.entryDate ?? '') ?? DateTime(2000);
+      if (orderBy == 'upDownCreate') {
+        return dateB.compareTo(dateA); // Newest first
+      } else if (orderBy == 'downUpCreate') {
+        return dateA.compareTo(dateB); // Oldest first
+      }
+      return 0;
+    });
 
     // 2. Background Sync
     _syncTransactions(
@@ -310,9 +322,21 @@ class TransactionRepository {
       }
     }
 
-    // 4. Combine Offline & Cached Online
-    final List<TransactionHistoryModel> offlineList = await _getOfflineAsHistoryModels();
+    // 4. Combine Offline & Cached Online (Bills only)
+    final List<TransactionHistoryModel> offlineList = await _getOfflineAsHistoryModels(isBill: true);
     final combinedList = [...offlineList, ...localList];
+
+    // Sort by time
+    combinedList.sort((a, b) {
+      final dateA = DateTime.tryParse(a.entryDate ?? '') ?? DateTime(2000);
+      final dateB = DateTime.tryParse(b.entryDate ?? '') ?? DateTime(2000);
+      if (orderBy == 'upDownCreate') {
+        return dateB.compareTo(dateA); // Newest first
+      } else if (orderBy == 'downUpCreate') {
+        return dateA.compareTo(dateB); // Oldest first
+      }
+      return 0;
+    });
 
     // 3. Background Sync
     _syncTransactions(
@@ -436,8 +460,20 @@ class TransactionRepository {
                 .toList();
             
             if (type == 'bill' || type == 'history') {
-              final offlineList = await _getOfflineAsHistoryModels();
+              final offlineList = await _getOfflineAsHistoryModels(isBill: type == 'bill');
               updatedList = [...offlineList, ...updatedList];
+
+              // Sort by time
+              updatedList.sort((a, b) {
+                final dateA = DateTime.tryParse(a.entryDate ?? '') ?? DateTime(2000);
+                final dateB = DateTime.tryParse(b.entryDate ?? '') ?? DateTime(2000);
+                if (orderBy == 'upDownCreate') {
+                  return dateB.compareTo(dateA); // Newest first
+                } else if (orderBy == 'downUpCreate') {
+                  return dateA.compareTo(dateB); // Oldest first
+                }
+                return 0;
+              });
             }
             
             onSyncUpdate(updatedList);
@@ -659,9 +695,17 @@ class TransactionRepository {
     return true; // We consider it "done" locally
   }
 
-  Future<List<TransactionHistoryModel>> _getOfflineAsHistoryModels() async {
+  Future<List<TransactionHistoryModel>> _getOfflineAsHistoryModels({required bool isBill}) async {
     final offlineTx = await _dbHelper.getOfflineTransactions();
-    return offlineTx.map((ot) {
+    
+    // Filter out based on whether it is a Bill or History.
+    // Offline transactions that do NOT have a payment method are Bills.
+    final filteredTx = offlineTx.where((ot) {
+      final bool hasPaymentMethod = ot['payment_method'] != null && ot['payment_method'].toString().isNotEmpty;
+      return isBill ? !hasPaymentMethod : hasPaymentMethod;
+    }).toList();
+
+    return filteredTx.map((ot) {
       final isDeleted = ot['is_deleted'] == 1;
       double amount = (ot['value'] as num?)?.toDouble() ?? 0.0;
       if (amount == 0 && ot['payload'] != null) {
