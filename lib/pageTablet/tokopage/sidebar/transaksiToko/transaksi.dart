@@ -355,17 +355,21 @@ class _TransactionPageState extends State<TransactionPage>
 
   Future<void> getImage() async {
     var picker = ImagePicker();
-    PickedFile? image;
+    XFile? image;
 
-    image = await picker.getImage(
+    image = await picker.pickImage(
       source: ImageSource.gallery,
       maxHeight: 900,
       maxWidth: 900,
     );
-    if (image!.path.isEmpty == false) {
+
+    if (image == null) return;
+    if (image.path.isEmpty == false) {
       myImage = File(image.path);
 
       bytes = await Io.File(myImage!.path).readAsBytes();
+      if (!mounted) return;
+
       setState(() {
         img64 = base64Encode(bytes!);
         images.add(img64!);
@@ -516,9 +520,6 @@ class _TransactionPageState extends State<TransactionPage>
     sumTotal = total.fold<num>(0, (a, b) => a + b);
   }
 
-  String textOrderBy = 'Nama Produk A ke Z';
-  String textvalueOrderBy = 'upDownNama';
-
   late Future<List<PaymentMethod>> futurePaymentMethodsDebit;
   late Future<List<PaymentMethod>> futurePaymentMethodsKredit;
   late Future<List<PaymentMethod>> futurePaymentMethodsEWallet;
@@ -569,7 +570,7 @@ class _TransactionPageState extends State<TransactionPage>
       );
 
       //getDataCoin('');
-
+      if (!mounted) return;
       setState(() {
         print(datasTransaksi.toString());
         subTotal;
@@ -637,6 +638,8 @@ class _TransactionPageState extends State<TransactionPage>
       datasTransaksi = await getProductTransaksi(context, widget.token, value, [
         '',
       ], textvalueOrderBy);
+      if (!mounted) return;
+
       setState(() {});
     });
   }
@@ -644,6 +647,13 @@ class _TransactionPageState extends State<TransactionPage>
   @override
   dispose() {
     _debounce?.cancel();
+    _tabController?.dispose();
+    searchController.dispose();
+    customProdukName.dispose();
+    customProdukPrice.dispose();
+    conCatatanPreview.dispose();
+    conCounterPreview.dispose();
+    uangTunaiController.dispose();
     sumTotal;
     productPrice;
     pinController.dispose();
@@ -661,6 +671,8 @@ class _TransactionPageState extends State<TransactionPage>
   refreshColor() {
     cartMap.isEmpty ? hasItemColor = bnw300 : hasItemColor = primary500;
     cart.isEmpty ? hasItemColor = bnw300 : hasItemColor = primary500;
+    if (!mounted) return;
+
     setState(() {});
   }
 
@@ -1016,11 +1028,12 @@ class _TransactionPageState extends State<TransactionPage>
                                                             img64,
                                                             '',
                                                           ).then((value) {
-                                                            // Navigator.pop(context);
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
                                                           }),
                                                     );
                                                     setState(() {});
-                                                    // initState();
                                                   },
                                                   child: SizedBox(
                                                     child: TextFormField(
@@ -1342,7 +1355,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                             '',
                                                           );
                                                           setState(() {});
-                                                          initState();
                                                         },
                                                         child: SizedBox(
                                                           child: TextFormField(
@@ -1583,6 +1595,7 @@ class _TransactionPageState extends State<TransactionPage>
                               transactionidValue = "";
 
                               refreshColor();
+
                               setState(() {});
                             }
 
@@ -9569,10 +9582,13 @@ class _TransactionPageState extends State<TransactionPage>
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
           setState(() {
+            int previousValue = valueOrderByCart;
+            bool confirmed = false;
             showModalBottomSheet(
               constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
@@ -9633,7 +9649,7 @@ class _TransactionPageState extends State<TransactionPage>
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
-                                    orderByProductText.length,
+                                    orderByCartText.length,
                                     (int index) {
                                       return Padding(
                                         padding: EdgeInsets.only(right: size16),
@@ -9645,8 +9661,7 @@ class _TransactionPageState extends State<TransactionPage>
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
+                                              color: valueOrderByCart == index
                                                   ? primary500
                                                   : bnw300,
                                             ),
@@ -9655,23 +9670,22 @@ class _TransactionPageState extends State<TransactionPage>
                                             ),
                                           ),
                                           label: Text(
-                                            orderByProductText[index],
+                                            orderByCartText[index],
                                             style: heading4(
                                               FontWeight.w400,
-                                              valueOrderByProduct == index
+                                              valueOrderByCart == index
                                                   ? primary500
                                                   : bnw900,
                                               'Outfit',
                                             ),
                                           ),
-                                          selected:
-                                              valueOrderByProduct == index,
+                                          selected: valueOrderByCart == index,
                                           onSelected: (bool selected) {
                                             setState(() {
                                               print(index);
                                               // _value =
                                               //     selected ? index : null;
-                                              valueOrderByProduct = index;
+                                              valueOrderByCart = index;
                                             });
                                             setState(() {});
                                           },
@@ -9687,17 +9701,27 @@ class _TransactionPageState extends State<TransactionPage>
                           SizedBox(
                             width: double.infinity,
                             child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
+                              onTap: () async {
+                                confirmed = true;
+                                textOrderByCart =
+                                    orderByCartText[valueOrderByCart];
+                                textvalueOrderByCart =
+                                    orderByCart[valueOrderByCart];
+                                orderByCart[valueOrderByCart];
 
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                orderByProduct[valueOrderByProduct];
+                                final result = await getProductTransaksi(
+                                  context,
+                                  checkToken,
+                                  '',
+                                  [merchantId],
+                                  textvalueOrderByCart,
+                                );
+
+                                if (!mounted) return;
+                                outerSetState(() {
+                                  datasTransaksi = result;
+                                });
                                 Navigator.pop(context);
-                                initState();
                               },
                               child: buttonXL(
                                 Center(
@@ -9720,7 +9744,13 @@ class _TransactionPageState extends State<TransactionPage>
                   ),
                 );
               },
-            );
+            ).whenComplete(() {
+              if (!confirmed) {
+                outerSetState(() {
+                  valueOrderByCart = previousValue;
+                });
+              }
+            });
           });
         },
         child: buttonLoutline(
@@ -9732,7 +9762,7 @@ class _TransactionPageState extends State<TransactionPage>
                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari $textOrderBy',
+                ' dari $textOrderByCart',
                 style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
@@ -9763,6 +9793,8 @@ class _TransactionPageState extends State<TransactionPage>
           if (response.statusCode == 200) {
             final data = json.decode(response.body);
             if (data != null && data['data'] != null) {
+              if (!mounted) return;
+
               setState(() {
                 typeproductList = List<dynamic>.from(data['data']);
                 searchResultListProduct = typeproductList;

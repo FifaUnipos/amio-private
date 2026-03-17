@@ -534,14 +534,13 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                         scrollToTextField();
                                                         closeLoading(context);
                                                       });
-                                                  initState();
                                                   setState(() {});
                                                 });
                                               }
                                               closeLoading(context);
                                             });
+                                            if (!mounted) return;
                                             setState(() {});
-                                            initState();
                                           });
                                         },
                                         child: buttonXL(
@@ -655,6 +654,8 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                   curve: Curves.ease,
                 );
               }
+                                            if (!mounted) return;
+              
               setState(() {});
             },
             tabs: [
@@ -765,7 +766,6 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                   color: bnw100,
                                   backgroundColor: primary500,
                                   onRefresh: () async {
-                                    initState();
                                     setState(() {});
                                   },
                                   child: ListView.builder(
@@ -2342,7 +2342,6 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                     orderByRiwayatTagihan[valueOrderByProduct];
                                 orderByRiwayatTagihan[valueOrderByProduct];
                                 Navigator.pop(context);
-                                initState();
                               },
                               child: buttonXL(
                                 Center(

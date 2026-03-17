@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'diskonToko.dart';
@@ -10,7 +11,10 @@ import '../../../../utils/component/skeletons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import '../../../../utils/component/component_orderBy.dart';
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,14 +27,13 @@ import '../../../../models/promosiModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
-import '../../../home/sidebar/tokoPage/ubahToko.dart';import '../../../../utils/component/component_button.dart';
+import '../../../home/sidebar/tokoPage/ubahToko.dart';
+import '../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';
+
 class PromosiToko extends StatefulWidget {
   String token;
-  PromosiToko({
-    Key? key,
-    required this.token,
-  }) : super(key: key);
+  PromosiToko({Key? key, required this.token}) : super(key: key);
 
   @override
   State<PromosiToko> createState() => _PromosiTokoState();
@@ -88,24 +91,22 @@ class _PromosiTokoState extends State<PromosiToko>
     hargaProductPromosi = '';
 
     _tabController = TabController(length: 1, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [''];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [''];
 
-        await getDataProduk();
+      await getDataProduk();
 
-        setState(() {
-          // log(datasProduk.toString());
-          datasProduk;
-        });
+      setState(() {
+        // log(datasProduk.toString());
+        datasProduk;
+      });
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
     _getProvinceList();
 
     conHarga.addListener(formatInputRpHarga);
@@ -131,6 +132,7 @@ class _PromosiTokoState extends State<PromosiToko>
     listProduct = [];
     listProduct.clear();
     selectedFlag.clear();
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -152,8 +154,11 @@ class _PromosiTokoState extends State<PromosiToko>
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -225,7 +230,7 @@ class _PromosiTokoState extends State<PromosiToko>
                 UbahDiskonPage(
                   token: widget.token,
                   pageController: _pageController,
-                )
+                ),
               ],
             ),
           ),
@@ -243,9 +248,10 @@ class _PromosiTokoState extends State<PromosiToko>
               GestureDetector(
                 onTap: () {
                   _pageController.previousPage(
-                      duration: Duration(milliseconds: 10), curve: Curves.ease);
+                    duration: Duration(milliseconds: 10),
+                    curve: Curves.ease,
+                  );
                   refreshDataProduk();
-                  initState();
                 },
                 child: Icon(
                   PhosphorIcons.arrow_left,
@@ -266,7 +272,7 @@ class _PromosiTokoState extends State<PromosiToko>
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
           SizedBox(height: size16),
@@ -326,8 +332,10 @@ class _PromosiTokoState extends State<PromosiToko>
                         height: 28.0,
                         value: onswitchtampikan,
                         padding: 0,
-                        activeIcon:
-                            Icon(PhosphorIcons.check, color: primary500),
+                        activeIcon: Icon(
+                          PhosphorIcons.check,
+                          color: primary500,
+                        ),
                         inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                         activeColor: primary500,
                         inactiveColor: bnw100,
@@ -335,8 +343,10 @@ class _PromosiTokoState extends State<PromosiToko>
                         inactiveToggleColor: bnw900,
                         activeToggleColor: primary200,
                         activeSwitchBorder: Border.all(color: primary500),
-                        inactiveSwitchBorder:
-                            Border.all(color: bnw300, width: 2),
+                        inactiveSwitchBorder: Border.all(
+                          color: bnw300,
+                          width: 2,
+                        ),
                         onToggle: (val) {
                           onswitchtampikan = val;
                           onswitchtampikan
@@ -406,7 +416,6 @@ class _PromosiTokoState extends State<PromosiToko>
                       }
                     });
                     setState(() {});
-                    initState();
                   },
                   child: buttonXL(
                     Center(
@@ -420,7 +429,7 @@ class _PromosiTokoState extends State<PromosiToko>
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -474,7 +483,7 @@ class _PromosiTokoState extends State<PromosiToko>
                     ),
                     130,
                   ),
-                )
+                ),
               ],
             ),
           ],
@@ -514,9 +523,7 @@ class _PromosiTokoState extends State<PromosiToko>
                     // Tab(
                     //   text: 'Voucher',
                     // ),
-                    Tab(
-                      text: 'Diskon',
-                    ),
+                    Tab(text: 'Diskon'),
                   ],
                 ),
               ),
@@ -546,7 +553,7 @@ class _PromosiTokoState extends State<PromosiToko>
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -642,7 +649,7 @@ class _PromosiTokoState extends State<PromosiToko>
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   )
                 : Row(
@@ -658,8 +665,8 @@ class _PromosiTokoState extends State<PromosiToko>
                               checkFill == 'penuh'
                                   ? PhosphorIcons.check_square_fill
                                   : isSelectionMode
-                                      ? PhosphorIcons.minus_circle_fill
-                                      : PhosphorIcons.square,
+                                  ? PhosphorIcons.minus_circle_fill
+                                  : PhosphorIcons.square,
                               color: bnw100,
                             ),
                           ),
@@ -681,13 +688,19 @@ class _PromosiTokoState extends State<PromosiToko>
                                     Text(
                                       'Yakin Ingin Menghapus Voucher?',
                                       style: heading1(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                     SizedBox(height: size16),
                                     Text(
                                       'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
                                       style: heading2(
-                                          FontWeight.w400, bnw900, 'Outfit'),
+                                        FontWeight.w400,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -707,14 +720,16 @@ class _PromosiTokoState extends State<PromosiToko>
                                           refreshDataProduk();
 
                                           setState(() {});
-                                          initState();
                                         },
                                         child: buttonXLoutline(
                                           Center(
                                             child: Text(
                                               'Iya, Hapus',
-                                              style: heading3(FontWeight.w600,
-                                                  primary500, 'Outfit'),
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                primary500,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ),
                                           MediaQuery.of(context).size.width,
@@ -732,8 +747,11 @@ class _PromosiTokoState extends State<PromosiToko>
                                           Center(
                                             child: Text(
                                               'Batalkan',
-                                              style: heading3(FontWeight.w600,
-                                                  bnw100, 'Outfit'),
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                bnw100,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ),
                                           MediaQuery.of(context).size.width,
@@ -757,8 +775,11 @@ class _PromosiTokoState extends State<PromosiToko>
                               SizedBox(width: size12),
                               Text(
                                 'Hapus Semua',
-                                style:
-                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                             ],
                           ),
@@ -778,7 +799,6 @@ class _PromosiTokoState extends State<PromosiToko>
                           );
                           refreshDataProduk();
                           setState(() {});
-                          initState();
                         },
                         child: buttonL(
                           Row(
@@ -786,8 +806,11 @@ class _PromosiTokoState extends State<PromosiToko>
                             children: [
                               Text(
                                 'Aktifkan Tampilkan dikasir',
-                                style:
-                                    heading3(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                             ],
                           ),
@@ -805,7 +828,6 @@ class _PromosiTokoState extends State<PromosiToko>
                     color: bnw100,
                     backgroundColor: primary500,
                     onRefresh: () async {
-                      initState();
                       setState(() {});
                     },
                     child: Container(
@@ -830,11 +852,15 @@ class _PromosiTokoState extends State<PromosiToko>
 
                           return Container(
                             padding: EdgeInsets.symmetric(
-                                horizontal: size16, vertical: size12),
+                              horizontal: size16,
+                              vertical: size12,
+                            ),
                             decoration: BoxDecoration(
                               border: Border(
-                                bottom:
-                                    BorderSide(color: bnw300, width: width1),
+                                bottom: BorderSide(
+                                  color: bnw300,
+                                  width: width1,
+                                ),
                               ),
                             ),
                             child: Row(
@@ -861,30 +887,40 @@ class _PromosiTokoState extends State<PromosiToko>
                                   child: Text(
                                     datasProduk![index].name ?? '',
                                     style: heading4(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
                                 Expanded(
                                   child: Text(
                                     FormatCurrency.convertToIdr(
-                                        datasProduk![index].price ?? 0),
+                                      datasProduk![index].price ?? 0,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: heading4(
-                                        FontWeight.w400, bnw900, 'Outfit'),
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
                                 Expanded(
                                   child: Text(
                                     FormatCurrency.convertToIdr(
-                                            datasProduk![index].point ?? 0)
-                                        .toString(),
+                                      datasProduk![index].point ?? 0,
+                                    ).toString(),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: heading4(
-                                        FontWeight.w400, bnw900, 'Outfit'),
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -896,13 +932,18 @@ class _PromosiTokoState extends State<PromosiToko>
                                         MediaQuery.of(context).size.width / 9,
                                   ),
                                   child: FlutterSwitch(
-                                    value:
-                                        dataProduk.isActive == 1 ? true : false,
+                                    value: dataProduk.isActive == 1
+                                        ? true
+                                        : false,
                                     padding: 1,
-                                    activeIcon: Icon(PhosphorIcons.check,
-                                        color: primary500),
-                                    inactiveIcon:
-                                        Icon(PhosphorIcons.x, color: bnw100),
+                                    activeIcon: Icon(
+                                      PhosphorIcons.check,
+                                      color: primary500,
+                                    ),
+                                    inactiveIcon: Icon(
+                                      PhosphorIcons.x,
+                                      color: bnw100,
+                                    ),
                                     activeColor: primary500,
                                     inactiveColor: bnw100,
                                     borderRadius: 30.0,
@@ -910,14 +951,17 @@ class _PromosiTokoState extends State<PromosiToko>
                                     height: 27.0,
                                     inactiveToggleColor: bnw900,
                                     activeToggleColor: primary200,
-                                    activeSwitchBorder:
-                                        Border.all(color: primary500),
-                                    inactiveSwitchBorder:
-                                        Border.all(color: bnw300, width: 2),
+                                    activeSwitchBorder: Border.all(
+                                      color: primary500,
+                                    ),
+                                    inactiveSwitchBorder: Border.all(
+                                      color: bnw300,
+                                      width: 2,
+                                    ),
                                     onToggle: (bool value) {
                                       // print('hello');
                                       List<String> listProduct = [
-                                        dataProduk.productid!
+                                        dataProduk.productid!,
                                       ];
                                       changeActive(
                                         context,
@@ -927,7 +971,6 @@ class _PromosiTokoState extends State<PromosiToko>
                                         "",
                                       );
                                       setState(() {});
-                                      initState();
                                     },
                                   ),
                                 ),
@@ -960,17 +1003,19 @@ class _PromosiTokoState extends State<PromosiToko>
                                                       Text(
                                                         dataProduk.name!,
                                                         style: heading2(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                       Text(
                                                         dataProduk
                                                             .typeproducts!,
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
@@ -993,12 +1038,12 @@ class _PromosiTokoState extends State<PromosiToko>
                                                   singleProductId =
                                                       dataProduk.productid;
                                                   getSinglePromosi(
-                                                          context,
-                                                          widget.token,
-                                                          "",
-                                                          singleProductId,
-                                                          setState)
-                                                      .then((value) {
+                                                    context,
+                                                    widget.token,
+                                                    "",
+                                                    singleProductId,
+                                                    setState,
+                                                  ).then((value) {
                                                     if (value == '00') {
                                                       _pageController
                                                           .jumpToPage(2);
@@ -1019,7 +1064,7 @@ class _PromosiTokoState extends State<PromosiToko>
                                                     HitTestBehavior.translucent,
                                                 onTap: () {
                                                   List<String> listProduct = [
-                                                    dataProduk.productid!
+                                                    dataProduk.productid!,
                                                   ];
                                                   List<String> value = [''];
                                                   Navigator.pop(context);
@@ -1032,30 +1077,31 @@ class _PromosiTokoState extends State<PromosiToko>
                                                             Text(
                                                               'Yakin Ingin Menghapus Voucher?',
                                                               style: heading1(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             SizedBox(
-                                                                height: size16),
+                                                              height: size16,
+                                                            ),
                                                             Text(
                                                               'Data voucher yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                               style: heading2(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
                                                         SizedBox(
-                                                            height: size16),
+                                                          height: size16,
+                                                        ),
                                                         Row(
                                                           children: [
                                                             Expanded(
-                                                              child:
-                                                                  GestureDetector(
+                                                              child: GestureDetector(
                                                                 onTap: () {
                                                                   // Navigator.pop(context);
                                                                   deleteProduk(
@@ -1068,53 +1114,53 @@ class _PromosiTokoState extends State<PromosiToko>
                                                                   refreshDataProduk();
 
                                                                   setState(
-                                                                      () {});
-                                                                  initState();
+                                                                    () {},
+                                                                  );
                                                                 },
-                                                                child:
-                                                                    buttonXLoutline(
+                                                                child: buttonXLoutline(
                                                                   Center(
                                                                     child: Text(
                                                                       'Iya, Hapus',
                                                                       style: heading3(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          primary500,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        primary500,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                   MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width,
+                                                                    context,
+                                                                  ).size.width,
                                                                   primary500,
                                                                 ),
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                                width: size16),
+                                                              width: size16,
+                                                            ),
                                                             Expanded(
-                                                              child:
-                                                                  GestureDetector(
+                                                              child: GestureDetector(
                                                                 onTap: () {
                                                                   Navigator.pop(
-                                                                      context);
+                                                                    context,
+                                                                  );
                                                                 },
                                                                 child: buttonXL(
                                                                   Center(
                                                                     child: Text(
                                                                       'Batalkan',
                                                                       style: heading3(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw100,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw100,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                   MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width,
+                                                                    context,
+                                                                  ).size.width,
                                                                 ),
                                                               ),
                                                             ),
@@ -1144,8 +1190,11 @@ class _PromosiTokoState extends State<PromosiToko>
                                         SizedBox(width: size12),
                                         Text(
                                           'Atur',
-                                          style: body1(FontWeight.w600, bnw900,
-                                              'Outfit'),
+                                          style: body1(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1174,13 +1223,10 @@ class _PromosiTokoState extends State<PromosiToko>
           children: [
             Icon(icon, color: bnw900),
             SizedBox(width: size12),
-            Text(
-              title,
-              style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-            )
+            Text(title, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
           ],
         ),
-        Divider(color: bnw300)
+        Divider(color: bnw300),
       ],
     );
   }
@@ -1192,14 +1238,8 @@ class _PromosiTokoState extends State<PromosiToko>
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading4(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: heading4(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           TextFormField(
@@ -1210,18 +1250,12 @@ class _PromosiTokoState extends State<PromosiToko>
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1267,21 +1301,19 @@ class _PromosiTokoState extends State<PromosiToko>
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(
-      () {
-        if (selectedFlag.containsValue(false)) {
-          checkFill = 'kosong';
-          listProduct.clear();
-          isSelectionMode = selectedFlag.containsValue(false);
-          isSelectionMode = selectedFlag.containsValue(true);
-        } else {
-          checkFill = 'penuh';
-          listProduct.clear();
-          listProduct.addAll(productId);
-          isSelectionMode = selectedFlag.containsValue(true);
-        }
-      },
-    );
+    setState(() {
+      if (selectedFlag.containsValue(false)) {
+        checkFill = 'kosong';
+        listProduct.clear();
+        isSelectionMode = selectedFlag.containsValue(false);
+        isSelectionMode = selectedFlag.containsValue(true);
+      } else {
+        checkFill = 'penuh';
+        listProduct.clear();
+        listProduct.addAll(productId);
+        isSelectionMode = selectedFlag.containsValue(true);
+      }
+    });
   }
 
   List? typeproductList;
@@ -1289,147 +1321,181 @@ class _PromosiTokoState extends State<PromosiToko>
 
   String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProvinceList() async {
-    await http.post(Uri.parse(provinceInfoUrl), body: {
-      "deviceid": identifier,
-    }).then((response) {
-      var data = json.decode(response.body);
+    await http
+        .post(Uri.parse(provinceInfoUrl), body: {"deviceid": identifier})
+        .then((response) {
+          var data = json.decode(response.body);
 
-      setState(() {
-        typeproductList = data['data'];
-      });
-    });
+          setState(() {
+            typeproductList = data['data'];
+          });
+        });
   }
 
-  orderBy(BuildContext context) {
+  orderBy() {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: size24),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByVoucherText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(orderByVoucherText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                textOrderBy =
-                                    orderByVoucherText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                0,
-                              ),
-                            ),
-                          ),
-                        ],
+          int previousValue = valueOrderByDiscount;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setState) => IntrinsicHeight(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size12),
+                        topLeft: Radius.circular(size12),
                       ),
                     ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        Container(
+                          width: double.infinity,
+                          color: bnw100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Urutkan',
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Text(
+                                'Tentukan data yang akan tampil',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                'Pilih Urutan',
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Wrap(
+                                children: List<Widget>.generate(
+                                  orderByDiscountText.length,
+                                  (int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(right: size16),
+                                      child: ChoiceChip(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: size12,
+                                        ),
+                                        backgroundColor: bnw100,
+                                        selectedColor: primary100,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: valueOrderByDiscount == index
+                                                ? primary500
+                                                : bnw300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                        ),
+                                        label: Text(
+                                          orderByDiscountText[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            valueOrderByDiscount == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        selected: valueOrderByDiscount == index,
+                                        onSelected: (bool selected) {
+                                          setState(() {
+                                            print(index);
+                                            // _value =
+                                            //     selected ? index : null;
+                                            valueOrderByDiscount = index;
+                                          });
+                                          setState(() {});
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: size32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: GestureDetector(
+                            onTap: () async {
+                              confirmed = true;
+                              textOrderBy =
+                                  orderByDiscountText[valueOrderByDiscount];
+                              textvalueOrderBy =
+                                  orderByDiscount[valueOrderByDiscount];
+                              final result = await getVoucher(
+                                context,
+                                checkToken,
+                                textvalueOrderByMember,
+                                merchantId,
+                              );
+                              if (!mounted) return;
+                              outerSetState(() {
+                                datasProduk = result;
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: buttonXL(
+                              Center(
+                                child: Text(
+                                  'Tampilkans',
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                              0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              },
-            );
+                ),
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              outerSetState(() {
+                valueOrderByDiscount = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(
@@ -1438,26 +1504,14 @@ class _PromosiTokoState extends State<PromosiToko>
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,

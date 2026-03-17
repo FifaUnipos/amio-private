@@ -35,7 +35,7 @@ dependencies:
   dio: ^4.0.6
   file_picker: ^8.0.0
   firebase_core: ^2.4.1
-  firebase_messaging: ^14.2.1
+  # firebase_messaging: ^14.2.1
   flutter:
     sdk: flutter
   flutter_device_type: ^0.4.0

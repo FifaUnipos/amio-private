@@ -127,6 +127,7 @@ class _DiskonGrupState extends State<DiskonGrup> {
     listProduct = [];
     listProduct.clear();
     selectedFlag.clear();
+    if (!mounted) return;
     setState(() {});
   }
 

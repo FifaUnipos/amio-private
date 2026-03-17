@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -15,7 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../main.dart';
 import '../../../services/apimethod.dart';
-import '../../../services/notification.dart';
 
 import '../../../utils/component/component_appbar.dart';
 

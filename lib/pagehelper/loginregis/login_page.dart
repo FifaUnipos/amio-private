@@ -6,7 +6,7 @@ import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart'
 import '../masukakun.dart';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -25,7 +25,6 @@ import '../../../../utils/component/component_color.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
 import '../../services/apimethod.dart';
-import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
@@ -348,7 +347,8 @@ class _LoginPageState extends State<LoginPage> {
     var jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      Navigator.of(context, rootNavigator: true).pop();
+      // Navigator.of(context, rootNavigator: true).pop();
+      closeLoading(context);
       print(jsonResponse['data']);
       print("succes");
       _validate = false;

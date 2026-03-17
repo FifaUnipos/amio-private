@@ -164,9 +164,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
   @override
   void initState() {
     // checkEmail(widget.token, identifier, context, emailProfile.toString());
-    
     iconSelectedSidebar = 0;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (!mounted) return;
       setState(() {
         myprofile(widget.token);
 
@@ -182,20 +182,23 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
     });
     deviceDetails();
     callName();
-    sidebarController.addListener(() {
-      if (mounted) setState(() {});
-    });
+    sidebarController.addListener(_onSidebarChanged);
     super.initState();
   }
 
   @override
   void dispose() {
-    sidebarController.removeListener(() {});
+    sidebarController.removeListener(_onSidebarChanged);
     super.dispose();
+  }
+
+  void _onSidebarChanged() {
+    if (mounted) setState(() {});
   }
 
   Future callName() async {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (!mounted) return;
       setState(() {
         myprofile(widget.token);
 

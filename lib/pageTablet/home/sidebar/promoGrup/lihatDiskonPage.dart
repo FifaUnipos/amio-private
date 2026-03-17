@@ -136,6 +136,7 @@ class _PromosiGrupState extends State<PromosiGrup>
     listProduct = [];
     listProduct.clear();
     selectedFlag.clear();
+    if (!mounted) return;
     setState(() {});
   }
 

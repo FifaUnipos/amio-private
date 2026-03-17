@@ -97,9 +97,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
     });
   }
 
-  String textOrderBy = 'Riwayat Terbaru';
-  String textvalueOrderBy = 'upDownCreate';
-
   @override
   void dispose() {
     // TODO: implement dispose
@@ -120,7 +117,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
         widget.token,
         '',
         '',
-        textvalueOrderBy,
+        textvalueOrderByRiwayatTransaksi,
       );
       setState(() {});
     });
@@ -405,7 +402,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                     color: bnw100,
                                     backgroundColor: primary500,
                                     onRefresh: () async {
-                                      initState();
                                       setState(() {});
                                     },
                                     child: ListView.builder(
@@ -1818,135 +1814,151 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
+          int previousValue = valueOrderByHistoryTransaction;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setState) => IntrinsicHeight(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size12),
+                        topLeft: Radius.circular(size12),
                       ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
+                    ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        Container(
+                          width: double.infinity,
+                          color: bnw100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Urutkan',
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
                                 ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
+                              ),
+                              Text(
+                                'Tentukan data yang akan tampil',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
                                 ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                'Pilih Urutan',
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
                                 ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByRiwayatText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByRiwayatText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
+                              ),
+                              Wrap(
+                                children: List<Widget>.generate(
+                                  orderByRiwayatTransaksiText.length,
+                                  (int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(right: size16),
+                                      child: ChoiceChip(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: size12,
                                         ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                                        backgroundColor: bnw100,
+                                        selectedColor: primary100,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color:
+                                                valueOrderByHistoryTransaction ==
+                                                    index
+                                                ? primary500
+                                                : bnw300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                        ),
+                                        label: Text(
+                                          orderByRiwayatTransaksiText[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            valueOrderByHistoryTransaction ==
+                                                    index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        selected:
+                                            valueOrderByHistoryTransaction ==
+                                            index,
+                                        onSelected: (bool selected) {
+                                          setState(() {
+                                            print(index);
+                                            // _value =
+                                            //     selected ? index : null;
+                                            valueOrderByHistoryTransaction =
+                                                index;
+                                          });
+                                          setState(() {});
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByRiwayatText[valueOrderByProduct]);
+                        ),
+                        SizedBox(height: size32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: StatefulBuilder(
+                            builder: (BuildContext context, setState) => GestureDetector(
+                              onTap: () async {
+                                confirmed = true;
+                                textOrderByRiwayatTransaksi =
+                                    orderByRiwayatTransaksiText[valueOrderByHistoryTransaction];
+                                textvalueOrderByRiwayatTransaksi =
+                                    orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
+                                orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
 
-                                textOrderBy =
-                                    orderByRiwayatText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByRiwayatTagihan[valueOrderByProduct];
-                                orderByRiwayatTagihan[valueOrderByProduct];
+                                final result = await getRiwayatTransaksi(
+                                  context,
+                                  checkToken,
+                                  '0',
+                                  merchantId,
+                                  textvalueOrderByRiwayatTransaksi,
+                                );
+                                if (!mounted) return;
+                                outerSetState(() {
+                                  datasRiwayat = result;
+                                });
                                 Navigator.pop(context);
-                                initState();
                               },
                               child: buttonXL(
                                 Center(
@@ -1963,13 +1975,19 @@ class _RiwayatPageState extends State<RiwayatPage> {
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-            );
+                ),
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              outerSetState(() {
+                valueOrderByHistoryTransaction = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(
@@ -1981,7 +1999,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari $textOrderBy',
+                ' dari $textOrderByRiwayatTransaksi',
                 style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),

@@ -12,11 +12,13 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
 import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
 import 'package:unipos_app_335/routes/navigation_route.dart';
+import 'package:unipos_app_335/services/api/product/product_sorting_service.dart';
 import 'package:unipos_app_335/services/api/transaction/history/delete.dart';
 
 import 'package:unipos_app_335/services/api/transaction/history/delete_get_reasons.dart';
@@ -42,8 +44,6 @@ final ValueNotifier<int> mobileTabIndex = ValueNotifier<int>(0);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔹 Baca launch details SEBELUM init() — plugin membersihkan native state saat initialize()
-  // Kalau dibaca sesudah init(), hot restart akan terus re-read data notif lama
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final notificationAppLaunchDetails = await flutterLocalNotificationsPlugin
       .getNotificationAppLaunchDetails();
@@ -55,7 +55,9 @@ Future<void> main() async {
     payload = notificationResponse?.payload;
   }
 
-  // 🔹 Init notif service SETELAH baca launch details
+  final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
   final UniposNotificationService notifService = UniposNotificationService();
   await notifService.init();
   await notifService.requestPermissions();
@@ -82,7 +84,11 @@ Future<void> main() async {
   myprofile(prefs.getString('token') ?? '');
   typeAccount = prefs.getString('merchantType');
   roleAccount = prefs.getString('roleProfile');
-  dashboard(identifier, checkToken ?? '');
+  try {
+    await dashboard(identifier, checkToken ?? '');
+  } catch (e) {
+    print('Dashboard skip: $e');
+  }
   merchantType;
 
   // Set status bar
@@ -164,6 +170,11 @@ class UniPOSApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => PayloadProvider(payload: payload),
+        ),
+        Provider(create: (context) => ProductSortingService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductSortingProvider(context.read<ProductSortingService>()),
         ),
       ],
       child: MaterialApp(

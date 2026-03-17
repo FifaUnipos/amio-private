@@ -7,7 +7,7 @@ import '../../main.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
@@ -26,7 +26,6 @@ import '../../../../utils/component/component_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../services/apimethod.dart';
-import '../../services/notification.dart';
 
 import '../../utils/component/component_appbar.dart';
 import 'login_page.dart';
@@ -35,8 +34,13 @@ import 'register_page.dart';
 class Otppage extends StatefulWidget {
   //pass
   final String phone, name, email, pageidentify;
-  const Otppage(this.phone, this.name, this.email, this.pageidentify,
-      {super.key});
+  const Otppage(
+    this.phone,
+    this.name,
+    this.email,
+    this.pageidentify, {
+    super.key,
+  });
 
   @override
   State<Otppage> createState() => _OtppageState();
@@ -57,10 +61,17 @@ class _OtppageState extends State<Otppage> {
 
   String get timerText =>
       '${((timerMaxSeconds - currentSeconds) ~/ 60).toString().padLeft(2, '0')}: ${((timerMaxSeconds - currentSeconds) % 60).toString().padLeft(2, '0')}';
+  Timer? _timer;
 
   startTimeout([int? milliseconds]) {
+    _timer?.cancel();
+    currentSeconds = 0;
     var duration = interval;
-    Timer.periodic(duration, (timer) {
+    _timer = Timer.periodic(duration, (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         // print(timer.tick);
         currentSeconds = timer.tick;
@@ -96,7 +107,7 @@ class _OtppageState extends State<Otppage> {
 
   @override
   void dispose() {
-    textEditingController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -128,8 +139,9 @@ class _OtppageState extends State<Otppage> {
                       SizedBox(width: size16),
                       Expanded(
                         child: ScrollConfiguration(
-                          behavior: const ScrollBehavior()
-                              .copyWith(overscroll: false),
+                          behavior: const ScrollBehavior().copyWith(
+                            overscroll: false,
+                          ),
                           child: SingleChildScrollView(
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
@@ -140,18 +152,25 @@ class _OtppageState extends State<Otppage> {
                                 Text(
                                   'Masukkan Kode Verifikasi',
                                   style: heading1(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Kode Verifikasi (OTP) sudah dikirim ke nomor telepon anda $phoneNumber',
                                   textAlign: TextAlign.center,
                                   style: heading3(
-                                      FontWeight.w400, bnw500, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: size32),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 103),
+                                    horizontal: 103,
+                                  ),
                                   child: Column(
                                     children: [
                                       Container(
@@ -174,8 +193,11 @@ class _OtppageState extends State<Otppage> {
                                             cursorColor: primary500,
                                             controller: textEditingController,
                                             keyboardType: TextInputType.number,
-                                            textStyle: heading1(FontWeight.w700,
-                                                bnw900, 'Outfit'),
+                                            textStyle: heading1(
+                                              FontWeight.w700,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                             onCompleted: (pin) {
                                               print("Completed: " + pin);
                                               if (widget.pageidentify ==
@@ -193,7 +215,10 @@ class _OtppageState extends State<Otppage> {
                                               } else if (widget.pageidentify ==
                                                   'forgotPass') {
                                                 changePasswordVerify(
-                                                    context, userId, pin);
+                                                  context,
+                                                  userId,
+                                                  pin,
+                                                );
                                               }
                                             },
                                             onChanged: (value) {
@@ -207,21 +232,26 @@ class _OtppageState extends State<Otppage> {
                                         ),
                                       ),
                                       SizedBox(
-                                          height: errorText.isNotEmpty
-                                              ? size16
-                                              : 0),
+                                        height: errorText.isNotEmpty
+                                            ? size16
+                                            : 0,
+                                      ),
                                       Align(
                                         alignment: Alignment.centerLeft,
                                         child: Text(
                                           errorText.isNotEmpty ? errorText : '',
-                                          style: heading4(FontWeight.w500,
-                                              red500, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            red500,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ),
                                       SizedBox(
-                                          height: errorText.isNotEmpty
-                                              ? size16
-                                              : 0),
+                                        height: errorText.isNotEmpty
+                                            ? size16
+                                            : 0,
+                                      ),
                                       SizedBox(
                                         child: Row(
                                           mainAxisAlignment:
@@ -229,8 +259,11 @@ class _OtppageState extends State<Otppage> {
                                           children: [
                                             Text(
                                               'Waktu kirim ulang : ',
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                             ),
                                             GestureDetector(
                                               onTap: () {
@@ -256,9 +289,10 @@ class _OtppageState extends State<Otppage> {
                                                       child: Text(
                                                         'Kirim Ulang Code',
                                                         style: heading4(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     )
                                                   : Row(
@@ -268,16 +302,17 @@ class _OtppageState extends State<Otppage> {
                                                           width: 8,
                                                           child:
                                                               const CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                          ),
+                                                                strokeWidth: 2,
+                                                              ),
                                                         ),
                                                         SizedBox(width: 4),
                                                         Text(
                                                           timerText,
                                                           style: body1(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -382,19 +417,22 @@ class _OtppageState extends State<Otppage> {
 
   Future login(otp) async {
     try {
-      showDialog(
-          barrierDismissible: false,
-          useRootNavigator: true,
-          context: context,
-          builder: (context) {
-            return const Center(
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(),
-              ),
-            );
-          });
+      if (!mounted) return;
+      whenLoading(context);
+      // showDialog(
+      //   barrierDismissible: false,
+      //   useRootNavigator: true,
+      //   context: context,
+      //   builder: (context) {
+      //     return const Center(
+      //       child: SizedBox(
+      //         width: 40,
+      //         height: 40,
+      //         child: CircularProgressIndicator(),
+      //       ),
+      //     );
+      //   },
+      // );
 
       final response = await http.post(
         Uri.parse(loginentryotp),
@@ -406,6 +444,8 @@ class _OtppageState extends State<Otppage> {
       );
 
       var jsonResponse = jsonDecode(response.body);
+
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         print("succes aman tentram login");
@@ -425,24 +465,23 @@ class _OtppageState extends State<Otppage> {
 
         myprofile(jsonResponse['token']);
 
+        if (!mounted) return;
+        closeLoading(context);
         if (jsonResponse['token'] != null) {
-          Future.delayed(
-            const Duration(seconds: 3),
-            () {
-              Navigator.of(context, rootNavigator: true).pop();
-              sessionPage(
-                context,
-                jsonResponse['token'].toString(),
-                jsonResponse['type_account'],
-                jsonResponse['type_role'],
-              );
-            },
-          );
+          Future.delayed(const Duration(seconds: 3), () {
+            // Navigator.of(context, rootNavigator: true).pop();
+            sessionPage(
+              context,
+              jsonResponse['token'].toString(),
+              jsonResponse['type_account'],
+              jsonResponse['type_role'],
+            );
+          });
         }
 
         errorText = '';
       } else {
-        Navigator.of(context, rootNavigator: true).pop();
+        closeLoading(context);
         errorText = jsonResponse['message'];
       }
       return null;
@@ -453,10 +492,10 @@ class _OtppageState extends State<Otppage> {
 
   Future getOtpAgain() async {
     try {
-      var response = await Dio().post(loginbyotp, data: {
-        'phonenumber': widget.phone,
-        'deviceid': identifier,
-      });
+      var response = await Dio().post(
+        loginbyotp,
+        data: {'phonenumber': widget.phone, 'deviceid': identifier},
+      );
       print(widget.phone);
       if (response.statusCode == 200) {
         errorText = '';

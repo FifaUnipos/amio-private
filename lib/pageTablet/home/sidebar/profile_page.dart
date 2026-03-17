@@ -141,12 +141,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
+    // Hanya TextEditingController dan FocusNode yang perlu di-dispose
+    // nameProfile, phoneProfile, emailProfile adalah String global — BUKAN controller
     controllerName.dispose();
-    nameProfile.dispose();
     controllerPhone.dispose();
-    phoneProfile.dispose();
     controllerEmail.dispose();
-    emailProfile.dispose();
     controllerPass.dispose();
     controllerConfirmPass.dispose();
     controllerChangeEmail.dispose();

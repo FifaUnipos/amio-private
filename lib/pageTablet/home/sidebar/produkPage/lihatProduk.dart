@@ -257,6 +257,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     conHarga.text = '';
     idProduct = null;
     img64 = null;
+    if (!mounted) return;
     setState(() {});
   }
 

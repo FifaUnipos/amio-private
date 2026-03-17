@@ -1,8 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/services.dart';
+import 'package:unipos_app_335/components/atoms/fields/unipos_text_field.dart';
+
+import 'package:unipos_app_335/data/model/product/product_sorting_data.dart';
+import 'package:unipos_app_335/data/static/product/product_sorting_state.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produkVariantPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/ubahProductVariantPage.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,7 +19,6 @@ import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
 import '../../../../utils/component/skeletons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -24,18 +29,17 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../utils/component/component_orderBy.dart';
-import '../../../../models/tokoModel/transaksiTokoModel.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../../../main.dart';
 import '../../../../models/produkmodel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
-import '../../../../services/modelBloc.dart';
 
 import '../../../../utils/component/providerModel/refreshTampilanModel.dart';
 import '../../../../utils/component/component_button.dart';
-import 'ubahProdukToko.dart';
+
 import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
 import 'package:file_picker/file_picker.dart';
@@ -73,27 +77,29 @@ class _ProdukTokoState extends State<ProdukToko> {
   TextEditingController controllerName = TextEditingController();
   late TextEditingController controllerNameEdit = TextEditingController();
 
-  void formatInputRp() {
-    String text = conHarga.text.replaceAll('.', '');
+  // void formatInputRp() {
+  //   String text = conHarga.text.replaceAll('.', '');
 
-    int value = int.tryParse(text)!;
+  //   int value = int.tryParse(text)!;
+
+  //   String formattedAmount = formatCurrency(value);
+
+  //   conHarga.value = TextEditingValue(
+  //     text: formattedAmount,
+  //     selection: TextSelection.collapsed(offset: formattedAmount.length),
+  //   );
+  // }
+
+  void formatInputPrice(TextEditingController textController) {
+    String text = textController.text.replaceAll('.', '');
+    if (text.isEmpty) return;
+
+    int value = int.tryParse(text) ?? 0;
+    if (value == 0) return;
 
     String formattedAmount = formatCurrency(value);
 
-    conHarga.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
-  void formatInputOnlineRp() {
-    String text = conHargaOnline.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!;
-
-    String formattedAmount = formatCurrency(value);
-
-    conHargaOnline.value = TextEditingValue(
+    textController.value = TextEditingValue(
       text: formattedAmount,
       selection: TextSelection.collapsed(offset: formattedAmount.length),
     );
@@ -134,6 +140,7 @@ class _ProdukTokoState extends State<ProdukToko> {
       maxHeight: 900,
       maxWidth: 900,
     );
+    if (imageFile == null) return;
     if (imageFile!.path.isEmpty == false) {
       myImageEdit = File(imageFile.path);
 
@@ -258,7 +265,7 @@ class _ProdukTokoState extends State<ProdukToko> {
       List<String> value = [''];
 
       await getDataProduk(value);
-
+      if (!mounted) return;
       setState(() {
         // log(datasProduk.toString());
         datasProduk;
@@ -271,30 +278,24 @@ class _ProdukTokoState extends State<ProdukToko> {
       );
     });
 
-    conHarga.addListener(formatInputRp);
-    conHargaOnline.addListener(formatInputOnlineRp);
-    conHargaEdit.addListener(formatInputRpEdit);
-    conHargaOnlineEdit.addListener(formatInputOnlineRpEdit);
+    conHarga.addListener(() => formatInputPrice(conHarga));
+    conHargaOnline.addListener(() => formatInputPrice(conHargaOnline));
+    conHargaEdit.addListener(() => formatInputPrice(conHargaEdit));
+    conHargaOnlineEdit.addListener(() => formatInputPrice(conHargaOnlineEdit));
     super.initState();
   }
 
   Future<dynamic> getDataProduk(List<String> value) async {
-    return datasProduk = await getProduct(
-      context,
+    context.read<ProductSortingProvider>().fetchProductSorting(
       widget.token,
-      '',
       value,
+      '',
       textvalueOrderBy,
     );
   }
 
-  getData() async {
-    datasProduk = await getProduct(context, widget.token, '', [
-      '',
-    ], textvalueOrderBy);
-  }
-
   refreshDataProduk() {
+    if (!mounted) return;
     setState(() {
       datasProduk;
       conHarga.text;
@@ -317,11 +318,11 @@ class _ProdukTokoState extends State<ProdukToko> {
       listProduct = [];
       listProduct.clear();
       selectedFlag.clear();
-      getData();
     });
   }
 
   autoReload() {
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -336,18 +337,20 @@ class _ProdukTokoState extends State<ProdukToko> {
 
   Future<void> getImage() async {
     var picker = ImagePicker();
-    PickedFile? image;
+    XFile? image;
 
-    image = await picker.getImage(
+    image = await picker.pickImage(
       source: ImageSource.gallery,
-      // imageQuality: 50,
       maxHeight: 900,
       maxWidth: 900,
     );
-    if (image!.path.isEmpty == false) {
+    if (image == null) return;
+    if (image.path.isEmpty == false) {
       myImage = File(image.path);
 
       bytes = await Io.File(myImage!.path).readAsBytes();
+      if (!mounted) return;
+
       setState(() {
         img64 = base64Encode(bytes!);
         images.add(img64!);
@@ -363,9 +366,14 @@ class _ProdukTokoState extends State<ProdukToko> {
   void _onChanged(String value) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
-      datasProduk = await getProduct(context, widget.token, value, [
-        '',
-      ], textvalueOrderBy);
+      context.read<ProductSortingProvider>().fetchProductSorting(
+        widget.token,
+        [''],
+        value,
+        textvalueOrderBy,
+      );
+      if (!mounted) return;
+
       setState(() {});
     });
   }
@@ -492,159 +500,186 @@ class _ProdukTokoState extends State<ProdukToko> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  Text(
-                    'Logo Produk',
-                    style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: 10),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
                     children: [
-                      GestureDetector(
-                        onTap: () => tambahGambar(context),
-                        child: Container(
-                          child: myImage != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(size8),
-                                  child: Image.file(
-                                    myImage!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : Icon(PhosphorIcons.plus),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: bnw900),
-                            borderRadius: BorderRadius.circular(size8),
-                          ),
-                          height: 80,
-                          width: 80,
-                        ),
-                      ),
-                      SizedBox(width: 10),
                       Text(
-                        'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                        'Logo Produk',
                         style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                    ],
-                  ),
-                  GestureDetector(
-                    // onTap: () => getImage(),
-                    onTap: () {
-                      tambahGambar(context);
-                    },
-                    child: SizedBox(
-                      child: TextFormField(
-                        cursorColor: primary500,
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        decoration: InputDecoration(
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(width: 2, color: primary500),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => tambahGambar(context),
+                            child: Container(
+                              child: myImage != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                        size8,
+                                      ),
+                                      child: Image.file(
+                                        myImage!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : Icon(PhosphorIcons.plus),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: bnw900),
+                                borderRadius: BorderRadius.circular(size8),
+                              ),
+                              height: 80,
+                              width: 80,
+                            ),
                           ),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(width: 1.5, color: bnw500),
+                          SizedBox(width: 10),
+                          Text(
+                            'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                           ),
-                          enabled: false,
-                          suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
-                          hintText: 'Tambah Gambar',
-                          hintStyle: heading2(
-                            FontWeight.w600,
-                            bnw900,
-                            'Outfit',
-                          ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ),
-                  SizedBox(height: size16),
-                  fieldAddProduk(
-                    'Nama Produk',
-                    'Matcha Latte Cappuchino',
-                    conNameProduk,
-                    TextInputType.text,
-                  ),
-                  SizedBox(height: size16),
-                  kategoriList(context),
-                  SizedBox(height: size16),
-                  fieldAddProduk(
-                    'Harga',
-                    'Rp. 12.000',
-                    conHarga,
-                    TextInputType.number,
-                  ),
-                  SizedBox(height: size16),
-                  fieldAddProdukTanpaBintang(
-                    'Harga Online',
-                    'Rp. 14.000',
-                    conHargaOnline,
-                    TextInputType.number,
-                  ),
-                  SizedBox(height: size16),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      onswitchppn = !onswitchppn;
-                      onswitchppn
-                          ? ppnAktif = "Aktif"
-                          : ppnAktif = "Tidak Aktif";
-                      setState(() {});
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'PPN',
-                              style: heading2(
+                      GestureDetector(
+                        // onTap: () => getImage(),
+                        onTap: () {
+                          tambahGambar(context);
+                        },
+                        child: SizedBox(
+                          child: TextFormField(
+                            cursorColor: primary500,
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                            decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 1.5,
+                                  color: bnw500,
+                                ),
+                              ),
+                              enabled: false,
+                              suffixIcon: Icon(
+                                PhosphorIcons.plus,
+                                color: bnw900,
+                              ),
+                              hintText: 'Tambah Gambar',
+                              hintStyle: heading2(
                                 FontWeight.w600,
                                 bnw900,
                                 'Outfit',
                               ),
                             ),
-                            Text(
-                              ppnAktif,
-                              style: heading4(
-                                FontWeight.w400,
-                                bnw900,
-                                'Outfit',
+                          ),
+                        ),
+                      ),
+                      UniposTextField(
+                        title: 'Nama Produk',
+                        hintText: 'Matcha Latte Cappuchino',
+                        required: true,
+                        controller: conNameProduk,
+                      ),
+                      kategoriList(context),
+                      UniposTextField(
+                        title: 'Harga',
+                        hintText: 'Rp. 12,000',
+                        controller: conHarga,
+                        required: true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                      UniposTextField(
+                        title: 'Harga Online',
+                        hintText: 'Rp. 14,000',
+                        controller: conHargaOnline,
+                        required: true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                          onswitchppn = !onswitchppn;
+                          onswitchppn
+                              ? ppnAktif = "Aktif"
+                              : ppnAktif = "Tidak Aktif";
+                          if (!mounted) return;
+                          setState(() {});
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'PPN',
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Text(
+                                  ppnAktif,
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            FlutterSwitch(
+                              width: 52.0,
+                              height: 28.0,
+                              value: onswitchppn,
+                              padding: 0,
+                              activeIcon: Icon(
+                                PhosphorIcons.check,
+                                color: primary500,
                               ),
+                              inactiveIcon: Icon(
+                                PhosphorIcons.x,
+                                color: bnw100,
+                              ),
+                              activeColor: primary500,
+                              inactiveColor: bnw100,
+                              borderRadius: 30.0,
+                              inactiveToggleColor: bnw900,
+                              activeToggleColor: primary200,
+                              activeSwitchBorder: Border.all(color: primary500),
+                              inactiveSwitchBorder: Border.all(
+                                color: bnw300,
+                                width: 2,
+                              ),
+                              onToggle: (val) {
+                                setState(() {
+                                  FocusScope.of(context).unfocus();
+                                  onswitchppn = val;
+                                  onswitchppn
+                                      ? ppnAktif = "Aktif"
+                                      : ppnAktif = "Tidak Aktif";
+                                  log(onswitchppn.toString());
+                                  log(ppnAktif);
+                                });
+                              },
                             ),
                           ],
                         ),
-                        FlutterSwitch(
-                          width: 52.0,
-                          height: 28.0,
-                          value: onswitchppn,
-                          padding: 0,
-                          activeIcon: Icon(
-                            PhosphorIcons.check,
-                            color: primary500,
-                          ),
-                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
-                          activeColor: primary500,
-                          inactiveColor: bnw100,
-                          borderRadius: 30.0,
-                          inactiveToggleColor: bnw900,
-                          activeToggleColor: primary200,
-                          activeSwitchBorder: Border.all(color: primary500),
-                          inactiveSwitchBorder: Border.all(
-                            color: bnw300,
-                            width: 2,
-                          ),
-                          onToggle: (val) {
-                            setState(() {
-                              onswitchppn = val;
-                              onswitchppn
-                                  ? ppnAktif = "Aktif"
-                                  : ppnAktif = "Tidak Aktif";
-                              log(onswitchppn.toString());
-                              log(ppnAktif);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+
                   SizedBox(height: size16),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -742,10 +777,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                             await Future.delayed(Duration(seconds: 1));
                             _pageController.jumpToPage(3);
                             setState(() {});
-                            initState();
                           }
                         });
-                        initState();
+
                         setState(() {});
                       },
                       child: buttonXLoutline(
@@ -788,7 +822,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                           // img64 = null;
                           refreshDataProduk();
                           setState(() {});
-                          initState();
                         }
                       });
                       getDataProduk(['']);
@@ -834,11 +867,11 @@ class _ProdukTokoState extends State<ProdukToko> {
                           await Future.delayed(Duration(seconds: 1));
                           _pageController.jumpToPage(0);
                           setState(() {});
-                          initState();
+
                           getDataProduk(['']);
                         }
                       });
-                      initState();
+
                       setState(() {});
                     },
                     child: buttonXL(
@@ -997,20 +1030,31 @@ class _ProdukTokoState extends State<ProdukToko> {
                   ),
                 ),
                 SizedBox(height: size16),
-                fieldEditProduk(
-                  'Nama Produk',
-                  conNameProdukEdit,
-                  TextInputType.text,
+                UniposTextField(
+                  title: 'Nama Produk',
+                  hintText: 'Matcha Latte Cappuchino',
+                  required: true,
+                  controller: conNameProdukEdit,
                 ),
                 SizedBox(height: size16),
                 kategoriList(context),
                 SizedBox(height: size16),
-                fieldEditProduk('Harga', conHargaEdit, TextInputType.number),
+                UniposTextField(
+                  title: 'Harga',
+                  hintText: 'Rp. 12,000',
+                  controller: conHargaEdit,
+                  required: true,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
                 SizedBox(height: size16),
-                fieldEditProdukTanpaBintang(
-                  'Harga Online',
-                  conHargaOnlineEdit,
-                  TextInputType.number,
+                UniposTextField(
+                  title: 'Harga Online',
+                  hintText: 'Rp. 14,000',
+                  controller: conHargaOnlineEdit,
+                  required: true,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 SizedBox(height: size16),
                 GestureDetector(
@@ -1155,10 +1199,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                       if (response != null &&
                           response['rc'] == '00' &&
                           response['data'] != null) {
-                        Provider.of<ProductVariantProvider>(
-                          context,
-                          listen: false,
-                        ).setProductData(response['data']);
+                        context.read<ProductVariantProvider>().setProductData(
+                          response['data'],
+                        );
 
                         _pageController.jumpToPage(4);
                       } else {
@@ -1237,10 +1280,9 @@ class _ProdukTokoState extends State<ProdukToko> {
                     await Future.delayed(Duration(seconds: 1));
                     _pageController.jumpToPage(0);
                     setState(() {});
-                    initState();
                   }
                 });
-                initState();
+
                 setState(() {});
               },
               child: buttonXL(
@@ -1326,7 +1368,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                               ? GestureDetector(
                                   onTap: () {
                                     searchController.text = '';
-                                    initState();
                                   },
                                   child: Icon(
                                     PhosphorIcons.x_fill,
@@ -1755,7 +1796,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                             ),
                           ),
                           Text(
-                            '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
+                            '${listProduct.length}/${context.read<ProductSortingProvider>().totalData} Produk Terpilih',
                             style: heading4(FontWeight.w600, bnw100, 'Outfit'),
                           ),
                           SizedBox(width: size8),
@@ -1801,22 +1842,21 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                 "",
                                               ).then((value) async {
                                                 if (value == '00') {
-                                                  refreshDataProduk();
-                                                  await Future.delayed(
-                                                    Duration(seconds: 1),
-                                                  );
-                                                  conNameProduk.text = '';
-                                                  conHarga.text = '';
-                                                  idProduct = '';
-                                                  _pageController.jumpToPage(0);
-                                                  setState(() {});
-                                                  initState();
+                                                  final deletedIds =
+                                                      List<String>.from(
+                                                        listProduct,
+                                                      );
+                                                  for (final id in deletedIds) {
+                                                    context
+                                                        .read<
+                                                          ProductSortingProvider
+                                                        >()
+                                                        .deleteProduct(id);
+                                                  }
                                                 }
+                                                refreshDataProduk();
+                                                setState(() {});
                                               });
-                                              refreshDataProduk();
-
-                                              setState(() {});
-                                              initState();
                                             },
                                             child: buttonXLoutline(
                                               Center(
@@ -1884,13 +1924,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                           SizedBox(width: size8),
                           GestureDetector(
                             onTap: () {
-                              listProduct.forEach((element) {
-                                datasProduk!.forEach((element2) {
-                                  if (element == element2.productid) {
-                                    element2.isPPN = 0;
-                                  }
-                                });
-                              });
                               changePpn(
                                 context,
                                 widget.token,
@@ -1899,30 +1932,15 @@ class _ProdukTokoState extends State<ProdukToko> {
                                 "",
                               ).then((value) {
                                 if (value == '00') {
-                                  listProduct.forEach((element) {
-                                    datasProduk!.forEach((element2) {
-                                      if (element == element2.productid) {
-                                        element2.isPPN = 0;
-                                      }
-                                    });
-                                  });
-                                } else {
-                                  listProduct.forEach((element) {
-                                    datasProduk!.forEach((element2) {
-                                      if (element == element2.productid) {
-                                        element2.isPPN = 1;
-                                      }
-                                    });
-                                  });
+                                  for (final id in listProduct) {
+                                    context
+                                        .read<ProductSortingProvider>()
+                                        .updateIsPPN(id, 0);
+                                  }
                                 }
+                                refreshDataProduk();
                                 setState(() {});
-                                initState();
                               });
-                              ;
-                              refreshDataProduk();
-
-                              setState(() {});
-                              initState();
                             },
                             child: buttonL(
                               Row(
@@ -1945,13 +1963,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                           SizedBox(width: size8),
                           GestureDetector(
                             onTap: () {
-                              listProduct.forEach((element) {
-                                datasProduk!.forEach((element2) {
-                                  if (element == element2.productid) {
-                                    element2.isActive = 1;
-                                  }
-                                });
-                              });
                               changeActive(
                                 context,
                                 widget.token,
@@ -1960,29 +1971,15 @@ class _ProdukTokoState extends State<ProdukToko> {
                                 "",
                               ).then((value) {
                                 if (value == '00') {
-                                  listProduct.forEach((element) {
-                                    datasProduk!.forEach((element2) {
-                                      if (element == element2.productid) {
-                                        element2.isActive = 1;
-                                      }
-                                    });
-                                  });
-                                } else {
-                                  listProduct.forEach((element) {
-                                    datasProduk!.forEach((element2) {
-                                      if (element == element2.productid) {
-                                        element2.isActive = 0;
-                                      }
-                                    });
-                                  });
+                                  for (final id in listProduct) {
+                                    context
+                                        .read<ProductSortingProvider>()
+                                        .updateIsActive(id, 1);
+                                  }
                                 }
+                                refreshDataProduk();
                                 setState(() {});
-                                initState();
                               });
-                              ;
-                              refreshDataProduk();
-                              initState();
-                              setState(() {});
                             },
                             child: buttonL(
                               Row(
@@ -2005,10 +2002,19 @@ class _ProdukTokoState extends State<ProdukToko> {
                         ],
                       ),
               ),
-              datasProduk == null
-                  ? SkeletonCardLine()
-                  : Expanded(
-                      child: Container(
+              Expanded(
+                child: Consumer<ProductSortingProvider>(
+                  builder: (context, value, child) {
+                    return switch (value.resultState) {
+                      ProductSortingResultNoneState() => const Center(
+                        child: Text('Tidak ada data'),
+                      ),
+                      ProductSortingResultErrorState(message: var message) =>
+                        Center(child: Text('Erorr $message')),
+                      ProductSortingResultLoadingState() => Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      ProductSortingResultLoadedState(data: var dataProduct) => Container(
                         decoration: BoxDecoration(
                           color: primary100,
                           borderRadius: BorderRadius.only(
@@ -2021,19 +2027,18 @@ class _ProdukTokoState extends State<ProdukToko> {
                           backgroundColor: primary500,
                           onRefresh: () async {
                             setState(() {});
-                            initState();
                           },
                           child: ListView.builder(
                             // physics: BouncingScrollPhysics(),
                             padding: EdgeInsets.zero,
-                            itemCount: datasProduk!.length,
+                            itemCount: dataProduct.length,
                             itemBuilder: (builder, index) {
-                              ModelDataProduk data = datasProduk![index];
+                              ProductSortingData data = dataProduct[index];
                               selectedFlag[index] =
                                   selectedFlag[index] ?? false;
                               bool? isSelected = selectedFlag[index];
-                              final dataProduk = datasProduk![index];
-                              productIdCheckAll = datasProduk!
+                              final dataProduk = dataProduct[index];
+                              productIdCheckAll = dataProduct
                                   .map((data) => data.productid!)
                                   .toList();
 
@@ -2065,7 +2070,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               dataProduk.productid,
                                             );
                                             // print(
-                                            //   datasProduk![index].productImage,
+                                            //   dataProduct[index].productImage,
                                             // );
                                             // log(data.name.toString());
                                             // print(dataProduk.isActive);
@@ -2094,7 +2099,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                           size8,
                                                         ),
                                                     child:
-                                                        datasProduk![index]
+                                                        dataProduct[index]
                                                                 .productImage !=
                                                             null
                                                         ? Padding(
@@ -2108,7 +2113,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                     size8,
                                                                   ),
                                                               child: Image.network(
-                                                                datasProduk![index]
+                                                                dataProduct[index]
                                                                     .productImage
                                                                     .toString(),
                                                                 fit: BoxFit
@@ -2140,7 +2145,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                             .start,
                                                     children: [
                                                       Text(
-                                                        datasProduk![index]
+                                                        dataProduct[index]
                                                                 .name ??
                                                             '',
                                                         style: heading4(
@@ -2153,7 +2158,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                             .ellipsis,
                                                       ),
                                                       Text(
-                                                        datasProduk![index]
+                                                        dataProduct[index]
                                                                 .typeproducts ??
                                                             '',
                                                         style: heading4(
@@ -2192,11 +2197,10 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                datasProduk![index].discount ==
-                                                        0
+                                                dataProduct[index].discount == 0
                                                     ? Text(
                                                         FormatCurrency.convertToIdr(
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                               .price_after,
                                                         ).toString(),
                                                         maxLines: 3,
@@ -2215,7 +2219,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                         children: [
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              datasProduk![index]
+                                                              dataProduct[index]
                                                                   .price_after,
                                                             ).toString(),
                                                             maxLines: 3,
@@ -2233,7 +2237,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              datasProduk![index]
+                                                              dataProduct[index]
                                                                   .price,
                                                             ).toString(),
                                                             maxLines: 3,
@@ -2251,12 +2255,12 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                           SizedBox(
                                                             height: size4,
                                                           ),
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                                       .discount_type ==
                                                                   'price'
                                                               ? Text(
                                                                   FormatCurrency.convertToIdr(
-                                                                    datasProduk![index]
+                                                                    dataProduct[index]
                                                                         .discount,
                                                                   ).toString(),
                                                                   maxLines: 3,
@@ -2271,7 +2275,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                   ),
                                                                 )
                                                               : Text(
-                                                                  '${datasProduk![index].discount}%',
+                                                                  '${dataProduct[index].discount}%',
                                                                   maxLines: 3,
                                                                   overflow:
                                                                       TextOverflow
@@ -2285,11 +2289,11 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                 ),
                                                         ],
                                                       ),
-                                                // datasProduk![index]
+                                                // dataProduct[index]
                                                 //             .discount_type ==
                                                 //         'percentage'
                                                 //     ? Text(
-                                                //         '${datasProduk![index].discount}%',
+                                                //         '${dataProduct[index].discount}%',
                                                 //         style: body3(
                                                 //           FontWeight.w700,
                                                 //           danger500,
@@ -2299,7 +2303,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                 //     : Text(
                                                 //         FormatCurrency
                                                 //             .convertToIdr(
-                                                //           datasProduk![index]
+                                                //           dataProduct[index]
                                                 //               .discount,
                                                 //         ),
                                                 //         style: body3(
@@ -2332,11 +2336,10 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                datasProduk![index].discount ==
-                                                        0
+                                                dataProduct[index].discount == 0
                                                     ? Text(
                                                         FormatCurrency.convertToIdr(
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                               .price_online_shop_after,
                                                         ).toString(),
                                                         maxLines: 3,
@@ -2355,7 +2358,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                         children: [
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              datasProduk![index]
+                                                              dataProduct[index]
                                                                   .price_online_shop_after,
                                                             ).toString(),
                                                             maxLines: 3,
@@ -2373,7 +2376,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                           ),
                                                           Text(
                                                             FormatCurrency.convertToIdr(
-                                                              datasProduk![index]
+                                                              dataProduct[index]
                                                                   .price_online_shop,
                                                             ).toString(),
                                                             maxLines: 3,
@@ -2391,12 +2394,12 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                           SizedBox(
                                                             height: size4,
                                                           ),
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                                       .discount_type ==
                                                                   'price'
                                                               ? Text(
                                                                   FormatCurrency.convertToIdr(
-                                                                    datasProduk![index]
+                                                                    dataProduct[index]
                                                                         .discount,
                                                                   ).toString(),
                                                                   maxLines: 3,
@@ -2411,7 +2414,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                   ),
                                                                 )
                                                               : Text(
-                                                                  '${datasProduk![index].discount}%',
+                                                                  '${dataProduct[index].discount}%',
                                                                   maxLines: 3,
                                                                   overflow:
                                                                       TextOverflow
@@ -2471,28 +2474,30 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               width: 2,
                                             ),
                                             onToggle: (bool value) {
-                                              // print('hello');
-                                              List<String> listProduct = [
+                                              final List<String> listProduct = [
                                                 dataProduk.productid!,
                                               ];
+
                                               changePpn(
                                                 context,
                                                 widget.token,
                                                 value.toString(),
                                                 listProduct,
                                                 '',
-                                              ).then((value) {
-                                                if (value != '00') {
-                                                  dataProduk.isPPN = 0;
-                                                } else {
-                                                  dataProduk.isPPN = 1;
-                                                }
-                                                setState(() {});
-                                                initState();
+                                              ).then((result) {
+                                                if (!mounted) return;
+                                                final newIsPPN = result == '00'
+                                                    ? (value ? 1 : 0)
+                                                    : dataProduk.isPPN!;
+                                                context
+                                                    .read<
+                                                      ProductSortingProvider
+                                                    >()
+                                                    .updateIsPPN(
+                                                      dataProduk.productid!,
+                                                      newIsPPN,
+                                                    );
                                               });
-                                              ;
-                                              initState();
-                                              setState(() {});
                                             },
                                           ),
                                         ),
@@ -2538,8 +2543,7 @@ class _ProdukTokoState extends State<ProdukToko> {
                                               width: 2,
                                             ),
                                             onToggle: (bool value) {
-                                              // print('hello');
-                                              List<String> listProduct = [
+                                              final List<String> listProduct = [
                                                 dataProduk.productid!,
                                               ];
                                               changeActive(
@@ -2548,18 +2552,21 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                 value.toString(),
                                                 listProduct,
                                                 '',
-                                              ).then((value) {
-                                                if (value != '00') {
-                                                  dataProduk.isActive = 0;
-                                                } else {
-                                                  dataProduk.isActive = 1;
-                                                }
-                                                setState(() {});
-                                                initState();
+                                              ).then((result) {
+                                                if (!mounted) return;
+                                                final newIsActive =
+                                                    result == '00'
+                                                    ? (value ? 1 : 0)
+                                                    : dataProduk.isActive!;
+                                                context
+                                                    .read<
+                                                      ProductSortingProvider
+                                                    >()
+                                                    .updateIsActive(
+                                                      dataProduk.productid!,
+                                                      newIsActive,
+                                                    );
                                               });
-                                              ;
-                                              initState();
-                                              setState(() {});
                                             },
                                           ),
                                         ),
@@ -2920,29 +2927,19 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                                 ) async {
                                                                                   if (value ==
                                                                                       '00') {
-                                                                                    refreshDataProduk();
-                                                                                    await Future.delayed(
-                                                                                      Duration(
-                                                                                        seconds: 1,
-                                                                                      ),
-                                                                                    );
-                                                                                    conNameProduk.text = '';
-                                                                                    conHarga.text = '';
-                                                                                    idProduct = '';
-                                                                                    _pageController.jumpToPage(
-                                                                                      0,
-                                                                                    );
-                                                                                    setState(
-                                                                                      () {},
-                                                                                    );
-                                                                                    initState();
+                                                                                    context
+                                                                                        .read<
+                                                                                          ProductSortingProvider
+                                                                                        >()
+                                                                                        .deleteProduct(
+                                                                                          dataProduk.productid!,
+                                                                                        );
                                                                                   }
                                                                                 },
                                                                               );
                                                                               ;
                                                                               refreshDataProduk();
 
-                                                                              initState();
                                                                               setState(
                                                                                 () {},
                                                                               );
@@ -3048,7 +3045,10 @@ class _ProdukTokoState extends State<ProdukToko> {
                           ),
                         ),
                       ),
-                    ),
+                    };
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -3353,6 +3353,7 @@ class _ProdukTokoState extends State<ProdukToko> {
             child: TextFormField(
               cursorColor: primary500,
               keyboardType: numberNo,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onSaved: (value) {
@@ -3377,7 +3378,13 @@ class _ProdukTokoState extends State<ProdukToko> {
     );
   }
 
-  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo) {
+  fieldAddProduk(
+    title,
+    hint,
+    mycontroller, {
+    TextInputType numberNo = TextInputType.text,
+    List<TextInputFormatter> numberFormat = const [],
+  }) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3392,6 +3399,7 @@ class _ProdukTokoState extends State<ProdukToko> {
             child: TextFormField(
               cursorColor: primary500,
               keyboardType: numberNo,
+              inputFormatters: numberFormat,
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {
@@ -3440,6 +3448,7 @@ class _ProdukTokoState extends State<ProdukToko> {
             child: TextFormField(
               cursorColor: primary500,
               keyboardType: numberNo,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onChanged: (value) {
@@ -3485,6 +3494,7 @@ class _ProdukTokoState extends State<ProdukToko> {
             child: TextFormField(
               cursorColor: primary500,
               keyboardType: numberNo,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: heading2(FontWeight.w600, bnw900, 'Outfit'),
               controller: mycontroller,
               onSaved: (value) {
@@ -3508,22 +3518,18 @@ class _ProdukTokoState extends State<ProdukToko> {
   }
 
   void onTap(bool isSelected, int index, productId) {
-    if (index >= 0 && index < selectedFlag.length) {
-      selectedFlag[index] = !isSelected;
+    if (productId == null) return;
+    setState(() {
+      bool current = selectedFlag[index] ?? false;
+      selectedFlag[index] = !current;
       isSelectionMode = selectedFlag.containsValue(true);
 
       if (selectedFlag[index] == true) {
-        // Periksa apakah productId sudah ada di dalam listProduct sebelum menambahkannya
-        if (!listProduct.contains(productId)) {
-          listProduct.add(productId);
-        }
+        if (!listProduct.contains(productId)) listProduct.add(productId);
       } else {
-        // Hapus productId dari listProduct jika sudah ada
         listProduct.remove(productId);
       }
-
-      setState(() {});
-    }
+    });
   }
 
   void onLongPress(bool isSelected, int index) {
@@ -3533,7 +3539,7 @@ class _ProdukTokoState extends State<ProdukToko> {
     });
   }
 
-  Widget _buildSelectIcon(bool isSelected, ModelDataProduk data) {
+  Widget _buildSelectIcon(bool isSelected, dynamic data) {
     return Icon(
       isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
       color: primary500,
@@ -3728,7 +3734,6 @@ class _ProdukTokoState extends State<ProdukToko> {
                           onRefresh: () async {
                             _getProductList();
                             setState(() {});
-                            initState();
                           },
                           child: ListView(
                             children: [
@@ -4028,30 +4033,40 @@ class _ProdukTokoState extends State<ProdukToko> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        whenLoading(context);
                                         ubahKategoriForm(
                                           context,
                                           widget.token,
                                           product['kodeproduct'],
                                           controllerNameEdit.text,
-                                        ).then((value) {
+                                        ).then((value) async {
                                           if (value == '00') {
-                                            Navigator.pop(context);
-                                            kategoriListForm(context, false);
-                                            showSnackBarComponent(
-                                              context,
-                                              'Berhasil ubah kategori',
-                                              '00',
-                                            );
                                             errorText = '';
                                             controllerNameEdit.text = '';
+
+                                            await _getProductList();
+                                            refreshDataProduk();
+                                            await getDataProduk(['']);
+                                            if (!mounted) return;
+                                            setState(() {});
+
+                                            Navigator.of(
+                                              context,
+                                              rootNavigator: false,
+                                            ).pop();
+
+                                            // ✅ Tunggu sebentar sebelum buka modal baru
+                                            await Future.delayed(
+                                              Duration(milliseconds: 300),
+                                            );
+                                            if (!mounted) return;
+                                            setState(() {});
+
+                                            kategoriListForm(
+                                              this.context,
+                                              false,
+                                            );
                                           }
                                         });
-                                        _getProductList();
-                                        refreshDataProduk();
-                                        getDataProduk(['']);
-                                        setState(() {});
-                                        initState();
                                       },
                                       child: buttonXL(
                                         Center(
@@ -4119,34 +4134,20 @@ class _ProdukTokoState extends State<ProdukToko> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  // whenLoading(context);
-                                  setState(() {
-                                    hapusKategoriForm(
-                                      context,
-                                      widget.token,
-                                      product['kodeproduct'],
-                                    ).then((value) {
-                                      if (value == '00') {
-                                        // Navigator.pop(context);
-                                        Navigator.pop(outerContext);
-                                        // kategoriListForm(context, false);
-                                        showSnackBarComponent(
-                                          context,
-                                          'Berhasil hapus kategori',
-                                          '00',
-                                        );
-                                        _getProductList();
-                                      } else {
-                                        Navigator.pop(outerContext);
-                                        showSnackBarComponent(
-                                          context,
-                                          'Kategori tidak dapat dihapus',
-                                          '05',
-                                        );
-                                      }
-                                    });
+                                  hapusKategoriForm(
+                                    context,
+                                    widget.token,
+                                    product['kodeproduct'],
+                                  ).then((value) {
+                                    if (value == '00') {
+                                      Navigator.pop(context);
+                                      _getProductList();
+                                      if (mounted) setState(() {});
+                                      kategoriListForm(this.context, false);
+                                    } else {
+                                      Navigator.pop(context);
+                                    }
                                   });
-                                  initState();
                                 },
                                 child: buttonXLoutline(
                                   Center(
@@ -4306,34 +4307,23 @@ class _ProdukTokoState extends State<ProdukToko> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.pop(context);
                           tambahKategoriForm(
                             context,
                             controllerName.text,
                             widget.token,
-                          ).then((value) {
+                          ).then((value) async {
                             if (value == '00') {
-                              showSnackBarComponent(
-                                context,
-                                'Berhasil tambah kategori',
-                                '00',
-                              );
-
-                              // Future.delayed(Duration(seconds: 1))
-                              //     .then((value) {
-                              //   autoReload();
-                              //   kategoriListForm(context, isKeyboardActive);
-                              // });
+                              Navigator.pop(context);
 
                               errorText = '';
                               controllerName.text = '';
+
+                              await _getProductList();
+                              if (!mounted) return;
+                              setState(() {});
+                              kategoriListForm(this.context, false);
                             }
                           });
-                          // _getProductList();
-                          // refreshDataProduk();
-                          // getDataProduk(['']);
-                          // setState(() {});
-                          // initState();
                         },
                         child: buttonXL(
                           Center(
@@ -4412,154 +4402,158 @@ class _ProdukTokoState extends State<ProdukToko> {
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+          int previousValue = valueOrderByProduct;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setModalState) =>
+                    IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: size20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByProductText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByProductText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Urutkan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
                                       'Outfit',
                                     ),
                                   ),
-                                ),
-                                0,
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size20),
+                                  Text(
+                                    'Pilih Urutan',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Wrap(
+                                    children: List<Widget>.generate(
+                                      orderByProductText.length,
+                                      (int index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: size16,
+                                          ),
+                                          child: ChoiceChip(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            backgroundColor: bnw100,
+                                            selectedColor: primary100,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color:
+                                                    valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                            ),
+                                            label: Text(
+                                              orderByProductText[index],
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            selected:
+                                                valueOrderByProduct == index,
+                                            onSelected: (bool selected) {
+                                              setModalState(() {
+                                                valueOrderByProduct = index;
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                                  textOrderBy =
+                                      orderByProductText[valueOrderByProduct];
+                                  textvalueOrderBy =
+                                      orderByProduct[valueOrderByProduct];
+                                  setState(() {});
+                                  Navigator.pop(context);
+
+                                  getDataProduk(['']);
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            );
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              setState(() {
+                valueOrderByProduct = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(
