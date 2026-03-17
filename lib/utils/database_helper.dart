@@ -21,7 +21,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'unipos_database.db');
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -62,6 +62,7 @@ class DatabaseHelper {
       )
     ''');
     await _createCacheTables(db);
+    await _createDashboardCacheTable(db);
     await db.execute('''
       CREATE TABLE deletion_reasons (
         idkategori TEXT PRIMARY KEY,
@@ -113,6 +114,16 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE transaction_details_cache (
         transaction_id TEXT PRIMARY KEY,
+        payload TEXT,
+        timestamp INTEGER
+      )
+    ''');
+  }
+
+  Future<void> _createDashboardCacheTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE dashboard_cache (
+        key TEXT PRIMARY KEY,
         payload TEXT,
         timestamp INTEGER
       )
@@ -182,6 +193,13 @@ class DatabaseHelper {
         ''');
       } catch (e) {
         print("Error upgrading to version 8: $e");
+      }
+    }
+    if (oldVersion < 9) {
+      try {
+        await _createDashboardCacheTable(db);
+      } catch (e) {
+        print("Error upgrading to version 9 (dashboard_cache): $e");
       }
     }
   }
@@ -401,6 +419,38 @@ class DatabaseHelper {
   Future<void> deleteFromSyncQueue(int id) async {
     final db = await database;
     await db.delete('sync_queue', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // MARK: Dashboard Cache Operations
+  Future<void> saveDashboardCache(String key, Map<String, dynamic> payload) async {
+    final db = await database;
+    await db.insert(
+      'dashboard_cache',
+      {
+        'key': key,
+        'payload': json.encode(payload),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getDashboardCache(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'dashboard_cache',
+      where: 'key = ?',
+      whereArgs: [key],
+    );
+    if (maps.isNotEmpty) {
+      return json.decode(maps.first['payload']) as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  Future<void> clearDashboardCache() async {
+    final db = await database;
+    await db.delete('dashboard_cache');
   }
 
   // MARK: Deletion Reasons

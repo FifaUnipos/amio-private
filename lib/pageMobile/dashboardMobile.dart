@@ -32,7 +32,8 @@ import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
 import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
 import 'package:unipos_app_335/services/config/apimethod.dart';
-import 'package:unipos_app_335/services/checkConnection.dart';
+import 'package:unipos_app_335/services/checkConnection.dart'
+    hide ConnectionChecker;
 import 'package:unipos_app_335/services/unipos_notification_service.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -42,6 +43,8 @@ import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import '../../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_color.dart';
+import 'package:unipos_app_335/utils/database_helper.dart';
+import 'package:unipos_app_335/utils/connection_checker.dart';
 
 class DashboardPageMobile extends StatefulWidget {
   String token;
@@ -124,6 +127,11 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   late Future<dynamic> futureDashboard;
   late Future<dynamic> futureDashboardSide;
 
+  // Offline mode
+  bool _isOffline = false;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final ConnectionChecker _connectionChecker = ConnectionChecker();
+
   bool get isCashier => roleProfile?.toLowerCase() == 'cashier';
 
   int selectedAppBarIndex = 0;
@@ -161,20 +169,14 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     checkConnection(context);
     checkEmail(context, setState);
     getKulasedaya(context, widget.token, '');
-    // myprofile(checkToken);
-    // connectWeb();
-    dashboardKulasedaya(widget.token);
     futureMembers = dashboardKulasedaya(widget.token);
-    futureBilling = getBilling(context, widget.token);
     futureKulasedayaBinding = bindingKulasedaya(widget.token);
-    futureDashboard = dashboard(identifier ?? '', widget.token);
-    futureDashboardSide = dashboardSide(context, widget.token);
 
-    // dashboard(identifier, widget.token);
+    // Load dashboard with offline fallback
+    _loadDashboardData();
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       datas = await getAllToko(context, widget.token, '', '');
-
-      //   datas;
       setState(() {});
 
       _pageController = PageController(
@@ -183,13 +185,80 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
         viewportFraction: 1,
       );
     });
-    pendapatanDas;
-    membersDas;
-    transaksiDas;
-    rataTransaksiDas;
-    // rangeDate;
 
     super.initState();
+  }
+
+  /// Loads dashboard data from API (online) or SQLite cache (offline).
+  /// Call this in initState and also on pull-to-refresh.
+  Future<void> _loadDashboardData() async {
+    final isOnline = await _connectionChecker.checkInternet();
+
+    if (isOnline) {
+      // ── ONLINE: fetch from API and save to cache ────────────────────────
+      final billingFuture = getBilling(context, widget.token);
+      final dashboardFuture = dashboard(identifier ?? '', widget.token);
+      final dashboardSideFuture = dashboardSide(context, widget.token);
+
+      setState(() {
+        _isOffline = false;
+        futureBilling = billingFuture;
+        futureDashboard = dashboardFuture;
+        futureDashboardSide = dashboardSideFuture;
+      });
+
+      // Persist results to SQLite in the background
+      billingFuture
+          .then((data) {
+            _dbHelper.saveDashboardCache('billing', data);
+          })
+          .catchError((_) {});
+
+      dashboardFuture
+          .then((data) {
+            if (data is Map<String, dynamic>) {
+              _dbHelper.saveDashboardCache('dashboard', data);
+            }
+          })
+          .catchError((_) {});
+
+      dashboardSideFuture
+          .then((data) {
+            if (data is Map<String, dynamic>) {
+              _dbHelper.saveDashboardCache('dashboard_side', data);
+            }
+          })
+          .catchError((_) {});
+    } else {
+      // ── OFFLINE: load from SQLite cache ────────────────────────────────
+      final cachedBilling = await _dbHelper.getDashboardCache('billing');
+      final cachedDashboard = await _dbHelper.getDashboardCache('dashboard');
+      final cachedSide = await _dbHelper.getDashboardCache('dashboard_side');
+
+      setState(() {
+        _isOffline = true;
+
+        futureBilling = cachedBilling != null
+            ? Future.value(cachedBilling)
+            : Future.error('Tidak ada data tersimpan');
+
+        futureDashboard = cachedDashboard != null
+            ? Future.value(cachedDashboard)
+            : Future.error('Tidak ada data tersimpan');
+
+        futureDashboardSide = cachedSide != null
+            ? Future.value(cachedSide)
+            : Future.error('Tidak ada data tersimpan');
+
+        // Restore global vars from cache so frameDash() shows correct values
+        if (cachedDashboard != null) {
+          pendapatanDas = cachedDashboard['income'] as int?;
+          membersDas = cachedDashboard['members'] as int?;
+          transaksiDas = cachedDashboard['transaction'] as int?;
+          rataTransaksiDas = cachedDashboard['averageTransaction'] as int?;
+        }
+      });
+    }
   }
 
   @override
@@ -928,422 +997,588 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            physics: BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // ── Offline Banner ──────────────────────────────────────────────────
+        if (_isOffline)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            color: const Color(0xFFFFF3CD),
+            child: Row(
               children: [
-                FutureBuilder<Map<String, dynamic>>(
-                  future: futureBilling, // Fetch data from API
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Billing Kadaluarsa'));
-                      // return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (snapshot.hasData) {
-                      var data = snapshot.data!['data'];
-                      var dueDate = data['due_date'] ?? 'Not Available';
-                      var name = data['name'] ?? 'Not Available';
-
-                      // Now, use the data to populate the UI
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(size12),
-                          border: Border.all(color: bnw300),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: bnw200,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(size12),
-                                  topRight: Radius.circular(size12),
-                                ),
-                              ),
-                              padding: EdgeInsets.all(size8),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Berlangganan: $name',
-                                    style: heading4(
-                                      FontWeight.w500,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  SizedBox(width: size56),
-                                  Icon(
-                                    Icons.alarm,
-                                    color: bnw900,
-                                  ), // Clock icon
-                                ],
-                              ),
-                            ),
-                            // Bottom section with white background
-                            Container(
-                              decoration: BoxDecoration(
-                                color: bnw100, // White background
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(size12),
-                                  bottomRight: Radius.circular(size12),
-                                ),
-                              ),
-                              padding: EdgeInsets.all(size8),
-                              child: Text(
-                                'Berlaku hingga : $dueDate', // Dynamic due date from API
-                                style: heading4(
-                                  FontWeight.w500,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      return Center(
-                        child: Text('No data available.'),
-                      ); // No data state
-                    }
-                  },
+                Icon(
+                  Icons.wifi_off_rounded,
+                  color: Color(0xFF856404),
+                  size: 18,
                 ),
-
-                SizedBox(height: size16),
-                Container(
-                  // height: 330,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(size16),
-                    border: Border.all(color: bnw300),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kamu sedang offline. Menampilkan data terakhir.',
+                    style: TextStyle(
+                      color: const Color(0xFF856404),
+                      fontSize: 12,
+                      fontFamily: 'Outfit',
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      FutureBuilder<List<KulasedayaBinding>>(
-                        future: futureKulasedayaBinding,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Text('Gagal memuat data');
-                          }
+                ),
+                GestureDetector(
+                  onTap: _loadDashboardData,
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                    color: Color(0xFF856404),
+                    size: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadDashboardData,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: futureBilling, // Fetch data from API
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Billing Kadaluarsa'));
+                        // return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (snapshot.hasData) {
+                        var data = snapshot.data!['data'];
+                        var dueDate = data['due_date'] ?? 'Not Available';
+                        var name = data['name'] ?? 'Not Available';
 
-                          final data = snapshot.data!.first;
-
-                          return Container(
-                            padding: EdgeInsets.all(size12),
-                            decoration: BoxDecoration(
-                              color: primary100,
-                              borderRadius: BorderRadius.circular(size16),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
+                        // Now, use the data to populate the UI
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(size12),
+                            border: Border.all(color: bnw300),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: bnw200,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(size12),
+                                    topRight: Radius.circular(size12),
+                                  ),
+                                ),
+                                padding: EdgeInsets.all(size8),
+                                child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/fifapaylogo.png',
-                                          height: 40,
-                                        ),
-                                        SizedBox(width: size12),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'FifaPay',
-                                              style: heading2(
-                                                FontWeight.w600,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            Text(
-                                              data.status
-                                                  ? 'Terhubung'
-                                                  : 'Belum Terhubung',
-                                              style: body1(
-                                                FontWeight.w300,
-                                                data.status
-                                                    ? primary500
-                                                    : red500,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
                                     Text(
-                                      FormatCurrency.convertToIdr(
-                                        int.tryParse(data.saldo) ?? 0,
-                                      ),
-                                      style: heading1(
-                                        FontWeight.w700,
+                                      'Berlangganan: $name',
+                                      style: heading4(
+                                        FontWeight.w500,
                                         bnw900,
                                         'Outfit',
                                       ),
                                     ),
+                                    SizedBox(width: size56),
+                                    Icon(
+                                      Icons.alarm,
+                                      color: bnw900,
+                                    ), // Clock icon
                                   ],
                                 ),
-                                if (!data.status) ...[
+                              ),
+                              // Bottom section with white background
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: bnw100, // White background
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(size12),
+                                    bottomRight: Radius.circular(size12),
+                                  ),
+                                ),
+                                padding: EdgeInsets.all(size8),
+                                child: Text(
+                                  'Berlaku hingga : $dueDate', // Dynamic due date from API
+                                  style: heading4(
+                                    FontWeight.w500,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Center(
+                          child: Text('No data available.'),
+                        ); // No data state
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: size16),
+                  Container(
+                    // height: 330,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(size16),
+                      border: Border.all(color: bnw300),
+                    ),
+                    child: Column(
+                      children: [
+                        FutureBuilder<List<KulasedayaBinding>>(
+                          future: futureKulasedayaBinding,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            }
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Text('Gagal memuat data');
+                            }
+
+                            final data = snapshot.data!.first;
+
+                            return Container(
+                              padding: EdgeInsets.all(size12),
+                              decoration: BoxDecoration(
+                                color: primary100,
+                                borderRadius: BorderRadius.circular(size16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/fifapaylogo.png',
+                                            height: 40,
+                                          ),
+                                          SizedBox(width: size12),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'FifaPay',
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              Text(
+                                                data.status
+                                                    ? 'Terhubung'
+                                                    : 'Belum Terhubung',
+                                                style: body1(
+                                                  FontWeight.w300,
+                                                  data.status
+                                                      ? primary500
+                                                      : red500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        FormatCurrency.convertToIdr(
+                                          int.tryParse(data.saldo) ?? 0,
+                                        ),
+                                        style: heading1(
+                                          FontWeight.w700,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (!data.status) ...[
+                                    SizedBox(height: size16),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _pageController.jumpToPage(1),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: buttonXL(
+                                          Center(
+                                            child: Text(
+                                              'Hubungkan FifaPay',
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                bnw100,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ),
+                                          MediaQuery.of(context).size.width,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        FutureBuilder(
+                          future: futureDashboard,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Column(
+                                children: [
                                   SizedBox(height: size16),
-                                  GestureDetector(
-                                    onTap: () => _pageController.jumpToPage(1),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: buttonXL(
-                                        Center(
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: size16,
+                                      vertical: size16,
+                                    ),
+                                    decoration: BoxDecoration(color: bnw200),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          PhosphorIcons.info_fill,
+                                          size: size24,
+                                          color: bnw600,
+                                        ),
+                                        SizedBox(width: size12),
+                                        Flexible(
                                           child: Text(
-                                            'Hubungkan FifaPay',
-                                            style: heading3(
-                                              FontWeight.w600,
-                                              bnw100,
+                                            'Dibawah ini adalah data dalam kurun waktu (${snapshot.data?['rangeDate'] ?? 'N/A'}).',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw600,
                                               'Outfit',
                                             ),
                                           ),
                                         ),
-                                        MediaQuery.of(context).size.width,
-                                      ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: size16),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      // vertical: size16,
+                                      horizontal: size16,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            frameDash(
+                                              'Pendapatan',
+                                              FormatCurrency.convertToIdr(
+                                                pendapatanDas,
+                                              ),
+                                              // 'Rp. $pendapatanDas',
+                                              '',
+                                              PhosphorIcons.money_fill,
+                                            ),
+                                            SizedBox(width: size16),
+                                            frameDash(
+                                              'Total Pelanggan',
+                                              membersDas,
+                                              'Pelanggan',
+                                              PhosphorIcons.users_three_fill,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: size16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            frameDash(
+                                              'Transaksi',
+                                              transaksiDas,
+                                              'Produk Terjual',
+                                              PhosphorIcons
+                                                  .shopping_cart_simple_fill,
+                                            ),
+                                            SizedBox(width: size16),
+                                            frameDash(
+                                              'Rata - rata Perhari',
+                                              FormatCurrency.convertToIdr(
+                                                rataTransaksiDas,
+                                              ),
+                                              'Transaksi',
+                                              PhosphorIcons
+                                                  .shopping_cart_simple_fill,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: size16),
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      FutureBuilder(
-                        future: futureDashboard,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Column(
-                              children: [
-                                SizedBox(height: size16),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: size16,
-                                    vertical: size16,
+                              );
+                            }
+                            return Container(
+                              padding: EdgeInsets.fromLTRB(
+                                size8,
+                                0,
+                                size8,
+                                size8,
+                              ),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(top: size8),
+                                    child: SkeletonLine(
+                                      style: SkeletonLineStyle(height: 60),
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(color: bnw200),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        PhosphorIcons.info_fill,
-                                        size: size24,
-                                        color: bnw600,
-                                      ),
-                                      SizedBox(width: size12),
-                                      Flexible(
-                                        child: Text(
-                                          'Dibawah ini adalah data dalam kurun waktu (${snapshot.data?['rangeDate'] ?? 'N/A'}).',
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            bnw600,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  Padding(
+                                    padding: EdgeInsets.only(top: size8),
+                                    child: SkeletonLine(
+                                      style: SkeletonLineStyle(height: 60),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: size16),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    // vertical: size16,
-                                    horizontal: size16,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          frameDash(
-                                            'Pendapatan',
-                                            FormatCurrency.convertToIdr(
-                                              pendapatanDas,
-                                            ),
-                                            // 'Rp. $pendapatanDas',
-                                            '',
-                                            PhosphorIcons.money_fill,
-                                          ),
-                                          SizedBox(width: size16),
-                                          frameDash(
-                                            'Total Pelanggan',
-                                            membersDas,
-                                            'Pelanggan',
-                                            PhosphorIcons.users_three_fill,
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: size16),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          frameDash(
-                                            'Transaksi',
-                                            transaksiDas,
-                                            'Produk Terjual',
-                                            PhosphorIcons
-                                                .shopping_cart_simple_fill,
-                                          ),
-                                          SizedBox(width: size16),
-                                          frameDash(
-                                            'Rata - rata Perhari',
-                                            FormatCurrency.convertToIdr(
-                                              rataTransaksiDas,
-                                            ),
-                                            'Transaksi',
-                                            PhosphorIcons
-                                                .shopping_cart_simple_fill,
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: size16),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             );
-                          }
-                          return Container(
-                            padding: EdgeInsets.fromLTRB(
-                              size8,
-                              0,
-                              size8,
-                              size8,
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(top: size8),
-                                  child: SkeletonLine(
-                                    style: SkeletonLineStyle(height: 60),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(top: size8),
-                                  child: SkeletonLine(
-                                    style: SkeletonLineStyle(height: 60),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                ChartPage(token: widget.token),
-                ChartPagePendapatan(token: widget.token),
+                  ChartPage(token: widget.token),
+                  ChartPagePendapatan(token: widget.token),
 
-                SizedBox(height: size16),
-                SizedBox(
-                  child: FutureBuilder(
-                    future: futureDashboardSide,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData &&
-                          snapshot.data != null &&
-                          snapshot.data!['data'] != null) {
-                        List datatop =
-                            snapshot.data!['data']['product']?['top-three'] ??
-                            [];
-                        List dataunder =
-                            snapshot.data!['data']['product']?['under-three'] ??
-                            [];
+                  SizedBox(height: size16),
+                  SizedBox(
+                    child: FutureBuilder(
+                      future: futureDashboardSide,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data != null &&
+                            snapshot.data!['data'] != null) {
+                          List datatop =
+                              snapshot.data!['data']['product']?['top-three'] ??
+                              [];
+                          List dataunder =
+                              snapshot
+                                  .data!['data']['product']?['under-three'] ??
+                              [];
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: size8,
-                                bottom: size12,
-                              ),
-                              child: Text(
-                                'Penjualan Terlaris',
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  top: size8,
+                                  bottom: size12,
+                                ),
+                                child: Text(
+                                  'Penjualan Terlaris',
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
-                            ),
-                            datatop.isNotEmpty
-                                ? ListView.builder(
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.zero,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: datatop.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.only(
-                                          top: 4,
-                                          bottom: 4,
-                                        ),
-                                        padding: EdgeInsets.only(
-                                          left: size12,
-                                          right: size12,
-                                        ),
-                                        height: 80,
-                                        width: 240,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
+                              datatop.isNotEmpty
+                                  ? ListView.builder(
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.zero,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: datatop.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: EdgeInsets.only(
+                                            top: 4,
+                                            bottom: 4,
                                           ),
-                                          color: bnw100,
-                                          border: Border.all(
-                                            color: bnw300,
-                                            width: 1.4,
+                                          padding: EdgeInsets.only(
+                                            left: size12,
+                                            right: size12,
                                           ),
-                                        ),
-                                        child: Center(
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Container(
-                                                width: 20,
-                                                padding: EdgeInsets.all(4),
-                                                child: Text(
-                                                  (index + 1).toString(),
+                                          height: 80,
+                                          width: 240,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                            color: bnw100,
+                                            border: Border.all(
+                                              color: bnw300,
+                                              width: 1.4,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Container(
+                                                  width: 20,
+                                                  padding: EdgeInsets.all(4),
+                                                  child: Text(
+                                                    (index + 1).toString(),
+                                                    style: heading2(
+                                                      FontWeight.w700,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                    left: size8,
+                                                    right: size8,
+                                                  ),
+                                                  height: 48,
+                                                  width: 48,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          size8,
+                                                        ),
+                                                    child: Image.network(
+                                                      datatop[index]['product_image'],
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder:
+                                                          (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) => SizedBox(
+                                                            child: SvgPicture.asset(
+                                                              'assets/logoProduct.svg',
+                                                            ),
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                          datatop[index]['name'],
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        datatop[index]['typeproducts'],
+                                                        style: body1(
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Spacer(),
+                                                Text(
+                                                  datatop[index]['qty'],
                                                   style: heading2(
                                                     FontWeight.w700,
-                                                    bnw900,
+                                                    primary500,
                                                     'Outfit',
                                                   ),
-                                                  textAlign: TextAlign.center,
                                                 ),
-                                              ),
-                                              Container(
-                                                margin: EdgeInsets.only(
-                                                  left: size8,
-                                                  right: size8,
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Text('Belum Melakukan Transaksi'),
+                              Padding(
+                                padding: EdgeInsets.only(top: size12),
+                                child: Text(
+                                  'Penjualan Terendah',
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                              dataunder.isNotEmpty
+                                  ? ListView.builder(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      padding: EdgeInsets.zero,
+                                      shrinkWrap: true,
+                                      itemCount: dataunder.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: EdgeInsets.only(
+                                            top: 4,
+                                            bottom: 4,
+                                          ),
+                                          padding: EdgeInsets.only(
+                                            left: size12,
+                                            right: size12,
+                                          ),
+                                          height: 80,
+                                          width: 240,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                            color: bnw100,
+                                            border: Border.all(
+                                              color: bnw300,
+                                              width: 1.4,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Container(
+                                                  width: 20,
+                                                  padding: EdgeInsets.all(4),
+                                                  child: Text(
+                                                    (index + 1).toString(),
+                                                    style: heading2(
+                                                      FontWeight.w700,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
                                                 ),
-                                                height: 48,
-                                                width: 48,
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        size8,
-                                                      ),
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                    left: size8,
+                                                    right: size8,
+                                                  ),
+                                                  height: 48,
+                                                  width: 48,
                                                   child: Image.network(
-                                                    datatop[index]['product_image'],
+                                                    dataunder[index]['product_image'],
                                                     fit: BoxFit.cover,
                                                     errorBuilder:
                                                         (
@@ -1357,215 +1592,93 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                                         ),
                                                   ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                width: 100,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Flexible(
-                                                      child: Text(
-                                                        datatop[index]['name'],
-                                                        style: heading3(
-                                                          FontWeight.w600,
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                          dataunder[index]['name'],
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        dataunder[index]['typeproducts'],
+                                                        style: body1(
+                                                          FontWeight.w400,
                                                           bnw900,
                                                           'Outfit',
                                                         ),
                                                       ),
-                                                    ),
-                                                    Text(
-                                                      datatop[index]['typeproducts'],
-                                                      style: body1(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit',
-                                                      ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                datatop[index]['qty'],
-                                                style: heading2(
-                                                  FontWeight.w700,
-                                                  primary500,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Text('Belum Melakukan Transaksi'),
-                            Padding(
-                              padding: EdgeInsets.only(top: size12),
-                              child: Text(
-                                'Penjualan Terendah',
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                            ),
-                            dataunder.isNotEmpty
-                                ? ListView.builder(
-                                    physics: NeverScrollableScrollPhysics(),
-                                    padding: EdgeInsets.zero,
-                                    shrinkWrap: true,
-                                    itemCount: dataunder.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.only(
-                                          top: 4,
-                                          bottom: 4,
-                                        ),
-                                        padding: EdgeInsets.only(
-                                          left: size12,
-                                          right: size12,
-                                        ),
-                                        height: 80,
-                                        width: 240,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                          color: bnw100,
-                                          border: Border.all(
-                                            color: bnw300,
-                                            width: 1.4,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Container(
-                                                width: 20,
-                                                padding: EdgeInsets.all(4),
-                                                child: Text(
-                                                  (index + 1).toString(),
+                                                Spacer(),
+                                                Text(
+                                                  dataunder[index]['qty'],
                                                   style: heading2(
                                                     FontWeight.w700,
-                                                    bnw900,
+                                                    primary500,
                                                     'Outfit',
                                                   ),
-                                                  textAlign: TextAlign.center,
                                                 ),
-                                              ),
-                                              Container(
-                                                margin: EdgeInsets.only(
-                                                  left: size8,
-                                                  right: size8,
-                                                ),
-                                                height: 48,
-                                                width: 48,
-                                                child: Image.network(
-                                                  dataunder[index]['product_image'],
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) => SizedBox(
-                                                        child: SvgPicture.asset(
-                                                          'assets/logoProduct.svg',
-                                                        ),
-                                                      ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 100,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Flexible(
-                                                      child: Text(
-                                                        dataunder[index]['name'],
-                                                        style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      dataunder[index]['typeproducts'],
-                                                      style: body1(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit',
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                dataunder[index]['qty'],
-                                                style: heading2(
-                                                  FontWeight.w700,
-                                                  primary500,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Text('Belum Melakukan Transaksi'),
-                          ],
-                        );
-                      }
-                      return Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Penjualan Terlaris',
-                              style: heading2(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            skeletonLinePenjualan(),
-                            skeletonLinePenjualan(),
-                            skeletonLinePenjualan(),
-                            Padding(
-                              padding: EdgeInsets.only(top: 8),
-                              child: Text(
-                                'Penjualan Terendah',
+                                        );
+                                      },
+                                    )
+                                  : Text('Belum Melakukan Transaksi'),
+                            ],
+                          );
+                        }
+                        return Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Penjualan Terlaris',
                                 style: heading2(
                                   FontWeight.w600,
                                   bnw900,
                                   'Outfit',
                                 ),
                               ),
-                            ),
-                            skeletonLinePenjualan(),
-                            skeletonLinePenjualan(),
-                            skeletonLinePenjualan(),
-                          ],
-                        ),
-                      );
-                    },
+                              skeletonLinePenjualan(),
+                              skeletonLinePenjualan(),
+                              skeletonLinePenjualan(),
+                              Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: Text(
+                                  'Penjualan Terendah',
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                              skeletonLinePenjualan(),
+                              skeletonLinePenjualan(),
+                              skeletonLinePenjualan(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -1749,14 +1862,25 @@ class _ChartPageState extends State<ChartPage> {
   }
 
   Future<ChartData> _fetch(String tipe) async {
-    // panggil fungsi KAMU (di file lain) → Map response
-    final Map<String, dynamic> resp = await getValueDataChart(
-      context,
-      widget.token,
-      tipe,
-    );
-    // parsing ke model chart
-    return ChartData.fromPayload(resp);
+    final isOnline = await ConnectionChecker().checkInternet();
+    if (isOnline) {
+      final Map<String, dynamic> resp = await getValueDataChart(
+        context,
+        widget.token,
+        tipe,
+      );
+      DatabaseHelper().saveDashboardCache('chart_penjualan_$tipe', resp);
+      return ChartData.fromPayload(resp);
+    } else {
+      final cached = await DatabaseHelper().getDashboardCache(
+        'chart_penjualan_$tipe',
+      );
+      if (cached != null) {
+        return ChartData.fromPayload(cached);
+      } else {
+        throw Exception('Tidak ada data tersimpan');
+      }
+    }
   }
 
   void _reload(String tipe) {
@@ -1862,14 +1986,25 @@ class _ChartPagePendapatanState extends State<ChartPagePendapatan> {
   }
 
   Future<ChartData> _fetch(String tipe) async {
-    // panggil fungsi KAMU (di file lain) → Map response
-    final Map<String, dynamic> resp = await getValueDataChartPendapatan(
-      context,
-      widget.token,
-      tipe,
-    );
-    // parsing ke model chart
-    return ChartData.fromPayload(resp);
+    final isOnline = await ConnectionChecker().checkInternet();
+    if (isOnline) {
+      final Map<String, dynamic> resp = await getValueDataChartPendapatan(
+        context,
+        widget.token,
+        tipe,
+      );
+      DatabaseHelper().saveDashboardCache('chart_pendapatan_$tipe', resp);
+      return ChartData.fromPayload(resp);
+    } else {
+      final cached = await DatabaseHelper().getDashboardCache(
+        'chart_pendapatan_$tipe',
+      );
+      if (cached != null) {
+        return ChartData.fromPayload(cached);
+      } else {
+        throw Exception('Tidak ada data tersimpan');
+      }
+    }
   }
 
   void _reload(String tipe) {
@@ -2842,6 +2977,7 @@ class _DashboardWithNotifState extends State<DashboardWithNotif> {
       ],
     );
   }
+
   Future<void> _showNotification() async {
     context.read<UniposNotificationProvider>().showNotification();
   }
