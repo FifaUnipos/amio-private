@@ -1,17 +1,24 @@
 import 'dart:convert';
 
+import 'package:unipos_app_335/pagehelper/loginregis/login_page.dart';
+import 'package:unipos_app_335/services/config/app_endpoints.dart';
+
 import '../../../main.dart';
 import 'otpPageMobile.dart';
 import 'package:http/http.dart' as http;
 import '../../dashboardMobile.dart';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_color.dart';
-import '../../../services/apimethod.dart';
-import '../../../utils/component/component_appbar.dart';import '../../../../../utils/component/component_button.dart';
+import '../../../services/config/apimethod.dart';
+import '../../../utils/component/component_appbar.dart';
+import '../../../../../utils/component/component_button.dart';
 
 class LoginPageMobile extends StatefulWidget {
   const LoginPageMobile({super.key});
@@ -83,8 +90,11 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                           Container(
                             child: IntrinsicHeight(
                               child: TextFormField(
-                                style:
-                                    heading2(FontWeight.w600, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                                 onChanged: (value) {
                                   setState(() {
                                     if (value.contains('@') ||
@@ -100,8 +110,11 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                                 controller: phoneEmailCon,
                                 decoration: InputDecoration(
                                   errorText: _validate ? errorText : null,
-                                  errorStyle:
-                                      body1(FontWeight.w500, red500, 'Outfit'),
+                                  errorStyle: body1(
+                                    FontWeight.w500,
+                                    red500,
+                                    'Outfit',
+                                  ),
                                   focusedBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(
                                       width: 2,
@@ -114,12 +127,16 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                                       color: red500,
                                     ),
                                   ),
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: size12),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: size12,
+                                  ),
                                   hintText:
                                       'Cth : 08123456789 / nabil@email.com ',
                                   hintStyle: heading2(
-                                      FontWeight.w600, bnw400, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw400,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -150,13 +167,15 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                             );
                           } else if (validated == 'email') {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Container(),
-                                  // LoginWithEmail(
-                                  //   email: phoneEmailController.text,
-                                  // ),
-                                ));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    // Container(),
+                                    LoginWithEmail(
+                                      email: phoneEmailCon.text,
+                                    ),
+                              ),
+                            );
                             // getOtpEmail(
                             // );
                           }
@@ -164,8 +183,10 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                 },
                 child: buttonXXLonOff(
                   Center(
-                    child: Text('Berikutnya',
-                        style: heading2(FontWeight.w600, bnw100, 'Outfit')),
+                    child: Text(
+                      'Berikutnya',
+                      style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
                   ),
                   double.infinity,
                   phoneEmailCon.text.isEmpty ? bnw300 : primary500,
@@ -182,7 +203,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
   Future getOtp(page) async {
     try {
       final response = await http.post(
-        Uri.parse(loginbyotp),
+        Uri.parse(ApiEndpoints.loginbyotp),
         body: {
           // 'phonenumber': '085947737725',
           'phonenumber': phoneEmailCon.text,
@@ -196,12 +217,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
         print("succes");
         _validate = false;
         // ignore: use_build_context_synchronously
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       } else {
         setState(() {
           errorText = jsonResponse['message'];
@@ -237,5 +253,4 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
   //     throw Exception(e.toString());
   //   }
   // }
-
 }
