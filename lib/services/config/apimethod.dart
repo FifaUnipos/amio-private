@@ -62,8 +62,8 @@ import '../../utils/component/component_loading.dart';
 import '../../utils/component/providerModel/refreshTampilanModel.dart';
 import 'app_endpoints.dart';
 
-// String url = 'https://api.prod.amio.my.id';
-String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+String url = 'https://api.prod.amio.my.id';
+// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 // TRANSACTION HISTORY DELETE
 abstract class ApiTransactionHistory {
