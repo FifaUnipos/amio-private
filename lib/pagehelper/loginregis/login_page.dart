@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/config/app_endpoints.dart';
 
 import '../masukakun.dart';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -25,8 +25,6 @@ import 'package:unipos_app_335/main.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
-import '../../services/config/apimethod.dart';
-import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
