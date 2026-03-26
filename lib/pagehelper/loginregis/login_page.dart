@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:unipos_app_335/pageMobile/pageHelperMobile/masukAkunMobile.dart';
+import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/config/app_endpoints.dart';
 
 import '../masukakun.dart';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
@@ -25,8 +25,6 @@ import 'package:unipos_app_335/main.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../pageTablet/home/dashboard.dart';
 import '../../pageTablet/tokopage/dashboardtoko.dart';
-import '../../services/config/apimethod.dart';
-import '../../services/notification.dart';
 import '../daftarAkun.dart';
 import 'lupaSandiPage/lupa_sandi.dart';
 import 'otp_page.dart';
@@ -145,205 +143,142 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget loginForm(bool isTablet) {
     return ScrollConfiguration(
-      behavior: ScrollBehavior().copyWith(
-        overscroll: false,
-      ),
+      behavior: ScrollBehavior().copyWith(overscroll: false),
       child: Container(
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.only(bottom: size16),
           child: IntrinsicHeight(
             child: Column(
-              mainAxisAlignment:
-                  isTablet ? MainAxisAlignment.center : MainAxisAlignment.start,
+              mainAxisAlignment: isTablet
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Masuk',
-                  style: heading1(
-                    FontWeight.w700,
-                    bnw900,
-                    'Outfit',
+                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                Text(
+                  'Masukkan nomor telepon atau email yang telah terdaftar.',
+                  style: heading3(FontWeight.w500, bnw500, 'Outfit'),
+                ),
+                SizedBox(height: size24),
+                Row(
+                  children: [
+                    Text(
+                      'Nomor Telpon / Email ',
+                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      '*',
+                      style: heading4(FontWeight.w700, red500, 'Outfit'),
+                    ),
+                  ],
+                ),
+                Container(
+                  child: IntrinsicHeight(
+                    child: TextFormField(
+                      // focusNode: _focusScopeNode,
+                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value.contains('@') || value.endsWith('.com')) {
+                            validated = 'email';
+                            onOffButton = primary500;
+                          } else if (value.startsWith('08') ||
+                              value.length < 10) {
+                            validated = 'number';
+                            onOffButton = primary500;
+                          }
+                        });
+                      },
+                      cursorColor: primary500,
+                      controller: phoneEmailController,
+                      decoration: InputDecoration(
+                        errorText: _validate ? errorText : null,
+                        errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(width: 2, color: primary500),
+                        ),
+                        focusedErrorBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(width: 2, color: red500),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: size12),
+                        hintText: 'Cth : 08123456789 / nabil@email.com ',
+                        hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
+                      ),
+                    ),
                   ),
                 ),
-                                    Text(
-                                      'Masukkan nomor telepon atau email yang telah terdaftar.',
-                                      style: heading3(
-                                        FontWeight.w500,
-                                        bnw500,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                    SizedBox(height: size24),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Nomor Telpon / Email ',
-                                          style: heading4(
-                                            FontWeight.w500,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        Text(
-                                          '*',
-                                          style: heading4(
-                                            FontWeight.w700,
-                                            red500,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      child: IntrinsicHeight(
-                                        child: TextFormField(
-                                          // focusNode: _focusScopeNode,
-                                          style: heading2(
-                                            FontWeight.w600,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              if (value.contains('@') ||
-                                                  value.endsWith('.com')) {
-                                                validated = 'email';
-                                                onOffButton = primary500;
-                                              } else if (value.startsWith(
-                                                    '08',
-                                                  ) ||
-                                                  value.length < 10) {
-                                                validated = 'number';
-                                                onOffButton = primary500;
-                                              }
-                                            });
-                                          },
-                                          cursorColor: primary500,
-                                          controller: phoneEmailController,
-                                          decoration: InputDecoration(
-                                            errorText: _validate
-                                                ? errorText
-                                                : null,
-                                            errorStyle: body1(
-                                              FontWeight.w500,
-                                              red500,
-                                              'Outfit',
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                width: 2,
-                                                color: primary500,
-                                              ),
-                                            ),
-                                            focusedErrorBorder:
-                                                UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    width: 2,
-                                                    color: red500,
-                                                  ),
-                                                ),
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  vertical: size12,
-                                                ),
-                                            hintText:
-                                                'Cth : 08123456789 / nabil@email.com ',
-                                            hintStyle: heading2(
-                                              FontWeight.w600,
-                                              bnw400,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: size32),
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: GestureDetector(
-                                        onTap: () async {
-                                          setState(() {
-                                            errorText = '';
-                                            _focusScopeNode.unfocus();
-                                            if (validated == 'number') {
-                                              getOtp(
-                                                Otppage(
-                                                  phoneEmailController.text,
-                                                  name.toString(),
-                                                  // pass.toString(),
-                                                  email.toString(),
-                                                  'login_page',
-                                                ),
-                                              );
-                                            } else if (validated == 'email') {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      LoginWithEmail(
-                                                        email:
-                                                            phoneEmailController
-                                                                .text,
-                                                      ),
-                                                ),
-                                              );
-                                              // getOtpEmail(
-                                              // );
-                                            }
-                                          });
-                                        },
-                                        child: buttonXXLonOff(
-                                          Center(
-                                            child: Text(
-                                              'Masuk',
-                                              style: heading2(
-                                                FontWeight.w600,
-                                                bnw100,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                          ),
-                                          double.infinity,
-                                          onOffButton,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: size32),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Belum Memiliki Akun?',
-                                          style: heading4(
-                                            FontWeight.w500,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        SizedBox(width: size12),
-                                        GestureDetector(
-                                          // onTap: () async => getOtp(),
-                                          onTap: () =>
-                                              Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      DaftarAkunPage(),
-                                                ),
-                                              ),
-                                          child: Text(
-                                            'Daftar',
-                                            style: heading4(
-                                              FontWeight.w500,
-                                              primary500,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                SizedBox(height: size32),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: GestureDetector(
+                    onTap: () async {
+                      setState(() {
+                        errorText = '';
+                        _focusScopeNode.unfocus();
+                        if (validated == 'number') {
+                          getOtp(
+                            Otppage(
+                              phoneEmailController.text,
+                              name.toString(),
+                              // pass.toString(),
+                              email.toString(),
+                              'login_page',
+                            ),
+                          );
+                        } else if (validated == 'email') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginWithEmail(
+                                email: phoneEmailController.text,
+                              ),
+                            ),
+                          );
+                          // getOtpEmail(
+                          // );
+                        }
+                      });
+                    },
+                    child: buttonXXLonOff(
+                      Center(
+                        child: Text(
+                          'Masuk',
+                          style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                      double.infinity,
+                      onOffButton,
+                    ),
+                  ),
+                ),
+                SizedBox(height: size32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Belum Memiliki Akun?',
+                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(width: size12),
+                    GestureDetector(
+                      // onTap: () async => getOtp(),
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DaftarAkunPage(),
+                        ),
+                      ),
+                      child: Text(
+                        'Daftar',
+                        style: heading4(FontWeight.w500, primary500, 'Outfit'),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -453,7 +388,9 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                       onTap: () => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MasukAkunPageMobile(),
+                          builder: (context) => isTablet
+                              ? MasukAkunPage()
+                              : MasukAkunPageMobile(),
                         ),
                       ),
                       child: Icon(
@@ -522,55 +459,36 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           padding: EdgeInsets.only(bottom: size16),
           child: IntrinsicHeight(
             child: Column(
-              mainAxisAlignment:
-                  isTablet ? MainAxisAlignment.center : MainAxisAlignment.start,
+              mainAxisAlignment: isTablet
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Masukkan Kata Sandi',
-                  style: heading1(
-                    FontWeight.w700,
-                    bnw900,
-                    'Outfit',
-                  ),
+                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 Text(
                   'Masukkan kata sandi anda.',
-                  style: heading3(
-                    FontWeight.w500,
-                    bnw500,
-                    'Outfit',
-                  ),
+                  style: heading3(FontWeight.w500, bnw500, 'Outfit'),
                 ),
                 SizedBox(height: size24),
                 Row(
                   children: [
                     Text(
                       'Kata Sandi ',
-                      style: heading4(
-                        FontWeight.w500,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
                     ),
                     Text(
                       '*',
-                      style: heading4(
-                        FontWeight.w700,
-                        red500,
-                        'Outfit',
-                      ),
+                      style: heading4(FontWeight.w700, red500, 'Outfit'),
                     ),
                   ],
                 ),
                 Container(
                   child: IntrinsicHeight(
                     child: TextFormField(
-                      style: heading2(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                       cursorColor: primary500,
                       controller: passController,
                       obscureText: _obscureText,
@@ -580,16 +498,9 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                       },
                       decoration: InputDecoration(
                         errorText: _validate ? errorText : null,
-                        errorStyle: body1(
-                          FontWeight.w500,
-                          red500,
-                          'Outfit',
-                        ),
+                        errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: primary500,
-                          ),
+                          borderSide: BorderSide(width: 2, color: primary500),
                         ),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -606,20 +517,11 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                           },
                         ),
                         focusedErrorBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: red500,
-                          ),
+                          borderSide: BorderSide(width: 2, color: red500),
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: size12,
-                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: size12),
                         hintText: 'Masukkan Kata Sandi',
-                        hintStyle: heading2(
-                          FontWeight.w600,
-                          bnw400,
-                          'Outfit',
-                        ),
+                        hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
                       ),
                     ),
                   ),
@@ -638,11 +540,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                       ),
                       child: Text(
                         'Lupa Kata Sandi',
-                        style: heading4(
-                          FontWeight.w500,
-                          primary500,
-                          'Outfit',
-                        ),
+                        style: heading4(FontWeight.w500, primary500, 'Outfit'),
                       ),
                     ),
                   ],
@@ -656,11 +554,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                     Center(
                       child: Text(
                         'Masuk',
-                        style: heading2(
-                          FontWeight.w600,
-                          bnw100,
-                          'Outfit',
-                        ),
+                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                     ),
                     double.infinity,

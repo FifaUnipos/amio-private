@@ -16,7 +16,6 @@ import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_color.dart';
-import '../../../services/config/apimethod.dart';
 import '../../../utils/component/component_appbar.dart';
 import '../../../../../utils/component/component_button.dart';
 
