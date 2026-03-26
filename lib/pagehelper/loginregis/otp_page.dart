@@ -113,6 +113,7 @@ class _OtppageState extends State<Otppage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isTablet = isTabletLayout(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -121,215 +122,192 @@ class _OtppageState extends State<Otppage> {
       child: Scaffold(
         backgroundColor: bnw100,
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: EdgeInsets.symmetric(horizontal: size32),
           child: Column(
             children: [
               appbar(context, false),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: SvgPicture.asset(
-                          'assets/newIllustration/KodeOTP.svg',
+                  padding: EdgeInsets.symmetric(vertical: size12),
+                  child: isTablet
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: SvgPicture.asset(
+                                'assets/newIllustration/KodeOTP.svg',
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            otpForm(context),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height / 3,
+                              child: SvgPicture.asset(
+                                'assets/newIllustration/KodeOTP.svg',
+                              ),
+                            ),
+                            SizedBox(height: size16),
+                            otpForm(context),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Expanded otpForm(BuildContext context) {
+    return Expanded(
+      child: ScrollConfiguration(
+        behavior: const ScrollBehavior().copyWith(overscroll: false),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.only(bottom: size16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Masukkan Kode Verifikasi',
+                style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+              ),
+              Text(
+                'Kode Verifikasi (OTP) sudah dikirim ke nomor telepon anda $phoneNumber',
+                textAlign: TextAlign.center,
+                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+              SizedBox(height: size32),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1), //bagian ini di ganti jadi 1 dari 103
+                child: Column(
+                  children: [
+                    Container(
+                      child: Form(
+                        key: formKey,
+                        child: PinCodeTextField(
+                          appContext: context,
+                          animationType: AnimationType.fade,
+                          length: 6,
+                          errorTextSpace: 0,
+                          pinTheme: PinTheme(
+                            activeColor: errorText.isEmpty
+                                ? primary500
+                                : red500,
+                            inactiveColor: bnw300,
+                            selectedColor: primary500,
+                            selectedBorderWidth: 2,
+                            inactiveBorderWidth: 1,
+                          ),
+                          cursorColor: primary500,
+                          controller: textEditingController,
+                          keyboardType: TextInputType.number,
+                          textStyle: heading1(
+                            FontWeight.w700,
+                            bnw900,
+                            'Outfit',
+                          ),
+                          onCompleted: (pin) {
+                            print("Completed: " + pin);
+                            if (widget.pageidentify == 'login_page') {
+                              print('login');
+                              login(pin);
+                              print('login_succes');
+                            } else if (widget.pageidentify == 'register_page') {
+                              registErentryOtp(pin);
+                              print('register_succes');
+                            } else if (widget.pageidentify ==
+                                'public_register_page') {
+                              globalRegisterEntry(pin);
+                            } else if (widget.pageidentify == 'forgotPass') {
+                              changePasswordVerify(context, userId, pin);
+                            }
+                          },
+                          onChanged: (value) {
+                            debugPrint(value);
+                            errorText = '';
+                            setState(() {
+                              currentText = value;
+                            });
+                          },
                         ),
                       ),
-                      SizedBox(width: size16),
-                      Expanded(
-                        child: ScrollConfiguration(
-                          behavior: const ScrollBehavior().copyWith(
-                            overscroll: false,
+                    ),
+                    SizedBox(height: errorText.isNotEmpty ? size16 : 0),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        errorText.isNotEmpty ? errorText : '',
+                        style: heading4(FontWeight.w500, red500, 'Outfit'),
+                      ),
+                    ),
+                    SizedBox(height: errorText.isNotEmpty ? size16 : 0),
+                    SizedBox(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Waktu kirim ulang : ',
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                           ),
-                          child: SingleChildScrollView(
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            padding: EdgeInsets.only(bottom: size16),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Masukkan Kode Verifikasi',
-                                  style: heading1(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Kode Verifikasi (OTP) sudah dikirim ke nomor telepon anda $phoneNumber',
-                                  textAlign: TextAlign.center,
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw500,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: size32),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 103,
-                                  ),
-                                  child: Column(
+                          GestureDetector(
+                            onTap: () {
+                              if (widget.pageidentify == 'login_page') {
+                                getOtpAgain();
+                              } else if (widget.pageidentify ==
+                                  'register_page') {
+                                registerAgain();
+                              } else if (widget.pageidentify ==
+                                  'global_register_page') {}
+                              // log(timerText);
+                            },
+                            child: timerText == '00: 00'
+                                ? GestureDetector(
+                                    onTap: () {
+                                      getOtpAgain();
+                                      startTimeout();
+                                    },
+                                    // onTap: () => registerAgain(),
+                                    child: Text(
+                                      'Kirim Ulang Code',
+                                      style: heading4(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  )
+                                : Row(
                                     children: [
-                                      Container(
-                                        child: Form(
-                                          key: formKey,
-                                          child: PinCodeTextField(
-                                            appContext: context,
-                                            animationType: AnimationType.fade,
-                                            length: 6,
-                                            errorTextSpace: 0,
-                                            pinTheme: PinTheme(
-                                              activeColor: errorText.isEmpty
-                                                  ? primary500
-                                                  : red500,
-                                              inactiveColor: bnw300,
-                                              selectedColor: primary500,
-                                              selectedBorderWidth: 2,
-                                              inactiveBorderWidth: 1,
-                                            ),
-                                            cursorColor: primary500,
-                                            controller: textEditingController,
-                                            keyboardType: TextInputType.number,
-                                            textStyle: heading1(
-                                              FontWeight.w700,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                            onCompleted: (pin) {
-                                              print("Completed: " + pin);
-                                              if (widget.pageidentify ==
-                                                  'login_page') {
-                                                print('login');
-                                                login(pin);
-                                                print('login_succes');
-                                              } else if (widget.pageidentify ==
-                                                  'register_page') {
-                                                registErentryOtp(pin);
-                                                print('register_succes');
-                                              } else if (widget.pageidentify ==
-                                                  'public_register_page') {
-                                                globalRegisterEntry(pin);
-                                              } else if (widget.pageidentify ==
-                                                  'forgotPass') {
-                                                changePasswordVerify(
-                                                  context,
-                                                  userId,
-                                                  pin,
-                                                );
-                                              }
-                                            },
-                                            onChanged: (value) {
-                                              debugPrint(value);
-                                              errorText = '';
-                                              setState(() {
-                                                currentText = value;
-                                              });
-                                            },
-                                          ),
+                                      SizedBox(
+                                        height: 8,
+                                        width: 8,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: errorText.isNotEmpty
-                                            ? size16
-                                            : 0,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          errorText.isNotEmpty ? errorText : '',
-                                          style: heading4(
-                                            FontWeight.w500,
-                                            red500,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: errorText.isNotEmpty
-                                            ? size16
-                                            : 0,
-                                      ),
-                                      SizedBox(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Waktu kirim ulang : ',
-                                              style: heading4(
-                                                FontWeight.w400,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                if (widget.pageidentify ==
-                                                    'login_page') {
-                                                  getOtpAgain();
-                                                } else if (widget
-                                                        .pageidentify ==
-                                                    'register_page') {
-                                                  registerAgain();
-                                                } else if (widget
-                                                        .pageidentify ==
-                                                    'global_register_page') {}
-                                                // log(timerText);
-                                              },
-                                              child: timerText == '00: 00'
-                                                  ? GestureDetector(
-                                                      onTap: () {
-                                                        getOtpAgain();
-                                                        startTimeout();
-                                                      },
-                                                      // onTap: () => registerAgain(),
-                                                      child: Text(
-                                                        'Kirim Ulang Code',
-                                                        style: heading4(
-                                                          FontWeight.w600,
-                                                          primary500,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : Row(
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 8,
-                                                          width: 8,
-                                                          child:
-                                                              const CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                              ),
-                                                        ),
-                                                        SizedBox(width: 4),
-                                                        Text(
-                                                          timerText,
-                                                          style: body1(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                            ),
-                                          ],
+                                      SizedBox(width: 4),
+                                      Text(
+                                        timerText,
+                                        style: body1(
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
