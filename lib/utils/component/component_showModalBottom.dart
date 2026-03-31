@@ -142,16 +142,18 @@ showModalBottomProfile(BuildContext context, height, child) {
       return StatefulBuilder(
         // dipakein IntrinsicHeight dan height dihapus
         builder: (context, setState) => IntrinsicHeight(
-          child: Container(
-            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-            decoration: BoxDecoration(
-              color: bnw100,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                topLeft: Radius.circular(12),
+          child: SafeArea(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                ),
               ),
+              child: child,
             ),
-            child: child,
           ),
         ),
       );
