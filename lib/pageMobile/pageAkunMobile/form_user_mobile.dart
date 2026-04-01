@@ -12,8 +12,12 @@ class FormUserMobile extends StatefulWidget {
   final String token, merchantId;
   final UserModel? userItem; // If null, then Create mode.
 
-  const FormUserMobile({Key? key, required this.token, required this.merchantId, this.userItem})
-    : super(key: key);
+  const FormUserMobile({
+    Key? key,
+    required this.token,
+    required this.merchantId,
+    this.userItem,
+  }) : super(key: key);
 
   @override
   State<FormUserMobile> createState() => _FormUserMobileState();
@@ -125,6 +129,8 @@ class _FormUserMobileState extends State<FormUserMobile> {
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
     );
     if (pickedFile != null) {
       final bytes = await File(pickedFile.path).readAsBytes();
