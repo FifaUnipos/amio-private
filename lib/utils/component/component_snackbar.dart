@@ -153,7 +153,7 @@ void showSnackbar(BuildContext context, jsonResponse) async {
 void showSnackBarComponent(BuildContext context, String text, String rc) {
   try {
     final fToast = FToast();
-    fToast.init(context);
+    fToast.init(navigatorKey.currentContext ?? context);
 
     Widget toast = Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 128),
