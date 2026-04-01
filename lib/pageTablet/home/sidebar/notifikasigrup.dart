@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:unipos_app_335/components/notification/notification_data_list.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/models/notificationModel.dart';
 import 'package:unipos_app_335/components/notification/modal_notification_show_detail.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
@@ -22,7 +23,7 @@ class NotifikasiGrup extends StatefulWidget {
 }
 
 class _NotifikasiGrupState extends State<NotifikasiGrup> {
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
   IO.Socket? socket;
   List<NotificationModel> notifications = [];
 

@@ -728,62 +728,74 @@ class _ScreensExampleState extends State<_ScreensExample> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        // final pageTitle = _getTitleByIndex(widget.controller.selectedIndex);
-        switch (widget.controller.selectedIndex) {
-          case 0:
-            // return Dashboarpagenew(token: widget.token);
-            return Dashboarpagenew(token: widget.token);
-          case 1:
-            return NotifikasiGrup();
-          case 2:
-            return TokoSidePage(token: widget.token);
-          case 3:
-            return ProdukGrup(token: widget.token);
-          case 4:
-            return InventoriPageGrup(token: widget.token);
-          case 5:
-            return COAPageGrup(token: widget.token);
-          case 6:
-            return PromoGrup(token: widget.token);
-          // return InventoriPageGrup(token: widget.token);
-          case 7:
-            return AkunGrup(token: widget.token);
-          // return InventoriGrup(token: widget.token);
-          case 8:
-            return TransaksiGrup(token: widget.token);
-          // return InventoriGrup(token: widget.token);
-          // case 9:
-          //   return KeuanganGrup(token: widget.token);
-          // return AkunGrup(token: widget.token);
-          // LaporanGrup(
-          //   token: widget.token,
-          //   controller: widget.controller,
-          // );
-          case 9:
-            return LaporanToko(
+        return LazyIndexedStack(
+          index: widget.controller.selectedIndex,
+          children: [
+            Dashboarpagenew(token: widget.token),
+            NotifikasiGrup(),
+            TokoSidePage(token: widget.token),
+            ProdukGrup(token: widget.token),
+            InventoriPageGrup(token: widget.token),
+            COAPageGrup(token: widget.token),
+            PromoGrup(token: widget.token),
+            AkunGrup(token: widget.token),
+            TransaksiGrup(token: widget.token),
+            LaporanToko(
               token: widget.token,
               controller: widget.controller,
-            );
-          // return TransaksiGrup(token: widget.token);
-          case 10:
-            return BantuanGrup();
-          // return KeuanganGrup(token: widget.token);
-          // case size8:
-          //   return LaporanGrup(
-          //     token: widget.token,
-          //     controller: widget.controller,
-          //   );
-          // case 9:
-          //   return BantuanGrup();
-          case 11:
-            return BluetoothPage();
-          default:
-            return Text(
-              'Not found page',
-              // style: theme.textTheme.headline5,
-            );
-        }
+            ),
+            BantuanGrup(),
+            BluetoothPage(),
+          ],
+        );
       },
+    );
+  }
+}
+
+class LazyIndexedStack extends StatefulWidget {
+  final int index;
+  final List<Widget> children;
+
+  const LazyIndexedStack({
+    Key? key,
+    required this.index,
+    required this.children,
+  }) : super(key: key);
+
+  @override
+  _LazyIndexedStackState createState() => _LazyIndexedStackState();
+}
+
+class _LazyIndexedStackState extends State<LazyIndexedStack> {
+  late List<bool> _loaded;
+
+  @override
+  void initState() {
+    super.initState();
+    _loaded = List<bool>.filled(widget.children.length, false);
+    _loaded[widget.index] = true;
+  }
+
+  @override
+  void didUpdateWidget(LazyIndexedStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != widget.index) {
+      _loaded[widget.index] = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: widget.index,
+      children: List.generate(widget.children.length, (i) {
+        if (_loaded[i]) {
+          return widget.children[i];
+        } else {
+          return const SizedBox.shrink();
+        }
+      }),
     );
   }
 }

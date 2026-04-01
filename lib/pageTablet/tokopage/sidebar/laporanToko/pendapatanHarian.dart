@@ -68,7 +68,7 @@ class LaporanPendapatanHarianPageState
   // String textOrderBy = 'Tanggal Terkini',
   String textKeyword = '30 Hari Terakhir';
   String _textvalueOrderBy = 'tanggalTerkini',
-      _textvalueKeyword = '1B',
+      _textvalueKeyword = '1M',
       _textKeyword = '30 Hari Terakhir';
 
   String tanggalSelect = '';
@@ -103,7 +103,6 @@ class LaporanPendapatanHarianPageState
       child: Column(
         children: [
           Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Row(
@@ -1544,7 +1543,6 @@ class LaporanPendapatanHarianPageState
                                   textvalueOrderByReportDaily =
                                       orderByLaporanHarian[valueOrderByReportDaily];
 
-                                  // ✅ Sync variabel lokal yang dibaca FutureBuilder
                                   _textvalueOrderBy = textvalueOrderByReportDaily;
 
                                   if (!mounted) return;
@@ -1554,7 +1552,7 @@ class LaporanPendapatanHarianPageState
                                 child: buttonXL(
                                   Center(
                                     child: Text(
-                                      'Tampilkans',
+                                      'Tampilkan',
                                       style: heading3(
                                         FontWeight.w600,
                                         bnw100,

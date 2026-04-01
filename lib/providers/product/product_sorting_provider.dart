@@ -28,7 +28,11 @@ class ProductSortingProvider extends ChangeNotifier {
         orderBy,
       );
       if (result.rc == "00" && result.data != null) {
-        _resultState = ProductSortingResultLoadedState(result.data!);
+        if (result.data!.isEmpty) {
+          _resultState = ProductSortingResultNoneState();
+        } else {
+          _resultState = ProductSortingResultLoadedState(result.data!);
+        }
       } else {
         _resultState = ProductSortingResultErrorState(
           result.rc ?? "Gagal memuat history",
@@ -75,8 +79,8 @@ class ProductSortingProvider extends ChangeNotifier {
     final state = _resultState;
     if (state is ProductSortingResultLoadedState) {
       final updatedList = state.data
-        .where((d) => d.productid != productId)
-        .toList();
+          .where((d) => d.productid != productId)
+          .toList();
 
       _resultState = ProductSortingResultLoadedState(updatedList);
       notifyListeners();

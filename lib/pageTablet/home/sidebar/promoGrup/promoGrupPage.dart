@@ -1,5 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/merchant/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/merchant_card.dart';
+
+import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 
@@ -36,15 +44,19 @@ class PromoGrup extends StatefulWidget {
 class _PromoGrupState extends State<PromoGrup> {
   TextEditingController searchController = TextEditingController();
   PageController _pageController = PageController();
-  List<ModelDataToko>? datas;
+  List<ModelDataToko>? dataStore;
 
   late String _name, _merchid;
   Timer? _debounce;
 
   void _onChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
-      datas = await getAllToko(context, widget.token, value, '');
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        '',
+        textvalueOrderByStore,
+      );
       setState(() {});
     });
   }
@@ -58,7 +70,11 @@ class _PromoGrupState extends State<PromoGrup> {
     hargaEditProduk = '';
     jenisProductEdit = '';
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      datas = await getAllToko(context, widget.token, '', textvalueOrderBy);
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        '',
+        textvalueOrderByStore,
+      );
 
       setState(() {});
 
@@ -74,7 +90,7 @@ class _PromoGrupState extends State<PromoGrup> {
 
   @override
   void dispose() {
-    _debounce!.cancel();
+    _debounce?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -226,318 +242,88 @@ class _PromoGrupState extends State<PromoGrup> {
           ),
         ),
         SizedBox(height: size16),
-        orderByTokoField(),
+        SortBottomSheetButton(
+          options: orderByTokoText,
+          initialIndex: valueOrderByStore,
+          onConfirm: (i) async {
+            setState(() {
+              valueOrderByStore = i;
+              textvalueOrderByStore = orderByToko[i];
+            });
+            await context.read<MerchantSortingProvider>().fetchMerchantSorting(
+              widget.token,
+              '',
+              textvalueOrderByStore,
+            );
+          },
+        ),
         SizedBox(height: size16),
         Text('Pilih Toko', style: heading2(FontWeight.w400, bnw900, 'Outfit')),
         SizedBox(height: size16),
-        datas == null
-            ? SkeletonCard()
-            : Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.zero,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisExtent: 130,
-                    // childAspectRatio: 2.977,
-                    crossAxisCount: 2,
-                    crossAxisSpacing: size16,
-                    mainAxisSpacing: size16,
-                  ),
-                  itemCount: datas!.length,
-                  itemBuilder: (context, i) {
-                    return Container(
-                      padding: EdgeInsets.all(size16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(size16),
-                        border: Border.all(color: bnw300),
-                      ),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(1000),
-                                  child: SizedBox(
-                                    height: 60,
-                                    width: 60,
-                                    child: datas![i].logomerchant_url != null
-                                        ? Image.network(
-                                            datas![i].logomerchant_url
-                                                .toString(),
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    SizedBox(
-                                                      child: Icon(
-                                                        PhosphorIcons
-                                                            .storefront_fill,
-                                                        size: 60,
-                                                        color: bnw900,
-                                                      ),
-                                                    ),
-                                          )
-                                        : Icon(
-                                            PhosphorIcons.storefront_fill,
-                                            size: 60,
-                                          ),
-                                  ),
-                                ),
-                                SizedBox(width: size24),
-                                Flexible(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        datas![i].name ?? '',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading2(
-                                          FontWeight.w700,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      Text(
-                                        '${datas![i].address}',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: body1(
-                                          FontWeight.w400,
-                                          bnw800,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: size16),
-                            GestureDetector(
-                              onTap: () {
-                                _pageController.nextPage(
-                                  duration: Duration(milliseconds: 10),
-                                  curve: Curves.easeIn,
-                                );
-                                log(datas![i].name.toString());
-                                log(datas![i].merchantid.toString());
 
-                                _name = datas![i].name.toString();
-                                _merchid = datas![i].merchantid.toString();
-
-                                setState(() {});
-                              },
-                              child: buttonLoutline(
-                                Center(
-                                  child: Text(
-                                    'Lihat Produk',
-                                    style: heading4(
-                                      FontWeight.w600,
-                                      primary500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                primary500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+        Expanded(
+          child: Consumer<MerchantSortingProvider>(
+            builder: (context, value, child) {
+              return switch (value.resultState) {
+                MerchantSortingResultNoneState() => const Center(
+                  child: Text('Tidak ada data'),
                 ),
-              ),
-      ],
-    );
-  }
-
-  orderByTokoField() {
-    final outerSetState = setState;
-    return IntrinsicWidth(
-      child: GestureDetector(
-        onTap: () {
-          int previousValue = valueOrderByDiscount;
-          bool confirmed = false;
-          showModalBottomSheet(
-            constraints: const BoxConstraints(maxWidth: double.infinity),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-            context: context,
-            builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) => IntrinsicHeight(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      size32,
-                      size16,
-                      size32,
-                      size32,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size12),
-                        topLeft: Radius.circular(size12),
-                      ),
-                    ),
+                MerchantSortingResultErrorState(message: var message) => Center(
+                  child: Text('Erorr $message'),
+                ),
+                MerchantSortingResultLoadingState() => Center(
+                  child: SkeletonCard(),
+                ),
+                MerchantSortingResultLoadedState(data: var dataStore) => Container(
+                  child: RefreshIndicator(
+                    color: bnw100,
+                    backgroundColor: primary500,
+                    onRefresh: () async {
+                      setState(() {});
+                    },
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        dividerShowdialog(),
-                        SizedBox(height: size16),
-                        Container(
-                          width: double.infinity,
-                          color: bnw100,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Urutkan',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
+                        Expanded(
+                          child: MasonryGridView.builder(
+                            padding: EdgeInsets.zero,
+                            gridDelegate:
+                                SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
                                 ),
-                              ),
-                              Text(
-                                'Tentukan data yang akan tampil',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw600,
-                                  'Outfit',
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              Text(
-                                'Pilih Urutan',
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Wrap(
-                                children: List<Widget>.generate(
-                                  orderByDiscountText.length,
-                                  (int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(right: size16),
-                                      child: ChoiceChip(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: size12,
-                                        ),
-                                        backgroundColor: bnw100,
-                                        selectedColor: primary100,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: valueOrderByDiscount == index
-                                                ? primary500
-                                                : bnw300,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                        ),
-                                        label: Text(
-                                          orderByDiscountText[index],
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            valueOrderByDiscount == index
-                                                ? primary500
-                                                : bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        selected: valueOrderByDiscount == index,
-                                        onSelected: (bool selected) {
-                                          setState(() {
-                                            print(index);
-                                            // _value =
-                                            //     selected ? index : null;
-                                            valueOrderByDiscount = index;
-                                          });
-                                          setState(() {});
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: size32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: GestureDetector(
-                            onTap: () async {
-                              confirmed = true;
-                              textOrderBy =
-                                  orderByDiscountText[valueOrderByDiscount];
-                              textvalueOrderBy =
-                                  orderByDiscount[valueOrderByDiscount];
-                              final result = await getVoucher(
-                                context,
-                                checkToken,
-                                textvalueOrderByMember,
-                                merchantId,
+                            crossAxisSpacing: size16,
+                            mainAxisSpacing: size16,
+                            itemCount: dataStore.length,
+                            itemBuilder: (context, i) {
+                              return MerchantCard(
+                                merchant: dataStore[i],
+                                onTap: () {
+                                  _pageController.nextPage(
+                                    duration: Duration(milliseconds: 10),
+                                    curve: Curves.easeIn,
+                                  );
+                                  log(dataStore[i].name.toString());
+                                  log(dataStore[i].merchantid.toString());
+
+                                  _name = dataStore[i].name.toString();
+                                  _merchid = dataStore[i].merchantid.toString();
+
+                                  setState(() {});
+                                },
+                                buttonText: 'Lihat Promo',
                               );
-                              if (!mounted) return;
-                              outerSetState(() {
-                                datas = result;
-                              });
-                              Navigator.pop(context);
                             },
-                            child: buttonXL(
-                              Center(
-                                child: Text(
-                                  'Tampilkanss',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    bnw100,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                              0,
-                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              );
+              };
             },
-          ).whenComplete(() {
-            if (!confirmed) {
-              outerSetState(() {
-                valueOrderByDiscount = previousValue;
-              });
-            }
-          });
-        },
-        child: buttonLoutline(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Urutkan',
-                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' dari $textOrderBy',
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(width: size12),
-              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
-            ],
           ),
-          bnw300,
         ),
-      ),
+      ],
     );
   }
 }

@@ -92,7 +92,7 @@ class _PromosiGrupState extends State<PromosiGrup>
     poinEditPromosi = '';
     hargaProductPromosi = '';
 
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         List<String> value = [''];

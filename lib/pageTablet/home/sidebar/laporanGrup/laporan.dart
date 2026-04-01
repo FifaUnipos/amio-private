@@ -1,5 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
+
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
@@ -45,7 +47,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
   TextEditingController hapusController = TextEditingController();
   bool _validate = false;
 
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
 
   String _textOrderBy = 'Tanggal Terkini',
       textOrderByToko = 'Toko Terbaru',

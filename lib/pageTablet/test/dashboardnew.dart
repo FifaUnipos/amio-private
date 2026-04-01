@@ -2,10 +2,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
 
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/models/keranjangModel.dart';
 import 'package:unipos_app_335/models/kulasedayaMemberModel.dart';
 import 'package:unipos_app_335/models/tokomodel.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
+import 'package:unipos_app_335/utils/component/component_orderBy.dart';
 
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -49,7 +53,7 @@ class Dashboarpagenew extends StatefulWidget {
 
 class _DashboarpagenewState extends State<Dashboarpagenew> {
   PageController _pageController = PageController();
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
   WebViewController? webController;
 
   late Future<List<KulasedayaMember>> futureMembers;
@@ -65,9 +69,13 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
 
     // dashboard(identifier, widget.token);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      datas = await getAllToko(context, widget.token, '', '');
-
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        '',
+        textvalueOrderByStore,
+      );
       //   datas;
+      if (!mounted) return;
       setState(() {});
 
       _pageController = PageController(

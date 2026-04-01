@@ -75,9 +75,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     text: nameKategoriEdit,
   );
 
-  String textOrderBy = 'Nama Produk A ke Z';
-  String textvalueOrderBy = 'upDownNama';
-
   List<String>? productIdCheckAll;
   String checkFill = 'kosong';
 
@@ -176,7 +173,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   void _onChanged(String value) {
     List<String> val = [widget.merchId];
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasProduk = await getProductGrup(
         context,
@@ -203,7 +200,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
       List<String> value = [widget.merchId];
 
       await getDataProduk(value);
-
+      if (!mounted) return;
       setState(() {
         // log(datasProduk.toString());
         datasProduk;
@@ -267,7 +264,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   @override
   dispose() {
-    _debounce!.cancel();
+    _debounce?.cancel();
     productPrice;
     _pageController.dispose();
     conNameProduk.dispose();
@@ -3818,6 +3815,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
           headers: {"token": widget.token},
         )
         .then((response) {
+          if (!mounted) return;
           if (response.statusCode == 200) {
             final data = json.decode(response.body);
             if (data != null && data['data'] != null) {
@@ -3849,158 +3847,162 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     });
   }
 
-  orderBy(BuildContext context) {
+   orderBy(BuildContext context) {
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+          int previousValue = valueOrderByProduct;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setModalState) =>
+                    IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByProductText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByProductText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Urutkan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
                                       'Outfit',
                                     ),
                                   ),
-                                ),
-                                0,
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size20),
+                                  Text(
+                                    'Pilih Urutan',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Wrap(
+                                    children: List<Widget>.generate(
+                                      orderByProductText.length,
+                                      (int index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: size16,
+                                          ),
+                                          child: ChoiceChip(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            backgroundColor: bnw100,
+                                            selectedColor: primary100,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color:
+                                                    valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                            ),
+                                            label: Text(
+                                              orderByProductText[index],
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            selected:
+                                                valueOrderByProduct == index,
+                                            onSelected: (bool selected) {
+                                              setModalState(() {
+                                                valueOrderByProduct = index;
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                                  textOrderBy =
+                                      orderByProductText[valueOrderByProduct];
+                                  textvalueOrderBy =
+                                      orderByProduct[valueOrderByProduct];
+                                  setState(() {});
+                                  Navigator.pop(context);
+
+                                  getDataProduk(['']);
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            );
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              setState(() {
+                valueOrderByProduct = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(

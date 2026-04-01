@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -40,7 +42,7 @@ class _TokoPageTokoState extends State<TokoPageToko> {
   PageController _pageController = PageController();
   TextEditingController hapusController = TextEditingController();
 
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
 
   String image = "",
       name = "",
