@@ -218,9 +218,14 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getVillageLink = '$url/api/village',
     getTipeUsahaLink = '$url/api/tipeusaha';
 
-// TRANSACTION HISTORY DELETE
+// PRODUCT
 abstract class ApiProduct {
   static String get getProduct => '$url/api/v2/product';
+}
+
+// STORE
+abstract class ApiStore {
+  static String get getStore => '$url/api/v2/product';
 }
 
 // TRANSACTION HISTORY DELETE
@@ -3608,22 +3613,22 @@ Future getLaporanPerProdukExport(
 Future getLaporanPembayaran(
   BuildContext context,
   token,
-  List merchid,
+  merchid,
   keyword,
   orderby,
   export,
 ) async {
-  final String jsonTest = json.encode(merchid);
+  // final String jsonTest = json.encode(merchid);
   final response = await http.post(
     Uri.parse(laporanPembayaranUrl),
-    headers: {'token': token},
-    body: {
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: jsonEncode({
       "deviceid": identifier,
-      "merchantid": jsonTest,
+      "merchant_id": merchid,
       "keyword": keyword.toString(),
-      "orderby": orderby.toString(),
+      "order_by": orderby.toString(),
       "export": export,
-    },
+    }),
   );
 
   var jsonResponse = jsonDecode(response.body);

@@ -633,7 +633,7 @@ class _TransactionPageState extends State<TransactionPage>
   Timer? _debounce;
 
   void _onChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasTransaksi = await getProductTransaksi(context, widget.token, value, [
         '',
@@ -1091,7 +1091,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                             '',
                                                           );
                                                           setState(() {});
-                                                          // initState();
                                                         },
                                                         child: SizedBox(
                                                           child: TextFormField(
@@ -1302,7 +1301,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                       ),
                                                     );
                                                     setState(() {});
-                                                    // initState();
                                                   },
                                                   child: SizedBox(
                                                     child: TextFormField(
@@ -1991,7 +1989,6 @@ class _TransactionPageState extends State<TransactionPage>
                                             color: bnw100,
                                             backgroundColor: primary500,
                                             onRefresh: () async {
-                                              initState();
                                             },
                                             child: ListView(
                                               children: [
@@ -4528,7 +4525,6 @@ class _TransactionPageState extends State<TransactionPage>
                                             child: GestureDetector(
                                               onTap: () {
                                                 searchController.text = '';
-                                                initState();
                                               },
                                               child: Icon(
                                                 PhosphorIcons.x_fill,
@@ -4892,7 +4888,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                       setState(
                                                                                         () {},
                                                                                       );
-                                                                                      // initState();
                                                                                     },
                                                                                     child: buttonMoutlineColor(
                                                                                       Icon(
@@ -5221,7 +5216,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                         );
 
                                                                                         sumTotal = totalku;
-                                                                                        initState();
                                                                                         refreshColor();
                                                                                       }
                                                                                     } else {
@@ -5907,7 +5901,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                                   setState(
                                                                     () {},
                                                                   );
-                                                                  initState();
                                                                 },
                                                             child: ListView.builder(
                                                               // physics: BouncingScrollPhysics(),
@@ -6392,7 +6385,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                     backgroundColor: primary500,
                                                     onRefresh: () async {
                                                       setState(() {});
-                                                      initState();
                                                     },
                                                     child: SingleChildScrollView(
                                                       physics:
@@ -9440,7 +9432,6 @@ class _TransactionPageState extends State<TransactionPage>
                                                               context,
                                                             );
                                                             setState(() {});
-                                                            // initState();
                                                           },
                                                           child: buttonXL(
                                                             Center(
@@ -9711,7 +9702,7 @@ class _TransactionPageState extends State<TransactionPage>
 
                                 final result = await getProductTransaksi(
                                   context,
-                                  checkToken,
+                                  widget.token,
                                   '',
                                   [merchantId],
                                   textvalueOrderByCart,

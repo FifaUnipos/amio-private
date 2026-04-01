@@ -84,6 +84,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
     );
 
     imageStruk = imageBytesFromNetwork;
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -119,6 +120,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
         '',
         textvalueOrderByRiwayatTransaksi,
       );
+      if (!mounted) return;
       setState(() {});
     });
 

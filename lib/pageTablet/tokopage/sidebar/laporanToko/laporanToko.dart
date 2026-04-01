@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/laporanToko/laporanMoveInvenPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/laporanToko/laporanPenggunaanProduk.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/laporanToko/pendapatanPembayaran.dart';
@@ -53,7 +54,7 @@ class _LaporanTokoState extends State<LaporanToko> {
   TextEditingController hapusController = TextEditingController();
   bool _validate = false;
 
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
 
   String _textOrderBy = 'Tanggal Terkini',
       textOrderByToko = 'Toko Terbaru',

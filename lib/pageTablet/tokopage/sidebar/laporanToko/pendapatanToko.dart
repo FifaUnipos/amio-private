@@ -88,46 +88,57 @@ class LaporanPendapatanTokoPageState extends State<LaporanPendapatanTokoPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      widget.pageController.jumpToPage(0);
-                    },
-                    child: Icon(
-                      PhosphorIcons.arrow_left,
-                      size: size40,
-                      color: bnw900,
+              Expanded(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        widget.pageController.jumpToPage(0);
+                      },
+                      child: Icon(
+                        PhosphorIcons.arrow_left,
+                        size: size40,
+                        color: bnw900,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: size8),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pendapatan Toko',
-                        style: heading1(
-                          FontWeight.w700,
-                          Colors.black,
-                          'Outfit',
-                        ),
+                    SizedBox(width: size8),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pendapatan Toko',
+                            style: heading1(
+                              FontWeight.w700,
+                              Colors.black,
+                              'Outfit',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          Text(
+                            'Laporan',
+                            style: heading3(
+                              FontWeight.w400,
+                              Colors.black,
+                              'Outfit',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Laporan',
-                        style: heading3(
-                          FontWeight.w400,
-                          Colors.black,
-                          'Outfit',
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
               // Spacer(),
               SizedBox(width: size16),
-              Expanded(
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.60,
+                ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(

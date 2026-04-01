@@ -1,5 +1,9 @@
 String textOrderBy = 'Nama Toko A ke Z ';
 String textvalueOrderBy = 'upDownNama';
+
+String textOrderByStore = 'Nama Toko A ke Z ';
+String textvalueOrderByStore = 'upDownNama';
+
 String textOrderByBahan = 'Nama Bahan A ke Z';
 String textvalueOrderByBahan = 'upDownName';
 String textOrderByCart = 'Nama Produk A ke Z';
@@ -15,6 +19,14 @@ String textvalueOrderByDiscount = 'upDownNama';
 
 String textOrderByReportDaily = 'Laporan Terkini';
 String textvalueOrderByReportDaily = 'tanggalTerkini';
+String textOrderByReportProduct = 'Laporan Terkini';
+String textvalueOrderByReportProduct = 'tanggalTerkini';
+String textOrderByReportByPayment = 'Nama Pembayaran A-Z';
+String textvalueOrderByReportByPayment = 'nameCoaAsc';
+String textOrderByReportInventoryStock = 'Stok Akhir A-Z';
+String textvalueOrderByReportInventoryStock = 'endingStockAsc';
+String textOrderByReportMoveInventory = 'Stok Akhir A-Z';
+String textvalueOrderByReportMoveInventory = 'endingStockAsc';
 
 String textOrderByCOA = '';
 
@@ -138,7 +150,19 @@ List orderByRiwayatTransaksiText = [
   "Total Terendah",
 ];
 
-// LAPORAN
+List orderByLaporanPerProdukText = [
+  "Product Terbaru",
+  "Product Terlama",
+  "Transaksi Terbanyak",
+  "Transaksi Terendah",
+  "Nilai Transaksi Tertinggi",
+  "Nilai Transaksi Terendah",
+  "PPN Tertinggi",
+  "PPN Terendah",
+  "Total PerProduk Tertinggi",
+  "Total PerProduk Terendah",
+];
+
 List orderByLaporanHarianText = [
   "Tanggal Terkini",
   "Tanggal Terlama",
@@ -148,6 +172,36 @@ List orderByLaporanHarianText = [
   "PPN Terendah",
   "Total Tertinggi",
   "Total Terendah",
+];
+List orderByLaporanPembayaranText = [
+  "Nama Pembayaran A-Z",
+  "Nama Pembayaran Z-A",
+];
+
+List orderByLaporanStokInventarisText = [
+  "Stok Akhir A-Z", // endingStockAsc
+  "Stok Akhir Z-A", // endingStockDesc
+  "Stok Awal A-Z", // startingStockAsc
+  "Stok Awal Z-A", // startingStockDesc
+  "Nama Inventori A-Z", // inventoryNameAsc
+  "Nama Inventori Z-A", // inventoryNameDesc
+  "Inventori Keluar A-Z", // outgoingInventoryAsc
+  "Inventori Keluar Z-A", // outgoingInventoryDesc
+  "Inventori Masuk A-Z", // incomingInventoryAsc
+  "Inventori Masuk Z-A", // incomingInventoryDesc
+];
+
+List orderByLaporanPergerakanInventarisText = [
+  "Stok Akhir A-Z", // endingStockAsc
+  "Stok Akhir Z-A", // endingStockDesc
+  "Stok Awal A-Z", // startingStockAsc
+  "Stok Awal Z-A", // startingStockDesc
+  "Nama Inventori A-Z", // inventoryNameAsc
+  "Nama Inventori Z-A", // inventoryNameDesc
+  "Inventori Keluar A-Z", // outgoingInventoryAsc
+  "Inventori Keluar Z-A", // outgoingInventoryDesc
+  "Inventori Masuk A-Z", // incomingInventoryAsc
+  "Inventori Masuk Z-A", // incomingInventoryDesc
 ];
 
 //! orderby
@@ -230,6 +284,50 @@ List orderByLaporanHarian = [
   "totalTerendah",
 ];
 
+List orderByLaporanPerProduk = [
+  "productTerbaru",
+  "productTerlama",
+  "countTertinggi",
+  "countTerendah",
+  "transaksiTertinggi",
+  "transaksiTerendah",
+  "ppnTertinggi",
+  "ppnTerendah",
+  "totalTertinggi",
+  "totalTerendah",
+];
+
+List orderByLaporanPembayaran = ["nameCoaAsc", "nameCoaDesc"];
+List orderByLaporanStokInventaris = [
+  "endingStockAsc",
+  "endingStockDesc",
+  "startingStockAsc",
+  "startingStockDesc",
+  "inventoryNameAsc",
+  "inventoryNameDesc",
+  "outgoingInventoryAsc",
+  "outgoingInventoryDesc",
+  "incomingInventoryAsc",
+  "incomingInventoryDesc",
+];
+
+List orderByLaporanPergerakanInventaris = [
+  "endingStockAsc",
+  "endingStockDesc",
+  "startingStockAsc",
+  "startingStockDesc",
+  "inventoryNameAsc",
+  "inventoryNameDesc",
+  "outgoingInventoryAsc",
+  "outgoingInventoryDesc",
+  "incomingInventoryAsc",
+  "incomingInventoryDesc",
+];
+
+
+// 
+int valueOrderByStore = 0;
+
 int valueOrderByProduct = 0;
 int valueOrderByIngredient = 0;
 int valueOrderByDiscount = 0;
@@ -238,3 +336,7 @@ int valueOrderByHistoryTransaction = 0;
 int valueOrderByBills = 0;
 int valueOrderByMember = 0;
 int valueOrderByReportDaily = 0;
+int valueOrderByReportProduct = 0;
+int valueOrderByReportByPayment = 0;
+int valueOrderByReportInventoryStock = 0;
+int valueOrderByReportMoveInventory = 0;

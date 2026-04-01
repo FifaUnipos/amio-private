@@ -1205,10 +1205,10 @@ class _ProdukTokoState extends State<ProdukToko> {
 
                         _pageController.jumpToPage(4);
                       } else {
-                        showSnackbar(
-                          context,
-                          "Failed to fetch or no data available",
-                        );
+                        showSnackbar(context, {
+                          "rc": "99",
+                          "message": "Gagal mengambil data variant",
+                        });
                       }
 
                       setState(() => isLoading = false);
@@ -2837,7 +2837,11 @@ class _ProdukTokoState extends State<ProdukToko> {
                                                                 );
                                                                 showSnackbar(
                                                                   context,
-                                                                  "Failed to fetch or no data available",
+                                                                  {
+                                                                    "rc": "99",
+                                                                    "message":
+                                                                        "Gagal mengambil data variant",
+                                                                  },
                                                                 );
                                                               }
 
@@ -4308,22 +4312,27 @@ class _ProdukTokoState extends State<ProdukToko> {
                       child: GestureDetector(
                         onTap: () {
                           tambahKategoriForm(
-                            context,
-                            controllerName.text,
-                            widget.token,
-                          ).then((value) async {
-                            if (value == '00') {
-                              Navigator.pop(context);
+                                context,
+                                controllerName.text,
+                                widget.token,
+                              )
+                              .then((value) async {
+                                if (value == '00') {
+                                  Navigator.pop(context);
 
-                              errorText = '';
-                              controllerName.text = '';
+                                  errorText = '';
+                                  controllerName.text = '';
 
-                              await _getProductList();
-                              if (!mounted) return;
-                              setState(() {});
-                              kategoriListForm(this.context, false);
-                            }
-                          });
+                                  await _getProductList();
+                                  if (!mounted) return;
+                                  setState(() {});
+                                  kategoriListForm(this.context, false);
+                                }
+                              })
+                              .catchError((e, StackTrace stack) {
+                                debugPrint('❌ tambahKategoriForm error: $e');
+                                debugPrint('❌ stack: $stack');
+                              });
                         },
                         child: buttonXL(
                           Center(

@@ -204,7 +204,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   Timer? _debounce;
 
   Future<void> _onChanged(String value) async {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasProdukBOM = await getBOM(
         widget.token,
@@ -217,7 +217,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   }
 
   Future<void> _onChangedBahan(String value) async {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasBahan = await getMasterData(
         widget.token,

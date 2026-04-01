@@ -19,7 +19,7 @@
 // import '../../../tokopage/sidebar/produkToko/produk.dart';
 
 // class CreateMerchant extends StatefulWidget {
-//   List<ModelDataToko> datas;
+//   List<StoreSortingData> datas;
 //   String token;
 //   PageController pageController = PageController();
 //   CreateMerchant({
