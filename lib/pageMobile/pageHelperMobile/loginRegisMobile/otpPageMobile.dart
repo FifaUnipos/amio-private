@@ -249,6 +249,21 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
 
   Future registErentryOtp(pin) async {
     try {
+      showDialog(
+        barrierDismissible: false,
+        useRootNavigator: true,
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
+      );
+
       final response = await http.post(
         Uri.parse(registerentryotp),
         body: {
@@ -263,71 +278,33 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
       if (response.statusCode == 200) {
         print("success");
 
-        errorText = '';
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('deviceid', identifier.toString());
+        checkToken = jsonResponse['token'];
 
-        // Menggunakan Future.delayed untuk navigasi setelah 3 detik
-        if (jsonResponse.containsKey('token') &&
-            jsonResponse['token'] != null) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString('token', jsonResponse['token']);
-          checkToken = jsonResponse['token'];
-          String token = jsonResponse['token'];
+        myprofile(jsonResponse['token']);
 
-          // Ignore: use_build_context_synchronously
-          myprofile(token);
-
-          // late FirebaseMessaging messaging;
-          // messaging = FirebaseMessaging.instance;
-
-          // messaging.getToken().then((value) {
-          //   setState(() {
-          //     print("firebase token : $value");
-          //     firebaseToken(value, token);
-          //   });
-          // });
-
-          // final NotifFCM = FCM();
-          // NotifFCM.setNotifiications();
-
-          showDialog(
-            barrierDismissible: true,
-            useRootNavigator: true,
-            context: context,
-            builder: (context) {
-              Future.delayed(const Duration(seconds: 3), () {
-                // Navigasi setelah 3 detik
-                sessionPageMobile(
-                  context,
-                  token,
-                  jsonResponse['type_account'],
-                  jsonResponse['type_role'],
-                );
-              });
-
-              return const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            },
-          );
-        } else {
-          print("Token tidak ditemukan di response");
-          errorText = 'Token tidak ditemukan';
+        if (jsonResponse['token'] != null) {
+          Future.delayed(const Duration(seconds: 3), () {
+            Navigator.of(context, rootNavigator: true).pop();
+            sessionPageMobile(
+              context,
+              jsonResponse['token'].toString(),
+              jsonResponse['type_account'],
+              jsonResponse['type_role'],
+            );
+          });
         }
-      } else {
-        print('HTTP error: ${response.statusCode}');
-        // Menampilkan error berdasarkan response message
-        errorText = jsonResponse['message'] ?? 'Terjadi kesalahan';
-      }
 
+        errorText = '';
+      } else {
+        Navigator.of(context, rootNavigator: true).pop();
+        errorText = jsonResponse['message'];
+      }
       return null;
     } catch (e) {
-      // Menangani error dengan lebih jelas
-      print('Error: ${e.toString()}');
-      throw Exception('Terjadi kesalahan: ${e.toString()}');
+      throw Exception(e.toString());
     }
   }
 
@@ -431,17 +408,53 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
 
   Future globalRegisterEntry(pin) async {
     try {
-      final response = await http.post(
-        Uri.parse(registerGlobalMerchEntry),
-        body: {'phonenumber': widget.phone, 'otp': pin, 'deviceid': identifier},
+      showDialog(
+        barrierDismissible: false,
+        useRootNavigator: true,
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
       );
+
+      final response = await http.post(
+        Uri.parse(registerentryotp),
+        body: {'deviceid': identifier, 'phonenumber': widget.phone, 'otp': pin},
+      );
+
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print("succes");
+        print("success");
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', jsonResponse['token']);
+        prefs.setString('deviceid', identifier.toString());
+        checkToken = jsonResponse['token'];
+
+        myprofile(jsonResponse['token']);
+
+        if (jsonResponse['token'] != null) {
+          Future.delayed(const Duration(seconds: 3), () {
+            Navigator.of(context, rootNavigator: true).pop();
+            sessionPageMobile(
+              context,
+              jsonResponse['token'].toString(),
+              jsonResponse['type_account'],
+              jsonResponse['type_role'],
+            );
+          });
+        }
+
         errorText = '';
       } else {
-        // dialogError(context, jsonResponse['message'], jsonResponse['rc']);
+        Navigator.of(context, rootNavigator: true).pop();
         errorText = jsonResponse['message'];
       }
       return null;

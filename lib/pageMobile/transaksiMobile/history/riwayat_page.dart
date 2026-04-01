@@ -142,99 +142,101 @@ class _HistoryTabState extends State<HistoryTab> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Urutkan',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Urutkan',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Pilih urutan yang ingin ditampilkan',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: List.generate(sortOptions.length, (index) {
-                  final label = sortOptions[index]["label"]!;
-                  final tag = sortOptions[index]["tag"]!;
-                  bool isSelected = _selectedSortTag == tag;
-
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedSortTag = tag;
-                        _selectedSortText = label;
-                      });
-                      Navigator.pop(context);
-                      _fetchHistory();
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? primary500.withOpacity(0.1)
-                            : Colors.white,
-                        border: Border.all(
-                          color: isSelected ? primary500 : Colors.grey[300]!,
+                        Text(
+                          'Pilih urutan yang ingin ditampilkan',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          color: isSelected ? primary500 : Colors.black,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
+                      ],
                     ),
-                  );
-                }),
-              ),
-              SizedBox(height: 20),
-            ],
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: List.generate(sortOptions.length, (index) {
+                    final label = sortOptions[index]["label"]!;
+                    final tag = sortOptions[index]["tag"]!;
+                    bool isSelected = _selectedSortTag == tag;
+          
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedSortTag = tag;
+                          _selectedSortText = label;
+                        });
+                        Navigator.pop(context);
+                        _fetchHistory();
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primary500.withOpacity(0.1)
+                              : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? primary500 : Colors.grey[300]!,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: isSelected ? primary500 : Colors.black,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
@@ -395,11 +397,13 @@ class _HistoryTabState extends State<HistoryTab> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => TransactionDetailModal(
-        token: widget.token,
-        merchantId: widget.merchantId,
-        transactionId: transactionId,
-        baseUrl: widget.baseUrl,
+      builder: (context) => SafeArea(
+        child: TransactionDetailModal(
+          token: widget.token,
+          merchantId: widget.merchantId,
+          transactionId: transactionId,
+          baseUrl: widget.baseUrl,
+        ),
       ),
     );
 
@@ -550,668 +554,670 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
       useSafeArea: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.9,
-          child: FutureBuilder(
-            future: transaksiViewReference(
-              context,
-              widget.token,
-              _pickStr(data, [
-                'transactionid',
-                'transaction_id',
-              ], fallback: widget.transactionId),
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final dataPerubahan = snapshot.data['data'];
-                final detail = dataPerubahan['detail'] ?? [];
-
-                bool isDropdownOpen = false;
-                bool isApproving = false;
-
-                return StatefulBuilder(
-                  builder: (context, setStateModal) => Container(
-                    margin: EdgeInsets.only(top: size32),
-                    padding: EdgeInsets.fromLTRB(
-                      size32,
-                      size16,
-                      size32,
-                      size32,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size12),
-                        topLeft: Radius.circular(size12),
+        return SafeArea(
+          child: FractionallySizedBox(
+            heightFactor: 0.9,
+            child: FutureBuilder(
+              future: transaksiViewReference(
+                context,
+                widget.token,
+                _pickStr(data, [
+                  'transactionid',
+                  'transaction_id',
+                ], fallback: widget.transactionId),
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final dataPerubahan = snapshot.data['data'];
+                  final detail = dataPerubahan['detail'] ?? [];
+          
+                  bool isDropdownOpen = false;
+                  bool isApproving = false;
+          
+                  return StatefulBuilder(
+                    builder: (context, setStateModal) => Container(
+                      margin: EdgeInsets.only(top: size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
                       ),
-                    ),
-                    child: Column(
-                      children: [
-                        dividerShowdialog(),
-                        SizedBox(height: size16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Riwayat Perubahan',
-                                style: heading1(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                'Rincian riwayat perubahan transaksi',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw500,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
                         ),
-                        SizedBox(height: size32),
-                        GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () {
-                            setStateModal(() {
-                              isDropdownOpen = !isDropdownOpen;
-                            });
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(bottom: size16),
-                            padding: EdgeInsets.symmetric(
-                              vertical: size12,
-                              horizontal: size16,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(size16),
-                              border: Border.all(color: bnw300),
-                            ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          SizedBox(
+                            width: double.infinity,
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Flexible(
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: size8,
-                                          horizontal: size12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                          color: danger100,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                'Pengisian Terakhir',
-                                                style: heading3(
-                                                  FontWeight.w600,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: size16),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: size12,
-                                                vertical: size8,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      size8,
-                                                    ),
-                                                color: danger500,
-                                              ),
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(
-                                                  dataPerubahan['estimate'] ??
-                                                      '-',
-                                                  style: heading3(
-                                                    FontWeight.w400,
-                                                    bnw100,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: size12),
-                                    Icon(
-                                      PhosphorIcons.caret_down,
-                                      color: bnw900,
-                                      size: size24,
-                                    ),
-                                  ],
-                                ),
-                                AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  margin: EdgeInsets.only(
-                                    top: isDropdownOpen ? size16 : 0,
+                                Text(
+                                  'Riwayat Perubahan',
+                                  style: heading1(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
                                   ),
-                                  child: isDropdownOpen
-                                      ? Column(
-                                          children: [
-                                            Container(
-                                              height:
-                                                  MediaQuery.of(
-                                                    context,
-                                                  ).size.height /
-                                                  2,
-                                              width: double.infinity,
-                                              padding: EdgeInsets.all(size16),
-                                              decoration: BoxDecoration(
-                                                color: bnw200,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      size16,
-                                                    ),
-                                              ),
-                                              child: ListView(
-                                                padding: EdgeInsets.zero,
-                                                physics:
-                                                    BouncingScrollPhysics(),
-                                                children: [
-                                                  Text(
-                                                    'Status Transaksi',
-                                                    style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: size12),
-                                                  SizedBox(
-                                                    width: double.infinity,
-                                                    child:
-                                                        buttonStatusTransaksi(
-                                                          data,
-                                                        ),
-                                                  ),
-                                                  SizedBox(height: size16),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        'Informasi Transaksi',
-                                                        style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: size12),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                'Waktu Tagihan',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                'Nomor Tagihan',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                'Kasir',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                'Alasan Batal',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              Text(
-                                                                dataPerubahan['entrydate'] ??
-                                                                    '-',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                dataPerubahan['transactionid'] ??
-                                                                    '-',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                dataPerubahan['pic'] ??
-                                                                    '-',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: size8,
-                                                              ),
-                                                              Text(
-                                                                dataPerubahan['reference']['alasan_reference'] ??
-                                                                    '-',
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: size16),
-                                                      Text(
-                                                        'Detail Alasan',
-                                                        style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: size8),
-                                                      Wrap(
-                                                        children: [
-                                                          for (final paragraph
-                                                              in (dataPerubahan['reference']['detail_alasan_reference'] ??
-                                                                      '')
-                                                                  .split('\n'))
-                                                            Text(
-                                                              paragraph,
-                                                              style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit',
-                                                              ),
-                                                            ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: size16),
-                                                      Text(
-                                                        'Rincian Produk',
-                                                        style: heading3(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        child: ListView.builder(
-                                                          shrinkWrap: true,
-                                                          padding:
-                                                              EdgeInsets.zero,
-                                                          physics:
-                                                              NeverScrollableScrollPhysics(),
-                                                          itemCount:
-                                                              detail.length,
-                                                          itemBuilder: (context, index) {
-                                                            return SizedBox(
-                                                              child: Column(
-                                                                children: [
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        'x${detail[index]['quantity']}',
-                                                                        style: heading3(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit',
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            size8,
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            size48,
-                                                                        width:
-                                                                            size48,
-                                                                        child: AspectRatio(
-                                                                          aspectRatio:
-                                                                              1,
-                                                                          child: Container(
-                                                                            child: Image.network(
-                                                                              detail[index]['product_image'],
-                                                                              fit: BoxFit.cover,
-                                                                              errorBuilder:
-                                                                                  (
-                                                                                    context,
-                                                                                    error,
-                                                                                    stackTrace,
-                                                                                  ) => SvgPicture.asset(
-                                                                                    'assets/logoProduct.svg',
-                                                                                    fit: BoxFit.cover,
-                                                                                  ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            size8,
-                                                                      ),
-                                                                      Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          Text(
-                                                                            detail[index]['name'] ??
-                                                                                '-',
-                                                                            style: heading3(
-                                                                              FontWeight.w600,
-                                                                              bnw900,
-                                                                              'Outfit',
-                                                                            ),
-                                                                          ),
-                                                                          Text(
-                                                                            FormatCurrency.convertToIdr(
-                                                                              detail[index]['amount'] ??
-                                                                                  '-',
-                                                                            ).toString(),
-                                                                            style: body1(
-                                                                              FontWeight.w400,
-                                                                              bnw900,
-                                                                              'Outfit',
-                                                                            ),
-                                                                          ),
-                                                                          Text(
-                                                                            'Catatan : ${detail[index]['description']}',
-                                                                            style: body1(
-                                                                              FontWeight.w400,
-                                                                              bnw900,
-                                                                              'Outfit',
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Divider(),
-                                                                ],
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            dataPerubahan['isApprove'] ==
-                                                    'false'
-                                                ? Column(
-                                                    children: [
-                                                      SizedBox(height: size16),
-                                                      Row(
-                                                        children: [
-                                                          Expanded(
-                                                            child: GestureDetector(
-                                                              onTap: () async {
-                                                                if (isApproving)
-                                                                  return;
-                                                                setStateModal(
-                                                                  () =>
-                                                                      isApproving =
-                                                                          true,
-                                                                );
-                                                                try {
-                                                                  await approveReference(
-                                                                    context,
-                                                                    widget
-                                                                        .token,
-                                                                    data['transactionid'],
-                                                                    'true',
-                                                                  );
-                                                                  if (!mounted)
-                                                                    return;
-                                                                  ScaffoldMessenger.of(
-                                                                    context,
-                                                                  ).showSnackBar(
-                                                                    const SnackBar(
-                                                                      content: Text(
-                                                                        'Pembatalan disetujui',
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                  setStateModal(() {
-                                                                    dataPerubahan['isApprove'] =
-                                                                        'true';
-                                                                    data['status_transactions'] =
-                                                                        'Pembatalan Tagihan Disetujui';
-                                                                    data['is_color'] =
-                                                                        '1';
-                                                                  });
-                                                                } catch (e) {
-                                                                  if (!mounted)
-                                                                    return;
-                                                                  ScaffoldMessenger.of(
-                                                                    context,
-                                                                  ).showSnackBar(
-                                                                    SnackBar(
-                                                                      content: Text(
-                                                                        'Gagal approve: $e',
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                } finally {
-                                                                  if (mounted) {
-                                                                    setStateModal(
-                                                                      () => isApproving =
-                                                                          false,
-                                                                    );
-                                                                  }
-                                                                }
-                                                              },
-                                                              child: isApproving
-                                                                  ? SizedBox(
-                                                                      height:
-                                                                          size48,
-                                                                      child: Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                                    )
-                                                                  : buttonXL(
-                                                                      Center(
-                                                                        child: Text(
-                                                                          'Setuju',
-                                                                          style: heading2(
-                                                                            FontWeight.w600,
-                                                                            bnw100,
-                                                                            'Outfit',
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      double
-                                                                          .infinity,
-                                                                    ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            width: size16,
-                                                          ),
-                                                          Expanded(
-                                                            child: GestureDetector(
-                                                              onTap: () async {
-                                                                if (isApproving)
-                                                                  return;
-                                                                setStateModal(
-                                                                  () =>
-                                                                      isApproving =
-                                                                          true,
-                                                                );
-                                                                try {
-                                                                  approveReference(
-                                                                    context,
-                                                                    widget
-                                                                        .token,
-                                                                    data['transactionid'],
-                                                                    'false',
-                                                                  );
-                                                                  if (!mounted)
-                                                                    return;
-                                                                  ScaffoldMessenger.of(
-                                                                    context,
-                                                                  ).showSnackBar(
-                                                                    const SnackBar(
-                                                                      content: Text(
-                                                                        'Pembatalan tidak disetujui',
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                  setStateModal(() {
-                                                                    dataPerubahan['isApprove'] =
-                                                                        'true';
-                                                                    data['status_transactions'] =
-                                                                        'Pembatalan Tagihan Tidak Disetujui';
-                                                                    data['is_color'] =
-                                                                        '2';
-                                                                  });
-                                                                } catch (e) {
-                                                                  if (!mounted)
-                                                                    return;
-                                                                  ScaffoldMessenger.of(
-                                                                    context,
-                                                                  ).showSnackBar(
-                                                                    SnackBar(
-                                                                      content: Text(
-                                                                        'Gagal approve: $e',
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                } finally {
-                                                                  if (mounted)
-                                                                    setStateModal(
-                                                                      () => isApproving =
-                                                                          false,
-                                                                    );
-                                                                }
-                                                              },
-                                                              child: isApproving
-                                                                  ? SizedBox(
-                                                                      height:
-                                                                          size48,
-                                                                      child: Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                                    )
-                                                                  : buttonXLoutline(
-                                                                      Center(
-                                                                        child: Text(
-                                                                          'Tidak Setuju',
-                                                                          style: heading2(
-                                                                            FontWeight.w600,
-                                                                            danger500,
-                                                                            'Outfit',
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      double
-                                                                          .infinity,
-                                                                      danger500,
-                                                                    ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  )
-                                                : const SizedBox(),
-                                          ],
-                                        )
-                                      : SizedBox(),
+                                ),
+                                Text(
+                                  'Rincian riwayat perubahan transaksi',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: size32),
+                          GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              setStateModal(() {
+                                isDropdownOpen = !isDropdownOpen;
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: size16),
+                              padding: EdgeInsets.symmetric(
+                                vertical: size12,
+                                horizontal: size16,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(size16),
+                                border: Border.all(color: bnw300),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Flexible(
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: size8,
+                                            horizontal: size12,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                            color: danger100,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  'Pengisian Terakhir',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: size16),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: size12,
+                                                  vertical: size8,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
+                                                  color: danger500,
+                                                ),
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: Text(
+                                                    dataPerubahan['estimate'] ??
+                                                        '-',
+                                                    style: heading3(
+                                                      FontWeight.w400,
+                                                      bnw100,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: size12),
+                                      Icon(
+                                        PhosphorIcons.caret_down,
+                                        color: bnw900,
+                                        size: size24,
+                                      ),
+                                    ],
+                                  ),
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    margin: EdgeInsets.only(
+                                      top: isDropdownOpen ? size16 : 0,
+                                    ),
+                                    child: isDropdownOpen
+                                        ? Column(
+                                            children: [
+                                              Container(
+                                                height:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height /
+                                                    2,
+                                                width: double.infinity,
+                                                padding: EdgeInsets.all(size16),
+                                                decoration: BoxDecoration(
+                                                  color: bnw200,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size16,
+                                                      ),
+                                                ),
+                                                child: ListView(
+                                                  padding: EdgeInsets.zero,
+                                                  physics:
+                                                      BouncingScrollPhysics(),
+                                                  children: [
+                                                    Text(
+                                                      'Status Transaksi',
+                                                      style: heading3(
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: size12),
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      child:
+                                                          buttonStatusTransaksi(
+                                                            data,
+                                                          ),
+                                                    ),
+                                                    SizedBox(height: size16),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          'Informasi Transaksi',
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size12),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  'Waktu Tagihan',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  'Nomor Tagihan',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  'Kasir',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  'Alasan Batal',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .end,
+                                                              children: [
+                                                                Text(
+                                                                  dataPerubahan['entrydate'] ??
+                                                                      '-',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  dataPerubahan['transactionid'] ??
+                                                                      '-',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  dataPerubahan['pic'] ??
+                                                                      '-',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: size8,
+                                                                ),
+                                                                Text(
+                                                                  dataPerubahan['reference']['alasan_reference'] ??
+                                                                      '-',
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: size16),
+                                                        Text(
+                                                          'Detail Alasan',
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: size8),
+                                                        Wrap(
+                                                          children: [
+                                                            for (final paragraph
+                                                                in (dataPerubahan['reference']['detail_alasan_reference'] ??
+                                                                        '')
+                                                                    .split('\n'))
+                                                              Text(
+                                                                paragraph,
+                                                                style: heading4(
+                                                                  FontWeight.w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: size16),
+                                                        Text(
+                                                          'Rincian Produk',
+                                                          style: heading3(
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          child: ListView.builder(
+                                                            shrinkWrap: true,
+                                                            padding:
+                                                                EdgeInsets.zero,
+                                                            physics:
+                                                                NeverScrollableScrollPhysics(),
+                                                            itemCount:
+                                                                detail.length,
+                                                            itemBuilder: (context, index) {
+                                                              return SizedBox(
+                                                                child: Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'x${detail[index]['quantity']}',
+                                                                          style: heading3(
+                                                                            FontWeight
+                                                                                .w600,
+                                                                            bnw900,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              size8,
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              size48,
+                                                                          width:
+                                                                              size48,
+                                                                          child: AspectRatio(
+                                                                            aspectRatio:
+                                                                                1,
+                                                                            child: Container(
+                                                                              child: Image.network(
+                                                                                detail[index]['product_image'],
+                                                                                fit: BoxFit.cover,
+                                                                                errorBuilder:
+                                                                                    (
+                                                                                      context,
+                                                                                      error,
+                                                                                      stackTrace,
+                                                                                    ) => SvgPicture.asset(
+                                                                                      'assets/logoProduct.svg',
+                                                                                      fit: BoxFit.cover,
+                                                                                    ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              size8,
+                                                                        ),
+                                                                        Column(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.center,
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              detail[index]['name'] ??
+                                                                                  '-',
+                                                                              style: heading3(
+                                                                                FontWeight.w600,
+                                                                                bnw900,
+                                                                                'Outfit',
+                                                                              ),
+                                                                            ),
+                                                                            Text(
+                                                                              FormatCurrency.convertToIdr(
+                                                                                detail[index]['amount'] ??
+                                                                                    '-',
+                                                                              ).toString(),
+                                                                              style: body1(
+                                                                                FontWeight.w400,
+                                                                                bnw900,
+                                                                                'Outfit',
+                                                                              ),
+                                                                            ),
+                                                                            Text(
+                                                                              'Catatan : ${detail[index]['description']}',
+                                                                              style: body1(
+                                                                                FontWeight.w400,
+                                                                                bnw900,
+                                                                                'Outfit',
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    Divider(),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              dataPerubahan['isApprove'] ==
+                                                      'false'
+                                                  ? Column(
+                                                      children: [
+                                                        SizedBox(height: size16),
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: GestureDetector(
+                                                                onTap: () async {
+                                                                  if (isApproving)
+                                                                    return;
+                                                                  setStateModal(
+                                                                    () =>
+                                                                        isApproving =
+                                                                            true,
+                                                                  );
+                                                                  try {
+                                                                    await approveReference(
+                                                                      context,
+                                                                      widget
+                                                                          .token,
+                                                                      data['transactionid'],
+                                                                      'true',
+                                                                    );
+                                                                    if (!mounted)
+                                                                      return;
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      const SnackBar(
+                                                                        content: Text(
+                                                                          'Pembatalan disetujui',
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                    setStateModal(() {
+                                                                      dataPerubahan['isApprove'] =
+                                                                          'true';
+                                                                      data['status_transactions'] =
+                                                                          'Pembatalan Tagihan Disetujui';
+                                                                      data['is_color'] =
+                                                                          '1';
+                                                                    });
+                                                                  } catch (e) {
+                                                                    if (!mounted)
+                                                                      return;
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          'Gagal approve: $e',
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  } finally {
+                                                                    if (mounted) {
+                                                                      setStateModal(
+                                                                        () => isApproving =
+                                                                            false,
+                                                                      );
+                                                                    }
+                                                                  }
+                                                                },
+                                                                child: isApproving
+                                                                    ? SizedBox(
+                                                                        height:
+                                                                            size48,
+                                                                        child: Center(
+                                                                          child:
+                                                                              CircularProgressIndicator(),
+                                                                        ),
+                                                                      )
+                                                                    : buttonXL(
+                                                                        Center(
+                                                                          child: Text(
+                                                                            'Setuju',
+                                                                            style: heading2(
+                                                                              FontWeight.w600,
+                                                                              bnw100,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        double
+                                                                            .infinity,
+                                                                      ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              width: size16,
+                                                            ),
+                                                            Expanded(
+                                                              child: GestureDetector(
+                                                                onTap: () async {
+                                                                  if (isApproving)
+                                                                    return;
+                                                                  setStateModal(
+                                                                    () =>
+                                                                        isApproving =
+                                                                            true,
+                                                                  );
+                                                                  try {
+                                                                    approveReference(
+                                                                      context,
+                                                                      widget
+                                                                          .token,
+                                                                      data['transactionid'],
+                                                                      'false',
+                                                                    );
+                                                                    if (!mounted)
+                                                                      return;
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      const SnackBar(
+                                                                        content: Text(
+                                                                          'Pembatalan tidak disetujui',
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                    setStateModal(() {
+                                                                      dataPerubahan['isApprove'] =
+                                                                          'true';
+                                                                      data['status_transactions'] =
+                                                                          'Pembatalan Tagihan Tidak Disetujui';
+                                                                      data['is_color'] =
+                                                                          '2';
+                                                                    });
+                                                                  } catch (e) {
+                                                                    if (!mounted)
+                                                                      return;
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          'Gagal approve: $e',
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  } finally {
+                                                                    if (mounted)
+                                                                      setStateModal(
+                                                                        () => isApproving =
+                                                                            false,
+                                                                      );
+                                                                  }
+                                                                },
+                                                                child: isApproving
+                                                                    ? SizedBox(
+                                                                        height:
+                                                                            size48,
+                                                                        child: Center(
+                                                                          child:
+                                                                              CircularProgressIndicator(),
+                                                                        ),
+                                                                      )
+                                                                    : buttonXLoutline(
+                                                                        Center(
+                                                                          child: Text(
+                                                                            'Tidak Setuju',
+                                                                            style: heading2(
+                                                                              FontWeight.w600,
+                                                                              danger500,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        double
+                                                                            .infinity,
+                                                                        danger500,
+                                                                      ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : const SizedBox(),
+                                            ],
+                                          )
+                                        : SizedBox(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }
-              return const SizedBox();
-            },
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
           ),
         );
       },

@@ -154,46 +154,48 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                leading: Icon(PhosphorIcons.pencil, color: primary500),
-                title: Text(
-                  'Update',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                ListTile(
+                  leading: Icon(PhosphorIcons.pencil, color: primary500),
+                  title: Text(
+                    'Update',
+                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToAddPage(productMaterialId: id);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToAddPage(productMaterialId: id);
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                title: Text(
-                  'Delete',
-                  style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                Divider(),
+                ListTile(
+                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
+                  title: Text(
+                    'Delete',
+                    style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDelete(id);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete(id);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -207,104 +209,106 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 24),
-              Icon(
-                PhosphorIcons.warning_circle,
-                size: 64,
-                color: Colors.orange,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Konfirmasi Hapus',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Apakah Anda yakin ingin menghapus data ini?',
-                textAlign: TextAlign.center,
-                style: body1(FontWeight.w400, bnw600, 'Outfit'),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(modalContext),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: bnw300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                SizedBox(height: 24),
+                Icon(
+                  PhosphorIcons.warning_circle,
+                  size: 64,
+                  color: Colors.orange,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Konfirmasi Hapus',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Apakah Anda yakin ingin menghapus data ini?',
+                  textAlign: TextAlign.center,
+                  style: body1(FontWeight.w400, bnw600, 'Outfit'),
+                ),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: bnw300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Batal',
+                          style: heading3(FontWeight.w600, bnw600, 'Outfit'),
                         ),
                       ),
-                      child: Text(
-                        'Batal',
-                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
-                      ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(modalContext);
-                        final result = await _deleteProductMaterial(id);
-                        if (mounted) {
-                          if (result != null && result['rc'] == '00') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Berhasil menghapus data'),
-                              ),
-                            );
-                            _fetchProductMaterials();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  result?['rm'] ??
-                                      result?['message'] ??
-                                      'Gagal menghapus data',
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(modalContext);
+                          final result = await _deleteProductMaterial(id);
+                          if (mounted) {
+                            if (result != null && result['rc'] == '00') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Berhasil menghapus data'),
                                 ),
-                              ),
-                            );
+                              );
+                              _fetchProductMaterials();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result?['rm'] ??
+                                        result?['message'] ??
+                                        'Gagal menghapus data',
+                                  ),
+                                ),
+                              );
+                            }
                           }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Hapus',
-                        style: heading3(
-                          FontWeight.w600,
-                          Colors.white,
-                          'Outfit',
+                        child: Text(
+                          'Hapus',
+                          style: heading3(
+                            FontWeight.w600,
+                            bnw100,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -319,10 +323,10 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
           ? FloatingActionButton.extended(
               onPressed: () => _navigateToAddPage(),
               backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              icon: Icon(PhosphorIcons.plus, color: bnw100),
               label: Text(
                 'Produk Material',
-                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
               ),
             )
           : null,
@@ -351,7 +355,7 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bnw100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: bnw200),
       ),
@@ -608,64 +612,66 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       ),
       builder: (context) {
         final conversions = (material['unit_conversion'] as List?) ?? [];
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Pilih Unit Konversi',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 20),
-              // Default unit
-              ListTile(
-                title: Text(
-                  material['unit_name'] ?? material['unit_abbreviation'] ?? '-',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                Text(
+                  'Pilih Unit Konversi',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                onTap: () {
-                  onSelected(null, material['unit_abbreviation'] ?? "-", 1.0);
-                  Navigator.pop(context);
-                },
-              ),
-              if (conversions.isNotEmpty) Divider(),
-              // Unit conversions
-              ...conversions.map((conversion) {
-                return ListTile(
+                SizedBox(height: 20),
+                // Default unit
+                ListTile(
                   title: Text(
-                    conversion['unit_conversion_name'] ?? '',
+                    material['unit_name'] ?? material['unit_abbreviation'] ?? '-',
                     style: heading4(FontWeight.w600, bnw900, 'Outfit'),
                   ),
-                  subtitle: Text(
-                    'Factor: ${conversion['conversion_factor']}',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
                   onTap: () {
-                    onSelected(
-                      conversion['unit_conversion_id'],
-                      conversion['unit_conversion_name'] ?? '',
-                      double.tryParse(
-                            conversion['conversion_factor'].toString(),
-                          ) ??
-                          1.0,
-                    );
+                    onSelected(null, material['unit_abbreviation'] ?? "-", 1.0);
                     Navigator.pop(context);
                   },
-                );
-              }).toList(),
-            ],
+                ),
+                if (conversions.isNotEmpty) Divider(),
+                // Unit conversions
+                ...conversions.map((conversion) {
+                  return ListTile(
+                    title: Text(
+                      conversion['unit_conversion_name'] ?? '',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    subtitle: Text(
+                      'Factor: ${conversion['conversion_factor']}',
+                      style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                    onTap: () {
+                      onSelected(
+                        conversion['unit_conversion_id'],
+                        conversion['unit_conversion_name'] ?? '',
+                        double.tryParse(
+                              conversion['conversion_factor'].toString(),
+                            ) ??
+                            1.0,
+                      );
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         );
       },
@@ -687,22 +693,237 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setDetailState) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.5,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20,
+          return SafeArea(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Tambah Pemakaian',
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      'Pilih bahan yang sudah terpakai',
+                      style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Icon(
+                          PhosphorIcons.check_circle,
+                          color: primary500,
+                          size: 24,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                material['name_item'] ?? '',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Text(
+                                material['unit_name'] ?? '',
+                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: primary500.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Qty',
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 150,
+                                child: TextField(
+                                  controller: qtyController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.right,
+                                  decoration: InputDecoration(
+                                    hintText: '0',
+                                    border: InputBorder.none,
+                                  ),
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                  onChanged: (v) => setDetailState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Unit Konversi',
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  _showUnitConversionPicker(material, (
+                                    id,
+                                    name,
+                                    factor,
+                                  ) {
+                                    setDetailState(() {
+                                      selectedConversionId = id;
+                                      selectedConversionName = name;
+                                      conversionFactor = factor;
+                                    });
+                                  });
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: primary500),
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: bnw100,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        selectedConversionName,
+                                        style: body2(
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.unfold_more,
+                                        size: 16,
+                                        color: bnw500,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final qty = qtyController.text;
+                          if (qty.isNotEmpty) {
+                            _addMaterialToList({
+                              'inventory_master_id': material['id'],
+                              'item_name': material['name_item'],
+                              'unit_name': material['unit_name'],
+                              'unit_abbreviation': material['unit_abbreviation'],
+                              'quantity_needed': qty,
+                              'unit_conversion_id': selectedConversionId,
+                              'unit_conversion_name': selectedConversionName,
+                            });
+                            Navigator.pop(context); // Close detail input
+                            setParentModalState(
+                              () {},
+                            ); // update checkbox state in parent
+                          }
+                        },
+                        child: Text(
+                          'Simpan',
+                          style: heading3(
+                            FontWeight.w600,
+                            bnw100,
+                            'Outfit',
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: SingleChildScrollView(
+          );
+        },
+      ),
+    );
+  }
+
+  void _showMaterialPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: StatefulBuilder(
+          builder: (context, setModalState) {
+            if (!_isMaterialsLoaded && _allMaterials.isEmpty) {
+              return Container(
+                height: 300,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+        
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              padding: EdgeInsets.all(20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
                     child: Container(
@@ -724,324 +945,113 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                     style: body2(FontWeight.w400, bnw500, 'Outfit'),
                   ),
                   SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _allMaterials.length,
+                      itemBuilder: (context, index) {
+                        final material = _allMaterials[index];
+                        // check isSelected
+                        bool isSelected = false;
+                        if (_selectedVariantId == null) {
+                          isSelected = _baseMaterials.any(
+                            (m) => m['inventory_master_id'] == material['id'],
+                          );
+                        } else {
+                          isSelected =
+                              (_variantMaterials[_selectedVariantId!] ?? []).any(
+                                (m) => m['inventory_master_id'] == material['id'],
+                              );
+                        }
+        
+                        return CheckboxListTile(
+                          value: isSelected,
+                          onChanged: (checked) {
+                            if (checked == true) {
+                              _showMaterialDetailInput(material, setModalState);
+                            } else {
+                              setState(() {
+                                if (_selectedVariantId == null) {
+                                  _baseMaterials.removeWhere(
+                                    (m) =>
+                                        m['inventory_master_id'] ==
+                                        material['id'],
+                                  );
+                                } else {
+                                  _variantMaterials[_selectedVariantId!]
+                                      ?.removeWhere(
+                                        (m) =>
+                                            m['inventory_master_id'] ==
+                                            material['id'],
+                                      );
+                                }
+                              });
+                              setModalState(() {});
+                            }
+                          },
+                          title: Text(
+                            material['name_item'] ?? '',
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          subtitle: Text(
+                            material['unit_name'] ?? '',
+                            style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          activeColor: primary500,
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
                   Row(
                     children: [
-                      Icon(
-                        PhosphorIcons.check_circle,
-                        color: primary500,
-                        size: 24,
-                      ),
-                      SizedBox(width: 8),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              material['name_item'] ?? '',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(color: primary500),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            Text(
-                              material['unit_name'] ?? '',
-                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          child: Text(
+                            'Batal',
+                            style: heading3(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
                             ),
-                          ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Simpan',
+                            style: heading3(
+                              FontWeight.w600,
+                              bnw100,
+                              'Outfit',
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primary500.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Qty',
-                                style: body2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 150,
-                              child: TextField(
-                                controller: qtyController,
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.right,
-                                decoration: InputDecoration(
-                                  hintText: '0',
-                                  border: InputBorder.none,
-                                ),
-                                style: heading3(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                                onChanged: (v) => setDetailState(() {}),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Unit Konversi',
-                                style: body2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                _showUnitConversionPicker(material, (
-                                  id,
-                                  name,
-                                  factor,
-                                ) {
-                                  setDetailState(() {
-                                    selectedConversionId = id;
-                                    selectedConversionName = name;
-                                    conversionFactor = factor;
-                                  });
-                                });
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: primary500),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.white,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      selectedConversionName,
-                                      style: body2(
-                                        FontWeight.w400,
-                                        bnw900,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.unfold_more,
-                                      size: 16,
-                                      color: bnw500,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final qty = qtyController.text;
-                        if (qty.isNotEmpty) {
-                          _addMaterialToList({
-                            'inventory_master_id': material['id'],
-                            'item_name': material['name_item'],
-                            'unit_name': material['unit_name'],
-                            'unit_abbreviation': material['unit_abbreviation'],
-                            'quantity_needed': qty,
-                            'unit_conversion_id': selectedConversionId,
-                            'unit_conversion_name': selectedConversionName,
-                          });
-                          Navigator.pop(context); // Close detail input
-                          setParentModalState(
-                            () {},
-                          ); // update checkbox state in parent
-                        }
-                      },
-                      child: Text(
-                        'Simpan',
-                        style: heading3(
-                          FontWeight.w600,
-                          Colors.white,
-                          'Outfit',
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _showMaterialPicker() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          if (!_isMaterialsLoaded && _allMaterials.isEmpty) {
-            return Container(
-              height: 300,
-              child: Center(child: CircularProgressIndicator()),
             );
-          }
-
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-            padding: EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Tambah Pemakaian',
-                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  'Pilih bahan yang sudah terpakai',
-                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                ),
-                SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _allMaterials.length,
-                    itemBuilder: (context, index) {
-                      final material = _allMaterials[index];
-                      // check isSelected
-                      bool isSelected = false;
-                      if (_selectedVariantId == null) {
-                        isSelected = _baseMaterials.any(
-                          (m) => m['inventory_master_id'] == material['id'],
-                        );
-                      } else {
-                        isSelected =
-                            (_variantMaterials[_selectedVariantId!] ?? []).any(
-                              (m) => m['inventory_master_id'] == material['id'],
-                            );
-                      }
-
-                      return CheckboxListTile(
-                        value: isSelected,
-                        onChanged: (checked) {
-                          if (checked == true) {
-                            _showMaterialDetailInput(material, setModalState);
-                          } else {
-                            setState(() {
-                              if (_selectedVariantId == null) {
-                                _baseMaterials.removeWhere(
-                                  (m) =>
-                                      m['inventory_master_id'] ==
-                                      material['id'],
-                                );
-                              } else {
-                                _variantMaterials[_selectedVariantId!]
-                                    ?.removeWhere(
-                                      (m) =>
-                                          m['inventory_master_id'] ==
-                                          material['id'],
-                                    );
-                              }
-                            });
-                            setModalState(() {});
-                          }
-                        },
-                        title: Text(
-                          material['name_item'] ?? '',
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        subtitle: Text(
-                          material['unit_name'] ?? '',
-                          style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                        ),
-                        activeColor: primary500,
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Batal',
-                          style: heading3(
-                            FontWeight.w600,
-                            primary500,
-                            'Outfit',
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary500,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Simpan',
-                          style: heading3(
-                            FontWeight.w600,
-                            Colors.white,
-                            'Outfit',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -1051,87 +1061,89 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+      builder: (context) => SafeArea(
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Pilih Produk',
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                ],
+                    SizedBox(height: 16),
+                    Text(
+                      'Pilih Produk',
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: ProductPickerList(
-                token: widget.token,
-                merchantId: widget.merchantId,
-                onSelected: (product) async {
-                  setState(() => _isLoading = true);
-                  // Fetch variants when product is selected
-                  final cats = await getProductVariantTransaksi(
-                    context,
-                    widget.token,
-                    widget.merchantId,
-                    product.productid,
-                  );
-                  setState(() {
-                    if (cats != null) {
-                      _selectedProduct = PMProduct(
-                        productid: product.productid,
-                        name: product.name,
-                        productImage: product.productImage,
-                        variantCategories: (cats as List).map((c) {
-                          return PMVariantCategory(
-                            id: c.id,
-                            title: c.title,
-                            variants: (c.productVariants as List)
-                                .map(
-                                  (v) => PMVariant(
-                                    productvariantid: v.id,
-                                    namevariant: v.name,
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        }).toList(),
-                      );
-                    } else {
-                      _selectedProduct = PMProduct(
-                        productid: product.productid,
-                        name: product.name,
-                        productImage: product.productImage,
-                        variantCategories: [],
-                      );
-                    }
-                    _variantMaterials.clear();
-                    _baseMaterials.clear();
-                    _isLoading = false;
-                  });
-                  Navigator.pop(context);
-                },
+              Expanded(
+                child: ProductPickerList(
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  onSelected: (product) async {
+                    setState(() => _isLoading = true);
+                    // Fetch variants when product is selected
+                    final cats = await getProductVariantTransaksi(
+                      context,
+                      widget.token,
+                      widget.merchantId,
+                      product.productid,
+                    );
+                    setState(() {
+                      if (cats != null) {
+                        _selectedProduct = PMProduct(
+                          productid: product.productid,
+                          name: product.name,
+                          productImage: product.productImage,
+                          variantCategories: (cats as List).map((c) {
+                            return PMVariantCategory(
+                              id: c.id,
+                              title: c.title,
+                              variants: (c.productVariants as List)
+                                  .map(
+                                    (v) => PMVariant(
+                                      productvariantid: v.id,
+                                      namevariant: v.name,
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          }).toList(),
+                        );
+                      } else {
+                        _selectedProduct = PMProduct(
+                          productid: product.productid,
+                          name: product.name,
+                          productImage: product.productImage,
+                          variantCategories: [],
+                        );
+                      }
+                      _variantMaterials.clear();
+                      _baseMaterials.clear();
+                      _isLoading = false;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1262,7 +1274,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bnw100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: bnw200),
       ),
@@ -1411,7 +1423,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
         return Container(
           margin: EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: bnw100,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: bnw200),
           ),
@@ -1449,11 +1461,11 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                       ),
                       child: Text(
                         'Pilih',
-                        style: body2(FontWeight.w600, Colors.white, 'Outfit'),
+                        style: body2(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primary500,
-                        foregroundColor: Colors.white,
+                        foregroundColor: bnw100,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -1480,232 +1492,235 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       showBottomActions = false;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          widget.productMaterialId == null
-              ? 'Tambah Bill Of Material'
-              : 'Edit Bill Of Material',
-          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: bnw100,
+        appBar: AppBar(
+          title: Text(
+            widget.productMaterialId == null
+                ? 'Tambah Bill Of Material'
+                : 'Edit Bill Of Material',
+            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+          ),
+          leading: IconButton(
+            icon: Icon(PhosphorIcons.arrow_left, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+          elevation: 0,
+          backgroundColor: bnw100,
+          actions: [
+            if (widget.productMaterialId != null)
+              IconButton(
+                icon: Icon(PhosphorIcons.trash, color: Colors.red),
+                onPressed: _handleDelete,
+              ),
+          ],
         ),
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrow_left, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        actions: [
-          if (widget.productMaterialId != null)
-            IconButton(
-              icon: Icon(PhosphorIcons.trash, color: Colors.red),
-              onPressed: _handleDelete,
-            ),
-        ],
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: 'Judul ',
-                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _titleController,
-                          decoration: InputDecoration(
-                            hintText: 'Cth: Pembelian Matcha',
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: primary500),
-                            ),
-                          ),
-                          style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: 24),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Produk ',
-                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        InkWell(
-                          onTap: _showProductPicker,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: primary500),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              text: 'Judul ',
+                              style: body1(FontWeight.w400, bnw900, 'Outfit'),
                               children: [
-                                Text(
-                                  _selectedProduct?.name ?? '-',
-                                  style: heading4(
-                                    FontWeight.w500,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.red),
                                 ),
-                                Spacer(),
-                                Icon(Icons.unfold_more, color: bnw500),
                               ],
                             ),
                           ),
-                        ),
-                        SizedBox(height: 24),
-                        TabBar(
-                          controller: _tabController,
-                          labelColor: primary500,
-                          unselectedLabelColor: bnw500,
-                          indicatorColor: primary500,
-                          labelStyle: heading4(
-                            FontWeight.w600,
-                            primary500,
-                            'Outfit',
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                              hintText: 'Cth: Pembelian Matcha',
+                              border: UnderlineInputBorder(),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: primary500),
+                              ),
+                            ),
+                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
                           ),
-                          unselectedLabelStyle: heading4(
-                            FontWeight.w400,
-                            bnw500,
-                            'Outfit',
+                          SizedBox(height: 24),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Produk ',
+                              style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              children: [
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
                           ),
-                          tabs: [
-                            Tab(text: 'Base Produk'),
-                            Tab(text: 'Variant'),
-                          ],
-                          onTap: (index) {
-                            setState(
-                              () {},
-                            ); // Trigger rebuild to check bottom action visibility
-                          },
-                        ),
-                        SizedBox(
-                          height: 500,
-                          child: TabBarView(
+                          SizedBox(height: 8),
+                          InkWell(
+                            onTap: _showProductPicker,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: primary500),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    _selectedProduct?.name ?? '-',
+                                    style: heading4(
+                                      FontWeight.w500,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.unfold_more, color: bnw500),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 24),
+                          TabBar(
                             controller: _tabController,
-                            children: [
-                              _buildBaseProductTab(),
-                              _buildVariantTab(),
+                            labelColor: primary500,
+                            unselectedLabelColor: bnw500,
+                            indicatorColor: primary500,
+                            labelStyle: heading4(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                            unselectedLabelStyle: heading4(
+                              FontWeight.w400,
+                              bnw500,
+                              'Outfit',
+                            ),
+                            tabs: [
+                              Tab(text: 'Base Produk'),
+                              Tab(text: 'Variant'),
                             ],
+                            onTap: (index) {
+                              setState(
+                                () {},
+                              ); // Trigger rebuild to check bottom action visibility
+                            },
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 500,
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildBaseProductTab(),
+                                _buildVariantTab(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-      bottomNavigationBar: showBottomActions
-          ? Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, -4),
                   ),
                 ],
               ),
-              padding: EdgeInsets.all(20),
-              child: SizedBox(
-                width: double.infinity,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _canMaterial
-                            ? () {
-                                if (_selectedProduct == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Pilih produk dulu'),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                _showMaterialPicker();
-                              }
-                            : null,
-                        child: Text(
-                          _selectedVariantId == null
-                              ? 'Tambah untuk base produk'
-                              : 'Tambah untuk variant',
-                          style: heading3(
-                            FontWeight.w600,
-                            primary500,
-                            'Outfit',
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _canMaterial ? _handleSave : null,
-                        child: Text(
-                          widget.productMaterialId == null
-                              ? 'Simpan'
-                              : 'Update',
-                          style: heading3(
-                            FontWeight.w600,
-                            Colors.white,
-                            'Outfit',
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary500,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
+        bottomNavigationBar: showBottomActions
+            ? Container(
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: Offset(0, -4),
                     ),
                   ],
                 ),
-              ),
-            )
-          : null,
+                padding: EdgeInsets.all(20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: _canMaterial
+                              ? () {
+                                  if (_selectedProduct == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Pilih produk dulu'),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  _showMaterialPicker();
+                                }
+                              : null,
+                          child: Text(
+                            _selectedVariantId == null
+                                ? 'Tambah untuk base produk'
+                                : 'Tambah untuk variant',
+                            style: heading3(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(color: primary500),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _canMaterial ? _handleSave : null,
+                          child: Text(
+                            widget.productMaterialId == null
+                                ? 'Simpan'
+                                : 'Update',
+                            style: heading3(
+                              FontWeight.w600,
+                              bnw100,
+                              'Outfit',
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                            foregroundColor: bnw100,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
+      ),
     );
   }
 }

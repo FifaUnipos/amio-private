@@ -373,194 +373,188 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
     bool isTablet = isTabletLayout(context);
     return Scaffold(
       backgroundColor: bnw100,
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: size32),
-        child: Column(
-          children: [
-            SafeArea(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: size12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(
-                        PhosphorIcons.arrow_left,
-                        size: size32,
-                        color: bnw900,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: size16),
+          child: Column(
+            children: [
+              SafeArea(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: size12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => isTablet
+                                ? MasukAkunPage()
+                                : MasukAkunPageMobile(),
+                          ),
+                        ),
+                        child: Icon(
+                          PhosphorIcons.arrow_left,
+                          size: size32,
+                          color: bnw900,
+                        ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        helpQuestionShow(context);
-                      },
-                      child: Icon(
-                        PhosphorIcons.question,
-                        size: size32,
-                        color: bnw900,
+                      GestureDetector(
+                        onTap: () {
+                          helpQuestionShow(context);
+                        },
+                        child: Icon(
+                          PhosphorIcons.question,
+                          size: size32,
+                          color: bnw900,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: size12),
-                child: isTablet
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: Container(
+              Expanded(
+                child: Container(
+                  // padding: EdgeInsets.symmetric(vertical: size12),
+                  child: isTablet
+                      ? Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                child: SvgPicture.asset(
+                                  'assets/newIllustration/Login.svg',
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(child: loginEmailForm(isTablet)),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height / 3,
                               child: SvgPicture.asset(
                                 'assets/newIllustration/Login.svg',
                               ),
                             ),
-                          ),
-                          SizedBox(width: size16),
-                          Expanded(child: loginEmailForm(isTablet)),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height / 3,
-                            child: SvgPicture.asset(
-                              'assets/newIllustration/Login.svg',
-                            ),
-                          ),
-                          SizedBox(height: size24),
-                          Expanded(child: loginEmailForm(isTablet)),
-                        ],
-                      ),
+                            SizedBox(height: size24),
+                            Expanded(child: loginEmailForm(isTablet)),
+                          ],
+                        ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget loginEmailForm(bool isTablet) {
-    return ScrollConfiguration(
-      behavior: ScrollBehavior().copyWith(overscroll: false),
-      child: Container(
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.only(bottom: size16),
-          child: IntrinsicHeight(
-            child: Column(
-              mainAxisAlignment: isTablet
-                  ? MainAxisAlignment.center
-                  : MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Masukkan Kata Sandi',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  'Masukkan kata sandi anda.',
-                  style: heading3(FontWeight.w500, bnw500, 'Outfit'),
-                ),
-                SizedBox(height: size24),
-                Row(
-                  children: [
-                    Text(
-                      'Kata Sandi ',
-                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                    ),
-                    Text(
-                      '*',
-                      style: heading4(FontWeight.w700, red500, 'Outfit'),
-                    ),
-                  ],
-                ),
-                Container(
-                  child: IntrinsicHeight(
-                    child: TextFormField(
-                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                      cursorColor: primary500,
-                      controller: passController,
-                      obscureText: _obscureText,
-                      obscuringCharacter: '*',
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                      decoration: InputDecoration(
-                        errorText: _validate ? errorText : null,
-                        errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 2, color: primary500),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            !_obscureText
-                                ? PhosphorIcons.eye_closed
-                                : PhosphorIcons.eye,
-                            color: bnw900,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                              print(_obscureText);
-                            });
-                          },
-                        ),
-                        focusedErrorBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 2, color: red500),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: size12),
-                        hintText: 'Masukkan Kata Sandi',
-                        hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
-                      ),
-                    ),
+    return SafeArea(
+      child: Column(
+        mainAxisAlignment: isTablet
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Masukkan Kata Sandi',
+            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+          ),
+          Text(
+            'Masukkan kata sandi anda.',
+            style: heading3(FontWeight.w500, bnw500, 'Outfit'),
+          ),
+          SizedBox(height: size24),
+          Row(
+            children: [
+              Text(
+                'Kata Sandi ',
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+              ),
+              Text('*', style: heading4(FontWeight.w700, red500, 'Outfit')),
+            ],
+          ),
+          Container(
+            child: IntrinsicHeight(
+              child: TextFormField(
+                style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                cursorColor: primary500,
+                controller: passController,
+                obscureText: _obscureText,
+                obscuringCharacter: '*',
+                onChanged: (value) {
+                  setState(() {});
+                },
+                decoration: InputDecoration(
+                  errorText: _validate ? errorText : null,
+                  errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(width: 2, color: primary500),
                   ),
-                ),
-                SizedBox(height: size16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      // onTap: () async => getOtp(),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ForgotPasswordPage(),
-                        ),
-                      ),
-                      child: Text(
-                        'Lupa Kata Sandi',
-                        style: heading4(FontWeight.w500, primary500, 'Outfit'),
-                      ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      !_obscureText
+                          ? PhosphorIcons.eye_closed
+                          : PhosphorIcons.eye,
+                      color: bnw900,
                     ),
-                  ],
-                ),
-                SizedBox(height: size32),
-                GestureDetector(
-                  onTap: () {
-                    loginEmail();
-                  },
-                  child: buttonXXL(
-                    Center(
-                      child: Text(
-                        'Masuk',
-                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
-                    ),
-                    double.infinity,
-                    // onOffButton,
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                        print(_obscureText);
+                      });
+                    },
                   ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(width: 2, color: red500),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: size12),
+                  hintText: 'Masukkan Kata Sandi',
+                  hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
                 ),
-                SizedBox(height: size32),
-              ],
+              ),
             ),
           ),
-        ),
+          SizedBox(height: size16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              GestureDetector(
+                // onTap: () async => getOtp(),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                ),
+                child: Text(
+                  'Lupa Kata Sandi',
+                  style: heading4(FontWeight.w500, primary500, 'Outfit'),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: size32),
+          Spacer(),
+          GestureDetector(
+            onTap: () {
+              loginEmail();
+            },
+            child: buttonXXL(
+              Center(
+                child: Text(
+                  'Masuk',
+                  style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                ),
+              ),
+              double.infinity,
+              // onOffButton,
+            ),
+          ),
+          SizedBox(height: size32),
+        ],
       ),
     );
   }

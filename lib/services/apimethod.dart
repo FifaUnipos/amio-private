@@ -640,17 +640,27 @@ Future checkEmail(token, setState) async {
       options: Options(headers: {"token": "$token"}),
     );
 
-    if (response.statusCode == 200) {
-      print("succes aman tentram check email");
+    print("status email: ${response.data['data']}");
 
+    if (response.statusCode == 200) {
       statusVerified = response.data['data'].toString();
       statusPw = response.data['data'].toString();
-
       setState(() {});
-    } else {}
-    return null;
-  } catch (e) {
-    throw Exception(e.toString());
+    }
+
+    return response.data['rc'];
+  } on DioError catch (e) {
+    if (e.response != null) {
+      print("checkEmail error rc: ${e.response!.data['rc']}");
+      print("checkEmail error message: ${e.response!.data['message']}");
+
+      statusVerified = null.toString();
+      statusPw = null.toString();
+      setState(() {});
+
+      return e.response!.data['rc'];
+    }
+    rethrow;
   }
 }
 
