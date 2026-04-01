@@ -425,11 +425,7 @@ class _OtpPageMobileState extends State<OtpPageMobile> {
 
       final response = await http.post(
         Uri.parse(registerentryotp),
-        body: {
-          'phonenumber': widget.phone,
-          'otp': pin,
-          'deviceid': identifier.toString(),
-        },
+        body: {'deviceid': identifier, 'phonenumber': widget.phone, 'otp': pin},
       );
 
       var jsonResponse = jsonDecode(response.body);

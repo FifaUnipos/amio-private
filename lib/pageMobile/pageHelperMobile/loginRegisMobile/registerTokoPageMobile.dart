@@ -63,16 +63,26 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      imageQuality: 30,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
+
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
       bytes = await Io.File(myImage!.path).readAsBytes();
+
       setState(() {
         img64 = base64Encode(bytes!);
         images.add(img64!);
       });
-      // Clipboard.setData(ClipboardData(text: img64));
+
+      // print(
+      //   "Ukuran base64: ${(img64!.length / 1024 / 1024).toStringAsFixed(2)} MB",
+      // );
     } else {
       print('Error Image');
     }
@@ -601,7 +611,7 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
                         'Outfit',
                       ),
                     ),
-                    Icon(PhosphorIcons.caret_down_fill, color: bnw900),
+                    Icon(PhosphorIcons.caret_down, color: bnw900),
                   ],
                 ),
               ),
@@ -2018,6 +2028,7 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
       final response = await http.post(
         Uri.parse(ApiEndpoints.registerLink),
         body: {
+          "deviceid": identifier,
           "type": "Merchant",
           "email": emailController.text,
           "fullname": nameController.text,

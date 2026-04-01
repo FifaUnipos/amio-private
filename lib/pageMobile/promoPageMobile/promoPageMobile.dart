@@ -181,75 +181,77 @@ class _PromoPageMobileState extends State<PromoPageMobile> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Hapus Promo",
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Apakah anda yakin ingin menghapus promo ini?",
-                style: body1(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: bnw300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                SizedBox(height: 20),
+                Text(
+                  "Hapus Promo",
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Apakah anda yakin ingin menghapus promo ini?",
+                  style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: bnw300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _deleteDiscount(id);
+                        },
+                        child: Text(
+                          "Iya, Hapus",
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _deleteDiscount(id);
-                      },
-                      child: Text(
-                        "Iya, Hapus",
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          // side: BorderSide(color: primary500),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            // side: BorderSide(color: primary500),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Gajadi",
+                          style: heading3(FontWeight.w600, primary500, 'Outfit'),
                         ),
                       ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        "Gajadi",
-                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -289,114 +291,116 @@ class _PromoPageMobileState extends State<PromoPageMobile> {
       ),
       builder: (context) {
         String tempOrder = _sortOption;
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Container(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Urutkan",
-                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Urutkan",
+                              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              "Pilih urutan yang ingin ditampilkan",
+                              style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: _sortOptions.map((option) {
+                        bool isSelected = tempOrder == option['value'];
+                        return InkWell(
+                          onTap: () {
+                            setModalState(() {
+                              tempOrder = option['value']!;
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? primary500.withOpacity(0.1)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected ? primary500 : bnw300,
+                              ),
+                            ),
+                            child: Text(
+                              option['label']!,
+                              style: TextStyle(
+                                color: isSelected ? primary500 : bnw900,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
                           ),
-                          Text(
-                            "Pilih urutan yang ingin ditampilkan",
-                            style: heading4(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: _sortOptions.map((option) {
-                      bool isSelected = tempOrder == option['value'];
-                      return InkWell(
-                        onTap: () {
-                          setModalState(() {
-                            tempOrder = option['value']!;
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? primary500.withOpacity(0.1)
-                                : Colors.white,
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected ? primary500 : bnw300,
-                            ),
-                          ),
-                          child: Text(
-                            option['label']!,
-                            style: TextStyle(
-                              color: isSelected ? primary500 : bnw900,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        onPressed: () {
+                          setState(() {
+                            _sortOption = tempOrder;
+                          });
+                          _applyFilterAndSort();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Tampilkan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _sortOption = tempOrder;
-                        });
-                        _applyFilterAndSort();
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        "Tampilkan",
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -450,202 +454,204 @@ class _PromoPageMobileState extends State<PromoPageMobile> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Cari nama atau alamat", // Text from image 2
-                prefixIcon: Icon(PhosphorIcons.magnifying_glass, color: bnw500),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: Colors.white,
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: "Cari nama atau alamat", // Text from image 2
+                  prefixIcon: Icon(PhosphorIcons.magnifying_glass, color: bnw500),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: bnw200, // Light grey
+                  contentPadding: EdgeInsets.zero,
                 ),
-                filled: true,
-                fillColor: bnw200, // Light grey
-                contentPadding: EdgeInsets.zero,
+                onChanged: _onSearch,
               ),
-              onChanged: _onSearch,
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: _showSortBottomSheet,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ), // Increased padding matches image
-                    decoration: BoxDecoration(
-                      border: Border.all(color: bnw300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Urutkan toko",
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(
-                          PhosphorIcons.caret_down_fill,
-                          size: 16,
-                          color: bnw900,
-                        ),
-                      ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: _showSortBottomSheet,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ), // Increased padding matches image
+                      decoration: BoxDecoration(
+                        border: Border.all(color: bnw300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Urutkan toko",
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(width: 4),
+                          Icon(
+                            PhosphorIcons.caret_down_fill,
+                            size: 16,
+                            color: bnw900,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filteredDiscounts.length,
-                    separatorBuilder: (ctx, i) =>
-                        Divider(height: 24, thickness: 1, color: bnw200),
-                    itemBuilder: (context, index) {
-                      final item = _filteredDiscounts[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item.name,
+            Expanded(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _filteredDiscounts.length,
+                      separatorBuilder: (ctx, i) =>
+                          Divider(height: 24, thickness: 1, color: bnw200),
+                      itemBuilder: (context, index) {
+                        final item = _filteredDiscounts[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    style: heading3(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  item.discountType == 'percentage'
+                                      ? "${item.discount}%"
+                                      : FormatCurrency.convertToIdr(
+                                          item.discount,
+                                        ),
                                   style: heading3(
-                                    FontWeight.w700,
+                                    FontWeight.w400,
                                     bnw900,
                                     'Outfit',
                                   ),
                                 ),
-                              ),
-                              Text(
-                                item.discountType == 'percentage'
-                                    ? "${item.discount}%"
-                                    : FormatCurrency.convertToIdr(
-                                        item.discount,
-                                      ),
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
+                              ],
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              item.type == 'per_produk' ? "Per Produk" : "Umum",
+                              style: body2(FontWeight.w400, primary500, 'Outfit'),
+                            ),
+                            SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Text(
+                                  "Aktif",
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            item.type == 'per_produk' ? "Per Produk" : "Umum",
-                            style: body2(FontWeight.w400, primary500, 'Outfit'),
-                          ),
-                          SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Text(
-                                "Aktif",
-                                style: body2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                              Spacer(),
-                              Transform.scale(
-                                scale: 0.8,
-                                child: Switch(
-                                  value: item.isActive,
-                                  activeColor: primary500,
-                                  inactiveTrackColor: bnw300,
-                                  onChanged: (val) => _toggleActive(item, val),
+                                Spacer(),
+                                Transform.scale(
+                                  scale: 0.8,
+                                  child: Switch(
+                                    value: item.isActive,
+                                    activeColor: primary500,
+                                    inactiveTrackColor: bnw300,
+                                    onChanged: (val) => _toggleActive(item, val),
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                height: 20,
-                                width: 1,
-                                color: bnw300,
-                                margin: EdgeInsets.symmetric(horizontal: 12),
-                              ),
-                              Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () =>
-                                        _showDeleteConfirmation(item.id),
-                                    child: Container(
-                                      padding: EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.red),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        PhosphorIcons.trash,
-                                        size: 16,
-                                        color: Colors.red,
+                                Container(
+                                  height: 20,
+                                  width: 1,
+                                  color: bnw300,
+                                  margin: EdgeInsets.symmetric(horizontal: 12),
+                                ),
+                                Row(
+                                  children: [
+                                    InkWell(
+                                      onTap: () =>
+                                          _showDeleteConfirmation(item.id),
+                                      child: Container(
+                                        padding: EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.red),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          PhosphorIcons.trash,
+                                          size: 16,
+                                          color: Colors.red,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  InkWell(
-                                    onTap: () async {
-                                      await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => AddPromoPageMobile(
-                                            token: widget.token,
-                                            merchantId: widget.merchantId ?? "",
-                                            editDiscount: item,
-                                          ),
-                                        ),
-                                      );
-                                      _fetchDiscounts();
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: bnw900),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            PhosphorIcons.pencil_simple,
-                                            size: 16,
-                                            color: bnw900,
-                                          ),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            "Atur",
-                                            style: heading4(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
+                                    SizedBox(width: 8),
+                                    InkWell(
+                                      onTap: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => AddPromoPageMobile(
+                                              token: widget.token,
+                                              merchantId: widget.merchantId ?? "",
+                                              editDiscount: item,
                                             ),
                                           ),
-                                        ],
+                                        );
+                                        _fetchDiscounts();
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: bnw900),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              PhosphorIcons.pencil_simple,
+                                              size: 16,
+                                              color: bnw900,
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              "Atur",
+                                              style: heading4(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-          ),
-        ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
