@@ -58,7 +58,10 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
 
     if (!isCreateMode) {
       final response = await getSingleMerch(
-          context, widget.token, widget.merchantId!);
+        context,
+        widget.token,
+        widget.merchantId!,
+      );
       // Assuming getSingleMerch updates globals or is modified to return data properly
       // Based on viewed snippet, it returns jsonResponse and data is in jsonResponse['data']
       if (response != null && response['rc'] == '00') {
@@ -73,34 +76,54 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         // Trigger cascading loads
         final provId = data['kode_province'];
         if (provId != null) {
-          setState(() => selectedProvinsi =
-              WilayahModel(id: provId, name: data['nama_province']));
+          setState(
+            () => selectedProvinsi = WilayahModel(
+              id: provId,
+              name: data['nama_province'],
+            ),
+          );
           kabupatenList = await getKabupaten(widget.token, provId);
 
           final regId = data['kode_regencies'];
           if (regId != null) {
-            setState(() => selectedKabupaten =
-                WilayahModel(id: regId, name: data['nama_regencies']));
+            setState(
+              () => selectedKabupaten = WilayahModel(
+                id: regId,
+                name: data['nama_regencies'],
+              ),
+            );
             kecamatanList = await getKecamatan(widget.token, regId);
 
             final distId = data['kode_district'];
             if (distId != null) {
-              setState(() => selectedKecamatan =
-                  WilayahModel(id: distId, name: data['nama_district']));
+              setState(
+                () => selectedKecamatan = WilayahModel(
+                  id: distId,
+                  name: data['nama_district'],
+                ),
+              );
               kelurahanList = await getKelurahan(widget.token, distId);
 
               final villId = data['kode_village'];
               if (villId != null) {
-                setState(() => selectedKelurahan = WilayahModel(
-                    id: villId, name: data['nama_village']));
+                setState(
+                  () => selectedKelurahan = WilayahModel(
+                    id: villId,
+                    name: data['nama_village'],
+                  ),
+                );
               }
             }
           }
         }
         final tipeId = data['tipeusaha'];
         if (tipeId != null) {
-          setState(() => selectedTipeUsaha =
-              TipeUsahaModel(id: tipeId, nama: data['nama_tipe_usaha']));
+          setState(
+            () => selectedTipeUsaha = TipeUsahaModel(
+              id: tipeId,
+              nama: data['nama_tipe_usaha'],
+            ),
+          );
         }
       }
     }
@@ -109,7 +132,11 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 50);
+      source: ImageSource.gallery,
+      imageQuality: 30,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -125,256 +152,260 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
           isCreateMode ? 'Tambah Toko' : 'Ubah Toko',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: bnw100,
         elevation: 0,
         foregroundColor: Colors.black,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: bnw100,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: _pickImage,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: _image != null
-                      ? FileImage(_image!)
-                      : (_imageUrl != null && _imageUrl!.isNotEmpty
-                          ? NetworkImage(_imageUrl!)
-                          : null) as ImageProvider?,
-                  child: (_image == null &&
-                          (_imageUrl == null || _imageUrl!.isEmpty))
-                      ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
-                      : null,
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            buildInput('Nama Toko *', namaTokoController),
-            const SizedBox(height: 16),
-            buildModalSelector(
-              label: 'Tipe Usaha *',
-              value: selectedTipeUsaha?.nama,
-              onTap: () => showListModal<TipeUsahaModel>(
-                context,
-                title: 'Tipe Usaha',
-                items: tipeUsahaList,
-                getName: (e) => e.nama,
-                selected: selectedTipeUsaha,
-                onSelected: (val) => setState(() => selectedTipeUsaha = val),
-              ),
-            ),
-            const SizedBox(height: 16),
-            buildInput('Alamat *', alamatController),
-            const SizedBox(height: 16),
-
-            // ==================== PROVINSI ====================
-            buildModalSelector(
-              label: 'Provinsi *',
-              value: selectedProvinsi?.name,
-              onTap: () async {
-                final result = await showListModal<WilayahModel>(
-                  context,
-                  title: 'Provinsi',
-                  items: provinsiList,
-                  getName: (e) => e.name,
-                  selected: selectedProvinsi,
-                  onSelected: (val) async {
-                    setState(() {
-                      selectedProvinsi = val;
-                      selectedKabupaten = null;
-                      selectedKecamatan = null;
-                      selectedKelurahan = null;
-                      kabupatenList = [];
-                      kecamatanList = [];
-                      kelurahanList = [];
-                    });
-                    kabupatenList = await getKabupaten(
-                      widget.token,
-                      val!.id.toString(),
-                    );
-                    setState(() {});
-                  },
-                );
-              },
-            ),
-
-            // ==================== KABUPATEN ====================
-            buildModalSelector(
-              label: 'Kabupaten *',
-              value: selectedKabupaten?.name,
-              onTap: selectedProvinsi == null
-                  ? null
-                  : () async {
-                      final result = await showListModal<WilayahModel>(
-                        context,
-                        title: 'Kabupaten',
-                        items: kabupatenList,
-                        getName: (e) => e.name,
-                        selected: selectedKabupaten,
-                        onSelected: (val) async {
-                          setState(() {
-                            selectedKabupaten = val;
-                            selectedKecamatan = null;
-                            selectedKelurahan = null;
-                            kecamatanList = [];
-                            kelurahanList = [];
-                          });
-                          kecamatanList = await getKecamatan(
-                            widget.token,
-                            val!.id.toString(),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-            ),
-
-            // ==================== KECAMATAN ====================
-            buildModalSelector(
-              label: 'Kecamatan *',
-              value: selectedKecamatan?.name,
-              onTap: selectedKabupaten == null
-                  ? null
-                  : () async {
-                      final result = await showListModal<WilayahModel>(
-                        context,
-                        title: 'Kecamatan',
-                        items: kecamatanList,
-                        getName: (e) => e.name,
-                        selected: selectedKecamatan,
-                        onSelected: (val) async {
-                          setState(() {
-                            selectedKecamatan = val;
-                            selectedKelurahan = null;
-                            kelurahanList = [];
-                          });
-                          kelurahanList = await getKelurahan(
-                            widget.token,
-                            val!.id.toString(),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-            ),
-
-            // ==================== KELURAHAN ====================
-            buildModalSelector(
-              label: 'Kelurahan *',
-              value: selectedKelurahan?.name,
-              onTap: selectedKecamatan == null
-                  ? null
-                  : () => showListModal<WilayahModel>(
-                      context,
-                      title: 'Kelurahan',
-                      items: kelurahanList,
-                      getName: (e) => e.name,
-                      selected: selectedKelurahan,
-                      onSelected: (val) =>
-                          setState(() => selectedKelurahan = val),
-                    ),
-            ),
-
-            SizedBox(height: size16),
-            buildInput('Kode Pos *', kodePosController),
-            SizedBox(height: size16),
-            GestureDetector(
-              onTap: () async {
-                // ✅ Validasi form input
-                if (namaTokoController.text.isEmpty ||
-                    alamatController.text.isEmpty ||
-                    kodePosController.text.isEmpty ||
-                    selectedTipeUsaha == null ||
-                    selectedProvinsi == null ||
-                    selectedKabupaten == null ||
-                    selectedKecamatan == null ||
-                    selectedKelurahan == null) {
-                  showSnackbar(context, {
-                    "message": "Harap isi semua kolom wajib!",
-                  });
-                  return;
-                }
-
-                // ✅ Tampilkan loading
-                whenLoading(context);
-
-                // 🧩 Ambil semua data inputan
-                final nameMerch = namaTokoController.text.trim();
-                final address = alamatController.text.trim();
-                final province = selectedProvinsi!.id;
-                final regencies = selectedKabupaten!.id;
-                final district = selectedKecamatan!.id;
-                final village = selectedKelurahan!.id;
-                final zipcode = kodePosController.text.trim();
-                final type = selectedTipeUsaha!.id;
-                final image = "";
-                final merchid = merchantId;
-                final PageController pageController = PageController();
-
-                // ✅ Panggil API dari apimethod.dart
-                String base64Image =
-                    _image != null ? base64Encode(_image!.readAsBytesSync()) : '';
-
-                String result;
-                if (isCreateMode) {
-                  result = await createMerch(
-                    context,
-                    widget.token,
-                    nameMerch,
-                    address,
-                    province,
-                    regencies,
-                    district,
-                    village,
-                    zipcode,
-                    base64Image,
-                    pageController,
-                    type,
-                  );
-                } else {
-                  // Ensure merchantId is passed correctly. widget.merchantId is the source of truth for existing ID.
-                  result = await updateMerch(
-                    context,
-                    widget.token,
-                    widget.merchantId, 
-                    nameMerch,
-                    address,
-                    province,
-                    regencies,
-                    district,
-                    village,
-                    zipcode,
-                    base64Image,
-                    pageController,
-                    type,
-                  );
-                }
-
-                // Success check (handle both String and int just in case)
-                if (result == '00' || result == 0 || result == '0') {
-                  Navigator.pop(context, true);
-                }
-
-              },
-              child: SizedBox(
-                width: double.infinity,
-                child: buttonM(
-                  Center(
-                    child: Text(
-                      isCreateMode ? 'Tambah' : 'Simpan',
-                      style: body1(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: _image != null
+                        ? FileImage(_image!)
+                        : (_imageUrl != null && _imageUrl!.isNotEmpty
+                                  ? NetworkImage(_imageUrl!)
+                                  : null)
+                              as ImageProvider?,
+                    child:
+                        (_image == null &&
+                            (_imageUrl == null || _imageUrl!.isEmpty))
+                        ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                        : null,
                   ),
-                  primary500,
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 16),
+              buildInput('Nama Toko *', namaTokoController),
+              const SizedBox(height: 16),
+              buildModalSelector(
+                label: 'Tipe Usaha *',
+                value: selectedTipeUsaha?.nama,
+                onTap: () => showListModal<TipeUsahaModel>(
+                  context,
+                  title: 'Tipe Usaha',
+                  items: tipeUsahaList,
+                  getName: (e) => e.nama,
+                  selected: selectedTipeUsaha,
+                  onSelected: (val) => setState(() => selectedTipeUsaha = val),
+                ),
+              ),
+              const SizedBox(height: 16),
+              buildInput('Alamat *', alamatController),
+              const SizedBox(height: 16),
+
+              // ==================== PROVINSI ====================
+              buildModalSelector(
+                label: 'Provinsi *',
+                value: selectedProvinsi?.name,
+                onTap: () async {
+                  final result = await showListModal<WilayahModel>(
+                    context,
+                    title: 'Provinsi',
+                    items: provinsiList,
+                    getName: (e) => e.name,
+                    selected: selectedProvinsi,
+                    onSelected: (val) async {
+                      setState(() {
+                        selectedProvinsi = val;
+                        selectedKabupaten = null;
+                        selectedKecamatan = null;
+                        selectedKelurahan = null;
+                        kabupatenList = [];
+                        kecamatanList = [];
+                        kelurahanList = [];
+                      });
+                      kabupatenList = await getKabupaten(
+                        widget.token,
+                        val!.id.toString(),
+                      );
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
+
+              // ==================== KABUPATEN ====================
+              buildModalSelector(
+                label: 'Kabupaten *',
+                value: selectedKabupaten?.name,
+                onTap: selectedProvinsi == null
+                    ? null
+                    : () async {
+                        final result = await showListModal<WilayahModel>(
+                          context,
+                          title: 'Kabupaten',
+                          items: kabupatenList,
+                          getName: (e) => e.name,
+                          selected: selectedKabupaten,
+                          onSelected: (val) async {
+                            setState(() {
+                              selectedKabupaten = val;
+                              selectedKecamatan = null;
+                              selectedKelurahan = null;
+                              kecamatanList = [];
+                              kelurahanList = [];
+                            });
+                            kecamatanList = await getKecamatan(
+                              widget.token,
+                              val!.id.toString(),
+                            );
+                            setState(() {});
+                          },
+                        );
+                      },
+              ),
+
+              // ==================== KECAMATAN ====================
+              buildModalSelector(
+                label: 'Kecamatan *',
+                value: selectedKecamatan?.name,
+                onTap: selectedKabupaten == null
+                    ? null
+                    : () async {
+                        final result = await showListModal<WilayahModel>(
+                          context,
+                          title: 'Kecamatan',
+                          items: kecamatanList,
+                          getName: (e) => e.name,
+                          selected: selectedKecamatan,
+                          onSelected: (val) async {
+                            setState(() {
+                              selectedKecamatan = val;
+                              selectedKelurahan = null;
+                              kelurahanList = [];
+                            });
+                            kelurahanList = await getKelurahan(
+                              widget.token,
+                              val!.id.toString(),
+                            );
+                            setState(() {});
+                          },
+                        );
+                      },
+              ),
+
+              // ==================== KELURAHAN ====================
+              buildModalSelector(
+                label: 'Kelurahan *',
+                value: selectedKelurahan?.name,
+                onTap: selectedKecamatan == null
+                    ? null
+                    : () => showListModal<WilayahModel>(
+                        context,
+                        title: 'Kelurahan',
+                        items: kelurahanList,
+                        getName: (e) => e.name,
+                        selected: selectedKelurahan,
+                        onSelected: (val) =>
+                            setState(() => selectedKelurahan = val),
+                      ),
+              ),
+
+              SizedBox(height: size16),
+              buildInput('Kode Pos *', kodePosController),
+              SizedBox(height: size16),
+              GestureDetector(
+                onTap: () async {
+                  // ✅ Validasi form input
+                  if (namaTokoController.text.isEmpty ||
+                      alamatController.text.isEmpty ||
+                      kodePosController.text.isEmpty ||
+                      selectedTipeUsaha == null ||
+                      selectedProvinsi == null ||
+                      selectedKabupaten == null ||
+                      selectedKecamatan == null ||
+                      selectedKelurahan == null) {
+                    showSnackbar(context, {
+                      "message": "Harap isi semua kolom wajib!",
+                    });
+                    return;
+                  }
+
+                  // ✅ Tampilkan loading
+                  whenLoading(context);
+
+                  // 🧩 Ambil semua data inputan
+                  final nameMerch = namaTokoController.text.trim();
+                  final address = alamatController.text.trim();
+                  final province = selectedProvinsi!.id;
+                  final regencies = selectedKabupaten!.id;
+                  final district = selectedKecamatan!.id;
+                  final village = selectedKelurahan!.id;
+                  final zipcode = kodePosController.text.trim();
+                  final type = selectedTipeUsaha!.id;
+                  final image = "";
+                  final merchid = merchantId;
+                  final PageController pageController = PageController();
+
+                  // ✅ Panggil API dari apimethod.dart
+                  String base64Image = _image != null
+                      ? base64Encode(_image!.readAsBytesSync())
+                      : '';
+
+                  String result;
+                  if (isCreateMode) {
+                    result = await createMerch(
+                      context,
+                      widget.token,
+                      nameMerch,
+                      address,
+                      province,
+                      regencies,
+                      district,
+                      village,
+                      zipcode,
+                      base64Image,
+                      pageController,
+                      type,
+                    );
+                  } else {
+                    // Ensure merchantId is passed correctly. widget.merchantId is the source of truth for existing ID.
+                    result = await updateMerch(
+                      context,
+                      widget.token,
+                      widget.merchantId,
+                      nameMerch,
+                      address,
+                      province,
+                      regencies,
+                      district,
+                      village,
+                      zipcode,
+                      base64Image,
+                      pageController,
+                      type,
+                    );
+                  }
+
+                  // Success check (handle both String and int just in case)
+                  if (result == '00' || result == 0 || result == '0') {
+                    Navigator.pop(context, true);
+                  }
+                },
+                child: SizedBox(
+                  width: double.infinity,
+                  child: buttonM(
+                    Center(
+                      child: Text(
+                        isCreateMode ? 'Tambah' : 'Simpan',
+                        style: body1(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                    ),
+                    primary500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -586,7 +617,7 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
                           hintText: 'Cari $title...',
                           prefixIcon: const Icon(Icons.search),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: bnw100,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

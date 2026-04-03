@@ -182,56 +182,58 @@ class _SettingsTabState extends State<SettingsTab> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: EdgeInsets.all(size16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(bottom: size16),
-                  decoration: BoxDecoration(
-                    color: bnw300,
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: EdgeInsets.all(size16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: size16),
+                    decoration: BoxDecoration(
+                      color: bnw300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                'Logo Struk',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: size16),
-              ListTile(
-                leading: Icon(PhosphorIcons.image, color: bnw900),
-                title: Text(
-                  'Pilih dari galeri',
-                  style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                Text(
+                  'Logo Struk',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  getImage();
-                },
-              ),
-              if (_receiptLogoUrl != null)
+                SizedBox(height: size16),
                 ListTile(
-                  leading: Icon(PhosphorIcons.trash, color: danger500),
+                  leading: Icon(PhosphorIcons.image, color: bnw900),
                   title: Text(
-                    'Hapus foto',
-                    style: heading3(FontWeight.w400, danger500, 'Outfit'),
+                    'Pilih dari galeri',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _deleteReceiptLogo();
+                    getImage();
                   },
                 ),
-              SizedBox(height: size16),
-            ],
+                if (_receiptLogoUrl != null)
+                  ListTile(
+                    leading: Icon(PhosphorIcons.trash, color: danger500),
+                    title: Text(
+                      'Hapus foto',
+                      style: heading3(FontWeight.w400, danger500, 'Outfit'),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _deleteReceiptLogo();
+                    },
+                  ),
+                SizedBox(height: size16),
+              ],
+            ),
           ),
         );
       },

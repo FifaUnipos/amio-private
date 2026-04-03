@@ -219,7 +219,7 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
                         'Hapus',
                         style: heading3(
                           FontWeight.w600,
-                          Colors.white,
+                          bnw100,
                           'Outfit',
                         ),
                       ),
@@ -257,10 +257,10 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
           : FloatingActionButton.extended(
               onPressed: () => _navigateToAddPage(),
               backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              icon: Icon(PhosphorIcons.plus, color: bnw100),
               label: Text(
                 'Unit Conversi',
-                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
               ),
             ),
       body: _isLoading
@@ -288,7 +288,7 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bnw100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: bnw200),
       ),
@@ -438,178 +438,181 @@ class _AddUnitConversionPageState extends State<AddUnitConversionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          widget.unitConversionId == null ? 'Tambah Konversi' : 'Edit Konversi',
-          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: bnw100,
+        appBar: AppBar(
+          title: Text(
+            widget.unitConversionId == null ? 'Tambah Konversi' : 'Edit Konversi',
+            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+          ),
+          leading: IconButton(
+            icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
+            onPressed: () => Navigator.pop(context),
+          ),
+          elevation: 0,
+          backgroundColor: bnw100,
         ),
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrow_left),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: 'Nama Konversi ',
-                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              text: 'Nama Konversi ',
+                              style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              children: [
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              hintText: 'Cth: Box',
+                              border: UnderlineInputBorder(),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            hintText: 'Cth: Box',
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: primary500),
-                            ),
-                          ),
-                          style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: 24),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Konversi Faktor ',
-                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.red),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: primary500),
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _factorController,
-                          keyboardType: TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Cth: 12',
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
                             ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: primary500),
+                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: 24),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Konversi Faktor ',
+                              style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              children: [
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
                             ),
                           ),
-                          style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _factorController,
+                            keyboardType: TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Cth: 12',
+                              border: UnderlineInputBorder(),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: primary500),
+                              ),
+                            ),
+                            style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, -4),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.all(20),
-                  child: widget.unitConversionId == null
-                      ? Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () async {
-                                  await _handleSave(stayOnPage: true);
-                                },
-                                child: Text(
-                                  'Save & Add New',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    primary500,
-                                    'Outfit',
+                    padding: EdgeInsets.all(20),
+                    child: widget.unitConversionId == null
+                        ? Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    await _handleSave(stayOnPage: true);
+                                  },
+                                  child: Text(
+                                    'Save & Add New',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  side: BorderSide(color: primary500),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    side: BorderSide(color: primary500),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: _handleSave,
-                                child: Text(
-                                  'Create',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    Colors.white,
-                                    'Outfit',
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _handleSave,
+                                  child: Text(
+                                    'Create',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primary500,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primary500,
+                                    foregroundColor: bnw100,
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        )
-                      : SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _handleSave,
-                            child: Text(
-                              'Update',
-                              style: heading3(
-                                FontWeight.w600,
-                                Colors.white,
-                                'Outfit',
+                            ],
+                          )
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _handleSave,
+                              child: Text(
+                                'Update',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary500,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary500,
+                                foregroundColor: bnw100,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

@@ -102,6 +102,8 @@ Future<void> main() async {
     ),
   );
 
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   // Jalankan app
   runApp(
     UniPOSApp(
@@ -112,7 +114,7 @@ Future<void> main() async {
   );
 }
 
-// ✅ Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
+// Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
 class UniPOSApp extends StatelessWidget {
   final String? mytokenGet;
   final String? onBoard;
@@ -137,7 +139,7 @@ class UniPOSApp extends StatelessWidget {
             final ws = WebSocketService();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (checkToken != null) {
-                debugPrint('🔌 Global WebSocket connect... token: $checkToken');
+                debugPrint('Global WebSocket connect... token: $checkToken');
                 ws.connect(checkToken, identifier);
               }
             });
@@ -190,6 +192,16 @@ class UniPOSApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: MediaQuery.of(context).padding.copyWith(
+                bottom: MediaQuery.of(context).viewPadding.bottom,
+              ),
+            ),
+            child: child!,
+          );
+        },
         navigatorKey: navigatorKey,
         scaffoldMessengerKey: rootScaffoldMessengerKey,
         debugShowCheckedModeBanner: false,

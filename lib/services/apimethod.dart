@@ -62,8 +62,8 @@ import '../utils/component/component_color.dart';
 import '../utils/component/component_loading.dart';
 import '../utils/component/providerModel/refreshTampilanModel.dart';
 
-String url = 'https://api.prod.amio.my.id';
-// String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
+// String url = 'https://api.prod.amio.my.id';
+String url = 'https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host';
 
 String registerbyotp = '$url/api/user/registerbyotp',
     registerentryotp = '$url/api/register/verify',
@@ -641,17 +641,27 @@ Future checkEmail(token, setState) async {
       options: Options(headers: {"token": "$token"}),
     );
 
-    if (response.statusCode == 200) {
-      print("succes aman tentram check email");
+    print("status email: ${response.data['data']}");
 
+    if (response.statusCode == 200) {
       statusVerified = response.data['data'].toString();
       statusPw = response.data['data'].toString();
-
       setState(() {});
-    } else {}
-    return null;
-  } catch (e) {
-    throw Exception(e.toString());
+    }
+
+    return response.data['rc'];
+  } on DioError catch (e) {
+    if (e.response != null) {
+      print("checkEmail error rc: ${e.response!.data['rc']}");
+      print("checkEmail error message: ${e.response!.data['message']}");
+
+      statusVerified = null.toString();
+      statusPw = null.toString();
+      setState(() {});
+
+      return e.response!.data['rc'];
+    }
+    rethrow;
   }
 }
 
@@ -5985,28 +5995,38 @@ Future<CoaModel?> getSingleCoa(context, token, paymentMethodId) async {
   }
 }
 
-Future<List<UserModel>> getGroupUsers(context, token, orderby) async {
+Future<List<UserModel>> getGroupUsers(
+  context,
+  token,
+  merchantId,
+  orderby,
+) async {
   try {
-    final response = await http.get(
-      Uri.parse('$getAkunUrl?deviceid=$identifier&orderby=$orderby'),
-      headers: {'token': token},
+    final response = await http.post(
+      Uri.parse(getAllAkun),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "deviceid": identifier,
+        "merchantid": merchantId,
+        "orderby": orderby,
+      }),
     );
 
     print('Response getGroupUsers: ${response.body}');
 
     if (response.statusCode == 200) {
-      final List<UserModel> result = [];
       final Map<String, dynamic> decoded = jsonDecode(response.body);
-      if (decoded['data'] != null) {
-        for (Map<String, dynamic> item in decoded['data']) {
-          result.add(UserModel.fromJson(item));
-        }
+
+      if (decoded['rc'] == "00" && decoded['data'] != null) {
+        final List<dynamic> dataList = decoded['data'];
+        return dataList.map((item) => UserModel.fromJson(item)).toList();
       }
-      return result;
+      return [];
     } else {
       return [];
     }
   } catch (e) {
+    print('Error getGroupUsers: $e');
     throw Exception(e.toString());
   }
 }
@@ -6082,13 +6102,17 @@ Future updateUserAccount(
   status,
   image,
 ) async {
+  String finalImage = image;
+  if (image.isNotEmpty && !image.startsWith("data:image")) {
+    finalImage = "data:image/png;base64,$image";
+  }
   try {
-    // print('test role $role');
+    // print('test image $finalImage');
     whenLoading(context);
     final response = await http.post(
       Uri.parse(updateAkunUrl),
-      headers: {'token': token},
-      body: {
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({
         "deviceid": identifier,
         "userid": userid,
         "fullname": fullname,
@@ -6096,13 +6120,14 @@ Future updateUserAccount(
         "phonenumber": phonenumber,
         "status": status,
         "role": role,
-        "image": image,
-      },
+        "image": finalImage,
+      }),
     );
 
     var jsonResponse = jsonDecode(response.body);
     closeLoading(context);
     showSnackbar(context, jsonResponse);
+    print(jsonResponse);
     return jsonResponse['rc'];
   } catch (e) {
     closeLoading(context);
