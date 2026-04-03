@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/moleculs/lazy_indexed_stack.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/coaPageGrup/coaPageGrup.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/inventoriGrupSelectMerch.dart';
 import 'package:unipos_app_335/services/websocket_service.dart';
@@ -505,7 +506,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 0;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -523,7 +523,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 1;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -538,7 +537,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 2;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -553,7 +551,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 3;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -568,7 +565,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 4;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -583,7 +579,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 5;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -598,7 +593,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 6;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -624,7 +618,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 7;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -639,7 +632,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 8;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -655,7 +647,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         //     setState(() {
         //       selectedIndexSideBar = false;
         //       iconSelectedSidebar = 9;
-        //       valueOrderByProduct = 0;
         //     });
         //   },
         // ),
@@ -672,7 +663,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 9;
               // iconSelectedSidebar = 10;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -687,7 +677,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 10;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -702,7 +691,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 11;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -753,52 +741,7 @@ class _ScreensExampleState extends State<_ScreensExample> {
   }
 }
 
-class LazyIndexedStack extends StatefulWidget {
-  final int index;
-  final List<Widget> children;
 
-  const LazyIndexedStack({
-    Key? key,
-    required this.index,
-    required this.children,
-  }) : super(key: key);
-
-  @override
-  _LazyIndexedStackState createState() => _LazyIndexedStackState();
-}
-
-class _LazyIndexedStackState extends State<LazyIndexedStack> {
-  late List<bool> _loaded;
-
-  @override
-  void initState() {
-    super.initState();
-    _loaded = List<bool>.filled(widget.children.length, false);
-    _loaded[widget.index] = true;
-  }
-
-  @override
-  void didUpdateWidget(LazyIndexedStack oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index) {
-      _loaded[widget.index] = true;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return IndexedStack(
-      index: widget.index,
-      children: List.generate(widget.children.length, (i) {
-        if (_loaded[i]) {
-          return widget.children[i];
-        } else {
-          return const SizedBox.shrink();
-        }
-      }),
-    );
-  }
-}
 
 String _getTitleByIndex(int index) {
   switch (index) {

@@ -1,6 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/merchant_card.dart';
 import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
+import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
+import 'package:unipos_app_335/utils/component/component_orderBy.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
@@ -119,7 +126,11 @@ class _TokoPageTokoState extends State<TokoPageToko> {
     _getTipeList();
     _getProvinceList();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      datas = await getAllToko(context, widget.token, '', '');
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        '',
+        textvalueOrderByStore,
+      );
 
       //   datas;
       setState(() {});
@@ -211,6 +222,7 @@ class _TokoPageTokoState extends State<TokoPageToko> {
   mainPageToko() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: size16,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,213 +243,193 @@ class _TokoPageTokoState extends State<TokoPageToko> {
             ),
           ],
         ),
-        datas == null
-            ? SkeletonCard()
-            : Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: size16),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          setState(() {});
-                        },
-                        child: GridView.builder(
-                          padding: EdgeInsets.zero,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisExtent: 130,
-                                // childAspectRatio: 2.977,
-                                crossAxisCount: 2,
-                                crossAxisSpacing: size16,
-                                mainAxisSpacing: size16,
-                              ),
-                          itemCount: datas!.length,
-                          itemBuilder: (context, i) => Container(
-                            padding: EdgeInsets.all(size16),
-                            margin: EdgeInsets.only(right: size8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(size16),
-                              border: Border.all(color: bnw300),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(1000),
-                                      child: SizedBox(
-                                        height: 60,
-                                        width: 60,
-                                        child:
-                                            datas![i].logomerchant_url != null
-                                            ? Image.network(
-                                                datas![i].logomerchant_url
-                                                    .toString(),
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => SizedBox(
-                                                      child: Icon(
-                                                        PhosphorIcons
-                                                            .storefront_fill,
-                                                        size: 60,
-                                                        color: bnw900,
-                                                      ),
-                                                    ),
-                                              )
-                                            : Icon(Icons.person, size: 60),
-                                      ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    Flexible(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            datas![i].name ?? '',
-                                            style: heading2(
-                                              FontWeight.w700,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          Text(
-                                            '${datas![i].address}',
-                                            style: body1(
-                                              FontWeight.w400,
-                                              bnw800,
-                                              'Outfit',
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 2,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Spacer(),
-                                GestureDetector(
-                                  onTap: () {
-                                    whenLoading(context);
-                                    merchid = datas![i].merchantid.toString();
-                                    getSingleMerch(
-                                      context,
-                                      widget.token,
-                                      merchid,
-                                    ).then((value) async {
-                                      await Future.delayed(
-                                        Duration(seconds: 1),
-                                      );
-                                      if (value['rc'] == '00') {
-                                        conNameMerch.text = nameMerchantUbah;
-                                        conAddress.text = addressMerchantUbah;
-                                        conCodePos.text = zipMerchantUbah;
-
-                                        tipe = tipeUbah;
-                                        prov = nameProvUbah;
-                                        kab = nameregUbah;
-                                        kec = nameDisUbah;
-                                        desa = nameVillageUbah;
-
-                                        idtipe = idtipeUbah;
-                                        idprov = kodeProvUbah;
-                                        idkab = kodeRegUbah;
-                                        idkec = kodeDisUbah;
-                                        iddesa = kodeVillageUbah;
-
-                                        await _getTipeList();
-                                        selectedTipeUsaha = tipeList
-                                            ?.firstWhere(
-                                              (t) =>
-                                                  t['tipeusaha_id'] ==
-                                                  idtipeUbah,
-                                              orElse: () => null,
-                                            );
-
-                                        await _getProvinceList();
-                                        selectedProvince = provincesList
-                                            ?.firstWhere(
-                                              (province) =>
-                                                  province['ID'] ==
-                                                  kodeProvUbah,
-                                              orElse: () => null,
-                                            );
-
-                                        await _getRegenciesList(idprov);
-                                        selectedRegencies = regenciesList
-                                            ?.firstWhere(
-                                              (regencie) =>
-                                                  regencie['ID'] == kodeRegUbah,
-                                              orElse: () => null,
-                                            );
-
-                                        await _getDistrictList(idkab);
-                                        selectedDistrict = districtList
-                                            ?.firstWhere(
-                                              (distric) =>
-                                                  distric['ID'] == kodeDisUbah,
-                                              orElse: () => null,
-                                            );
-
-                                        await _getVillageList(idkec);
-                                        selectedVillage = villageList
-                                            ?.firstWhere(
-                                              (village) =>
-                                                  village['ID'] ==
-                                                  kodeVillageUbah,
-                                              orElse: () => null,
-                                            );
-                                        closeLoading(context);
-                                        _pageController.jumpToPage(2);
-                                        setState(() {});
-                                      }
-                                    });
-
-                                    setState(() {});
-                                  },
-                                  child: Container(
-                                    height: 40,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: bnw100,
-                                      border: Border.all(color: bnw300),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(PhosphorIcons.pencil_line),
-                                        SizedBox(width: size16),
-                                        Text(
-                                          'Ubah',
-                                          style: heading4(
-                                            FontWeight.w600,
-                                            bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+        SortBottomSheetButton(
+          options: orderByTokoText,
+          initialIndex: valueOrderByStore,
+          onConfirm: (i) async {
+            setState(() {
+              valueOrderByStore = i;
+              textvalueOrderByStore = orderByToko[i];
+            });
+            await context.read<MerchantSortingProvider>().fetchMerchantSorting(
+              widget.token,
+              '',
+              textvalueOrderByStore,
+            );
+          },
+        ),
+        Expanded(
+          child: Consumer<MerchantSortingProvider>(
+            builder: (context, value, child) {
+              return switch (value.resultState) {
+                MerchantSortingResultNoneState() => const Center(
+                  child: Text('Tidak ada data'),
                 ),
-              ),
+                MerchantSortingResultErrorState(message: var message) => Center(
+                  child: Text('Erorr $message'),
+                ),
+                MerchantSortingResultLoadingState() => Center(
+                  child: SkeletonCard(),
+                ),
+                MerchantSortingResultLoadedState(data: var dataStore) =>
+                  Expanded(
+                    child: Consumer<MerchantSortingProvider>(
+                      builder: (context, value, child) {
+                        return switch (value.resultState) {
+                          MerchantSortingResultNoneState() => const Center(
+                            child: Text('Tidak ada data'),
+                          ),
+                          MerchantSortingResultErrorState(
+                            message: var message,
+                          ) =>
+                            Center(child: Text('Erorr $message')),
+                          MerchantSortingResultLoadingState() => Center(
+                            child: SkeletonCard(),
+                          ),
+                          MerchantSortingResultLoadedState(
+                            data: var dataStore,
+                          ) =>
+                            Expanded(
+                              child: RefreshIndicator(
+                                color: bnw100,
+                                backgroundColor: primary500,
+                                onRefresh: () async {
+                                  await context
+                                      .read<MerchantSortingProvider>()
+                                      .fetchMerchantSorting(
+                                        widget.token,
+                                        '',
+                                        textvalueOrderByStore,
+                                      );
+                                },
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: (dataStore.length / 2).ceil(),
+                                  itemBuilder: (context, rowIndex) {
+                                    final totalRows = (dataStore.length / 2)
+                                        .ceil();
+                                    final isLastRow = rowIndex == totalRows - 1;
+                                    final leftIndex = rowIndex * 2;
+                                    final rightIndex = rowIndex * 2 + 1;
+
+                                    Widget buildCard(int i) {
+                                      return MerchantCard(
+                                        merchant: dataStore[i],
+                                        onTap: () {},
+                                        onEdit: () {
+                                          whenLoading(context);
+                                          merchid = dataStore[i].merchantid
+                                              .toString();
+                                          getSingleMerch(
+                                            context,
+                                            widget.token,
+                                            merchid,
+                                          ).then((value) async {
+                                            await Future.delayed(
+                                              Duration(seconds: 1),
+                                            );
+                                            if (value['rc'] == '00') {
+                                              conNameMerch.text =
+                                                  nameMerchantUbah;
+                                              conAddress.text =
+                                                  addressMerchantUbah;
+                                              conCodePos.text = zipMerchantUbah;
+                                              tipe = tipeUbah;
+                                              prov = nameProvUbah;
+                                              kab = nameregUbah;
+                                              kec = nameDisUbah;
+                                              desa = nameVillageUbah;
+                                              idtipe = idtipeUbah;
+                                              idprov = kodeProvUbah;
+                                              idkab = kodeRegUbah;
+                                              idkec = kodeDisUbah;
+                                              iddesa = kodeVillageUbah;
+                                              await _getTipeList();
+                                              selectedTipeUsaha = tipeList
+                                                  ?.firstWhere(
+                                                    (t) =>
+                                                        t['tipeusaha_id'] ==
+                                                        idtipeUbah,
+                                                    orElse: () => null,
+                                                  );
+                                              await _getProvinceList();
+                                              selectedProvince = provincesList
+                                                  ?.firstWhere(
+                                                    (province) =>
+                                                        province['ID'] ==
+                                                        kodeProvUbah,
+                                                    orElse: () => null,
+                                                  );
+                                              await _getRegenciesList(idprov);
+                                              selectedRegencies = regenciesList
+                                                  ?.firstWhere(
+                                                    (regencie) =>
+                                                        regencie['ID'] ==
+                                                        kodeRegUbah,
+                                                    orElse: () => null,
+                                                  );
+                                              await _getDistrictList(idkab);
+                                              selectedDistrict = districtList
+                                                  ?.firstWhere(
+                                                    (distric) =>
+                                                        distric['ID'] ==
+                                                        kodeDisUbah,
+                                                    orElse: () => null,
+                                                  );
+                                              await _getVillageList(idkec);
+                                              selectedVillage = villageList
+                                                  ?.firstWhere(
+                                                    (village) =>
+                                                        village['ID'] ==
+                                                        kodeVillageUbah,
+                                                    orElse: () => null,
+                                                  );
+                                              closeLoading(context);
+                                              _pageController.jumpToPage(2);
+                                              setState(() {});
+                                            }
+                                          });
+                                          setState(() {});
+                                        },
+                                        editable: true,
+                                      );
+                                    }
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: isLastRow ? 0 : size16,
+                                      ),
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Expanded(
+                                              child: buildCard(leftIndex),
+                                            ),
+                                            SizedBox(width: size16),
+                                            Expanded(
+                                              child:
+                                                  rightIndex < dataStore.length
+                                                  ? buildCard(rightIndex)
+                                                  : SizedBox(),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                        };
+                      },
+                    ),
+                  ),
+              };
+            },
+          ),
+        ),
       ],
     );
   }

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/atoms/fields/unipos_text_field.dart';
 import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
 import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 import 'package:unipos_app_335/utils/component/component_orderBy.dart';
+import 'package:unipos_app_335/utils/format_input_price.dart';
 import 'dart:developer';
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
@@ -101,32 +104,6 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
     }
   }
 
-  void formatInputRp() {
-    String text = conHarga.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHarga.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
-  void formatInputOnlineRp() {
-    String text = conHargaOnline.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHargaOnline.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
   refreshDataProduk() {
     conNameProduk.text = '';
     idProduct = '';
@@ -138,8 +115,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
   @override
   void initState() {
     checkConnection(context);
-    conHarga.addListener(formatInputRp);
-    conHargaOnline.addListener(formatInputOnlineRp);
+    conHarga.addListener(() => formatInputPrice(conHarga));
+    conHargaOnline.addListener(() => formatInputPrice(conHargaOnline));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       context.read<MerchantSortingProvider>().fetchMerchantSorting(
         widget.token,
@@ -402,7 +379,8 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
                                           child: SizedBox(
                                             width: 400,
                                             child: Text(
-                                              dataStore[index].address.toString(),
+                                              dataStore[index].address
+                                                  .toString(),
                                             ),
                                           ),
                                         ),
@@ -488,207 +466,252 @@ class _TambahBanyakProdukPagPageState extends State<TambahBanyakProdukPagPage> {
             // padding: EdgeInsets.zero,
             physics: BouncingScrollPhysics(),
             children: [
-              Container(
-                height: 48,
-                width: double.infinity,
-                margin: EdgeInsets.only(top: size12, bottom: size12),
-                padding: EdgeInsets.fromLTRB(size12, size12, size12, size12),
-                decoration: BoxDecoration(
-                  color: succes100,
-                  borderRadius: BorderRadius.circular(size8),
-                  border: Border.all(color: succes600),
-                ),
-                child: Row(
-                  children: [
-                    Icon(PhosphorIcons.storefront, color: succes600),
-                    Text(
-                      "  ${listToko.length} Toko Terpilih",
-                      style: heading4(FontWeight.w600, succes600, 'Outfit'),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Foto Produk',
-                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: size12),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
                 children: [
-                  GestureDetector(
-                    onTap: () => tambahGambar(context),
-                    child: Container(
-                      child: myImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(size8),
-                              child: Image.file(myImage!, fit: BoxFit.cover),
-                            )
-                          : Icon(PhosphorIcons.plus),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: bnw900),
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                      height: 80,
-                      width: 80,
+                  Container(
+                    height: 48,
+                    width: double.infinity,
+                    margin: EdgeInsets.only(top: size12, bottom: size12),
+                    padding: EdgeInsets.fromLTRB(
+                      size12,
+                      size12,
+                      size12,
+                      size12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: succes100,
+                      borderRadius: BorderRadius.circular(size8),
+                      border: Border.all(color: succes600),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(PhosphorIcons.storefront, color: succes600),
+                        Text(
+                          "  ${listToko.length} Toko Terpilih",
+                          style: heading4(FontWeight.w600, succes600, 'Outfit'),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: size12),
                   Text(
-                    'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                    'Foto Produk',
                     style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                   ),
-                ],
-              ),
-              GestureDetector(
-                onTap: () => tambahGambar(context),
-                child: IntrinsicHeight(
-                  child: TextFormField(
-                    cursorColor: primary500,
-                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                    decoration: InputDecoration(
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(width: 2, color: primary500),
+                  SizedBox(height: size12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => tambahGambar(context),
+                        child: Container(
+                          child: myImage != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  child: Image.file(
+                                    myImage!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Icon(PhosphorIcons.plus),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: bnw900),
+                            borderRadius: BorderRadius.circular(size8),
+                          ),
+                          height: 80,
+                          width: 80,
+                        ),
                       ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(width: 1.5, color: bnw500),
+                      SizedBox(width: size12),
+                      Text(
+                        'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      enabled: false,
-                      suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
-                      hintText: 'Tambah Gambar',
-                      hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => tambahGambar(context),
+                    child: IntrinsicHeight(
+                      child: TextFormField(
+                        cursorColor: primary500,
+                        style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                        decoration: InputDecoration(
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(width: 2, color: primary500),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(width: 1.5, color: bnw500),
+                          ),
+                          enabled: false,
+                          suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
+                          hintText: 'Tambah Gambar',
+                          hintStyle: heading2(
+                            FontWeight.w600,
+                            bnw900,
+                            'Outfit',
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              SizedBox(height: size16),
-              fieldAddProduk(
-                'Nama Produk',
-                'Matcha Latte Cappuchino',
-                // 'conNameProduk',
-                conNameProduk,
-                TextInputType.text,
-              ),
-              SizedBox(height: size16),
-              SizedBox(child: kategoriList(context)),
-              SizedBox(height: size16),
-              fieldAddProduk(
-                'Harga',
-                'Rp 12.000',
-                conHarga,
-                TextInputType.number,
-              ),
-              SizedBox(height: size16),
-              fieldAddProduk(
-                'Harga Online Gojek/Grab',
-                'Rp 14.000',
-                conHargaOnline,
-                TextInputType.number,
-              ),
-              SizedBox(height: size16),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  onswitchppn = !onswitchppn;
-                  onswitchppn ? ppnAktif = "Aktif" : ppnAktif = "Tidak Aktif";
-                  setState(() {});
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  UniposTextField(
+                    title: 'Nama Produk',
+                    hintText: 'Matcha Latte Cappuchino',
+                    required: true,
+                    controller: conNameProduk,
+                  ),
+                  kategoriList(context),
+                  UniposTextField(
+                    title: 'Harga',
+                    hintText: 'Rp. 12,000',
+                    controller: conHarga,
+                    required: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                  UniposTextField(
+                    title: 'Harga Online',
+                    hintText: 'Rp. 14,000',
+                    controller: conHargaOnline,
+                    required: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      onswitchppn = !onswitchppn;
+                      onswitchppn
+                          ? ppnAktif = "Aktif"
+                          : ppnAktif = "Tidak Aktif";
+                      setState(() {});
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'PPN',
-                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'PPN',
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            Text(
+                              ppnAktif,
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          ppnAktif,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                        FlutterSwitch(
+                          width: 52,
+                          height: 28,
+                          value: onswitchppn,
+                          padding: 0,
+                          activeIcon: Icon(
+                            PhosphorIcons.check,
+                            color: primary500,
+                          ),
+                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                          activeColor: primary500,
+                          inactiveColor: bnw100,
+                          borderRadius: 30,
+                          inactiveToggleColor: bnw900,
+                          activeToggleColor: primary200,
+                          activeSwitchBorder: Border.all(color: primary500),
+                          inactiveSwitchBorder: Border.all(
+                            color: bnw300,
+                            width: 2,
+                          ),
+                          onToggle: (val) {
+                            setState(() {
+                              onswitchppn = val;
+                              onswitchppn
+                                  ? ppnAktif = "Aktif"
+                                  : ppnAktif = "Tidak Aktif";
+                              print(onswitchppn.toString());
+                              print(ppnAktif);
+                            });
+                          },
                         ),
                       ],
                     ),
-                    FlutterSwitch(
-                      width: 52,
-                      height: 28,
-                      value: onswitchppn,
-                      padding: 0,
-                      activeIcon: Icon(PhosphorIcons.check, color: primary500),
-                      inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
-                      activeColor: primary500,
-                      inactiveColor: bnw100,
-                      borderRadius: 30,
-                      inactiveToggleColor: bnw900,
-                      activeToggleColor: primary200,
-                      activeSwitchBorder: Border.all(color: primary500),
-                      inactiveSwitchBorder: Border.all(color: bnw300, width: 2),
-                      onToggle: (val) {
-                        setState(() {
-                          onswitchppn = val;
-                          onswitchppn
-                              ? ppnAktif = "Aktif"
-                              : ppnAktif = "Tidak Aktif";
-                          print(onswitchppn.toString());
-                          print(ppnAktif);
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: size16),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  onswitchtampikan = !onswitchtampikan;
-                  onswitchtampikan
-                      ? kasirAktif = "Aktif"
-                      : kasirAktif = "Tidak Aktif";
+                  ),
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      onswitchtampikan = !onswitchtampikan;
+                      onswitchtampikan
+                          ? kasirAktif = "Aktif"
+                          : kasirAktif = "Tidak Aktif";
 
-                  setState(() {});
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      setState(() {});
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Tampilkan Di Kasir',
-                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tampilkan Di Kasir',
+                              style: heading2(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            Text(
+                              kasirAktif,
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          kasirAktif,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                        FlutterSwitch(
+                          width: 52,
+                          height: 28,
+                          value: onswitchtampikan,
+                          padding: 0,
+                          activeIcon: Icon(
+                            PhosphorIcons.check,
+                            color: primary500,
+                          ),
+                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
+                          activeColor: primary500,
+                          inactiveColor: bnw100,
+                          borderRadius: 30,
+                          inactiveToggleColor: bnw900,
+                          activeToggleColor: primary200,
+                          activeSwitchBorder: Border.all(color: primary500),
+                          inactiveSwitchBorder: Border.all(
+                            color: bnw300,
+                            width: 2,
+                          ),
+                          onToggle: (val) {
+                            onswitchtampikan = val;
+                            onswitchtampikan
+                                ? kasirAktif = "Aktif"
+                                : kasirAktif = "Tidak Aktif";
+                            print(onswitchtampikan.toString());
+                            print(kasirAktif);
+                            setState(() {});
+                          },
                         ),
                       ],
                     ),
-                    FlutterSwitch(
-                      width: 52,
-                      height: 28,
-                      value: onswitchtampikan,
-                      padding: 0,
-                      activeIcon: Icon(PhosphorIcons.check, color: primary500),
-                      inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
-                      activeColor: primary500,
-                      inactiveColor: bnw100,
-                      borderRadius: 30,
-                      inactiveToggleColor: bnw900,
-                      activeToggleColor: primary200,
-                      activeSwitchBorder: Border.all(color: primary500),
-                      inactiveSwitchBorder: Border.all(color: bnw300, width: 2),
-                      onToggle: (val) {
-                        onswitchtampikan = val;
-                        onswitchtampikan
-                            ? kasirAktif = "Aktif"
-                            : kasirAktif = "Tidak Aktif";
-                        print(onswitchtampikan.toString());
-                        print(kasirAktif);
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),

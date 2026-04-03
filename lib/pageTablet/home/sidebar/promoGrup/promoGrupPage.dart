@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
-import 'package:unipos_app_335/components/merchant/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
 import 'package:unipos_app_335/components/organisms/merchant_card.dart';
 
 import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
@@ -274,51 +274,72 @@ class _PromoGrupState extends State<PromoGrup> {
                 MerchantSortingResultLoadingState() => Center(
                   child: SkeletonCard(),
                 ),
-                MerchantSortingResultLoadedState(data: var dataStore) => Container(
-                  child: RefreshIndicator(
-                    color: bnw100,
-                    backgroundColor: primary500,
-                    onRefresh: () async {
-                      setState(() {});
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: MasonryGridView.builder(
-                            padding: EdgeInsets.zero,
-                            gridDelegate:
-                                SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                ),
-                            crossAxisSpacing: size16,
-                            mainAxisSpacing: size16,
-                            itemCount: dataStore.length,
-                            itemBuilder: (context, i) {
-                              return MerchantCard(
-                                merchant: dataStore[i],
-                                onTap: () {
-                                  _pageController.nextPage(
-                                    duration: Duration(milliseconds: 10),
-                                    curve: Curves.easeIn,
-                                  );
-                                  log(dataStore[i].name.toString());
-                                  log(dataStore[i].merchantid.toString());
+                MerchantSortingResultLoadedState(data: var dataStore) =>
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: bnw100,
+                      backgroundColor: primary500,
+                      onRefresh: () async {
+                        await context
+                            .read<MerchantSortingProvider>()
+                            .fetchMerchantSorting(
+                              widget.token,
+                              '',
+                              textvalueOrderByStore,
+                            );
+                      },
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: (dataStore.length / 2).ceil(),
+                        itemBuilder: (context, rowIndex) {
+                          final totalRows = (dataStore.length / 2).ceil();
+                          final isLastRow = rowIndex == totalRows - 1;
+                          final leftIndex = rowIndex * 2;
+                          final rightIndex = rowIndex * 2 + 1;
 
-                                  _name = dataStore[i].name.toString();
-                                  _merchid = dataStore[i].merchantid.toString();
+                          Widget buildCard(int i) {
+                            return MerchantCard(
+                              merchant: dataStore[i],
+                              onTap: () {
+                                _pageController.nextPage(
+                                  duration: Duration(milliseconds: 10),
+                                  curve: Curves.easeIn,
+                                );
+                                log(dataStore[i].name.toString());
+                                log(dataStore[i].merchantid.toString());
 
-                                  setState(() {});
-                                },
-                                buttonText: 'Lihat Promo',
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                                _name = dataStore[i].name.toString();
+                                _merchid = dataStore[i].merchantid.toString();
+
+                                setState(() {});
+                              },
+                              buttonText: 'Lihat Promo',
+                            );
+                          }
+
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: isLastRow ? 0 : size16,
+                            ),
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(child: buildCard(leftIndex)),
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    child: rightIndex < dataStore.length
+                                        ? buildCard(rightIndex)
+                                        : SizedBox(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
               };
             },
           ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/models/coaModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/bomModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/detailPembelianModel.dart';
@@ -786,13 +787,13 @@ Future getAllToko(context, token, name, orderby) async {
   if (response.statusCode == 200) {
     print('succes');
 
-    final List<ModelDataToko> result = [];
+    final List<MerchantSortingData> result = [];
 
     final Map<String, dynamic> decoded = jsonDecode(response.body);
     for (Map<String, dynamic> item in decoded['data']) {
       // print(item);
 
-      final model = ModelDataToko.fromJson(item);
+      final model = MerchantSortingData.fromJson(item);
       result.add(model);
 
       // print(model.toJson());
@@ -1138,6 +1139,7 @@ Future updateMerch(
       return jsonResponse['rc'];
     }
   } catch (e) {
+    closeLoading(context);
     throw Exception(e.toString());
   }
 }

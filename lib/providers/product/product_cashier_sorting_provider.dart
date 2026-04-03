@@ -1,24 +1,25 @@
 import 'package:flutter/widgets.dart';
 import 'package:unipos_app_335/data/static/product/product_sorting_state.dart';
+import 'package:unipos_app_335/data/static/product_cashier/product_cashier_sorting_state.dart';
 import 'package:unipos_app_335/services/api/product/product_sorting_service.dart';
 
-class ProductSortingProvider extends ChangeNotifier {
+class ProductCashierSortingProvider extends ChangeNotifier {
   final ProductSortingService _apiService;
 
-  ProductSortingProvider(this._apiService);
+  ProductCashierSortingProvider(this._apiService);
 
-  ProductSortingState _resultState = ProductSortingResultNoneState();
+  ProductCashierSortingState _resultState = ProductCashierSortingResultNoneState();
 
-  ProductSortingState get resultState => _resultState;
+  ProductCashierSortingState get resultState => _resultState;
 
-  Future<void> fetchProductSorting(
+  Future<void> fetchProductCashierSorting(
     String token,
     String merchantId,
     String name,
     String orderBy,
   ) async {
     try {
-      _resultState = ProductSortingResultLoadingState();
+      _resultState = ProductCashierSortingResultLoadingState();
       notifyListeners();
 
       final result = await _apiService.getProductSorting(
@@ -29,25 +30,25 @@ class ProductSortingProvider extends ChangeNotifier {
       );
       if (result.rc == "00" && result.data != null) {
         if (result.data!.isEmpty) {
-          _resultState = ProductSortingResultNoneState();
+          _resultState = ProductCashierSortingResultNoneState();
         } else {
-          _resultState = ProductSortingResultLoadedState(result.data!);
+          _resultState = ProductCashierSortingResultLoadedState(result.data!);
         }
       } else {
-        _resultState = ProductSortingResultErrorState(
+        _resultState = ProductCashierSortingResultErrorState(
           result.rc ?? "Gagal memuat history",
         );
       }
       notifyListeners();
     } catch (e) {
-      _resultState = ProductSortingResultErrorState(e.toString());
+      _resultState = ProductCashierSortingResultErrorState(e.toString());
       notifyListeners();
     }
   }
 
   void updateIsPPN(String productId, int value) {
     final state = _resultState;
-    if (state is ProductSortingResultLoadedState) {
+    if (state is ProductCashierSortingResultLoadedState) {
       final updatedList = state.data.map((data) {
         if (data.productid == productId) {
           return data.copyWith(isPPN: value);
@@ -55,14 +56,14 @@ class ProductSortingProvider extends ChangeNotifier {
         return data;
       }).toList();
 
-      _resultState = ProductSortingResultLoadedState(updatedList);
+      _resultState = ProductCashierSortingResultLoadedState(updatedList);
       notifyListeners();
     }
   }
 
   void updateIsActive(String productId, int value) {
     final state = _resultState;
-    if (state is ProductSortingResultLoadedState) {
+    if (state is ProductCashierSortingResultLoadedState) {
       final updatedList = state.data.map((data) {
         if (data.productid == productId) {
           return data.copyWith(isActive: value);
@@ -70,26 +71,26 @@ class ProductSortingProvider extends ChangeNotifier {
         return data;
       }).toList();
 
-      _resultState = ProductSortingResultLoadedState(updatedList);
+      _resultState = ProductCashierSortingResultLoadedState(updatedList);
       notifyListeners();
     }
   }
 
-  void deleteProduct(String productId) {
+  void deleteProductCashier(String productId) {
     final state = _resultState;
-    if (state is ProductSortingResultLoadedState) {
+    if (state is ProductCashierSortingResultLoadedState) {
       final updatedList = state.data
           .where((d) => d.productid != productId)
           .toList();
 
-      _resultState = ProductSortingResultLoadedState(updatedList);
+      _resultState = ProductCashierSortingResultLoadedState(updatedList);
       notifyListeners();
     }
   }
 
   int get totalData {
     final state = resultState;
-    if (state is ProductSortingResultLoadedState) {
+    if (state is ProductCashierSortingResultLoadedState) {
       return state.data.length;
     }
     return 0;

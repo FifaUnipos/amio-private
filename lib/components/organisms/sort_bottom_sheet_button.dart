@@ -7,7 +7,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 
 
-class SortBottomSheetButton extends StatefulWidget {
+class SortBottomSheetButton extends StatelessWidget {
   const SortBottomSheetButton({
     super.key,
     required this.options,
@@ -29,39 +29,15 @@ class SortBottomSheetButton extends StatefulWidget {
   final String sectionLabel;
   final String confirmLabel;
 
-  @override
-  State<SortBottomSheetButton> createState() => _SortBottomSheetButtonState();
-}
-
-class _SortBottomSheetButtonState extends State<SortBottomSheetButton> {
-  late int _displayIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _displayIndex = widget.initialIndex;
-  }
-
-  @override
-  void didUpdateWidget(SortBottomSheetButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialIndex != widget.initialIndex) {
-      _displayIndex = widget.initialIndex;
-    }
-  }
-
-  void _openSheet() {
-    final int snapshot = _displayIndex;
-    bool confirmed = false;
-
-    showModalBottomSheet<void>(
+  void _openSheet(BuildContext context) async {
+    final int? selectedIndex = await showModalBottomSheet<int>(
       context: context,
       constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
       ),
       builder: (sheetContext) {
-        int localIndex = snapshot;
+        int localIndex = initialIndex;
 
         return StatefulBuilder(
           builder: (_, setSheet) => IntrinsicHeight(
@@ -85,21 +61,21 @@ class _SortBottomSheetButtonState extends State<SortBottomSheetButton> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.sheetTitle,
+                          sheetTitle,
                           style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                         ),
                         Text(
-                          widget.sheetSubtitle,
+                          sheetSubtitle,
                           style: heading4(FontWeight.w400, bnw600, 'Outfit'),
                         ),
                         SizedBox(height: size20),
                         Text(
-                          widget.sectionLabel,
+                          sectionLabel,
                           style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                         ),
                         Wrap(
                           children: List<Widget>.generate(
-                            widget.options.length,
+                            options.length,
                             (int index) {
                               return Padding(
                                 padding: EdgeInsets.only(right: size16),
@@ -118,7 +94,7 @@ class _SortBottomSheetButtonState extends State<SortBottomSheetButton> {
                                     borderRadius: BorderRadius.circular(size8),
                                   ),
                                   label: Text(
-                                    widget.options[index],
+                                    options[index],
                                     style: heading4(
                                       FontWeight.w400,
                                       localIndex == index
@@ -143,15 +119,12 @@ class _SortBottomSheetButtonState extends State<SortBottomSheetButton> {
                     width: double.infinity,
                     child: GestureDetector(
                       onTap: () {
-                        confirmed = true;
-                        setState(() => _displayIndex = localIndex);
-                        Navigator.pop(sheetContext);
-                        widget.onConfirm(localIndex);
+                        Navigator.pop(sheetContext, localIndex);
                       },
                       child: buttonXL(
                         Center(
                           child: Text(
-                            widget.confirmLabel,
+                            confirmLabel,
                             style: heading3(
                               FontWeight.w600,
                               bnw100,
@@ -169,28 +142,28 @@ class _SortBottomSheetButtonState extends State<SortBottomSheetButton> {
           ),
         );
       },
-    ).whenComplete(() {
-      if (!confirmed && mounted) {
-        setState(() => _displayIndex = snapshot);
-      }
-    });
+    );
+
+    if (selectedIndex != null) {
+      onConfirm(selectedIndex);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return IntrinsicWidth(
       child: GestureDetector(
-        onTap: _openSheet,
+        onTap: () => _openSheet(context),
         child: buttonLoutline(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                widget.buttonLabel,
+                buttonLabel,
                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari ${widget.options[_displayIndex]}',
+                ' dari ${options[initialIndex]}',
                 style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),

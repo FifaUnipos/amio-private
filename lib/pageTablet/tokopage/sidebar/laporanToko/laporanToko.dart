@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:unipos_app_335/components/organisms/report_card.dart';
 import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/laporanToko/laporanMoveInvenPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/laporanToko/laporanPenggunaanProduk.dart';
@@ -37,11 +39,8 @@ import 'pendapatanToko.dart';
 
 class LaporanToko extends StatefulWidget {
   String token;
-  LaporanToko({
-    Key? key,
-    required this.token,
-    required this.controller,
-  }) : super(key: key);
+  LaporanToko({Key? key, required this.token, required this.controller})
+    : super(key: key);
 
   final SidebarXController controller;
 
@@ -70,16 +69,14 @@ class _LaporanTokoState extends State<LaporanToko> {
     checkConnection(context);
     // print(_textvalueOrderBy);
 
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-        setState(() {});
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+      setState(() {});
+    });
     super.initState();
   }
 
@@ -102,7 +99,7 @@ class _LaporanTokoState extends State<LaporanToko> {
     "PPN Tertinggi",
     "PPN Terendah",
     "Total Tertinggi",
-    "Total Terendah"
+    "Total Terendah",
   ];
 
   List pendapatanHarianText = [
@@ -113,27 +110,43 @@ class _LaporanTokoState extends State<LaporanToko> {
     "ppnTertinggi",
     "ppnTerendah",
     "totalTertinggi",
-    "totalTerendah"
+    "totalTerendah",
   ];
 
   @override
   Widget build(BuildContext context) {
     List<ObjectLaporan> objects = [
-      ObjectLaporan('Pendapatan Harian', 'Laporan Pendapatan Harian Toko',
-          PhosphorIcons.calendar_fill),
-      if (merchantType == 'Group_Merchant')
-        ObjectLaporan('Pendapatan Toko', 'Laporan Pendapatan Keseluruhan Toko',
-            PhosphorIcons.storefront_fill),
-      ObjectLaporan('Pendapatan Per Produk', 'Laporan Pendapatan Per Produk',
-          PhosphorIcons.shopping_bag_open_fill),
       ObjectLaporan(
-          'Pendapatan Per Metode Pembayaran',
-          'Laporan Pendapatan Per Metode Pembayaran',
-          PhosphorIcons.credit_card_fill),
-      ObjectLaporan('Stok Inventaris', 'Laporan Stok Inventaris',
-          PhosphorIcons.clipboard_fill),
-      ObjectLaporan('Pergerakan Inventaris', 'Laporan Pergerakan Inventaris',
-          PhosphorIcons.swap_fill),
+        'Pendapatan Harian',
+        'Laporan Pendapatan Harian Toko',
+        PhosphorIcons.calendar_fill,
+      ),
+      if (merchantType == 'Group_Merchant')
+        ObjectLaporan(
+          'Pendapatan Toko',
+          'Laporan Pendapatan Keseluruhan Toko',
+          PhosphorIcons.storefront_fill,
+        ),
+      ObjectLaporan(
+        'Pendapatan Per Produk',
+        'Laporan Pendapatan Per Produk',
+        PhosphorIcons.shopping_bag_open_fill,
+      ),
+      ObjectLaporan(
+        'Pendapatan Per Metode Pembayaran',
+        'Laporan Pendapatan Per Metode Pembayaran',
+        PhosphorIcons.credit_card_fill,
+      ),
+      ObjectLaporan(
+        'Stok Inventaris',
+        'Laporan Stok Inventaris',
+        PhosphorIcons.clipboard_fill,
+      ),
+      ObjectLaporan(
+        'Pergerakan Inventaris',
+        'Laporan Pergerakan Inventaris',
+        PhosphorIcons.swap_fill,
+      ),
       // ObjectLaporan(
       //     'Penggunaan Bahan Produk',
       //     'Laporan Penggunaan Bahan Produk',
@@ -170,20 +183,34 @@ class _LaporanTokoState extends State<LaporanToko> {
             children: [
               lihatLaporanPage(objects),
               LaporanPendapatanHarianPage(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               if (merchantType == 'Group_Merchant')
                 LaporanPendapatanTokoPage(
-                    pageController: pageController, token: widget.token),
+                  pageController: pageController,
+                  token: widget.token,
+                ),
               LaporanPendapatanPerProduk(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               LaporanPembayaranPage(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               LaporanStokInventarisPage(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               LaporanPergerakanInventarisPage(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               LaporanPenggunaanProdukPage(
-                  pageController: pageController, token: widget.token),
+                pageController: pageController,
+                token: widget.token,
+              ),
               // profitHarian(context),5
             ],
           ),
@@ -233,11 +260,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                     Icon(PhosphorIcons.calendar, color: bnw900),
                     Text(
                       '30 Hari Terakhir',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -254,11 +277,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                     Icon(PhosphorIcons.storefront, color: bnw900),
                     Text(
                       'Semua Toko',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -346,12 +365,16 @@ class _LaporanTokoState extends State<LaporanToko> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(top: 10),
-            decoration: BoxDecoration(
-              color: primary100,
-            ),
+            decoration: BoxDecoration(color: primary100),
             child: FutureBuilder(
-              future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, [''], ''),
+              future: getLaporanDaily(
+                context,
+                widget.token,
+                _textvalueOrderBy,
+                _textvalueKeyword,
+                [''],
+                '',
+              ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -373,7 +396,10 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 child: Text(
                                   detail[index]['tanggal'].toString(),
                                   style: heading4(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -383,60 +409,75 @@ class _LaporanTokoState extends State<LaporanToko> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['nilaiTransaksi'])
-                                      .toString(),
+                                    detail[index]['nilaiTransaksi'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['totalPPN'])
-                                      .toString(),
+                                    detail[index]['totalPPN'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(thickness: 1.2)
+                          Divider(thickness: 1.2),
                         ],
                       );
                     },
@@ -449,8 +490,14 @@ class _LaporanTokoState extends State<LaporanToko> {
           ),
         ),
         FutureBuilder(
-          future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-              _textvalueKeyword, [''], ''),
+          future: getLaporanDaily(
+            context,
+            widget.token,
+            _textvalueOrderBy,
+            _textvalueKeyword,
+            [''],
+            '',
+          ),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               Map<String, dynamic>? data = snapshot.data!['data'];
@@ -480,8 +527,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w400, bnw900, 'Outfit'),
@@ -490,8 +538,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w400, bnw900, 'Outfit'),
@@ -500,8 +549,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w400, bnw900, 'Outfit'),
@@ -510,8 +560,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['total'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['total'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w400, bnw900, 'Outfit'),
@@ -528,10 +579,7 @@ class _LaporanTokoState extends State<LaporanToko> {
                         ),
                       ],
                     ),
-                    Divider(
-                      thickness: 0.6,
-                      color: bnw900,
-                    ),
+                    Divider(thickness: 0.6, color: bnw900),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -545,8 +593,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w700, bnw900, 'Outfit'),
@@ -555,8 +604,9 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['totalPPN'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: heading4(FontWeight.w700, bnw900, 'Outfit'),
@@ -565,12 +615,16 @@ class _LaporanTokoState extends State<LaporanToko> {
                         SizedBox(
                           width: width,
                           child: Text(
-                            FormatCurrency.convertToIdr(header['total'])
-                                .toString(),
+                            FormatCurrency.convertToIdr(
+                              header['total'],
+                            ).toString(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style:
-                                heading4(FontWeight.w400, succes600, 'Outfit'),
+                            style: heading4(
+                              FontWeight.w400,
+                              succes600,
+                              'Outfit',
+                            ),
                           ),
                         ),
                       ],
@@ -612,82 +666,42 @@ class _LaporanTokoState extends State<LaporanToko> {
         ),
         SizedBox(height: size16),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: objects.length >= 6 ? 6 : objects.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // 2 item per row
-                    crossAxisSpacing: size16,
-                    mainAxisSpacing: size16,
-                    childAspectRatio: 3, // sesuaikan ukuran kotak
-                  ),
-                  itemBuilder: (context, i) {
-                    final obj = objects[i];
-                    return GestureDetector(
-                      onTap: () {
-                        pageController.jumpToPage(i + 1);
-                        setState(() {});
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(size16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(size16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(obj.title,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.visible,
-                                          style: heading2(
-                                              FontWeight.w700, bnw900, 'Outfit')),
-                                      Text(obj.description,
-                                          style: body1(
-                                              FontWeight.w400, bnw800, 'Outfit')),
-                                    ],
-                                  ),
-                                ),
-                                Icon(obj.icon, color: bnw900, size: 36),
-                              ],
-                            ),
-                            Spacer(),
-                            Container(
-                              height: 40,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: bnw100,
-                                border: Border.all(color: primary500),
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Lihat Laporan',
-                                  style: heading4(
-                                      FontWeight.w600, primary500, 'Outfit'),
-                                ),
-                              ),
-                            ),
-                          ],
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: (objects.length / 2).ceil(),
+            itemBuilder: (context, rowIndex) {
+              final leftIndex = rowIndex * 2;
+              final rightIndex = rowIndex * 2 + 1;
+              return Padding(
+                padding: EdgeInsets.only(bottom: size16),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: ReportCard(
+                          obj: objects[leftIndex],
+                          index: leftIndex,
+                          pageController: pageController,
                         ),
                       ),
-                    );
-                  },
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: rightIndex < objects.length
+                            ? ReportCard(
+                                obj: objects[rightIndex],
+                                index: rightIndex,
+                                pageController: pageController,
+                              )
+                            : SizedBox(),
+                      ),
+                    ],
+                  ),
                 ),
-              )
-            ],
+              );
+            },
           ),
-        )
+        ),
       ],
     );
   }
@@ -698,9 +712,7 @@ class _LaporanTokoState extends State<LaporanToko> {
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -709,8 +721,12 @@ class _LaporanTokoState extends State<LaporanToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -731,18 +747,27 @@ class _LaporanTokoState extends State<LaporanToko> {
                                 Text(
                                   'Rentang Waktu',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: size24),
                                 Text(
                                   'Pilih Rentang Waktu',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -752,7 +777,8 @@ class _LaporanTokoState extends State<LaporanToko> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
@@ -761,16 +787,20 @@ class _LaporanTokoState extends State<LaporanToko> {
                                                   ? primary500
                                                   : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
-                                          label: Text(pilihUrutan[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  _valueOrder == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
+                                          label: Text(
+                                            pilihUrutan[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              _valueOrder == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           selected: _valueOrder == index,
                                           onSelected: (bool selected) {
                                             setState(() {
@@ -808,7 +838,10 @@ class _LaporanTokoState extends State<LaporanToko> {
                                   child: Text(
                                     'Tampilkan',
                                     style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 0,
@@ -831,11 +864,7 @@ class _LaporanTokoState extends State<LaporanToko> {
               SizedBox(width: size12),
               Text(
                 textOrderBy,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -847,14 +876,16 @@ class _LaporanTokoState extends State<LaporanToko> {
   }
 
   orderByToko(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
+    BuildContext context,
+    pilihUrutan,
+    pendapatanHarianText,
+    textOrderBy,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
           showModalBottomSheet(
-            constraints: const BoxConstraints(
-              maxWidth: double.infinity,
-            ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -883,19 +914,28 @@ class _LaporanTokoState extends State<LaporanToko> {
                             children: [
                               Text(
                                 'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -904,8 +944,12 @@ class _LaporanTokoState extends State<LaporanToko> {
                                     return Padding(
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
-                                        padding:
-                                            EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                        padding: EdgeInsets.fromLTRB(
+                                          0,
+                                          10,
+                                          0,
+                                          10,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -914,16 +958,20 @@ class _LaporanTokoState extends State<LaporanToko> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueOrder == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueOrder == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -961,14 +1009,17 @@ class _LaporanTokoState extends State<LaporanToko> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -988,11 +1039,7 @@ class _LaporanTokoState extends State<LaporanToko> {
               SizedBox(width: 4),
               Text(
                 textOrderBy,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -1003,14 +1050,16 @@ class _LaporanTokoState extends State<LaporanToko> {
   }
 
   orderByProduct(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
+    BuildContext context,
+    pilihUrutan,
+    pendapatanHarianText,
+    textOrderBy,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
           showModalBottomSheet(
-            constraints: const BoxConstraints(
-              maxWidth: double.infinity,
-            ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -1039,19 +1088,28 @@ class _LaporanTokoState extends State<LaporanToko> {
                             children: [
                               Text(
                                 'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -1060,8 +1118,12 @@ class _LaporanTokoState extends State<LaporanToko> {
                                     return Padding(
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
-                                        padding:
-                                            EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                        padding: EdgeInsets.fromLTRB(
+                                          0,
+                                          10,
+                                          0,
+                                          10,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -1070,16 +1132,20 @@ class _LaporanTokoState extends State<LaporanToko> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueOrder == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueOrder == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -1118,14 +1184,17 @@ class _LaporanTokoState extends State<LaporanToko> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -1145,11 +1214,7 @@ class _LaporanTokoState extends State<LaporanToko> {
               SizedBox(width: 4),
               Text(
                 textOrderByProduct,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -1168,18 +1233,11 @@ class _LaporanTokoState extends State<LaporanToko> {
           '6 Bulan Terakhir',
           '1 Tahun Terakhir',
         ];
-        List textvalueKeyword = [
-          '1B',
-          '3B',
-          '6B',
-          '1Y',
-        ];
+        List textvalueKeyword = ['1B', '3B', '6B', '1Y'];
 
         setState(() {
           showModalBottomSheet(
-            constraints: const BoxConstraints(
-              maxWidth: double.infinity,
-            ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -1208,19 +1266,28 @@ class _LaporanTokoState extends State<LaporanToko> {
                             children: [
                               Text(
                                 'Pilih Tanggal',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size24),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -1229,8 +1296,12 @@ class _LaporanTokoState extends State<LaporanToko> {
                                     return Padding(
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
-                                        padding:
-                                            EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                        padding: EdgeInsets.fromLTRB(
+                                          0,
+                                          10,
+                                          0,
+                                          10,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -1239,16 +1310,20 @@ class _LaporanTokoState extends State<LaporanToko> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueKeyword == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueKeyword == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueKeyword == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -1281,14 +1356,17 @@ class _LaporanTokoState extends State<LaporanToko> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -1308,11 +1386,7 @@ class _LaporanTokoState extends State<LaporanToko> {
               SizedBox(width: 4),
               Text(
                 _textKeyword,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),

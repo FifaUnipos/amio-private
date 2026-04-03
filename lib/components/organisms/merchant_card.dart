@@ -10,14 +10,22 @@ class MerchantCard extends StatelessWidget {
   final MerchantSortingData merchant;
   final VoidCallback onTap;
   final String buttonText;
+  final bool editable;
+  final bool deletable;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const MerchantCard({
     super.key,
     required this.merchant,
     required this.onTap,
+    this.editable = false,
+    this.deletable = false,
+    this.onEdit = _defaultCallback,
+    this.onDelete = _defaultCallback,
     this.buttonText = 'Lihat Toko',
   });
-
+  static void _defaultCallback() {}
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,6 +36,8 @@ class MerchantCard extends StatelessWidget {
       ),
       child: IntrinsicHeight(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: size16,
           children: [
             Row(
               children: [
@@ -75,8 +85,85 @@ class MerchantCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: size16),
-            GestureDetector(
+            _ActionButtons(
+              onTap: onTap,
+              buttonText: buttonText,
+              editable: editable,
+              deletable: deletable,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButtons extends StatelessWidget {
+  final VoidCallback onTap;
+  final String buttonText;
+  final bool editable;
+  final bool deletable;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _ActionButtons({
+    required this.onTap,
+    this.editable = false,
+    this.deletable = false,
+    required this.onEdit,
+    required this.onDelete,
+    this.buttonText = 'Lihat Toko',
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: size16,
+      children: [
+        if (editable)
+          Expanded(
+            child: GestureDetector(
+              onTap: onEdit,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  border: Border.all(color: bnw300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(PhosphorIcons.pencil_line),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Ubah',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+        if (deletable)
+          GestureDetector(
+            onTap: onDelete,
+            child: Container(
+              height: 40,
+              width: 50,
+              decoration: BoxDecoration(
+                color: bnw100,
+                border: Border.all(color: red500),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(PhosphorIcons.trash_fill, color: red500, size: 18),
+            ),
+          ),
+        if (!editable && !deletable) ...[
+          Expanded(
+            child: GestureDetector(
               onTap: onTap,
               child: buttonLoutline(
                 Center(
@@ -88,9 +175,9 @@ class MerchantCard extends StatelessWidget {
                 primary500,
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        ],
+      ],
     );
   }
 }
