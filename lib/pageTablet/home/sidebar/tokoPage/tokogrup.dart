@@ -6,7 +6,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:unipos_app_335/components/merchant/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/merchant_card.dart';
 
 import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
@@ -392,300 +393,180 @@ class _TokoSidePageState extends State<TokoSidePage> {
                 MerchantSortingResultLoadingState() => Center(
                   child: SkeletonCard(),
                 ),
-                MerchantSortingResultLoadedState(data: var dataStore) => Container(
+                MerchantSortingResultLoadedState(data: var dataStore) => Expanded(
                   child: RefreshIndicator(
                     color: bnw100,
                     backgroundColor: primary500,
                     onRefresh: () async {
-                      setState(() {});
+                      await context
+                          .read<MerchantSortingProvider>()
+                          .fetchMerchantSorting(
+                            widget.token,
+                            '',
+                            textvalueOrderByStore,
+                          );
                     },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: MasonryGridView.builder(
-                            padding: EdgeInsets.zero,
-                            gridDelegate:
-                                SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                ),
-                            crossAxisSpacing: size16,
-                            mainAxisSpacing: size16,
-                            itemCount: dataStore.length,
-                            itemBuilder: (context, i) {
-                              return Container(
-                                padding: EdgeInsets.all(size16),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(size16),
-                                  border: Border.all(color: bnw300),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: (dataStore.length / 2).ceil(),
+                      itemBuilder: (context, rowIndex) {
+                        final totalRows = (dataStore.length / 2).ceil();
+                        final isLastRow = rowIndex == totalRows - 1;
+                        final leftIndex = rowIndex * 2;
+                        final rightIndex = rowIndex * 2 + 1;
+
+                        Widget buildCard(int i) {
+                          return MerchantCard(
+                            merchant: dataStore[i],
+                            onTap: () {},
+                            onEdit: () {
+                              whenLoading(context);
+                              merchid = dataStore[i].merchantid.toString();
+                              getSingleMerch(
+                                context,
+                                widget.token,
+                                merchid,
+                              ).then((value) async {
+                                await Future.delayed(Duration(seconds: 1));
+
+                                if (value['rc'] == '00') {
+                                  await context
+                                      .read<MerchantSortingProvider>()
+                                      .fetchMerchantSorting(
+                                        widget.token,
+                                        '',
+                                        textvalueOrderByStore,
+                                      );
+                                  conNameMerchEdit.text = nameMerchantUbah;
+                                  conAddressEdit.text = addressMerchantUbah;
+                                  conCodePosEdit.text = zipMerchantUbah;
+                                  tipe = tipeUbah;
+                                  prov = nameProvUbah;
+                                  kab = nameregUbah;
+                                  kec = nameDisUbah;
+                                  desa = nameVillageUbah;
+                                  idtipe = idtipeUbah;
+                                  idprov = kodeProvUbah;
+                                  idkab = kodeRegUbah;
+                                  idkec = kodeDisUbah;
+                                  iddesa = kodeVillageUbah;
+                                  await _getTipeList();
+                                  selectedTipeUsaha = tipeList?.firstWhere(
+                                    (t) => t['tipeusaha_id'] == idtipeUbah,
+                                    orElse: () => null,
+                                  );
+                                  await _getProvinceList();
+                                  selectedProvince = provincesList?.firstWhere(
+                                    (province) =>
+                                        province['ID'] == kodeProvUbah,
+                                    orElse: () => null,
+                                  );
+                                  await _getRegenciesList(idprov);
+                                  selectedRegencies = regenciesList?.firstWhere(
+                                    (regencie) => regencie['ID'] == kodeRegUbah,
+                                    orElse: () => null,
+                                  );
+                                  await _getDistrictList(idkab);
+                                  selectedDistrict = districtList?.firstWhere(
+                                    (distric) => distric['ID'] == kodeDisUbah,
+                                    orElse: () => null,
+                                  );
+                                  await _getVillageList(idkec);
+                                  selectedVillage = villageList?.firstWhere(
+                                    (village) =>
+                                        village['ID'] == kodeVillageUbah,
+                                    orElse: () => null,
+                                  );
+                                  _pageController.jumpToPage(2);
+                                  setState(() {});
+                                }
+                                closeLoading(context);
+                              });
+
+                              setState(() {});
+                            },
+                            deletable: true,
+                            onDelete: () {
+                              _validate = false;
+                              hapusController.text = '';
+                              showBottomPilihan(
+                                context,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Row(
+                                    Column(
                                       children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            1000,
-                                          ),
-                                          child: SizedBox(
-                                            height: 60,
-                                            width: 60,
-                                            child:
-                                                dataStore[i].logomerchant_url !=
-                                                    null
-                                                ? Image.network(
-                                                    dataStore[i]
-                                                        .logomerchant_url
-                                                        .toString(),
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => SizedBox(
-                                                          child: Icon(
-                                                            PhosphorIcons
-                                                                .storefront_fill,
-                                                            size: 60,
-                                                            color: bnw900,
-                                                          ),
-                                                        ),
-                                                  )
-                                                : Icon(
-                                                    PhosphorIcons
-                                                        .storefront_fill,
-                                                    size: 60,
-                                                  ),
+                                        Text(
+                                          'Yakin Ingin Menghapus Toko?',
+                                          style: heading1(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
                                           ),
                                         ),
-                                        SizedBox(width: size20),
-                                        Flexible(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                dataStore[i].name ?? '',
-                                                style: heading2(
-                                                  FontWeight.w700,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Text(
-                                                '${dataStore[i].address}',
-                                                style: body1(
-                                                  FontWeight.w400,
-                                                  bnw800,
-                                                  'Outfit',
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 2,
-                                              ),
-                                            ],
+                                        SizedBox(height: size4),
+                                        Text(
+                                          'Data-data transaksi pada toko ini akan dihapus semua. Toko yang dihapus tidak dapat dikembalikan lagi.',
+                                          style: heading2(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
                                           ),
                                         ),
+                                        SizedBox(height: size32),
                                       ],
                                     ),
-                                    SizedBox(height: size16),
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: GestureDetector(
                                             onTap: () {
-                                              whenLoading(context);
-                                              merchid = dataStore[i].merchantid
-                                                  .toString();
-
-                                              getSingleMerch(
+                                              print(merchid);
+                                              Navigator.pop(context);
+                                              showBotomHapusToko(
                                                 context,
-                                                widget.token,
-                                                merchid,
-                                              ).then((value) async {
-                                                await Future.delayed(
-                                                  Duration(seconds: 1),
-                                                );
-                                                if (value['rc'] == '00') {
-                                                  conNameMerchEdit.text =
-                                                      nameMerchantUbah;
-                                                  conAddressEdit.text =
-                                                      addressMerchantUbah;
-                                                  conCodePosEdit.text =
-                                                      zipMerchantUbah;
-
-                                                  tipe = tipeUbah;
-                                                  prov = nameProvUbah;
-                                                  kab = nameregUbah;
-                                                  kec = nameDisUbah;
-                                                  desa = nameVillageUbah;
-
-                                                  idtipe = idtipeUbah;
-                                                  idprov = kodeProvUbah;
-                                                  idkab = kodeRegUbah;
-                                                  idkec = kodeDisUbah;
-                                                  iddesa = kodeVillageUbah;
-
-                                                  closeLoading(context);
-                                                  _pageController.jumpToPage(2);
-                                                  setState(() {});
-                                                }
-                                              });
-
+                                                dataStore[i].merchantid ?? '',
+                                                dataStore[i].name ?? '',
+                                              );
                                               setState(() {});
                                             },
-                                            child: Container(
-                                              height: 40,
-                                              width: 300,
-                                              decoration: BoxDecoration(
-                                                color: bnw100,
-                                                border: Border.all(
-                                                  color: bnw300,
+                                            child: buttonXLoutline(
+                                              Center(
+                                                child: Text(
+                                                  'Iya, Hapus',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    primary500,
+                                                    'Outfit',
+                                                  ),
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
                                               ),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    PhosphorIcons.pencil_line,
-                                                  ),
-                                                  SizedBox(width: size16),
-                                                  Text(
-                                                    'Ubah',
-                                                    style: heading4(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit',
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                              MediaQuery.of(context).size.width,
+                                              primary500,
                                             ),
                                           ),
                                         ),
-                                        SizedBox(width: size12),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _validate = false;
-                                            hapusController.text = '';
-                                            showBottomPilihan(
-                                              context,
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Column(
-                                                    children: [
-                                                      Text(
-                                                        'Yakin Ingin Menghapus Toko?',
-                                                        style: heading1(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: size4),
-                                                      Text(
-                                                        'Data-data transaksi pada toko ini akan dihapus semua. Toko yang dihapus tidak dapat dikembalikan lagi.',
-                                                        style: heading2(
-                                                          FontWeight.w400,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: size32),
-                                                    ],
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {});
+                                              Navigator.pop(context);
+                                            },
+                                            child: buttonXL(
+                                              Center(
+                                                child: Text(
+                                                  'Batal',
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw100,
+                                                    'Outfit',
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            print(merchid);
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                            showBotomHapusToko(
-                                                              context,
-                                                              i,
-                                                            );
-                                                            setState(() {});
-                                                          },
-                                                          child: buttonXLoutline(
-                                                            Center(
-                                                              child: Text(
-                                                                'Iya, Hapus',
-                                                                style: heading3(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  primary500,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            MediaQuery.of(
-                                                              context,
-                                                            ).size.width,
-                                                            primary500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: size16),
-                                                      Expanded(
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            setState(() {});
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                          },
-                                                          child: buttonXL(
-                                                            Center(
-                                                              child: Text(
-                                                                'Batal',
-                                                                style: heading3(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw100,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            MediaQuery.of(
-                                                              context,
-                                                            ).size.width,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                                ),
                                               ),
-                                            );
-                                          },
-                                          child: Container(
-                                            height: 40,
-                                            width: 50,
-                                            decoration: BoxDecoration(
-                                              color: bnw100,
-                                              border: Border.all(color: red500),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Icon(
-                                              PhosphorIcons.trash_fill,
-                                              color: red500,
-                                              size: 18,
+                                              MediaQuery.of(context).size.width,
                                             ),
                                           ),
                                         ),
@@ -695,9 +576,30 @@ class _TokoSidePageState extends State<TokoSidePage> {
                                 ),
                               );
                             },
+                            editable: true,
+                          );
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: isLastRow ? 0 : size16,
                           ),
-                        ),
-                      ],
+                          child: IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(child: buildCard(leftIndex)),
+                                SizedBox(width: size16),
+                                Expanded(
+                                  child: rightIndex < dataStore.length
+                                      ? buildCard(rightIndex)
+                                      : SizedBox(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -920,10 +822,15 @@ class _TokoSidePageState extends State<TokoSidePage> {
                               img64,
                               _pageController,
                               iditpe,
-                            ).then((value) {
+                            ).then((value) async {
                               if (value == '00') {
-                                refreshTampilan();
-                                setState(() {});
+                                await context
+                                    .read<MerchantSortingProvider>()
+                                    .fetchMerchantSorting(
+                                      widget.token,
+                                      '',
+                                      textvalueOrderByStore,
+                                    );
                               }
                             });
                             setState(() {});
@@ -964,15 +871,18 @@ class _TokoSidePageState extends State<TokoSidePage> {
                               iditpe,
                             ).then((value) async {
                               if (value == '00') {
-                                getAllToko(context, widget.token, '', '');
-                                refreshTampilan();
+                                await context
+                                    .read<MerchantSortingProvider>()
+                                    .fetchMerchantSorting(
+                                      widget.token,
+                                      '',
+                                      textvalueOrderByStore,
+                                    );
                                 await Future.delayed(Duration(seconds: 2));
                                 _pageController.jumpToPage(0);
-                                setState(() {});
                               }
                             });
 
-                            // initState();
                             setState(() {});
                           },
                           child: buttonXL(
@@ -1189,7 +1099,11 @@ class _TokoSidePageState extends State<TokoSidePage> {
                         ],
                       ),
                       SizedBox(height: size16),
-                      fieldZipToko('Kode Pos', conCodePosEdit.text, conCodePosEdit),
+                      fieldZipToko(
+                        'Kode Pos',
+                        conCodePosEdit.text,
+                        conCodePosEdit,
+                      ),
                       SizedBox(height: size16),
                     ],
                   ),
@@ -1198,41 +1112,45 @@ class _TokoSidePageState extends State<TokoSidePage> {
                 SizedBox(
                   width: double.infinity,
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       whenLoading(context);
-                      updateMerch(
-                        context,
-                        widget.token,
-                        merchid,
-                        conNameMerch.text,
-                        conAddress.text,
-                        idprov,
-                        idkab,
-                        idkec,
-                        iddesa,
-                        conCodePos.text,
-                        img64,
-                        _pageController,
-                        idtipe,
-                      ).then((value) async {
+                      try {
+                        final value = await updateMerch(
+                          context,
+                          widget.token,
+                          merchid,
+                          conNameMerchEdit.text, 
+                          conAddressEdit.text, 
+                          idprov,
+                          idkab,
+                          idkec,
+                          iddesa,
+                          conCodePosEdit.text, 
+                          img64,
+                          _pageController,
+                          idtipe,
+                        );
+
                         if (!mounted) return;
-                        closeLoading(context);
+                        closeLoading(context); 
+
                         if (value == '00') {
-                          await Future.delayed(Duration(seconds: 1));
-                          if (!mounted) return;
-                          datas = await getAllToko(
-                            context,
-                            widget.token,
-                            '',
-                            '',
-                          );
+                          await context
+                              .read<MerchantSortingProvider>()
+                              .fetchMerchantSorting(
+                                widget.token,
+                                '',
+                                textvalueOrderByStore,
+                              );
                           if (!mounted) return;
                           _pageController.jumpToPage(0);
                           setState(() {});
                         }
-                      });
-
-                      setState(() {});
+                      } catch (e) {
+                        if (!mounted) return;
+                        closeLoading(context); 
+                        print('Error update: $e');
+                      }
                     },
                     child: buttonXL(
                       Center(
@@ -1254,7 +1172,12 @@ class _TokoSidePageState extends State<TokoSidePage> {
   }
 
   // widget
-  Future<dynamic> showBotomHapusToko(BuildContext context, int i) {
+  Future<dynamic> showBotomHapusToko(
+    BuildContext context,
+    String merchantId,
+    String merchantName,
+  ) {
+    final pageContext = context;
     return showBottomPilihan(
       context,
       StatefulBuilder(
@@ -1322,28 +1245,26 @@ class _TokoSidePageState extends State<TokoSidePage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      hapusToko() {}
-                      List<String> value = [datas![i].merchantid.toString()];
-
                       setState(() {
-                        hapusController.text != datas![i].name.toString()
+                        hapusController.text != merchantName
                             ? _validate = true
                             : _validate = false;
                       });
 
-                      _validate != true
-                          ? deleteMerchant(context, widget.token, value).then((
-                              value,
-                            ) async {
-                              Navigator.of(context, rootNavigator: true).pop();
-                              await Future.delayed(Duration(seconds: 2));
-                              setState(() {});
-                            })
-                          : null;
-
-                      setState(() {});
-
-                      // log(datas![i].name.toString());
+                      if (_validate != true) {
+                        deleteMerchant(context, widget.token, [
+                          merchantId,
+                        ]).then((value) async {
+                          Navigator.of(context, rootNavigator: true).pop();
+                          await pageContext
+                              .read<MerchantSortingProvider>()
+                              .fetchMerchantSorting(
+                                widget.token,
+                                '',
+                                textvalueOrderByStore,
+                              );
+                        });
+                      }
                     },
                     child: buttonXLoutline(
                       Center(

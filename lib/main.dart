@@ -12,6 +12,7 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
+import 'package:unipos_app_335/providers/product/product_cashier_sorting_provider.dart';
 import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
@@ -59,8 +60,6 @@ Future<void> main() async {
     payload = notificationResponse?.payload;
   }
 
-  final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
 
   final UniposNotificationService notifService = UniposNotificationService();
   await notifService.init();
@@ -179,6 +178,10 @@ class UniPOSApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) =>
               ProductSortingProvider(context.read<ProductSortingService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductCashierSortingProvider(context.read<ProductSortingService>()),
         ),
         Provider(create: (context) => MerchantSortingService()),
         ChangeNotifierProvider(

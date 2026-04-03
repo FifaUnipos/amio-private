@@ -1,6 +1,11 @@
 String textOrderBy = 'Nama Toko A ke Z ';
 String textvalueOrderBy = 'upDownNama';
 
+String textOrderByProduct = 'Nama Produk A ke Z ';
+String textvalueOrderByProduct = 'upDownNama';
+String textOrderByProductCashier = 'Nama Produk A ke Z ';
+String textvalueOrderByProductCashier = 'upDownNama';
+
 String textOrderByStore = 'Nama Toko A ke Z ';
 String textvalueOrderByStore = 'upDownNama';
 
@@ -324,11 +329,11 @@ List orderByLaporanPergerakanInventaris = [
   "incomingInventoryDesc",
 ];
 
-
-// 
+//
 int valueOrderByStore = 0;
 
 int valueOrderByProduct = 0;
+int valueOrderByProductCashier = 0;
 int valueOrderByIngredient = 0;
 int valueOrderByDiscount = 0;
 int valueOrderByCart = 0;

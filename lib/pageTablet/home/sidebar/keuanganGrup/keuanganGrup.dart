@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:provider/provider.dart';
-import 'package:unipos_app_335/components/merchant/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
 import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 

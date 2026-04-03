@@ -432,9 +432,15 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => isTabletLayout(context)
+                              ? MasukAkunPage()
+                              : MasukAkunPageMobile(),
+                        ),
+                      ),
+
                       child: Icon(
                         PhosphorIcons.arrow_left,
                         size: size32,

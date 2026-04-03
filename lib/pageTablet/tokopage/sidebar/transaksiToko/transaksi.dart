@@ -6,11 +6,17 @@ import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/data/static/product/product_sorting_state.dart';
+import 'package:unipos_app_335/data/static/product_cashier/product_cashier_sorting_state.dart';
 import 'package:unipos_app_335/models/coaModel.dart';
 import 'package:unipos_app_335/models/productVariantModel.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/daftar_akun_toko.dart';
+import 'package:unipos_app_335/providers/product/product_cashier_sorting_provider.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/utils/component/providerModel/refreshTampilanModel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
@@ -560,7 +566,12 @@ class _TransactionPageState extends State<TransactionPage>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       List<String> value = [''];
-
+      context.read<ProductCashierSortingProvider>().fetchProductCashierSorting(
+        widget.token,
+        merchantId,
+        '',
+        textvalueOrderByStore,
+      );
       datasTransaksi = await getProductTransaksi(
         context,
         widget.token,
@@ -1988,8 +1999,7 @@ class _TransactionPageState extends State<TransactionPage>
                                           child: RefreshIndicator(
                                             color: bnw100,
                                             backgroundColor: primary500,
-                                            onRefresh: () async {
-                                            },
+                                            onRefresh: () async {},
                                             child: ListView(
                                               children: [
                                                 SizedBox(height: size16),
@@ -4434,26 +4444,30 @@ class _TransactionPageState extends State<TransactionPage>
                       Container(
                         child: Row(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Transaksi',
-                                  style: heading1(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Transaksi',
+                                    style: heading1(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  nameToko ?? '',
-                                  style: heading3(
-                                    FontWeight.w300,
-                                    bnw900,
-                                    'Outfit',
+                                  Text(
+                                    nameToko ?? '',
+                                    style: heading3(
+                                      FontWeight.w300,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             SizedBox(width: size16),
                             Expanded(
@@ -5643,7 +5657,29 @@ class _TransactionPageState extends State<TransactionPage>
                                             children: [
                                               Row(
                                                 children: [
-                                                  orderBy(context),
+                                                  SortBottomSheetButton(
+                                                    options: orderByProductText,
+                                                    initialIndex:
+                                                        valueOrderByProductCashier,
+                                                    onConfirm: (i) async {
+                                                      setState(() {
+                                                        valueOrderByProductCashier =
+                                                            i;
+                                                        textvalueOrderByProductCashier =
+                                                            orderByProduct[i];
+                                                      });
+                                                      await context
+                                                          .read<
+                                                            ProductCashierSortingProvider
+                                                          >()
+                                                          .fetchProductCashierSorting(
+                                                            widget.token,
+                                                            merchantId,
+                                                            '',
+                                                            textvalueOrderByProductCashier,
+                                                          );
+                                                    },
+                                                  ),
                                                   SizedBox(width: size12),
                                                   buttonL(
                                                     Row(
@@ -5756,179 +5792,71 @@ class _TransactionPageState extends State<TransactionPage>
                                           ),
                                           //! table produk
                                           SizedBox(height: size16),
-                                          datasTransaksi == null
-                                              ? SkeletonCardLine()
-                                              : _selectedOption == 'Tabel'
+                                          _selectedOption == 'Tabel'
                                               ? Expanded(
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      // color: primary100,
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                            bottomLeft:
-                                                                Radius.circular(
-                                                                  size12,
+                                                  child:
+                                                      Consumer<
+                                                        ProductCashierSortingProvider
+                                                      >(
+                                                        builder: (context, value, child) {
+                                                          return switch (value
+                                                              .resultState) {
+                                                            ProductCashierSortingResultNoneState() =>
+                                                              const Center(
+                                                                child: Text(
+                                                                  'Tidak ada data',
                                                                 ),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                  size12,
-                                                                ),
-                                                          ),
-                                                    ),
-                                                    child: Column(
-                                                      children: [
-                                                        Container(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal:
-                                                                    size16,
                                                               ),
-                                                          width:
-                                                              double.infinity,
-                                                          height: 50,
-                                                          decoration: BoxDecoration(
-                                                            color: primary500,
-                                                            borderRadius:
-                                                                BorderRadius.only(
-                                                                  topLeft:
-                                                                      Radius.circular(
-                                                                        size16,
-                                                                      ),
-                                                                  topRight:
-                                                                      Radius.circular(
-                                                                        size16,
-                                                                      ),
+                                                            ProductCashierSortingResultErrorState(
+                                                              message: var message,
+                                                            ) =>
+                                                              Center(
+                                                                child: Text(
+                                                                  'Erorr $message',
                                                                 ),
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              Expanded(
-                                                                flex: 3,
-                                                                child: Container(
-                                                                  child: Text(
-                                                                    'Info Produk',
-                                                                    style: heading4(
-                                                                      FontWeight
-                                                                          .w700,
-                                                                      bnw100,
-                                                                      'Outfit',
-                                                                    ),
+                                                              ),
+                                                            ProductCashierSortingResultLoadingState() =>
+                                                              Center(
+                                                                child:
+                                                                    SkeletonCardLine(),
+                                                              ),
+                                                            ProductCashierSortingResultLoadedState(
+                                                              data: var dataProduct,
+                                                            ) =>
+                                                              Container(
+                                                                decoration: BoxDecoration(
+                                                                  // color: primary100,
+                                                                  borderRadius: BorderRadius.only(
+                                                                    bottomLeft:
+                                                                        Radius.circular(
+                                                                          size12,
+                                                                        ),
+                                                                    bottomRight:
+                                                                        Radius.circular(
+                                                                          size12,
+                                                                        ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              SizedBox(
-                                                                width:
-                                                                    size64 +
-                                                                    size16,
-                                                              ),
-                                                              Expanded(
-                                                                flex: 2,
-                                                                child: Container(
-                                                                  constraints: BoxConstraints(
-                                                                    maxWidth:
-                                                                        MediaQuery.of(
-                                                                          context,
-                                                                        ).size.width /
-                                                                        size8,
-                                                                    minWidth:
-                                                                        MediaQuery.of(
-                                                                          context,
-                                                                        ).size.width /
-                                                                        size8,
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Harga Normal',
-                                                                    style: heading4(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw100,
-                                                                      'Outfit',
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                width: size16,
-                                                              ),
-                                                              Expanded(
-                                                                flex: 2,
-                                                                child: Container(
-                                                                  constraints: BoxConstraints(
-                                                                    maxWidth:
-                                                                        MediaQuery.of(
-                                                                          context,
-                                                                        ).size.width /
-                                                                        size12,
-                                                                    minWidth:
-                                                                        MediaQuery.of(
-                                                                          context,
-                                                                        ).size.width /
-                                                                        size12,
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Harga Online',
-                                                                    style: heading4(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw100,
-                                                                      'Outfit',
-                                                                    ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                width: size16,
-                                                              ),
-                                                              // const SizedBox(
-                                                              //   width: 96,
-                                                              // ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: RefreshIndicator(
-                                                            color: bnw100,
-                                                            backgroundColor:
-                                                                primary500,
-                                                            onRefresh:
-                                                                () async {
-                                                                  setState(
-                                                                    () {},
-                                                                  );
-                                                                },
-                                                            child: ListView.builder(
-                                                              // physics: BouncingScrollPhysics(),
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .zero,
-                                                              itemCount:
-                                                                  datasTransaksi!
-                                                                      .length,
-                                                              itemBuilder: (builder, index) {
-                                                                return Column(
+                                                                child: Column(
                                                                   children: [
                                                                     Container(
-                                                                      // padding: EdgeInsets.symmetric(
-                                                                      //     horizontal: size16, vertical: size12),
+                                                                      padding: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            size16,
+                                                                      ),
+                                                                      width: double
+                                                                          .infinity,
+                                                                      height:
+                                                                          50,
                                                                       decoration: BoxDecoration(
                                                                         color:
-                                                                            cartProductIds.contains(
-                                                                              datasTransaksi![index].productid.toString(),
-                                                                            )
-                                                                            ? primary100
-                                                                            : bnw100,
-                                                                        border: Border(
-                                                                          bottom: BorderSide(
-                                                                            color:
-                                                                                bnw300,
-                                                                            width:
-                                                                                width1,
+                                                                            primary500,
+                                                                        borderRadius: BorderRadius.only(
+                                                                          topLeft: Radius.circular(
+                                                                            size16,
+                                                                          ),
+                                                                          topRight: Radius.circular(
+                                                                            size16,
                                                                           ),
                                                                         ),
                                                                       ),
@@ -5938,260 +5866,23 @@ class _TransactionPageState extends State<TransactionPage>
                                                                         children: [
                                                                           Expanded(
                                                                             flex:
-                                                                                4,
+                                                                                3,
                                                                             child: Container(
-                                                                              child: Row(
-                                                                                children: [
-                                                                                  SizedBox(
-                                                                                    width: 60,
-                                                                                    height: 60,
-                                                                                    child: ClipRRect(
-                                                                                      borderRadius: BorderRadius.circular(
-                                                                                        size8,
-                                                                                      ),
-                                                                                      child:
-                                                                                          datasTransaksi![index].product_image !=
-                                                                                              null
-                                                                                          ? Padding(
-                                                                                              padding: EdgeInsets.all(
-                                                                                                size8,
-                                                                                              ),
-                                                                                              child: ClipRRect(
-                                                                                                borderRadius: BorderRadius.circular(
-                                                                                                  size8,
-                                                                                                ),
-                                                                                                child: Image.network(
-                                                                                                  datasTransaksi![index].product_image.toString(),
-                                                                                                  fit: BoxFit.cover,
-                                                                                                  errorBuilder:
-                                                                                                      (
-                                                                                                        context,
-                                                                                                        error,
-                                                                                                        stackTrace,
-                                                                                                      ) => SizedBox(
-                                                                                                        child: SvgPicture.asset(
-                                                                                                          'assets/logoProduct.svg',
-                                                                                                        ),
-                                                                                                      ),
-                                                                                                ),
-                                                                                              ),
-                                                                                            )
-                                                                                          : Icon(
-                                                                                              Icons.person,
-                                                                                              size: 60,
-                                                                                            ),
-                                                                                    ),
-                                                                                  ),
-                                                                                  SizedBox(
-                                                                                    width: size16,
-                                                                                  ),
-                                                                                  Flexible(
-                                                                                    child: Column(
-                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                      children: [
-                                                                                        Text(
-                                                                                          datasTransaksi![index].name ??
-                                                                                              '',
-                                                                                          style: heading4(
-                                                                                            FontWeight.w600,
-                                                                                            bnw900,
-                                                                                            'Outfit',
-                                                                                          ),
-                                                                                          maxLines: 3,
-                                                                                          overflow: TextOverflow.ellipsis,
-                                                                                        ),
-                                                                                        Text(
-                                                                                          datasTransaksi![index].typeproducts ??
-                                                                                              '',
-                                                                                          style: heading4(
-                                                                                            FontWeight.w400,
-                                                                                            bnw900,
-                                                                                            'Outfit',
-                                                                                          ),
-                                                                                          maxLines: 3,
-                                                                                          overflow: TextOverflow.ellipsis,
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                size16,
-                                                                          ),
-                                                                          Expanded(
-                                                                            flex:
-                                                                                2,
-                                                                            child: Container(
-                                                                              constraints: BoxConstraints(
-                                                                                maxWidth:
-                                                                                    MediaQuery.of(
-                                                                                      context,
-                                                                                    ).size.width /
-                                                                                    size8,
-                                                                                minWidth:
-                                                                                    MediaQuery.of(
-                                                                                      context,
-                                                                                    ).size.width /
-                                                                                    size8,
-                                                                              ),
-                                                                              child: GestureDetector(
-                                                                                onTap: () async {
-                                                                                  String productId = datasTransaksi![index].productid.toString();
-
-                                                                                  // Tombol harga offline
-                                                                                  if (isOfflineAddedList[index]) {
-                                                                                    // Jika produk sudah ada di keranjang untuk harga offline, hapus produk tersebut
-                                                                                    cartProductIds.remove(
-                                                                                      productId,
-                                                                                    );
-
-                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
-                                                                                    for (
-                                                                                      int i = 0;
-                                                                                      i <
-                                                                                          cart.length;
-                                                                                      i++
-                                                                                    ) {
-                                                                                      if (cart[i].productid ==
-                                                                                          productId) {
-                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
-                                                                                        total.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus harga produk dari total
-                                                                                        cart.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus produk dari cart
-                                                                                        cartMap.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus produk dari cartMap
-
-                                                                                        // Jika cart kosong, set sumTotal ke 0
-                                                                                        if (cart.isEmpty) {
-                                                                                          sumTotal = 0;
-                                                                                        } else {
-                                                                                          sumTotal -=
-                                                                                              price! *
-                                                                                              counterCart; // Mengurangi sumTotal
-                                                                                        }
-                                                                                        break;
-                                                                                      }
-                                                                                    }
-                                                                                    isOfflineAddedList[index] = false; // Mengubah status tombol offline menjadi "Tambah ke Keranjang"
-                                                                                  } else {
-                                                                                    // Tambahkan produk ke keranjang untuk harga offline
-                                                                                    cartProductIds.add(
-                                                                                      productId,
-                                                                                    );
-                                                                                    Map<
-                                                                                      String,
-                                                                                      String
-                                                                                    >
-                                                                                    map1 = {};
-                                                                                    map1['name'] = datasTransaksi![index].name.toString();
-                                                                                    map1['product_id'] = datasTransaksi![index].productid.toString();
-                                                                                    map1['quantity'] = counterCart.toString();
-                                                                                    map1['image'] = datasTransaksi![index].product_image.toString();
-                                                                                    map1['amount_display'] = datasTransaksi![index].price_after!.toString();
-                                                                                    map1['amount'] = datasTransaksi![index].price_after!.toString();
-                                                                                    map1['description'] = conCatatanPreview.text;
-                                                                                    map1['id_request'] = '';
-
-                                                                                    cartMap.add(
-                                                                                      map1,
-                                                                                    );
-
-                                                                                    conCatatan.add(
-                                                                                      TextEditingController(
-                                                                                        text: conCatatanPreview.text,
-                                                                                      ),
-                                                                                    );
-
-                                                                                    String name = datasTransaksi![index].name.toString().trim();
-                                                                                    String productid = datasTransaksi![index].productid.toString().trim();
-                                                                                    String image = datasTransaksi![index].product_image.toString().trim();
-
-                                                                                    final num price = datasTransaksi![index].price_after!;
-                                                                                    cart.add(
-                                                                                      CartTransaksi(
-                                                                                        name: name,
-                                                                                        productid: productid,
-                                                                                        image: image,
-                                                                                        desc: conCatatanPreview.text,
-                                                                                        idRequest: "",
-                                                                                        quantity: counterCart,
-                                                                                        price: price,
-                                                                                        baseUsed: price,
-                                                                                      ),
-                                                                                    );
-
-                                                                                    sumTotal +=
-                                                                                        price *
-                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
-                                                                                    total.add(
-                                                                                      price *
-                                                                                          counterCart,
-                                                                                    ); // Menambahkan harga produk ke total
-                                                                                    isOfflineAddedList[index] = true; // Mengubah status tombol offline menjadi "Hapus"
-                                                                                  }
-
-                                                                                  setState(
-                                                                                    () {},
-                                                                                  ); // Memperbarui tampilan
-                                                                                },
-                                                                                child: buttonL(
-                                                                                  Center(
-                                                                                    child: isOfflineAddedList[index]
-                                                                                        ? Text(
-                                                                                            'Hapus',
-                                                                                            style: heading3(
-                                                                                              FontWeight.w600,
-                                                                                              bnw900,
-                                                                                              'Outfit',
-                                                                                            ),
-                                                                                          )
-                                                                                        : Column(
-                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                            children: [
-                                                                                              datasTransaksi![index].discount ==
-                                                                                                      0
-                                                                                                  ? Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_after,
-                                                                                                      ),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        bnw900,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    )
-                                                                                                  : Text(
-                                                                                                      FormatCurrency.convertToIdr(
-                                                                                                        datasTransaksi![index].price_after,
-                                                                                                      ),
-                                                                                                      maxLines: 3,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                      style: heading4(
-                                                                                                        FontWeight.w400,
-                                                                                                        danger500,
-                                                                                                        'Outfit',
-                                                                                                      ),
-                                                                                                    ),
-                                                                                            ],
-                                                                                          ),
-                                                                                  ),
+                                                                              child: Text(
+                                                                                'Info Produk',
+                                                                                style: heading4(
+                                                                                  FontWeight.w700,
                                                                                   bnw100,
-                                                                                  bnw900,
+                                                                                  'Outfit',
                                                                                 ),
                                                                               ),
                                                                             ),
                                                                           ),
-                                                                          Spacer(),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                size64 +
+                                                                                size16,
+                                                                          ),
                                                                           Expanded(
                                                                             flex:
                                                                                 2,
@@ -6207,406 +5898,10 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                       context,
                                                                                     ).size.width /
                                                                                     size8,
-                                                                              ),
-                                                                              child: GestureDetector(
-                                                                                onTap: () async {
-                                                                                  String productId = datasTransaksi![index].productid.toString();
-
-                                                                                  // Tombol harga online
-                                                                                  if (isOnlineAddedList[index]) {
-                                                                                    // Jika produk sudah ada di keranjang untuk harga online, hapus produk tersebut
-                                                                                    cartProductIds.remove(
-                                                                                      productId,
-                                                                                    );
-
-                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
-                                                                                    for (
-                                                                                      int i = 0;
-                                                                                      i <
-                                                                                          cart.length;
-                                                                                      i++
-                                                                                    ) {
-                                                                                      if (cart[i].productid ==
-                                                                                          productId) {
-                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
-                                                                                        total.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus harga produk dari total
-                                                                                        cart.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus produk dari cart
-                                                                                        cartMap.removeAt(
-                                                                                          i,
-                                                                                        ); // Menghapus produk dari cartMap
-
-                                                                                        // Jika cart kosong, set sumTotal ke 0
-                                                                                        if (cart.isEmpty) {
-                                                                                          sumTotal = 0;
-                                                                                        } else {
-                                                                                          sumTotal -=
-                                                                                              price! *
-                                                                                              counterCart; // Mengurangi sumTotal
-                                                                                        }
-                                                                                        break;
-                                                                                      }
-                                                                                    }
-                                                                                    isOnlineAddedList[index] = false; // Mengubah status tombol online menjadi "Tambah ke Keranjang"
-                                                                                  } else {
-                                                                                    // Tambahkan produk ke keranjang untuk harga online
-                                                                                    cartProductIds.add(
-                                                                                      productId,
-                                                                                    );
-                                                                                    Map<
-                                                                                      String,
-                                                                                      String
-                                                                                    >
-                                                                                    map1 = {};
-                                                                                    map1['name'] = datasTransaksi![index].name.toString();
-                                                                                    map1['product_id'] = datasTransaksi![index].productid.toString();
-                                                                                    map1['quantity'] = counterCart.toString();
-                                                                                    map1['image'] = datasTransaksi![index].product_image.toString();
-                                                                                    map1['amount_display'] = datasTransaksi![index].price_online_shop!.toString();
-                                                                                    map1['amount'] = datasTransaksi![index].price_online_shop!.toString();
-                                                                                    map1['description'] = conCatatanPreview.text;
-                                                                                    map1['id_request'] = '';
-
-                                                                                    cartMap.add(
-                                                                                      map1,
-                                                                                    );
-
-                                                                                    String name = datasTransaksi![index].name.toString().trim();
-                                                                                    String productid = datasTransaksi![index].productid.toString().trim();
-                                                                                    String image = datasTransaksi![index].product_image.toString().trim();
-
-                                                                                    num? price = datasTransaksi![index].price_online_shop!;
-                                                                                    cart.add(
-                                                                                      CartTransaksi(
-                                                                                        name: name,
-                                                                                        productid: productid,
-                                                                                        image: image,
-                                                                                        desc: conCatatanPreview.text,
-                                                                                        idRequest: "",
-                                                                                        quantity: counterCart,
-                                                                                        baseUsed: price,
-                                                                                        price: price,
-                                                                                      ),
-                                                                                    );
-
-                                                                                    sumTotal +=
-                                                                                        price *
-                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
-                                                                                    total.add(
-                                                                                      price *
-                                                                                          counterCart,
-                                                                                    ); // Menambahkan harga produk ke total
-                                                                                    isOnlineAddedList[index] = true; // Mengubah status tombol online menjadi "Hapus"
-                                                                                  }
-
-                                                                                  setState(
-                                                                                    () {},
-                                                                                  ); // Memperbarui tampilan
-                                                                                },
-                                                                                child:
-                                                                                    datasTransaksi![index].price_online_shop ==
-                                                                                        0
-                                                                                    ? SizedBox()
-                                                                                    : buttonL(
-                                                                                        Center(
-                                                                                          child: isOnlineAddedList[index]
-                                                                                              ? Text(
-                                                                                                  'Hapus',
-                                                                                                  style: heading3(
-                                                                                                    FontWeight.w600,
-                                                                                                    bnw900,
-                                                                                                    'Outfit',
-                                                                                                  ),
-                                                                                                )
-                                                                                              : Column(
-                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                  children: [
-                                                                                                    datasTransaksi![index].discount ==
-                                                                                                            0
-                                                                                                        ? Text(
-                                                                                                            FormatCurrency.convertToIdr(
-                                                                                                              datasTransaksi![index].price_online_shop,
-                                                                                                            ),
-                                                                                                            maxLines: 3,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                            style: heading4(
-                                                                                                              FontWeight.w400,
-                                                                                                              bnw900,
-                                                                                                              'Outfit',
-                                                                                                            ),
-                                                                                                          )
-                                                                                                        : Text(
-                                                                                                            FormatCurrency.convertToIdr(
-                                                                                                              datasTransaksi![index].price_online_shop,
-                                                                                                            ),
-                                                                                                            maxLines: 3,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                            style: heading4(
-                                                                                                              FontWeight.w400,
-                                                                                                              danger500,
-                                                                                                              'Outfit',
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                  ],
-                                                                                                ),
-                                                                                        ),
-                                                                                        bnw100,
-                                                                                        bnw900,
-                                                                                      ),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                size16,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                              // itemCount: staticData!.length,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                )
-                                              :
-                                                // ! grid produk
-                                                Expanded(
-                                                  child: RefreshIndicator(
-                                                    color: bnw100,
-                                                    backgroundColor: primary500,
-                                                    onRefresh: () async {
-                                                      setState(() {});
-                                                    },
-                                                    child: SingleChildScrollView(
-                                                      physics:
-                                                          BouncingScrollPhysics(),
-                                                      child: Column(
-                                                        children: [
-                                                          SizedBox(
-                                                            child: GridView.builder(
-                                                              shrinkWrap: true,
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .zero,
-                                                              physics:
-                                                                  BouncingScrollPhysics(),
-                                                              itemCount:
-                                                                  datasTransaksi!
-                                                                      .length,
-                                                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                                // mainAxisExtent:
-                                                                //     null,
-                                                                crossAxisCount:
-                                                                    4,
-                                                                crossAxisSpacing:
-                                                                    size16,
-                                                                mainAxisSpacing:
-                                                                    size16,
-                                                                childAspectRatio:
-                                                                    0.60,
-                                                              ),
-                                                              itemBuilder: (context, i) {
-                                                                return // 🔹 Ambil productId di luar GestureDetector
-                                                                GestureDetector(
-                                                                  onTap: () {
-                                                                    String
-                                                                    productId = datasTransaksi![i]
-                                                                        .productid
-                                                                        .toString();
-
-                                                                    // ✅ Selalu tampilkan preview, walaupun produk sudah ada di cart
-                                                                    showPriviewCart(
-                                                                      context,
-                                                                      i,
-                                                                    );
-                                                                  },
-                                                                  child: Container(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                          size8,
-                                                                        ),
-                                                                    decoration: BoxDecoration(
-                                                                      color:
-                                                                          cart.any(
-                                                                            (
-                                                                              e,
-                                                                            ) =>
-                                                                                e.productid ==
-                                                                                datasTransaksi![i].productid.toString(),
-                                                                          )
-                                                                          ? primary100
-                                                                          : bnw100,
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                            size12,
-                                                                          ),
-                                                                      border: Border.all(
-                                                                        color:
-                                                                            cart.any(
-                                                                              (
-                                                                                e,
-                                                                              ) =>
-                                                                                  e.productid ==
-                                                                                  datasTransaksi![i].productid.toString(),
-                                                                            )
-                                                                            ? primary500
-                                                                            : bnw300,
-                                                                        width:
-                                                                            2,
-                                                                      ),
-                                                                    ),
-                                                                    child: Stack(
-                                                                      children: [
-                                                                        Column(
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(
-                                                                                size8,
-                                                                              ),
-                                                                              child: AspectRatio(
-                                                                                aspectRatio: 1,
-                                                                                child: Image.network(
-                                                                                  datasTransaksi![i].product_image.toString(),
-                                                                                  fit: BoxFit.cover,
-                                                                                  loadingBuilder:
-                                                                                      (
-                                                                                        context,
-                                                                                        child,
-                                                                                        loadingProgress,
-                                                                                      ) {
-                                                                                        if (loadingProgress ==
-                                                                                            null)
-                                                                                          return child;
-                                                                                        return Center(
-                                                                                          child: loading(),
-                                                                                        );
-                                                                                      },
-                                                                                  errorBuilder:
-                                                                                      (
-                                                                                        context,
-                                                                                        error,
-                                                                                        stackTrace,
-                                                                                      ) => SvgPicture.asset(
-                                                                                        'assets/logoProduct.svg',
-                                                                                      ),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              height: size8,
-                                                                            ),
-                                                                            Text(
-                                                                              datasTransaksi![i].name ??
-                                                                                  '',
-                                                                              style: heading4(
-                                                                                FontWeight.w600,
-                                                                                bnw900,
-                                                                                'Outfit',
-                                                                              ),
-                                                                              maxLines: 2,
-                                                                              overflow: TextOverflow.ellipsis,
-                                                                            ),
-                                                                            SizedBox(
-                                                                              height: size4,
-                                                                            ),
-                                                                            Text(
-                                                                              FormatCurrency.convertToIdr(
-                                                                                datasTransaksi![i].price_after,
-                                                                              ),
-                                                                              style: heading4(
-                                                                                FontWeight.w400,
-                                                                                bnw900,
-                                                                                'Outfit',
-                                                                              ),
-                                                                            ),
-                                                                            datasTransaksi![i].discount ==
-                                                                                    0
-                                                                                ? SizedBox()
-                                                                                : Row(
-                                                                                    children: [
-                                                                                      Text(
-                                                                                        FormatCurrency.convertToIdr(
-                                                                                          datasTransaksi![i].price,
-                                                                                        ),
-                                                                                        style: body3lineThrough(
-                                                                                          FontWeight.w400,
-                                                                                          bnw900,
-                                                                                          'Outfit',
-                                                                                        ),
-                                                                                      ),
-                                                                                      SizedBox(
-                                                                                        width: size4,
-                                                                                      ),
-                                                                                      datasTransaksi![i].discount_type ==
-                                                                                              'percentage'
-                                                                                          ? Text(
-                                                                                              '${datasTransaksi![i].discount}%',
-                                                                                              style: body3(
-                                                                                                FontWeight.w700,
-                                                                                                danger500,
-                                                                                                'Outfit',
-                                                                                              ),
-                                                                                            )
-                                                                                          : Text(
-                                                                                              FormatCurrency.convertToIdr(
-                                                                                                datasTransaksi![i].discount,
-                                                                                              ),
-                                                                                              style: body3(
-                                                                                                FontWeight.w700,
-                                                                                                danger500,
-                                                                                                'Outfit',
-                                                                                              ),
-                                                                                            ),
-                                                                                    ],
-                                                                                  ),
-                                                                            SizedBox(
-                                                                              height: size4,
-                                                                            ),
-                                                                            Text(
-                                                                              datasTransaksi![i].typeproducts.toString(),
-                                                                              style: body1(
-                                                                                FontWeight.w400,
-                                                                                bnw500,
-                                                                                'Outfit',
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-
-                                                                        // 🛒 Badge merah jumlah produk
-                                                                        if (cart.any(
-                                                                          (e) =>
-                                                                              e.productid ==
-                                                                              datasTransaksi![i].productid.toString(),
-                                                                        ))
-                                                                          Positioned(
-                                                                            right:
-                                                                                4,
-                                                                            top:
-                                                                                4,
-                                                                            child: Container(
-                                                                              padding: EdgeInsets.all(
-                                                                                6,
-                                                                              ),
-                                                                              decoration: BoxDecoration(
-                                                                                color: danger500,
-                                                                                shape: BoxShape.circle,
                                                                               ),
                                                                               child: Text(
-                                                                                // ✅ Konversi quantity ke int agar tipe fold cocok
-                                                                                '${cart.where((e) => e.productid == datasTransaksi![i].productid.toString()).fold<int>(0, (sum, item) => sum + (item.quantity as int))}',
-                                                                                style: heading3(
+                                                                                'Harga Normal',
+                                                                                style: heading4(
                                                                                   FontWeight.w600,
                                                                                   bnw100,
                                                                                   'Outfit',
@@ -6614,20 +5909,871 @@ class _TransactionPageState extends State<TransactionPage>
                                                                               ),
                                                                             ),
                                                                           ),
-                                                                      ],
+                                                                          SizedBox(
+                                                                            width:
+                                                                                size16,
+                                                                          ),
+                                                                          Expanded(
+                                                                            flex:
+                                                                                2,
+                                                                            child: Container(
+                                                                              constraints: BoxConstraints(
+                                                                                maxWidth:
+                                                                                    MediaQuery.of(
+                                                                                      context,
+                                                                                    ).size.width /
+                                                                                    size12,
+                                                                                minWidth:
+                                                                                    MediaQuery.of(
+                                                                                      context,
+                                                                                    ).size.width /
+                                                                                    size12,
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Harga Online',
+                                                                                style: heading4(
+                                                                                  FontWeight.w600,
+                                                                                  bnw100,
+                                                                                  'Outfit',
+                                                                                ),
+                                                                                textAlign: TextAlign.center,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                size16,
+                                                                          ),
+                                                                          // const SizedBox(
+                                                                          //   width: 96,
+                                                                          // ),
+                                                                        ],
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: size16,
-                                                          ),
-                                                        ],
+                                                                    Expanded(
+                                                                      child: RefreshIndicator(
+                                                                        color:
+                                                                            bnw100,
+                                                                        backgroundColor:
+                                                                            primary500,
+                                                                        onRefresh: () async {
+                                                                          setState(
+                                                                            () {},
+                                                                          );
+                                                                        },
+                                                                        child: ListView.builder(
+                                                                          // physics: BouncingScrollPhysics(),
+                                                                          padding:
+                                                                              EdgeInsets.zero,
+                                                                          itemCount:
+                                                                              dataProduct.length,
+                                                                          itemBuilder:
+                                                                              (
+                                                                                builder,
+                                                                                index,
+                                                                              ) {
+                                                                                return Column(
+                                                                                  children: [
+                                                                                    Container(
+                                                                                      // padding: EdgeInsets.symmetric(
+                                                                                      //     horizontal: size16, vertical: size12),
+                                                                                      decoration: BoxDecoration(
+                                                                                        color:
+                                                                                            cartProductIds.contains(
+                                                                                              dataProduct[index].productid.toString(),
+                                                                                            )
+                                                                                            ? primary100
+                                                                                            : bnw100,
+                                                                                        border: Border(
+                                                                                          bottom: BorderSide(
+                                                                                            color: bnw300,
+                                                                                            width: width1,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      child: Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                        children: [
+                                                                                          Expanded(
+                                                                                            flex: 4,
+                                                                                            child: Container(
+                                                                                              child: Row(
+                                                                                                children: [
+                                                                                                  SizedBox(
+                                                                                                    width: 60,
+                                                                                                    height: 60,
+                                                                                                    child: ClipRRect(
+                                                                                                      borderRadius: BorderRadius.circular(
+                                                                                                        size8,
+                                                                                                      ),
+                                                                                                      child:
+                                                                                                          dataProduct[index].productImage !=
+                                                                                                              null
+                                                                                                          ? Padding(
+                                                                                                              padding: EdgeInsets.all(
+                                                                                                                size8,
+                                                                                                              ),
+                                                                                                              child: ClipRRect(
+                                                                                                                borderRadius: BorderRadius.circular(
+                                                                                                                  size8,
+                                                                                                                ),
+                                                                                                                child: Image.network(
+                                                                                                                  dataProduct[index].productImage.toString(),
+                                                                                                                  fit: BoxFit.cover,
+                                                                                                                  errorBuilder:
+                                                                                                                      (
+                                                                                                                        context,
+                                                                                                                        error,
+                                                                                                                        stackTrace,
+                                                                                                                      ) => SizedBox(
+                                                                                                                        child: SvgPicture.asset(
+                                                                                                                          'assets/logoProduct.svg',
+                                                                                                                        ),
+                                                                                                                      ),
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                            )
+                                                                                                          : Icon(
+                                                                                                              Icons.person,
+                                                                                                              size: 60,
+                                                                                                            ),
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  SizedBox(
+                                                                                                    width: size16,
+                                                                                                  ),
+                                                                                                  Flexible(
+                                                                                                    child: Column(
+                                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                      children: [
+                                                                                                        Text(
+                                                                                                          dataProduct[index].name ??
+                                                                                                              '',
+                                                                                                          style: heading4(
+                                                                                                            FontWeight.w600,
+                                                                                                            bnw900,
+                                                                                                            'Outfit',
+                                                                                                          ),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                        ),
+                                                                                                        Text(
+                                                                                                          dataProduct[index].typeproducts ??
+                                                                                                              '',
+                                                                                                          style: heading4(
+                                                                                                            FontWeight.w400,
+                                                                                                            bnw900,
+                                                                                                            'Outfit',
+                                                                                                          ),
+                                                                                                          maxLines: 3,
+                                                                                                          overflow: TextOverflow.ellipsis,
+                                                                                                        ),
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                          SizedBox(
+                                                                                            width: size16,
+                                                                                          ),
+                                                                                          Expanded(
+                                                                                            flex: 2,
+                                                                                            child: Container(
+                                                                                              constraints: BoxConstraints(
+                                                                                                maxWidth:
+                                                                                                    MediaQuery.of(
+                                                                                                      context,
+                                                                                                    ).size.width /
+                                                                                                    size8,
+                                                                                                minWidth:
+                                                                                                    MediaQuery.of(
+                                                                                                      context,
+                                                                                                    ).size.width /
+                                                                                                    size8,
+                                                                                              ),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () async {
+                                                                                                  String productId = dataProduct[index].productid.toString();
+
+                                                                                                  // Tombol harga offline
+                                                                                                  if (isOfflineAddedList[index]) {
+                                                                                                    // Jika produk sudah ada di keranjang untuk harga offline, hapus produk tersebut
+                                                                                                    cartProductIds.remove(
+                                                                                                      productId,
+                                                                                                    );
+
+                                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
+                                                                                                    for (
+                                                                                                      int i = 0;
+                                                                                                      i <
+                                                                                                          cart.length;
+                                                                                                      i++
+                                                                                                    ) {
+                                                                                                      if (cart[i].productid ==
+                                                                                                          productId) {
+                                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
+                                                                                                        total.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus harga produk dari total
+                                                                                                        cart.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus produk dari cart
+                                                                                                        cartMap.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus produk dari cartMap
+
+                                                                                                        // Jika cart kosong, set sumTotal ke 0
+                                                                                                        if (cart.isEmpty) {
+                                                                                                          sumTotal = 0;
+                                                                                                        } else {
+                                                                                                          sumTotal -=
+                                                                                                              price! *
+                                                                                                              counterCart; // Mengurangi sumTotal
+                                                                                                        }
+                                                                                                        break;
+                                                                                                      }
+                                                                                                    }
+                                                                                                    isOfflineAddedList[index] = false; // Mengubah status tombol offline menjadi "Tambah ke Keranjang"
+                                                                                                  } else {
+                                                                                                    // Tambahkan produk ke keranjang untuk harga offline
+                                                                                                    cartProductIds.add(
+                                                                                                      productId,
+                                                                                                    );
+                                                                                                    Map<
+                                                                                                      String,
+                                                                                                      String
+                                                                                                    >
+                                                                                                    map1 = {};
+                                                                                                    map1['name'] = dataProduct[index].name.toString();
+                                                                                                    map1['product_id'] = dataProduct[index].productid.toString();
+                                                                                                    map1['quantity'] = counterCart.toString();
+                                                                                                    map1['image'] = dataProduct[index].productImage.toString();
+                                                                                                    map1['amount_display'] = dataProduct[index].price_after!.toString();
+                                                                                                    map1['amount'] = dataProduct[index].price_after!.toString();
+                                                                                                    map1['description'] = conCatatanPreview.text;
+                                                                                                    map1['id_request'] = '';
+
+                                                                                                    cartMap.add(
+                                                                                                      map1,
+                                                                                                    );
+
+                                                                                                    conCatatan.add(
+                                                                                                      TextEditingController(
+                                                                                                        text: conCatatanPreview.text,
+                                                                                                      ),
+                                                                                                    );
+
+                                                                                                    String name = dataProduct[index].name.toString().trim();
+                                                                                                    String productid = dataProduct[index].productid.toString().trim();
+                                                                                                    String image = dataProduct[index].productImage.toString().trim();
+
+                                                                                                    final num price = dataProduct[index].price_after!;
+                                                                                                    cart.add(
+                                                                                                      CartTransaksi(
+                                                                                                        name: name,
+                                                                                                        productid: productid,
+                                                                                                        image: image,
+                                                                                                        desc: conCatatanPreview.text,
+                                                                                                        idRequest: "",
+                                                                                                        quantity: counterCart,
+                                                                                                        price: price,
+                                                                                                        baseUsed: price,
+                                                                                                      ),
+                                                                                                    );
+
+                                                                                                    sumTotal +=
+                                                                                                        price *
+                                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
+                                                                                                    total.add(
+                                                                                                      price *
+                                                                                                          counterCart,
+                                                                                                    ); // Menambahkan harga produk ke total
+                                                                                                    isOfflineAddedList[index] = true; // Mengubah status tombol offline menjadi "Hapus"
+                                                                                                  }
+
+                                                                                                  setState(
+                                                                                                    () {},
+                                                                                                  ); // Memperbarui tampilan
+                                                                                                },
+                                                                                                child: buttonL(
+                                                                                                  Center(
+                                                                                                    child: isOfflineAddedList[index]
+                                                                                                        ? Text(
+                                                                                                            'Hapus',
+                                                                                                            style: heading3(
+                                                                                                              FontWeight.w600,
+                                                                                                              bnw900,
+                                                                                                              'Outfit',
+                                                                                                            ),
+                                                                                                          )
+                                                                                                        : Column(
+                                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                            children: [
+                                                                                                              dataProduct[index].discount ==
+                                                                                                                      0
+                                                                                                                  ? Text(
+                                                                                                                      FormatCurrency.convertToIdr(
+                                                                                                                        dataProduct[index].price_after,
+                                                                                                                      ),
+                                                                                                                      maxLines: 3,
+                                                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                                                      style: heading4(
+                                                                                                                        FontWeight.w400,
+                                                                                                                        bnw900,
+                                                                                                                        'Outfit',
+                                                                                                                      ),
+                                                                                                                    )
+                                                                                                                  : Text(
+                                                                                                                      FormatCurrency.convertToIdr(
+                                                                                                                        dataProduct[index].price_after,
+                                                                                                                      ),
+                                                                                                                      maxLines: 3,
+                                                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                                                      style: heading4(
+                                                                                                                        FontWeight.w400,
+                                                                                                                        danger500,
+                                                                                                                        'Outfit',
+                                                                                                                      ),
+                                                                                                                    ),
+                                                                                                            ],
+                                                                                                          ),
+                                                                                                  ),
+                                                                                                  bnw100,
+                                                                                                  bnw900,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                          Spacer(),
+                                                                                          Expanded(
+                                                                                            flex: 2,
+                                                                                            child: Container(
+                                                                                              constraints: BoxConstraints(
+                                                                                                maxWidth:
+                                                                                                    MediaQuery.of(
+                                                                                                      context,
+                                                                                                    ).size.width /
+                                                                                                    size8,
+                                                                                                minWidth:
+                                                                                                    MediaQuery.of(
+                                                                                                      context,
+                                                                                                    ).size.width /
+                                                                                                    size8,
+                                                                                              ),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () async {
+                                                                                                  String productId = dataProduct[index].productid.toString();
+
+                                                                                                  // Tombol harga online
+                                                                                                  if (isOnlineAddedList[index]) {
+                                                                                                    // Jika produk sudah ada di keranjang untuk harga online, hapus produk tersebut
+                                                                                                    cartProductIds.remove(
+                                                                                                      productId,
+                                                                                                    );
+
+                                                                                                    // Mengurangi nilai total dan sumTotal saat produk dihapus
+                                                                                                    for (
+                                                                                                      int i = 0;
+                                                                                                      i <
+                                                                                                          cart.length;
+                                                                                                      i++
+                                                                                                    ) {
+                                                                                                      if (cart[i].productid ==
+                                                                                                          productId) {
+                                                                                                        num? price = cart[i].price; // Mendapatkan harga produk yang dihapus
+                                                                                                        total.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus harga produk dari total
+                                                                                                        cart.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus produk dari cart
+                                                                                                        cartMap.removeAt(
+                                                                                                          i,
+                                                                                                        ); // Menghapus produk dari cartMap
+
+                                                                                                        // Jika cart kosong, set sumTotal ke 0
+                                                                                                        if (cart.isEmpty) {
+                                                                                                          sumTotal = 0;
+                                                                                                        } else {
+                                                                                                          sumTotal -=
+                                                                                                              price! *
+                                                                                                              counterCart; // Mengurangi sumTotal
+                                                                                                        }
+                                                                                                        break;
+                                                                                                      }
+                                                                                                    }
+                                                                                                    isOnlineAddedList[index] = false; // Mengubah status tombol online menjadi "Tambah ke Keranjang"
+                                                                                                  } else {
+                                                                                                    // Tambahkan produk ke keranjang untuk harga online
+                                                                                                    cartProductIds.add(
+                                                                                                      productId,
+                                                                                                    );
+                                                                                                    Map<
+                                                                                                      String,
+                                                                                                      String
+                                                                                                    >
+                                                                                                    map1 = {};
+                                                                                                    map1['name'] = dataProduct[index].name.toString();
+                                                                                                    map1['product_id'] = dataProduct[index].productid.toString();
+                                                                                                    map1['quantity'] = counterCart.toString();
+                                                                                                    map1['image'] = dataProduct[index].productImage.toString();
+                                                                                                    map1['amount_display'] = dataProduct[index].price_online_shop!.toString();
+                                                                                                    map1['amount'] = dataProduct[index].price_online_shop!.toString();
+                                                                                                    map1['description'] = conCatatanPreview.text;
+                                                                                                    map1['id_request'] = '';
+
+                                                                                                    cartMap.add(
+                                                                                                      map1,
+                                                                                                    );
+
+                                                                                                    String name = dataProduct[index].name.toString().trim();
+                                                                                                    String productid = dataProduct[index].productid.toString().trim();
+                                                                                                    String image = dataProduct[index].productImage.toString().trim();
+
+                                                                                                    num? price = dataProduct[index].price_online_shop!;
+                                                                                                    cart.add(
+                                                                                                      CartTransaksi(
+                                                                                                        name: name,
+                                                                                                        productid: productid,
+                                                                                                        image: image,
+                                                                                                        desc: conCatatanPreview.text,
+                                                                                                        idRequest: "",
+                                                                                                        quantity: counterCart,
+                                                                                                        baseUsed: price,
+                                                                                                        price: price,
+                                                                                                      ),
+                                                                                                    );
+
+                                                                                                    sumTotal +=
+                                                                                                        price *
+                                                                                                        counterCart; // Menambahkan harga produk ke sumTotal
+                                                                                                    total.add(
+                                                                                                      price *
+                                                                                                          counterCart,
+                                                                                                    ); // Menambahkan harga produk ke total
+                                                                                                    isOnlineAddedList[index] = true; // Mengubah status tombol online menjadi "Hapus"
+                                                                                                  }
+
+                                                                                                  setState(
+                                                                                                    () {},
+                                                                                                  ); // Memperbarui tampilan
+                                                                                                },
+                                                                                                child:
+                                                                                                    dataProduct[index].price_online_shop ==
+                                                                                                        0
+                                                                                                    ? SizedBox()
+                                                                                                    : buttonL(
+                                                                                                        Center(
+                                                                                                          child: isOnlineAddedList[index]
+                                                                                                              ? Text(
+                                                                                                                  'Hapus',
+                                                                                                                  style: heading3(
+                                                                                                                    FontWeight.w600,
+                                                                                                                    bnw900,
+                                                                                                                    'Outfit',
+                                                                                                                  ),
+                                                                                                                )
+                                                                                                              : Column(
+                                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                                  children: [
+                                                                                                                    dataProduct[index].discount ==
+                                                                                                                            0
+                                                                                                                        ? Text(
+                                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                                              dataProduct[index].price_online_shop,
+                                                                                                                            ),
+                                                                                                                            maxLines: 3,
+                                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                                            style: heading4(
+                                                                                                                              FontWeight.w400,
+                                                                                                                              bnw900,
+                                                                                                                              'Outfit',
+                                                                                                                            ),
+                                                                                                                          )
+                                                                                                                        : Text(
+                                                                                                                            FormatCurrency.convertToIdr(
+                                                                                                                              dataProduct[index].price_online_shop,
+                                                                                                                            ),
+                                                                                                                            maxLines: 3,
+                                                                                                                            overflow: TextOverflow.ellipsis,
+                                                                                                                            style: heading4(
+                                                                                                                              FontWeight.w400,
+                                                                                                                              danger500,
+                                                                                                                              'Outfit',
+                                                                                                                            ),
+                                                                                                                          ),
+                                                                                                                  ],
+                                                                                                                ),
+                                                                                                        ),
+                                                                                                        bnw100,
+                                                                                                        bnw900,
+                                                                                                      ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                          SizedBox(
+                                                                                            width: size16,
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                  ],
+                                                                                );
+                                                                              },
+                                                                          // itemCount: staticData!.length,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                          };
+                                                        },
                                                       ),
-                                                    ),
-                                                  ),
+                                                )
+                                              :
+                                                // ! grid produk
+                                                Expanded(
+                                                  child:
+                                                      Consumer<
+                                                        ProductCashierSortingProvider
+                                                      >(
+                                                        builder: (context, value, child) {
+                                                          return switch (value
+                                                              .resultState) {
+                                                            ProductCashierSortingResultNoneState() =>
+                                                              const Center(
+                                                                child: Text(
+                                                                  'Tidak ada data',
+                                                                ),
+                                                              ),
+                                                            ProductCashierSortingResultErrorState(
+                                                              message: var message,
+                                                            ) =>
+                                                              Center(
+                                                                child: Text(
+                                                                  'Erorr $message',
+                                                                ),
+                                                              ),
+                                                            ProductCashierSortingResultLoadingState() =>
+                                                              Center(
+                                                                child:
+                                                                    SkeletonCardLine(),
+                                                              ),
+                                                            ProductCashierSortingResultLoadedState(
+                                                              data: var dataProduct,
+                                                            ) =>
+                                                              RefreshIndicator(
+                                                                color: bnw100,
+                                                                backgroundColor:
+                                                                    primary500,
+                                                                onRefresh: () async {
+                                                                  await context
+                                                                      .read<
+                                                                        ProductCashierSortingProvider
+                                                                      >()
+                                                                      .fetchProductCashierSorting(
+                                                                        widget
+                                                                            .token,
+                                                                        merchantId,
+                                                                        '',
+                                                                        textvalueOrderByProductCashier,
+                                                                      );
+                                                                },
+                                                                child: ListView.builder(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                  physics:
+                                                                      BouncingScrollPhysics(),
+                                                                  itemCount:
+                                                                      (dataProduct.length /
+                                                                              4)
+                                                                          .ceil(),
+                                                                  itemBuilder:
+                                                                      (
+                                                                        context,
+                                                                        rowIndex,
+                                                                      ) {
+                                                                        final totalRows =
+                                                                            (dataProduct.length /
+                                                                                    4)
+                                                                                .ceil();
+                                                                        final isLastRow =
+                                                                            rowIndex ==
+                                                                            totalRows -
+                                                                                1;
+
+                                                                        Widget
+                                                                        buildCard(
+                                                                          int i,
+                                                                        ) {
+                                                                          if (i >=
+                                                                              dataProduct.length)
+                                                                            return const SizedBox();
+                                                                          return GestureDetector(
+                                                                            onTap: () {
+                                                                              String
+                                                                              productId = dataProduct[i].productid.toString();
+                                                                              showPriviewCart(
+                                                                                context,
+                                                                                i,
+                                                                              );
+                                                                            },
+                                                                            child: Container(
+                                                                              padding: EdgeInsets.all(
+                                                                                size8,
+                                                                              ),
+                                                                              decoration: BoxDecoration(
+                                                                                color:
+                                                                                    cart.any(
+                                                                                      (
+                                                                                        e,
+                                                                                      ) =>
+                                                                                          e.productid ==
+                                                                                          dataProduct[i].productid.toString(),
+                                                                                    )
+                                                                                    ? primary100
+                                                                                    : bnw100,
+                                                                                borderRadius: BorderRadius.circular(
+                                                                                  size12,
+                                                                                ),
+                                                                                border: Border.all(
+                                                                                  color:
+                                                                                      cart.any(
+                                                                                        (
+                                                                                          e,
+                                                                                        ) =>
+                                                                                            e.productid ==
+                                                                                            dataProduct[i].productid.toString(),
+                                                                                      )
+                                                                                      ? primary500
+                                                                                      : bnw300,
+                                                                                  width:
+                                                                                      cart.any(
+                                                                                        (
+                                                                                          e,
+                                                                                        ) =>
+                                                                                            e.productid ==
+                                                                                            dataProduct[i].productid.toString(),
+                                                                                      )
+                                                                                      ? 2
+                                                                                      : 1,
+                                                                                ),
+                                                                              ),
+                                                                              child: Stack(
+                                                                                children: [
+                                                                                  Column(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                    children: [
+                                                                                      ClipRRect(
+                                                                                        borderRadius: BorderRadius.circular(
+                                                                                          size8,
+                                                                                        ),
+                                                                                        child: AspectRatio(
+                                                                                          aspectRatio: 1,
+                                                                                          child: Image.network(
+                                                                                            dataProduct[i].productImage.toString(),
+                                                                                            fit: BoxFit.cover,
+                                                                                            loadingBuilder:
+                                                                                                (
+                                                                                                  context,
+                                                                                                  child,
+                                                                                                  loadingProgress,
+                                                                                                ) {
+                                                                                                  if (loadingProgress ==
+                                                                                                      null)
+                                                                                                    return child;
+                                                                                                  return Center(
+                                                                                                    child: loading(),
+                                                                                                  );
+                                                                                                },
+                                                                                            errorBuilder:
+                                                                                                (
+                                                                                                  context,
+                                                                                                  error,
+                                                                                                  stackTrace,
+                                                                                                ) => SvgPicture.asset(
+                                                                                                  'assets/logoProduct.svg',
+                                                                                                ),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        height: size8,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        dataProduct[i].name ??
+                                                                                            '',
+                                                                                        style: heading4(
+                                                                                          FontWeight.w600,
+                                                                                          bnw900,
+                                                                                          'Outfit',
+                                                                                        ),
+                                                                                        maxLines: 2,
+                                                                                        overflow: TextOverflow.ellipsis,
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        height: size4,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        FormatCurrency.convertToIdr(
+                                                                                          dataProduct[i].price_after,
+                                                                                        ),
+                                                                                        style: heading4(
+                                                                                          FontWeight.w400,
+                                                                                          bnw900,
+                                                                                          'Outfit',
+                                                                                        ),
+                                                                                      ),
+                                                                                      dataProduct[i].discount ==
+                                                                                              0
+                                                                                          ? SizedBox()
+                                                                                          : Row(
+                                                                                              children: [
+                                                                                                Text(
+                                                                                                  FormatCurrency.convertToIdr(
+                                                                                                    dataProduct[i].price,
+                                                                                                  ),
+                                                                                                  style: body3lineThrough(
+                                                                                                    FontWeight.w400,
+                                                                                                    bnw900,
+                                                                                                    'Outfit',
+                                                                                                  ),
+                                                                                                ),
+                                                                                                SizedBox(
+                                                                                                  width: size4,
+                                                                                                ),
+                                                                                                dataProduct[i].discount_type ==
+                                                                                                        'percentage'
+                                                                                                    ? Text(
+                                                                                                        '${dataProduct[i].discount}%',
+                                                                                                        style: body3(
+                                                                                                          FontWeight.w700,
+                                                                                                          danger500,
+                                                                                                          'Outfit',
+                                                                                                        ),
+                                                                                                      )
+                                                                                                    : Text(
+                                                                                                        FormatCurrency.convertToIdr(
+                                                                                                          dataProduct[i].discount,
+                                                                                                        ),
+                                                                                                        style: body3(
+                                                                                                          FontWeight.w700,
+                                                                                                          danger500,
+                                                                                                          'Outfit',
+                                                                                                        ),
+                                                                                                      ),
+                                                                                              ],
+                                                                                            ),
+                                                                                      SizedBox(
+                                                                                        height: size4,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        dataProduct[i].typeproducts.toString(),
+                                                                                        style: body1(
+                                                                                          FontWeight.w400,
+                                                                                          bnw500,
+                                                                                          'Outfit',
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+
+                                                                                  // 🛒 Badge merah jumlah produk
+                                                                                  if (cart.any(
+                                                                                    (
+                                                                                      e,
+                                                                                    ) =>
+                                                                                        e.productid ==
+                                                                                        dataProduct[i].productid.toString(),
+                                                                                  ))
+                                                                                    Positioned(
+                                                                                      right: 4,
+                                                                                      top: 4,
+                                                                                      child: Container(
+                                                                                        padding: EdgeInsets.all(
+                                                                                          6,
+                                                                                        ),
+                                                                                        decoration: BoxDecoration(
+                                                                                          color: danger500,
+                                                                                          shape: BoxShape.circle,
+                                                                                        ),
+                                                                                        child: Text(
+                                                                                          '${cart.where((e) => e.productid == dataProduct[i].productid.toString()).fold<int>(0, (sum, item) => sum + (item.quantity as int))}',
+                                                                                          style: heading3(
+                                                                                            FontWeight.w600,
+                                                                                            bnw100,
+                                                                                            'Outfit',
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        }
+
+                                                                        return Padding(
+                                                                          padding: EdgeInsets.only(
+                                                                            bottom:
+                                                                                isLastRow
+                                                                                ? 0
+                                                                                : size8,
+                                                                          ),
+                                                                          child: IntrinsicHeight(
+                                                                            child: Row(
+                                                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                                              children: [
+                                                                                Expanded(
+                                                                                  child: buildCard(
+                                                                                    rowIndex *
+                                                                                        4,
+                                                                                  ),
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: size8,
+                                                                                ),
+                                                                                Expanded(
+                                                                                  child: buildCard(
+                                                                                    rowIndex *
+                                                                                            4 +
+                                                                                        1,
+                                                                                  ),
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: size8,
+                                                                                ),
+                                                                                Expanded(
+                                                                                  child: buildCard(
+                                                                                    rowIndex *
+                                                                                            4 +
+                                                                                        2,
+                                                                                  ),
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: size8,
+                                                                                ),
+                                                                                Expanded(
+                                                                                  child: buildCard(
+                                                                                    rowIndex *
+                                                                                            4 +
+                                                                                        3,
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                ),
+                                                              ),
+                                                          };
+                                                        },
+                                                      ),
                                                 ),
                                         ],
                                       ),
@@ -9567,200 +9713,6 @@ class _TransactionPageState extends State<TransactionPage>
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  orderBy(BuildContext context) {
-    final outerSetState = setState;
-    return IntrinsicWidth(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            int previousValue = valueOrderByCart;
-            bool confirmed = false;
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByCartText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: valueOrderByCart == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByCartText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByCart == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected: valueOrderByCart == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByCart = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () async {
-                                confirmed = true;
-                                textOrderByCart =
-                                    orderByCartText[valueOrderByCart];
-                                textvalueOrderByCart =
-                                    orderByCart[valueOrderByCart];
-                                orderByCart[valueOrderByCart];
-
-                                final result = await getProductTransaksi(
-                                  context,
-                                  widget.token,
-                                  '',
-                                  [merchantId],
-                                  textvalueOrderByCart,
-                                );
-
-                                if (!mounted) return;
-                                outerSetState(() {
-                                  datasTransaksi = result;
-                                });
-                                Navigator.pop(context);
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ).whenComplete(() {
-              if (!confirmed) {
-                outerSetState(() {
-                  valueOrderByCart = previousValue;
-                });
-              }
-            });
-          });
-        },
-        child: buttonLoutline(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Urutkan',
-                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' dari $textOrderByCart',
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(width: size12),
-              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
-            ],
-          ),
-          bnw300,
         ),
       ),
     );

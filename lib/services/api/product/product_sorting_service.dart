@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 class ProductSortingService {
   Future<ProductSortingResponse> getProductSorting(
     String token,
-    List<String> merchantId,
+    String merchantId,
     String name,
     String orderBy,
   ) async {
@@ -17,7 +17,7 @@ class ProductSortingService {
       headers: {'token': token, 'Content-Type': 'application/json'},
       body: jsonEncode({
         "deviceid": identifier,
-        "merchant_id": merchantId,
+        "merchant_id": [merchantId],
         "name": name,
         "order_by": orderBy,
       }),
