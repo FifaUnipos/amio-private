@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:unipos_app_335/components/moleculs/lazy_indexed_stack.dart';
+import 'package:unipos_app_335/pageTablet/home/dashboard.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoriToko/inventoriMerchantOnly.dart';
 
@@ -511,7 +513,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             debugPrint(widget.token);
             debugPrint(identifier);
             iconSelectedSidebar = 0;
-            valueOrderByProduct = 0;
           },
         ),
         SidebarXItem(
@@ -529,7 +530,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             debugPrint(widget.token);
             debugPrint(identifier);
             iconSelectedSidebar = 1;
-            valueOrderByProduct = 0;
           },
         ),
         SidebarXItem(
@@ -543,7 +543,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 2;
-              valueOrderByProduct = 0;
               print(iconSelectedSidebar);
             });
           },
@@ -559,7 +558,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 3;
-              valueOrderByProduct = 0;
               print(widget.controller.selectedIndex);
             });
           },
@@ -575,7 +573,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 4;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -590,7 +587,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         //     setState(() {
         //       selectedIndexSideBar = false;
         //       iconSelectedSidebar = 5;
-        //       valueOrderByProduct = 0;
         //     });
         //   },
         // ),
@@ -605,7 +601,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         //     setState(() {
         //       selectedIndexSideBar = false;
         //       iconSelectedSidebar = 5;
-        //       valueOrderByProduct = 0;
         //     });
         //   },
         // ),
@@ -620,7 +615,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 5;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -635,7 +629,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         //     setState(() {
         //       selectedIndexSideBar = false;
         //       iconSelectedSidebar = 6;
-        //       valueOrderByProduct = 0;
         //     });
         //   },
         // ),
@@ -650,7 +643,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 6;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -665,7 +657,6 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 7;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -743,60 +734,24 @@ class _ScreensExampleState extends State<_ScreensExample> {
         animation: widget.controller,
         builder: (context, child) {
           // final pageTitle = _getTitleByIndex(widget.controller.selectedIndex);
-
-          switch (widget.controller.selectedIndex) {
-            case 0:
-              // case 1:
-              return Dashboarpagenew(token: widget.token);
-            case 1:
-              return NotifikasiGrup();
-
-            case 2:
-              return TokoPageToko(token: widget.token);
-            case 3:
-              return ProdukToko(token: widget.token);
-            // case 3:
-            // return InventoriPage(token: widget.token);
-            // return COAPage(token: widget.token);
-            case 4:
-              return typeAccount == 'Merchant_Only'
+          return LazyIndexedStack(
+            index: widget.controller.selectedIndex,
+            children: [
+              Dashboarpagenew(token: widget.token),
+              NotifikasiGrup(),
+              TokoPageToko(token: widget.token),
+              ProdukToko(token: widget.token),
+              typeAccount == 'Merchant_Only'
                   ? InventoriPageMerchantOnly(token: widget.token)
-                  : InventoriPageTest(token: widget.token);
-
-            // return UnitConvertionPage(token: widget.token);
-
-            // case 5:
-            //   return UnitConvertionPage(token: widget.token);
-
-            // case 5:
-            // return InventoriPage(token: widget.token);
-            // return COAPage(token: widget.token);
-            case 5:
-              return TransactionPage(token: widget.token);
-            // case 6:
-            //   return LihatKeuanganToko(token: widget.token);
-            case 6:
-              // case 7:
-              return PelangganToko(token: widget.token);
-
-            case 7:
-              return PromosiToko(token: widget.token);
-            case 8:
-              return LaporanToko(
-                token: widget.token,
-                controller: widget.controller,
-              );
-            // return TestingSaja();
-            case 9:
-              return BantuanGrup();
-            case 10:
-              return BluetoothPage();
-            default:
-              return Text(
-                'Not found page',
-                // style: theme.textTheme.headlzine5,
-              );
-          }
+                  : InventoriPageTest(token: widget.token),
+              TransactionPage(token: widget.token),
+              PelangganToko(token: widget.token),
+              PromosiToko(token: widget.token),
+              LaporanToko(token: widget.token, controller: widget.controller),
+              BantuanGrup(),
+              BluetoothPage(),
+            ],
+          );
         },
       ),
     );

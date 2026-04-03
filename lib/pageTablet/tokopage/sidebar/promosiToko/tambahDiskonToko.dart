@@ -1,16 +1,22 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/services.dart';
+
 import '../produkToko/produk.dart';
 import '../../../../pagehelper/loginregis/daftar_akun_toko.dart';
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import '../../../../main.dart';
 import '../../../../services/apimethod.dart';
-import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../../utils/component/component_loading.dart';
 
 class TambahDiskonPage extends StatefulWidget {
@@ -52,7 +58,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
 
   void formatInputRpHargaEdit() {
     String text = conHarga.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text) ?? 0;
+    if (value == 0) return;
     String formattedAmount = formatCurrency(value);
 
     conHarga.value = TextEditingValue(
@@ -63,7 +70,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
 
   void formatInputRpPoinEdit() {
     String text = conPointEdit.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text) ?? 0;
+    if (value == 0) return;
     String formattedAmount = formatCurrency(value);
 
     conPointEdit.value = TextEditingValue(
@@ -137,7 +145,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                   style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                 ),
               ],
-            )
+            ),
           ],
         ),
         SizedBox(height: size16),
@@ -173,10 +181,13 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                               setState(() {});
                             },
                             child: buttonActive(
-                                tipeUmumAktif,
-                                'Umum',
-                                Icon(PhosphorIcons.squares_four_fill,
-                                    color: bnw900)),
+                              tipeUmumAktif,
+                              'Umum',
+                              Icon(
+                                PhosphorIcons.squares_four_fill,
+                                color: bnw900,
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(width: size12),
@@ -190,8 +201,10 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                             child: buttonActive(
                               tipeProdukAktif,
                               'Per Produk',
-                              Icon(PhosphorIcons.shopping_bag_open_fill,
-                                  color: bnw900),
+                              Icon(
+                                PhosphorIcons.shopping_bag_open_fill,
+                                color: bnw900,
+                              ),
                             ),
                           ),
                         ),
@@ -204,10 +217,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                             decoration: BoxDecoration(
                               color: bnw100,
                               border: Border(
-                                bottom: BorderSide(
-                                  width: 1.5,
-                                  color: bnw500,
-                                ),
+                                bottom: BorderSide(width: 1.5, color: bnw500),
                               ),
                             ),
                             child: Align(
@@ -220,12 +230,18 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                       Text(
                                         'Kategori',
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                       Text(
                                         ' *',
                                         style: heading4(
-                                            FontWeight.w400, red500, 'Outfit'),
+                                          FontWeight.w400,
+                                          red500,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -238,66 +254,73 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                         ),
                                         isScrollControlled: true,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25),
+                                          borderRadius: BorderRadius.circular(
+                                            25,
+                                          ),
                                         ),
                                         context: context,
                                         builder: (context) {
                                           return StatefulBuilder(
-                                            builder: (BuildContext context,
-                                                    setState) =>
-                                                FractionallySizedBox(
-                                              heightFactor:
-                                                  isKeyboardActive ? 0.9 : 0.80,
+                                            builder: (BuildContext context, setState) => FractionallySizedBox(
+                                              heightFactor: isKeyboardActive
+                                                  ? 0.9
+                                                  : 0.80,
                                               child: GestureDetector(
                                                 onTap: () => textFieldFocusNode
                                                     .unfocus(),
                                                 child: Container(
                                                   padding: EdgeInsets.only(
-                                                      bottom:
-                                                          MediaQuery.of(context)
-                                                              .viewInsets
-                                                              .bottom),
+                                                    bottom: MediaQuery.of(
+                                                      context,
+                                                    ).viewInsets.bottom,
+                                                  ),
                                                   // height: MediaQuery.of(context).size.height / 1,
                                                   decoration: BoxDecoration(
                                                     color: bnw100,
                                                     borderRadius:
                                                         BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(12),
-                                                      topLeft:
-                                                          Radius.circular(12),
-                                                    ),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                12,
+                                                              ),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                12,
+                                                              ),
+                                                        ),
                                                   ),
                                                   child: Padding(
                                                     padding:
                                                         EdgeInsets.fromLTRB(
-                                                            size32,
-                                                            size16,
-                                                            size32,
-                                                            size32),
+                                                          size32,
+                                                          size16,
+                                                          size32,
+                                                          size32,
+                                                        ),
                                                     child: Column(
                                                       children: [
                                                         dividerShowdialog(),
                                                         SizedBox(
-                                                            height: size16),
+                                                          height: size16,
+                                                        ),
                                                         Align(
                                                           alignment: Alignment
                                                               .centerLeft,
                                                           child: Text(
                                                             'Pilih Produk',
                                                             style: heading1(
-                                                                FontWeight.w700,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w700,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ),
                                                         SizedBox(
-                                                            height: size16),
+                                                          height: size16,
+                                                        ),
                                                         FocusScope(
                                                           child: Focus(
-                                                            onFocusChange:
-                                                                (value) {
+                                                            onFocusChange: (value) {
                                                               isKeyboardActive =
                                                                   value;
                                                               setState(() {});
@@ -309,121 +332,135 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                                   searchController,
                                                               focusNode:
                                                                   textFieldFocusNode,
-                                                              onChanged:
-                                                                  (value) {
+                                                              onChanged: (value) {
                                                                 //   isKeyboardActive = value.isNotEmpty;
                                                                 _runSearchProduct(
-                                                                    value);
+                                                                  value,
+                                                                );
                                                                 setState(() {});
                                                               },
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                      contentPadding: EdgeInsets.symmetric(
-                                                                          vertical:
-                                                                              size12),
-                                                                      isDense:
-                                                                          true,
-                                                                      filled:
-                                                                          true,
-                                                                      fillColor:
-                                                                          bnw200,
-                                                                      border:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              bnw300,
-                                                                        ),
+                                                              decoration: InputDecoration(
+                                                                contentPadding:
+                                                                    EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          size12,
+                                                                    ),
+                                                                isDense: true,
+                                                                filled: true,
+                                                                fillColor:
+                                                                    bnw200,
+                                                                border: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        size8,
                                                                       ),
-                                                                      focusedBorder:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          width:
-                                                                              2,
-                                                                          color:
-                                                                              primary500,
-                                                                        ),
-                                                                      ),
-                                                                      enabledBorder:
-                                                                          OutlineInputBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(size8),
-                                                                        borderSide:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              bnw300,
-                                                                        ),
-                                                                      ),
-                                                                      suffixIcon: searchController
-                                                                              .text
-                                                                              .isNotEmpty
-                                                                          ? GestureDetector(
-                                                                              onTap: () {
-                                                                                searchController.text = '';
-                                                                                _runSearchProduct('');
-                                                                                setState(() {});
-                                                                              },
-                                                                              child: Icon(
-                                                                                PhosphorIcons.x_fill,
-                                                                                size: 20,
-                                                                                color: bnw900,
-                                                                              ),
-                                                                            )
-                                                                          : null,
-                                                                      prefixIcon:
-                                                                          Icon(
-                                                                        PhosphorIcons
-                                                                            .magnifying_glass,
+                                                                  borderSide:
+                                                                      BorderSide(
                                                                         color:
-                                                                            bnw500,
+                                                                            bnw300,
                                                                       ),
-                                                                      hintText:
-                                                                          'Cari',
-                                                                      hintStyle: heading3(
-                                                                          FontWeight
-                                                                              .w500,
-                                                                          bnw500,
-                                                                          'Outfit')),
+                                                                ),
+                                                                focusedBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        size8,
+                                                                      ),
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                        width:
+                                                                            2,
+                                                                        color:
+                                                                            primary500,
+                                                                      ),
+                                                                ),
+                                                                enabledBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        size8,
+                                                                      ),
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                        color:
+                                                                            bnw300,
+                                                                      ),
+                                                                ),
+                                                                suffixIcon:
+                                                                    searchController
+                                                                        .text
+                                                                        .isNotEmpty
+                                                                    ? GestureDetector(
+                                                                        onTap: () {
+                                                                          searchController.text =
+                                                                              '';
+                                                                          _runSearchProduct(
+                                                                            '',
+                                                                          );
+                                                                          setState(
+                                                                            () {},
+                                                                          );
+                                                                        },
+                                                                        child: Icon(
+                                                                          PhosphorIcons
+                                                                              .x_fill,
+                                                                          size:
+                                                                              20,
+                                                                          color:
+                                                                              bnw900,
+                                                                        ),
+                                                                      )
+                                                                    : null,
+                                                                prefixIcon: Icon(
+                                                                  PhosphorIcons
+                                                                      .magnifying_glass,
+                                                                  color: bnw500,
+                                                                ),
+                                                                hintText:
+                                                                    'Cari',
+                                                                hintStyle:
+                                                                    heading3(
+                                                                      FontWeight
+                                                                          .w500,
+                                                                      bnw500,
+                                                                      'Outfit',
+                                                                    ),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
                                                         Expanded(
-                                                          child:
-                                                              RefreshIndicator(
+                                                          child: RefreshIndicator(
                                                             onRefresh:
                                                                 () async {
-                                                              initState();
-                                                            },
+                                                                  initState();
+                                                                },
                                                             child: ListView(
                                                               children: [
                                                                 SizedBox(
-                                                                    height:
-                                                                        size16),
+                                                                  height:
+                                                                      size16,
+                                                                ),
                                                                 SizedBox(
                                                                   width: double
                                                                       .infinity,
                                                                   child: buttonL(
-                                                                      Text(
-                                                                        dataMap![
-                                                                            'name'],
-                                                                        style: heading2(
-                                                                            FontWeight.w400,
-                                                                            bnw100,
-                                                                            'Outfit'),
+                                                                    Text(
+                                                                      dataMap!['name'],
+                                                                      style: heading2(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw100,
+                                                                        'Outfit',
                                                                       ),
-                                                                      primary800,
-                                                                      primary800),
+                                                                    ),
+                                                                    primary800,
+                                                                    primary800,
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
-                                                                    height:
-                                                                        size12),
-                                                                ListView
-                                                                    .builder(
+                                                                  height:
+                                                                      size12,
+                                                                ),
+                                                                ListView.builder(
                                                                   shrinkWrap:
                                                                       true,
                                                                   padding:
@@ -436,164 +473,230 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                                           .onDrag,
                                                                   itemCount:
                                                                       searchResultListProduct
-                                                                              ?.length ??
-                                                                          0,
+                                                                          ?.length ??
+                                                                      0,
                                                                   itemBuilder:
-                                                                      (context,
-                                                                          index) {
-                                                                    final product =
-                                                                        searchResultListProduct?[
-                                                                            index];
-                                                                    if (product ==
-                                                                        null) {
-                                                                      return const SizedBox(); // atau Widget lain sesuai kebutuhan
-                                                                    }
+                                                                      (
+                                                                        context,
+                                                                        index,
+                                                                      ) {
+                                                                        final product =
+                                                                            searchResultListProduct?[index];
+                                                                        if (product ==
+                                                                            null) {
+                                                                          return const SizedBox(); // atau Widget lain sesuai kebutuhan
+                                                                        }
 
-                                                                    final bool isMatchingSearch = product[
-                                                                            'name']
-                                                                        .toString()
-                                                                        .toLowerCase()
-                                                                        .contains(searchController
-                                                                            .text
-                                                                            .toLowerCase());
+                                                                        final bool
+                                                                        isMatchingSearch = product['name']
+                                                                            .toString()
+                                                                            .toLowerCase()
+                                                                            .contains(
+                                                                              searchController.text.toLowerCase(),
+                                                                            );
 
-                                                                    final bool
+                                                                        final bool
                                                                         isSelected =
-                                                                        productidDiskon
-                                                                            .contains(product['productid']);
+                                                                            productidDiskon.contains(
+                                                                              product['productid'],
+                                                                            );
 
-                                                                    if (isMatchingSearch) {
-                                                                      return GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          // print('Selected product: ${product['name']}');
-                                                                          textFieldFocusNode
-                                                                              .unfocus();
+                                                                        if (isMatchingSearch) {
+                                                                          return GestureDetector(
+                                                                            onTap: () {
+                                                                              // print('Selected product: ${product['name']}');
+                                                                              textFieldFocusNode.unfocus();
 
-                                                                          if (product['discount_status'] ==
-                                                                              '') {
-                                                                            if (isSelected) {
-                                                                              productidDiskon.remove(product['productid']);
-                                                                            } else {
-                                                                              productidDiskon.add(product['productid']);
-                                                                            }
-                                                                          }
-                                                                          print(
-                                                                              productidDiskon);
-                                                                          // Panggil fungsi _selectProduct dengan produk yang dipilih
-                                                                          idProduct =
-                                                                              product['productid'];
-                                                                          _selectProduct(
-                                                                              product);
-                                                                          setState(
-                                                                              () {});
-                                                                        },
-                                                                        child: Container(
-                                                                            padding: EdgeInsets.all(size8),
-                                                                            margin: EdgeInsets.only(bottom: size16),
-                                                                            decoration: BoxDecoration(
-                                                                              color: product['discount_status'] == ''
-                                                                                  ? isSelected
-                                                                                      ? primary100
-                                                                                      : bnw100
-                                                                                  : bnw200,
-                                                                              border: Border.all(
-                                                                                color: product['discount_status'] == ''
-                                                                                    ? isSelected
-                                                                                        ? primary500
-                                                                                        : bnw300
-                                                                                    : bnw200,
+                                                                              if (product['discount_status'] ==
+                                                                                  '') {
+                                                                                if (isSelected) {
+                                                                                  productidDiskon.remove(
+                                                                                    product['productid'],
+                                                                                  );
+                                                                                } else {
+                                                                                  productidDiskon.add(
+                                                                                    product['productid'],
+                                                                                  );
+                                                                                }
+                                                                              }
+                                                                              print(
+                                                                                productidDiskon,
+                                                                              );
+                                                                              // Panggil fungsi _selectProduct dengan produk yang dipilih
+                                                                              idProduct = product['productid'];
+                                                                              _selectProduct(
+                                                                                product,
+                                                                              );
+                                                                              setState(
+                                                                                () {},
+                                                                              );
+                                                                            },
+                                                                            child: Container(
+                                                                              padding: EdgeInsets.all(
+                                                                                size8,
                                                                               ),
-                                                                              borderRadius: BorderRadius.circular(size16),
-                                                                            ),
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                Row(
-                                                                                  children: [
-                                                                                    ClipRRect(
-                                                                                      borderRadius: BorderRadius.circular(size8),
-                                                                                      child: Image.network(
-                                                                                        product['product_image'],
-                                                                                        fit: BoxFit.cover,
-                                                                                        width: size48,
-                                                                                        height: size48,
-                                                                                        loadingBuilder: (context, child, loadingProgress) {
-                                                                                          if (loadingProgress == null) {
-                                                                                            return child;
-                                                                                          }
+                                                                              margin: EdgeInsets.only(
+                                                                                bottom: size16,
+                                                                              ),
+                                                                              decoration: BoxDecoration(
+                                                                                color:
+                                                                                    product['discount_status'] ==
+                                                                                        ''
+                                                                                    ? isSelected
+                                                                                          ? primary100
+                                                                                          : bnw100
+                                                                                    : bnw200,
+                                                                                border: Border.all(
+                                                                                  color:
+                                                                                      product['discount_status'] ==
+                                                                                          ''
+                                                                                      ? isSelected
+                                                                                            ? primary500
+                                                                                            : bnw300
+                                                                                      : bnw200,
+                                                                                ),
+                                                                                borderRadius: BorderRadius.circular(
+                                                                                  size16,
+                                                                                ),
+                                                                              ),
+                                                                              child: Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      ClipRRect(
+                                                                                        borderRadius: BorderRadius.circular(
+                                                                                          size8,
+                                                                                        ),
+                                                                                        child: Image.network(
+                                                                                          product['product_image'],
+                                                                                          fit: BoxFit.cover,
+                                                                                          width: size48,
+                                                                                          height: size48,
+                                                                                          loadingBuilder:
+                                                                                              (
+                                                                                                context,
+                                                                                                child,
+                                                                                                loadingProgress,
+                                                                                              ) {
+                                                                                                if (loadingProgress ==
+                                                                                                    null) {
+                                                                                                  return child;
+                                                                                                }
 
-                                                                                          return Center(child: loading());
-                                                                                        },
-                                                                                        errorBuilder: (context, error, stackTrace) => SizedBox(
-                                                                                          // height: 227,
-                                                                                          // width: 227,
-                                                                                          child: SvgPicture.asset('assets/logoProduct.svg'),
+                                                                                                return Center(
+                                                                                                  child: loading(),
+                                                                                                );
+                                                                                              },
+                                                                                          errorBuilder:
+                                                                                              (
+                                                                                                context,
+                                                                                                error,
+                                                                                                stackTrace,
+                                                                                              ) => SizedBox(
+                                                                                                // height: 227,
+                                                                                                // width: 227,
+                                                                                                child: SvgPicture.asset(
+                                                                                                  'assets/logoProduct.svg',
+                                                                                                ),
+                                                                                              ),
                                                                                         ),
                                                                                       ),
-                                                                                    ),
-                                                                                    SizedBox(width: size16),
-                                                                                    Column(
-                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                      children: [
-                                                                                        Text(
-                                                                                          product['name'],
-                                                                                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                                                                                        ),
-                                                                                        Text(
-                                                                                          FormatCurrency.convertToIdr(product['price']),
-                                                                                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                    Spacer(),
-                                                                                    Icon(
-                                                                                      product['discount_status'] == ''
-                                                                                          ? isSelected
-                                                                                              ? PhosphorIcons.check_square_fill
-                                                                                              : PhosphorIcons.square
-                                                                                          : PhosphorIcons.square,
-                                                                                      color: product['discount_status'] == ''
-                                                                                          ? isSelected
-                                                                                              ? primary500
-                                                                                              : bnw900
-                                                                                          : bnw400,
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                SizedBox(height: size8),
-                                                                                product['discount_status'] != ''
-                                                                                    ? Container(
-                                                                                        padding: EdgeInsets.symmetric(vertical: size8, horizontal: size16),
-                                                                                        height: size32,
-                                                                                        decoration: BoxDecoration(
-                                                                                          color: danger100,
-                                                                                          borderRadius: BorderRadius.circular(size8),
-                                                                                        ),
-                                                                                        child: Row(
-                                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                                          children: [
-                                                                                            Text(
-                                                                                              product['discount_status'],
-                                                                                              style: body3(FontWeight.w400, danger500, 'Outfit'),
+                                                                                      SizedBox(
+                                                                                        width: size16,
+                                                                                      ),
+                                                                                      Column(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        children: [
+                                                                                          Text(
+                                                                                            product['name'],
+                                                                                            style: heading3(
+                                                                                              FontWeight.w400,
+                                                                                              bnw900,
+                                                                                              'Outfit',
                                                                                             ),
-                                                                                            Spacer(),
-                                                                                            Icon(PhosphorIcons.clock, color: danger500, size: size16),
-                                                                                          ],
-                                                                                        ),
-                                                                                      )
-                                                                                    : SizedBox(),
-                                                                              ],
-                                                                            )),
-                                                                      );
-                                                                    } else {
-                                                                      return const SizedBox();
-                                                                    }
-                                                                  },
+                                                                                          ),
+                                                                                          Text(
+                                                                                            FormatCurrency.convertToIdr(
+                                                                                              product['price'],
+                                                                                            ),
+                                                                                            style: heading3(
+                                                                                              FontWeight.w600,
+                                                                                              bnw900,
+                                                                                              'Outfit',
+                                                                                            ),
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                      Spacer(),
+                                                                                      Icon(
+                                                                                        product['discount_status'] ==
+                                                                                                ''
+                                                                                            ? isSelected
+                                                                                                  ? PhosphorIcons.check_square_fill
+                                                                                                  : PhosphorIcons.square
+                                                                                            : PhosphorIcons.square,
+                                                                                        color:
+                                                                                            product['discount_status'] ==
+                                                                                                ''
+                                                                                            ? isSelected
+                                                                                                  ? primary500
+                                                                                                  : bnw900
+                                                                                            : bnw400,
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: size8,
+                                                                                  ),
+                                                                                  product['discount_status'] !=
+                                                                                          ''
+                                                                                      ? Container(
+                                                                                          padding: EdgeInsets.symmetric(
+                                                                                            vertical: size8,
+                                                                                            horizontal: size16,
+                                                                                          ),
+                                                                                          height: size32,
+                                                                                          decoration: BoxDecoration(
+                                                                                            color: danger100,
+                                                                                            borderRadius: BorderRadius.circular(
+                                                                                              size8,
+                                                                                            ),
+                                                                                          ),
+                                                                                          child: Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                product['discount_status'],
+                                                                                                style: body3(
+                                                                                                  FontWeight.w400,
+                                                                                                  danger500,
+                                                                                                  'Outfit',
+                                                                                                ),
+                                                                                              ),
+                                                                                              Spacer(),
+                                                                                              Icon(
+                                                                                                PhosphorIcons.clock,
+                                                                                                color: danger500,
+                                                                                                size: size16,
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        )
+                                                                                      : SizedBox(),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        } else {
+                                                                          return const SizedBox();
+                                                                        }
+                                                                      },
                                                                 ),
                                                                 SizedBox(
-                                                                    height:
-                                                                        size16),
+                                                                  height:
+                                                                      size16,
+                                                                ),
                                                               ],
                                                             ),
                                                           ),
@@ -601,23 +704,25 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                         GestureDetector(
                                                           onTap: () {
                                                             Navigator.pop(
-                                                                context);
+                                                              context,
+                                                            );
                                                           },
                                                           child: buttonXXL(
                                                             Center(
                                                               child: Text(
                                                                 'Selesai',
                                                                 style: heading2(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw100,
-                                                                    'Outfit'),
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  bnw100,
+                                                                  'Outfit',
+                                                                ),
                                                               ),
                                                             ),
                                                             double.infinity,
                                                           ),
                                                         ),
-                                                        SizedBox(height: size8)
+                                                        SizedBox(height: size8),
                                                       ],
                                                     ),
                                                   ),
@@ -630,7 +735,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                     },
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical: size12),
+                                        vertical: size12,
+                                      ),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -640,16 +746,17 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                 ? 'Pilih Produk'
                                                 : '${productidDiskon.length} Produk Terpilih',
                                             style: heading2(
-                                                FontWeight.w600,
-                                                productidDiskon.isEmpty
-                                                    ? bnw500
-                                                    : bnw900,
-                                                'Outfit'),
+                                              FontWeight.w600,
+                                              productidDiskon.isEmpty
+                                                  ? bnw500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                           Icon(
                                             PhosphorIcons.caret_down,
                                             color: bnw900,
-                                          )
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -697,8 +804,11 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                               hargaRupiahAktif = 1;
                               setState(() {});
                             },
-                            child: buttonActive(hargaRupiahAktif, 'Rupiah',
-                                Icon(PhosphorIcons.money_fill, color: bnw900)),
+                            child: buttonActive(
+                              hargaRupiahAktif,
+                              'Rupiah',
+                              Icon(PhosphorIcons.money_fill, color: bnw900),
+                            ),
                           ),
                         ),
                         SizedBox(width: size12),
@@ -724,8 +834,14 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                 child: TextFormField(
                                   cursorColor: primary500,
                                   keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
                                   style: heading2(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                   controller: conHarga,
                                   decoration: InputDecoration(
                                     focusedBorder: UnderlineInputBorder(
@@ -735,8 +851,9 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                       ),
                                     ),
                                     isDense: true,
-                                    contentPadding:
-                                        EdgeInsets.symmetric(vertical: size12),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: size12,
+                                    ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
                                         width: 1.5,
@@ -747,11 +864,14 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                         ? '%'
                                         : 'Rp. 12.000',
                                     hintStyle: heading2(
-                                        FontWeight.w600, bnw500, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                               )
-                            : SizedBox()
+                            : SizedBox(),
                       ],
                     ),
                     SizedBox(height: size12),
@@ -787,10 +907,10 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                               setState(() {});
                             },
                             child: buttonActive(
-                                masaSelamanya,
-                                'Selamanya',
-                                Icon(PhosphorIcons.hourglass_fill,
-                                    color: bnw900)),
+                              masaSelamanya,
+                              'Selamanya',
+                              Icon(PhosphorIcons.hourglass_fill, color: bnw900),
+                            ),
                           ),
                         ),
                         SizedBox(width: size12),
@@ -804,8 +924,10 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                             child: buttonActive(
                               masaKustom,
                               'Kustom Waktu',
-                              Icon(PhosphorIcons.hourglass_medium_fill,
-                                  color: bnw900),
+                              Icon(
+                                PhosphorIcons.hourglass_medium_fill,
+                                color: bnw900,
+                              ),
                             ),
                           ),
                         ),
@@ -837,13 +959,19 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           children: [
                                             Text(
                                               'Waktu Mulai',
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                             ),
                                             Text(
                                               ' *',
-                                              style: heading4(FontWeight.w400,
-                                                  red500, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                red500,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -852,22 +980,25 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: _selectedDate ??
+                                              initialDate:
+                                                  _selectedDate ??
                                                   DateTime.now(),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
+                                              if (selectedDate == null) return;
                                               DateTime selectedDateTime =
                                                   DateTime(
-                                                selectedDate!.year,
+                                                    selectedDate!.year,
+                                                    selectedDate.month,
+                                                    selectedDate.day,
+                                                  );
+
+                                              _selectedDate = DateTime(
+                                                selectedDate.year,
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
-
-                                              _selectedDate = DateTime(
-                                                  selectedDate.year,
-                                                  selectedDate.month,
-                                                  selectedDate.day);
 
                                               tanggalAwal =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
@@ -877,7 +1008,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
-                                                vertical: size12),
+                                              vertical: size12,
+                                            ),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
@@ -888,16 +1020,17 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                       ? 'Pilih Tanggal'
                                                       : tanggalAwal,
                                                   style: heading2(
-                                                      FontWeight.w600,
-                                                      tanggalAwal == ''
-                                                          ? bnw500
-                                                          : bnw900,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    tanggalAwal == ''
+                                                        ? bnw500
+                                                        : bnw900,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                                 Icon(
                                                   PhosphorIcons.calendar_fill,
                                                   color: bnw900,
-                                                )
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -929,13 +1062,19 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           children: [
                                             Text(
                                               'Waktu Berakhir',
-                                              style: heading4(FontWeight.w400,
-                                                  bnw900, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                             ),
                                             Text(
                                               ' *',
-                                              style: heading4(FontWeight.w400,
-                                                  red500, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                red500,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -944,21 +1083,24 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           onTap: () {
                                             showDatePicker(
                                               context: context,
-                                              initialDate: _selectedDate2 ??
+                                              initialDate:
+                                                  _selectedDate2 ??
                                                   DateTime.now(),
                                               firstDate: DateTime(2022),
                                               lastDate: DateTime(2101),
                                             ).then((selectedDate) {
+                                              if (selectedDate == null) return;
                                               DateTime selectedDateTime =
                                                   DateTime(
-                                                selectedDate!.year,
+                                                    selectedDate!.year,
+                                                    selectedDate.month,
+                                                    selectedDate.day,
+                                                  );
+                                              _selectedDate2 = DateTime(
+                                                selectedDate.year,
                                                 selectedDate.month,
                                                 selectedDate.day,
                                               );
-                                              _selectedDate2 = DateTime(
-                                                  selectedDate.year,
-                                                  selectedDate.month,
-                                                  selectedDate.day);
 
                                               tanggalAkhir =
                                                   "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
@@ -968,7 +1110,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
-                                                vertical: size12),
+                                              vertical: size12,
+                                            ),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
@@ -979,16 +1122,17 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                                                       ? 'Pilih Tanggal'
                                                       : tanggalAkhir,
                                                   style: heading2(
-                                                      FontWeight.w600,
-                                                      tanggalAkhir == ''
-                                                          ? bnw500
-                                                          : bnw900,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    tanggalAkhir == ''
+                                                        ? bnw500
+                                                        : bnw900,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                                 Icon(
                                                   PhosphorIcons.calendar_fill,
                                                   color: bnw900,
-                                                )
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -1000,7 +1144,7 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
                               ),
                             ],
                           )
-                        : SizedBox()
+                        : SizedBox(),
                   ],
                 ),
               ),
@@ -1204,7 +1348,10 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             Text(
               title,
               style: heading3(
-                  FontWeight.w400, active == 1 ? primary500 : bnw900, 'Outfit'),
+                FontWeight.w400,
+                active == 1 ? primary500 : bnw900,
+                'Outfit',
+              ),
             ),
             icon,
           ],
@@ -1220,14 +1367,8 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading4(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: heading4(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           TextFormField(
@@ -1241,18 +1382,12 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
             },
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: hintText,
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1271,38 +1406,42 @@ class _TambahDiskonPageState extends State<TambahDiskonPage> {
   bool isItemSelected = false;
 
   Future _getProductList() async {
-    await http.post(Uri.parse(getProdukDiskonLink), body: {
-      "deviceid": identifier,
-    }, headers: {
-      "token": widget.token,
-    }).then((response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data != null && data['data'] != null) {
-          setState(() {
-            dataMap = data['data'];
+    await http
+        .post(
+          Uri.parse(getProdukDiskonLink),
+          body: {"deviceid": identifier},
+          headers: {"token": widget.token},
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            if (data != null && data['data'] != null) {
+              setState(() {
+                dataMap = data['data'];
 
-            List<dynamic> typeproductList =
-                List<dynamic>.from(dataMap!['products']);
+                List<dynamic> typeproductList = List<dynamic>.from(
+                  dataMap!['products'],
+                );
 
-            searchResultListProduct = typeproductList;
-          });
-        }
-      }
-    });
+                searchResultListProduct = typeproductList;
+              });
+            }
+          }
+        });
   }
 
   void _runSearchProduct(String searchText) {
     setState(() {
       if (typeproductList != null) {
         searchResultListProduct = typeproductList!
-            .where((product) =>
-                product != null &&
-                product['name'] != null &&
-                product['name']
-                    .toString()
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase()))
+            .where(
+              (product) =>
+                  product != null &&
+                  product['name'] != null &&
+                  product['name'].toString().toLowerCase().contains(
+                    searchText.toLowerCase(),
+                  ),
+            )
             .toList();
       }
     });

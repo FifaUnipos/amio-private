@@ -17,7 +17,6 @@ class ModalTransactionDelete {
     Map<String, dynamic>? dataDetailProduct,
     String token,
   ) async {
-    // Reset state saat modal baru mau dibuka agar error yang lama hilang
     context.read<TransactionHistoryDeleteProvider>().resetState();
 
     String? selectedReasonId;

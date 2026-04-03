@@ -1,16 +1,23 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:unipos_app_335/components/organisms/report_card.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
+
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-
 
 import 'package:sidebarx/sidebarx.dart';
 import '../../../../utils/component/component_loading.dart';
@@ -20,19 +27,18 @@ import '../../../../../models/tokomodel.dart';
 import '../../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 import '../../../tokopage/sidebar/laporanToko/classLaporan.dart';
-import '../../../tokopage/sidebar/laporanToko/pendapatanHarian.dart';import '../../../../utils/component/component_color.dart';
+import '../../../tokopage/sidebar/laporanToko/pendapatanHarian.dart';
+import '../../../../utils/component/component_color.dart';
 import '../../../tokopage/sidebar/laporanToko/pendapatanPerProduk.dart';
-import '../../../tokopage/sidebar/laporanToko/pendapatanToko.dart';import '../../../../../utils/component/component_button.dart';
+import '../../../tokopage/sidebar/laporanToko/pendapatanToko.dart';
+import '../../../../../utils/component/component_button.dart';
 
 Color maainColor = Color(0xFF1363DF);
 
 class LaporanGrup extends StatefulWidget {
   String token;
-  LaporanGrup({
-    Key? key,
-    required this.token,
-    required this.controller,
-  }) : super(key: key);
+  LaporanGrup({Key? key, required this.token, required this.controller})
+    : super(key: key);
 
   final SidebarXController controller;
 
@@ -45,7 +51,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
   TextEditingController hapusController = TextEditingController();
   bool _validate = false;
 
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
 
   String _textOrderBy = 'Tanggal Terkini',
       textOrderByToko = 'Toko Terbaru',
@@ -82,7 +88,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
     "PPN Tertinggi",
     "PPN Terendah",
     "Total Tertinggi",
-    "Total Terendah"
+    "Total Terendah",
   ];
 
   List pendapatanHarianText = [
@@ -93,7 +99,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
     "ppnTertinggi",
     "ppnTerendah",
     "totalTertinggi",
-    "totalTerendah"
+    "totalTerendah",
   ];
 
   List pilihUrutanToko = [
@@ -119,7 +125,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
     "ppnTertinggi",
     "ppnTerendah",
     "totalTertinggi",
-    "totalTerendah"
+    "totalTerendah",
   ];
 
   List pilihUrutanProduct = [
@@ -132,7 +138,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
     "PPN Tertinggi",
     "PPN Terendah",
     "Total PerProduk Tertinggi",
-    "Total PerProduk Terendah"
+    "Total PerProduk Terendah",
   ];
 
   List pendapatanProductText = [
@@ -145,54 +151,71 @@ class _LaporanGrupState extends State<LaporanGrup> {
     "ppnTertinggi",
     "ppnTerendah",
     "totalTertinggi",
-    "totalTerendah"
+    "totalTerendah",
   ];
 
   Widget build(BuildContext context) {
     List<ObjectLaporan> objects = [
-      ObjectLaporan('Pendapatan Harian', 'Laporan Pendapatan Harian Toko',
-          PhosphorIcons.calendar_fill),
-      ObjectLaporan('Pendapatan Toko', 'Laporan Pendapatan Keseluruhan Toko',
-          PhosphorIcons.storefront_fill),
-      ObjectLaporan('Pendapatan Per Produk', 'Laporan Pendapatan Per Produk',
-          PhosphorIcons.shopping_bag_open_fill),
+      ObjectLaporan(
+        'Pendapatan Harian',
+        'Laporan Pendapatan Harian Toko',
+        PhosphorIcons.calendar_fill,
+      ),
+      ObjectLaporan(
+        'Pendapatan Toko',
+        'Laporan Pendapatan Keseluruhan Toko',
+        PhosphorIcons.storefront_fill,
+      ),
+      ObjectLaporan(
+        'Pendapatan Per Produk',
+        'Laporan Pendapatan Per Produk',
+        PhosphorIcons.shopping_bag_open_fill,
+      ),
       // ObjectLaporan('Profit Harian', 'Laporan Profit Harian Toko',
       //     PhosphorIcons.chart_line),
       // ObjectLaporan(
       //     'Profit Toko', 'Laporan Profit Toko', PhosphorIcons.chart_line),
     ];
 
-    return ScreenUtilInit(builder: (context, child) {
-      return Container(
-        margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
-        padding: EdgeInsets.all(size16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(size16),
-        ),
-        child: PageView(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          pageSnapping: true,
-          reverse: false,
-          physics: NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            print('$index');
-          },
-          children: [
-            lihatLaporanPage(objects),
-            LaporanPendapatanHarianPage(
-                pageController: _pageController, token: widget.token),
-            LaporanPendapatanTokoPage(
-                pageController: _pageController, token: widget.token),
-            LaporanPendapatanPerProduk(
-                pageController: _pageController, token: widget.token),
-            profitHarian(context),
-            profitHarian(context),
-          ],
-        ),
-      );
-    });
+    return ScreenUtilInit(
+      builder: (context, child) {
+        return Container(
+          margin: EdgeInsets.fromLTRB(size16, size48, size16, size16),
+          padding: EdgeInsets.all(size16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.circular(size16),
+          ),
+          child: PageView(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            pageSnapping: true,
+            reverse: false,
+            physics: NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              print('$index');
+            },
+            children: [
+              lihatLaporanPage(objects),
+              LaporanPendapatanHarianPage(
+                pageController: _pageController,
+                token: widget.token,
+              ),
+              LaporanPendapatanTokoPage(
+                pageController: _pageController,
+                token: widget.token,
+              ),
+              LaporanPendapatanPerProduk(
+                pageController: _pageController,
+                token: widget.token,
+              ),
+              profitHarian(context),
+              profitHarian(context),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   pendapatanHarianToko(BuildContext context) {
@@ -206,10 +229,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               onTap: () {
                 _pageController.jumpToPage(0);
               },
-              child: Icon(
-                PhosphorIcons.arrow_left,
-                color: bnw900,
-              ),
+              child: Icon(PhosphorIcons.arrow_left, color: bnw900),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -236,11 +256,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                     Icon(PhosphorIcons.storefront, color: bnw900),
                     Text(
                       'Semua Toko',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -252,9 +268,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               onTap: () {
                 showBottomPilihan(
                   context,
-                  Column(
-                    children: [Text('Bagikan Laporan')],
-                  ),
+                  Column(children: [Text('Bagikan Laporan')]),
                 );
               },
               child: buttonXLoutline(
@@ -329,12 +343,16 @@ class _LaporanGrupState extends State<LaporanGrup> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(top: size16),
-            decoration: BoxDecoration(
-              color: primary100,
-            ),
+            decoration: BoxDecoration(color: primary100),
             child: FutureBuilder(
-              future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, [''], ''),
+              future: getLaporanDaily(
+                context,
+                widget.token,
+                _textvalueOrderBy,
+                _textvalueKeyword,
+                [''],
+                '',
+              ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -356,7 +374,10 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                 child: Text(
                                   detail[index]['tanggal'].toString(),
                                   style: heading4(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -366,48 +387,60 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['nilaiTransaksi'])
-                                      .toString(),
+                                    detail[index]['nilaiTransaksi'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['totalPPN'])
-                                      .toString(),
+                                    detail[index]['totalPPN'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(thickness: 1.2)
+                          Divider(thickness: 1.2),
                         ],
                       );
                     },
@@ -420,78 +453,86 @@ class _LaporanGrupState extends State<LaporanGrup> {
           ),
         ),
         FutureBuilder(
-            future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, [''], ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Map<String, dynamic>? data = snapshot.data!['data'];
+          future: getLaporanDaily(
+            context,
+            widget.token,
+            _textvalueOrderBy,
+            _textvalueKeyword,
+            [''],
+            '',
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map<String, dynamic>? data = snapshot.data!['data'];
 
-                var header = data!['header'];
-                return Container(
-                  padding: EdgeInsets.only(top: size16, bottom: size16),
-                  decoration: BoxDecoration(
-                    color: primary200,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(size12),
-                      bottomRight: Radius.circular(size12),
+              var header = data!['header'];
+              return Container(
+                padding: EdgeInsets.only(top: size16, bottom: size16),
+                decoration: BoxDecoration(
+                  color: primary200,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(size12),
+                    bottomRight: Radius.circular(size12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        'Total',
+                        style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          'Total',
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        header['count'].toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          header['count'].toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['nilaiTransaksi'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['nilaiTransaksi'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['totalPPN'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['totalPPN'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(header['total']).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['total'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              return loading();
-            }),
+            return loading();
+          },
+        ),
       ],
     );
   }
@@ -507,10 +548,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               onTap: () {
                 _pageController.jumpToPage(0);
               },
-              child: Icon(
-                PhosphorIcons.arrow_left,
-                color: bnw900,
-              ),
+              child: Icon(PhosphorIcons.arrow_left, color: bnw900),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -527,7 +565,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
               ],
             ),
             orderByToko(
-                context, pilihUrutanToko, pendapatanTokoText, textOrderByToko),
+              context,
+              pilihUrutanToko,
+              pendapatanTokoText,
+              textOrderByToko,
+            ),
             keyword(context),
             buttonXLoutline(
               Padding(
@@ -538,11 +580,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                     Icon(PhosphorIcons.storefront, color: bnw900),
                     Text(
                       'Semua Toko',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -621,16 +659,15 @@ class _LaporanGrupState extends State<LaporanGrup> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(top: size16),
-            decoration: BoxDecoration(
-              color: primary100,
-            ),
+            decoration: BoxDecoration(color: primary100),
             child: FutureBuilder(
               future: getLaporanMerchant(
                 context,
                 widget.token,
                 _textvalueKeyword,
                 textvalueOrderByToko,
-                [''],""
+                [''],
+                "",
               ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -653,7 +690,10 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                 child: Text(
                                   detail[index]['namerToko'].toString(),
                                   style: heading4(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -663,48 +703,60 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['nilaiTransaksi'])
-                                      .toString(),
+                                    detail[index]['nilaiTransaksi'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['totalPPN'])
-                                      .toString(),
+                                    detail[index]['totalPPN'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(thickness: 1.2)
+                          Divider(thickness: 1.2),
                         ],
                       );
                     },
@@ -717,78 +769,86 @@ class _LaporanGrupState extends State<LaporanGrup> {
           ),
         ),
         FutureBuilder(
-            future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, [''], ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Map<String, dynamic>? data = snapshot.data!['data'];
+          future: getLaporanDaily(
+            context,
+            widget.token,
+            _textvalueOrderBy,
+            _textvalueKeyword,
+            [''],
+            '',
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map<String, dynamic>? data = snapshot.data!['data'];
 
-                var header = data!['header'];
-                return Container(
-                  padding: EdgeInsets.only(top: size16, bottom: size16),
-                  decoration: BoxDecoration(
-                    color: primary200,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(size12),
-                      bottomRight: Radius.circular(size12),
+              var header = data!['header'];
+              return Container(
+                padding: EdgeInsets.only(top: size16, bottom: size16),
+                decoration: BoxDecoration(
+                  color: primary200,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(size12),
+                    bottomRight: Radius.circular(size12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        'Total',
+                        style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          'Total',
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        header['count'].toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          header['count'].toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['nilaiTransaksi'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['nilaiTransaksi'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['totalPPN'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['totalPPN'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(header['total']).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['total'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              return loading();
-            }),
+            return loading();
+          },
+        ),
       ],
     );
   }
@@ -804,10 +864,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               onTap: () {
                 _pageController.jumpToPage(0);
               },
-              child: Icon(
-                PhosphorIcons.arrow_left,
-                color: bnw900,
-              ),
+              child: Icon(PhosphorIcons.arrow_left, color: bnw900),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -839,11 +896,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                     Icon(PhosphorIcons.storefront, color: bnw900),
                     Text(
                       'Semua Toko',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -922,16 +975,15 @@ class _LaporanGrupState extends State<LaporanGrup> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(top: size16),
-            decoration: BoxDecoration(
-              color: primary100,
-            ),
+            decoration: BoxDecoration(color: primary100),
             child: FutureBuilder(
               future: getLaporanPerProduk(
                 context,
                 widget.token,
                 _textvalueKeyword,
                 textvalueOrderByProduct,
-                [''],""
+                [''],
+                "",
               ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -954,7 +1006,10 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                 child: Text(
                                   detail[index]['nameProduk'].toString(),
                                   style: heading4(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -964,48 +1019,60 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['nilaiTransaksi'])
-                                      .toString(),
+                                    detail[index]['nilaiTransaksi'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['totalPPN'])
-                                      .toString(),
+                                    detail[index]['totalPPN'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(thickness: 1.2)
+                          Divider(thickness: 1.2),
                         ],
                       );
                     },
@@ -1018,78 +1085,86 @@ class _LaporanGrupState extends State<LaporanGrup> {
           ),
         ),
         FutureBuilder(
-            future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, [''], ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Map<String, dynamic>? data = snapshot.data!['data'];
+          future: getLaporanDaily(
+            context,
+            widget.token,
+            _textvalueOrderBy,
+            _textvalueKeyword,
+            [''],
+            '',
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map<String, dynamic>? data = snapshot.data!['data'];
 
-                var header = data!['header'];
-                return Container(
-                  padding: EdgeInsets.only(top: size16, bottom: size16),
-                  decoration: BoxDecoration(
-                    color: primary200,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(size12),
-                      bottomRight: Radius.circular(size12),
+              var header = data!['header'];
+              return Container(
+                padding: EdgeInsets.only(top: size16, bottom: size16),
+                decoration: BoxDecoration(
+                  color: primary200,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(size12),
+                    bottomRight: Radius.circular(size12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        'Total Keseluruhan',
+                        style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          'Total Keseluruhan',
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
+                    SizedBox(
+                      width: width + size16,
+                      child: Text(
+                        header['count'].toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width + size16,
-                        child: Text(
-                          header['count'].toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['nilaiTransaksi'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['nilaiTransaksi'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(
+                          header['totalPPN'],
+                        ).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['totalPPN'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Text(
+                        FormatCurrency.convertToIdr(header['total']).toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                       ),
-                      SizedBox(
-                        width: width,
-                        child: Text(
-                          FormatCurrency.convertToIdr(header['total'])
-                              .toString(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              return loading();
-            }),
+            return loading();
+          },
+        ),
       ],
     );
   }
@@ -1105,10 +1180,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               onTap: () {
                 _pageController.jumpToPage(0);
               },
-              child: Icon(
-                PhosphorIcons.arrow_left,
-                color: bnw900,
-              ),
+              child: Icon(PhosphorIcons.arrow_left, color: bnw900),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1134,11 +1206,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                     Icon(PhosphorIcons.calendar, color: bnw900),
                     Text(
                       '30 Hari Terakhir',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -1155,11 +1223,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
                     Icon(PhosphorIcons.storefront, color: bnw900),
                     Text(
                       'Semua Toko',
-                      style: heading3(
-                        FontWeight.w600,
-                        bnw900,
-                        'Outfit',
-                      ),
+                      style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                     ),
                   ],
                 ),
@@ -1245,12 +1309,16 @@ class _LaporanGrupState extends State<LaporanGrup> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(top: size16),
-            decoration: BoxDecoration(
-              color: primary100,
-            ),
+            decoration: BoxDecoration(color: primary100),
             child: FutureBuilder(
-              future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                  _textvalueKeyword, [''], ''),
+              future: getLaporanDaily(
+                context,
+                widget.token,
+                _textvalueOrderBy,
+                _textvalueKeyword,
+                [''],
+                '',
+              ),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Map<String, dynamic>? data = snapshot.data!['data'];
@@ -1272,7 +1340,10 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                 child: Text(
                                   detail[index]['tanggal'].toString(),
                                   style: heading4(
-                                      FontWeight.w600, bnw900, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -1282,60 +1353,75 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['nilaiTransaksi'])
-                                      .toString(),
+                                    detail[index]['nilaiTransaksi'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['totalPPN'])
-                                      .toString(),
+                                    detail[index]['totalPPN'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 width: width,
                                 child: Text(
                                   FormatCurrency.convertToIdr(
-                                          detail[index]['total'])
-                                      .toString(),
+                                    detail[index]['total'],
+                                  ).toString(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(thickness: 1.2)
+                          Divider(thickness: 1.2),
                         ],
                       );
                     },
@@ -1348,148 +1434,153 @@ class _LaporanGrupState extends State<LaporanGrup> {
           ),
         ),
         FutureBuilder(
-            future: getLaporanDaily(context, widget.token, _textvalueOrderBy,
-                _textvalueKeyword, [''], ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Map<String, dynamic>? data = snapshot.data!['data'];
+          future: getLaporanDaily(
+            context,
+            widget.token,
+            _textvalueOrderBy,
+            _textvalueKeyword,
+            [''],
+            '',
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map<String, dynamic>? data = snapshot.data!['data'];
 
-                var header = data!['header'];
-                return Container(
-                  padding: EdgeInsets.only(top: size16, bottom: size16),
-                  decoration: BoxDecoration(
-                    color: primary200,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(size12),
-                      bottomRight: Radius.circular(size12),
+              var header = data!['header'];
+              return Container(
+                padding: EdgeInsets.only(top: size16, bottom: size16),
+                decoration: BoxDecoration(
+                  color: primary200,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(size12),
+                    bottomRight: Radius.circular(size12),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: width - size16,
+                          child: Text(
+                            'Total Nilai',
+                            style: heading4(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['total'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          SizedBox(
-                            width: width - size16,
-                            child: Text(
-                              'Total Nilai',
-                              style:
-                                  heading4(FontWeight.w700, bnw900, 'Outfit'),
+                    Divider(thickness: 0.6, color: bnw900),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(
+                          width: width + size16,
+                          child: Text(
+                            'Total Keseluruhan',
+                            style: heading4(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['totalPPN'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: width,
+                          child: Text(
+                            FormatCurrency.convertToIdr(
+                              header['total'],
+                            ).toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(
+                              FontWeight.w400,
+                              succes600,
+                              'Outfit',
                             ),
                           ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['total'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              '',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w400, bnw900, 'Outfit'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(
-                        thickness: 0.6,
-                        color: bnw900,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            width: width + size16,
-                            child: Text(
-                              'Total Keseluruhan',
-                              style:
-                                  heading4(FontWeight.w700, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w700, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['totalPPN'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  heading4(FontWeight.w700, bnw900, 'Outfit'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: width,
-                            child: Text(
-                              FormatCurrency.convertToIdr(header['total'])
-                                  .toString(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: heading4(
-                                  FontWeight.w400, succes600, 'Outfit'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              return loading();
-            }),
+            return loading();
+          },
+        ),
       ],
     );
   }
@@ -1506,11 +1597,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Laporan',
+                  'Laporans',
                   style: heading1(FontWeight.w700, Colors.black, 'Outfit'),
                 ),
                 Text(
-                  'Laporan pendapatan dan profit toko',
+                  'Laporan pendapatan dan profit tokos',
                   style: heading3(FontWeight.w400, Colors.black, 'Outfit'),
                 ),
               ],
@@ -1519,106 +1610,57 @@ class _LaporanGrupState extends State<LaporanGrup> {
         ),
         SizedBox(height: size16),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: GridView.count(
-                  physics: BouncingScrollPhysics(),
-                  crossAxisCount: 2,
-                  childAspectRatio: 3.275,
-                  crossAxisSpacing: size16,
-                  mainAxisSpacing: size16,
-                  shrinkWrap: true,
-                  children: List.generate(
-                    objects.length,
-                    (i) => GestureDetector(
-                      onTap: () {
-                        print(i);
-                        // widget.controller.toggleExtendedTrue();
-                        // showingMenuSidebar = false;
-                        _pageController.jumpToPage(i + 1);
-                        setState(() {});
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(size16),
-                        margin: EdgeInsets.only(right: size8, bottom: size8),
-                        height: 180,
-                        width: 30,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(size16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(objects[i].title,
-                                          style: heading2(FontWeight.w700,
-                                              bnw900, 'Outfit')),
-                                      Text(objects[i].description,
-                                          style: body1(FontWeight.w400, bnw800,
-                                              'Outfit')),
-                                    ],
-                                  ),
-                                  Icon(
-                                    objects[i].icon,
-                                    color: bnw900,
-                                    size: 36,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Spacer(),
-                            Container(
-                              height: 40,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: bnw100,
-                                border: Border.all(color: primary500),
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Lihat Laporan',
-                                  style: heading4(
-                                    FontWeight.w600,
-                                    primary500,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: (objects.length / 2).ceil(),
+            itemBuilder: (context, rowIndex) {
+              final leftIndex = rowIndex * 2;
+              final rightIndex = rowIndex * 2 + 1;
+              return Padding(
+                padding: EdgeInsets.only(bottom: size16),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: ReportCard(
+                          obj: objects[leftIndex],
+                          index: leftIndex,
+                          pageController: _pageController,
                         ),
                       ),
-                    ),
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: rightIndex < objects.length
+                            ? ReportCard(
+                                obj: objects[rightIndex],
+                                index: rightIndex,
+                                pageController: _pageController,
+                              )
+                            : SizedBox(),
+                      ),
+                    ],
                   ),
                 ),
-              )
-            ],
+              );
+            },
           ),
-        )
+        ),
       ],
     );
   }
 
   orderBy(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
+    BuildContext context,
+    pilihUrutan,
+    pendapatanHarianText,
+    textOrderBy,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -1647,19 +1689,28 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             children: [
                               Text(
                                 'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size16),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -1669,7 +1720,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
                                         padding: EdgeInsets.fromLTRB(
-                                            0, size16, 0, size16),
+                                          0,
+                                          size16,
+                                          0,
+                                          size16,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -1678,16 +1733,20 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueOrder == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueOrder == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -1727,14 +1786,17 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -1754,11 +1816,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               SizedBox(width: 4),
               Text(
                 textOrderBy,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -1769,14 +1827,16 @@ class _LaporanGrupState extends State<LaporanGrup> {
   }
 
   orderByToko(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
+    BuildContext context,
+    pilihUrutan,
+    pendapatanHarianText,
+    textOrderBy,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -1805,19 +1865,28 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             children: [
                               Text(
                                 'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size16),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -1827,7 +1896,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
                                         padding: EdgeInsets.fromLTRB(
-                                            0, size16, 0, size16),
+                                          0,
+                                          size16,
+                                          0,
+                                          size16,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -1836,16 +1909,20 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueOrder == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueOrder == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -1883,14 +1960,17 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -1910,11 +1990,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               SizedBox(width: 4),
               Text(
                 textOrderBy,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -1925,14 +2001,16 @@ class _LaporanGrupState extends State<LaporanGrup> {
   }
 
   orderByProduct(
-      BuildContext context, pilihUrutan, pendapatanHarianText, textOrderBy) {
+    BuildContext context,
+    pilihUrutan,
+    pendapatanHarianText,
+    textOrderBy,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -1961,19 +2039,28 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             children: [
                               Text(
                                 'Urutkan',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size16),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -1983,7 +2070,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
                                         padding: EdgeInsets.fromLTRB(
-                                            0, size16, 0, size16),
+                                          0,
+                                          size16,
+                                          0,
+                                          size16,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -1992,16 +2083,20 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueOrder == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueOrder == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueOrder == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -2040,14 +2135,17 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -2067,11 +2165,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               SizedBox(width: 4),
               Text(
                 textOrderByProduct,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),
@@ -2090,18 +2184,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
           '6 Bulan Terakhir',
           '1 Tahun Terakhir',
         ];
-        List textvalueKeyword = [
-          '1B',
-          '3B',
-          '6B',
-          '1Y',
-        ];
+        List textvalueKeyword = ['1B', '3B', '6B', '1Y'];
 
         setState(() {
           showModalBottomSheet(
-      constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(size24),
             ),
@@ -2130,19 +2217,28 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             children: [
                               Text(
                                 'Pilih Tanggal',
-                                style:
-                                    heading2(FontWeight.w700, bnw900, 'Outfit'),
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Text(
                                 'Tentukan data yang akan tampil',
-                                style:
-                                    heading4(FontWeight.w400, bnw600, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
                               ),
                               SizedBox(height: size16),
                               Text(
                                 'Pilih Urutan',
-                                style:
-                                    heading3(FontWeight.w400, bnw900, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
                               Wrap(
                                 children: List<Widget>.generate(
@@ -2152,7 +2248,11 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                       padding: EdgeInsets.only(right: size8),
                                       child: ChoiceChip(
                                         padding: EdgeInsets.fromLTRB(
-                                            0, size16, 0, size16),
+                                          0,
+                                          size16,
+                                          0,
+                                          size16,
+                                        ),
                                         backgroundColor: bnw100,
                                         selectedColor: primary200,
                                         shape: RoundedRectangleBorder(
@@ -2161,16 +2261,20 @@ class _LaporanGrupState extends State<LaporanGrup> {
                                                 ? primary500
                                                 : bnw300,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(size8),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
-                                        label: Text(pilihUrutan[index],
-                                            style: heading4(
-                                                FontWeight.w400,
-                                                _valueKeyword == index
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit')),
+                                        label: Text(
+                                          pilihUrutan[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            _valueKeyword == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
                                         selected: _valueKeyword == index,
                                         onSelected: (bool selected) {
                                           setState(() {
@@ -2203,14 +2307,17 @@ class _LaporanGrupState extends State<LaporanGrup> {
                             Center(
                               child: Text(
                                 'Tampilkan',
-                                style:
-                                    heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                             double.infinity,
                           ),
                         ),
-                        SizedBox(height: size8)
+                        SizedBox(height: size8),
                       ],
                     ),
                   ),
@@ -2230,11 +2337,7 @@ class _LaporanGrupState extends State<LaporanGrup> {
               SizedBox(width: 4),
               Text(
                 _textKeyword,
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
             ],
           ),

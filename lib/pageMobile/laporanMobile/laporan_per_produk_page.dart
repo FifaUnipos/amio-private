@@ -142,7 +142,7 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
     return Scaffold(
       backgroundColor:  Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: bnw100,
         elevation: 0,
         leading: IconButton(
           icon:  Icon(PhosphorIcons.arrow_left, color: bnw900),
@@ -160,31 +160,33 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
            SizedBox(width: 8),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip(_selectedSortLabel, _showSortModal),
-                   SizedBox(width: 8),
-                  _buildFilterChip(_dateRangeLabel, _showDateRangeModal),
-                   SizedBox(width: 8),
-                  _buildFilterChip(_storeFilterLabel, _showStoreModal),
-                ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              color: bnw100,
+              padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip(_selectedSortLabel, _showSortModal),
+                     SizedBox(width: 8),
+                    _buildFilterChip(_dateRangeLabel, _showDateRangeModal),
+                     SizedBox(width: 8),
+                    _buildFilterChip(_storeFilterLabel, _showStoreModal),
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: _isLoading
-                ?  Center(child: CircularProgressIndicator())
-                : _buildReportList(),
-          ),
-          if (!_isLoading && _reportData != null) _buildBottomBar(),
-        ],
+            Expanded(
+              child: _isLoading
+                  ?  Center(child: CircularProgressIndicator())
+                  : _buildReportList(),
+            ),
+            if (!_isLoading && _reportData != null) _buildBottomBar(),
+          ],
+        ),
       ),
     );
   }
@@ -232,7 +234,7 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
       margin:  EdgeInsets.only(bottom: 16),
       padding:  EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bnw100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: bnw300),
       ),
@@ -309,12 +311,12 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Total", style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+            Text("Total", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
             Row(
               children: [
-                Text(_formatCurrency(total), style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                Text(_formatCurrency(total), style: heading3(FontWeight.w600, bnw100, 'Outfit')),
                  SizedBox(width: 8),
-                 Icon(Icons.keyboard_arrow_up, color: Colors.white),
+                 Icon(Icons.keyboard_arrow_up, color: bnw100),
               ],
             ),
           ],
@@ -330,63 +332,65 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding:  EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding:  EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-               SizedBox(height: 24),
-              Text("Bagikan Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-              Text("Pilih format untuk dibagikan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
-               SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _exportReport("pdf");
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding:  EdgeInsets.symmetric(vertical: 16),
-                        side:  BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                 SizedBox(height: 24),
+                Text("Bagikan Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                Text("Pilih format untuk dibagikan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
+                 SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _exportReport("pdf");
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding:  EdgeInsets.symmetric(vertical: 16),
+                          side:  BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon:  Icon(PhosphorIcons.file_pdf, color: primary500),
+                        label: Text("PDF", style: heading3(FontWeight.w600, primary500, 'Outfit')),
                       ),
-                      icon:  Icon(PhosphorIcons.file_pdf, color: primary500),
-                      label: Text("PDF", style: heading3(FontWeight.w600, primary500, 'Outfit')),
                     ),
-                  ),
-                   SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _exportReport("excel");
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding:  EdgeInsets.symmetric(vertical: 16),
-                        side:  BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                     SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _exportReport("excel");
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding:  EdgeInsets.symmetric(vertical: 16),
+                          side:  BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon:  Icon(PhosphorIcons.file_xls, color: primary500),
+                        label: Text("Excel", style: heading3(FontWeight.w600, primary500, 'Outfit')),
                       ),
-                      icon:  Icon(PhosphorIcons.file_xls, color: primary500),
-                      label: Text("Excel", style: heading3(FontWeight.w600, primary500, 'Outfit')),
                     ),
-                  ),
-                ],
-              ),
-               SizedBox(height: 16),
-            ],
+                  ],
+                ),
+                 SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
@@ -401,81 +405,83 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
       ),
       builder: (context) {
         String tempOrder = _selectedSortValue;
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding:  EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Container(
+                padding:  EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+                      ),
                     ),
-                  ),
-                   SizedBox(height: 20),
-                  Text("Urutkan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                  Text("Pilih Urutan yang ingin ditampilkan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
-                   SizedBox(height: 20),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: List.generate(_pilihUrutan.length, (index) {
-                      final label = _pilihUrutan[index];
-                      final value = _pendapatanText[index];
-                      final isSelected = tempOrder == value;
-                      return InkWell(
-                        onTap: () {
-                          setModalState(() {
-                            tempOrder = value;
-                          });
-                        },
-                        child: Container(
-                          padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isSelected ? primary500.withOpacity(0.1) : Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: isSelected ? primary500 : bnw300),
-                          ),
-                          child: Text(
-                            label,
-                            style: heading4(
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                              isSelected ? primary500 : bnw900,
-                              'Outfit',
+                     SizedBox(height: 20),
+                    Text("Urutkan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                    Text("Pilih Urutan yang ingin ditampilkan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
+                     SizedBox(height: 20),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: List.generate(_pilihUrutan.length, (index) {
+                        final label = _pilihUrutan[index];
+                        final value = _pendapatanText[index];
+                        final isSelected = tempOrder == value;
+                        return InkWell(
+                          onTap: () {
+                            setModalState(() {
+                              tempOrder = value;
+                            });
+                          },
+                          child: Container(
+                            padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isSelected ? primary500.withOpacity(0.1) : bnw100,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: isSelected ? primary500 : bnw300),
+                            ),
+                            child: Text(
+                              label,
+                              style: heading4(
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                                isSelected ? primary500 : bnw900,
+                                'Outfit',
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
-                  ),
-                   SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedSortValue = tempOrder;
-                          _selectedSortLabel = _pilihUrutan[_pendapatanText.indexOf(tempOrder)];
-                        });
-                        _fetchData();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding:  EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text("Tampilkan", style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                        );
+                      }),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                     SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedSortValue = tempOrder;
+                            _selectedSortLabel = _pilihUrutan[_pendapatanText.indexOf(tempOrder)];
+                          });
+                          _fetchData();
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding:  EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: Text("Tampilkan", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -487,90 +493,92 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
       isScrollControlled: true,
       shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding:  EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-                   SizedBox(height: 20),
-                  Text("Rentang Waktu", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                   SizedBox(height: 20),
-                  _buildDateOption("30 Hari Terakhir", "1B", setModalState),
-                  _buildDateOption("3 Bulan Terakhir", "3B", setModalState),
-                  _buildDateOption("6 Bulan Terakhir", "6B", setModalState),
-                  _buildDateOption("1 Tahun Terakhir", "1Y", setModalState),
-                  _buildDateOption("Kustom Hari", "custom", setModalState),
-                  if (_selectedKeyword == "custom") ...[
-                     SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: _startDate ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now(),
-                              );
-                              if (picked != null) setModalState(() => _startDate = picked);
-                            },
-                            child: Container(
-                              padding:  EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)),
-                              alignment: Alignment.center,
-                              child: Text(_startDate == null ? "Dari Tanggal" : DateFormat('dd-MM-yyyy').format(_startDate!)),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Container(
+                padding:  EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+                     SizedBox(height: 20),
+                    Text("Rentang Waktu", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                     SizedBox(height: 20),
+                    _buildDateOption("30 Hari Terakhir", "1B", setModalState),
+                    _buildDateOption("3 Bulan Terakhir", "3B", setModalState),
+                    _buildDateOption("6 Bulan Terakhir", "6B", setModalState),
+                    _buildDateOption("1 Tahun Terakhir", "1Y", setModalState),
+                    _buildDateOption("Kustom Hari", "custom", setModalState),
+                    if (_selectedKeyword == "custom") ...[
+                       SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: _startDate ?? DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) setModalState(() => _startDate = picked);
+                              },
+                              child: Container(
+                                padding:  EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)),
+                                alignment: Alignment.center,
+                                child: Text(_startDate == null ? "Dari Tanggal" : DateFormat('dd-MM-yyyy').format(_startDate!)),
+                              ),
                             ),
                           ),
-                        ),
-                         Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("-")),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: _endDate ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now(),
-                              );
-                              if (picked != null) setModalState(() => _endDate = picked);
-                            },
-                            child: Container(
-                              padding:  EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)),
-                              alignment: Alignment.center,
-                              child: Text(_endDate == null ? "Sampai Tanggal" : DateFormat('dd-MM-yyyy').format(_endDate!)),
+                           Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("-")),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: _endDate ?? DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) setModalState(() => _endDate = picked);
+                              },
+                              child: Container(
+                                padding:  EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)),
+                                alignment: Alignment.center,
+                                child: Text(_endDate == null ? "Sampai Tanggal" : DateFormat('dd-MM-yyyy').format(_endDate!)),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ],
+                     SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _dateRangeLabel = _selectedKeyword == "custom" 
+                                ? "Kustom Hari" 
+                                : {"1B": "30 Hari Terakhir", "3B": "3 Bulan Terakhir", "6B": "6 Bulan Terakhir", "1Y": "1 Tahun Terakhir"}[_selectedKeyword] ?? "30 Hari Terakhir";
+                          });
+                          _fetchData();
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
+                        child: Text("Tampilkan", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                      ),
                     ),
                   ],
-                   SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _dateRangeLabel = _selectedKeyword == "custom" 
-                              ? "Kustom Hari" 
-                              : {"1B": "30 Hari Terakhir", "3B": "3 Bulan Terakhir", "6B": "6 Bulan Terakhir", "1Y": "1 Tahun Terakhir"}[_selectedKeyword] ?? "30 Hari Terakhir";
-                        });
-                        _fetchData();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
-                      child: Text("Tampilkan", style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+                ),
+              );
+            }
+          ),
         );
       },
     );
@@ -598,59 +606,61 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
       context: context,
       shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding:  EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-                   SizedBox(height: 20),
-                  Text("Daftar Toko", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                   SizedBox(height: 20),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: stores.length,
-                      itemBuilder: (context, index) {
-                        final store = stores[index];
-                        final isSelected = _selectedMerchants.contains(store.merchantid);
-                        return CheckboxListTile(
-                          value: isSelected,
-                          activeColor: primary500,
-                          title: Text(store.name ?? '', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
-                          onChanged: (val) {
-                            setModalState(() {
-                              if (val == true) _selectedMerchants.add(store.merchantid!);
-                              else _selectedMerchants.remove(store.merchantid);
-                            });
-                          },
-                        );
-                      },
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Container(
+                padding:  EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+                     SizedBox(height: 20),
+                    Text("Daftar Toko", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                     SizedBox(height: 20),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: stores.length,
+                        itemBuilder: (context, index) {
+                          final store = stores[index];
+                          final isSelected = _selectedMerchants.contains(store.merchantid);
+                          return CheckboxListTile(
+                            value: isSelected,
+                            activeColor: primary500,
+                            title: Text(store.name ?? '', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                            onChanged: (val) {
+                              setModalState(() {
+                                if (val == true) _selectedMerchants.add(store.merchantid!);
+                                else _selectedMerchants.remove(store.merchantid);
+                              });
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                   SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedMerchants.length == stores.length) _storeFilterLabel = "Semua toko";
-                          else if (_selectedMerchants.isEmpty) _storeFilterLabel = "Pilih toko";
-                          else _storeFilterLabel = "${_selectedMerchants.length} toko dipilih";
-                        });
-                        _fetchData();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
-                      child: Text("Selesai", style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+                     SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_selectedMerchants.length == stores.length) _storeFilterLabel = "Semua toko";
+                            else if (_selectedMerchants.isEmpty) _storeFilterLabel = "Pilih toko";
+                            else _storeFilterLabel = "${_selectedMerchants.length} toko dipilih";
+                          });
+                          _fetchData();
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
+                        child: Text("Selesai", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
+                  ],
+                ),
+              );
+            }
+          ),
         );
       },
     );
@@ -663,34 +673,36 @@ class _PendapatanPerProdukPageState extends State<PendapatanPerProdukPage> {
       context: context,
       shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
-        return Container(
-          padding:  EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Total Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-               SizedBox(height: 24),
-              _buildSummaryRow("Total Jumlah Transaksi", "${header['count'] ?? 0}"),
-              _buildSummaryRow("Total Nilai Transaksi", _formatCurrency(header['nilaiTransaksi'])),
-              _buildSummaryRow("Total PPN", _formatCurrency(header['totalPPN'])),
-               Divider(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Total Keseluruhan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                  Text(_formatCurrency(header['total']), style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                ],
-              ),
-               SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(backgroundColor: primary500, padding:  EdgeInsets.symmetric(vertical: 16)),
-                  child: Text("Tutup", style: heading3(FontWeight.w600, Colors.white, 'Outfit')),
+        return SafeArea(
+          child: Container(
+            padding:  EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Total Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                 SizedBox(height: 24),
+                _buildSummaryRow("Total Jumlah Transaksi", "${header['count'] ?? 0}"),
+                _buildSummaryRow("Total Nilai Transaksi", _formatCurrency(header['nilaiTransaksi'])),
+                _buildSummaryRow("Total PPN", _formatCurrency(header['totalPPN'])),
+                 Divider(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Total Keseluruhan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                    Text(_formatCurrency(header['total']), style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                  ],
                 ),
-              ),
-            ],
+                 SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(backgroundColor: primary500, padding:  EdgeInsets.symmetric(vertical: 16)),
+                    child: Text("Tutup", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/moleculs/lazy_indexed_stack.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/coaPageGrup/coaPageGrup.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/inventoriGrupSelectMerch.dart';
 import 'package:unipos_app_335/services/websocket_service.dart';
@@ -164,9 +165,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
   @override
   void initState() {
     // checkEmail(widget.token, identifier, context, emailProfile.toString());
-    
     iconSelectedSidebar = 0;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (!mounted) return;
       setState(() {
         myprofile(widget.token);
 
@@ -182,20 +183,23 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
     });
     deviceDetails();
     callName();
-    sidebarController.addListener(() {
-      if (mounted) setState(() {});
-    });
+    sidebarController.addListener(_onSidebarChanged);
     super.initState();
   }
 
   @override
   void dispose() {
-    sidebarController.removeListener(() {});
+    sidebarController.removeListener(_onSidebarChanged);
     super.dispose();
+  }
+
+  void _onSidebarChanged() {
+    if (mounted) setState(() {});
   }
 
   Future callName() async {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (!mounted) return;
       setState(() {
         myprofile(widget.token);
 
@@ -502,7 +506,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 0;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -520,7 +523,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 1;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -535,7 +537,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 2;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -550,7 +551,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 3;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -565,7 +565,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 4;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -580,7 +579,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 5;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -595,7 +593,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 6;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -621,7 +618,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 7;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -636,7 +632,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 8;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -652,7 +647,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         //     setState(() {
         //       selectedIndexSideBar = false;
         //       iconSelectedSidebar = 9;
-        //       valueOrderByProduct = 0;
         //     });
         //   },
         // ),
@@ -669,7 +663,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 9;
               // iconSelectedSidebar = 10;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -684,7 +677,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 10;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -699,7 +691,6 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 11;
-              valueOrderByProduct = 0;
             });
           },
         ),
@@ -725,65 +716,32 @@ class _ScreensExampleState extends State<_ScreensExample> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        // final pageTitle = _getTitleByIndex(widget.controller.selectedIndex);
-        switch (widget.controller.selectedIndex) {
-          case 0:
-            // return Dashboarpagenew(token: widget.token);
-            return Dashboarpagenew(token: widget.token);
-          case 1:
-            return NotifikasiGrup();
-          case 2:
-            return TokoSidePage(token: widget.token);
-          case 3:
-            return ProdukGrup(token: widget.token);
-          case 4:
-            return InventoriPageGrup(token: widget.token);
-          case 5:
-            return COAPageGrup(token: widget.token);
-          case 6:
-            return PromoGrup(token: widget.token);
-          // return InventoriPageGrup(token: widget.token);
-          case 7:
-            return AkunGrup(token: widget.token);
-          // return InventoriGrup(token: widget.token);
-          case 8:
-            return TransaksiGrup(token: widget.token);
-          // return InventoriGrup(token: widget.token);
-          // case 9:
-          //   return KeuanganGrup(token: widget.token);
-          // return AkunGrup(token: widget.token);
-          // LaporanGrup(
-          //   token: widget.token,
-          //   controller: widget.controller,
-          // );
-          case 9:
-            return LaporanToko(
+        return LazyIndexedStack(
+          index: widget.controller.selectedIndex,
+          children: [
+            Dashboarpagenew(token: widget.token),
+            NotifikasiGrup(),
+            TokoSidePage(token: widget.token),
+            ProdukGrup(token: widget.token),
+            InventoriPageGrup(token: widget.token),
+            COAPageGrup(token: widget.token),
+            PromoGrup(token: widget.token),
+            AkunGrup(token: widget.token),
+            TransaksiGrup(token: widget.token),
+            LaporanToko(
               token: widget.token,
               controller: widget.controller,
-            );
-          // return TransaksiGrup(token: widget.token);
-          case 10:
-            return BantuanGrup();
-          // return KeuanganGrup(token: widget.token);
-          // case size8:
-          //   return LaporanGrup(
-          //     token: widget.token,
-          //     controller: widget.controller,
-          //   );
-          // case 9:
-          //   return BantuanGrup();
-          case 11:
-            return BluetoothPage();
-          default:
-            return Text(
-              'Not found page',
-              // style: theme.textTheme.headline5,
-            );
-        }
+            ),
+            BantuanGrup(),
+            BluetoothPage(),
+          ],
+        );
       },
     );
   }
 }
+
+
 
 String _getTitleByIndex(int index) {
   switch (index) {

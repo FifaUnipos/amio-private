@@ -38,136 +38,138 @@ class _OnbordingState extends State<Onbording> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(vertical: size12, horizontal: size32),
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: contents.length,
-                onPageChanged: (int index) {
-                  setState(() {
-                    currentIndex = index;
-                  });
-                },
-                itemBuilder: (_, i) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(child: SvgPicture.asset(contents[i].image)),
-                      SizedBox(height: size32),
-                      Text(
-                        contents[i].title,
-                        textAlign: TextAlign.center,
-                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                      ),
-                      // SizedBox(height: size12),
-                      // Text(
-                      //   contents[i].discription,
-                      //   textAlign: TextAlign.center,
-                      //   style: heading2(FontWeight.w500, bnw900, 'Outfit'),
-                      // )
-                    ],
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: size12, horizontal: size32),
+          child: Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: contents.length,
+                  onPageChanged: (int index) {
+                    setState(() {
+                      currentIndex = index;
+                    });
+                  },
+                  itemBuilder: (_, i) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(child: SvgPicture.asset(contents[i].image)),
+                        SizedBox(height: size32),
+                        Text(
+                          contents[i].title,
+                          textAlign: TextAlign.center,
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        // SizedBox(height: size12),
+                        // Text(
+                        //   contents[i].discription,
+                        //   textAlign: TextAlign.center,
+                        //   style: heading2(FontWeight.w500, bnw900, 'Outfit'),
+                        // )
+                      ],
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: size16),
+              GestureDetector(
+                onTap: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          widget.isTablet ? MasukAkunPage() : MasukAkunPageMobile(),
+                    ),
                   );
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setString('onboard', 'true');
                 },
-              ),
-            ),
-            SizedBox(height: size16),
-            GestureDetector(
-              onTap: () async {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        widget.isTablet ? MasukAkunPage() : MasukAkunPageMobile(),
-                  ),
-                );
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setString('onboard', 'true');
-              },
-              child: Container(
-                child: buttonXXL(
-                  Center(
-                    child: Text(
-                      'Gabung Sekarang',
-                      style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                child: Container(
+                  child: buttonXXL(
+                    Center(
+                      child: Text(
+                        'Gabung Sekarang',
+                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
                     ),
+                    MediaQuery.of(context).size.width,
                   ),
-                  MediaQuery.of(context).size.width,
                 ),
               ),
-            ),
-            SizedBox(height: size16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    _controller!.previousPage(
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.easeIn,
-                    );
-                  },
-                  child: currentIndex == 0
-                      ? Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size20, size12, size20, size12),
-                          child: Text(
-                            'Kembali',
-                            style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                          ),
-                        )
-                      : Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size20, size12, size20, size12),
-                          child: Text(
-                            currentIndex == 0 ? "" : "Kembali",
-                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                        ),
-                ),
-                Row(
-                  children: List.generate(
-                    contents.length,
-                    (index) => buildDot(index, context),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    if (currentIndex == contents.length - 1) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => widget.isTablet
-                              ? MasukAkunPage()
-                              : MasukAkunPageMobile(),
-                        ),
+              SizedBox(height: size16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _controller!.previousPage(
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeIn,
                       );
-                    }
-                    _controller!.nextPage(
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.easeIn,
-                    );
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.setString('onboard', 'true');
-                  },
-                  child: Container(
-                    padding:
-                        EdgeInsets.fromLTRB(size20, size12, size20, size12),
-                    child: Text(
-                      currentIndex == contents.length - 1
-                          ? "Selesai"
-                          : "Lanjut",
-                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                    },
+                    child: currentIndex == 0
+                        ? Padding(
+                            padding: EdgeInsets.fromLTRB(
+                                size20, size12, size20, size12),
+                            child: Text(
+                              'Kembali',
+                              style: heading2(FontWeight.w600, bnw100, 'Outfit'),
+                            ),
+                          )
+                        : Padding(
+                            padding: EdgeInsets.fromLTRB(
+                                size20, size12, size20, size12),
+                            child: Text(
+                              currentIndex == 0 ? "" : "Kembali",
+                              style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                          ),
+                  ),
+                  Row(
+                    children: List.generate(
+                      contents.length,
+                      (index) => buildDot(index, context),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: size16),
-          ],
+                  GestureDetector(
+                    onTap: () async {
+                      if (currentIndex == contents.length - 1) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => widget.isTablet
+                                ? MasukAkunPage()
+                                : MasukAkunPageMobile(),
+                          ),
+                        );
+                      }
+                      _controller!.nextPage(
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeIn,
+                      );
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setString('onboard', 'true');
+                    },
+                    child: Container(
+                      padding:
+                          EdgeInsets.fromLTRB(size20, size12, size20, size12),
+                      child: Text(
+                        currentIndex == contents.length - 1
+                            ? "Selesai"
+                            : "Lanjut",
+                        style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: size16),
+            ],
+          ),
         ),
       ),
     );

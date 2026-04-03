@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/component/component_orderBy.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import '../../../../utils/component/component_size.dart';
@@ -31,36 +32,8 @@ class LaporanPergerakanInventarisPage extends StatefulWidget {
 
 class LaporanPendapatanPerProdukState
     extends State<LaporanPergerakanInventarisPage> {
-  List pilihUrutan = [
-    "Stok Akhir A-Z", // endingStockAsc
-    "Stok Akhir Z-A", // endingStockDesc
-    "Stok Awal A-Z", // startingStockAsc
-    "Stok Awal Z-A", // startingStockDesc
-    "Nama Inventori A-Z", // inventoryNameAsc
-    "Nama Inventori Z-A", // inventoryNameDesc
-    "Inventori Keluar A-Z", // outgoingInventoryAsc
-    "Inventori Keluar Z-A", // outgoingInventoryDesc
-    "Inventori Masuk A-Z", // incomingInventoryAsc
-    "Inventori Masuk Z-A", // incomingInventoryDesc
-  ];
-
-  List pendapatanText = [
-    "endingStockAsc",
-    "endingStockDesc",
-    "startingStockAsc",
-    "startingStockDesc",
-    "inventoryNameAsc",
-    "inventoryNameDesc",
-    "outgoingInventoryAsc",
-    "outgoingInventoryDesc",
-    "incomingInventoryAsc",
-    "incomingInventoryDesc",
-  ];
-
-  String textOrderBy = 'Stok Akhir A-Z', textKeyword = '30 Hari Terakhir';
-  String _textvalueOrderBy = 'endingStockAsc',
-      _textvalueKeyword = '1B',
-      _textKeyword = '30 Hari Terakhir';
+  String textKeyword = '30 Hari Terakhir';
+  String _textvalueKeyword = '1M', _textKeyword = '30 Hari Terakhir';
 
   int _valueOrder = 0, _valueKeyword = 0;
 
@@ -85,38 +58,46 @@ class LaporanPendapatanPerProdukState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      widget.pageController.jumpToPage(0);
-                    },
-                    child: Icon(
-                      PhosphorIcons.arrow_left,
-                      size: size40,
-                      color: bnw900,
-                    ),
-                  ),
-                  SizedBox(width: size8),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pergerakan Inventaris',
-                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                      ),
-                      Text(
-                        'Laporan',
-                        style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              // Spacer(),
-              SizedBox(width: size16),
               Expanded(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        widget.pageController.jumpToPage(0);
+                      },
+                      child: Icon(
+                        PhosphorIcons.arrow_left,
+                        size: size40,
+                        color: bnw900,
+                      ),
+                    ),
+                    SizedBox(width: size8),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pergerakan Inventaris',
+                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          Text(
+                            'Laporan',
+                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                flex: 0,
+                fit: FlexFit.loose,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -171,7 +152,7 @@ class LaporanPendapatanPerProdukState
                                                 widget.token,
                                                 listToko,
                                                 _textvalueKeyword,
-                                                _textvalueOrderBy,
+                                                textvalueOrderByReportMoveInventory,
                                                 "pdf",
                                               ).then((value) {
                                                 try {
@@ -213,7 +194,7 @@ class LaporanPendapatanPerProdukState
                                                 widget.token,
                                                 listToko,
                                                 _textvalueKeyword,
-                                                _textvalueOrderBy,
+                                                textvalueOrderByReportMoveInventory,
                                                 "excel",
                                               ).then((value) {
                                                 try {
@@ -358,7 +339,7 @@ class LaporanPendapatanPerProdukState
                   widget.token,
                   listToko,
                   _textvalueKeyword,
-                  _textvalueOrderBy,
+                  textvalueOrderByReportMoveInventory,
                   "",
                 ),
                 builder: (context, snapshot) {
@@ -376,7 +357,7 @@ class LaporanPendapatanPerProdukState
                           widget.token,
                           listToko,
                           _textvalueKeyword,
-                          _textvalueOrderBy,
+                          textvalueOrderByReportMoveInventory,
                           "",
                         );
                         setState(() {});
@@ -722,9 +703,11 @@ class LaporanPendapatanPerProdukState
                                 spacing: size16,
                                 runSpacing: size12,
                                 children: List<Widget>.generate(
-                                  pilihUrutan.length,
+                                  orderByLaporanPergerakanInventarisText.length,
                                   (int index) {
-                                    final selected = _valueOrder == index;
+                                    final selected =
+                                        valueOrderByReportMoveInventory ==
+                                        index;
                                     return ChoiceChip(
                                       padding: EdgeInsets.symmetric(
                                         vertical: size12,
@@ -740,7 +723,7 @@ class LaporanPendapatanPerProdukState
                                         ),
                                       ),
                                       label: Text(
-                                        pilihUrutan[index],
+                                        orderByLaporanPergerakanInventarisText[index],
                                         style: heading4(
                                           FontWeight.w400,
                                           selected ? primary500 : bnw900,
@@ -749,7 +732,11 @@ class LaporanPendapatanPerProdukState
                                       ),
                                       selected: selected,
                                       onSelected: (_) {
-                                        setState(() => _valueOrder = index);
+                                        setState(
+                                          () =>
+                                              valueOrderByReportMoveInventory =
+                                                  index,
+                                        );
                                       },
                                     );
                                   },
@@ -761,12 +748,12 @@ class LaporanPendapatanPerProdukState
                                 width: double.infinity,
                                 child: GestureDetector(
                                   onTap: () {
-                                    textOrderBy = pilihUrutan[_valueOrder];
-                                    _textvalueOrderBy =
-                                        pendapatanText[_valueOrder];
+                                    textOrderByReportMoveInventory =
+                                        orderByLaporanPergerakanInventarisText[valueOrderByReportMoveInventory];
+                                    textvalueOrderByReportMoveInventory =
+                                        orderByLaporanPergerakanInventaris[valueOrderByReportMoveInventory];
                                     refresh();
                                     Navigator.pop(context);
-                                    initState();
                                   },
                                   child: buttonXL(
                                     Center(
@@ -808,7 +795,7 @@ class LaporanPendapatanPerProdukState
                 Flexible(
                   // ⟵ biar teks bisa ellipsis
                   child: Text(
-                    textOrderBy,
+                    textOrderByReportMoveInventory,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: heading3(FontWeight.w600, bnw900, 'Outfit'),
@@ -831,7 +818,7 @@ class LaporanPendapatanPerProdukState
       '6 Bulan Terakhir',
       '1 Tahun Terakhir',
     ];
-    final List<String> textvalueKeyword = ['1B', '3B', '6B', '1Y'];
+    final List<String> textvalueKeyword = ['1M', '3M', '6M', '1Y'];
 
     return SizedBox(
       height: 48, // tinggi konsisten seperti orderBy
@@ -1231,12 +1218,12 @@ class LaporanPendapatanPerProdukState
                                 getLaporanPerProduk(
                                   context,
                                   widget.token,
-                                  _textvalueOrderBy,
+                                  textvalueOrderByReportMoveInventory,
                                   _textvalueKeyword,
-                                  listToko,""
+                                  listToko,
+                                  "",
                                 );
                                 Navigator.pop(context);
-                                initState();
                                 setState(() {});
                               },
                               child: buttonXL(

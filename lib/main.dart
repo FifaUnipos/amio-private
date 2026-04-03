@@ -12,11 +12,16 @@ import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
+import 'package:unipos_app_335/providers/product/product_cashier_sorting_provider.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
 import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
 import 'package:unipos_app_335/routes/navigation_route.dart';
+import 'package:unipos_app_335/services/api/product/product_sorting_service.dart';
+import 'package:unipos_app_335/services/api/merchant/merchant_sorting_service.dart';
 import 'package:unipos_app_335/services/api/transaction/history/delete.dart';
 
 import 'package:unipos_app_335/services/api/transaction/history/delete_get_reasons.dart';
@@ -33,6 +38,8 @@ import 'utils/component/providerModel/timerModel.dart';
 bool isTabletLayout(BuildContext context) =>
     MediaQuery.of(context).size.shortestSide >= 600;
 
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final SidebarXController sidebarController = SidebarXController(
   selectedIndex: 0,
@@ -42,8 +49,6 @@ final ValueNotifier<int> mobileTabIndex = ValueNotifier<int>(0);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔹 Baca launch details SEBELUM init() — plugin membersihkan native state saat initialize()
-  // Kalau dibaca sesudah init(), hot restart akan terus re-read data notif lama
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final notificationAppLaunchDetails = await flutterLocalNotificationsPlugin
       .getNotificationAppLaunchDetails();
@@ -55,7 +60,7 @@ Future<void> main() async {
     payload = notificationResponse?.payload;
   }
 
-  // 🔹 Init notif service SETELAH baca launch details
+
   final UniposNotificationService notifService = UniposNotificationService();
   await notifService.init();
   await notifService.requestPermissions();
@@ -82,7 +87,11 @@ Future<void> main() async {
   myprofile(prefs.getString('token') ?? '');
   typeAccount = prefs.getString('merchantType');
   roleAccount = prefs.getString('roleProfile');
-  dashboard(identifier, checkToken ?? '');
+  try {
+    await dashboard(identifier, checkToken ?? '');
+  } catch (e) {
+    print('Dashboard skip: $e');
+  }
   merchantType;
 
   // Set status bar
@@ -92,6 +101,8 @@ Future<void> main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Jalankan app
   runApp(
@@ -103,7 +114,7 @@ Future<void> main() async {
   );
 }
 
-// ✅ Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
+// Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
 class UniPOSApp extends StatelessWidget {
   final String? mytokenGet;
   final String? onBoard;
@@ -128,7 +139,7 @@ class UniPOSApp extends StatelessWidget {
             final ws = WebSocketService();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (checkToken != null) {
-                debugPrint('🔌 Global WebSocket connect... token: $checkToken');
+                debugPrint('Global WebSocket connect... token: $checkToken');
                 ws.connect(checkToken, identifier);
               }
             });
@@ -165,9 +176,34 @@ class UniPOSApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => PayloadProvider(payload: payload),
         ),
+        Provider(create: (context) => ProductSortingService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductSortingProvider(context.read<ProductSortingService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductCashierSortingProvider(context.read<ProductSortingService>()),
+        ),
+        Provider(create: (context) => MerchantSortingService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              MerchantSortingProvider(context.read<MerchantSortingService>()),
+        ),
       ],
       child: MaterialApp(
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: MediaQuery.of(context).padding.copyWith(
+                bottom: MediaQuery.of(context).viewPadding.bottom,
+              ),
+            ),
+            child: child!,
+          );
+        },
         navigatorKey: navigatorKey,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
         title: 'UniPOS',
         theme: ThemeData(
@@ -209,7 +245,7 @@ class UniPOSApp extends StatelessWidget {
         routes: {
           NavigationRoute.notificationRoute.name: (context) =>
               DashboardPageMobile(token: checkToken, initialIndex: 1),
-          NavigationRoute.notificationGroupTabletRoute.name: (context) =>
+        NavigationRoute.notificationGroupTabletRoute.name: (context) =>
               NotifikasiGrup(),
         },
       ),

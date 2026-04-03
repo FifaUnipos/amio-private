@@ -1,10 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/services.dart';
+import 'package:unipos_app_335/components/atoms/fields/unipos_text_field.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/data/model/product/product_sorting_data.dart';
+import 'package:unipos_app_335/data/static/product/product_sorting_state.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produkVariantPage.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/ubahProductVariantPage.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+import 'package:unipos_app_335/utils/format_input_price.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
@@ -75,64 +82,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     text: nameKategoriEdit,
   );
 
-  String textOrderBy = 'Nama Produk A ke Z';
-  String textvalueOrderBy = 'upDownNama';
-
   List<String>? productIdCheckAll;
   String checkFill = 'kosong';
-
-  void formatInputRp() {
-    String text = conHarga.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHarga.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
-  void formatOnlineInputRp() {
-    String text = conHargaOnline.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHargaOnline.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
-  void formatInputRpEdit() {
-    String text = conHargaEdit.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHargaEdit.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
-  void formatOnlineInputRpEdit() {
-    String text = conHargaOnlineEdit.text.replaceAll('.', '');
-
-    int value = int.tryParse(text)!; // Mengambil nilai angka dari teks
-
-    String formattedAmount = formatCurrency(value);
-
-    conHargaOnlineEdit.value = TextEditingValue(
-      text: formattedAmount,
-      selection: TextSelection.collapsed(offset: formattedAmount.length),
-    );
-  }
-
   // Edit page
   File? myImageEdit;
   Uint8List? bytesEdit;
@@ -175,15 +126,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   Timer? _debounce;
 
   void _onChanged(String value) {
-    List<String> val = [widget.merchId];
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
-      datasProduk = await getProductGrup(
-        context,
+      context.read<ProductSortingProvider>().fetchProductSorting(
         widget.token,
+        widget.merchId,
         value,
-        val,
-        textvalueOrderBy,
+        textvalueOrderByProduct,
       );
       setState(() {});
     });
@@ -192,18 +141,17 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   @override
   void initState() {
     checkConnection(context);
-    conHarga.addListener(formatInputRp);
-    conHargaOnline.addListener(formatOnlineInputRp);
+    conHarga.addListener(() => formatInputPrice(conHarga));
+    conHargaOnline.addListener(() => formatInputPrice(conHargaOnline));
 
-    conHargaEdit.addListener(formatInputRpEdit);
-    conHargaOnlineEdit.addListener(formatOnlineInputRpEdit);
-
+    conHargaEdit.addListener(() => formatInputPrice(conHargaEdit));
+    conHargaOnlineEdit.addListener(() => formatInputPrice(conHargaOnlineEdit));
     // getSingleProduct(context, widget.token, "", singleProductId, setState);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       List<String> value = [widget.merchId];
 
       await getDataProduk(value);
-
+      if (!mounted) return;
       setState(() {
         // log(datasProduk.toString());
         datasProduk;
@@ -221,13 +169,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
   }
 
   Future<dynamic> getDataProduk(List<String> value) async {
-    List<String> val = [widget.merchId];
-    return datasProduk = await getProductGrup(
-      context,
+    context.read<ProductSortingProvider>().fetchProductSorting(
       widget.token,
+      widget.merchId,
       '',
-      val,
-      textvalueOrderBy,
+      textvalueOrderByProduct,
     );
   }
 
@@ -257,6 +203,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     conHarga.text = '';
     idProduct = null;
     img64 = null;
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -266,7 +213,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
 
   @override
   dispose() {
-    _debounce!.cancel();
+    _debounce?.cancel();
     productPrice;
     _pageController.dispose();
     conNameProduk.dispose();
@@ -426,271 +373,291 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
               physics: BouncingScrollPhysics(),
               padding: EdgeInsets.zero,
               children: [
-                Text(
-                  'Foto Produk',
-                  style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: size12),
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: size16,
                   children: [
-                    GestureDetector(
-                      onTap: () => tambahGambar(context),
-                      child: Container(
-                        child: myImage != null
-                            ? Image.file(myImage!, fit: BoxFit.cover)
-                            : Icon(PhosphorIcons.plus, color: bnw900),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: bnw900),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        height: 80,
-                        width: 80,
-                      ),
-                    ),
-                    SizedBox(width: 10),
                     Text(
-                      'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                      'Foto Produk',
                       style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                     ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: () => tambahGambar(context),
-                  child: IntrinsicHeight(
-                    child: TextFormField(
-                      cursorColor: primary500,
-                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                      decoration: InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 2, color: primary500),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => tambahGambar(context),
+                          child: Container(
+                            child: myImage != null
+                                ? Image.file(myImage!, fit: BoxFit.cover)
+                                : Icon(PhosphorIcons.plus, color: bnw900),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw900),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            height: 80,
+                            width: 80,
+                          ),
                         ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 1.5, color: bnw500),
+                        SizedBox(width: 10),
+                        Text(
+                          'Masukkan logo atau foto yang menandakan identitas dari tokomu.',
+                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
                         ),
-                        enabled: false,
-                        suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
-                        hintText: 'Tambah Gambar',
-                        hintStyle: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () => tambahGambar(context),
+                      child: IntrinsicHeight(
+                        child: TextFormField(
+                          cursorColor: primary500,
+                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                          decoration: InputDecoration(
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: primary500,
+                              ),
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(width: 1.5, color: bnw500),
+                            ),
+                            enabled: false,
+                            suffixIcon: Icon(PhosphorIcons.plus, color: bnw900),
+                            hintText: 'Tambah Gambar',
+                            hintStyle: heading2(
+                              FontWeight.w600,
+                              bnw900,
+                              'Outfit',
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(height: size16),
-                fieldAddProduk(
-                  'Nama Produk',
-                  'Matcha Latte Cappuchino',
-                  conNameProduk,
-                  TextInputType.text,
-                ),
-                SizedBox(height: size16),
-                SizedBox(child: kategoriList(context)),
-                SizedBox(height: size16),
-                fieldAddProduk(
-                  'Harga',
-                  'Rp 12.000',
-                  conHarga,
-                  TextInputType.number,
-                ),
-                SizedBox(height: size16),
-                fieldAddProduk(
-                  'Harga Online Gojek/Grab',
-                  'Rp 14.000',
-                  conHargaOnline,
-                  TextInputType.number,
-                ),
-                SizedBox(height: size16),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    setState(() {
-                      onswitchppn = !onswitchppn;
-                      onswitchppn
-                          ? ppnAktif = "Aktif"
-                          : ppnAktif = "Tidak Aktif";
-                      // log(onswitchppn.toString());
-                      log(ppnAktif);
-                    });
-                  },
-                  child: Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    UniposTextField(
+                      title: 'Nama Produk',
+                      hintText: 'Matcha Latte Cappuchino',
+                      required: true,
+                      controller: conNameProduk,
+                    ),
+                    kategoriList(context),
+                    UniposTextField(
+                      title: 'Harga',
+                      hintText: 'Rp. 12,000',
+                      controller: conHarga,
+                      required: true,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                    UniposTextField(
+                      title: 'Harga Online',
+                      hintText: 'Rp. 14,000',
+                      controller: conHargaOnline,
+                      required: true,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        setState(() {
+                          onswitchppn = !onswitchppn;
+                          onswitchppn
+                              ? ppnAktif = "Aktif"
+                              : ppnAktif = "Tidak Aktif";
+                          // log(onswitchppn.toString());
+                          log(ppnAktif);
+                        });
+                      },
+                      child: Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'PPN',
-                              style: heading2(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'PPN',
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Text(
+                                  ppnAktif,
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            FlutterSwitch(
+                              width: 52,
+                              height: 28,
+                              value: onswitchppn,
+                              padding: 0,
+                              activeIcon: Icon(
+                                PhosphorIcons.check,
+                                color: primary500,
+                              ),
+                              inactiveIcon: Icon(
+                                PhosphorIcons.x,
+                                color: bnw100,
+                              ),
+                              activeColor: primary500,
+                              inactiveColor: bnw100,
+                              borderRadius: 30,
+                              inactiveToggleColor: bnw900,
+                              activeToggleColor: primary200,
+                              activeSwitchBorder: Border.all(color: primary500),
+                              inactiveSwitchBorder: Border.all(
+                                color: bnw300,
+                                width: 2,
+                              ),
+                              onToggle: (val) {
+                                setState(() {
+                                  onswitchppn = val;
+                                  onswitchppn
+                                      ? ppnAktif = "Aktif"
+                                      : ppnAktif = "Tidak Aktif";
+                                  log(onswitchppn.toString());
+                                  log(ppnAktif);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          // log(kasirAktif);
+                          setState(() {
+                            onswitchtampikan = !onswitchtampikan;
+                            onswitchtampikan
+                                ? kasirAktif = "Aktif"
+                                : kasirAktif = "Tidak Aktif";
+                          });
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Tampilkan Di Kasir',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    kasirAktif,
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            FlutterSwitch(
+                              width: 52,
+                              height: 28,
+                              value: onswitchtampikan,
+                              padding: 0,
+                              activeIcon: Icon(
+                                PhosphorIcons.check,
+                                color: primary500,
+                              ),
+                              inactiveIcon: Icon(
+                                PhosphorIcons.x,
+                                color: bnw100,
+                              ),
+                              activeColor: primary500,
+                              inactiveColor: bnw100,
+                              borderRadius: 30,
+                              inactiveToggleColor: bnw900,
+                              activeToggleColor: primary200,
+                              activeSwitchBorder: Border.all(color: primary500),
+                              inactiveSwitchBorder: Border.all(
+                                color: bnw300,
+                                width: 2,
+                              ),
+                              onToggle: (val) {
+                                onswitchtampikan = val;
+                                onswitchtampikan
+                                    ? kasirAktif = "Aktif"
+                                    : kasirAktif = "Tidak Aktif";
+                                log(onswitchtampikan.toString());
+                                // log(kasirAktif);
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: GestureDetector(
+                        onTap: () {
+                          List<String> value = [widget.merchId];
+                          // create hello world
+                          createProduct(
+                            context,
+                            widget.token,
+                            conNameProduk.text,
+                            idProduct,
+                            onswitchppn,
+                            onswitchtampikan,
+                            conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                            conHargaOnline.text.replaceAll(
+                              RegExp(r'[^0-9]'),
+                              '',
+                            ),
+                            img64.toString(),
+                            value,
+                            _pageController,
+                          ).then((value) async {
+                            if (value == '00') {
+                              refreshDataProduk();
+                              conNameProduk.text = '';
+                              conHarga.text = '';
+                              conHargaOnline.text = '';
+                              idProduct = '';
+                              await Future.delayed(Duration(seconds: 1));
+                              _pageController.jumpToPage(3);
+                              setState(() {});
+                              getDataProduk(['']);
+                            }
+                          });
+                          setState(() {});
+                        },
+                        child: buttonXLoutline(
+                          Center(
+                            child: Text(
+                              'Tambah Variant',
+                              style: heading3(
                                 FontWeight.w600,
                                 bnw900,
                                 'Outfit',
                               ),
                             ),
-                            Text(
-                              ppnAktif,
-                              style: heading4(
-                                FontWeight.w400,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                          ],
-                        ),
-                        FlutterSwitch(
-                          width: 52,
-                          height: 28,
-                          value: onswitchppn,
-                          padding: 0,
-                          activeIcon: Icon(
-                            PhosphorIcons.check,
-                            color: primary500,
                           ),
-                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
-                          activeColor: primary500,
-                          inactiveColor: bnw100,
-                          borderRadius: 30,
-                          inactiveToggleColor: bnw900,
-                          activeToggleColor: primary200,
-                          activeSwitchBorder: Border.all(color: primary500),
-                          inactiveSwitchBorder: Border.all(
-                            color: bnw300,
-                            width: 2,
-                          ),
-                          onToggle: (val) {
-                            setState(() {
-                              onswitchppn = val;
-                              onswitchppn
-                                  ? ppnAktif = "Aktif"
-                                  : ppnAktif = "Tidak Aktif";
-                              log(onswitchppn.toString());
-                              log(ppnAktif);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: size16),
-                Container(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      // log(kasirAktif);
-                      setState(() {
-                        onswitchtampikan = !onswitchtampikan;
-                        onswitchtampikan
-                            ? kasirAktif = "Aktif"
-                            : kasirAktif = "Tidak Aktif";
-                      });
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Tampilkan Di Kasir',
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                kasirAktif,
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        FlutterSwitch(
-                          width: 52,
-                          height: 28,
-                          value: onswitchtampikan,
-                          padding: 0,
-                          activeIcon: Icon(
-                            PhosphorIcons.check,
-                            color: primary500,
-                          ),
-                          inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
-                          activeColor: primary500,
-                          inactiveColor: bnw100,
-                          borderRadius: 30,
-                          inactiveToggleColor: bnw900,
-                          activeToggleColor: primary200,
-                          activeSwitchBorder: Border.all(color: primary500),
-                          inactiveSwitchBorder: Border.all(
-                            color: bnw300,
-                            width: 2,
-                          ),
-                          onToggle: (val) {
-                            onswitchtampikan = val;
-                            onswitchtampikan
-                                ? kasirAktif = "Aktif"
-                                : kasirAktif = "Tidak Aktif";
-                            log(onswitchtampikan.toString());
-                            // log(kasirAktif);
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: size16),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: GestureDetector(
-                    onTap: () {
-                      List<String> value = [widget.merchId];
-                      // create hello world
-                      createProduct(
-                        context,
-                        widget.token,
-                        conNameProduk.text,
-                        idProduct,
-                        onswitchppn,
-                        onswitchtampikan,
-                        conHarga.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                        conHargaOnline.text.replaceAll(RegExp(r'[^0-9]'), ''),
-                        img64.toString(),
-                        value,
-                        _pageController,
-                      ).then((value) async {
-                        if (value == '00') {
-                          refreshDataProduk();
-                          conNameProduk.text = '';
-                          conHarga.text = '';
-                          conHargaOnline.text = '';
-                          idProduct = '';
-                          await Future.delayed(Duration(seconds: 1));
-                          _pageController.jumpToPage(3);
-                          setState(() {});
-                          initState();
-                          getDataProduk(['']);
-                        }
-                      });
-                      initState();
-                      setState(() {});
-                    },
-                    child: buttonXLoutline(
-                      Center(
-                        child: Text(
-                          'Tambah Variant',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          0,
+                          bnw900,
                         ),
                       ),
-                      0,
-                      bnw900,
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -718,7 +685,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                       if (value == '00') {
                         refreshDataProduk();
                         setState(() {});
-                        initState();
                       }
                     });
                   },
@@ -763,10 +729,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                         idProduct = null;
                         _pageController.jumpToPage(0);
                         setState(() {});
-                        initState();
                       }
                     });
-                    initState();
                     setState(() {});
                   },
                   child: buttonXL(
@@ -791,7 +755,13 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     List<String> val = [widget.merchId];
 
     return FutureBuilder(
-      future: getProductGrup(context, widget.token, '', val, textvalueOrderBy),
+      future: getProduct(
+        context,
+        widget.token,
+        '',
+        val,
+        textvalueOrderByProduct,
+      ),
       builder: (context, snapshot) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -868,7 +838,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               ? GestureDetector(
                                   onTap: () {
                                     searchController.text = '';
-                                    initState();
                                   },
                                   child: Icon(
                                     PhosphorIcons.x_fill,
@@ -919,8 +888,24 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
             ],
           ),
           SizedBox(height: size16),
-          orderBy(context),
+          SortBottomSheetButton(
+            options: orderByProductText,
+            initialIndex: valueOrderByProduct,
+            onConfirm: (i) async {
+              setState(() {
+                valueOrderByProduct = i;
+                textvalueOrderByProduct = orderByProduct[i];
+              });
+              await context.read<ProductSortingProvider>().fetchProductSorting(
+                widget.token,
+                widget.merchId,
+                '',
+                textvalueOrderByProduct,
+              );
+            },
+          ),
           SizedBox(height: size16),
+
           Expanded(
             child: Column(
               children: [
@@ -1069,7 +1054,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                               ),
                             ),
                             Text(
-                              '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
+                              '${listProduct.length}/${context.read<ProductSortingProvider>().totalData} Produk Terpilih',
                               style: heading4(
                                 FontWeight.w600,
                                 bnw100,
@@ -1119,24 +1104,25 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   widget.merchId,
                                                 ).then((value) async {
                                                   if (value == '00') {
+                                                    final deletedIds =
+                                                        List<String>.from(
+                                                          listProduct,
+                                                        );
+                                                    for (final id
+                                                        in deletedIds) {
+                                                      context
+                                                          .read<
+                                                            ProductSortingProvider
+                                                          >()
+                                                          .deleteProduct(id);
+                                                    }
                                                     refreshDataProduk();
-                                                    await Future.delayed(
-                                                      Duration(seconds: 1),
-                                                    );
-                                                    conNameProduk.text = '';
-                                                    conHarga.text = '';
-                                                    idProduct = null;
-                                                    _pageController.jumpToPage(
-                                                      0,
-                                                    );
                                                     setState(() {});
-                                                    initState();
                                                   }
                                                 });
-                                                refreshDataProduk();
-
-                                                setState(() {});
-                                                initState();
+                                                Navigator.pop(
+                                                  context,
+                                                ); 
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -1211,46 +1197,24 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size8),
                             GestureDetector(
                               onTap: () {
-                                listProduct.forEach((element) {
-                                  datasProduk!.forEach((element2) {
-                                    if (element == element2.productid) {
-                                      element2.isPPN = 0;
-                                    }
-                                  });
-                                });
                                 changePpn(
                                   context,
                                   widget.token,
                                   'false',
                                   listProduct,
                                   widget.merchId,
-                                ).then((value) {
-                                  if (value == '00') {
-                                    listProduct.forEach((element) {
-                                      datasProduk!.forEach((element2) {
-                                        if (element == element2.productid) {
-                                          element2.isPPN = 0;
-                                        }
-                                      });
-                                    });
-                                  } else {
-                                    listProduct.forEach((element) {
-                                      datasProduk!.forEach((element2) {
-                                        if (element == element2.productid) {
-                                          element2.isPPN = 1;
-                                        }
-                                      });
-                                    });
+                                ).then((response) {
+                                  if (!mounted) return;
+                                  if (response == '00') {
+                                    final provider = context
+                                        .read<ProductSortingProvider>();
+                                    for (final productId in listProduct) {
+                                      provider.updateIsPPN(productId, 0);
+                                    }
                                   }
+                                  refreshDataProduk();
                                   setState(() {});
-                                  initState();
                                 });
-
-                                // log("ini adalah ${widget.merchId}");
-                                refreshDataProduk();
-
-                                setState(() {});
-                                initState();
                               },
                               child: buttonL(
                                 Row(
@@ -1273,43 +1237,24 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             SizedBox(width: size8),
                             GestureDetector(
                               onTap: () {
-                                listProduct.forEach((element) {
-                                  datasProduk!.forEach((element2) {
-                                    if (element == element2.productid) {
-                                      element2.isActive = 1;
-                                    }
-                                  });
-                                });
                                 changeActive(
                                   context,
                                   widget.token,
                                   'true',
                                   listProduct,
                                   widget.merchId,
-                                ).then((value) {
-                                  if (value == '00') {
-                                    listProduct.forEach((element) {
-                                      datasProduk!.forEach((element2) {
-                                        if (element == element2.productid) {
-                                          element2.isActive = 1;
-                                        }
-                                      });
-                                    });
-                                  } else {
-                                    listProduct.forEach((element) {
-                                      datasProduk!.forEach((element2) {
-                                        if (element == element2.productid) {
-                                          element2.isActive = 0;
-                                        }
-                                      });
-                                    });
+                                ).then((response) {
+                                  if (!mounted) return;
+                                  if (response == '00') {
+                                    final provider = context
+                                        .read<ProductSortingProvider>();
+                                    for (final productId in listProduct) {
+                                      provider.updateIsActive(productId, 1);
+                                    }
                                   }
+                                  refreshDataProduk();
                                   setState(() {});
-                                  initState();
                                 });
-                                refreshDataProduk();
-                                initState();
-                                setState(() {});
                               },
                               child: buttonL(
                                 Row(
@@ -1332,10 +1277,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           ],
                         ),
                 ),
-                datasProduk == null
-                    ? SkeletonCardLine()
-                    : Expanded(
-                        child: Container(
+                Expanded(
+                  child: Consumer<ProductSortingProvider>(
+                    builder: (context, value, child) {
+                      return switch (value.resultState) {
+                        ProductSortingResultNoneState() => const Center(
+                          child: Text('Tidak ada data'),
+                        ),
+                        ProductSortingResultErrorState(message: var message) =>
+                          Center(child: Text('Erorr $message')),
+                        ProductSortingResultLoadingState() => Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        ProductSortingResultLoadedState(data: var dataProduct) => Container(
                           decoration: BoxDecoration(
                             color: primary100,
                             borderRadius: BorderRadius.only(
@@ -1347,20 +1301,19 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             color: bnw100,
                             backgroundColor: primary500,
                             onRefresh: () async {
-                              setState(() {});
-                              initState();
+                              getDataProduk(['']);
                             },
                             child: ListView.builder(
                               // physics: BouncingScrollPhysics(),
                               padding: EdgeInsets.zero,
-                              itemCount: datasProduk!.length,
+                              itemCount: dataProduct.length,
                               itemBuilder: (builder, index) {
-                                ModelDataProdukGrup data = datasProduk![index];
+                                ProductSortingData data = dataProduct[index];
                                 selectedFlag[index] =
                                     selectedFlag[index] ?? false;
                                 bool? isSelected = selectedFlag[index];
-                                final dataProduk = datasProduk![index];
-                                productIdCheckAll = datasProduk!
+                                final dataProduk = dataProduct[index];
+                                productIdCheckAll = dataProduct
                                     .map((data) => data.productid!)
                                     .toList();
 
@@ -1416,7 +1369,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                             size8,
                                                           ),
                                                       child:
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                                   .productImage !=
                                                               null
                                                           ? Padding(
@@ -1430,7 +1383,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                       size8,
                                                                     ),
                                                                 child: Image.network(
-                                                                  datasProduk![index]
+                                                                  dataProduct[index]
                                                                       .productImage
                                                                       .toString(),
                                                                   fit: BoxFit
@@ -1462,7 +1415,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                               .start,
                                                       children: [
                                                         Text(
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                                   .name ??
                                                               '',
                                                           style: heading4(
@@ -1475,7 +1428,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                               .ellipsis,
                                                         ),
                                                         Text(
-                                                          datasProduk![index]
+                                                          dataProduct[index]
                                                                   .typeproducts ??
                                                               '',
                                                           style: heading4(
@@ -1514,12 +1467,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  datasProduk![index]
-                                                              .discount ==
+                                                  dataProduct[index].discount ==
                                                           0
                                                       ? Text(
                                                           FormatCurrency.convertToIdr(
-                                                            datasProduk![index]
+                                                            dataProduct[index]
                                                                 .price_after,
                                                           ).toString(),
                                                           maxLines: 3,
@@ -1538,7 +1490,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           children: [
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                datasProduk![index]
+                                                                dataProduct[index]
                                                                     .price_after,
                                                               ).toString(),
                                                               maxLines: 3,
@@ -1556,7 +1508,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                             ),
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                datasProduk![index]
+                                                                dataProduct[index]
                                                                     .price,
                                                               ).toString(),
                                                               maxLines: 3,
@@ -1574,12 +1526,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                             SizedBox(
                                                               height: size4,
                                                             ),
-                                                            datasProduk![index]
+                                                            dataProduct[index]
                                                                         .discount_type ==
                                                                     'price'
                                                                 ? Text(
                                                                     FormatCurrency.convertToIdr(
-                                                                      datasProduk![index]
+                                                                      dataProduct[index]
                                                                           .discount,
                                                                     ).toString(),
                                                                     maxLines: 3,
@@ -1594,7 +1546,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                     ),
                                                                   )
                                                                 : Text(
-                                                                    '${datasProduk![index].discount}%',
+                                                                    '${dataProduct[index].discount}%',
                                                                     maxLines: 3,
                                                                     overflow:
                                                                         TextOverflow
@@ -1608,11 +1560,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                   ),
                                                           ],
                                                         ),
-                                                  // datasProduk![index]
+                                                  // dataProduct[index]
                                                   //             .discount_type ==
                                                   //         'percentage'
                                                   //     ? Text(
-                                                  //         '${datasProduk![index].discount}%',
+                                                  //         '${dataProduct[index].discount}%',
                                                   //         style: body3(
                                                   //           FontWeight.w700,
                                                   //           danger500,
@@ -1622,7 +1574,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                   //     : Text(
                                                   //         FormatCurrency
                                                   //             .convertToIdr(
-                                                  //           datasProduk![index]
+                                                  //           dataProduct[index]
                                                   //               .discount,
                                                   //         ),
                                                   //         style: body3(
@@ -1655,12 +1607,11 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  datasProduk![index]
-                                                              .discount ==
+                                                  dataProduct[index].discount ==
                                                           0
                                                       ? Text(
                                                           FormatCurrency.convertToIdr(
-                                                            datasProduk![index]
+                                                            dataProduct[index]
                                                                 .price_online_shop_after,
                                                           ).toString(),
                                                           maxLines: 3,
@@ -1679,7 +1630,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                           children: [
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                datasProduk![index]
+                                                                dataProduct[index]
                                                                     .price_online_shop_after,
                                                               ).toString(),
                                                               maxLines: 3,
@@ -1697,7 +1648,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                             ),
                                                             Text(
                                                               FormatCurrency.convertToIdr(
-                                                                datasProduk![index]
+                                                                dataProduct[index]
                                                                     .price_online_shop,
                                                               ).toString(),
                                                               maxLines: 3,
@@ -1715,12 +1666,12 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                             SizedBox(
                                                               height: size4,
                                                             ),
-                                                            datasProduk![index]
+                                                            dataProduct[index]
                                                                         .discount_type ==
                                                                     'price'
                                                                 ? Text(
                                                                     FormatCurrency.convertToIdr(
-                                                                      datasProduk![index]
+                                                                      dataProduct[index]
                                                                           .discount,
                                                                     ).toString(),
                                                                     maxLines: 3,
@@ -1735,7 +1686,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                     ),
                                                                   )
                                                                 : Text(
-                                                                    '${datasProduk![index].discount}%',
+                                                                    '${dataProduct[index].discount}%',
                                                                     maxLines: 3,
                                                                     overflow:
                                                                         TextOverflow
@@ -1794,29 +1745,31 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                 color: bnw300,
                                                 width: 2,
                                               ),
-                                              onToggle: (bool value) {
-                                                dataProduk.isPPN = 1;
-                                                // print('hello');
+                                              onToggle: (bool toggleValue) {
                                                 List<String> listProduct = [
                                                   dataProduk.productid!,
                                                 ];
                                                 changePpn(
                                                   context,
                                                   widget.token,
-                                                  value.toString(),
+                                                  toggleValue.toString(),
                                                   listProduct,
                                                   widget.merchId,
-                                                ).then((value) {
-                                                  if (value != '00') {
-                                                    dataProduk.isPPN = 0;
-                                                  } else {
-                                                    dataProduk.isPPN = 1;
-                                                  }
-                                                  setState(() {});
-                                                  initState();
+                                                ).then((response) {
+                                                  if (!mounted) return;
+                                                  final newIsPPN =
+                                                      response == '00'
+                                                      ? (toggleValue ? 1 : 0)
+                                                      : dataProduk.isPPN!;
+                                                  context
+                                                      .read<
+                                                        ProductSortingProvider
+                                                      >()
+                                                      .updateIsPPN(
+                                                        dataProduk.productid!,
+                                                        newIsPPN,
+                                                      );
                                                 });
-                                                initState();
-                                                setState(() {});
                                               },
                                             ),
                                           ),
@@ -1861,28 +1814,31 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                 color: bnw300,
                                                 width: 2,
                                               ),
-                                              onToggle: (bool value) {
-                                                // print('hello');
+                                              onToggle: (bool toggleValue) {
                                                 List<String> listProduct = [
                                                   dataProduk.productid!,
                                                 ];
                                                 changeActive(
                                                   context,
                                                   widget.token,
-                                                  value.toString(),
+                                                  toggleValue.toString(),
                                                   listProduct,
                                                   widget.merchId,
-                                                ).then((value) {
-                                                  if (value != '00') {
-                                                    dataProduk.isActive = 0;
-                                                  } else {
-                                                    dataProduk.isActive = 1;
-                                                  }
-                                                  setState(() {});
-                                                  initState();
+                                                ).then((response) {
+                                                  if (!mounted) return;
+                                                  final newIsActive =
+                                                      response == '00'
+                                                      ? (toggleValue ? 1 : 0)
+                                                      : dataProduk.isActive!;
+                                                  context
+                                                      .read<
+                                                        ProductSortingProvider
+                                                      >()
+                                                      .updateIsActive(
+                                                        dataProduk.productid!,
+                                                        newIsActive,
+                                                      );
                                                 });
-                                                initState();
-                                                setState(() {});
                                               },
                                             ),
                                           ),
@@ -2241,17 +2197,22 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                                                                       _pageController.jumpToPage(
                                                                                         0,
                                                                                       );
+                                                                                      context
+                                                                                          .read<
+                                                                                            ProductSortingProvider
+                                                                                          >()
+                                                                                          .deleteProduct(
+                                                                                            dataProduk.productid!,
+                                                                                          );
                                                                                       setState(
                                                                                         () {},
                                                                                       );
-                                                                                      initState();
                                                                                     }
                                                                                   },
                                                                                 );
                                                                                 ;
                                                                                 refreshDataProduk();
 
-                                                                                initState();
                                                                                 setState(
                                                                                   () {},
                                                                                 );
@@ -2356,7 +2317,10 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             ),
                           ),
                         ),
-                      ),
+                      };
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -2672,10 +2636,8 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                     _pageController.jumpToPage(0);
                     getDataProduk(['']);
                     setState(() {});
-                    initState();
                   }
                 });
-                initState();
                 setState(() {});
               },
               child: buttonXL(
@@ -3005,7 +2967,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     });
   }
 
-  Widget _buildSelectIcon(bool isSelected, ModelDataProdukGrup data) {
+  Widget _buildSelectIcon(bool isSelected, ProductSortingData data) {
     return Icon(
       isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
       color: primary500,
@@ -3154,9 +3116,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                             ),
                             Expanded(
                               child: RefreshIndicator(
-                                onRefresh: () async {
-                                  initState();
-                                },
+                                onRefresh: () async {},
                                 child: ListView(
                                   padding: EdgeInsets.zero,
                                   children: [
@@ -3515,7 +3475,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                         refreshDataProduk();
                                         getDataProduk(['']);
                                         setState(() {});
-                                        initState();
                                       },
                                       child: buttonXL(
                                         Center(
@@ -3589,7 +3548,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                                     product['kodeproduct'],
                                   );
 
-                                  initState();
                                   setState(() {});
                                 },
                                 child: buttonXLoutline(
@@ -3774,7 +3732,6 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
                           getDataProduk(['']);
 
                           setState(() {});
-                          initState();
                         },
                         child: buttonXL(
                           Center(
@@ -3817,6 +3774,7 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
           headers: {"token": widget.token},
         )
         .then((response) {
+          if (!mounted) return;
           if (response.statusCode == 200) {
             final data = json.decode(response.body);
             if (data != null && data['data'] != null) {
@@ -3852,154 +3810,158 @@ class _LihatProdukPageState extends State<LihatProdukPage> {
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+          int previousValue = valueOrderByProduct;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setModalState) =>
+                    IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByProductText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByProductText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Urutkan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
                                       'Outfit',
                                     ),
                                   ),
-                                ),
-                                0,
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size20),
+                                  Text(
+                                    'Pilih Urutan',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Wrap(
+                                    children: List<Widget>.generate(
+                                      orderByProductText.length,
+                                      (int index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: size16,
+                                          ),
+                                          child: ChoiceChip(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            backgroundColor: bnw100,
+                                            selectedColor: primary100,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color:
+                                                    valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                            ),
+                                            label: Text(
+                                              orderByProductText[index],
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            selected:
+                                                valueOrderByProduct == index,
+                                            onSelected: (bool selected) {
+                                              setModalState(() {
+                                                valueOrderByProduct = index;
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                                  textOrderBy =
+                                      orderByProductText[valueOrderByProduct];
+                                  textvalueOrderBy =
+                                      orderByProduct[valueOrderByProduct];
+                                  setState(() {});
+                                  Navigator.pop(context);
+
+                                  getDataProduk(['']);
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            );
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              setState(() {
+                valueOrderByProduct = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(

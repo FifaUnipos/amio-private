@@ -115,46 +115,48 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                leading: Icon(PhosphorIcons.pencil, color: primary500),
-                title: Text(
-                  'Update',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                ListTile(
+                  leading: Icon(PhosphorIcons.pencil, color: primary500),
+                  title: Text(
+                    'Update',
+                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToUpdateAdjustment(groupId);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToUpdateAdjustment(groupId);
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                title: Text(
-                  'Delete',
-                  style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                Divider(),
+                ListTile(
+                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
+                  title: Text(
+                    'Delete',
+                    style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDelete(groupId);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete(groupId);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -168,107 +170,109 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 24),
-              Icon(
-                PhosphorIcons.warning_circle,
-                size: 64,
-                color: Colors.orange,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Konfirmasi Hapus',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Apakah Anda yakin ingin menghapus data penyesuaian ini?',
-                textAlign: TextAlign.center,
-                style: body1(FontWeight.w400, bnw600, 'Outfit'),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(modalContext),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: bnw300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                SizedBox(height: 24),
+                Icon(
+                  PhosphorIcons.warning_circle,
+                  size: 64,
+                  color: Colors.orange,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Konfirmasi Hapus',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Apakah Anda yakin ingin menghapus data penyesuaian ini?',
+                  textAlign: TextAlign.center,
+                  style: body1(FontWeight.w400, bnw600, 'Outfit'),
+                ),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: bnw300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Batal',
+                          style: heading3(FontWeight.w600, bnw600, 'Outfit'),
                         ),
                       ),
-                      child: Text(
-                        'Batal',
-                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
-                      ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(modalContext);
-                        final result = await _deleteAdjustment([groupId]);
-                        print('DELETE RESPONSE: ${jsonEncode(result)}');
-                        if (mounted) {
-                          if (result != null && result['rc'] == '00') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  result['rm'] ?? 'Berhasil menghapus data',
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(modalContext);
+                          final result = await _deleteAdjustment([groupId]);
+                          print('DELETE RESPONSE: ${jsonEncode(result)}');
+                          if (mounted) {
+                            if (result != null && result['rc'] == '00') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result['rm'] ?? 'Berhasil menghapus data',
+                                  ),
                                 ),
-                              ),
-                            );
-                            _fetchAdjustments();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  result?['rm'] ??
-                                      result?['message'] ??
-                                      'Gagal menghapus data',
+                              );
+                              _fetchAdjustments();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result?['rm'] ??
+                                        result?['message'] ??
+                                        'Gagal menghapus data',
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Hapus',
-                        style: heading3(
-                          FontWeight.w600,
-                          Colors.white,
-                          'Outfit',
+                        child: Text(
+                          'Hapus',
+                          style: heading3(
+                            FontWeight.w600,
+                            bnw100,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -316,10 +320,10 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
           ? FloatingActionButton.extended(
               onPressed: _navigateToAddAdjustment,
               backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              icon: Icon(PhosphorIcons.plus, color: bnw100),
               label: Text(
                 'Sesuaikan',
-                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
               ),
             )
           : null,
@@ -341,7 +345,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
                   margin: EdgeInsets.only(bottom: 12),
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: bnw100,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: bnw200),
                   ),
@@ -536,115 +540,117 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-            padding: EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
+          return SafeArea(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              padding: EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Tambah Pemakaian',
-                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  'Pilih bahan yang sudah terpakai',
-                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                ),
-                SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _allMaterials.length,
-                    itemBuilder: (context, index) {
-                      final material = _allMaterials[index];
-                      final isSelected = _selectedMaterials.any(
-                        (m) => m['id'] == material['id'],
-                      );
-
-                      return CheckboxListTile(
-                        value: isSelected,
-                        onChanged: (checked) {
-                          if (checked == true) {
-                            _showMaterialDetailInput(material, setModalState);
-                          } else {
-                            // Uncheck - remove from selected materials
-                            setState(() {
-                              _selectedMaterials.removeWhere(
-                                (m) => m['id'] == material['id'],
-                              );
-                            });
-                            setModalState(() {});
-                          }
-                        },
-                        title: Text(
-                          material['name_item'] ?? '',
-                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        subtitle: Text(
-                          material['unit_name'] ?? '',
-                          style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                        ),
-                        activeColor: primary500,
-                      );
-                    },
+                  SizedBox(height: 20),
+                  Text(
+                    'Tambah Pemakaian',
+                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                   ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                  Text(
+                    'Pilih bahan yang sudah terpakai',
+                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _allMaterials.length,
+                      itemBuilder: (context, index) {
+                        final material = _allMaterials[index];
+                        final isSelected = _selectedMaterials.any(
+                          (m) => m['id'] == material['id'],
+                        );
+            
+                        return CheckboxListTile(
+                          value: isSelected,
+                          onChanged: (checked) {
+                            if (checked == true) {
+                              _showMaterialDetailInput(material, setModalState);
+                            } else {
+                              // Uncheck - remove from selected materials
+                              setState(() {
+                                _selectedMaterials.removeWhere(
+                                  (m) => m['id'] == material['id'],
+                                );
+                              });
+                              setModalState(() {});
+                            }
+                          },
+                          title: Text(
+                            material['name_item'] ?? '',
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
                           ),
-                        ),
-                        child: Text(
-                          'Batal',
-                          style: heading3(
-                            FontWeight.w600,
-                            primary500,
-                            'Outfit',
+                          subtitle: Text(
+                            material['unit_name'] ?? '',
+                            style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          activeColor: primary500,
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(color: primary500),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Batal',
+                            style: heading3(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary500,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'Simpan',
-                          style: heading3(
-                            FontWeight.w600,
-                            Colors.white,
-                            'Outfit',
+                          child: Text(
+                            'Simpan',
+                            style: heading3(
+                              FontWeight.w600,
+                              bnw100,
+                              'Outfit',
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -672,248 +678,250 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           double calculatedQty =
               (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
 
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.5,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Tambah Pemakaian',
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  Text(
-                    'Pilih bahan yang sudah terpakai',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Icon(
-                        PhosphorIcons.check_circle,
-                        color: primary500,
-                        size: 24,
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              material['name_item'] ?? '',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            Text(
-                              material['unit_name'] ?? '',
-                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                            ),
-                          ],
+          return SafeArea(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primary500.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
+                    SizedBox(height: 20),
+                    Text(
+                      'Tambah Pemakaian',
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      'Pilih bahan yang sudah terpakai',
+                      style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Qty',
-                                style: body2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: qtyController,
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.right,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: '0',
-                                ),
+                        Icon(
+                          PhosphorIcons.check_circle,
+                          color: primary500,
+                          size: 24,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                material['name_item'] ?? '',
                                 style: heading3(
                                   FontWeight.w600,
                                   bnw900,
                                   'Outfit',
                                 ),
-                                onChanged: (value) => setModalState(() {}),
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 12),
-                        if (calculatedQty > 0)
-                          Text(
-                            '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
-                            style: body2(FontWeight.w400, bnw600, 'Outfit'),
+                              Text(
+                                material['unit_name'] ?? '',
+                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                              ),
+                            ],
                           ),
-                        Divider(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Unit Konversi',
-                                style: body2(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                            ),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  _showUnitConversionPicker(context, material, (
-                                    conversionId,
-                                    conversionName,
-                                    factor,
-                                  ) {
-                                    setModalState(() {
-                                      selectedConversionId = conversionId;
-                                      selectedConversionName = conversionName;
-                                      conversionFactor = factor;
-                                    });
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: bnw300),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        selectedConversionName,
-                                        style: heading4(
-                                          FontWeight.w500,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_drop_down,
-                                        color: bnw900,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            side: BorderSide(color: primary500),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Batal',
-                            style: heading3(
-                              FontWeight.w600,
-                              primary500,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: primary500.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            final qty =
-                                double.tryParse(qtyController.text) ?? 0;
-
-                            if (qty > 0) {
-                              setState(() {
-                                _selectedMaterials.add({
-                                  'id': material['id'],
-                                  'name': material['name_item'],
-                                  'unit_name': material['unit_name'],
-                                  'unit_abbreviation':
-                                      material['unit_abbreviation'],
-                                  'qty': qty,
-                                  'unit_conversion_id': selectedConversionId,
-                                  'unit_conversion_name':
-                                      selectedConversionName,
-                                  'conversion_factor': conversionFactor,
-                                });
-                              });
-                              setParentModalState(() {});
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Material berhasil ditambahkan',
-                                  ),
-                                  duration: Duration(seconds: 1),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Qty',
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
                                 ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary500,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: qtyController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.right,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: '0',
+                                  ),
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                  onChanged: (value) => setModalState(() {}),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            'Simpan',
-                            style: heading3(
-                              FontWeight.w600,
-                              Colors.white,
-                              'Outfit',
+                          SizedBox(height: 12),
+                          if (calculatedQty > 0)
+                            Text(
+                              '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                              style: body2(FontWeight.w400, bnw600, 'Outfit'),
+                            ),
+                          Divider(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Unit Konversi',
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    _showUnitConversionPicker(context, material, (
+                                      conversionId,
+                                      conversionName,
+                                      factor,
+                                    ) {
+                                      setModalState(() {
+                                        selectedConversionId = conversionId;
+                                        selectedConversionName = conversionName;
+                                        conversionFactor = factor;
+                                      });
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: bnw100,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: bnw300),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          selectedConversionName,
+                                          style: heading4(
+                                            FontWeight.w500,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_drop_down,
+                                          color: bnw900,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              side: BorderSide(color: primary500),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Batal',
+                              style: heading3(
+                                FontWeight.w600,
+                                primary500,
+                                'Outfit',
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                ],
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              final qty =
+                                  double.tryParse(qtyController.text) ?? 0;
+            
+                              if (qty > 0) {
+                                setState(() {
+                                  _selectedMaterials.add({
+                                    'id': material['id'],
+                                    'name': material['name_item'],
+                                    'unit_name': material['unit_name'],
+                                    'unit_abbreviation':
+                                        material['unit_abbreviation'],
+                                    'qty': qty,
+                                    'unit_conversion_id': selectedConversionId,
+                                    'unit_conversion_name':
+                                        selectedConversionName,
+                                    'conversion_factor': conversionFactor,
+                                  });
+                                });
+                                setParentModalState(() {});
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Material berhasil ditambahkan',
+                                    ),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary500,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Simpan',
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           );
@@ -933,64 +941,66 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Pilih Unit Konversi',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 20),
-              // Default unit
-              ListTile(
-                title: Text(
-                  material['unit_abbreviation'] ?? '',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                Text(
+                  'Pilih Unit Konversi',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                onTap: () {
-                  onSelected(null, material['unit_abbreviation'] ?? '', 1.0);
-                  Navigator.pop(context);
-                },
-              ),
-              Divider(),
-              // Unit conversions
-              ..._unitConversions.map((conversion) {
-                return ListTile(
+                SizedBox(height: 20),
+                // Default unit
+                ListTile(
                   title: Text(
-                    conversion['conversion_name'] ?? '',
+                    material['unit_abbreviation'] ?? '',
                     style: heading4(FontWeight.w600, bnw900, 'Outfit'),
                   ),
-                  subtitle: Text(
-                    'Factor: ${conversion['conversion_factor']}',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
                   onTap: () {
-                    onSelected(
-                      conversion['id'],
-                      conversion['conversion_name'] ?? '',
-                      double.tryParse(
-                            conversion['conversion_factor'].toString(),
-                          ) ??
-                          1.0,
-                    );
+                    onSelected(null, material['unit_abbreviation'] ?? '', 1.0);
                     Navigator.pop(context);
                   },
-                );
-              }).toList(),
-            ],
+                ),
+                Divider(),
+                // Unit conversions
+                ..._unitConversions.map((conversion) {
+                  return ListTile(
+                    title: Text(
+                      conversion['conversion_name'] ?? '',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    subtitle: Text(
+                      'Factor: ${conversion['conversion_factor']}',
+                      style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                    onTap: () {
+                      onSelected(
+                        conversion['id'],
+                        conversion['conversion_name'] ?? '',
+                        double.tryParse(
+                              conversion['conversion_factor'].toString(),
+                            ) ??
+                            1.0,
+                      );
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         );
       },
@@ -1104,260 +1114,263 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pop(context),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: bnw100,
+        appBar: AppBar(
+          backgroundColor: bnw100,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Tambah Penyesuaian',
+            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+          ),
         ),
-        title: Text(
-          'Tambah Penyesuaian',
-          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'Judul',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                SizedBox(width: 4),
-                Text(
-                  '*',
-                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'Cth: Pembelian Matcha',
-                hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
-                filled: false,
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: bnw300),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: bnw300),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: primary500, width: 2),
-                ),
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Judul',
+                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '*',
+                    style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                  ),
+                ],
               ),
-              style: body1(FontWeight.w400, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: 24),
-            Row(
-              children: [
-                Text(
-                  'Tanggal',
-                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+              SizedBox(height: 8),
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  hintText: 'Cth: Pembelian Matcha',
+                  hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
+                  filled: false,
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: bnw300),
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: bnw300),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primary500, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
                 ),
-                SizedBox(width: 4),
-                Text(
-                  '*',
-                  style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            InkWell(
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (date != null) {
-                  setState(() => _selectedDate = date);
-                }
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: bnw300)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedDate != null
-                          ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
-                          : 'Pilih tanggal',
-                      style: body1(
-                        FontWeight.w400,
-                        _selectedDate != null ? bnw900 : bnw400,
-                        'Outfit',
-                      ),
-                    ),
-                    Icon(PhosphorIcons.calendar_blank, color: bnw600),
-                  ],
-                ),
+                style: body1(FontWeight.w400, bnw900, 'Outfit'),
               ),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Penyesuaian yang akan disesuaikan',
-              style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: 16),
-            if (_selectedMaterials.isEmpty)
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Text(
+                    'Tanggal',
+                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '*',
+                    style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
               InkWell(
-                onTap: _showMaterialPicker,
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date != null) {
+                    setState(() => _selectedDate = date);
+                  }
+                },
                 child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(40),
+                  padding: EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: bnw300),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(PhosphorIcons.package, size: 48, color: bnw400),
-                      SizedBox(height: 12),
-                      Text(
-                        'Masukan data pembelian',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              ..._selectedMaterials.asMap().entries.map((entry) {
-                final index = entry.key;
-                final material = entry.value;
-
-                return Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: bnw300),
+                    border: Border(bottom: BorderSide(color: bnw300)),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              material['name'],
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            Text(
-                              material['unit_conversion_name'],
-                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                            ),
-                          ],
+                      Text(
+                        _selectedDate != null
+                            ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
+                            : 'Pilih tanggal',
+                        style: body1(
+                          FontWeight.w400,
+                          _selectedDate != null ? bnw900 : bnw400,
+                          'Outfit',
                         ),
                       ),
-                      Text(
-                        '${material['qty'].toStringAsFixed(0)}x',
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                      SizedBox(width: 12),
-                      IconButton(
-                        icon: Icon(PhosphorIcons.x, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            _selectedMaterials.removeAt(index);
-                          });
-                        },
-                      ),
+                      Icon(PhosphorIcons.calendar_blank, color: bnw600),
                     ],
                   ),
-                );
-              }).toList(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            OutlinedButton(
-              onPressed: _canAdjust ? _showMaterialPicker : null,
-              style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(color: primary500),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                minimumSize: Size(double.infinity, 50),
               ),
-              child: Text(
-                'Penyesuaian',
-                style: heading3(FontWeight.w600, primary500, 'Outfit'),
+              SizedBox(height: 24),
+              Text(
+                'Penyesuaian yang akan disesuaikan',
+                style: heading4(FontWeight.w600, bnw900, 'Outfit'),
               ),
-            ),
-            SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _canAdjust ? () {} : null,
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: primary500),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+              SizedBox(height: 16),
+              if (_selectedMaterials.isEmpty)
+                InkWell(
+                  onTap: _showMaterialPicker,
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: bnw300),
                     ),
-                    child: Text(
-                      'Save & Add New',
-                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    child: Column(
+                      children: [
+                        Icon(PhosphorIcons.package, size: 48, color: bnw400),
+                        SizedBox(height: 12),
+                        Text(
+                          'Masukan data pembelian',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                      ],
                     ),
                   ),
+                )
+              else
+                ..._selectedMaterials.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final material = entry.value;
+      
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: bnw300),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                material['name'],
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Text(
+                                material['unit_conversion_name'],
+                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${material['qty'].toStringAsFixed(0)}x',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        SizedBox(width: 12),
+                        IconButton(
+                          icon: Icon(PhosphorIcons.x, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              _selectedMaterials.removeAt(index);
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              OutlinedButton(
+                onPressed: _canAdjust ? _showMaterialPicker : null,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: primary500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: Size(double.infinity, 50),
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _canAdjust ? _saveAdjustment : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary500,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                child: Text(
+                  'Penyesuaian',
+                  style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                ),
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _canAdjust ? () {} : null,
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: primary500),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Save & Add New',
+                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
                       ),
                     ),
-                    child: Text(
-                      'Create',
-                      style: heading3(FontWeight.w600, Colors.white, 'Outfit'),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _canAdjust ? _saveAdjustment : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary500,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Create',
+                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

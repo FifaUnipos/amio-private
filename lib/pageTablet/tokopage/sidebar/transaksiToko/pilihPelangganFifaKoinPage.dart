@@ -86,6 +86,7 @@ class _PilihPelangganTokoFifaKoinState
     pelangganName;
     pelangganId;
     datasPelanggan;
+    if (!mounted) return;
     setState(() {});
   }
 

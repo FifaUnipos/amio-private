@@ -36,112 +36,114 @@ class LaporanPage extends StatelessWidget {
           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
         ),
       ),
-      body: ListView(
-        padding:  EdgeInsets.all(16),
-        children: [
-          _buildReportCard(
-            context,
-            title: 'Pendapatan Harian',
-            subtitle: 'Laporan pendapatan harian toko',
-            icon: PhosphorIcons.money_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PendapatanHarianPage(
-                    token: token,
-                    merchantId: merchantId,
+      body: SafeArea(
+        child: ListView(
+          padding:  EdgeInsets.all(16),
+          children: [
+            _buildReportCard(
+              context,
+              title: 'Pendapatan Harian',
+              subtitle: 'Laporan pendapatan harian toko',
+              icon: PhosphorIcons.money_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PendapatanHarianPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          _buildReportCard(
-            context,
-            title: 'Pendapatan Per Toko',
-            subtitle: 'Laporan pendapatan per toko',
-            icon: PhosphorIcons.storefront_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PendapatanPerTokoPage(
-                    token: token,
-                    merchantId: merchantId,
+                );
+              },
+            ),
+            _buildReportCard(
+              context,
+              title: 'Pendapatan Per Toko',
+              subtitle: 'Laporan pendapatan per toko',
+              icon: PhosphorIcons.storefront_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PendapatanPerTokoPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          _buildReportCard(
-            context,
-            title: 'Pendapatan Per Produk',
-            subtitle: 'Laporan pendapatan per produk',
-            icon: PhosphorIcons.apple_logo_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PendapatanPerProdukPage(
-                    token: token,
-                    merchantId: merchantId,
+                );
+              },
+            ),
+            _buildReportCard(
+              context,
+              title: 'Pendapatan Per Produk',
+              subtitle: 'Laporan pendapatan per produk',
+              icon: PhosphorIcons.apple_logo_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PendapatanPerProdukPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          _buildReportCard(
-            context,
-            title: 'Pendapatan Per Metode Pembayaran',
-            subtitle: 'Laporan pendapatan per metode pembayaran',
-            icon: PhosphorIcons.list_bullets_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LaporanPembayaranPage(
-                    token: token,
-                    merchantId: merchantId,
+                );
+              },
+            ),
+            _buildReportCard(
+              context,
+              title: 'Pendapatan Per Metode Pembayaran',
+              subtitle: 'Laporan pendapatan per metode pembayaran',
+              icon: PhosphorIcons.list_bullets_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LaporanPembayaranPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          _buildReportCard(
-            context,
-            title: 'Stock Inventaris',
-            subtitle: 'Laporan stok inventaris',
-            icon: PhosphorIcons.package_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LaporanStokPage(
-                    token: token,
-                    merchantId: merchantId,
+                );
+              },
+            ),
+            _buildReportCard(
+              context,
+              title: 'Stock Inventaris',
+              subtitle: 'Laporan stok inventaris',
+              icon: PhosphorIcons.package_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LaporanStokPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          _buildReportCard(
-            context,
-            title: 'Pergerakan Inventaris',
-            subtitle: 'Laporan pergerakan inventaris',
-            icon: PhosphorIcons.cube_fill,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LaporanPergerakanStokPage(
-                    token: token,
-                    merchantId: merchantId,
+                );
+              },
+            ),
+            _buildReportCard(
+              context,
+              title: 'Pergerakan Inventaris',
+              subtitle: 'Laporan pergerakan inventaris',
+              icon: PhosphorIcons.cube_fill,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LaporanPergerakanStokPage(
+                      token: token,
+                      merchantId: merchantId,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

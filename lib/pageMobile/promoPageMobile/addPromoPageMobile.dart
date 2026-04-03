@@ -185,134 +185,136 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.8,
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Pilih Produk",
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: "Cari nama produk",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
-                    onChanged: (val) {
-                      // Optional: Implement Client-side Search
-                    },
-                  ),
-                  SizedBox(height: 12),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: _allProducts.length,
-                      separatorBuilder: (ctx, i) => Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final product = _allProducts[index];
-                        // Check if product is available
-                        // It is unavailable if it has a discount_status AND (we are creating NEW promo OR it belongs to a DIFFERENT promo)
-                        bool isUnavailable =
-                            product.discountStatus.isNotEmpty &&
-                            (widget.editDiscount == null ||
-                                product.discountId != widget.editDiscount!.id);
-
-                        return CheckboxListTile(
-                          title: Text(
-                            product.name,
-                            style: isUnavailable
-                                ? heading3(
-                                    FontWeight.w600,
-                                    Colors.grey,
-                                    'Outfit',
-                                  )
-                                : heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                FormatCurrency.convertToIdr(product.price),
-                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                              ),
-                              if (isUnavailable)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4.0),
-                                  child: Text(
-                                    product.discountStatus,
-                                    style: body2(
-                                      FontWeight.w400,
-                                      Colors.red,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          value: isUnavailable ? false : product.isSelected,
-                          activeColor: primary500,
-                          onChanged: isUnavailable
-                              ? null
-                              : (val) {
-                                  setStateDialog(() {
-                                    product.isSelected = val ?? false;
-                                  });
-                                },
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedProducts = _allProducts
-                              .where((p) => p.isSelected)
-                              .toList();
-                          _updateProductSelectionText();
-                        });
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      child: Text(
-                        "Simpan",
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      "Pilih Produk",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search),
+                        hintText: "Cari nama produk",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      onChanged: (val) {
+                        // Optional: Implement Client-side Search
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: _allProducts.length,
+                        separatorBuilder: (ctx, i) => Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final product = _allProducts[index];
+                          // Check if product is available
+                          // It is unavailable if it has a discount_status AND (we are creating NEW promo OR it belongs to a DIFFERENT promo)
+                          bool isUnavailable =
+                              product.discountStatus.isNotEmpty &&
+                              (widget.editDiscount == null ||
+                                  product.discountId != widget.editDiscount!.id);
+          
+                          return CheckboxListTile(
+                            title: Text(
+                              product.name,
+                              style: isUnavailable
+                                  ? heading3(
+                                      FontWeight.w600,
+                                      Colors.grey,
+                                      'Outfit',
+                                    )
+                                  : heading3(FontWeight.w600, bnw900, 'Outfit'),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  FormatCurrency.convertToIdr(product.price),
+                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                                ),
+                                if (isUnavailable)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      product.discountStatus,
+                                      style: body2(
+                                        FontWeight.w400,
+                                        Colors.red,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            value: isUnavailable ? false : product.isSelected,
+                            activeColor: primary500,
+                            onChanged: isUnavailable
+                                ? null
+                                : (val) {
+                                    setStateDialog(() {
+                                      product.isSelected = val ?? false;
+                                    });
+                                  },
+                          );
+                        },
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedProducts = _allProducts
+                                .where((p) => p.isSelected)
+                                .toList();
+                            _updateProductSelectionText();
+                          });
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          "Simpan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -409,303 +411,306 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bnw100,
-      appBar: AppBar(
-        title: Text(
-          widget.editDiscount == null ? "Tambah Promo" : "Ubah Promo",
-          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: bnw900),
-          onPressed: () => Navigator.pop(context),
-        ),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
         backgroundColor: bnw100,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel("Tipe Diskon *"),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSelectCard(
-                      "Umum",
-                      _type == "Umum",
-                      PhosphorIcons.squares_four_fill,
-                      () => setState(() => _type = "Umum"),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _buildSelectCard(
-                      "Per Produk",
-                      _type == "Per Produk",
-                      PhosphorIcons.shopping_bag_fill,
-                      () {
-                        setState(() => _type = "Per Produk");
-                        // Optionally prefetch here
-                        if (_allProducts.isEmpty) _fetchProducts();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-
-              if (_type == "Per Produk") ...[
-                _buildLabel("Produk *"),
-                GestureDetector(
-                  onTap: _showProductSelector,
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: _productSelectionController,
-                      decoration: InputDecoration(
-                        hintText: "Pilih Produk",
-                        suffixIcon: Icon(Icons.keyboard_arrow_down),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+        appBar: AppBar(
+          title: Text(
+            widget.editDiscount == null ? "Tambah Promo" : "Ubah Promo",
+            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: bnw900),
+            onPressed: () => Navigator.pop(context),
+          ),
+          backgroundColor: bnw100,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLabel("Tipe Diskon *"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSelectCard(
+                        "Umum",
+                        _type == "Umum",
+                        PhosphorIcons.squares_four_fill,
+                        () => setState(() => _type = "Umum"),
                       ),
-                      validator: (val) =>
-                          _type == "Per Produk" && _selectedProducts.isEmpty
-                          ? "Wajib pilih produk"
-                          : null,
                     ),
-                  ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: _buildSelectCard(
+                        "Per Produk",
+                        _type == "Per Produk",
+                        PhosphorIcons.shopping_bag_fill,
+                        () {
+                          setState(() => _type = "Per Produk");
+                          // Optionally prefetch here
+                          if (_allProducts.isEmpty) _fetchProducts();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16),
-              ],
-
-              _buildLabel("Nama Diskon *"),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: "Contoh: Diskon Tahun Baru",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (val) =>
-                    val == null || val.isEmpty ? "Nama wajib diisi" : null,
-              ),
-              SizedBox(height: 16),
-
-              _buildLabel("Harga Diskon *"),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSelectCard(
-                      "Rupiah",
-                      _valueType == "Rupiah",
-                      PhosphorIcons.money_fill,
-                      () => setState(() => _valueType = "Rupiah"),
+      
+                if (_type == "Per Produk") ...[
+                  _buildLabel("Produk *"),
+                  GestureDetector(
+                    onTap: _showProductSelector,
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _productSelectionController,
+                        decoration: InputDecoration(
+                          hintText: "Pilih Produk",
+                          suffixIcon: Icon(Icons.keyboard_arrow_down),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (val) =>
+                            _type == "Per Produk" && _selectedProducts.isEmpty
+                            ? "Wajib pilih produk"
+                            : null,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _buildSelectCard(
-                      "Persen",
-                      _valueType == "Persen",
-                      PhosphorIcons.percent,
-                      () => setState(() => _valueType = "Persen"),
-                    ),
-                  ),
+                  SizedBox(height: 16),
                 ],
-              ),
-              SizedBox(height: 8),
-              if (_valueType == "Rupiah")
+      
+                _buildLabel("Nama Diskon *"),
                 TextFormField(
-                  controller: _valueController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [CurrencyInputFormatter()],
+                  controller: _nameController,
                   decoration: InputDecoration(
-                    prefixText: "Rp ",
-                    hintText: "0",
-                    border: UnderlineInputBorder(),
+                    hintText: "Contoh: Diskon Tahun Baru",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   validator: (val) =>
-                      val == null || val.isEmpty ? "Nilai wajib diisi" : null,
-                ),
-              if (_valueType == "Persen")
-                TextFormField(
-                  controller: _valueController,
-                  keyboardType: TextInputType.number,
-                  // inputFormatters: [CurrencyInputFormatter()],
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(PhosphorIcons.percent, color: bnw900),
-                    suffixText: '%',
-                    hintText: "0",
-                    border: UnderlineInputBorder(),
-                  ),
-                  validator: (val) =>
-                      val == null || val.isEmpty ? "Nilai wajib diisi" : null,
-                ),
-
-              SizedBox(height: 16),
-
-              _buildLabel("Masa Aktif Diskon *"),
-              Column(
-                children: [
-                  _buildPeriodSelector(
-                    "Selamanya",
-                    _activePeriod == "Selamanya",
-                    PhosphorIcons.hourglass_high_fill,
-                    () => setState(() => _activePeriod = "Selamanya"),
-                  ),
-                  SizedBox(height: 8),
-                  _buildPeriodSelector(
-                    "Kustom Waktu",
-                    _activePeriod == "Kustom Waktu",
-                    PhosphorIcons.timer_fill,
-                    () => setState(() => _activePeriod = "Kustom Waktu"),
-                  ),
-                ],
-              ),
-
-              if (_activePeriod == "Kustom Waktu") ...[
-                SizedBox(height: 16),
-                _buildLabel("Waktu Mulai *"),
-                GestureDetector(
-                  onTap: () => _selectDate(_startDateController),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: _startDateController,
-                      decoration: InputDecoration(
-                        hintText: "Pilih Tanggal",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        suffixIcon: Icon(Icons.keyboard_arrow_down),
-                      ),
-                      validator: (val) =>
-                          _activePeriod == "Kustom Waktu" &&
-                              (val == null || val.isEmpty)
-                          ? "Wajib diisi"
-                          : null,
-                    ),
-                  ),
+                      val == null || val.isEmpty ? "Nama wajib diisi" : null,
                 ),
                 SizedBox(height: 16),
-                _buildLabel("Waktu Berakhir *"),
-                GestureDetector(
-                  onTap: () => _selectDate(_endDateController),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: _endDateController,
-                      decoration: InputDecoration(
-                        hintText: "Pilih Tanggal",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        suffixIcon: Icon(Icons.keyboard_arrow_down),
+      
+                _buildLabel("Harga Diskon *"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSelectCard(
+                        "Rupiah",
+                        _valueType == "Rupiah",
+                        PhosphorIcons.money_fill,
+                        () => setState(() => _valueType = "Rupiah"),
                       ),
-                      validator: (val) =>
-                          _activePeriod == "Kustom Waktu" &&
-                              (val == null || val.isEmpty)
-                          ? "Wajib diisi"
-                          : null,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: _buildSelectCard(
+                        "Persen",
+                        _valueType == "Persen",
+                        PhosphorIcons.percent,
+                        () => setState(() => _valueType = "Persen"),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                if (_valueType == "Rupiah")
+                  TextFormField(
+                    controller: _valueController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    decoration: InputDecoration(
+                      prefixText: "Rp ",
+                      hintText: "0",
+                      border: UnderlineInputBorder(),
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? "Nilai wajib diisi" : null,
+                  ),
+                if (_valueType == "Persen")
+                  TextFormField(
+                    controller: _valueController,
+                    keyboardType: TextInputType.number,
+                    // inputFormatters: [CurrencyInputFormatter()],
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(PhosphorIcons.percent, color: bnw900),
+                      suffixText: '%',
+                      hintText: "0",
+                      border: UnderlineInputBorder(),
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? "Nilai wajib diisi" : null,
+                  ),
+      
+                SizedBox(height: 16),
+      
+                _buildLabel("Masa Aktif Diskon *"),
+                Column(
+                  children: [
+                    _buildPeriodSelector(
+                      "Selamanya",
+                      _activePeriod == "Selamanya",
+                      PhosphorIcons.hourglass_high_fill,
+                      () => setState(() => _activePeriod = "Selamanya"),
+                    ),
+                    SizedBox(height: 8),
+                    _buildPeriodSelector(
+                      "Kustom Waktu",
+                      _activePeriod == "Kustom Waktu",
+                      PhosphorIcons.timer_fill,
+                      () => setState(() => _activePeriod = "Kustom Waktu"),
+                    ),
+                  ],
+                ),
+      
+                if (_activePeriod == "Kustom Waktu") ...[
+                  SizedBox(height: 16),
+                  _buildLabel("Waktu Mulai *"),
+                  GestureDetector(
+                    onTap: () => _selectDate(_startDateController),
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _startDateController,
+                        decoration: InputDecoration(
+                          hintText: "Pilih Tanggal",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: Icon(Icons.keyboard_arrow_down),
+                        ),
+                        validator: (val) =>
+                            _activePeriod == "Kustom Waktu" &&
+                                (val == null || val.isEmpty)
+                            ? "Wajib diisi"
+                            : null,
+                      ),
                     ),
                   ),
-                ),
-              ],
-
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Status Diskon",
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                  SizedBox(height: 16),
+                  _buildLabel("Waktu Berakhir *"),
+                  GestureDetector(
+                    onTap: () => _selectDate(_endDateController),
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _endDateController,
+                        decoration: InputDecoration(
+                          hintText: "Pilih Tanggal",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: Icon(Icons.keyboard_arrow_down),
+                        ),
+                        validator: (val) =>
+                            _activePeriod == "Kustom Waktu" &&
+                                (val == null || val.isEmpty)
+                            ? "Wajib diisi"
+                            : null,
                       ),
-                      Text(
-                        _isActive ? "Aktif" : "Tidak Aktif",
-                        style: body2(FontWeight.w400, bnw600, 'Outfit'),
-                      ),
-                    ],
-                  ),
-
-                  Switch(
-                    value: _isActive,
-                    activeColor: primary500,
-                    onChanged: (val) => setState(() => _isActive = val),
+                    ),
                   ),
                 ],
-              ),
-
-              SizedBox(height: 32),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _isSaving
-                          ? null
-                          : () async {
-                              await _saveDiscount();
-                              if (mounted) {
-                                _nameController.clear();
-                                _valueController.clear();
-                                _startDateController.clear();
-                                _endDateController.clear();
-                                _selectedProducts.clear();
-                                _updateProductSelectionText();
-                                setState(() {
-                                  _type = 'Umum';
-                                  _activePeriod = 'Selamanya';
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      "Berhasil disimpan, silahkan tambah baru",
+      
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Status Diskon",
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          _isActive ? "Aktif" : "Tidak Aktif",
+                          style: body2(FontWeight.w400, bnw600, 'Outfit'),
+                        ),
+                      ],
+                    ),
+      
+                    Switch(
+                      value: _isActive,
+                      activeColor: primary500,
+                      onChanged: (val) => setState(() => _isActive = val),
+                    ),
+                  ],
+                ),
+      
+                SizedBox(height: 32),
+      
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isSaving
+                            ? null
+                            : () async {
+                                await _saveDiscount();
+                                if (mounted) {
+                                  _nameController.clear();
+                                  _valueController.clear();
+                                  _startDateController.clear();
+                                  _endDateController.clear();
+                                  _selectedProducts.clear();
+                                  _updateProductSelectionText();
+                                  setState(() {
+                                    _type = 'Umum';
+                                    _activePeriod = 'Selamanya';
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Berhasil disimpan, silahkan tambah baru",
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }
-                            },
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                                  );
+                                }
+                              },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          "Simpan & Tambah Baru",
+                          style: heading3(FontWeight.w600, primary500, 'Outfit'),
                         ),
                       ),
-                      child: Text(
-                        "Simpan & Tambah Baru",
-                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                      ),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _saveDiscount,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _saveDiscount,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          widget.editDiscount == null ? "Tambah" : "Simpan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ),
-                      child: Text(
-                        widget.editDiscount == null ? "Tambah" : "Simpan",
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 32),
-            ],
+                  ],
+                ),
+                SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

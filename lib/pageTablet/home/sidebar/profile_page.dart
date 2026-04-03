@@ -141,12 +141,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
+    // Hanya TextEditingController dan FocusNode yang perlu di-dispose
+    // nameProfile, phoneProfile, emailProfile adalah String global — BUKAN controller
     controllerName.dispose();
-    nameProfile.dispose();
     controllerPhone.dispose();
-    phoneProfile.dispose();
     controllerEmail.dispose();
-    emailProfile.dispose();
     controllerPass.dispose();
     controllerConfirmPass.dispose();
     controllerChangeEmail.dispose();
@@ -348,8 +347,8 @@ class ProfilePageState extends State<ProfilePage> {
                   color: bnw100,
                   backgroundColor: primary500,
                   onRefresh: () async {
-                    initState();
                     setState(() {});
+                    myprofile(widget.token);
                   },
                   child: ListView(
                     // mainAxisAlignment: MainAxisAlignment.center,
@@ -718,7 +717,7 @@ class ProfilePageState extends State<ProfilePage> {
                                                               ).then((value) {
                                                                 imageError =
                                                                     'false';
-                                                                initState();
+
                                                               }),
                                                             );
                                                           },
@@ -767,7 +766,7 @@ class ProfilePageState extends State<ProfilePage> {
                                                                       (value) {
                                                                     imageError =
                                                                         'false';
-                                                                    initState();
+
                                                                   });
                                                                 },
                                                                 child: SizedBox(
@@ -1104,13 +1103,12 @@ class ProfilePageState extends State<ProfilePage> {
                                                         Navigator.of(context)
                                                             .popUntil((route) =>
                                                                 route.isFirst);
-                                                        initState();
+                                                        myprofile(widget.token);        
                                                       }
                                                     },
                                                   );
                                                   errorText = '';
                                                   setState(() {});
-                                                  initState();
                                                 },
                                                 child: buttonXL(
                                                   Center(
@@ -1390,7 +1388,6 @@ class ProfilePageState extends State<ProfilePage> {
                                 ? verifikasiDiriKamuShowdialog(context)
                                 : verifEmailField(context);
                             setState(() {});
-                            initState();
                           },
                           child: Text(
                             statusVerified.toString() == '1'
@@ -2214,12 +2211,10 @@ class ProfilePageState extends State<ProfilePage> {
                                                     Navigator.of(context)
                                                         .popUntil((route) =>
                                                             route.isFirst);
-                                                    initState();
                                                   }
                                                 });
                                               });
 
-                                              initState();
                                             },
                                             onChanged: (value) {
                                               debugPrint(value);
@@ -2968,7 +2963,6 @@ class ProfilePageState extends State<ProfilePage> {
                       // verifikasiEmail(context);
 
                       setState(() {});
-                      // initState();
                     },
                     child: buttonXLonOff(
                       Center(
@@ -3100,7 +3094,6 @@ class ProfilePageState extends State<ProfilePage> {
                       // verifikasiEmail(context);
 
                       setState(() {});
-                      // initState();
                     },
                     child: buttonXLonOff(
                       Center(
@@ -3772,7 +3765,6 @@ class ProfilePageState extends State<ProfilePage> {
                       // verifikasiEmail(context);
 
                       setState(() {});
-                      // initState();
                     },
                     child: buttonXLonOff(
                       Center(

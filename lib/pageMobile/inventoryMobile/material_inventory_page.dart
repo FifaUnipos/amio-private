@@ -78,8 +78,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
       'canPurchase=$_canInventory',
     );
     _tabController = TabController(length: 5, vsync: this);
+
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
+      setState(() {});
       if (_tabController.index == 0) {
         _fetchMaterials();
       }
@@ -348,135 +350,137 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: bnw200)),
-                  ),
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
+          return SafeArea(
+            child: Container(
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: bnw200)),
+                    ),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: primary500.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                        SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: primary500.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                PhosphorIcons.package,
+                                color: primary500,
+                                size: 24,
+                              ),
                             ),
-                            child: Icon(
-                              PhosphorIcons.package,
-                              color: primary500,
-                              size: 24,
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    detail['item_name'] ?? '',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    detail['unit_name'] ?? '',
+                                    style: body2(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  detail['item_name'] ?? '',
+                                  'Qty',
+                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                                ),
+                                Text(
+                                  _formatQty(detail['total_qty']),
                                   style: heading2(
                                     FontWeight.w700,
                                     bnw900,
                                     'Outfit',
                                   ),
                                 ),
-                                Text(
-                                  detail['unit_name'] ?? '',
-                                  style: body2(
-                                    FontWeight.w400,
-                                    bnw500,
-                                    'Outfit',
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Qty',
-                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                              ),
-                              Text(
-                                _formatQty(detail['total_qty']),
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 12),
-                          IconButton(
-                            icon: Icon(PhosphorIcons.pencil, color: primary500),
-                            onPressed: () {
-                              Navigator.pop(context); // Close detail modal
-                              _navigateToAddEditMaterial(
-                                material: {
-                                  'id': detail['item_id'],
-                                  'name_item': detail['item_name'],
-                                  'unit_id': detail['unit_id'],
-                                  'unit_name': detail['unit_name'],
-                                },
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(PhosphorIcons.trash, color: Colors.red),
-                            onPressed: () {
-                              Navigator.pop(context); // Close detail modal
-                              _confirmDeleteMaterial(
-                                itemId: detail['item_id'].toString(),
-                                itemName:
-                                    (detail['name_item'] ??
-                                            detail['item_name'] ??
-                                            '-')
-                                        .toString(),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 12),
+                            IconButton(
+                              icon: Icon(PhosphorIcons.pencil, color: primary500),
+                              onPressed: () {
+                                Navigator.pop(context); // Close detail modal
+                                _navigateToAddEditMaterial(
+                                  material: {
+                                    'id': detail['item_id'],
+                                    'name_item': detail['item_name'],
+                                    'unit_id': detail['unit_id'],
+                                    'unit_name': detail['unit_name'],
+                                  },
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(PhosphorIcons.trash, color: Colors.red),
+                              onPressed: () {
+                                Navigator.pop(context); // Close detail modal
+                                _confirmDeleteMaterial(
+                                  itemId: detail['item_id'].toString(),
+                                  itemName:
+                                      (detail['name_item'] ??
+                                              detail['item_name'] ??
+                                              '-')
+                                          .toString(),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    padding: EdgeInsets.all(16),
-                    itemCount: (detail['detail'] as List?)?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      final activity = detail['detail'][index];
-                      return _buildActivityCard(
-                        Map<String, dynamic>.from(activity),
-                      );
-                    },
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: EdgeInsets.all(16),
+                      itemCount: (detail['detail'] as List?)?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final activity = detail['detail'][index];
+                        return _buildActivityCard(
+                          Map<String, dynamic>.from(activity),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -631,61 +635,63 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-              Text(
-                itemName,
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              const SizedBox(height: 12),
-
-              if (locked)
-                lockedTile(
-                  icon: PhosphorIcons.pencil_line,
-                  title: 'Ubah nama bahan',
-                )
-              else
-                ListTile(
-                  leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
-                  title: const Text('Ubah Nama Bahan'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _showRenameDialog(
-                      itemId: itemId,
-                      currentName: itemName,
-                      unitId: unitId,
-                    );
-                  },
+          
+                const SizedBox(height: 16),
+                Text(
+                  itemName,
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-
-              if (locked)
-                lockedTile(icon: PhosphorIcons.trash, title: 'Hapus Bahan')
-              else
-                ListTile(
-                  leading: Icon(PhosphorIcons.trash, color: red500),
-                  title: const Text('Hapus Bahan'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _confirmDeleteMaterial(itemId: itemId, itemName: itemName);
-                  },
-                ),
-            ],
+                const SizedBox(height: 12),
+          
+                if (locked)
+                  lockedTile(
+                    icon: PhosphorIcons.pencil_line,
+                    title: 'Ubah nama bahan',
+                  )
+                else
+                  ListTile(
+                    leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
+                    title: const Text('Ubah Nama Bahan'),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showRenameDialog(
+                        itemId: itemId,
+                        currentName: itemName,
+                        unitId: unitId,
+                      );
+                    },
+                  ),
+          
+                if (locked)
+                  lockedTile(icon: PhosphorIcons.trash, title: 'Hapus Bahan')
+                else
+                  ListTile(
+                    leading: Icon(PhosphorIcons.trash, color: red500),
+                    title: const Text('Hapus Bahan'),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _confirmDeleteMaterial(itemId: itemId, itemName: itemName);
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -827,7 +833,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bnw100,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: bnw200),
       ),
@@ -844,7 +850,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ),
                 child: Text(
                   badgeLabel,
-                  style: body2(FontWeight.w600, Colors.white, 'Outfit'),
+                  style: body2(FontWeight.w600, bnw100, 'Outfit'),
                 ),
               ),
               Spacer(),
@@ -999,7 +1005,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: bnw100,
         elevation: 0,
         leading: IconButton(
           icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
@@ -1036,10 +1042,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           ? FloatingActionButton.extended(
               onPressed: () => _navigateToAddEditMaterial(),
               backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: Colors.white),
+              icon: Icon(PhosphorIcons.plus, color: bnw100),
               label: Text(
                 'Tambah Bahan',
-                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
               ),
             )
           : null,
@@ -1080,7 +1086,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     return Column(
       children: [
         Container(
-          color: Colors.white,
+          color: bnw100,
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
@@ -1200,7 +1206,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: bnw100,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: bnw200),
         ),
@@ -1433,165 +1439,167 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         return StatefulBuilder(
           builder: (BuildContext context, setModalState) => FractionallySizedBox(
             heightFactor: isKeyboardActive ? 0.9 : 0.80,
-            child: GestureDetector(
-              onTap: () => _unitSearchFocusNode.unfocus(),
-              child: Container(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(size12),
-                    topLeft: Radius.circular(size12),
+            child: SafeArea(
+              child: GestureDetector(
+                onTap: () => _unitSearchFocusNode.unfocus(),
+                child: Container(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                  child: Column(
-                    children: [
-                      dividerShowdialog(),
-                      SizedBox(height: size16),
-                      FocusScope(
-                        child: Focus(
-                          onFocusChange: (value) {
-                            isKeyboardActive = value;
-                            setModalState(() {});
-                          },
-                          child: TextField(
-                            cursorColor: primary500,
-                            controller: _searchUnitController,
-                            focusNode: _unitSearchFocusNode,
-                            onChanged: (value) {
-                              _runSearchUnit(value);
+                  decoration: BoxDecoration(
+                    color: bnw100,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(size12),
+                      topLeft: Radius.circular(size12),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        FocusScope(
+                          child: Focus(
+                            onFocusChange: (value) {
+                              isKeyboardActive = value;
                               setModalState(() {});
                             },
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: size12,
-                              ),
-                              isDense: true,
-                              filled: true,
-                              fillColor: bnw200,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                                borderSide: BorderSide(color: bnw300),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                                borderSide: BorderSide(color: bnw300),
-                              ),
-                              suffixIcon: _searchUnitController.text.isNotEmpty
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        _searchUnitController.text = '';
-                                        _runSearchUnit('');
-                                        setModalState(() {});
-                                      },
-                                      child: Icon(
-                                        PhosphorIcons.x_fill,
-                                        size: size20,
-                                        color: bnw900,
-                                      ),
-                                    )
-                                  : null,
-                              prefixIcon: Icon(
-                                PhosphorIcons.magnifying_glass,
-                                color: bnw500,
-                              ),
-                              hintText: 'Cari unit / singkatan / tipe',
-                              hintStyle: heading3(
-                                FontWeight.w500,
-                                bnw500,
-                                'Outfit',
+                            child: TextField(
+                              cursorColor: primary500,
+                              controller: _searchUnitController,
+                              focusNode: _unitSearchFocusNode,
+                              onChanged: (value) {
+                                _runSearchUnit(value);
+                                setModalState(() {});
+                              },
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: size12,
+                                ),
+                                isDense: true,
+                                filled: true,
+                                fillColor: bnw200,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(color: bnw300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(size8),
+                                  borderSide: BorderSide(color: bnw300),
+                                ),
+                                suffixIcon: _searchUnitController.text.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: () {
+                                          _searchUnitController.text = '';
+                                          _runSearchUnit('');
+                                          setModalState(() {});
+                                        },
+                                        child: Icon(
+                                          PhosphorIcons.x_fill,
+                                          size: size20,
+                                          color: bnw900,
+                                        ),
+                                      )
+                                    : null,
+                                prefixIcon: Icon(
+                                  PhosphorIcons.magnifying_glass,
+                                  color: bnw500,
+                                ),
+                                hintText: 'Cari unit / singkatan / tipe',
+                                hintStyle: heading3(
+                                  FontWeight.w500,
+                                  bnw500,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            await _fetchUnitMaster();
-                            setModalState(() {});
-                          },
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            physics: const BouncingScrollPhysics(),
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            itemCount: _filteredUnitList.length,
-                            itemBuilder: (context, index) {
-                              final unit = Map<String, dynamic>.from(
-                                _filteredUnitList[index],
-                              );
-                              final unitId = unit['id'].toString();
-                              final isSelected = unitId == _selectedUnitId;
-
-                              final label =
-                                  '${unit['name']}(${unit['abbreviation']})';
-
-                              return Container(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: bnw300,
-                                      width: width1,
-                                    ),
-                                  ),
-                                ),
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                    vertical: size16,
-                                  ),
-                                  title: Text(label),
-                                  subtitle: Text(
-                                    (unit['type'] ?? '').toString(),
-                                    style: body2(
-                                      FontWeight.w400,
-                                      bnw500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  trailing: Icon(
-                                    isSelected
-                                        ? PhosphorIcons.radio_button_fill
-                                        : PhosphorIcons.radio_button,
-                                    color: isSelected ? primary500 : bnw900,
-                                  ),
-                                  onTap: () {
-                                    _unitSearchFocusNode.unfocus();
-                                    this.setState(() {
-                                      _selectedUnitId = unitId;
-                                      _selectedUnitLabel = label;
-                                    });
-                                    setModalState(() {});
-                                  },
-                                ),
-                              );
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              await _fetchUnitMaster();
+                              setModalState(() {});
                             },
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: buttonXXL(
-                          Center(
-                            child: Text(
-                              'Selesai',
-                              style: heading2(
-                                FontWeight.w600,
-                                bnw100,
-                                'Outfit',
-                              ),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: const BouncingScrollPhysics(),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              itemCount: _filteredUnitList.length,
+                              itemBuilder: (context, index) {
+                                final unit = Map<String, dynamic>.from(
+                                  _filteredUnitList[index],
+                                );
+                                final unitId = unit['id'].toString();
+                                final isSelected = unitId == _selectedUnitId;
+                      
+                                final label =
+                                    '${unit['name']}(${unit['abbreviation']})';
+                      
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: bnw300,
+                                        width: width1,
+                                      ),
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: size16,
+                                    ),
+                                    title: Text(label),
+                                    subtitle: Text(
+                                      (unit['type'] ?? '').toString(),
+                                      style: body2(
+                                        FontWeight.w400,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    trailing: Icon(
+                                      isSelected
+                                          ? PhosphorIcons.radio_button_fill
+                                          : PhosphorIcons.radio_button,
+                                      color: isSelected ? primary500 : bnw900,
+                                    ),
+                                    onTap: () {
+                                      _unitSearchFocusNode.unfocus();
+                                      this.setState(() {
+                                        _selectedUnitId = unitId;
+                                        _selectedUnitLabel = label;
+                                      });
+                                      setModalState(() {});
+                                    },
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          double.infinity,
                         ),
-                      ),
-                      SizedBox(height: size8),
-                    ],
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: buttonXXL(
+                            Center(
+                              child: Text(
+                                'Selesai',
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                            double.infinity,
+                          ),
+                        ),
+                        SizedBox(height: size8),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1609,32 +1617,34 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Urutkan Bahan',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 20),
-              _buildSortOption('Nama A-Z', 'name_asc'),
-              _buildSortOption('Nama Z-A', 'name_desc'),
-              _buildSortOption('Stok Terbanyak', 'qty_desc'),
-              _buildSortOption('Stok Terkecil', 'qty_asc'),
-            ],
+                SizedBox(height: 20),
+                Text(
+                  'Urutkan Bahan',
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 20),
+                _buildSortOption('Nama A-Z', 'name_asc'),
+                _buildSortOption('Nama Z-A', 'name_desc'),
+                _buildSortOption('Stok Terbanyak', 'qty_desc'),
+                _buildSortOption('Stok Terkecil', 'qty_asc'),
+              ],
+            ),
           ),
         );
       },
@@ -1735,75 +1745,77 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
           minChildSize: 0.3,
           maxChildSize: 0.9,
           builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: FutureBuilder<http.Response>(
-                future: http.post(
-                  Uri.parse(getUnitMasterDataLink),
-                  headers: {
-                    'token': widget.token,
-                    'Content-type': 'application/json',
-                  },
-                  body: jsonEncode({"deviceid": identifier}),
+            return SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError || !snapshot.hasData) {
-                    return const Center(child: Text('Gagal memuat data unit'));
-                  }
-
-                  final res = snapshot.data!;
-                  Map<String, dynamic> decoded;
-
-                  try {
-                    decoded = jsonDecode(res.body) as Map<String, dynamic>;
-                  } catch (_) {
-                    return const Center(
-                      child: Text('Response unit tidak valid'),
-                    );
-                  }
-
-                  final List units =
-                      (decoded['data'] ?? decoded['units'] ?? []) as List;
-
-                  if (units.isEmpty) {
-                    return const Center(child: Text('Data unit kosong'));
-                  }
-
-                  return ListView.separated(
-                    controller: scrollController,
-                    itemCount: units.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final u = units[index] as Map<String, dynamic>;
-
-                      final unitId = u['id'] ?? u['unit_id'];
-                      final unitName = u['name'] ?? u['unit_name'] ?? '-';
-                      final isSelected = _selectedUnit?['id'] == unitId;
-
-                      return ListTile(
-                        title: Text(
-                          unitName.toString(),
-                          style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                        trailing: isSelected
-                            ? Icon(Icons.check, color: primary500, size: 18)
-                            : null,
-                        onTap: () {
-                          setState(() {
-                            _selectedUnit = {'id': unitId, 'name': unitName};
-                          });
-                          Navigator.pop(context);
-                        },
-                      );
+                child: FutureBuilder<http.Response>(
+                  future: http.post(
+                    Uri.parse(getUnitMasterDataLink),
+                    headers: {
+                      'token': widget.token,
+                      'Content-type': 'application/json',
                     },
-                  );
-                },
+                    body: jsonEncode({"deviceid": identifier}),
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError || !snapshot.hasData) {
+                      return const Center(child: Text('Gagal memuat data unit'));
+                    }
+              
+                    final res = snapshot.data!;
+                    Map<String, dynamic> decoded;
+              
+                    try {
+                      decoded = jsonDecode(res.body) as Map<String, dynamic>;
+                    } catch (_) {
+                      return const Center(
+                        child: Text('Response unit tidak valid'),
+                      );
+                    }
+              
+                    final List units =
+                        (decoded['data'] ?? decoded['units'] ?? []) as List;
+              
+                    if (units.isEmpty) {
+                      return const Center(child: Text('Data unit kosong'));
+                    }
+              
+                    return ListView.separated(
+                      controller: scrollController,
+                      itemCount: units.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final u = units[index] as Map<String, dynamic>;
+              
+                        final unitId = u['id'] ?? u['unit_id'];
+                        final unitName = u['name'] ?? u['unit_name'] ?? '-';
+                        final isSelected = _selectedUnit?['id'] == unitId;
+              
+                        return ListTile(
+                          title: Text(
+                            unitName.toString(),
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check, color: primary500, size: 18)
+                              : null,
+                          onTap: () {
+                            setState(() {
+                              _selectedUnit = {'id': unitId, 'name': unitName};
+                            });
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             );
           },
@@ -1869,9 +1881,9 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bnw100,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: bnw100,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
@@ -1885,150 +1897,152 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 12),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Nama Barang',
-                            style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: ' *',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            hintText: 'Cth: Matcha',
-                            hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Unit/Satuan',
-                            style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                            children: [
-                              TextSpan(
-                                text: ' *',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        InkWell(
-                          onTap: _showUnitPicker,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue[900]!),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          : SafeArea(
+            child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 12),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Nama Barang',
+                              style: heading4(FontWeight.w500, bnw900, 'Outfit'),
                               children: [
-                                Text(
-                                  _selectedUnit?['name'] ?? 'Pilih Unit/Satuan',
-                                  style: body1(
-                                    FontWeight.w500,
-                                    _selectedUnit == null ? bnw400 : bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Icon(
-                                  PhosphorIcons.caret_down,
-                                  size: 16,
-                                  color: bnw500,
+                                TextSpan(
+                                  text: ' *',
+                                  style: TextStyle(color: Colors.red),
                                 ),
                               ],
                             ),
                           ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              hintText: 'Cth: Matcha',
+                              hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 24),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Unit/Satuan',
+                              style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                              children: [
+                                TextSpan(
+                                  text: ' *',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          InkWell(
+                            onTap: _showUnitPicker,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blue[900]!),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _selectedUnit?['name'] ?? 'Pilih Unit/Satuan',
+                                    style: body1(
+                                      FontWeight.w500,
+                                      _selectedUnit == null ? bnw400 : bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Icon(
+                                    PhosphorIcons.caret_down,
+                                    size: 16,
+                                    color: bnw500,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          offset: Offset(0, -4),
+                          blurRadius: 10,
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        offset: Offset(0, -4),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      if (!isEdit)
+                    child: Column(
+                      children: [
+                        if (!isEdit)
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () => _saveMaterial(addNew: true),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: primary500),
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'Simpan & Tambah Baru',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  primary500,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (!isEdit) SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => _saveMaterial(addNew: true),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: primary500),
+                          child: ElevatedButton(
+                            onPressed: () => _saveMaterial(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary500,
                               padding: EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             child: Text(
-                              'Save & Add New',
+                              isEdit ? 'Simpan Perubahan' : 'Tambah Bahan',
                               style: heading3(
                                 FontWeight.w600,
-                                primary500,
+                                bnw100,
                                 'Outfit',
                               ),
                             ),
                           ),
                         ),
-                      if (!isEdit) SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => _saveMaterial(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary500,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            isEdit ? 'Save Changes' : 'Create',
-                            style: heading3(
-                              FontWeight.w600,
-                              Colors.white,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+          ),
     );
   }
 }

@@ -120,7 +120,7 @@ Future<dynamic> showDialogBilling(BuildContext context, text) {
 
 void showSnackbar(BuildContext context, jsonResponse) async {
   final isTablet = isTabletLayout(context);
-  
+
   String? rc = jsonResponse['rc']?.toString();
   String? message = jsonResponse['message'] ?? jsonResponse['data'];
 
@@ -141,7 +141,9 @@ void showSnackbar(BuildContext context, jsonResponse) async {
       prefs.remove('deviceid');
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => isTablet ? LoginPage() : LoginPageMobile()),
+        MaterialPageRoute(
+          builder: (context) => isTablet ? LoginPage() : LoginPageMobile(),
+        ),
         (Route<dynamic> route) => false,
       );
     }

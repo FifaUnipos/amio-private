@@ -43,11 +43,16 @@ class _PageUserMobileState extends State<PageUserMobile> {
   Future<void> _fetchUsers() async {
     setState(() => _isLoading = true);
     try {
-      final users = await getGroupUsers(context, widget.token, _selectedOrder);
+      final users = await getGroupUsers(
+        context,
+        widget.token,
+        widget.merchantId,
+        _selectedOrder,
+      );
       final scopedUsers = users.where((u) {
         if (widget.merchantId.isEmpty) return true;
 
-        final userMerchantId = (u.merchantid ?? '').trim();
+        final userMerchantId = (widget.merchantId).trim();
         return userMerchantId == widget.merchantId.trim();
       }).toList();
 

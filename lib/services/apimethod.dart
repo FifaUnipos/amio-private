@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/models/coaModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/bomModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/detailPembelianModel.dart';
@@ -217,11 +218,23 @@ String registerbyotp = '$url/api/user/registerbyotp',
     getDistrictLink = '$url/api/district',
     getVillageLink = '$url/api/village',
     getTipeUsahaLink = '$url/api/tipeusaha';
-    
+
+// PRODUCT
+abstract class ApiProduct {
+  static String get getProduct => '$url/api/v2/product';
+}
+
+// STORE
+abstract class ApiStore {
+  static String get getStore => '$url/api/v2/product';
+}
+
 // TRANSACTION HISTORY DELETE
 abstract class ApiTransactionHistory {
-  static String get getReasons => '$url/api/transaction/create/reference/tagihan';
-  static String get deleteTransaction => '$url/api/transaction/delete/reference/tagihan';
+  static String get getReasons =>
+      '$url/api/transaction/create/reference/tagihan';
+  static String get deleteTransaction =>
+      '$url/api/transaction/delete/reference/tagihan';
   static String get viewDeletedHistory => '$url/api/transaction/view/reference';
 }
 
@@ -428,12 +441,10 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
     if (response.statusCode == 200) {
       print("succes hapus kategori");
       closeLoading(context);
-      Navigator.pop(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
       closeLoading(context);
-      Navigator.pop(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
@@ -630,17 +641,27 @@ Future checkEmail(token, setState) async {
       options: Options(headers: {"token": "$token"}),
     );
 
-    if (response.statusCode == 200) {
-      print("succes aman tentram check email");
+    print("status email: ${response.data['data']}");
 
+    if (response.statusCode == 200) {
       statusVerified = response.data['data'].toString();
       statusPw = response.data['data'].toString();
-
       setState(() {});
-    } else {}
-    return null;
-  } catch (e) {
-    throw Exception(e.toString());
+    }
+
+    return response.data['rc'];
+  } on DioError catch (e) {
+    if (e.response != null) {
+      print("checkEmail error rc: ${e.response!.data['rc']}");
+      print("checkEmail error message: ${e.response!.data['message']}");
+
+      statusVerified = null.toString();
+      statusPw = null.toString();
+      setState(() {});
+
+      return e.response!.data['rc'];
+    }
+    rethrow;
   }
 }
 
@@ -766,13 +787,13 @@ Future getAllToko(context, token, name, orderby) async {
   if (response.statusCode == 200) {
     print('succes');
 
-    final List<ModelDataToko> result = [];
+    final List<MerchantSortingData> result = [];
 
     final Map<String, dynamic> decoded = jsonDecode(response.body);
     for (Map<String, dynamic> item in decoded['data']) {
       // print(item);
 
-      final model = ModelDataToko.fromJson(item);
+      final model = MerchantSortingData.fromJson(item);
       result.add(model);
 
       // print(model.toJson());
@@ -1118,6 +1139,7 @@ Future updateMerch(
       return jsonResponse['rc'];
     }
   } catch (e) {
+    closeLoading(context);
     throw Exception(e.toString());
   }
 }
@@ -1355,7 +1377,7 @@ Future changePpn(
   List productid,
   merchid,
 ) async {
-  whenLoading(context);
+  // whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1393,7 +1415,7 @@ Future changeActive(
   List productid,
   merchid,
 ) async {
-  whenLoading(context);
+  // whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1431,7 +1453,6 @@ Future changeActiveDiskon(
   productid,
   merchid,
 ) async {
-  whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1592,8 +1613,14 @@ Future dashboard(id, token) async {
       rataTransaksiDas = responseValue['averageTransaction'];
     }
     return response.data['data'];
+  } on DioError catch (e) {
+    // Tangkap spesifik DioError, biar tau status code-nya
+    print('Dashboard error: ${e.response?.statusCode} - ${e.response?.data}');
+    print('URL yang dipanggil: ${e.requestOptions.uri}');
+    return null;
   } catch (e) {
-    throw Exception(e.toString());
+    print('Unexpected error: $e');
+    return null;
   }
 }
 
@@ -1619,7 +1646,9 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
         return [];
       }
 
-      List<dynamic> dataList = responseData is List ? responseData : [responseData];
+      List<dynamic> dataList = responseData is List
+          ? responseData
+          : [responseData];
       List<KulasedayaMember> members = dataList
           .map((item) => KulasedayaMember.fromJson(item))
           .toList();
@@ -1628,7 +1657,8 @@ Future<List<KulasedayaMember>> dashboardKulasedaya(String token) async {
       return [];
     }
   } catch (e) {
-    throw Exception(e.toString());
+    print('dashboardKulasedaya error: $e');
+    return [];
   }
 }
 
@@ -1660,7 +1690,9 @@ Future<List<KulasedayaBinding>> bindingKulasedaya(String token) async {
         ];
       }
 
-      List<dynamic> dataList = responseData is List ? responseData : [responseData];
+      List<dynamic> dataList = responseData is List
+          ? responseData
+          : [responseData];
       List<KulasedayaBinding> members = dataList
           .map((item) => KulasedayaBinding.fromJson(item))
           .toList();
@@ -3363,7 +3395,7 @@ Future getLaporanDaily(
   token,
   orderBy,
   keyword,
-  List merchid,
+  merchid,
   export,
 ) async {
   final String jsonTest = json.encode(merchid);
@@ -3398,7 +3430,7 @@ Future getLaporanDailyExport(
   token,
   orderBy,
   keyword,
-  List merchid,
+  merchid,
   export,
 ) async {
   final String jsonTest = json.encode(merchid);
@@ -3583,22 +3615,22 @@ Future getLaporanPerProdukExport(
 Future getLaporanPembayaran(
   BuildContext context,
   token,
-  List merchid,
+  merchid,
   keyword,
   orderby,
   export,
 ) async {
-  final String jsonTest = json.encode(merchid);
+  // final String jsonTest = json.encode(merchid);
   final response = await http.post(
     Uri.parse(laporanPembayaranUrl),
-    headers: {'token': token},
-    body: {
+    headers: {'token': token, 'Content-Type': 'application/json'},
+    body: jsonEncode({
       "deviceid": identifier,
-      "merchantid": jsonTest,
+      "merchant_id": merchid,
       "keyword": keyword.toString(),
-      "orderby": orderby.toString(),
+      "order_by": orderby.toString(),
       "export": export,
-    },
+    }),
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -3990,6 +4022,7 @@ Future deleteQris(BuildContext context, token, merchantid) async {
 }
 
 Future uploadQris(BuildContext context, token, imageQris, merchantid) async {
+  if (imageQris == null) return;
   final response = await http.post(
     Uri.parse(uploadQrisLink),
     headers: {'token': token},
@@ -4026,6 +4059,7 @@ Future uploadQris(BuildContext context, token, imageQris, merchantid) async {
 }
 
 Future uploadStruk(BuildContext context, token, imageStruk, merchantid) async {
+  if (imageStruk == null) return;
   final response = await http.post(
     Uri.parse(uploadStrukLink),
     headers: {'token': token},
@@ -4340,8 +4374,9 @@ Future getAdjustment(token, merchid, String name, orderby) async {
     body: {
       "deviceid": identifier,
       "merchant_id": merchid,
-      // "name": name,
-      // "orderby": orderby,
+      // "export":
+      "name": '',
+      "orderby": '',
     },
   );
 
@@ -4369,16 +4404,11 @@ Future getMasterData(token, merchid, String name, orderby) async {
   final response = await http.post(
     Uri.parse(getMasterDataLink),
     headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchant_id": merchid,
-      "name": name,
-      "orderby": orderby,
-    },
+    body: {"merchant_id": merchid, "name": name, "order_by": orderby},
   );
 
   var jsonResponse = jsonDecode(response.body);
-  // print('ini ada response master data: ${response.body}');
+  print('ini ada response master data: ${response.body}');
   if (response.statusCode == 200) {
     // print('succes');
 
@@ -5965,28 +5995,38 @@ Future<CoaModel?> getSingleCoa(context, token, paymentMethodId) async {
   }
 }
 
-Future<List<UserModel>> getGroupUsers(context, token, orderby) async {
+Future<List<UserModel>> getGroupUsers(
+  context,
+  token,
+  merchantId,
+  orderby,
+) async {
   try {
-    final response = await http.get(
-      Uri.parse('$getAkunUrl?deviceid=$identifier&orderby=$orderby'),
-      headers: {'token': token},
+    final response = await http.post(
+      Uri.parse(getAllAkun),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "deviceid": identifier,
+        "merchantid": merchantId,
+        "orderby": orderby,
+      }),
     );
 
     print('Response getGroupUsers: ${response.body}');
 
     if (response.statusCode == 200) {
-      final List<UserModel> result = [];
       final Map<String, dynamic> decoded = jsonDecode(response.body);
-      if (decoded['data'] != null) {
-        for (Map<String, dynamic> item in decoded['data']) {
-          result.add(UserModel.fromJson(item));
-        }
+
+      if (decoded['rc'] == "00" && decoded['data'] != null) {
+        final List<dynamic> dataList = decoded['data'];
+        return dataList.map((item) => UserModel.fromJson(item)).toList();
       }
-      return result;
+      return [];
     } else {
       return [];
     }
   } catch (e) {
+    print('Error getGroupUsers: $e');
     throw Exception(e.toString());
   }
 }
@@ -6062,13 +6102,17 @@ Future updateUserAccount(
   status,
   image,
 ) async {
+  String finalImage = image;
+  if (image.isNotEmpty && !image.startsWith("data:image")) {
+    finalImage = "data:image/png;base64,$image";
+  }
   try {
-    // print('test role $role');
+    // print('test image $finalImage');
     whenLoading(context);
     final response = await http.post(
       Uri.parse(updateAkunUrl),
-      headers: {'token': token},
-      body: {
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({
         "deviceid": identifier,
         "userid": userid,
         "fullname": fullname,
@@ -6076,13 +6120,14 @@ Future updateUserAccount(
         "phonenumber": phonenumber,
         "status": status,
         "role": role,
-        "image": image,
-      },
+        "image": finalImage,
+      }),
     );
 
     var jsonResponse = jsonDecode(response.body);
     closeLoading(context);
     showSnackbar(context, jsonResponse);
+    print(jsonResponse);
     return jsonResponse['rc'];
   } catch (e) {
     closeLoading(context);

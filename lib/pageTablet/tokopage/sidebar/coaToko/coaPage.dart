@@ -54,7 +54,7 @@ class _COAPageState extends State<COAPage> {
   Timer? _debounce;
 
   void _onChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasCOA = await getCOAPayment(context, widget.token, textOrderByCOA, '');
       setState(() {});

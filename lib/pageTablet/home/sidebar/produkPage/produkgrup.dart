@@ -1,13 +1,24 @@
 import 'dart:async';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
+import 'package:unipos_app_335/components/organisms/merchant_card.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
+import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
+
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io';
 
 import 'lihatProduk.dart';
 import 'tambahBanyakProduk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
-
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -26,10 +37,7 @@ Color maainColor = Color(0xFF1363DF);
 
 class ProdukGrup extends StatefulWidget {
   String token;
-  ProdukGrup({
-    Key? key,
-    required this.token,
-  }) : super(key: key);
+  ProdukGrup({Key? key, required this.token}) : super(key: key);
 
   @override
   State<ProdukGrup> createState() => _ProdukGrupState();
@@ -38,17 +46,20 @@ class ProdukGrup extends StatefulWidget {
 class _ProdukGrupState extends State<ProdukGrup> {
   TextEditingController searchController = TextEditingController();
   PageController _pageController = PageController();
-  List<ModelDataToko>? datas;
 
   late String _name, _merchid;
 
   Timer? _debounce;
+  List<MerchantSortingData>? datas;
 
   void _onChanged(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(Duration(seconds: 2), () async {
-      datas = await getAllToko(context, widget.token, value, '');
-      setState(() {});
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(seconds: 2), () {
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        value,
+        textvalueOrderByStore,
+      );
     });
   }
 
@@ -60,15 +71,18 @@ class _ProdukGrupState extends State<ProdukGrup> {
     nameEditProduk = '';
     hargaEditProduk = '';
     jenisProductEdit = '';
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      datas = await getAllToko(context, widget.token, '', textvalueOrderBy);
 
-      setState(() {});
+    _pageController = PageController(
+      initialPage: 0,
+      keepPage: true,
+      viewportFraction: 1,
+    );
 
-      _pageController = PageController(
-        initialPage: 0,
-        keepPage: true,
-        viewportFraction: 1,
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MerchantSortingProvider>().fetchMerchantSorting(
+        widget.token,
+        '',
+        textvalueOrderByStore,
       );
     });
 
@@ -77,7 +91,7 @@ class _ProdukGrupState extends State<ProdukGrup> {
 
   @override
   void dispose() {
-    _debounce!.cancel();
+    _debounce?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -100,44 +114,45 @@ class _ProdukGrupState extends State<ProdukGrup> {
         return true;
       },
       child: Scaffold(
-          body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.all(size16),
-          margin: EdgeInsets.all(size16),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.circular(size16),
-          ),
-          child: PageView(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            pageSnapping: true,
-            reverse: false,
-            physics: NeverScrollableScrollPhysics(),
-            onPageChanged: (index) {
-              print('$index');
-            },
-            children: [
-              mainPageProduk(context),
-              LihatProdukPage(
-                token: widget.token,
-                merchId: _merchid,
-                name: _name,
-                pageController: _pageController,
-              ),
-              TambahProdukPage(
-                name: _name,
-                datas: datas ?? [],
-                pageController: _pageController,
-              ),
-              TambahBanyakProdukPagPage(
-                pageController: _pageController,
-                token: widget.token,
-              )
-            ],
+        body: SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(size16),
+            margin: EdgeInsets.all(size16),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.circular(size16),
+            ),
+            child: PageView(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              pageSnapping: true,
+              reverse: false,
+              physics: NeverScrollableScrollPhysics(),
+              onPageChanged: (index) {
+                print('$index');
+              },
+              children: [
+                mainPageProduk(context),
+                LihatProdukPage(
+                  token: widget.token,
+                  merchId: _merchid,
+                  name: _name,
+                  pageController: _pageController,
+                ),
+                TambahProdukPage(
+                  name: _name,
+                  datas: datas ?? [],
+                  pageController: _pageController,
+                ),
+                TambahBanyakProdukPagPage(
+                  pageController: _pageController,
+                  token: widget.token,
+                ),
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
@@ -173,16 +188,15 @@ class _ProdukGrupState extends State<ProdukGrup> {
                           textAlignVertical: TextAlignVertical.center,
                           onChanged: _onChanged,
                           decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: size12),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: size12,
+                            ),
                             isDense: true,
                             filled: true,
                             fillColor: bnw200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
-                              borderSide: BorderSide(
-                                color: bnw300,
-                              ),
+                              borderSide: BorderSide(color: bnw300),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
@@ -193,9 +207,7 @@ class _ProdukGrupState extends State<ProdukGrup> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
-                              borderSide: BorderSide(
-                                color: bnw300,
-                              ),
+                              borderSide: BorderSide(color: bnw300),
                             ),
                             prefixIcon: Container(
                               margin: EdgeInsets.only(left: 20, right: size12),
@@ -209,7 +221,6 @@ class _ProdukGrupState extends State<ProdukGrup> {
                                 ? GestureDetector(
                                     onTap: () {
                                       searchController.text = '';
-                                      initState();
                                     },
                                     child: Icon(
                                       PhosphorIcons.x_fill,
@@ -219,8 +230,11 @@ class _ProdukGrupState extends State<ProdukGrup> {
                                   )
                                 : null,
                             hintText: 'Cari nama toko',
-                            hintStyle:
-                                heading3(FontWeight.w500, bnw400, 'Outfit'),
+                            hintStyle: heading3(
+                              FontWeight.w500,
+                              bnw400,
+                              'Outfit',
+                            ),
                           ),
                         ),
                       ),
@@ -239,8 +253,11 @@ class _ProdukGrupState extends State<ProdukGrup> {
                             SizedBox(width: size12),
                             Text(
                               'Produk',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -254,300 +271,102 @@ class _ProdukGrupState extends State<ProdukGrup> {
           ),
         ),
         SizedBox(height: size16),
-        orderByTokoField(),
-        SizedBox(height: size16),
-        Text(
-          'Pilih Toko',
-          style: heading2(FontWeight.w400, bnw900, 'Outfit'),
+        SortBottomSheetButton(
+          options: orderByTokoText,
+          initialIndex: valueOrderByStore,
+          onConfirm: (i) async {
+            setState(() {
+              valueOrderByStore = i;
+              textvalueOrderByStore = orderByToko[i];
+            });
+            await context.read<MerchantSortingProvider>().fetchMerchantSorting(
+              widget.token,
+              '',
+              textvalueOrderByStore,
+            );
+          },
         ),
         SizedBox(height: size16),
-        datas == null
-            ? SkeletonCard()
-            : Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.zero,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisExtent: 130,
-                    // childAspectRatio: 2.977,
-                    crossAxisCount: 2,
-                    crossAxisSpacing: size16,
-                    mainAxisSpacing: size16,
-                  ),
-                  itemCount: datas!.length,
-                  itemBuilder: (context, i) {
-                    return Container(
-                      padding: EdgeInsets.all(size16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(size16),
-                        border: Border.all(color: bnw300),
-                      ),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(1000),
-                                  child: SizedBox(
-                                    height: 60,
-                                    width: 60,
-                                    child: datas![i].logomerchant_url != null
-                                        ? Image.network(
-                                            datas![i]
-                                                .logomerchant_url
-                                                .toString(),
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    SizedBox(
-                                              child: Icon(
-                                                PhosphorIcons.storefront_fill,
-                                                size: 60,
-                                                color: bnw900,
-                                              ),
-                                            ),
-                                          )
-                                        : Icon(
-                                            PhosphorIcons.storefront_fill,
-                                            size: 60,
-                                          ),
-                                  ),
-                                ),
-                                SizedBox(width: size24),
-                                Flexible(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        datas![i].name ?? '',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: heading2(
-                                          FontWeight.w700,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      Text(
-                                        '${datas![i].address}',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: body1(
-                                          FontWeight.w400,
-                                          bnw800,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: size16),
-                            GestureDetector(
-                              onTap: () {
-                                _pageController.nextPage(
-                                  duration: Duration(milliseconds: 10),
-                                  curve: Curves.easeIn,
-                                );
-                                log(datas![i].name.toString());
-                                log(datas![i].merchantid.toString());
-
-                                _name = datas![i].name.toString();
-                                _merchid = datas![i].merchantid.toString();
-
-                                setState(() {});
-                              },
-                              child: buttonLoutline(
-                                Center(
-                                  child: Text(
-                                    'Lihat Produk',
-                                    style: heading4(
-                                      FontWeight.w600,
-                                      primary500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                primary500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+        Text('Pilih Toko', style: heading2(FontWeight.w400, bnw900, 'Outfit')),
+        SizedBox(height: size16),
+        Expanded(
+          child: Consumer<MerchantSortingProvider>(
+            builder: (context, value, child) {
+              return switch (value.resultState) {
+                MerchantSortingResultNoneState() => const Center(
+                  child: Text('Tidak ada data'),
                 ),
-              )
-      ],
-    );
-  }
+                MerchantSortingResultErrorState(message: var message) => Center(
+                  child: Text('Erorr $message'),
+                ),
+                MerchantSortingResultLoadingState() => Center(
+                  child: SkeletonCard(),
+                ),
+                MerchantSortingResultLoadedState(data: var dataStore) =>
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: bnw100,
+                      backgroundColor: primary500,
+                      onRefresh: () async {
+                        await context
+                            .read<MerchantSortingProvider>()
+                            .fetchMerchantSorting(
+                              widget.token,
+                              '',
+                              textvalueOrderByStore,
+                            );
+                      },
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: (dataStore.length / 2).ceil(),
+                        itemBuilder: (context, rowIndex) {
+                          final totalRows = (dataStore.length / 2).ceil();
+                          final isLastRow = rowIndex == totalRows - 1;
+                          final leftIndex = rowIndex * 2;
+                          final rightIndex = rowIndex * 2 + 1;
 
-  orderByTokoField() {
-    return IntrinsicWidth(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByTokoText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(orderByTokoText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
+                          Widget buildCard(int i) {
+                            return MerchantCard(
+                              merchant: dataStore[i],
                               onTap: () {
-                                textOrderBy =
-                                    orderByTokoText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByToko[valueOrderByProduct];
-
-                                Navigator.pop(context);
-                                initState();
+                                setState(() {
+                                  _name = dataStore[i].name?.toString() ?? '';
+                                  _merchid =
+                                      dataStore[i].merchantid?.toString() ?? '';
+                                });
+                                refreshTampilan();
+                                _pageController.jumpToPage(1);
                               },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                              buttonText: 'Lihat Produk',
+                            );
+                          }
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: isLastRow ? 0 : size16),
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(child: buildCard(leftIndex)),
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    child: rightIndex < dataStore.length
+                                        ? buildCard(rightIndex)
+                                        : SizedBox(),
                                   ),
-                                ),
-                                0,
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ),
-                );
-              },
-            );
-          });
-        },
-        child: buttonLoutline(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
-              ),
-              Text(
-                ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
-              ),
-              SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
-            ],
+              };
+            },
           ),
-          bnw300,
         ),
-      ),
+      ],
     );
   }
 }
@@ -555,11 +374,8 @@ class _ProdukGrupState extends State<ProdukGrup> {
 // Hello world
 
 class CheckBoxPage extends StatefulWidget {
-  List<ModelDataToko>? datas;
-  CheckBoxPage({
-    Key? key,
-    required this.datas,
-  }) : super(key: key);
+  List<MerchantSortingData>? datas;
+  CheckBoxPage({Key? key, required this.datas}) : super(key: key);
   @override
   _CheckBoxPageState createState() => _CheckBoxPageState();
 }
@@ -567,7 +383,7 @@ class CheckBoxPage extends StatefulWidget {
 class _CheckBoxPageState extends State<CheckBoxPage> {
   bool isSelectionMode = false;
 
-  List<ModelDataToko>? staticData;
+  List<MerchantSortingData>? staticData;
   Map<int, bool> selectedFlag = {};
   // Map<int, bool> selectedFlag = {};
 
@@ -586,7 +402,7 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
     );
   }
 
-  Column newnew(List<ModelDataToko>? datas) {
+  Column newnew(List<MerchantSortingData>? datas) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     return Column(
       children: [
@@ -600,51 +416,55 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
               topRight: Radius.circular(size12),
             ),
           ),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            GestureDetector(
-              onTap: _selectAll,
-              child: SizedBox(
-                width: 50,
-                child: Icon(
-                  isFalseAvailable
-                      ? Icons.check_box_outline_blank
-                      : Icons.check_box,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: _selectAll,
+                child: SizedBox(
+                  width: 50,
+                  child: Icon(
+                    isFalseAvailable
+                        ? Icons.check_box_outline_blank
+                        : Icons.check_box,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              width: 100,
-              child: Text(
-                'Foto Toko',
-                style: heading4(FontWeight.w700, bnw100, 'Outfit'),
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              child: Text(
-                'Nama Toko',
-                style: heading4(FontWeight.w700, bnw100, 'Outfit'),
-              ),
-            ),
-            Expanded(
-              child: SizedBox(
-                width: double.infinity,
+              SizedBox(
+                width: 100,
                 child: Text(
-                  'Alamat',
+                  'Foto Toko',
                   style: heading4(FontWeight.w700, bnw100, 'Outfit'),
                 ),
               ),
-            ),
-          ]),
+              SizedBox(
+                width: 200,
+                child: Text(
+                  'Nama Toko',
+                  style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                ),
+              ),
+              Expanded(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    'Alamat',
+                    style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-                color: primary100, borderRadius: BorderRadius.circular(size12)),
+              color: primary100,
+              borderRadius: BorderRadius.circular(size12),
+            ),
             child: ListView.builder(
               itemBuilder: (builder, index) {
-                ModelDataToko data = datas[index];
+                MerchantSortingData data = datas[index];
                 selectedFlag[index] = selectedFlag[index] ?? false;
                 bool? isSelected = selectedFlag[index];
 
@@ -673,10 +493,7 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
                                   datas[index].logomerchant_url.toString(),
                                   fit: BoxFit.cover,
                                 )
-                              : Icon(
-                                  PhosphorIcons.storefront_fill,
-                                  size: 60,
-                                ),
+                              : Icon(PhosphorIcons.storefront_fill, size: 60),
                         ),
                       ),
                       SizedBox(width: size32),
@@ -737,7 +554,7 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
     });
   }
 
-  Widget _buildSelectIcon(bool isSelected, ModelDataToko data) {
+  Widget _buildSelectIcon(bool isSelected, MerchantSortingData data) {
     return Icon(
       isSelected ? Icons.check_box : Icons.check_box_outline_blank,
       color: Theme.of(context).primaryColor,

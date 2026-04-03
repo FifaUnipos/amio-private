@@ -34,74 +34,76 @@ void _showConfirmBottomSheet({
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => Container(
-      padding: EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+    builder: (context) => SafeArea(
+      child: Container(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          SizedBox(height: 24),
-          Text(
-            title,
-            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 8),
-          Text(
-            message,
-            style: heading4(FontWeight.w400, bnw500, 'Outfit'),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primary500),
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+            SizedBox(height: 24),
+            Text(
+              title,
+              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              message,
+              style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primary500),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onConfirm();
+                    },
+                    child: Text(
+                      confirmText,
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onConfirm();
-                  },
-                  child: Text(
-                    confirmText,
-                    style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                  ),
                 ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      cancelText,
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                     ),
                   ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    cancelText,
-                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-        ],
+              ],
+            ),
+            SizedBox(height: 16),
+          ],
+        ),
       ),
     ),
   );
@@ -248,112 +250,114 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
         String tempOrder = orderby;
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+            return SafeArea(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Urutkan",
-                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Urutkan",
+                              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              "Pilih urutan yang ingin ditampilkan",
+                              style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: _sortOptions.map((option) {
+                        bool isSelected = tempOrder == option['value'];
+                        return InkWell(
+                          onTap: () {
+                            setModalState(() {
+                              tempOrder = option['value']!;
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? primary500.withOpacity(0.1)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected ? primary500 : bnw300,
+                              ),
+                            ),
+                            child: Text(
+                              option['label']!,
+                              style: TextStyle(
+                                color: isSelected ? primary500 : bnw900,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
                           ),
-                          Text(
-                            "Pilih urutan yang ingin ditampilkan",
-                            style: heading4(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: _sortOptions.map((option) {
-                      bool isSelected = tempOrder == option['value'];
-                      return InkWell(
-                        onTap: () {
-                          setModalState(() {
-                            tempOrder = option['value']!;
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? primary500.withOpacity(0.1)
-                                : Colors.white,
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected ? primary500 : bnw300,
-                            ),
-                          ),
-                          child: Text(
-                            option['label']!,
-                            style: TextStyle(
-                              color: isSelected ? primary500 : bnw900,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        onPressed: () {
+                          setState(() {
+                            orderby = tempOrder;
+                            orderLabel = _sortOptions.firstWhere(
+                              (e) => e['value'] == tempOrder,
+                            )['label']!;
+                          });
+                          loadData();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Tampilkan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          orderby = tempOrder;
-                          orderLabel = _sortOptions.firstWhere(
-                            (e) => e['value'] == tempOrder,
-                          )['label']!;
-                        });
-                        loadData();
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        "Tampilkan",
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -777,152 +781,154 @@ void _showCategoryBottomSheet(
       String searchCat = '';
       return StatefulBuilder(
         builder: (context, setModalState) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.8,
-            padding: EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24),
-                RichText(
-                  text: TextSpan(
-                    text: 'Kategori ',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                    children: [
-                      TextSpan(
-                        text: '*',
-                        style: TextStyle(color: Colors.red),
+          return SafeArea(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 12),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Cari',
-                    hintStyle: heading4(FontWeight.w400, bnw400, 'Outfit'),
-                    prefixIcon: Icon(Icons.search, color: bnw400, size: 20),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: bnw300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: bnw300),
                     ),
                   ),
-                  onChanged: (v) => setModalState(() => searchCat = v),
-                ),
-                SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: primary500),
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
+                  SizedBox(height: 24),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Kategori ',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      children: [
+                        TextSpan(
+                          text: '*',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Cari',
+                      hintStyle: heading4(FontWeight.w400, bnw400, 'Outfit'),
+                      prefixIcon: Icon(Icons.search, color: bnw400, size: 20),
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: bnw300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: bnw300),
                       ),
                     ),
-                    onPressed: () => _showAddEditCategoryModal(
-                      context,
-                      token,
-                      onRefresh: () => setModalState(() {}),
-                    ),
-                    child: Text(
-                      "Tambah Kategori",
-                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    onChanged: (v) => setModalState(() => searchCat = v),
+                  ),
+                  SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: primary500),
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _showAddEditCategoryModal(
+                        context,
+                        token,
+                        onRefresh: () => setModalState(() {}),
+                      ),
+                      child: Text(
+                        "Tambah Kategori",
+                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 16),
-                Expanded(
-                  child: FutureBuilder<dynamic>(
-                    future: getTypeProduct(context, token),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        return Center(child: CircularProgressIndicator());
-                      if (!snapshot.hasData || (snapshot.data as List).isEmpty)
-                        return Center(child: Text("Kategori tidak tersedia"));
-                      List categories = snapshot.data as List;
-                      if (searchCat.isNotEmpty) {
-                        categories = categories
-                            .where(
-                              (c) => c['jenisproduct']
-                                  .toString()
-                                  .toLowerCase()
-                                  .contains(searchCat.toLowerCase()),
-                            )
-                            .toList();
-                      }
-                      return ListView.separated(
-                        itemCount: categories.length,
-                        separatorBuilder: (context, index) => Divider(),
-                        itemBuilder: (context, index) {
-                          final cat = categories[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              cat['jenisproduct'],
-                              style: heading4(
-                                FontWeight.w400,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.radio_button_off,
-                              color: bnw400,
-                            ),
-                            onTap: () {
-                              onSelected(
+                  SizedBox(height: 16),
+                  Expanded(
+                    child: FutureBuilder<dynamic>(
+                      future: getTypeProduct(context, token),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting)
+                          return Center(child: CircularProgressIndicator());
+                        if (!snapshot.hasData || (snapshot.data as List).isEmpty)
+                          return Center(child: Text("Kategori tidak tersedia"));
+                        List categories = snapshot.data as List;
+                        if (searchCat.isNotEmpty) {
+                          categories = categories
+                              .where(
+                                (c) => c['jenisproduct']
+                                    .toString()
+                                    .toLowerCase()
+                                    .contains(searchCat.toLowerCase()),
+                              )
+                              .toList();
+                        }
+                        return ListView.separated(
+                          itemCount: categories.length,
+                          separatorBuilder: (context, index) => Divider(),
+                          itemBuilder: (context, index) {
+                            final cat = categories[index];
+                            return ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
                                 cat['jenisproduct'],
-                                cat['kodeproduct'],
-                              );
-                              Navigator.pop(context);
-                            },
-                            onLongPress: () => _showCategoryActionMenu(
-                              context,
-                              token,
-                              cat,
-                              onRefresh: () => setModalState(() {}),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              trailing: Icon(
+                                Icons.radio_button_off,
+                                color: bnw400,
+                              ),
+                              onTap: () {
+                                onSelected(
+                                  cat['jenisproduct'],
+                                  cat['kodeproduct'],
+                                );
+                                Navigator.pop(context);
+                              },
+                              onLongPress: () => _showCategoryActionMenu(
+                                context,
+                                token,
+                                cat,
+                                onRefresh: () => setModalState(() {}),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary500,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary500,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Selesai",
+                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "Selesai",
-                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -946,115 +952,117 @@ void _showAddEditCategoryModal(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
-        top: 20,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+    builder: (context) => SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            category == null ? "Tambah Kategori" : "Ubah Kategori",
-            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-          ),
-          SizedBox(height: 16),
-          RichText(
-            text: TextSpan(
-              text: 'Kategori ',
-              style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+            SizedBox(height: 20),
+            Text(
+              category == null ? "Tambah Kategori" : "Ubah Kategori",
+              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+            ),
+            SizedBox(height: 16),
+            RichText(
+              text: TextSpan(
+                text: 'Kategori ',
+                style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                children: [
+                  TextSpan(
+                    text: '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: 'Cth : Makanan',
+                hintStyle: heading3(FontWeight.w400, bnw300, 'Outfit'),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: bnw300),
+                ),
+              ),
+            ),
+            SizedBox(height: 32),
+            Row(
               children: [
-                TextSpan(
-                  text: '*',
-                  style: TextStyle(color: Colors.red),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primary500),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Batal",
+                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () async {
+                      String rc;
+                      if (category == null) {
+                        rc = await storeKategori(
+                          context,
+                          token,
+                          nameController.text,
+                        );
+                      } else {
+                        rc = await updateKategori(
+                          context,
+                          token,
+                          category['kodeproduct'],
+                          nameController.text,
+                        );
+                      }
+                      if (rc == "00") {
+                        onRefresh();
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Text(
+                      "Simpan",
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-              hintText: 'Cth : Makanan',
-              hintStyle: heading3(FontWeight.w400, bnw300, 'Outfit'),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: bnw300),
-              ),
-            ),
-          ),
-          SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primary500),
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    "Batal",
-                    style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                  ),
-                ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () async {
-                    String rc;
-                    if (category == null) {
-                      rc = await storeKategori(
-                        context,
-                        token,
-                        nameController.text,
-                      );
-                    } else {
-                      rc = await updateKategori(
-                        context,
-                        token,
-                        category['kodeproduct'],
-                        nameController.text,
-                      );
-                    }
-                    if (rc == "00") {
-                      onRefresh();
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text(
-                    "Simpan",
-                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24),
-        ],
+            SizedBox(height: 24),
+          ],
+        ),
       ),
     ),
   );
@@ -1071,70 +1079,72 @@ void _showCategoryActionMenu(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => Container(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                cat['jenisproduct'],
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.edit_outlined),
-            title: Text(
-              "Ubah Kategori",
-              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+    builder: (context) => SafeArea(
+      child: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  cat['jenisproduct'],
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
-            onTap: () {
-              Navigator.pop(context);
-              _showAddEditCategoryModal(
-                context,
-                token,
-                category: cat,
-                onRefresh: onRefresh,
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.delete_outline, color: Colors.red),
-            title: Text(
-              "Hapus Kategori",
-              style: heading4(FontWeight.w400, Colors.red, 'Outfit'),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.edit_outlined),
+              title: Text(
+                "Ubah Kategori",
+                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showAddEditCategoryModal(
+                  context,
+                  token,
+                  category: cat,
+                  onRefresh: onRefresh,
+                );
+              },
             ),
-            onTap: () {
-              Navigator.pop(context);
-              _showConfirmBottomSheet(
-                context: context,
-                title: "Yakin Ingin Menghapus Kategori?",
-                message:
-                    "Kategori yang telah dihapus tidak dapat dikembalikan.",
-                confirmText: "Iya, Hapus",
-                cancelText: "Batalkan",
-                onConfirm: () async {
-                  final rc = await deleteKategori(
-                    context,
-                    token,
-                    cat['kodeproduct'],
-                  );
-                  if (rc == "00") onRefresh();
-                },
-              );
-            },
-          ),
-          SizedBox(height: 16),
-        ],
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: Colors.red),
+              title: Text(
+                "Hapus Kategori",
+                style: heading4(FontWeight.w400, Colors.red, 'Outfit'),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showConfirmBottomSheet(
+                  context: context,
+                  title: "Yakin Ingin Menghapus Kategori?",
+                  message:
+                      "Kategori yang telah dihapus tidak dapat dikembalikan.",
+                  confirmText: "Iya, Hapus",
+                  cancelText: "Batalkan",
+                  onConfirm: () async {
+                    final rc = await deleteKategori(
+                      context,
+                      token,
+                      cat['kodeproduct'],
+                    );
+                    if (rc == "00") onRefresh();
+                  },
+                );
+              },
+            ),
+            SizedBox(height: 16),
+          ],
+        ),
       ),
     ),
   );
@@ -1175,10 +1185,13 @@ class _TambahProdukPageMobileState extends State<TambahProdukPageMobile> {
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
     );
 
     if (image != null) {
       final bytes = await image.readAsBytes();
+
       setState(() {
         _image = File(image.path);
         _base64Image = base64Encode(bytes);
