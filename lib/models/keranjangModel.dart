@@ -9,6 +9,9 @@ class CartTransaksi {
   num quantity = 1;
   String? variants;
 
+  bool isOnline;
+  bool isCustomize;
+
   CartTransaksi({
     required this.name,
     required this.productid,
@@ -19,5 +22,7 @@ class CartTransaksi {
     required this.idRequest,
     this.variants,
     this.baseUsed,
+    this.isOnline = false,
+    this.isCustomize = false,
   });
 }
