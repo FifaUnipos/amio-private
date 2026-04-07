@@ -444,7 +444,7 @@ class _TransactionPageState extends State<TransactionPage>
 
     checkConnection(context);
     _getProductList();
-    getQris(context, widget.token, '');
+    // getQris(context, widget.token, '');
     getStruk(context, widget.token, '');
     getKulasedaya(context, widget.token, '');
 
@@ -458,48 +458,49 @@ class _TransactionPageState extends State<TransactionPage>
     futurePaymentMethodsKredit = safeFetch('Kredit');
     futurePaymentMethodsEWallet = safeFetch('EWallet');
     futurePaymentMethodsLainya = safeFetch('Other');
-    futurePaymentMethodsAll =
-        Future.wait<List<PaymentMethod>>([
-          futurePaymentMethodsDebit,
-          futurePaymentMethodsKredit,
-          futurePaymentMethodsEWallet,
-          futurePaymentMethodsLainya,
-        ]).then((lists) {
-          final all = lists.expand((e) => e).toList();
-          final hasCash = all.any((x) => (x.idpaymentmethode ?? '') == '001');
-          if (!hasCash) {
-            all.insert(
-              0,
-              PaymentMethod(
-                idpaymentmethode: '001',
-                paymentMethod: 'Cash',
-                accountNumber: '',
-                category: '',
-              ),
-            );
-          }
+    futurePaymentMethodsAll = getCOAPayment(context, widget.token, '', '')
+        // Future.wait<List<PaymentMethod>>([
+        //   futurePaymentMethodsDebit,
+        //   futurePaymentMethodsKredit,
+        //   futurePaymentMethodsEWallet,
+        //   futurePaymentMethodsLainya,
+        // ])
+        .then((list) {
+          // final all = lists.expand((e) => e).toList();
+          // final hasCash = all.any((x) => (x.idpaymentmethode ?? '') == '001');
+          // if (!hasCash) {
+          //   all.insert(
+          //     0,
+          //     PaymentMethod(
+          //       idpaymentmethode: '001',
+          //       paymentMethod: 'Cash',
+          //       accountNumber: '',
+          //       category: '',
+          //     ),
+          //   );
+          // }
 
-          final hasTempo = all.any(
-            (x) => (x.idpaymentmethode ?? '').trim().toUpperCase() == 'TEMPO',
-          );
-          if (!hasTempo) {
-            all.add(
-              PaymentMethod(
-                idpaymentmethode: 'TEMPO',
-                paymentMethod: 'Pembayaran Tempo',
-                accountNumber: 'Pembayaran Tempo',
-                category: 'Tempo',
-              ),
-            );
-          }
-          final seen = <String>{};
-          final deduped = <PaymentMethod>[];
-          for (final p in all) {
-            final id = (p.idpaymentmethode ?? '').trim();
-            if (id.isEmpty) continue;
-            if (seen.add(id)) deduped.add(p);
-          }
-          return deduped;
+          // final hasTempo = list.any(
+          //   (x) => (x.idpaymentmethode ?? '').trim().toUpperCase() == 'TEMPO',
+          // );
+          // if (!hasTempo) {
+          //   list.add(
+          //     PaymentMethod(
+          //       idpaymentmethode: 'TEMPO',
+          //       paymentMethod: 'Pembayaran Tempo',
+          //       accountNumber: 'Pembayaran Tempo',
+          //       category: 'Tempo',
+          //     ),
+          //   );
+          // }
+          // final seen = <String>{};
+          // final deduped = <PaymentMethod>[];
+          // for (final p in all) {
+          //   final id = (p.idpaymentmethode ?? '').trim();
+          //   if (id.isEmpty) continue;
+          //   if (seen.add(id)) deduped.add(p);
+          // }
+          return list;
         });
 
     _tabController = TabController(length: 3, vsync: this);
@@ -4165,61 +4166,84 @@ class _TransactionPageState extends State<TransactionPage>
 
     await showBottomPilihan(
       context,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Pilih metode pembayaran',
-              style: heading1(FontWeight.w600, bnw600, 'Outfit'),
+
+      Container(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Pilih metode pembayaran',
+                style: heading1(FontWeight.w600, bnw600, 'Outfit'),
+              ),
             ),
-          ),
-          SizedBox(height: size16),
+            SizedBox(height: size16),
 
-          ...options.map((e) {
-            final isSelected = splitLines[index].methodCode == e['code'];
-            final itemRadius = BorderRadius.circular(size8);
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: options.map((e) {
+                    final isSelected =
+                        splitLines[index].methodCode == e['code'];
+                    final itemRadius = BorderRadius.circular(size8);
 
-            return tapInk(
-              onTap: () {
-                setSB(() {
-                  splitLines[index].methodCode = e['code']!.toString();
-                  splitLines[index].methodLabel = e['label']!.toString();
-                  splitLines[index].paymentReferenceId = null;
-                });
-                Navigator.pop(context);
-              },
-              radius: itemRadius,
-              child: Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(bottom: size12),
-                padding: EdgeInsets.all(size16),
-                decoration: BoxDecoration(
-                  color: isSelected ? primary100 : bnw100,
-                  borderRadius: BorderRadius.circular(size8),
-                  border: Border.all(
-                    color: isSelected ? primary500 : bnw300,
-                    width: 1.6,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        e['label']!.toString(),
-                        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                    return tapInk(
+                      onTap: () {
+                        setState(() {
+                          splitLines[index].methodCode = e['code']!.toString();
+                          splitLines[index].methodLabel = e['label']!
+                              .toString();
+                          splitLines[index].paymentReferenceId = null;
+                        });
+                        if (e['code'] == '003' ||
+                            e['label'].toString().toUpperCase() == 'QRIS') {
+                          getQris(context, widget.token, '');
+                        }
+                        Navigator.pop(context);
+                      },
+                      radius: itemRadius,
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: size12),
+                        padding: EdgeInsets.all(size16),
+                        decoration: BoxDecoration(
+                          color: isSelected ? primary100 : bnw100,
+                          borderRadius: BorderRadius.circular(size8),
+                          border: Border.all(
+                            color: isSelected ? primary500 : bnw300,
+                            width: 1.6,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                e['label']!.toString(),
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                PhosphorIcons.check_circle_fill,
+                                color: primary500,
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    if (isSelected)
-                      Icon(PhosphorIcons.check_circle_fill, color: primary500),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ),
-            );
-          }).toList(),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
