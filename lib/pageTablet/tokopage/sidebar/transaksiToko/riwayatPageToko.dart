@@ -6,6 +6,7 @@ import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_delete.dart';
 import 'package:unipos_app_335/pageMobile/transaksiMobile/history/modal_view_deleted_history.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produk.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/payment_shared.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
 import 'package:unipos_app_335/utils/component/component_showModalBottom.dart';
@@ -587,6 +588,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                 Map<String, dynamic> data =
                                     snapshot.data!['data'];
                                 List detail = data['detail'];
+                                List<dynamic> payments = data['payments'] ?? [];
 
                                 return Container(
                                   padding: EdgeInsets.all(size16),
@@ -1196,10 +1198,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           Text(
                                                             FormatCurrency.convertToIdr(
                                                               double.tryParse(
-                                                                data['change_money']
-                                                                        .toString() ??
-                                                                    "-",
-                                                              ),
+                                                                    data['change_money']
+                                                                        .toString(),
+                                                                  ) ??
+                                                                  0,
                                                             ).toString(),
                                                             style: heading4(
                                                               FontWeight.w400,
@@ -1214,6 +1216,153 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                       ),
                                                     ],
                                                   ),
+                                                  SizedBox(height: size16),
+                                                  Text(
+                                                    'Histori Pembayaran',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  ...payments.asMap().entries.map((
+                                                    entry,
+                                                  ) {
+                                                    final index = entry.key;
+                                                    final payment = entry.value;
+
+                                                    final paymentDate =
+                                                        (payment['payment_date'] ??
+                                                                '')
+                                                            .toString();
+                                                    final rawMethod =
+                                                        (payment['payment_method_name'] ??
+                                                                payment['payment_name'] ??
+                                                                payment['method_name'] ??
+                                                                payment['method'] ??
+                                                                '-')
+                                                            .toString()
+                                                            .trim();
+
+                                                    final paymentMethod =
+                                                        rawMethod.isEmpty ||
+                                                            rawMethod == '-'
+                                                        ? 'Pembayaran ${index - 1}'
+                                                        : rawMethod;
+
+                                                    final paymentRef =
+                                                        (payment['payment_reference'] ??
+                                                                payment['payment_reference_id'] ??
+                                                                '')
+                                                            .toString()
+                                                            .trim();
+                                                    final paymentAmount = asInt(
+                                                      payment['payment_amount'] ??
+                                                          payment['amount'] ??
+                                                          payment['payment_value'],
+                                                    );
+
+                                                    return Container(
+                                                      margin: EdgeInsets.only(
+                                                        bottom: size12,
+                                                      ),
+                                                      padding: EdgeInsets.all(
+                                                        size12,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: bnw100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              size8,
+                                                            ),
+                                                        border: Border.all(
+                                                          color: bnw300,
+                                                        ),
+                                                      ),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      paymentMethod
+                                                                              .isEmpty
+                                                                          ? '-'
+                                                                          : paymentMethod,
+                                                                      style: heading4(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw600,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          size4,
+                                                                    ),
+                                                                    Text(
+                                                                      paymentDate,
+                                                                      style: body1(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw600,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    if (paymentRef
+                                                                        .isNotEmpty) ...[
+                                                                      SizedBox(
+                                                                        height:
+                                                                            size4,
+                                                                      ),
+                                                                      Text(
+                                                                        'Ref: $paymentRef',
+                                                                        style: body1(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw600,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: size12,
+                                                              ),
+                                                              Text(
+                                                                FormatCurrency.convertToIdr(
+                                                                  paymentAmount,
+                                                                ).toString(),
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  primary500,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }).toList(),
                                                 ],
                                               ),
                                             ),
