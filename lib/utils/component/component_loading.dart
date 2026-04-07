@@ -6,6 +6,7 @@ import '../component/component_color.dart';
 Completer<void> loadingCompleter = Completer<void>();
 
 void whenLoading(BuildContext context) {
+  loadingCompleter = Completer<void>();
   showDialog(
     barrierDismissible: false,
     useRootNavigator: true,
@@ -26,23 +27,29 @@ void whenLoading(BuildContext context) {
             child: SizedBox(
               width: 40,
               height: 40,
-              child: CircularProgressIndicator(
-                color: primary500,
-              ),
+              child: CircularProgressIndicator(color: primary500),
             ),
           );
         },
       ),
     ),
   );
+  Future.delayed(const Duration(seconds: 10), () {
+    if (!loadingCompleter.isCompleted) {
+      closeLoading(context);
+    }
+  });
 }
 
 Future<void> closeLoading(BuildContext context) async {
   if (!loadingCompleter.isCompleted) {
-    if (Navigator.of(context, rootNavigator: true).canPop()) {
+    // if (Navigator.of(context, rootNavigator: true).canPop()) {
+    //   Navigator.of(context, rootNavigator: true).pop();
+    // }
+    loadingCompleter.complete();
+    if (context.mounted && Navigator.of(context, rootNavigator: true).canPop()) {
       Navigator.of(context, rootNavigator: true).pop();
     }
-    loadingCompleter.complete();
   }
 }
 

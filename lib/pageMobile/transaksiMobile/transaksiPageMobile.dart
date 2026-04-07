@@ -19,6 +19,7 @@ import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/currency_formatter.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'history/riwayat_page.dart';
 import 'bill_page.dart';
 
@@ -374,8 +375,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   late final bool _isGroupMerchant;
 
   int _counterCart = 1;
-  final TextEditingController _customProductNameController = TextEditingController();
-  final TextEditingController _customProductPriceController = TextEditingController();
+  final TextEditingController _customProductNameController =
+      TextEditingController();
+  final TextEditingController _customProductPriceController =
+      TextEditingController();
   final TextEditingController _conCatatanPreview = TextEditingController();
   late final WebViewController _webController;
 
@@ -601,1195 +604,8 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                 ? (customAmount ?? baseAmt)
                 : baseAmt;
 
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.9,
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: Column(
-                children: [
-                  // Handle Bar
-                  Center(
-                    child: Container(
-                      margin: EdgeInsets.only(top: size8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      padding: EdgeInsets.all(16),
-                      children: [
-                        // Product Info
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: bnw200,
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                              child: Image.network(
-                                product.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    SvgPicture.asset('assets/logoProduct.svg'),
-                              ),
-                            ),
-                            SizedBox(width: size12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product.name,
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-
-                                  Row(
-                                    children: [
-                                      Text(
-                                        NumberFormat.currency(
-                                          locale: 'id',
-                                          symbol: 'Rp ',
-                                          decimalDigits: 0,
-                                        ).format(shownAmt),
-                                        style: heading3(
-                                          FontWeight.w600,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      if (isCustomize) ...[
-                                        SizedBox(width: size8),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: primary100,
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Custom',
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              primary500,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-
-                                  if (tapTrue == 1 &&
-                                      product.discountType != null &&
-                                      !isCustomize)
-                                    Text(
-                                      NumberFormat.currency(
-                                        locale: 'id',
-                                        symbol: 'Rp ',
-                                        decimalDigits: 0,
-                                      ).format(product.price),
-                                      style: TextStyle(
-                                        decoration: TextDecoration.lineThrough,
-                                        fontFamily: 'Outfit',
-                                        color: bnw500,
-                                        fontSize: sp14,
-                                        height: 1.22,
-                                      ),
-                                    ),
-                                  if (tapTrue == 1 &&
-                                      product.discount != null &&
-                                      product.discount! > 0)
-                                    Text(
-                                      product.discountType == 'price'
-                                          ? NumberFormat.currency(
-                                              locale: 'id',
-                                              symbol: 'Rp. ',
-                                              decimalDigits: 0,
-                                            ).format(product.discount ?? 0)
-                                          : '${product.discount ?? 0} %',
-                                      style: heading4(
-                                        FontWeight.w600,
-                                        danger500,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                  Text(
-                                    product.category,
-                                    style: heading3(
-                                      FontWeight.w400,
-                                      bnw500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Quantity
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.remove_circle_outline),
-                                      color: primary500,
-                                      onPressed: () {
-                                        if (qty > 1) {
-                                          setStateModal(() => qty--);
-                                        }
-                                      },
-                                    ),
-                                    Text(
-                                      '$qty',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.add_circle_outline),
-                                      color: primary500,
-                                      onPressed: () {
-                                        setStateModal(() => qty++);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                                OutlinedButton(
-                                  onPressed: () {
-                                    setStateModal(() {
-                                      showCustomPrice = !showCustomPrice;
-                                      customPriceError = null;
-
-                                      _syncCustomWithBaseIfNeeded();
-                                    });
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    side: BorderSide(color: primary500),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        size8,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    showCustomPrice ? 'Tutup' : 'Ubah Harga',
-                                    style: heading4(
-                                      FontWeight.w600,
-                                      primary500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 16),
-                        Divider(),
-
-                        // Price Type Toggle (Offline vs Online)
-                        Text(
-                          'Jenis Harga',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: size8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => setStateModal(() {
-                                  tapTrue = 1;
-                                  customPriceError = null;
-                                  _syncCustomWithBaseIfNeeded();
-                                }),
-                                child: Container(
-                                  padding: EdgeInsets.all(size12),
-                                  decoration: BoxDecoration(
-                                    color: tapTrue == 1 ? primary100 : bnw100,
-                                    border: Border.all(
-                                      color: tapTrue == 1 ? primary500 : bnw300,
-                                    ),
-                                    borderRadius: BorderRadius.circular(size8),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Harga Offline',
-                                      style: heading3(
-                                        FontWeight.w600,
-                                        tapTrue == 1 ? primary500 : bnw900,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            product.onlinePrice == 0
-                                ? SizedBox()
-                                : SizedBox(width: size12),
-                            product.onlinePrice == 0
-                                ? SizedBox()
-                                : Expanded(
-                                    child: InkWell(
-                                      onTap: () => setStateModal(() {
-                                        tapTrue = 2;
-                                        customPriceError = null;
-                                        _syncCustomWithBaseIfNeeded();
-                                      }),
-                                      child: Container(
-                                        padding: EdgeInsets.all(size12),
-                                        decoration: BoxDecoration(
-                                          color: tapTrue == 2
-                                              ? primary100
-                                              : bnw100,
-                                          border: Border.all(
-                                            color: tapTrue == 2
-                                                ? primary500
-                                                : bnw300,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'Harga Online',
-                                            style: TextStyle(
-                                              color: tapTrue == 2
-                                                  ? primary500
-                                                  : Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                          ],
-                        ),
-
-                        if (showCustomPrice) ...[
-                          SizedBox(height: 16),
-                          Text(
-                            'Harga',
-                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(height: 8),
-                          TextField(
-                            controller: customPriceContoller,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              services.FilteringTextInputFormatter.digitsOnly,
-                              RupiahInputFormatter(),
-                            ],
-                            decoration: InputDecoration(
-                              prefixText: 'Rp. ',
-                              hintText: 'Masukkan Harga',
-                              errorText: customPriceError,
-                              border: UnderlineInputBorder(),
-                            ),
-                            onChanged: (v) {
-                              final digits = v.replaceAll(
-                                RegExp(r'[^0-9]'),
-                                '',
-                              );
-                              setStateModal(() {
-                                customEdited = true;
-                                customPriceError = null;
-                                customAmount = digits.isEmpty
-                                    ? null
-                                    : int.tryParse(digits);
-                              });
-                            },
-                          ),
-                          SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                setStateModal(() {
-                                  customEdited = false;
-                                  customPriceError = null;
-                                  // customAmount = null;
-                                  _syncCustomWithBaseIfNeeded();
-                                });
-                              },
-                              child: Text(
-                                'Reset ke harga normal',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  primary500,
-                                  'Outfit',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-
-                        SizedBox(height: 16),
-
-                        // Variants FutureBuilder
-                        FutureBuilder<List<ProductVariantCategory>?>(
-                          future: variantFuture,
-                          // _fetchProductVariants(product.id),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(size8),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return SizedBox();
-                            }
-
-                            final categories = snapshot.data!;
-                            lastVariantData = categories;
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: categories.map((category) {
-                                final String catId = category.id;
-
-                                variantCategoryKeys[catId] ??= GlobalKey();
-
-                                // Validation error if any
-                                final error = variantErrorByCategory[catId];
-
-                                return Column(
-                                  key: variantCategoryKeys[catId],
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: size12),
-                                    Text(
-                                      category.title,
-                                      style: heading4(
-                                        FontWeight.w600,
-                                        bnw900,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                    Text(
-                                      category.isRequired == 1
-                                          ? "Wajib dipilih - Maks pilih ${category.maximumSelected}"
-                                          : "Opsional - Maks pilih ${category.maximumSelected}",
-                                      style: body2(
-                                        FontWeight.w600,
-                                        category.isRequired == 1
-                                            ? danger500
-                                            : bnw400,
-                                        'Outfit',
-                                      ),
-                                    ),
-
-                                    if (error != null)
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 4),
-                                        child: Text(
-                                          error,
-                                          style: TextStyle(
-                                            color: danger500,
-                                            fontSize: size12,
-                                          ),
-                                        ),
-                                      ),
-
-                                    SizedBox(height: size8),
-
-                                    ...category.productVariants.map((variant) {
-                                      final productId = product.id.toString();
-                                      final currentSelected =
-                                          selectedVariantsByProduct[productId] ??
-                                          [];
-
-                                      // Check if this variant is selected
-                                      final isSelected = currentSelected.any((
-                                        e,
-                                      ) {
-                                        final ids = (e['variant_id'] as List)
-                                            .map((id) => id.toString())
-                                            .toList();
-                                        return ids.contains(
-                                          variant.id.toString(),
-                                        );
-                                      });
-
-                                      final pid = product.id.toString();
-                                      final catIdStr = catId.toString();
-                                      final vid = variant.id.toString();
-
-                                      final detail = _findSelectedDetail(
-                                        pid: pid,
-                                        catId: catIdStr,
-                                        vid: vid,
-                                      );
-
-                                      final int defaultVPrice =
-                                          (double.tryParse(variant.price) ?? 0)
-                                              .toInt();
-
-                                      final int cachedPrice =
-                                          variantCustomCache[vid] ??
-                                          defaultVPrice;
-
-                                      final int shownVPrice = detail != null
-                                          ? _toIntSafe(detail['variant_price'])
-                                          : cachedPrice;
-
-                                      final bool isVCustomize = detail != null
-                                          ? _toBoolSafe(
-                                              detail['is_variant_customize'],
-                                            )
-                                          : variantCustomCache.containsKey(vid);
-
-                                      return CheckboxListTile(
-                                        activeColor: primary500,
-                                        title: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                variant.name,
-                                                style: heading3(
-                                                  FontWeight.w400,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  FormatCurrency.convertToIdr(
-                                                    shownVPrice.toDouble(),
-                                                  ),
-                                                  style: heading4(
-                                                    FontWeight.w400,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                if (isVCustomize) ...[
-                                                  SizedBox(width: 6),
-                                                  Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: primary100,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      'Custom',
-                                                      style: heading4(
-                                                        FontWeight.w400,
-                                                        primary500,
-                                                        'Outfit',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                                SizedBox(width: 8),
-                                                OutlinedButton(
-                                                  onPressed: () {
-                                                    if (!isSelected) {
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Pilih variannya dulu',
-                                                          ),
-                                                        ),
-                                                      );
-                                                      return;
-                                                    }
-                                                    final pid = product.id
-                                                        .toString();
-                                                    final catIdStr = catId
-                                                        .toString();
-
-                                                    final sels =
-                                                        selectedVariantsByProduct[pid] ??
-                                                        [];
-                                                    final catIndex = sels
-                                                        .indexWhere(
-                                                          (e) =>
-                                                              e['variant_category_id']
-                                                                  .toString() ==
-                                                              catIdStr,
-                                                        );
-                                                    if (catIndex == -1) return;
-
-                                                    final details =
-                                                        List<
-                                                          Map<String, dynamic>
-                                                        >.from(
-                                                          sels[catIndex]['variant_detail']
-                                                              as List,
-                                                        );
-                                                    final dIndex = details
-                                                        .indexWhere(
-                                                          (d) =>
-                                                              d['variant_id']
-                                                                  .toString() ==
-                                                              variant.id
-                                                                  .toString(),
-                                                        );
-                                                    if (dIndex == -1) return;
-
-                                                    final int
-                                                    defPrice = _toIntSafe(
-                                                      details[dIndex]['variant_price_default'],
-                                                    );
-                                                    int
-                                                    currentPrice = _toIntSafe(
-                                                      details[dIndex]['variant_price'],
-                                                    );
-
-                                                    final ctrl =
-                                                        TextEditingController(
-                                                          text:
-                                                              NumberFormat.decimalPattern(
-                                                                'id',
-                                                              ).format(
-                                                                currentPrice,
-                                                              ),
-                                                        );
-
-                                                    showModalBottomSheet(
-                                                      context: context,
-                                                      isScrollControlled: true,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      builder: (context) {
-                                                        return StatefulBuilder(
-                                                          builder: (context, setM) {
-                                                            return Container(
-                                                              padding: EdgeInsets.only(
-                                                                left: 16,
-                                                                right: 16,
-                                                                top: 16,
-                                                                bottom:
-                                                                    MediaQuery.of(
-                                                                          context,
-                                                                        )
-                                                                        .viewInsets
-                                                                        .bottom +
-                                                                    16,
-                                                              ),
-                                                              decoration: BoxDecoration(
-                                                                color: bnw100,
-                                                                borderRadius:
-                                                                    BorderRadius.vertical(
-                                                                      top:
-                                                                          Radius.circular(
-                                                                            16,
-                                                                          ),
-                                                                    ),
-                                                              ),
-                                                              child: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    'Ubah Harga Varian',
-                                                                    style: heading2(
-                                                                      FontWeight
-                                                                          .w700,
-                                                                      bnw900,
-                                                                      'Outfit',
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 8,
-                                                                  ),
-                                                                  Text(
-                                                                    variant
-                                                                        .name,
-                                                                    style: heading3(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw600,
-                                                                      'Outfit',
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 12,
-                                                                  ),
-                                                                  TextField(
-                                                                    controller:
-                                                                        ctrl,
-                                                                    keyboardType:
-                                                                        TextInputType
-                                                                            .number,
-                                                                    inputFormatters: [
-                                                                      services
-                                                                          .FilteringTextInputFormatter
-                                                                          .digitsOnly,
-                                                                      RupiahInputFormatter(),
-                                                                    ],
-                                                                    decoration: InputDecoration(
-                                                                      prefixText:
-                                                                          'Rp. ',
-                                                                      border:
-                                                                          UnderlineInputBorder(),
-                                                                    ),
-                                                                    onChanged: (value) {
-                                                                      final digits = value.replaceAll(
-                                                                        RegExp(
-                                                                          r'[^0-9]',
-                                                                        ),
-                                                                        '',
-                                                                      );
-                                                                      setM(() {
-                                                                        currentPrice =
-                                                                            digits.isEmpty
-                                                                            ? 0
-                                                                            : (int.tryParse(
-                                                                                    digits,
-                                                                                  ) ??
-                                                                                  0);
-                                                                      });
-                                                                    },
-                                                                  ),
-                                                                  Align(
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .centerRight,
-                                                                    child: TextButton(
-                                                                      onPressed: () {
-                                                                        setM(() {
-                                                                          currentPrice =
-                                                                              defPrice;
-                                                                          _setVariantCache(
-                                                                            variant.id.toString(),
-                                                                            defPrice,
-                                                                            defPrice,
-                                                                          );
-                                                                          ctrl.text =
-                                                                              NumberFormat.decimalPattern(
-                                                                                'id',
-                                                                              ).format(
-                                                                                defPrice,
-                                                                              );
-                                                                        });
-                                                                      },
-                                                                      child: Text(
-                                                                        'Reset ke harga normal',
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 12,
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: double
-                                                                        .infinity,
-                                                                    child: ElevatedButton(
-                                                                      style: ElevatedButton.styleFrom(
-                                                                        backgroundColor:
-                                                                            primary500,
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        details[dIndex]['variant_price'] =
-                                                                            currentPrice;
-                                                                        details[dIndex]['is_variant_customize'] =
-                                                                            (currentPrice !=
-                                                                            defPrice);
-
-                                                                        _setVariantCache(
-                                                                          variant
-                                                                              .id
-                                                                              .toString(),
-                                                                          currentPrice,
-                                                                          defPrice,
-                                                                        );
-
-                                                                        setStateModal(() {
-                                                                          sels[catIndex]['variant_detail'] =
-                                                                              details;
-                                                                          selectedVariantsByProduct[pid] =
-                                                                              sels;
-                                                                        });
-                                                                        Navigator.pop(
-                                                                          context,
-                                                                        );
-                                                                      },
-                                                                      child: Text(
-                                                                        'Simpan',
-                                                                        style: heading3(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw100,
-                                                                          'Outfit',
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                    );
-                                                  },
-                                                  child: Text('Ubah Harga'),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        value: isSelected,
-                                        contentPadding: EdgeInsets.zero,
-                                        controlAffinity:
-                                            ListTileControlAffinity.leading,
-                                        onChanged: (bool? val) {
-                                          setStateModal(() {
-                                            selectedVariantsByProduct[productId] ??=
-                                                [];
-                                            List<Map<String, dynamic>>
-                                            productVariants =
-                                                selectedVariantsByProduct[productId]!;
-
-                                            // Find entry for this category
-                                            int catIndex = productVariants
-                                                .indexWhere(
-                                                  (e) =>
-                                                      e['variant_category_id'] ==
-                                                      catId,
-                                                );
-
-                                            List<String> currentIds = [];
-                                            List<Map<String, dynamic>>
-                                            currentDetails = [];
-
-                                            if (catIndex != -1) {
-                                              currentIds = List<String>.from(
-                                                productVariants[catIndex]['variant_id'],
-                                              );
-                                              currentDetails =
-                                                  List<
-                                                    Map<String, dynamic>
-                                                  >.from(
-                                                    productVariants[catIndex]['variant_detail'],
-                                                  );
-                                            }
-
-                                            if (val == true) {
-                                              // Logic for selection
-
-                                              // Radio logic (max 1)
-                                              if (category.maximumSelected ==
-                                                  1) {
-                                                currentIds.clear();
-                                                currentDetails.clear();
-                                              }
-                                              // Limit logic
-                                              else if (category
-                                                          .maximumSelected >
-                                                      1 &&
-                                                  currentIds.length >=
-                                                      category
-                                                          .maximumSelected) {
-                                                currentIds.removeAt(
-                                                  0,
-                                                ); // Remove oldest
-                                                currentDetails.removeAt(0);
-                                              }
-
-                                              final int defaultVPrice =
-                                                  (double.tryParse(
-                                                            variant.price,
-                                                          ) ??
-                                                          0)
-                                                      .toInt();
-                                              final String vid = variant.id
-                                                  .toString();
-                                              final int usedPrice =
-                                                  variantCustomCache[vid] ??
-                                                  defaultVPrice;
-
-                                              // Add new
-                                              currentIds.add(variant.id);
-                                              currentDetails.add({
-                                                "variant_id": variant.id,
-                                                "variant_name": variant.name,
-                                                "variant_price_default":
-                                                    defaultVPrice,
-                                                "variant_price": usedPrice,
-                                                "is_variant_customize":
-                                                    usedPrice != defaultVPrice,
-                                                "is_online": tapTrue == 2,
-                                              });
-                                            } else {
-                                              // Uncheck
-                                              int removeIdx = currentIds
-                                                  .indexOf(variant.id);
-                                              if (removeIdx != -1) {
-                                                currentIds.removeAt(removeIdx);
-                                                currentDetails.removeAt(
-                                                  removeIdx,
-                                                );
-                                              }
-                                            }
-
-                                            // Update Map
-                                            if (catIndex != -1) {
-                                              if (currentIds.isEmpty) {
-                                                productVariants.removeAt(
-                                                  catIndex,
-                                                );
-                                              } else {
-                                                productVariants[catIndex]['variant_id'] =
-                                                    currentIds;
-                                                productVariants[catIndex]['variant_detail'] =
-                                                    currentDetails;
-                                              }
-                                            } else if (currentIds.isNotEmpty) {
-                                              productVariants.add({
-                                                "variant_category_id": catId,
-                                                "variant_id": currentIds,
-                                                "variant_detail":
-                                                    currentDetails,
-                                              });
-                                            }
-
-                                            // Remove error if any selection exists
-                                            if (currentIds.isNotEmpty) {
-                                              variantErrorByCategory.remove(
-                                                catId,
-                                              );
-                                            }
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
-                                  ],
-                                );
-                              }).toList(),
-                            );
-                          },
-                        ),
-
-                        SizedBox(height: 16),
-                        Text(
-                          "Catatan :",
-                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                        TextField(
-                          controller: notesController,
-                          decoration: InputDecoration(
-                            hintText: 'Contoh: Kurangi es, cabe dipisah',
-                            border: UnderlineInputBorder(),
-                            hintStyle: heading3(
-                              FontWeight.w600,
-                              bnw400,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 100), // Spacing for button
-                      ],
-                    ),
-                  ),
-
-                  // Buttons
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              side: BorderSide(color: primary500),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                            ),
-                            child: Text(
-                              'Batalkan',
-                              style: heading3(
-                                FontWeight.w600,
-                                primary500,
-                                'Outfit',
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: size12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Validation
-                              bool valid = true;
-                              for (var cat in lastVariantData) {
-                                if (cat.isRequired == 1) {
-                                  final pid = product.id.toString();
-                                  final sels =
-                                      selectedVariantsByProduct[pid] ?? [];
-                                  final catSel = sels.firstWhere(
-                                    (e) => e['variant_category_id'] == cat.id,
-                                    orElse: () => {},
-                                  );
-
-                                  if (catSel.isEmpty ||
-                                      (catSel['variant_id'] as List).isEmpty) {
-                                    setStateModal(() {
-                                      variantErrorByCategory[cat.id] =
-                                          'Wajib dipilih';
-                                    });
-
-                                    // Auto Scroll to error
-                                    // final key = variantCategoryKeys[cat.id];
-                                    // if (key?.currentContext != null) {
-                                    //   Scrollable.ensureVisible(
-                                    //     key!.currentContext!,
-                                    //     duration: Duration(milliseconds: 300),
-                                    //     curve: Curves.easeOut,
-                                    //   );
-                                    // }
-
-                                    valid = false;
-
-                                    // Break to focus on first error? or show all.
-                                    // If we want scroll to *first*, we should track it.
-                                    // Current loop marks all. Scroll to the last one encountered or logic needs adjustment.
-                                    // Better to find FIRST invalid and scroll, but mark ALL.
-                                  }
-                                }
-                              }
-
-                              if (!valid) {
-                                // Find first error key
-                                for (var cat in lastVariantData) {
-                                  if (variantErrorByCategory.containsKey(
-                                    cat.id,
-                                  )) {
-                                    final key = variantCategoryKeys[cat.id];
-                                    if (key?.currentContext != null) {
-                                      Scrollable.ensureVisible(
-                                        key!.currentContext!,
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeOut,
-                                      );
-                                      break; // Scroll to first
-                                    }
-                                  }
-                                }
-                                return;
-                              }
-
-                              final bool isCustomizeFinal = _isCustomizeNow();
-
-                              if (isCustomizeFinal) {
-                                final amt = customAmount ?? 0;
-                                if (amt <= 0) {
-                                  setStateModal(() {
-                                    customPriceError = 'Harga wajib diisi';
-                                  });
-                                  return;
-                                }
-                              }
-                              // if (isCustomize) {
-                              //   final amt = customAmount ?? 0;
-                              //   if (amt <= 0) {
-                              //     setStateModal(() {
-                              //       customPriceError =
-                              //           'Harga custom wajib diisi';
-                              //     });
-                              //     return;
-                              //   }
-                              // }
-
-                              // Add to Cart
-                              _addToCartWithVariants(
-                                product,
-                                qty,
-                                notesController.text,
-                                tapTrue == 2,
-                                customAmount: isCustomizeFinal
-                                    ? customAmount
-                                    : null,
-                                isCustomize: isCustomizeFinal,
-                              );
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary500,
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(size8),
-                              ),
-                            ),
-                            child: Text(
-                              'Tambah Ke Keranjang',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw100,
-                                'Outfit',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: size12),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _addToCartWithVariants(
-    Product product,
-    int quantity,
-    String notes,
-    bool isOnline, {
-    int? customAmount,
-    bool isCustomize = false,
-  }) {
-    final productId = product.id.toString();
-    final variantList = selectedVariantsByProduct[productId] ?? [];
-    void _showPreviewCart(Product product) {
-      // Reset state
-      selectedVariantsByProduct.clear();
-      variantErrorByCategory.clear();
-      lastVariantData = [];
-      variantCategoryKeys.clear();
-      tapTrue = 1;
-
-      int qty = 1;
-      TextEditingController notesController = TextEditingController();
-
-      bool showCustomPrice = false;
-
-      final TextEditingController customPriceContoller =
-          TextEditingController();
-      int? customAmount;
-      String? customPriceError;
-      bool customEdited = false;
-
-      int _baseAmount() {
-        return (tapTrue == 2)
-            ? product.onlinePrice
-            : (product.priceAfter ?? product.price);
-      }
-
-      Map<String, dynamic>? _findSelectedDetail({
-        required String pid,
-        required String catId,
-        required String vid,
-      }) {
-        final sels = selectedVariantsByProduct[pid];
-        if (sels == null) return null;
-
-        final catIndex = sels.indexWhere(
-          (e) => e['variant_category_id'].toString() == catId,
-        );
-        if (catIndex == -1) return null;
-
-        final details = List<Map<String, dynamic>>.from(
-          (sels[catIndex]['variant_detail'] ?? []) as List,
-        );
-
-        final dIndex = details.indexWhere(
-          (d) => d['variant_id'].toString() == vid,
-        );
-        if (dIndex == -1) return null;
-
-        return details[dIndex];
-      }
-
-      void _syncCustomWithBaseIfNeeded() {
-        // if (!isCustomize) return;
-        if (!showCustomPrice) return;
-
-        if (customEdited) return;
-
-        final base = _baseAmount();
-        customAmount = base;
-        customPriceContoller.text = NumberFormat.decimalPattern(
-          'id',
-        ).format(base);
-      }
-
-      bool _isCustomizeNow() {
-        final base = _baseAmount();
-        return customEdited && customAmount != null && customAmount != base;
-      }
-
-      // Create Future ONCE
-      final Future<List<ProductVariantCategory>?> variantFuture =
-          _fetchProductVariants(product.id);
-      final ScrollController scrollController = ScrollController();
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) {
-          return StatefulBuilder(
-            builder: (context, setStateModal) {
-              final int baseAmt = _baseAmount();
-              final bool isCustomize = _isCustomizeNow();
-              final int shownAmt = isCustomize
-                  ? (customAmount ?? baseAmt)
-                  : baseAmt;
-
-              return Container(
+            return SafeArea(
+              child: Container(
                 height: MediaQuery.of(context).size.height * 0.9,
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -2263,18 +1079,24 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                             (double.tryParse(variant.price) ??
                                                     0)
                                                 .toInt();
-                                        final int shownVPrice = detail == null
-                                            ? defaultVPrice
-                                            : _toIntSafe(
-                                                detail['variant_price'],
-                                                def: defaultVPrice,
-                                              );
 
-                                        final bool isVCustomize =
-                                            detail != null &&
-                                            _toBoolSafe(
-                                              detail['is_variant_customize'],
-                                            );
+                                        final int cachedPrice =
+                                            variantCustomCache[vid] ??
+                                            defaultVPrice;
+
+                                        final int shownVPrice = detail != null
+                                            ? _toIntSafe(
+                                                detail['variant_price'],
+                                              )
+                                            : cachedPrice;
+
+                                        final bool isVCustomize = detail != null
+                                            ? _toBoolSafe(
+                                                detail['is_variant_customize'],
+                                              )
+                                            : variantCustomCache.containsKey(
+                                                vid,
+                                              );
 
                                         return CheckboxListTile(
                                           activeColor: primary500,
@@ -2408,159 +1230,168 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                         builder: (context) {
                                                           return StatefulBuilder(
                                                             builder: (context, setM) {
-                                                              return Container(
-                                                                padding: EdgeInsets.only(
-                                                                  left: 16,
-                                                                  right: 16,
-                                                                  top: 16,
-                                                                  bottom:
-                                                                      MediaQuery.of(
-                                                                        context,
-                                                                      ).viewInsets.bottom +
-                                                                      16,
-                                                                ),
-                                                                decoration: BoxDecoration(
-                                                                  color: bnw100,
-                                                                  borderRadius:
-                                                                      BorderRadius.vertical(
-                                                                        top: Radius.circular(
-                                                                          16,
+                                                              return SafeArea(
+                                                                child: Container(
+                                                                  padding: EdgeInsets.only(
+                                                                    left: 16,
+                                                                    right: 16,
+                                                                    top: 16,
+                                                                    bottom:
+                                                                        MediaQuery.of(
+                                                                          context,
+                                                                        ).viewInsets.bottom +
+                                                                        16,
+                                                                  ),
+                                                                  decoration: BoxDecoration(
+                                                                    color:
+                                                                        bnw100,
+                                                                    borderRadius:
+                                                                        BorderRadius.vertical(
+                                                                          top: Radius.circular(
+                                                                            16,
+                                                                          ),
+                                                                        ),
+                                                                  ),
+                                                                  child: Column(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Text(
+                                                                        'Ubah Harga Varian',
+                                                                        style: heading2(
+                                                                          FontWeight
+                                                                              .w700,
+                                                                          bnw900,
+                                                                          'Outfit',
                                                                         ),
                                                                       ),
-                                                                ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      'Ubah Harga Varian',
-                                                                      style: heading2(
-                                                                        FontWeight
-                                                                            .w700,
-                                                                        bnw900,
-                                                                        'Outfit',
+                                                                      SizedBox(
+                                                                        height:
+                                                                            8,
                                                                       ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height: 8,
-                                                                    ),
-                                                                    Text(
-                                                                      variant
-                                                                          .name,
-                                                                      style: heading3(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw600,
-                                                                        'Outfit',
+                                                                      Text(
+                                                                        variant
+                                                                            .name,
+                                                                        style: heading3(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw600,
+                                                                          'Outfit',
+                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          12,
-                                                                    ),
-                                                                    TextField(
-                                                                      controller:
-                                                                          ctrl,
-                                                                      keyboardType:
-                                                                          TextInputType
-                                                                              .number,
-                                                                      inputFormatters: [
-                                                                        services
-                                                                            .FilteringTextInputFormatter
-                                                                            .digitsOnly,
-                                                                        RupiahInputFormatter(),
-                                                                      ],
-                                                                      decoration: InputDecoration(
-                                                                        prefixText:
-                                                                            'Rp. ',
-                                                                        border:
-                                                                            UnderlineInputBorder(),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            12,
                                                                       ),
-                                                                      onChanged: (value) {
-                                                                        final digits = value.replaceAll(
-                                                                          RegExp(
-                                                                            r'[^0-9]',
-                                                                          ),
-                                                                          '',
-                                                                        );
-                                                                        setM(() {
-                                                                          currentPrice =
-                                                                              digits.isEmpty
-                                                                              ? 0
-                                                                              : (int.tryParse(
-                                                                                      digits,
-                                                                                    ) ??
-                                                                                    0);
-                                                                        });
-                                                                      },
-                                                                    ),
-                                                                    Align(
-                                                                      alignment:
-                                                                          Alignment
-                                                                              .centerRight,
-                                                                      child: TextButton(
-                                                                        onPressed: () {
+                                                                      TextField(
+                                                                        controller:
+                                                                            ctrl,
+                                                                        keyboardType:
+                                                                            TextInputType.number,
+                                                                        inputFormatters: [
+                                                                          services
+                                                                              .FilteringTextInputFormatter
+                                                                              .digitsOnly,
+                                                                          RupiahInputFormatter(),
+                                                                        ],
+                                                                        decoration: InputDecoration(
+                                                                          prefixText:
+                                                                              'Rp. ',
+                                                                          border:
+                                                                              UnderlineInputBorder(),
+                                                                        ),
+                                                                        onChanged: (value) {
+                                                                          final digits = value.replaceAll(
+                                                                            RegExp(
+                                                                              r'[^0-9]',
+                                                                            ),
+                                                                            '',
+                                                                          );
                                                                           setM(() {
                                                                             currentPrice =
-                                                                                defPrice;
-
-                                                                            ctrl.text =
-                                                                                NumberFormat.decimalPattern(
-                                                                                  'id',
-                                                                                ).format(
-                                                                                  defPrice,
-                                                                                );
+                                                                                digits.isEmpty
+                                                                                ? 0
+                                                                                : (int.tryParse(
+                                                                                        digits,
+                                                                                      ) ??
+                                                                                      0);
                                                                           });
                                                                         },
-                                                                        child: Text(
-                                                                          'Reset ke harga normal',
-                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          12,
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: double
-                                                                          .infinity,
-                                                                      child: ElevatedButton(
-                                                                        style: ElevatedButton.styleFrom(
-                                                                          backgroundColor:
-                                                                              primary500,
-                                                                        ),
-                                                                        onPressed: () {
-                                                                          details[dIndex]['variant_price'] =
-                                                                              currentPrice;
-                                                                          details[dIndex]['is_variant_customize'] =
-                                                                              (currentPrice !=
-                                                                              defPrice);
-
-                                                                          setStateModal(() {
-                                                                            sels[catIndex]['variant_detail'] =
-                                                                                details;
-                                                                            selectedVariantsByProduct[pid] =
-                                                                                sels;
-                                                                          });
-                                                                          Navigator.pop(
-                                                                            context,
-                                                                          );
-                                                                        },
-                                                                        child: Text(
-                                                                          'Simpan',
-                                                                          style: heading3(
-                                                                            FontWeight.w600,
-                                                                            bnw100,
-                                                                            'Outfit',
+                                                                      Align(
+                                                                        alignment:
+                                                                            Alignment.centerRight,
+                                                                        child: TextButton(
+                                                                          onPressed: () {
+                                                                            setM(() {
+                                                                              currentPrice = defPrice;
+                                                                              _setVariantCache(
+                                                                                variant.id.toString(),
+                                                                                defPrice,
+                                                                                defPrice,
+                                                                              );
+                                                                              ctrl.text =
+                                                                                  NumberFormat.decimalPattern(
+                                                                                    'id',
+                                                                                  ).format(
+                                                                                    defPrice,
+                                                                                  );
+                                                                            });
+                                                                          },
+                                                                          child: Text(
+                                                                            'Reset ke harga normal',
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ],
+                                                                      SizedBox(
+                                                                        height:
+                                                                            12,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width: double
+                                                                            .infinity,
+                                                                        child: ElevatedButton(
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            backgroundColor:
+                                                                                primary500,
+                                                                          ),
+                                                                          onPressed: () {
+                                                                            details[dIndex]['variant_price'] =
+                                                                                currentPrice;
+                                                                            details[dIndex]['is_variant_customize'] =
+                                                                                (currentPrice !=
+                                                                                defPrice);
+
+                                                                            _setVariantCache(
+                                                                              variant.id.toString(),
+                                                                              currentPrice,
+                                                                              defPrice,
+                                                                            );
+
+                                                                            setStateModal(() {
+                                                                              sels[catIndex]['variant_detail'] = details;
+                                                                              selectedVariantsByProduct[pid] = sels;
+                                                                            });
+                                                                            Navigator.pop(
+                                                                              context,
+                                                                            );
+                                                                          },
+                                                                          child: Text(
+                                                                            'Simpan',
+                                                                            style: heading3(
+                                                                              FontWeight.w600,
+                                                                              bnw100,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                               );
                                                             },
@@ -2638,6 +1469,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                             ) ??
                                                             0)
                                                         .toInt();
+                                                final String vid = variant.id
+                                                    .toString();
+                                                final int usedPrice =
+                                                    variantCustomCache[vid] ??
+                                                    defaultVPrice;
 
                                                 // Add new
                                                 currentIds.add(variant.id);
@@ -2646,9 +1482,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                                                   "variant_name": variant.name,
                                                   "variant_price_default":
                                                       defaultVPrice,
-                                                  "variant_price":
+                                                  "variant_price": usedPrice,
+                                                  "is_variant_customize":
+                                                      usedPrice !=
                                                       defaultVPrice,
-                                                  "is_variant_customize": false,
                                                   "is_online": tapTrue == 2,
                                                 });
                                               } else {
@@ -2873,6 +1710,1235 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                     SizedBox(height: size12),
                   ],
                 ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _addToCartWithVariants(
+    Product product,
+    int quantity,
+    String notes,
+    bool isOnline, {
+    int? customAmount,
+    bool isCustomize = false,
+  }) {
+    final productId = product.id.toString();
+    final variantList = selectedVariantsByProduct[productId] ?? [];
+    void _showPreviewCart(Product product) {
+      // Reset state
+      selectedVariantsByProduct.clear();
+      variantErrorByCategory.clear();
+      lastVariantData = [];
+      variantCategoryKeys.clear();
+      tapTrue = 1;
+
+      int qty = 1;
+      TextEditingController notesController = TextEditingController();
+
+      bool showCustomPrice = false;
+
+      final TextEditingController customPriceContoller =
+          TextEditingController();
+      int? customAmount;
+      String? customPriceError;
+      bool customEdited = false;
+
+      int _baseAmount() {
+        return (tapTrue == 2)
+            ? product.onlinePrice
+            : (product.priceAfter ?? product.price);
+      }
+
+      Map<String, dynamic>? _findSelectedDetail({
+        required String pid,
+        required String catId,
+        required String vid,
+      }) {
+        final sels = selectedVariantsByProduct[pid];
+        if (sels == null) return null;
+
+        final catIndex = sels.indexWhere(
+          (e) => e['variant_category_id'].toString() == catId,
+        );
+        if (catIndex == -1) return null;
+
+        final details = List<Map<String, dynamic>>.from(
+          (sels[catIndex]['variant_detail'] ?? []) as List,
+        );
+
+        final dIndex = details.indexWhere(
+          (d) => d['variant_id'].toString() == vid,
+        );
+        if (dIndex == -1) return null;
+
+        return details[dIndex];
+      }
+
+      void _syncCustomWithBaseIfNeeded() {
+        // if (!isCustomize) return;
+        if (!showCustomPrice) return;
+
+        if (customEdited) return;
+
+        final base = _baseAmount();
+        customAmount = base;
+        customPriceContoller.text = NumberFormat.decimalPattern(
+          'id',
+        ).format(base);
+      }
+
+      bool _isCustomizeNow() {
+        final base = _baseAmount();
+        return customEdited && customAmount != null && customAmount != base;
+      }
+
+      // Create Future ONCE
+      final Future<List<ProductVariantCategory>?> variantFuture =
+          _fetchProductVariants(product.id);
+      final ScrollController scrollController = ScrollController();
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setStateModal) {
+              final int baseAmt = _baseAmount();
+              final bool isCustomize = _isCustomizeNow();
+              final int shownAmt = isCustomize
+                  ? (customAmount ?? baseAmt)
+                  : baseAmt;
+
+              return SafeArea(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  decoration: BoxDecoration(
+                    color: bnw100,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Handle Bar
+                      Center(
+                        child: Container(
+                          margin: EdgeInsets.only(top: size8),
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+
+                      Expanded(
+                        child: ListView(
+                          controller: scrollController,
+                          padding: EdgeInsets.all(16),
+                          children: [
+                            // Product Info
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: bnw200,
+                                    borderRadius: BorderRadius.circular(size8),
+                                  ),
+                                  child: Image.network(
+                                    product.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            SvgPicture.asset(
+                                              'assets/logoProduct.svg',
+                                            ),
+                                  ),
+                                ),
+                                SizedBox(width: size12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.name,
+                                        style: heading2(
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+
+                                      Row(
+                                        children: [
+                                          Text(
+                                            NumberFormat.currency(
+                                              locale: 'id',
+                                              symbol: 'Rp ',
+                                              decimalDigits: 0,
+                                            ).format(shownAmt),
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          if (isCustomize) ...[
+                                            SizedBox(width: size8),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: primary100,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                'Custom',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  primary500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+
+                                      if (tapTrue == 1 &&
+                                          product.discountType != null &&
+                                          !isCustomize)
+                                        Text(
+                                          NumberFormat.currency(
+                                            locale: 'id',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0,
+                                          ).format(product.price),
+                                          style: TextStyle(
+                                            decoration:
+                                                TextDecoration.lineThrough,
+                                            fontFamily: 'Outfit',
+                                            color: bnw500,
+                                            fontSize: sp14,
+                                            height: 1.22,
+                                          ),
+                                        ),
+                                      if (tapTrue == 1 &&
+                                          product.discount != null &&
+                                          product.discount! > 0)
+                                        Text(
+                                          product.discountType == 'price'
+                                              ? NumberFormat.currency(
+                                                  locale: 'id',
+                                                  symbol: 'Rp. ',
+                                                  decimalDigits: 0,
+                                                ).format(product.discount ?? 0)
+                                              : '${product.discount ?? 0} %',
+                                          style: heading4(
+                                            FontWeight.w600,
+                                            danger500,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      Text(
+                                        product.category,
+                                        style: heading3(
+                                          FontWeight.w400,
+                                          bnw500,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Quantity
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.remove_circle_outline,
+                                          ),
+                                          color: primary500,
+                                          onPressed: () {
+                                            if (qty > 1) {
+                                              setStateModal(() => qty--);
+                                            }
+                                          },
+                                        ),
+                                        Text(
+                                          '$qty',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.add_circle_outline),
+                                          color: primary500,
+                                          onPressed: () {
+                                            setStateModal(() => qty++);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    OutlinedButton(
+                                      onPressed: () {
+                                        setStateModal(() {
+                                          showCustomPrice = !showCustomPrice;
+                                          customPriceError = null;
+
+                                          _syncCustomWithBaseIfNeeded();
+                                        });
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        side: BorderSide(color: primary500),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        showCustomPrice
+                                            ? 'Tutup'
+                                            : 'Ubah Harga',
+                                        style: heading4(
+                                          FontWeight.w600,
+                                          primary500,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 16),
+                            Divider(),
+
+                            // Price Type Toggle (Offline vs Online)
+                            Text(
+                              'Jenis Harga',
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            SizedBox(height: size8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => setStateModal(() {
+                                      tapTrue = 1;
+                                      customPriceError = null;
+                                      _syncCustomWithBaseIfNeeded();
+                                    }),
+                                    child: Container(
+                                      padding: EdgeInsets.all(size12),
+                                      decoration: BoxDecoration(
+                                        color: tapTrue == 1
+                                            ? primary100
+                                            : bnw100,
+                                        border: Border.all(
+                                          color: tapTrue == 1
+                                              ? primary500
+                                              : bnw300,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          size8,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'Harga Offline',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            tapTrue == 1 ? primary500 : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                product.onlinePrice == 0
+                                    ? SizedBox()
+                                    : SizedBox(width: size12),
+                                product.onlinePrice == 0
+                                    ? SizedBox()
+                                    : Expanded(
+                                        child: InkWell(
+                                          onTap: () => setStateModal(() {
+                                            tapTrue = 2;
+                                            customPriceError = null;
+                                            _syncCustomWithBaseIfNeeded();
+                                          }),
+                                          child: Container(
+                                            padding: EdgeInsets.all(size12),
+                                            decoration: BoxDecoration(
+                                              color: tapTrue == 2
+                                                  ? primary100
+                                                  : bnw100,
+                                              border: Border.all(
+                                                color: tapTrue == 2
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'Harga Online',
+                                                style: TextStyle(
+                                                  color: tapTrue == 2
+                                                      ? primary500
+                                                      : Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
+                            ),
+
+                            if (showCustomPrice) ...[
+                              SizedBox(height: 16),
+                              Text(
+                                'Harga',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              TextField(
+                                controller: customPriceContoller,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  services
+                                      .FilteringTextInputFormatter
+                                      .digitsOnly,
+                                  RupiahInputFormatter(),
+                                ],
+                                decoration: InputDecoration(
+                                  prefixText: 'Rp. ',
+                                  hintText: 'Masukkan Harga',
+                                  errorText: customPriceError,
+                                  border: UnderlineInputBorder(),
+                                ),
+                                onChanged: (v) {
+                                  final digits = v.replaceAll(
+                                    RegExp(r'[^0-9]'),
+                                    '',
+                                  );
+                                  setStateModal(() {
+                                    customEdited = true;
+                                    customPriceError = null;
+                                    customAmount = digits.isEmpty
+                                        ? null
+                                        : int.tryParse(digits);
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    setStateModal(() {
+                                      customEdited = false;
+                                      customPriceError = null;
+                                      // customAmount = null;
+                                      _syncCustomWithBaseIfNeeded();
+                                    });
+                                  },
+                                  child: Text(
+                                    'Reset ke harga normal',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+
+                            SizedBox(height: 16),
+
+                            // Variants FutureBuilder
+                            FutureBuilder<List<ProductVariantCategory>?>(
+                              future: variantFuture,
+                              // _fetchProductVariants(product.id),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(size8),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return SizedBox();
+                                }
+
+                                final categories = snapshot.data!;
+                                lastVariantData = categories;
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: categories.map((category) {
+                                    final String catId = category.id;
+
+                                    variantCategoryKeys[catId] ??= GlobalKey();
+
+                                    // Validation error if any
+                                    final error = variantErrorByCategory[catId];
+
+                                    return Column(
+                                      key: variantCategoryKeys[catId],
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: size12),
+                                        Text(
+                                          category.title,
+                                          style: heading4(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        Text(
+                                          category.isRequired == 1
+                                              ? "Wajib dipilih - Maks pilih ${category.maximumSelected}"
+                                              : "Opsional - Maks pilih ${category.maximumSelected}",
+                                          style: body2(
+                                            FontWeight.w600,
+                                            category.isRequired == 1
+                                                ? danger500
+                                                : bnw400,
+                                            'Outfit',
+                                          ),
+                                        ),
+
+                                        if (error != null)
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 4),
+                                            child: Text(
+                                              error,
+                                              style: TextStyle(
+                                                color: danger500,
+                                                fontSize: size12,
+                                              ),
+                                            ),
+                                          ),
+
+                                        SizedBox(height: size8),
+
+                                        ...category.productVariants.map((
+                                          variant,
+                                        ) {
+                                          final productId = product.id
+                                              .toString();
+                                          final currentSelected =
+                                              selectedVariantsByProduct[productId] ??
+                                              [];
+
+                                          // Check if this variant is selected
+                                          final isSelected = currentSelected
+                                              .any((e) {
+                                                final ids =
+                                                    (e['variant_id'] as List)
+                                                        .map(
+                                                          (id) => id.toString(),
+                                                        )
+                                                        .toList();
+                                                return ids.contains(
+                                                  variant.id.toString(),
+                                                );
+                                              });
+
+                                          final pid = product.id.toString();
+                                          final catIdStr = catId.toString();
+                                          final vid = variant.id.toString();
+
+                                          final detail = _findSelectedDetail(
+                                            pid: pid,
+                                            catId: catIdStr,
+                                            vid: vid,
+                                          );
+
+                                          final int defaultVPrice =
+                                              (double.tryParse(variant.price) ??
+                                                      0)
+                                                  .toInt();
+                                          final int shownVPrice = detail == null
+                                              ? defaultVPrice
+                                              : _toIntSafe(
+                                                  detail['variant_price'],
+                                                  def: defaultVPrice,
+                                                );
+
+                                          final bool isVCustomize =
+                                              detail != null &&
+                                              _toBoolSafe(
+                                                detail['is_variant_customize'],
+                                              );
+
+                                          return CheckboxListTile(
+                                            activeColor: primary500,
+                                            title: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    variant.name,
+                                                    style: heading3(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      FormatCurrency.convertToIdr(
+                                                        shownVPrice.toDouble(),
+                                                      ),
+                                                      style: heading4(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                    if (isVCustomize) ...[
+                                                      SizedBox(width: 6),
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 2,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: primary100,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
+                                                        ),
+                                                        child: Text(
+                                                          'Custom',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            primary500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                    SizedBox(width: 8),
+                                                    OutlinedButton(
+                                                      onPressed: () {
+                                                        if (!isSelected) {
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(
+                                                                'Pilih variannya dulu',
+                                                              ),
+                                                            ),
+                                                          );
+                                                          return;
+                                                        }
+                                                        final pid = product.id
+                                                            .toString();
+                                                        final catIdStr = catId
+                                                            .toString();
+
+                                                        final sels =
+                                                            selectedVariantsByProduct[pid] ??
+                                                            [];
+                                                        final catIndex = sels
+                                                            .indexWhere(
+                                                              (e) =>
+                                                                  e['variant_category_id']
+                                                                      .toString() ==
+                                                                  catIdStr,
+                                                            );
+                                                        if (catIndex == -1)
+                                                          return;
+
+                                                        final details =
+                                                            List<
+                                                              Map<
+                                                                String,
+                                                                dynamic
+                                                              >
+                                                            >.from(
+                                                              sels[catIndex]['variant_detail']
+                                                                  as List,
+                                                            );
+                                                        final dIndex = details
+                                                            .indexWhere(
+                                                              (d) =>
+                                                                  d['variant_id']
+                                                                      .toString() ==
+                                                                  variant.id
+                                                                      .toString(),
+                                                            );
+                                                        if (dIndex == -1)
+                                                          return;
+
+                                                        final int
+                                                        defPrice = _toIntSafe(
+                                                          details[dIndex]['variant_price_default'],
+                                                        );
+                                                        int
+                                                        currentPrice = _toIntSafe(
+                                                          details[dIndex]['variant_price'],
+                                                        );
+
+                                                        final ctrl =
+                                                            TextEditingController(
+                                                              text:
+                                                                  NumberFormat.decimalPattern(
+                                                                    'id',
+                                                                  ).format(
+                                                                    currentPrice,
+                                                                  ),
+                                                            );
+
+                                                        showModalBottomSheet(
+                                                          context: context,
+                                                          isScrollControlled:
+                                                              true,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          builder: (context) {
+                                                            return StatefulBuilder(
+                                                              builder: (context, setM) {
+                                                                return SafeArea(
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(
+                                                                      left: 16,
+                                                                      right: 16,
+                                                                      top: 16,
+                                                                      bottom:
+                                                                          MediaQuery.of(
+                                                                            context,
+                                                                          ).viewInsets.bottom +
+                                                                          16,
+                                                                    ),
+                                                                    decoration: BoxDecoration(
+                                                                      color:
+                                                                          bnw100,
+                                                                      borderRadius:
+                                                                          BorderRadius.vertical(
+                                                                            top: Radius.circular(
+                                                                              16,
+                                                                            ),
+                                                                          ),
+                                                                    ),
+                                                                    child: Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'Ubah Harga Varian',
+                                                                          style: heading2(
+                                                                            FontWeight.w700,
+                                                                            bnw900,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              8,
+                                                                        ),
+                                                                        Text(
+                                                                          variant
+                                                                              .name,
+                                                                          style: heading3(
+                                                                            FontWeight.w400,
+                                                                            bnw600,
+                                                                            'Outfit',
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              12,
+                                                                        ),
+                                                                        TextField(
+                                                                          controller:
+                                                                              ctrl,
+                                                                          keyboardType:
+                                                                              TextInputType.number,
+                                                                          inputFormatters: [
+                                                                            services.FilteringTextInputFormatter.digitsOnly,
+                                                                            RupiahInputFormatter(),
+                                                                          ],
+                                                                          decoration: InputDecoration(
+                                                                            prefixText:
+                                                                                'Rp. ',
+                                                                            border:
+                                                                                UnderlineInputBorder(),
+                                                                          ),
+                                                                          onChanged:
+                                                                              (
+                                                                                value,
+                                                                              ) {
+                                                                                final digits = value.replaceAll(
+                                                                                  RegExp(
+                                                                                    r'[^0-9]',
+                                                                                  ),
+                                                                                  '',
+                                                                                );
+                                                                                setM(
+                                                                                  () {
+                                                                                    currentPrice = digits.isEmpty
+                                                                                        ? 0
+                                                                                        : (int.tryParse(
+                                                                                                digits,
+                                                                                              ) ??
+                                                                                              0);
+                                                                                  },
+                                                                                );
+                                                                              },
+                                                                        ),
+                                                                        Align(
+                                                                          alignment:
+                                                                              Alignment.centerRight,
+                                                                          child: TextButton(
+                                                                            onPressed: () {
+                                                                              setM(
+                                                                                () {
+                                                                                  currentPrice = defPrice;
+
+                                                                                  ctrl.text =
+                                                                                      NumberFormat.decimalPattern(
+                                                                                        'id',
+                                                                                      ).format(
+                                                                                        defPrice,
+                                                                                      );
+                                                                                },
+                                                                              );
+                                                                            },
+                                                                            child: Text(
+                                                                              'Reset ke harga normal',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              12,
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              double.infinity,
+                                                                          child: ElevatedButton(
+                                                                            style: ElevatedButton.styleFrom(
+                                                                              backgroundColor: primary500,
+                                                                            ),
+                                                                            onPressed: () {
+                                                                              details[dIndex]['variant_price'] = currentPrice;
+                                                                              details[dIndex]['is_variant_customize'] =
+                                                                                  (currentPrice !=
+                                                                                  defPrice);
+
+                                                                              setStateModal(
+                                                                                () {
+                                                                                  sels[catIndex]['variant_detail'] = details;
+                                                                                  selectedVariantsByProduct[pid] = sels;
+                                                                                },
+                                                                              );
+                                                                              Navigator.pop(
+                                                                                context,
+                                                                              );
+                                                                            },
+                                                                            child: Text(
+                                                                              'Simpan',
+                                                                              style: heading3(
+                                                                                FontWeight.w600,
+                                                                                bnw100,
+                                                                                'Outfit',
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: Text('Ubah Harga'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            value: isSelected,
+                                            contentPadding: EdgeInsets.zero,
+                                            controlAffinity:
+                                                ListTileControlAffinity.leading,
+                                            onChanged: (bool? val) {
+                                              setStateModal(() {
+                                                selectedVariantsByProduct[productId] ??=
+                                                    [];
+                                                List<Map<String, dynamic>>
+                                                productVariants =
+                                                    selectedVariantsByProduct[productId]!;
+
+                                                // Find entry for this category
+                                                int catIndex = productVariants
+                                                    .indexWhere(
+                                                      (e) =>
+                                                          e['variant_category_id'] ==
+                                                          catId,
+                                                    );
+
+                                                List<String> currentIds = [];
+                                                List<Map<String, dynamic>>
+                                                currentDetails = [];
+
+                                                if (catIndex != -1) {
+                                                  currentIds = List<String>.from(
+                                                    productVariants[catIndex]['variant_id'],
+                                                  );
+                                                  currentDetails =
+                                                      List<
+                                                        Map<String, dynamic>
+                                                      >.from(
+                                                        productVariants[catIndex]['variant_detail'],
+                                                      );
+                                                }
+
+                                                if (val == true) {
+                                                  // Logic for selection
+
+                                                  // Radio logic (max 1)
+                                                  if (category
+                                                          .maximumSelected ==
+                                                      1) {
+                                                    currentIds.clear();
+                                                    currentDetails.clear();
+                                                  }
+                                                  // Limit logic
+                                                  else if (category
+                                                              .maximumSelected >
+                                                          1 &&
+                                                      currentIds.length >=
+                                                          category
+                                                              .maximumSelected) {
+                                                    currentIds.removeAt(
+                                                      0,
+                                                    ); // Remove oldest
+                                                    currentDetails.removeAt(0);
+                                                  }
+
+                                                  final int defaultVPrice =
+                                                      (double.tryParse(
+                                                                variant.price,
+                                                              ) ??
+                                                              0)
+                                                          .toInt();
+
+                                                  // Add new
+                                                  currentIds.add(variant.id);
+                                                  currentDetails.add({
+                                                    "variant_id": variant.id,
+                                                    "variant_name":
+                                                        variant.name,
+                                                    "variant_price_default":
+                                                        defaultVPrice,
+                                                    "variant_price":
+                                                        defaultVPrice,
+                                                    "is_variant_customize":
+                                                        false,
+                                                    "is_online": tapTrue == 2,
+                                                  });
+                                                } else {
+                                                  // Uncheck
+                                                  int removeIdx = currentIds
+                                                      .indexOf(variant.id);
+                                                  if (removeIdx != -1) {
+                                                    currentIds.removeAt(
+                                                      removeIdx,
+                                                    );
+                                                    currentDetails.removeAt(
+                                                      removeIdx,
+                                                    );
+                                                  }
+                                                }
+
+                                                // Update Map
+                                                if (catIndex != -1) {
+                                                  if (currentIds.isEmpty) {
+                                                    productVariants.removeAt(
+                                                      catIndex,
+                                                    );
+                                                  } else {
+                                                    productVariants[catIndex]['variant_id'] =
+                                                        currentIds;
+                                                    productVariants[catIndex]['variant_detail'] =
+                                                        currentDetails;
+                                                  }
+                                                } else if (currentIds
+                                                    .isNotEmpty) {
+                                                  productVariants.add({
+                                                    "variant_category_id":
+                                                        catId,
+                                                    "variant_id": currentIds,
+                                                    "variant_detail":
+                                                        currentDetails,
+                                                  });
+                                                }
+
+                                                // Remove error if any selection exists
+                                                if (currentIds.isNotEmpty) {
+                                                  variantErrorByCategory.remove(
+                                                    catId,
+                                                  );
+                                                }
+                                              });
+                                            },
+                                          );
+                                        }).toList(),
+                                      ],
+                                    );
+                                  }).toList(),
+                                );
+                              },
+                            ),
+
+                            SizedBox(height: 16),
+                            Text(
+                              "Catatan :",
+                              style: heading3(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            TextField(
+                              controller: notesController,
+                              decoration: InputDecoration(
+                                hintText: 'Contoh: Kurangi es, cabe dipisah',
+                                border: UnderlineInputBorder(),
+                                hintStyle: heading3(
+                                  FontWeight.w600,
+                                  bnw400,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 100), // Spacing for button
+                          ],
+                        ),
+                      ),
+
+                      // Buttons
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  side: BorderSide(color: primary500),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(size8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Batalkan',
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    primary500,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // Validation
+                                  bool valid = true;
+                                  for (var cat in lastVariantData) {
+                                    if (cat.isRequired == 1) {
+                                      final pid = product.id.toString();
+                                      final sels =
+                                          selectedVariantsByProduct[pid] ?? [];
+                                      final catSel = sels.firstWhere(
+                                        (e) =>
+                                            e['variant_category_id'] == cat.id,
+                                        orElse: () => {},
+                                      );
+
+                                      if (catSel.isEmpty ||
+                                          (catSel['variant_id'] as List)
+                                              .isEmpty) {
+                                        setStateModal(() {
+                                          variantErrorByCategory[cat.id] =
+                                              'Wajib dipilih';
+                                        });
+
+                                        // Auto Scroll to error
+                                        // final key = variantCategoryKeys[cat.id];
+                                        // if (key?.currentContext != null) {
+                                        //   Scrollable.ensureVisible(
+                                        //     key!.currentContext!,
+                                        //     duration: Duration(milliseconds: 300),
+                                        //     curve: Curves.easeOut,
+                                        //   );
+                                        // }
+
+                                        valid = false;
+
+                                        // Break to focus on first error? or show all.
+                                        // If we want scroll to *first*, we should track it.
+                                        // Current loop marks all. Scroll to the last one encountered or logic needs adjustment.
+                                        // Better to find FIRST invalid and scroll, but mark ALL.
+                                      }
+                                    }
+                                  }
+
+                                  if (!valid) {
+                                    // Find first error key
+                                    for (var cat in lastVariantData) {
+                                      if (variantErrorByCategory.containsKey(
+                                        cat.id,
+                                      )) {
+                                        final key = variantCategoryKeys[cat.id];
+                                        if (key?.currentContext != null) {
+                                          Scrollable.ensureVisible(
+                                            key!.currentContext!,
+                                            duration: Duration(
+                                              milliseconds: 300,
+                                            ),
+                                            curve: Curves.easeOut,
+                                          );
+                                          break; // Scroll to first
+                                        }
+                                      }
+                                    }
+                                    return;
+                                  }
+
+                                  final bool isCustomizeFinal =
+                                      _isCustomizeNow();
+
+                                  if (isCustomizeFinal) {
+                                    final amt = customAmount ?? 0;
+                                    if (amt <= 0) {
+                                      setStateModal(() {
+                                        customPriceError = 'Harga wajib diisi';
+                                      });
+                                      return;
+                                    }
+                                  }
+                                  // if (isCustomize) {
+                                  //   final amt = customAmount ?? 0;
+                                  //   if (amt <= 0) {
+                                  //     setStateModal(() {
+                                  //       customPriceError =
+                                  //           'Harga custom wajib diisi';
+                                  //     });
+                                  //     return;
+                                  //   }
+                                  // }
+
+                                  // Add to Cart
+                                  _addToCartWithVariants(
+                                    product,
+                                    qty,
+                                    notesController.text,
+                                    tapTrue == 2,
+                                    customAmount: isCustomizeFinal
+                                        ? customAmount
+                                        : null,
+                                    isCustomize: isCustomizeFinal,
+                                  );
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primary500,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(size8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Tambah Ke Keranjang',
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: size12),
+                    ],
+                  ),
+                ),
               );
             },
           );
@@ -3012,9 +3078,11 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductDetailModal(
-        product: product,
-        onAddToCart: (qty, notes) => _addToCart(product, qty, notes),
+      builder: (context) => SafeArea(
+        child: ProductDetailModal(
+          product: product,
+          onAddToCart: (qty, notes) => _addToCart(product, qty, notes),
+        ),
       ),
     );
   }
@@ -3427,80 +3495,82 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CartBottomSheet(
-        cart: _cart,
-        onUpdateQty: (index, qty) {
-          _updateCartQty(index, qty);
-        },
-        onUpdateItem: (index, qty, notes) {
-          setState(() {
-            _cart[index]['quantity'] = qty;
-            _cart[index]['notes'] = notes;
-          });
-        },
-        onUpdateVariants: (index, apiVariants, uiVariants, total) {
-          setState(() {
-            _cart[index]['variants'] = apiVariants;
-            _cart[index]['variants_ui'] = uiVariants;
-            _cart[index]['variant_total'] = total;
+      builder: (context) => SafeArea(
+        child: CartBottomSheet(
+          cart: _cart,
+          onUpdateQty: (index, qty) {
+            _updateCartQty(index, qty);
+          },
+          onUpdateItem: (index, qty, notes) {
+            setState(() {
+              _cart[index]['quantity'] = qty;
+              _cart[index]['notes'] = notes;
+            });
+          },
+          onUpdateVariants: (index, apiVariants, uiVariants, total) {
+            setState(() {
+              _cart[index]['variants'] = apiVariants;
+              _cart[index]['variants_ui'] = uiVariants;
+              _cart[index]['variant_total'] = total;
 
-            final Product p = _cart[index]['product'];
-            final bool isOnline = _cart[index]['is_online'] == true;
-            final bool isCustomize = _cart[index]['is_customize'] == true;
-            final int? customAmount = _cart[index]['custom_amount'] as int?;
-            final int qty = _cart[index]['quantity'] as int;
+              final Product p = _cart[index]['product'];
+              final bool isOnline = _cart[index]['is_online'] == true;
+              final bool isCustomize = _cart[index]['is_customize'] == true;
+              final int? customAmount = _cart[index]['custom_amount'] as int?;
+              final int qty = _cart[index]['quantity'] as int;
 
-            final int baseDefault = isOnline
-                ? p.onlinePrice
-                : (p.priceAfter ?? p.price);
+              final int baseDefault = isOnline
+                  ? p.onlinePrice
+                  : (p.priceAfter ?? p.price);
 
-            final double baseUsed = (isCustomize && customAmount != null)
-                ? customAmount.toDouble()
-                : baseDefault.toDouble();
+              final double baseUsed = (isCustomize && customAmount != null)
+                  ? customAmount.toDouble()
+                  : baseDefault.toDouble();
 
-            final double unitAmount = baseUsed + total;
-            _cart[index]['unit_amount'] = unitAmount;
-            _cart[index]['total_amount'] = unitAmount * qty;
-          });
-        },
-        fetchVariants: _fetchProductVariants,
-        onRemove: (index) {
-          _removeFromCart(index);
-        },
-        onClearAll: () {
-          setState(() {
-            _cart.clear();
-          });
-        },
-        onPay: () {
-          Navigator.pop(context); // Close cart
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PaymentPage(
-                cart: _cart,
-                token: widget.token,
-                merchantId: widget.merchantId,
-                transactionId: _currentTransactionId,
-                memberId: _selectedMemberId, // Pass memberId
-                selectedDiscount: _selectedDiscount,
-                onSuccess: () {
-                  setState(() {
-                    _cart.clear();
-                    _calculationData = null;
-                    _currentTransactionId = null;
-                  });
-                },
+              final double unitAmount = baseUsed + total;
+              _cart[index]['unit_amount'] = unitAmount;
+              _cart[index]['total_amount'] = unitAmount * qty;
+            });
+          },
+          fetchVariants: _fetchProductVariants,
+          onRemove: (index) {
+            _removeFromCart(index);
+          },
+          onClearAll: () {
+            setState(() {
+              _cart.clear();
+            });
+          },
+          onPay: () {
+            Navigator.pop(context); // Close cart
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PaymentPage(
+                  cart: _cart,
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  transactionId: _currentTransactionId,
+                  memberId: _selectedMemberId, // Pass memberId
+                  selectedDiscount: _selectedDiscount,
+                  onSuccess: () {
+                    setState(() {
+                      _cart.clear();
+                      _calculationData = null;
+                      _currentTransactionId = null;
+                    });
+                  },
+                ),
               ),
-            ),
-          );
-        },
-        onSaveBill: () => _processSaveBill(closeOnSuccess: true),
-        selectedDiscount: _selectedDiscount,
-        onSelectDiscount: () {
-          Navigator.pop(context);
-          _showSelectDiscountModal();
-        },
+            );
+          },
+          onSaveBill: () => _processSaveBill(closeOnSuccess: true),
+          selectedDiscount: _selectedDiscount,
+          onSelectDiscount: () {
+            Navigator.pop(context);
+            _showSelectDiscountModal();
+          },
+        ),
       ),
     );
   }
@@ -3586,22 +3656,24 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
             ),
       body: widget.isEmbedded
           ? _buildKasirView()
-          : TabBarView(
-              controller: _tabController,
-              children: views,
-              // [
-              //   _buildKasirView(),
+          : SafeArea(
+              child: TabBarView(
+                controller: _tabController,
+                children: views,
+                // [
+                //   _buildKasirView(),
 
-              //   // Tab 2: Riwayat
-              //   HistoryTab(
-              //     token: widget.token,
-              //     merchantId: widget.merchantId,
-              //     baseUrl: url,
-              //   ),
+                //   // Tab 2: Riwayat
+                //   HistoryTab(
+                //     token: widget.token,
+                //     merchantId: widget.merchantId,
+                //     baseUrl: url,
+                //   ),
 
-              //   // Tab 3: Pengaturan
-              //   SettingsTab(token: widget.token, merchantId: widget.merchantId),
-              // ],
+                //   // Tab 3: Pengaturan
+                //   SettingsTab(token: widget.token, merchantId: widget.merchantId),
+                // ],
+              ),
             ),
       bottomNavigationBar: (_isGroupMerchant || widget.isEmbedded)
           ? null
@@ -3798,96 +3870,98 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Urutkan',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Urutkan',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Pilih urutan yang ingin ditampilkan',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: _sortOptions.map((option) {
-                  bool isSelected = textvalueOrderBy == option['value'];
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        textvalueOrderBy = option['value']!;
-                        textOrderBy = option['label']!;
-                      });
-                      Navigator.pop(context); // Close modal
-                      _fetchProducts(); // Refresh data
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? primary500.withOpacity(0.1)
-                            : bnw100,
-                        border: Border.all(
-                          color: isSelected ? primary500 : Colors.grey[300]!,
+                        Text(
+                          'Pilih urutan yang ingin ditampilkan',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                      child: Text(
-                        option['label']!,
-                        style: TextStyle(
-                          color: isSelected ? primary500 : Colors.black,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
+                      ],
                     ),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 20),
-            ],
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _sortOptions.map((option) {
+                    bool isSelected = textvalueOrderBy == option['value'];
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          textvalueOrderBy = option['value']!;
+                          textOrderBy = option['label']!;
+                        });
+                        Navigator.pop(context); // Close modal
+                        _fetchProducts(); // Refresh data
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primary500.withOpacity(0.1)
+                              : bnw100,
+                          border: Border.all(
+                            color: isSelected ? primary500 : Colors.grey[300]!,
+                          ),
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                        child: Text(
+                          option['label']!,
+                          style: TextStyle(
+                            color: isSelected ? primary500 : Colors.black,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
@@ -3897,158 +3971,166 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
   Widget _buildBottomBar() {
     bool hasItems = _cart.isNotEmpty;
 
-    return Container(
-      color: bnw100,
-      padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Divider(thickness: 4, indent: 150, endIndent: 150, color: bnw300),
-          SizedBox(height: size8),
+    return SafeArea(
+      child: Container(
+        color: bnw100,
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Divider(thickness: 4, indent: 150, endIndent: 150, color: bnw300),
+            SizedBox(height: size8),
 
-          if (_selectedMemberName == null)
-            OutlinedButton(
-              onPressed: _showCustomerSelectionSheet,
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(double.infinity, 48),
-                side: BorderSide(color: bnw300),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(size8),
+            if (_selectedMemberName == null)
+              OutlinedButton(
+                onPressed: _showCustomerSelectionSheet,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 48),
+                  side: BorderSide(color: bnw300),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(size8),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.people_outline, color: bnw900),
+                    SizedBox(width: size8),
+                    Text('Pilih Pembeli', style: TextStyle(color: bnw900)),
+                  ],
+                ),
+              )
+            else
+              ElevatedButton(
+                onPressed: _showCustomerSelectionSheet,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary500,
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(size8),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.person, color: bnw100),
+                    SizedBox(width: size8),
+                    Text(
+                      _selectedMemberName!,
+                      style: TextStyle(
+                        color: bnw100,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people_outline, color: bnw900),
-                  SizedBox(width: size8),
-                  Text('Pilih Pembeli', style: TextStyle(color: bnw900)),
-                ],
-              ),
-            )
-          else
-            ElevatedButton(
-              onPressed: _showCustomerSelectionSheet,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary500,
-                minimumSize: Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(size8),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person, color: bnw100),
-                  SizedBox(width: size8),
-                  Text(
-                    _selectedMemberName!,
-                    style: TextStyle(
-                      color: bnw100,
-                      fontWeight: FontWeight.bold,
+
+            SizedBox(height: size12),
+            Row(
+              children: [
+                if (hasItems) ...[
+                  // Active State: Icon Only Button + Simpan Tagihan
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(size8),
+                      border: Border.all(color: primary500),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        PhosphorIcons.notebook_fill,
+                        color: primary500,
+                      ),
+                      onPressed: _openBillList,
+                      tooltip: 'Daftar Tagihan',
                     ),
                   ),
+                  SizedBox(width: size8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _processSaveBill(closeOnSuccess: false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: bnw100,
+                        side: BorderSide(color: primary500),
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Simpan Tagihan',
+                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: size8),
+                ] else ...[
+                  // Empty State: Daftar Tagihan (Full button)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _openBillList,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: bnw100,
+                        side: BorderSide(color: primary500),
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                        elevation: 0,
+                      ),
+                      icon: Icon(
+                        PhosphorIcons.notebook_fill,
+                        color: primary500,
+                      ),
+                      label: Text(
+                        'Daftar Tagihan',
+                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: size8),
                 ],
-              ),
-            ),
 
-          SizedBox(height: size12),
-          Row(
-            children: [
-              if (hasItems) ...[
-                // Active State: Icon Only Button + Simpan Tagihan
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(size8),
-                    border: Border.all(color: primary500),
-                  ),
-                  child: IconButton(
-                    icon: Icon(PhosphorIcons.notebook_fill, color: primary500),
-                    onPressed: _openBillList,
-                    tooltip: 'Daftar Tagihan',
-                  ),
-                ),
-                SizedBox(width: size8),
+                // Keranjang Button (Common to both, styling adjusts if items present)
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _processSaveBill(closeOnSuccess: false),
+                    onPressed: hasItems ? _openFullCart : () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: bnw100,
-                      side: BorderSide(color: primary500),
+                      backgroundColor: primary500,
                       minimumSize: Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(size8),
                       ),
-                      elevation: 0,
                     ),
-                    child: Text(
-                      'Simpan Tagihan',
-                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                    ),
-                  ),
-                ),
-                SizedBox(width: size8),
-              ] else ...[
-                // Empty State: Daftar Tagihan (Full button)
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _openBillList,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: bnw100,
-                      side: BorderSide(color: primary500),
-                      minimumSize: Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: Icon(PhosphorIcons.notebook_fill, color: primary500),
-                    label: Text(
-                      'Daftar Tagihan',
-                      style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                    ),
-                  ),
-                ),
-                SizedBox(width: size8),
-              ],
-
-              // Keranjang Button (Common to both, styling adjusts if items present)
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: hasItems ? _openFullCart : () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    minimumSize: Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      Icon(Icons.shopping_bag_outlined, color: bnw100),
-                      if (hasItems) ...[
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                    child: Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Icon(Icons.shopping_bag_outlined, color: bnw100),
+                        if (hasItems) ...[
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: danger500,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '$_totalItems',
+                              style: TextStyle(fontSize: 10, color: bnw100),
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: danger500,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            '$_totalItems',
-                            style: TextStyle(fontSize: 10, color: bnw100),
-                          ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -4060,120 +4142,127 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Pilih Pembeli",
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(context); // Close sheet
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MemberPageMobile(),
-                          ),
-                        );
-                        if (result != null && result is MemberModel) {
-                          setState(() {
-                            // Set ID locally first
-                            _selectedMemberId = result.memberid;
-                            // Fallback name while loading
-                            _selectedMemberName = result.namaMember;
-                          });
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Pilih Pembeli",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context); // Close sheet
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MemberPageMobile(),
+                            ),
+                          );
+                          if (result != null && result is MemberModel) {
+                            setState(() {
+                              // Set ID locally first
+                              _selectedMemberId = result.memberid;
+                              // Fallback name while loading
+                              _selectedMemberName = result.namaMember;
+                            });
 
-                          // Trigger calculation to get authoritative name
-                          _calculateAndSetMember();
-                        }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: bnw300),
-                          borderRadius: BorderRadius.circular(12),
-                          color: bnw100, // Or light blue if matches image
-                        ),
-                        child: Column(
-                          children: [
-                            // Using standard icons or asset if available.
-                            // Image 2 shows specific illustrations.
-                            // I will use Icon for now as I don't have the assets ready.
-                            Icon(Icons.person, size: 48, color: primary500),
-                            SizedBox(height: 12),
-                            Text(
-                              "Pelanggan",
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
+                            // Trigger calculation to get authoritative name
+                            _calculateAndSetMember();
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: bnw300),
+                            borderRadius: BorderRadius.circular(12),
+                            color: bnw100, // Or light blue if matches image
+                          ),
+                          child: Column(
+                            children: [
+                              // Using standard icons or asset if available.
+                              // Image 2 shows specific illustrations.
+                              // I will use Icon for now as I don't have the assets ready.
+                              Icon(Icons.person, size: 48, color: primary500),
+                              SizedBox(height: 12),
+                              Text(
+                                "Pelanggan",
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        _showNonMemberInputSheet();
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: bnw300),
-                          borderRadius: BorderRadius.circular(12),
-                          color: bnw100,
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(Icons.person_outline, size: 48, color: bnw900),
-                            SizedBox(height: 12),
-                            Text(
-                              "Bukan Pelanggan",
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showNonMemberInputSheet();
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: bnw300),
+                            borderRadius: BorderRadius.circular(12),
+                            color: bnw100,
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.person_outline,
+                                size: 48,
+                                color: bnw900,
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 12),
+                              Text(
+                                "Bukan Pelanggan",
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-            ],
+                    SizedBox(width: size12),
+                  ],
+                ),
+                SizedBox(height: 24),
+              ],
+            ),
           ),
         );
       },
@@ -4189,111 +4278,117 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Pilih Pembeli",
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Nama Pembeli *",
-                style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: "Cth : Bayu Setiawan",
-                  border: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: primary500, width: 2),
-                  ),
-                ),
-              ),
-              SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Pilih Pembeli",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: primary500),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        "Kembali",
-                        style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Text(
+                  "Nama Pembeli *",
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: "Cth : Bayu Setiawan",
+                    border: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: primary500, width: 2),
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_nameController.text.trim().isNotEmpty) {
-                          setState(() {
-                            _selectedMemberId = _nameController.text.trim();
-                            // Fallback name
-                            _selectedMemberName = _nameController.text.trim();
-                          });
-                          Navigator.pop(context);
+                ),
+                SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          "Kembali",
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_nameController.text.trim().isNotEmpty) {
+                            setState(() {
+                              _selectedMemberId = _nameController.text.trim();
+                              // Fallback name
+                              _selectedMemberName = _nameController.text.trim();
+                            });
+                            Navigator.pop(context);
 
-                          _calculateAndSetMember();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Nama wajib diisi")),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                            _calculateAndSetMember();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Nama wajib diisi")),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          "Simpan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                         ),
                       ),
-                      child: Text(
-                        "Simpan",
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -4402,162 +4497,164 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.5,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.5,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Pilih Diskon Umum",
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: FutureBuilder<List<DiscountModel>>(
-                      future: _fetchDiscountsModal(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Center(
-                            child: Text("Tidak ada diskon tersedia"),
-                          );
-                        }
+                    SizedBox(height: 20),
+                    Text(
+                      "Pilih Diskon Umum",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: 16),
+                    Expanded(
+                      child: FutureBuilder<List<DiscountModel>>(
+                        future: _fetchDiscountsModal(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return Center(
+                              child: Text("Tidak ada diskon tersedia"),
+                            );
+                          }
 
-                        final discounts = snapshot.data!;
-                        return ListView.separated(
-                          controller: scrollController,
-                          itemCount: discounts.length,
-                          separatorBuilder: (_, __) => SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final discount = discounts[index];
-                            final isSelected =
-                                _selectedDiscount?.id == discount.id;
+                          final discounts = snapshot.data!;
+                          return ListView.separated(
+                            controller: scrollController,
+                            itemCount: discounts.length,
+                            separatorBuilder: (_, __) => SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final discount = discounts[index];
+                              final isSelected =
+                                  _selectedDiscount?.id == discount.id;
 
-                            // Formatted Value
-                            String valueText = "";
-                            if (discount.discountType == 'price') {
-                              valueText = NumberFormat.currency(
-                                locale: 'id',
-                                symbol: 'Rp ',
-                                decimalDigits: 0,
-                              ).format(discount.discount);
-                            } else {
-                              valueText = "${discount.discount}%";
-                            }
+                              // Formatted Value
+                              String valueText = "";
+                              if (discount.discountType == 'price') {
+                                valueText = NumberFormat.currency(
+                                  locale: 'id',
+                                  symbol: 'Rp ',
+                                  decimalDigits: 0,
+                                ).format(discount.discount);
+                              } else {
+                                valueText = "${discount.discount}%";
+                              }
 
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  if (_selectedDiscount?.id == discount.id) {
-                                    _selectedDiscount = null;
-                                  } else {
-                                    _selectedDiscount = discount;
-                                  }
-                                });
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: bnw100,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isSelected ? primary500 : bnw300,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      PhosphorIcons.tag_fill,
-                                      color: primary500,
-                                      size: 24,
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (_selectedDiscount?.id == discount.id) {
+                                      _selectedDiscount = null;
+                                    } else {
+                                      _selectedDiscount = discount;
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: bnw100,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isSelected ? primary500 : bnw300,
                                     ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        PhosphorIcons.tag_fill,
+                                        color: primary500,
+                                        size: 24,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              discount.name,
+                                              style: heading3(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            Text(
+                                              valueText,
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            discount.name,
-                                            style: heading3(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          Text(
-                                            valueText,
-                                            style: heading4(
+                                            discount.date,
+                                            style: body2(
                                               FontWeight.w400,
-                                              bnw900,
+                                              bnw500,
                                               'Outfit',
                                             ),
                                           ),
+                                          if (isSelected)
+                                            Icon(
+                                              Icons.check_circle,
+                                              color: primary500,
+                                              size: 20,
+                                            )
+                                          else
+                                            Icon(
+                                              Icons.circle_outlined,
+                                              color: bnw300,
+                                              size: 20,
+                                            ),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          discount.date,
-                                          style: body2(
-                                            FontWeight.w400,
-                                            bnw500,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Icon(
-                                            Icons.check_circle,
-                                            color: primary500,
-                                            size: 20,
-                                          )
-                                        else
-                                          Icon(
-                                            Icons.circle_outlined,
-                                            color: bnw300,
-                                            size: 20,
-                                          ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -4636,86 +4733,88 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+      builder: (context) => SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Kamu yakin ingin menghapus seluruh produk di keranjang?',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: size8),
-            Text(
-              'Semua catatan dan jumlah produk yang tersimpan di keranjang tidak dapat dikembalikan.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-            SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: primary500),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(size8),
+              SizedBox(height: 24),
+              Text(
+                'Kamu yakin ingin menghapus seluruh produk di keranjang?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: size8),
+              Text(
+                'Semua catatan dan jumlah produk yang tersimpan di keranjang tidak dapat dikembalikan.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: primary500),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Batalkan',
-                      style: TextStyle(
-                        color: primary500,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      widget.onClearAll();
-                      Navigator.pop(context); // Close dialog
-                      Navigator.pop(context); // Close bottom sheet
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary500,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(size8),
-                      ),
-                    ),
-                    child: Text(
-                      'Ya, Hapus',
-                      style: TextStyle(
-                        color: bnw100,
-                        fontWeight: FontWeight.bold,
+                      child: Text(
+                        'Batalkan',
+                        style: TextStyle(
+                          color: primary500,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        widget.onClearAll();
+                        Navigator.pop(context); // Close dialog
+                        Navigator.pop(context); // Close bottom sheet
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary500,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(size8),
+                        ),
+                      ),
+                      child: Text(
+                        'Ya, Hapus',
+                        style: TextStyle(
+                          color: bnw100,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -4731,15 +4830,17 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductDetailModal(
-        product: product,
-        initialQty: quantity,
-        initialNotes: notes,
-        onAddToCart: (newQty, newNotes) {
-          widget.onUpdateItem(index, newQty, newNotes);
-          setState(() {});
-          Navigator.pop(context);
-        },
+      builder: (context) => SafeArea(
+        child: ProductDetailModal(
+          product: product,
+          initialQty: quantity,
+          initialNotes: notes,
+          onAddToCart: (newQty, newNotes) {
+            widget.onUpdateItem(index, newQty, newNotes);
+            setState(() {});
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -5759,145 +5860,147 @@ class _CartItemWidgetState extends State<CartItemWidget> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setM) {
-            return Container(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              ),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ubah Harga Varian',
-                    style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    variant.name,
-                    style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-                  ),
-                  SizedBox(height: 12),
-                  TextField(
-                    controller: ctrl,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      services.FilteringTextInputFormatter.digitsOnly,
-                      RupiahInputFormatter(),
-                    ],
-                    decoration: InputDecoration(
-                      prefixText: 'Rp. ',
-                      border: UnderlineInputBorder(),
+            return SafeArea(
+              child: Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ubah Harga Varian',
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                     ),
-                    onChanged: (value) {
-                      final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-                      setM(() {
-                        currentPrice = digits.isEmpty
-                            ? 0
-                            : (int.tryParse(digits) ?? 0);
-                      });
-                    },
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
+                    SizedBox(height: 8),
+                    Text(
+                      variant.name,
+                      style: heading3(FontWeight.w400, bnw600, 'Outfit'),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: ctrl,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        services.FilteringTextInputFormatter.digitsOnly,
+                        RupiahInputFormatter(),
+                      ],
+                      decoration: InputDecoration(
+                        prefixText: 'Rp. ',
+                        border: UnderlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
                         setM(() {
-                          currentPrice = defPrice;
-
-                          ctrl.text = NumberFormat.decimalPattern(
-                            'id',
-                          ).format(defPrice);
+                          currentPrice = digits.isEmpty
+                              ? 0
+                              : (int.tryParse(digits) ?? 0);
                         });
                       },
-                      child: Text('Reset ke harga normal'),
                     ),
-                  ),
-                  SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary500,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          setM(() {
+                            currentPrice = defPrice;
+
+                            ctrl.text = NumberFormat.decimalPattern(
+                              'id',
+                            ).format(defPrice);
+                          });
+                        },
+                        child: Text('Reset ke harga normal'),
                       ),
-                      onPressed: () {
-                        items[vIndex]['variant_price'] = currentPrice;
-                        items[vIndex]['is_variant_customize'] =
-                            (currentPrice != defPrice);
-                        _setCache(varIdStr, currentPrice, defPrice);
+                    ),
+                    SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                        ),
+                        onPressed: () {
+                          items[vIndex]['variant_price'] = currentPrice;
+                          items[vIndex]['is_variant_customize'] =
+                              (currentPrice != defPrice);
+                          _setCache(varIdStr, currentPrice, defPrice);
 
-                        newApiVariants[catIndex]['variant'] = items;
+                          newApiVariants[catIndex]['variant'] = items;
 
-                        final Map<String, int> customPriceById = {};
-                        for (final c in newApiVariants) {
-                          final vars = (c['variant'] as List? ?? []);
-                          for (final vv in vars) {
-                            if (vv is! Map) continue;
-                            final id = vv['variant_id']?.toString() ?? '';
-                            if (vv['is_variant_customize'] == true) {
-                              customPriceById[id] = _toIntSafe(
-                                vv['variant_price'],
-                              );
+                          final Map<String, int> customPriceById = {};
+                          for (final c in newApiVariants) {
+                            final vars = (c['variant'] as List? ?? []);
+                            for (final vv in vars) {
+                              if (vv is! Map) continue;
+                              final id = vv['variant_id']?.toString() ?? '';
+                              if (vv['is_variant_customize'] == true) {
+                                customPriceById[id] = _toIntSafe(
+                                  vv['variant_price'],
+                                );
+                              }
                             }
                           }
-                        }
 
-                        List<Map<String, dynamic>> newUiVariants = [];
-                        double newTotal = 0;
+                          List<Map<String, dynamic>> newUiVariants = [];
+                          double newTotal = 0;
 
-                        for (var c in allCategories) {
-                          final sel = newApiVariants.firstWhere(
-                            (element) =>
-                                element['variant_category_id'].toString() ==
-                                c.id.toString(),
-                            orElse: () => {},
-                          );
-                          if (sel.isEmpty) continue;
+                          for (var c in allCategories) {
+                            final sel = newApiVariants.firstWhere(
+                              (element) =>
+                                  element['variant_category_id'].toString() ==
+                                  c.id.toString(),
+                              orElse: () => {},
+                            );
+                            if (sel.isEmpty) continue;
 
-                          final picked = (sel['variant'] as List? ?? []);
-                          final ids = picked
-                              .whereType<Map>()
-                              .map((e) => e['variant_id']?.toString() ?? '')
-                              .toList();
+                            final picked = (sel['variant'] as List? ?? []);
+                            final ids = picked
+                                .whereType<Map>()
+                                .map((e) => e['variant_id']?.toString() ?? '')
+                                .toList();
 
-                          for (var pv in c.productVariants) {
-                            final vid = pv.id.toString();
-                            if (!ids.contains(vid)) continue;
-                            final int def = (double.tryParse(pv.price) ?? 0)
-                                .toInt();
-                            final int used = customPriceById[vid] ?? def;
+                            for (var pv in c.productVariants) {
+                              final vid = pv.id.toString();
+                              if (!ids.contains(vid)) continue;
+                              final int def = (double.tryParse(pv.price) ?? 0)
+                                  .toInt();
+                              final int used = customPriceById[vid] ?? def;
 
-                            newTotal += used.toDouble();
-                            newUiVariants.add({
-                              "variant_id": pv.id,
-                              "name": pv.name,
-                              "price": used,
-                            });
+                              newTotal += used.toDouble();
+                              newUiVariants.add({
+                                "variant_id": pv.id,
+                                "name": pv.name,
+                                "price": used,
+                              });
+                            }
                           }
-                        }
 
-                        widget.onUpdateVariants(
-                          widget.index,
-                          newApiVariants,
-                          newUiVariants,
-                          newTotal,
-                        );
+                          widget.onUpdateVariants(
+                            widget.index,
+                            newApiVariants,
+                            newUiVariants,
+                            newTotal,
+                          );
 
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        'Simpan',
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Simpan',
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -6233,16 +6336,23 @@ class _PaymentPageState extends State<PaymentPage> {
 
       final body = {
         "deviceid": identifier,
-        "discount_id": _selectedDiscount?.id ?? "",
-        "member_id": widget.memberId, // Use widget.memberId
-        "transaction_id": widget.transactionId ?? "",
-        "value": _selectedMethod == 'Uang Tunai' ? _cashGiven : _totalPay,
-        "payment_method": _selectedMethod == 'Uang Tunai'
-            ? "001"
-            : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
+        "discount_id": _selectedDiscount?.id ?? null,
+        "member_id": widget.memberId,
+        "transaction_id": widget.transactionId ?? null,
+        "is_partial_payment": false,
+        "payments": [
+          {
+            "payment_method_id": _selectedMethod == 'Uang Tunai'
+                ? "001"
+                : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
+            "payment_reference_id": null,
+            "payment_value": _selectedMethod == 'Uang Tunai'
+                ? _cashGiven
+                : _totalPay,
+          },
+        ],
         "detail": details,
       };
-
       debugPrint("PAYMENT request: ${jsonEncode(body)}");
 
       final response = await http.post(
@@ -6370,155 +6480,160 @@ class _PaymentPageState extends State<PaymentPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+      builder: (context) => SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: bnw100,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Rincian Pesanan',
-                  style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(PhosphorIcons.x),
-                ),
-              ],
-            ),
-            Divider(),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.cart.length,
-                itemBuilder: (context, index) {
-                  final item = widget.cart[index];
-                  final Product p = item['product'];
-                  final int unitPrice = _unitAmountFromItem(item);
-                  final bool isCustomize = item['is_customize'] == true;
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: size8),
-                    child: Row(
-                      children: [
-                        Text(
-                          'x${item['quantity']}',
-                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(width: size12),
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(size8),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Rincian Pesanan',
+                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(PhosphorIcons.x),
+                  ),
+                ],
+              ),
+              Divider(),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.cart.length,
+                  itemBuilder: (context, index) {
+                    final item = widget.cart[index];
+                    final Product p = item['product'];
+                    final int unitPrice = _unitAmountFromItem(item);
+                    final bool isCustomize = item['is_customize'] == true;
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: size8),
+                      child: Row(
+                        children: [
+                          Text(
+                            'x${item['quantity']}',
+                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
                           ),
-                          child: p.imageUrl != null
-                              ? Image.network(p.imageUrl!, fit: BoxFit.cover)
-                              : SvgPicture.asset('assets/logoProduct.svg'),
-                        ),
-                        SizedBox(width: size12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p.name,
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                NumberFormat.currency(
-                                  locale: 'id',
-                                  symbol: 'Rp. ',
-                                  decimalDigits: 0,
-                                ).format(unitPrice),
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              if (isCustomize) ...[
-                                SizedBox(width: 8),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: primary100,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    'Custom',
-                                    style: heading4(
-                                      FontWeight.w600,
-                                      primary500,
-                                      'Outfit',
-                                    ),
+                          SizedBox(width: size12),
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(size8),
+                            ),
+                            child: p.imageUrl != null
+                                ? Image.network(p.imageUrl!, fit: BoxFit.cover)
+                                : SvgPicture.asset('assets/logoProduct.svg'),
+                          ),
+                          SizedBox(width: size12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p.name,
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
                                   ),
                                 ),
-                              ],
-                              if (p.discountType != null)
                                 Text(
                                   NumberFormat.currency(
                                     locale: 'id',
                                     symbol: 'Rp. ',
                                     decimalDigits: 0,
-                                  ).format(p.price),
-                                  style: TextStyle(
-                                    decoration: TextDecoration.lineThrough,
-                                    fontFamily: 'Outfit',
-                                    color: bnw500,
-                                    fontSize: sp12,
+                                  ).format(unitPrice),
+                                  style: heading2(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
                                   ),
                                 ),
-                            ],
+                                if (isCustomize) ...[
+                                  SizedBox(width: 8),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: primary100,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'Custom',
+                                      style: heading4(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (p.discountType != null)
+                                  Text(
+                                    NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp. ',
+                                      decimalDigits: 0,
+                                    ).format(p.price),
+                                    style: TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      fontFamily: 'Outfit',
+                                      color: bnw500,
+                                      fontSize: sp12,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary500,
+                    padding: EdgeInsets.all(16),
+                  ),
+                  child: Text(
+                    'Tutup',
+                    style: TextStyle(
+                      color: bnw100,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary500,
-                  padding: EdgeInsets.all(16),
-                ),
-                child: Text(
-                  'Tutup',
-                  style: TextStyle(color: bnw100, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -6540,300 +6655,310 @@ class _PaymentPageState extends State<PaymentPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Rincian Pesanan',
+                          style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        TextButton(
+                          onPressed: _showOrderDetails,
+                          child: Text(
+                            'Lihat Rincian',
+                            style: heading1(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: size12),
+                    // Discount Section
+                    Text(
+                      'Diskon',
+                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: size8),
+                    GestureDetector(
+                      onTap: _showSelectDiscountModal,
+                      child: Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _selectedDiscount != null
+                              ? primary100
+                              : bnw100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _selectedDiscount != null
+                                ? primary500
+                                : bnw200,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              PhosphorIcons.tag_fill,
+                              color: bnw900,
+                              size: 40,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Voucher & Diskon',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    _selectedDiscount != null
+                                        ? _selectedDiscount!.name
+                                        : 'Gunakan diskon untuk harga lebih murah',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_selectedDiscount != null)
+                              Icon(
+                                PhosphorIcons.check_circle_fill,
+                                color: primary500,
+                                size: 24,
+                              )
+                            else
+                              Icon(Icons.chevron_right, color: bnw500),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: size24),
+
+                    Text(
+                      'Metode Pembayaran',
+                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: size12),
+                    ...(_selectedMethod == null
+                            ? _methods
+                            : _methods.where(
+                                (m) => m['label'] == _selectedMethod,
+                              ))
+                        .map((m) => _buildMethodCard(m))
+                        .toList(),
+
+                    if (_selectedMethod != null &&
+                        _selectedMethod != 'Uang Tunai') ...[
+                      SizedBox(height: 24),
                       Text(
-                        'Rincian Pesanan',
+                        'Pilih $_selectedMethod',
                         style: heading1(FontWeight.w600, bnw900, 'Outfit'),
                       ),
-                      TextButton(
-                        onPressed: _showOrderDetails,
-                        child: Text(
-                          'Lihat Rincian',
-                          style: heading1(
-                            FontWeight.w600,
-                            primary500,
-                            'Outfit',
+                      SizedBox(height: size12),
+                      if (_isLoadingSubMethods)
+                        Center(child: CircularProgressIndicator())
+                      else if (_paymentSubMethods.isEmpty)
+                        Text(
+                          'Tidak ada metode tersedia',
+                          style: heading3(FontWeight.w400, bnw600, 'Outfit'),
+                        )
+                      else
+                        ..._paymentSubMethods
+                            .map((sub) => _buildSubMethodCard(sub))
+                            .toList(),
+                    ],
+
+                    if (_selectedMethod == 'Uang Tunai') ...[
+                      SizedBox(height: 24),
+                      Text(
+                        'Uang Tunai',
+                        style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                      ),
+                      TextField(
+                        controller: _cashController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [CurrencyInputFormatter()],
+                        style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                        decoration: InputDecoration(
+                          hintText: 'Rp. 0',
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: primary500),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(child: _quickMoneyBtn(50000)),
+                          SizedBox(width: size8),
+                          Expanded(child: _quickMoneyBtn(100000)),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => _cashController.text =
+                              CurrencyInputFormatter.format(
+                                _totalPay.toString(),
+                              ),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.all(size16),
+                          ),
+                          child: Text(
+                            'Uang Pas',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                  SizedBox(height: size12),
-                  // Discount Section
-                  Text(
-                    'Diskon',
-                    style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: size8),
-                  GestureDetector(
-                    onTap: _showSelectDiscountModal,
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: _selectedDiscount != null ? primary100 : bnw100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: _selectedDiscount != null
-                              ? primary500
-                              : bnw200,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(PhosphorIcons.tag_fill, color: bnw900, size: 40),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Voucher & Diskon',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  _selectedDiscount != null
-                                      ? _selectedDiscount!.name
-                                      : 'Gunakan diskon untuk harga lebih murah',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (_selectedDiscount != null)
-                            Icon(
-                              PhosphorIcons.check_circle_fill,
-                              color: primary500,
-                              size: 24,
-                            )
-                          else
-                            Icon(Icons.chevron_right, color: bnw500),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: size24),
-
-                  Text(
-                    'Metode Pembayaran',
-                    style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: size12),
-                  ...(_selectedMethod == null
-                          ? _methods
-                          : _methods.where(
-                              (m) => m['label'] == _selectedMethod,
-                            ))
-                      .map((m) => _buildMethodCard(m))
-                      .toList(),
-
-                  if (_selectedMethod != null &&
-                      _selectedMethod != 'Uang Tunai') ...[
-                    SizedBox(height: 24),
-                    Text(
-                      'Pilih $_selectedMethod',
-                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(height: size12),
-                    if (_isLoadingSubMethods)
-                      Center(child: CircularProgressIndicator())
-                    else if (_paymentSubMethods.isEmpty)
-                      Text(
-                        'Tidak ada metode tersedia',
-                        style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-                      )
-                    else
-                      ..._paymentSubMethods
-                          .map((sub) => _buildSubMethodCard(sub))
-                          .toList(),
+                    SizedBox(height: 100),
                   ],
-
-                  if (_selectedMethod == 'Uang Tunai') ...[
-                    SizedBox(height: 24),
-                    Text(
-                      'Uang Tunai',
-                      style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                    ),
-                    TextField(
-                      controller: _cashController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [CurrencyInputFormatter()],
-                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                      decoration: InputDecoration(
-                        hintText: 'Rp. 0',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: primary500),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(child: _quickMoneyBtn(50000)),
-                        SizedBox(width: size8),
-                        Expanded(child: _quickMoneyBtn(100000)),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () => _cashController.text =
-                            CurrencyInputFormatter.format(_totalPay.toString()),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.all(size16),
-                        ),
-                        child: Text(
-                          'Uang Pas',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                      ),
-                    ),
-                  ],
-                  SizedBox(height: 100),
-                ],
+                ),
               ),
             ),
-          ),
-          if (_selectedMethod != null)
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: bnw100,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: _isLoadingCalculation
-                  ? Center(child: CircularProgressIndicator())
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Rincian Pembayaran',
-                          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: size16),
-                        _rowSummary('Nama Pembeli', _customerName),
-                        _rowSummary(
-                          'Sub Total',
-                          NumberFormat.currency(
-                            locale: 'id',
-                            symbol: 'Rp. ',
-                            decimalDigits: 0,
-                          ).format(_subTotal),
-                        ),
-                        if (_discount > 0)
-                          _rowSummary(
-                            'Diskon',
-                            "- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_discount)}",
-                            color: succes500,
+            if (_selectedMethod != null)
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: _isLoadingCalculation
+                    ? Center(child: CircularProgressIndicator())
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Rincian Pembayaran',
+                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                           ),
-                        _rowSummary(
-                          'PPN',
-                          NumberFormat.currency(
-                            locale: 'id',
-                            symbol: 'Rp. ',
-                            decimalDigits: 0,
-                          ).format(_ppn),
-                        ),
-                        if (_cashGiven > _totalPay &&
-                            _selectedMethod == 'Uang Tunai')
+                          SizedBox(height: size16),
+                          _rowSummary('Nama Pembeli', _customerName),
                           _rowSummary(
-                            'Kembalian',
+                            'Sub Total',
                             NumberFormat.currency(
                               locale: 'id',
                               symbol: 'Rp. ',
                               decimalDigits: 0,
-                            ).format(_cashGiven - _totalPay),
-                            color: primary500,
+                            ).format(_subTotal),
                           ),
-                        Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Bayar',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  NumberFormat.currency(
-                                    locale: 'id',
-                                    symbol: 'Rp. ',
-                                    decimalDigits: 0,
-                                  ).format(_totalPay),
-                                  style: heading1(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ],
+                          if (_discount > 0)
+                            _rowSummary(
+                              'Diskon',
+                              "- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_discount)}",
+                              color: succes500,
                             ),
-                            ElevatedButton(
-                              onPressed:
-                                  (_isProcessing ||
-                                      (_selectedMethod == 'Uang Tunai' &&
-                                          _cashGiven < _totalPay) ||
-                                      (_selectedMethod != 'Uang Tunai' &&
-                                          _selectedSubMethod == null))
-                                  ? null
-                                  : _processPayment,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primary500,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: _isProcessing
-                                  ? CircularProgressIndicator(color: bnw100)
-                                  : Text(
-                                      'Bayar',
-                                      style: heading2(
-                                        FontWeight.w600,
-                                        bnw100,
-                                        'Outfit',
-                                      ),
+                          _rowSummary(
+                            'PPN',
+                            NumberFormat.currency(
+                              locale: 'id',
+                              symbol: 'Rp. ',
+                              decimalDigits: 0,
+                            ).format(_ppn),
+                          ),
+                          if (_cashGiven > _totalPay &&
+                              _selectedMethod == 'Uang Tunai')
+                            _rowSummary(
+                              'Kembalian',
+                              NumberFormat.currency(
+                                locale: 'id',
+                                symbol: 'Rp. ',
+                                decimalDigits: 0,
+                              ).format(_cashGiven - _totalPay),
+                              color: primary500,
+                            ),
+                          Divider(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Total Bayar',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
                                     ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-            ),
-        ],
+                                  ),
+                                  Text(
+                                    NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp. ',
+                                      decimalDigits: 0,
+                                    ).format(_totalPay),
+                                    style: heading1(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ElevatedButton(
+                                onPressed:
+                                    (_isProcessing ||
+                                        (_selectedMethod == 'Uang Tunai' &&
+                                            _cashGiven < _totalPay) ||
+                                        (_selectedMethod != 'Uang Tunai' &&
+                                            _selectedSubMethod == null))
+                                    ? null
+                                    : _processPayment,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primary500,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                child: _isProcessing
+                                    ? CircularProgressIndicator(color: bnw100)
+                                    : Text(
+                                        'Bayar',
+                                        style: heading2(
+                                          FontWeight.w600,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -6980,196 +7105,203 @@ class _PaymentPageState extends State<PaymentPage> {
         // 1. Initialize temporary state
         DiscountModel? tempSelected = _selectedDiscount;
 
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.5,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return StatefulBuilder(
-              builder: (context, setModalState) {
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: bnw100,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
+        return SafeArea(
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.5,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return StatefulBuilder(
+                builder: (context, setModalState) {
+                  return Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        "Pilih Diskon Umum",
-                        style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                      ),
-                      SizedBox(height: 16),
-                      Expanded(
-                        child: FutureBuilder<List<DiscountModel>>(
-                          future: _fetchDiscountsModal(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return Center(
-                                child: Text("Tidak ada diskon tersedia"),
-                              );
-                            }
+                        SizedBox(height: 20),
+                        Text(
+                          "Pilih Diskon Umum",
+                          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        SizedBox(height: 16),
+                        Expanded(
+                          child: FutureBuilder<List<DiscountModel>>(
+                            future: _fetchDiscountsModal(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Center(
+                                  child: Text("Tidak ada diskon tersedia"),
+                                );
+                              }
 
-                            final discounts = snapshot.data!;
-                            return ListView.separated(
-                              controller: scrollController,
-                              itemCount: discounts.length,
-                              separatorBuilder: (_, __) => SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final discount = discounts[index];
-                                final isSelected =
-                                    tempSelected?.id == discount.id;
+                              final discounts = snapshot.data!;
+                              return ListView.separated(
+                                controller: scrollController,
+                                itemCount: discounts.length,
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(height: 12),
+                                itemBuilder: (context, index) {
+                                  final discount = discounts[index];
+                                  final isSelected =
+                                      tempSelected?.id == discount.id;
 
-                                // Formatted Value
-                                String valueText = "";
-                                if (discount.discountType == 'price') {
-                                  valueText = NumberFormat.currency(
-                                    locale: 'id',
-                                    symbol: 'Rp ',
-                                    decimalDigits: 0,
-                                  ).format(discount.discount);
-                                } else {
-                                  valueText = "${discount.discount}%";
-                                }
+                                  // Formatted Value
+                                  String valueText = "";
+                                  if (discount.discountType == 'price') {
+                                    valueText = NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0,
+                                    ).format(discount.discount);
+                                  } else {
+                                    valueText = "${discount.discount}%";
+                                  }
 
-                                return GestureDetector(
-                                  onTap: () {
-                                    setModalState(() {
-                                      // Toggle temporary selection
-                                      if (tempSelected?.id == discount.id) {
-                                        tempSelected = null;
-                                      } else {
-                                        tempSelected = discount;
-                                      }
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? primary100 : bnw100,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isSelected ? primary500 : bnw300,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          PhosphorIcons.tag_fill,
-                                          color: primary500,
-                                          size: 24,
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        // Toggle temporary selection
+                                        if (tempSelected?.id == discount.id) {
+                                          tempSelected = null;
+                                        } else {
+                                          tempSelected = discount;
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? primary100 : bnw100,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? primary500
+                                              : bnw300,
                                         ),
-                                        SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            PhosphorIcons.tag_fill,
+                                            color: primary500,
+                                            size: 24,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  discount.name,
+                                                  style: heading3(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                                Text(
+                                                  valueText,
+                                                  style: heading4(
+                                                    FontWeight.w400,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.end,
                                             children: [
                                               Text(
-                                                discount.name,
-                                                style: heading3(
-                                                  FontWeight.w600,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                              Text(
-                                                valueText,
-                                                style: heading4(
+                                                discount.date,
+                                                style: body2(
                                                   FontWeight.w400,
-                                                  bnw900,
+                                                  bnw500,
                                                   'Outfit',
                                                 ),
                                               ),
+                                              if (isSelected)
+                                                Icon(
+                                                  Icons.check_circle,
+                                                  color: primary500,
+                                                  size: 20,
+                                                )
+                                              else
+                                                Icon(
+                                                  Icons.circle_outlined,
+                                                  color: bnw300,
+                                                  size: 20,
+                                                ),
                                             ],
                                           ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              discount.date,
-                                              style: body2(
-                                                FontWeight.w400,
-                                                bnw500,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            if (isSelected)
-                                              Icon(
-                                                Icons.check_circle,
-                                                color: primary500,
-                                                size: 20,
-                                              )
-                                            else
-                                              Icon(
-                                                Icons.circle_outlined,
-                                                color: bnw300,
-                                                size: 20,
-                                              ),
-                                          ],
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedDiscount = tempSelected;
-                            });
-                            Navigator.pop(context);
-                            _fetchCalculation();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary500,
-                            padding: EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Selesai',
-                            style: TextStyle(
-                              color: bnw100,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
+                        SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedDiscount = tempSelected;
+                              });
+                              Navigator.pop(context);
+                              _fetchCalculation();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary500,
+                              padding: EdgeInsets.all(16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Selesai',
+                              style: TextStyle(
+                                color: bnw100,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );
@@ -7235,183 +7367,188 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: bnw100,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      padding: EdgeInsets.only(
-        top: 16,
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          color: bnw100,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        padding: EdgeInsets.only(
+          top: 16,
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16),
-          // Product Info
-          Container(
-            padding: EdgeInsets.all(size12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[200]!),
-              borderRadius: BorderRadius.circular(size12),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(size8),
+            SizedBox(height: 16),
+            // Product Info
+            Container(
+              padding: EdgeInsets.all(size12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[200]!),
+                borderRadius: BorderRadius.circular(size12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(size8),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child:
+                        widget.product.imageUrl != null &&
+                            widget.product.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            widget.product.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                SvgPicture.asset('assets/logoProduct.svg'),
+                          )
+                        : Icon(Icons.coffee, size: 30, color: Colors.brown),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child:
-                      widget.product.imageUrl != null &&
-                          widget.product.imageUrl!.isNotEmpty
-                      ? Image.network(
-                          widget.product.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              SvgPicture.asset('assets/logoProduct.svg'),
-                        )
-                      : Icon(Icons.coffee, size: 30, color: Colors.brown),
+                  SizedBox(width: size12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.product.name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          NumberFormat.currency(
+                            locale: 'id',
+                            symbol: 'Rp. ',
+                            decimalDigits: 0,
+                          ).format(widget.product.price),
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          widget.product.category,
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: size12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            // Quantity Selector
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Jumlah',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                SizedBox(width: size12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.product.name,
+                Row(
+                  children: [
+                    _buildQtyButton(false),
+                    Container(
+                      width: 40,
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$_quantity',
                         style: TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        NumberFormat.currency(
-                          locale: 'id',
-                          symbol: 'Rp. ',
-                          decimalDigits: 0,
-                        ).format(widget.product.price),
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        widget.product.category,
-                        style: TextStyle(color: Colors.grey, fontSize: size12),
-                      ),
-                    ],
-                  ),
+                    ),
+                    _buildQtyButton(true),
+                  ],
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 16),
-          // Quantity Selector
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Jumlah',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            SizedBox(height: 16),
+            // Notes
+            Text('Catatan', style: TextStyle(fontWeight: FontWeight.w500)),
+            SizedBox(height: size8),
+            TextField(
+              controller: _notesController,
+              decoration: InputDecoration(
+                hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
+                hintStyle: TextStyle(color: Colors.grey, fontSize: size12),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
               ),
-              Row(
-                children: [
-                  _buildQtyButton(false),
-                  Container(
-                    width: 40,
-                    alignment: Alignment.center,
+            ),
+            SizedBox(height: 24),
+            // Actions
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: primary500),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(size8),
+                      ),
+                    ),
                     child: Text(
-                      '$_quantity',
+                      'Batalkan',
                       style: TextStyle(
-                        fontSize: 16,
+                        color: primary500,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  _buildQtyButton(true),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          // Notes
-          Text('Catatan', style: TextStyle(fontWeight: FontWeight.w500)),
-          SizedBox(height: size8),
-          TextField(
-            controller: _notesController,
-            decoration: InputDecoration(
-              hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-              hintStyle: TextStyle(color: Colors.grey, fontSize: size12),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-              ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      widget.onAddToCart(_quantity, _notesController.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(size8),
+                      ),
+                    ),
+                    child: Text(
+                      'Tambah Ke Keranjang',
+                      style: TextStyle(
+                        color: bnw100,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: 24),
-          // Actions
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: primary500),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                  child: Text(
-                    'Batalkan',
-                    style: TextStyle(
-                      color: primary500,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    widget.onAddToCart(_quantity, _notesController.text);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(size8),
-                    ),
-                  ),
-                  child: Text(
-                    'Tambah Ke Keranjang',
-                    style: TextStyle(
-                      color: bnw100,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: size8),
-        ],
+            SizedBox(height: size8),
+          ],
+        ),
       ),
     );
   }

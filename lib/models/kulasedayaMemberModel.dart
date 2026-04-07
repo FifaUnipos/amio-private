@@ -13,10 +13,10 @@ class KulasedayaMember {
 
   factory KulasedayaMember.fromJson(Map<String, dynamic> json) {
     return KulasedayaMember(
-      memberCode: json['member_code'],
-      nama: json['nama'],
-      isBinded: json['status'],
-      saldo: json['saldo'],
+      memberCode: json['member_code']?.toString() ?? '',
+      nama: json['nama']?.toString() ?? '',
+      isBinded: json['status']?.toString() ?? '',
+      saldo: json['saldo']?.toString() ?? '0',
     );
   }
 }

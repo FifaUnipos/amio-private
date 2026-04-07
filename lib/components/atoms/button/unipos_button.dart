@@ -12,6 +12,16 @@ enum UniposButtonVariant {
       this == UniposButtonVariant.primary ? primary500 : Colors.transparent;
   Color get fgColor =>
       this == UniposButtonVariant.primary ? bnw100 : primary500;
+
+  Color get colorLoading {
+    switch (this) {
+      case UniposButtonVariant.primary:
+        return bnw100;
+      case UniposButtonVariant.secondary:
+      case UniposButtonVariant.tertiary:
+        return primary500;
+    }
+  }
 }
 
 enum UniposButtonSize {
@@ -82,6 +92,7 @@ class UniposButton extends StatelessWidget {
     this.variant = UniposButtonVariant.primary,
     this.icon,
     this.size = UniposButtonSize.large,
+    this.loading = false,
   });
 
   final String text;
@@ -90,10 +101,10 @@ class UniposButton extends StatelessWidget {
   final UniposButtonVariant variant;
   final IconData? icon;
   final UniposButtonSize size;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
-    // Responsive logic: downgrade size by one step if the screen is Mobile (< 600px width)
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
 
@@ -104,14 +115,13 @@ class UniposButton extends StatelessWidget {
       } else if (size == UniposButtonSize.medium) {
         effectiveSize = UniposButtonSize.medium;
       }
-      // if it's already small, it remains small
     }
 
     final bgColor = variant.bgColor;
     final fgColor = variant.fgColor;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: loading ? null : onTap,
       child: Stack(
         children: [
           Container(
@@ -126,13 +136,21 @@ class UniposButton extends StatelessWidget {
                   : MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (icon != null) ...[
+                if (loading)
+                  SizedBox(
+                    width: effectiveSize.iconSizeValue,
+                    height: effectiveSize.iconSizeValue,
+                    child: CircularProgressIndicator(
+                      color: variant.colorLoading,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                if (icon != null && !loading) ...[
                   Icon(icon, color: fgColor, size: effectiveSize.iconSizeValue),
                   if (textShow)
                     SizedBox(width: uniposSize16), // space antar icon & text
                 ],
-
-                if (textShow)
+                if (textShow && !loading)
                   Text(text, style: effectiveSize.getTextStyle(fgColor)),
               ],
             ),

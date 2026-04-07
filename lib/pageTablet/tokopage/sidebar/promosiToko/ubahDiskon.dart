@@ -57,7 +57,10 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
 
   void formatInputRpHargaEdit() {
     String text = conHarga.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text)?? 0;
+
+    if (value == 0) return;
+
     String formattedAmount = formatCurrency(value);
 
     conHarga.value = TextEditingValue(
@@ -68,7 +71,9 @@ class _UbahDiskonPageState extends State<UbahDiskonPage> {
 
   void formatInputRpPoinEdit() {
     String text = conPointEdit.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text)?? 0;
+
+    if (value == 0) return;
     String formattedAmount = formatCurrency(value);
 
     conPointEdit.value = TextEditingValue(

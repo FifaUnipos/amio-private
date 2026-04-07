@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import '../../../../services/apimethod.dart';
@@ -24,14 +27,18 @@ class UbahPelangganPage extends StatefulWidget {
 }
 
 class _UbahPelangganPageState extends State<UbahPelangganPage> {
-  late TextEditingController conNameEdit =
-      TextEditingController(text: widget.nameEdit);
-  late TextEditingController conPhoneEdit =
-      TextEditingController(text: widget.nomorEdit);
-  late TextEditingController conEmailEdit =
-      TextEditingController(text: widget.emailEdit);
-  late TextEditingController conInstagramEdit =
-      TextEditingController(text: widget.instagramEdit);
+  late TextEditingController conNameEdit = TextEditingController(
+    text: widget.nameEdit,
+  );
+  late TextEditingController conPhoneEdit = TextEditingController(
+    text: widget.nomorEdit,
+  );
+  late TextEditingController conEmailEdit = TextEditingController(
+    text: widget.emailEdit,
+  );
+  late TextEditingController conInstagramEdit = TextEditingController(
+    text: widget.instagramEdit,
+  );
 
   @override
   void dispose() {
@@ -67,7 +74,7 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
                   style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                 ),
               ],
-            )
+            ),
           ],
         ),
         SizedBox(height: size16),
@@ -82,6 +89,7 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
                 conNameEdit,
                 TextInputType.text,
                 false,
+                const []
               ),
               SizedBox(height: size16),
               fieldEditProduk(
@@ -90,6 +98,7 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
                 conPhoneEdit,
                 TextInputType.number,
                 false,
+                [FilteringTextInputFormatter.digitsOnly]
               ),
               SizedBox(height: size16),
               fieldEditProduk(
@@ -98,6 +107,7 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
                 conEmailEdit,
                 TextInputType.emailAddress,
                 true,
+                const []
               ),
               SizedBox(height: size16),
               fieldEditProduk(
@@ -106,6 +116,7 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
                 conInstagramEdit,
                 TextInputType.text,
                 true,
+                const []
               ),
             ],
           ),
@@ -135,30 +146,28 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
               setState(() {});
             },
             child: buttonXL(
-                Center(
-                  child: Text(
-                    'Simpan',
-                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                  ),
+              Center(
+                child: Text(
+                  'Simpan',
+                  style: heading3(FontWeight.w600, bnw100, 'Outfit'),
                 ),
-                0),
+              ),
+              0,
+            ),
           ),
-        )
+        ),
       ],
     );
   }
 
-  fieldEditProduk(title, hint, mycontroller, TextInputType numberNo, bintang) {
+  fieldEditProduk(title, hint, mycontroller, TextInputType numberNo, bintang, List<TextInputFormatter> inputFormat) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
               Text(
                 bintang ? '' : ' *',
                 style: heading4(FontWeight.w700, red500, 'Outfit'),
@@ -168,23 +177,18 @@ class _UbahPelangganPageState extends State<UbahPelangganPage> {
           TextFormField(
             cursorColor: primary500,
             keyboardType: numberNo,
+            inputFormatters: inputFormat,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),

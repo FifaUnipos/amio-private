@@ -14,10 +14,9 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 class ModalTransactionDelete {
   static Future<bool?> show(
     BuildContext context,
-    Map<String, dynamic>? _detailData,
+    Map<String, dynamic>? dataDetailProduct,
     String token,
   ) async {
-    // Reset state saat modal baru mau dibuka agar error yang lama hilang
     context.read<TransactionHistoryDeleteProvider>().resetState();
 
     String? selectedReasonId;
@@ -33,7 +32,7 @@ class ModalTransactionDelete {
       },
       onTapPrefixButton: () => Navigator.pop(context),
       onTapSuffixButton: () async {
-        if (_detailData == null || _detailData['transactionid'] == null) {
+        if (dataDetailProduct == null || dataDetailProduct['transactionid'] == null) {
           showSnackbar(context, {
             'rc': '99',
             'message': 'ID Transaksi belum dimuat',
@@ -53,7 +52,7 @@ class ModalTransactionDelete {
         await provider.deleteTransactionHistory(
           noteController.text,
           selectedReasonId!,
-          _detailData['transactionid'].toString(),
+          dataDetailProduct['transactionid'].toString(),
           token,
         );
 

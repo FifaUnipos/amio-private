@@ -98,6 +98,7 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
   Future<dynamic> getDataProduk(List<String> value) async {
     return datasProduk = await getMasterData(
       widget.token,
+      
       widget.merchID,
       '',
       '',
@@ -108,7 +109,7 @@ class _InventoriPageTestState extends State<LihatInventoryPageGrup>
 
   void _onChanged(String value) {
     List<String> merchandID = [widget.merchID];
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasProduk = await getMasterData(
         widget.token,

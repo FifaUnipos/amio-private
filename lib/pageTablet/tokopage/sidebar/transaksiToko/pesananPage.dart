@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/payment_shared.dart';
+import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
@@ -84,9 +85,6 @@ class _SimpanPageState extends State<SimpanPage> {
   List<String> cartProductIds = [];
   String? nameSingle, transaksiReference, idKategori;
 
-  String textOrderBy = 'Tagihan Terbaru';
-  String textvalueOrderBy = 'upDownCreate';
-
   late Uint8List imageStruk;
 
   getStrukPhoto() async {
@@ -116,7 +114,7 @@ class _SimpanPageState extends State<SimpanPage> {
         widget.token,
         '0',
         '',
-        textvalueOrderBy,
+        textvalueOrderByTagihan,
       );
 
       setState(() {});
@@ -315,7 +313,6 @@ class _SimpanPageState extends State<SimpanPage> {
                                     color: bnw100,
                                     backgroundColor: primary500,
                                     onRefresh: () async {
-                                      initState();
                                       setState(() {});
                                     },
                                     child: ListView.builder(
@@ -2556,10 +2553,13 @@ class _SimpanPageState extends State<SimpanPage> {
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
           setState(() {
+            int previousValue = valueOrderByBills;
+            bool confirmed = false;
             showModalBottomSheet(
               constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
@@ -2632,8 +2632,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
+                                              color: valueOrderByBills == index
                                                   ? primary500
                                                   : bnw300,
                                             ),
@@ -2645,20 +2644,19 @@ class _SimpanPageState extends State<SimpanPage> {
                                             orderByTagihanText[index],
                                             style: heading4(
                                               FontWeight.w400,
-                                              valueOrderByProduct == index
+                                              valueOrderByBills == index
                                                   ? primary500
                                                   : bnw900,
                                               'Outfit',
                                             ),
                                           ),
-                                          selected:
-                                              valueOrderByProduct == index,
+                                          selected: valueOrderByBills == index,
                                           onSelected: (bool selected) {
                                             setState(() {
                                               print(index);
                                               // _value =
                                               //     selected ? index : null;
-                                              valueOrderByProduct = index;
+                                              valueOrderByBills = index;
                                             });
                                             setState(() {});
                                           },
@@ -2673,32 +2671,46 @@ class _SimpanPageState extends State<SimpanPage> {
                           SizedBox(height: size32),
                           SizedBox(
                             width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByTagihanText[valueOrderByProduct]);
+                            child: StatefulBuilder(
+                              builder: (BuildContext context, setState) =>
+                                  GestureDetector(
+                                    onTap: () async {
+                                      confirmed = true;
+                                      textOrderByTagihan =
+                                          orderByTagihanText[valueOrderByBills];
+                                      textvalueOrderByTagihan =
+                                          orderByRiwayatTagihan[valueOrderByBills];
+                                      orderByRiwayatTagihan[valueOrderByBills];
 
-                                textOrderBy =
-                                    orderByTagihanText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByRiwayatTagihan[valueOrderByProduct];
-                                orderByRiwayatTagihan[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
+                                      final result = await getRiwayatTransaksi(
+                                        context,
+                                        checkToken,
+                                        '0',
+                                        merchantId,
+                                        textvalueOrderByTagihan,
+                                      );
+
+                                      if (!mounted) return;
+                                      outerSetState(
+                                        () => datasRiwayat = result,
+                                      );
+
+                                      Navigator.pop(context);
+                                    },
+                                    child: buttonXL(
+                                      Center(
+                                        child: Text(
+                                          'Tampilkan',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw100,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ),
+                                      0,
                                     ),
                                   ),
-                                ),
-                                0,
-                              ),
                             ),
                           ),
                         ],
@@ -2707,7 +2719,13 @@ class _SimpanPageState extends State<SimpanPage> {
                   ),
                 );
               },
-            );
+            ).whenComplete(() {
+              if (!confirmed) {
+                outerSetState((){
+                  valueOrderByBills = previousValue;
+                });
+              }
+            });
           });
         },
         child: buttonLoutline(
@@ -2719,7 +2737,7 @@ class _SimpanPageState extends State<SimpanPage> {
                 style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari $textOrderBy',
+                ' dari $textOrderByTagihan',
                 style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),

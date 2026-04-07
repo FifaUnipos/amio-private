@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/services.dart';
+import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/models/inventoriModel/detailPembelianModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/inventoriModel.dart';
 import 'package:unipos_app_335/models/inventoriModel/pembelianInventoriModel.dart';
@@ -99,6 +101,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
 
   DateTime? _selectedDate, _selectedDate2;
   String tanggalAwal = '', tanggalAkhir = '';
+  String tanggalPersediaan = '';
 
   List<Map<String, dynamic>> dataPemakaian = [];
   final Map<String, Map<String, dynamic>> selectedDataPemakaian = {};
@@ -112,6 +115,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
       '',
       '',
     );
+    if (!mounted) return;
     setState(() {
       unitList = units;
     });
@@ -120,11 +124,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   void getMasterDataTokoAndUpdateState() async {
     try {
       final result = await getMasterDataToko(context, widget.token, "", "", "");
+      if (!mounted) return;
       setState(() {
         dataPemakaian = result;
       });
     } catch (e) {
       print("Error fetching data: $e");
+      if (!mounted) return;
       showSnackbar(context, {"message": e.toString()});
     }
   }
@@ -159,7 +165,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   //     (value) {
   //       Future.delayed(Duration(seconds: 1)).then((value) {
   //         _pageController.jumpToPage(9);
-  //         initState();
   //       });
   //     },
   //   );
@@ -199,7 +204,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   Timer? _debounce;
 
   Future<void> _onChanged(String value) async {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasProdukBOM = await getBOM(
         widget.token,
@@ -212,7 +217,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   }
 
   Future<void> _onChangedBahan(String value) async {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(Duration(seconds: 2), () async {
       datasBahan = await getMasterData(
         widget.token,
@@ -249,7 +254,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
       await getDatabahan(value);
       getDataProdukPemesanan(value);
       getDataProduk(value);
-
+      if (!mounted) return;
       setState(() {
         // log(datasProduk.toString());
         datasProduk;
@@ -345,11 +350,23 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   }
 
   Future<dynamic> getDataProdukPemesanan(List<String> value) async {
-    return datasProdukPemesanan = await getPembelian(widget.token, '', '', '');
+    final result = await getPembelian(widget.token, '', '', '');
+
+    if (!mounted) return;
+    setState(() {
+      datasProdukPemesanan = result;
+    });
+
+    return result;
   }
 
   Future<dynamic> getDatabahan(List<String> value) async {
-    return datasBahan = await getMasterData(widget.token, '', '', '');
+    return datasBahan = await getMasterData(
+      widget.token,
+      '',
+      '',
+      textvalueOrderByBahan,
+    );
   }
 
   @override
@@ -489,7 +506,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                       ? GestureDetector(
                                           onTap: () {
                                             searchController.text = '';
-                                            initState();
                                           },
                                           child: Icon(
                                             PhosphorIcons.x_fill,
@@ -532,7 +548,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                               } else if (pagesOn == 4) {
                                 _pageController.jumpToPage(7);
                               }
-
                               // pagesOn == 0
                               //     ? _pageController.jumpToPage(2)
                               //     : _pageController.jumpToPage(3);
@@ -732,7 +747,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                   onRefresh: () async {
                                     setState(() {});
                                     refreshPage();
-                                    // initState();
                                   },
                                   child: ListView.builder(
                                     // physics: BouncingScrollPhysics(),
@@ -1378,11 +1392,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                   listProduct,
                                                 ).then((value) {
                                                   setState(() {});
-                                                  initState();
                                                 });
 
                                                 setState(() {});
-                                                initState();
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -1474,7 +1486,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             backgroundColor: primary500,
                             onRefresh: () async {
                               setState(() {});
-                              initState();
                               refreshPage();
                             },
                             child: ListView.builder(
@@ -1765,8 +1776,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                               listProduct.clear();
                                                                               selectedFlag.clear();
                                                                             });
-                                                                            initState();
-                                                                            initState();
                                                                           });
                                                                         });
                                                                       },
@@ -2082,25 +2091,30 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                         children: [
                                           Expanded(
                                             child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  deletePembelian(
-                                                    context,
-                                                    widget.token,
-                                                    listProduct,
-                                                  ).then((value) {
-                                                    setState(() {
-                                                      isSelectionMode = false;
-                                                      listProduct = [];
-                                                      listProduct.clear();
-                                                      selectedFlag.clear();
-                                                    });
-                                                    initState();
-                                                  });
-                                                });
+                                              onTap: () async {
+                                                Navigator.pop(
+                                                  context,
+                                                ); // tutup dialog konfirmasi
 
-                                                setState(() {});
-                                                initState();
+                                                await deletePembelian(
+                                                  context,
+                                                  widget.token,
+                                                  listProduct,
+                                                );
+
+                                                if (!mounted) return;
+
+                                                // getDataProdukPemesanan sudah panggil setState sendiri
+                                                await getDataProdukPemesanan([
+                                                  '',
+                                                ]);
+
+                                                if (!mounted) return;
+                                                setState(() {
+                                                  isSelectionMode = false;
+                                                  listProduct = [];
+                                                  selectedFlag.clear();
+                                                });
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -2193,7 +2207,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             onRefresh: () async {
                               setState(() {});
                               refreshPage();
-                              // initState();
                             },
                             child: ListView.builder(
                               // physics: BouncingScrollPhysics(),
@@ -2455,31 +2468,45 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                 children: [
                                                                   Expanded(
                                                                     child: GestureDetector(
-                                                                      onTap: () {
+                                                                      onTap: () async {
+                                                                        final List<
+                                                                          String
+                                                                        >
+                                                                        dataBahan = [
+                                                                          datasProdukPemesanan![index]
+                                                                              .groupId
+                                                                              .toString(),
+                                                                        ];
+
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        ); // tutup dialog konfirmasi
+
+                                                                        await deletePembelian(
+                                                                          context,
+                                                                          widget
+                                                                              .token,
+                                                                          dataBahan,
+                                                                        );
+
+                                                                        if (!mounted)
+                                                                          return;
+
+                                                                        // Refresh data dari server setelah delete berhasil
+                                                                        await getDataProdukPemesanan(
+                                                                          [''],
+                                                                        );
+
+                                                                        if (!mounted)
+                                                                          return;
                                                                         setState(() {
-                                                                          List<
-                                                                            String
-                                                                          >
-                                                                          dataBahan = [
-                                                                            datasProdukPemesanan![index].groupId.toString(),
-                                                                          ];
-                                                                          deletePembelian(
-                                                                            context,
-                                                                            widget.token,
-                                                                            dataBahan,
-                                                                          ).then((
-                                                                            value,
-                                                                          ) {
-                                                                            setState(() {
-                                                                              isSelectionMode = false;
-                                                                              listProduct = [];
-                                                                              listProduct.clear();
-                                                                              selectedFlag.clear();
-                                                                            });
-                                                                            // initState();
-                                                                          });
+                                                                          isSelectionMode =
+                                                                              false;
+                                                                          listProduct =
+                                                                              [];
+                                                                          selectedFlag
+                                                                              .clear();
                                                                         });
-                                                                        initState();
                                                                       },
                                                                       child: buttonXLoutline(
                                                                         Center(
@@ -2533,7 +2560,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                         );
                                                       },
                                                       child: modalBottomValue(
-                                                        'Hapus Persediaan',
+                                                        'Hapus Persediaans',
                                                         PhosphorIcons.trash,
                                                       ),
                                                     ),
@@ -2817,14 +2844,12 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                               //       idProduct = '';
                                               //       _pageController.jumpToPage(0);
                                               //       setState(() {});
-                                              //       initState();
                                               //     }
                                               //   },
                                               // );
                                               // refreshDataProduk();
 
                                               setState(() {});
-                                              initState();
                                             },
                                             child: buttonXLoutline(
                                               Center(
@@ -2907,7 +2932,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                     backgroundColor: primary500,
                     onRefresh: () async {
                       setState(() {});
-                      // initState();
                       refreshPage();
                     },
                     child: ListView.builder(
@@ -3177,7 +3201,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
 
                   List<String> value = [""];
 
-                  initState();
                   setState(() {});
                 },
                 child: buttonXL(
@@ -3291,8 +3314,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                     firstDate: DateTime(2022),
                                     lastDate: DateTime(2101),
                                   ).then((selectedDate) {
+                                    if (selectedDate == null) return;
                                     DateTime selectedDateTime = DateTime(
-                                      selectedDate!.year,
+                                      selectedDate.year,
                                       selectedDate.month,
                                       selectedDate.day,
                                     );
@@ -3303,9 +3327,10 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                       selectedDate.day,
                                     );
 
-                                    tanggalAwal =
-                                        "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
-                                    print(tanggalAwal);
+                                    tanggalPersediaan =
+                                        "${selectedDateTime.day}-${selectedDateTime.month.toString().padLeft(2, '0')}-${selectedDateTime.year}";
+                                    print(tanggalPersediaan);
+                                    if (!mounted) return;
                                     setState(() {});
                                   });
                                 },
@@ -3318,12 +3343,14 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        tanggalAwal == ''
+                                        tanggalPersediaan == ''
                                             ? 'Pilih Tanggal'
-                                            : tanggalAwal,
+                                            : tanggalPersediaan,
                                         style: heading2(
                                           FontWeight.w600,
-                                          tanggalAwal == '' ? bnw500 : bnw900,
+                                          tanggalPersediaan == ''
+                                              ? bnw500
+                                              : bnw900,
                                           'Outfit',
                                         ),
                                       ),
@@ -3475,7 +3502,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                     ),
                                   ),
                                   Text(
-                                    '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
+                                    '${listProduct.length}/${datasProduk?.length ?? 0} Produk Terpilih',
                                     // 'produk terpilih',
                                     style: heading4(
                                       FontWeight.w600,
@@ -3534,14 +3561,12 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                       //       idProduct = '';
                                                       //       _pageController.jumpToPage(0);
                                                       //       setState(() {});
-                                                      //       initState();
                                                       //     }
                                                       //   },
                                                       // );
                                                       // refreshDataProduk();
 
                                                       setState(() {});
-                                                      initState();
                                                     },
                                                     child: buttonXLoutline(
                                                       Center(
@@ -3618,165 +3643,189 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                               ),
                       ),
                       Expanded(
-                        child: Container(
-                          // width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: primary100,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(size12),
-                              bottomRight: Radius.circular(size12),
-                            ),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            // physics: NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.zero,
-                            itemCount: orderInventory.length,
-                            itemBuilder: (context, index) {
-                              // Mendapatkan data dari dataPemakaian
-                              final Map<String, dynamic> data =
-                                  orderInventory[index];
-                              final productId = data['id'];
-                              final isSelected = selectedDataPemakaian
-                                  .containsKey(productId);
+                        child: StatefulBuilder(
+                          builder: (context, setTableState) {
+                            // Helper untuk hapus item dari tabel
+                            void removeItem(int idx) {
+                              final removedItem = orderInventory[idx];
+                              final itemId = removedItem['inventory_master_id']
+                                  ?.toString();
+                              if (itemId == null || itemId.isEmpty) {
+                                // Fallback: hapus berdasar 'id' jika inventory_master_id tidak ada
+                                final fallbackId = removedItem['id']
+                                    ?.toString();
+                                if (fallbackId != null) {
+                                  selectedDataPemakaian.remove(fallbackId);
+                                }
+                              } else {
+                                selectedDataPemakaian.remove(itemId);
+                              }
+                              orderInventory.removeAt(idx);
+                              setTableState(() {});
+                              setState(() {});
+                            }
 
-                              // print('dataku : $data');
-
-                              return Container(
-                                margin: EdgeInsets.symmetric(vertical: size12),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(color: bnw300, width: 1),
-                                  ),
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: primary100,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(size12),
+                                  bottomRight: Radius.circular(size12),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Opacity(
-                                      opacity: 0,
-                                      child: InkWell(
-                                        // onTap: () => onTap(isSelected, index),
-                                        onTap: () {
-                                          // print('onTap called $data');
-                                          // onTap(
-                                          //   isSelected,
-                                          //   index,
-                                          //   productId,
-                                          // );
-                                          // log(data.name.toString());
-                                          // print(dataProduk.isActive);
+                              ),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                itemCount: orderInventory.length,
+                                itemBuilder: (context, index) {
+                                  // Mendapatkan data dari dataPemakaian
+                                  final Map<String, dynamic> data =
+                                      orderInventory[index];
+                                  final productId = data['id'];
+                                  final isSelected = selectedDataPemakaian
+                                      .containsKey(productId);
 
-                                          print(listProduct);
-                                        },
-                                        child: SizedBox(
-                                          width: 50,
-                                          child: _buildSelectIconInventori(
-                                            isSelected!,
-                                            data,
+                                  // print('dataku : $data');
+
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(
+                                      vertical: size12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: bnw300,
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Opacity(
+                                          opacity: 0,
+                                          child: InkWell(
+                                            // onTap: () => onTap(isSelected, index),
+                                            onTap: () {
+                                              // print('onTap called $data');
+                                              // onTap(
+                                              //   isSelected,
+                                              //   index,
+                                              //   productId,
+                                              // );
+                                              // log(data.name.toString());
+                                              // print(dataProduk.isActive);
+
+                                              print(listProduct);
+                                            },
+                                            child: SizedBox(
+                                              width: 50,
+                                              child: _buildSelectIconInventori(
+                                                isSelected!,
+                                                data,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        data['unit'] ?? '',
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            data['unit'] ?? '',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        data['unit_name'] ?? '',
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            data['unit_name'] ?? '',
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        data['qty'].toString(),
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            (data['qty'] ?? 0).toString(),
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        data['price'].toString(),
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            (data['price'] ?? '0').toString(),
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        FormatCurrency.convertToIdr(
-                                          (double.tryParse(
-                                                    data['price']
-                                                        .toString()
-                                                        .replaceAll(',', ''),
-                                                  ) ??
-                                                  0) *
-                                              (num.tryParse(
-                                                    data['qty'].toString(),
-                                                  ) ??
-                                                  0),
-                                        ).toString(),
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
+                                        SizedBox(width: size16),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            FormatCurrency.convertToIdr(
+                                              (double.tryParse(
+                                                        (data['price'] ?? '0')
+                                                            .toString()
+                                                            .replaceAll(
+                                                              ',',
+                                                              '',
+                                                            ),
+                                                      ) ??
+                                                      0) *
+                                                  (num.tryParse(
+                                                        (data['qty'] ?? 0)
+                                                            .toString(),
+                                                      ) ??
+                                                      0),
+                                            ).toString(),
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                        SizedBox(width: size16),
+                                        GestureDetector(
+                                          onTap: () => removeItem(index),
+                                          child: Icon(
+                                            PhosphorIcons.x_fill,
+                                            color: red500,
+                                          ),
+                                        ),
+                                        SizedBox(width: size16),
+                                      ],
                                     ),
-                                    SizedBox(width: size16),
-                                    GestureDetector(
-                                      onTap: () {
-                                        var removedItem = orderInventory[index];
-                                        var itemId =
-                                            removedItem['inventory_master_id'];
-                                        selectedDataPemakaian.remove(itemId);
-                                        orderInventory.removeAt(index);
-                                        setState(() {});
-                                      },
-                                      child: Icon(
-                                        PhosphorIcons.x_fill,
-                                        color: red500,
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -3788,28 +3837,48 @@ class _InventoriPageTestState extends State<InventoriPageTest>
           ),
           SizedBox(height: size16),
           GestureDetector(
-            onTap: () {
-              if (selectedDataPemakaian.isEmpty) {
-                selectedDataPemakaian.clear();
+            onTap: () async {
+              try {
+                final result = await getMasterDataToko(
+                  context,
+                  widget.token,
+                  '',
+                  '',
+                  '',
+                );
+                if (mounted) {
+                  setState(() => dataPemakaian = result);
+                }
+              } catch (e) {
+                print('Error fetching dataPemakaian: $e');
               }
-              qtyController = List.generate(
-                dataPemakaian.length,
-                (index) => TextEditingController(),
+              if (!mounted) return;
+
+              final List<Map<String, dynamic>> localItems = List.from(
+                dataPemakaian,
               );
-              hargaSatuanControllers = List.generate(
-                dataPemakaian.length,
-                (index) => TextEditingController(),
-              );
-              textController = List.generate(
-                dataPemakaian.length,
-                (index) => TextEditingController(text: '-'),
-              );
+
+              final Map<String, TextEditingController> itemQtyCtrl = {
+                for (final it in localItems)
+                  if (it['id'] != null)
+                    it['id'].toString(): TextEditingController(),
+              };
+              final Map<String, TextEditingController> itemHargaCtrl = {
+                for (final it in localItems)
+                  if (it['id'] != null)
+                    it['id'].toString(): TextEditingController(),
+              };
+              final Map<String, TextEditingController> itemTextCtrl = {
+                for (final it in localItems)
+                  if (it['id'] != null)
+                    it['id'].toString(): TextEditingController(text: '-'),
+              };
 
               showModalBottom(
                 context,
                 double.infinity,
                 StatefulBuilder(
-                  builder: (context, setState) => IntrinsicHeight(
+                  builder: (context, setModalState) => IntrinsicHeight(
                     child: Container(
                       margin: EdgeInsets.all(size16),
                       padding: EdgeInsets.all(size12),
@@ -3828,7 +3897,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                           SizedBox(height: size16),
                           Container(
                             height: MediaQuery.sizeOf(context).height / 1.8,
-                            child: dataPemakaian.isEmpty
+                            child: localItems.isEmpty
                                 ? Center(
                                     child: Text(
                                       'Bahan tidak ditemukan.',
@@ -3845,11 +3914,22 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                         context,
                                       ).viewInsets.bottom,
                                     ),
-                                    itemCount: dataPemakaian.length,
+                                    itemCount: localItems.length,
                                     itemBuilder: (context, index) {
-                                      final item = dataPemakaian[index];
+                                      final item = localItems[index];
+                                      final itemId =
+                                          item['id']?.toString() ?? '';
+                                      final qtyCtrl =
+                                          itemQtyCtrl[itemId] ??
+                                          TextEditingController();
+                                      final hargaCtrl =
+                                          itemHargaCtrl[itemId] ??
+                                          TextEditingController();
+                                      final textCtrl =
+                                          itemTextCtrl[itemId] ??
+                                          TextEditingController(text: '-');
                                       return StatefulBuilder(
-                                        builder: (context, setState) {
+                                        builder: (context, setItemState) {
                                           return Column(
                                             children: [
                                               ListTile(
@@ -3859,7 +3939,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                   value: selectedDataPemakaian
                                                       .containsKey(item['id']),
                                                   onChanged: (bool? value) {
-                                                    setState(() {
+                                                    setModalState(() {
                                                       // print(
                                                       // "tapped ${unitList[index].id}");
                                                       // print(
@@ -3911,16 +3991,16 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                       : Icons.expand_more,
                                                 ),
                                                 onTap: () {
-                                                  setState(() {
-                                                    addNewItem();
+                                                  setModalState(() {
                                                     if (selectedDataPemakaian
                                                         .containsKey(
-                                                          item['id'],
+                                                          item['id'] ?? '',
                                                         )) {
                                                       selectedDataPemakaian
                                                           .remove(item['id']);
                                                     } else {
-                                                      selectedDataPemakaian[item['id']] = {
+                                                      selectedDataPemakaian[item['id'] ??
+                                                          ''] = {
                                                         "inventory_master_id":
                                                             item['id'],
                                                         "qty": 0,
@@ -3938,6 +4018,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                   });
                                                 },
                                               ),
+
                                               if (selectedDataPemakaian
                                                   .containsKey(item['id']))
                                                 Container(
@@ -3952,7 +4033,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                         ),
                                                   ),
 
-                                                  //ubah cu
                                                   child: Column(
                                                     children: [
                                                       Row(
@@ -3982,12 +4062,12 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                           ),
                                                           SizedBox(
                                                             key: ValueKey(
-                                                              index,
+                                                              itemId,
                                                             ),
                                                             width: 120,
                                                             child: TextField(
                                                               controller:
-                                                                  hargaSatuanControllers[index],
+                                                                  hargaCtrl,
                                                               // onTap: () {
                                                               //   FocusScope.of(
                                                               //           context)
@@ -4017,13 +4097,24 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                     ),
                                                               ),
                                                               onChanged: (value) {
-                                                                setState(() {});
-                                                                selectedDataPemakaian[item['id']]!['price'] =
-                                                                    value;
+                                                                setItemState(
+                                                                  () {},
+                                                                );
+                                                                if (selectedDataPemakaian
+                                                                    .containsKey(
+                                                                      item['id'],
+                                                                    )) {
+                                                                  selectedDataPemakaian[item['id']]!['price'] =
+                                                                      value;
+                                                                }
                                                               },
                                                               keyboardType:
                                                                   TextInputType
                                                                       .number,
+                                                              inputFormatters: [
+                                                                FilteringTextInputFormatter
+                                                                    .digitsOnly,
+                                                              ],
                                                             ),
                                                           ),
                                                         ],
@@ -4058,7 +4149,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                             width: 120,
                                                             child: TextField(
                                                               controller:
-                                                                  qtyController[index],
+                                                                  qtyCtrl,
                                                               decoration: InputDecoration(
                                                                 focusedBorder: UnderlineInputBorder(
                                                                   borderSide:
@@ -4082,13 +4173,24 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                     ),
                                                               ),
                                                               onChanged: (value) {
-                                                                selectedDataPemakaian[item['id']]!['qty'] =
-                                                                    value;
-                                                                setState(() {});
+                                                                if (selectedDataPemakaian
+                                                                    .containsKey(
+                                                                      item['id'],
+                                                                    )) {
+                                                                  selectedDataPemakaian[item['id']]!['qty'] =
+                                                                      value;
+                                                                }
+                                                                setItemState(
+                                                                  () {},
+                                                                );
                                                               },
                                                               keyboardType:
                                                                   TextInputType
                                                                       .number,
+                                                              inputFormatters: [
+                                                                FilteringTextInputFormatter
+                                                                    .digitsOnly,
+                                                              ],
                                                             ),
                                                           ),
                                                           SizedBox(
@@ -4109,7 +4211,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                             // 'Qty Total : ${qtyController.length}',
                                                             // qtyController.text,
                                                             // (selectedDataPemakaian[dataPemakaian[index]['id']]!['updated_at']) ?? "0",
-                                                            '1 qty = ${(double.tryParse(qtyController[index].text.isNotEmpty ? qtyController[index].text : '0') ?? 0) * (double.tryParse(selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor'] ?? '0.0') ?? 0.0)} ${item['unit_name']}',
+                                                            '1 qty = ${(double.tryParse(qtyCtrl.text.isNotEmpty ? qtyCtrl.text : '0') ?? 0) * (double.tryParse(selectedDataPemakaian[item['id']]?['unit_factor']?.toString() ?? '0.0') ?? 0.0)} ${item['unit_name'] ?? ''}',
 
                                                             // '1 qty = ${dataPemakaian.isNotEmpty && index < dataPemakaian.length && index < unitList.length ? ((int.tryParse(qtyController[index].text) ?? 0) * (double.tryParse(selectedDataPemakaian[dataPemakaian[index]['id']]?['unit_factor']?.replaceAll(',', '.') ?? "0.0") ?? 0.0)) : 0.0} ${item['unit_name']}',
                                                             style: heading4(
@@ -4167,9 +4269,8 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                 focusColor:
                                                                     primary500,
                                                                 hintText:
-                                                                    textController[index]
-                                                                        .text ??
-                                                                    '',
+                                                                    textCtrl
+                                                                        .text,
                                                                 hintStyle:
                                                                     heading2(
                                                                       FontWeight
@@ -4226,23 +4327,24 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                                       print(
                                                                                         selectedDataPemakaian[item['id']],
                                                                                       );
-                                                                                      textController[index].text = unit.name;
-
-                                                                                      // Update hanya pada item yang sedang aktif (index)
-                                                                                      selectedDataPemakaian[item['id']]!['unit'] = item['name_item'];
-                                                                                      selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = unit.name;
-                                                                                      selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = unit.conversionFactor;
-                                                                                      selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id.isEmpty
-                                                                                          ? null
-                                                                                          : unit.id;
-                                                                                      // Jika ingin menyimpan id juga:
-                                                                                      // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = unit.id;
+                                                                                      textCtrl.text = unit.name;
+                                                                                      // Update data per-item using item['id']
+                                                                                      if (selectedDataPemakaian.containsKey(
+                                                                                        item['id'],
+                                                                                      )) {
+                                                                                        selectedDataPemakaian[item['id']]!['unit'] = item['name_item'];
+                                                                                        selectedDataPemakaian[item['id']]!['unit_name'] = unit.name;
+                                                                                        selectedDataPemakaian[item['id']]!['unit_factor'] = unit.conversionFactor;
+                                                                                        selectedDataPemakaian[item['id']]!['unit_conversion_id'] = unit.id.isEmpty
+                                                                                            ? null
+                                                                                            : unit.id;
+                                                                                      }
 
                                                                                       Navigator.pop(
                                                                                         context,
                                                                                         unit,
                                                                                       );
-                                                                                      setState(
+                                                                                      setItemState(
                                                                                         () {},
                                                                                       );
                                                                                     },
@@ -4259,11 +4361,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                             ),
                                                                             child: GestureDetector(
                                                                               onTap: () {
-                                                                                textController[index].text = '-';
-                                                                                // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit'] = '';
-                                                                                // selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_name'] = '';
-                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_factor'] = '';
-                                                                                selectedDataPemakaian[dataPemakaian[index]['id']]!['unit_conversion_id'] = '';
+                                                                                textCtrl.text = '-';
+                                                                                if (selectedDataPemakaian.containsKey(
+                                                                                  item['id'],
+                                                                                )) {
+                                                                                  selectedDataPemakaian[item['id']]!['unit_factor'] = '';
+                                                                                  selectedDataPemakaian[item['id']]!['unit_conversion_id'] = '';
+                                                                                }
 
                                                                                 setState(
                                                                                   () {},
@@ -4301,7 +4405,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                 selectedUnit =
                                                                     selected;
 
-                                                                setState(() {});
+                                                                setItemState(
+                                                                  () {},
+                                                                );
                                                               }
                                                             },
                                                             child: Icon(
@@ -4350,17 +4456,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () {
-                                    setState(() {
-                                      orderInventory = selectedDataPemakaian
-                                          .values
-                                          .toList();
-
-                                      dataPemakaian = orderInventory;
-                                      print("Saved Data: $orderInventory");
-                                    });
-
+                                    final saved = selectedDataPemakaian.values
+                                        .toList();
                                     Navigator.pop(context);
-                                    initState();
+                                    setState(() {
+                                      orderInventory = saved;
+                                    });
+                                    print("Saved Data: $orderInventory");
                                   },
                                   child: buttonXL(
                                     Center(
@@ -4697,14 +4799,12 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                     //       idProduct = '';
                                                     //       _pageController.jumpToPage(0);
                                                     //       setState(() {});
-                                                    //       initState();
                                                     //     }
                                                     //   },
                                                     // );
                                                     // refreshDataProduk();
 
                                                     setState(() {});
-                                                    initState();
                                                   },
                                                   child: buttonXLoutline(
                                                     Center(
@@ -5492,7 +5592,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                   });
 
                                   Navigator.pop(context);
-                                  initState();
                                 },
                                 child: buttonXL(
                                   Center(
@@ -5551,7 +5650,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       tanggalAwal = '';
                       setState(() {});
                       refreshPage();
-                      // initState();
                     }
                   });
 
@@ -5798,12 +5896,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                     listProduct.clear();
                                                     selectedFlag.clear();
                                                   });
-                                                  initState();
-                                                  initState();
                                                 });
 
                                                 setState(() {});
-                                                initState();
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -5895,7 +5990,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             backgroundColor: primary500,
                             onRefresh: () async {
                               setState(() {});
-                              initState();
                             },
                             child: ListView.builder(
                               // physics: BouncingScrollPhysics(),
@@ -6107,7 +6201,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                   .jumpToPage(
                                                                     9,
                                                                   );
-                                                              initState();
                                                             });
                                                           });
                                                         });
@@ -6191,8 +6284,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                               listProduct.clear();
                                                                               selectedFlag.clear();
                                                                             });
-                                                                            initState();
-                                                                            initState();
                                                                           });
                                                                         });
                                                                       },
@@ -6523,12 +6614,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                     listProduct.clear();
                                                     selectedFlag.clear();
                                                   });
-                                                  initState();
-                                                  initState();
                                                 });
 
                                                 setState(() {});
-                                                initState();
                                               },
                                               child: buttonXLoutline(
                                                 Center(
@@ -6620,7 +6708,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             backgroundColor: primary500,
                             onRefresh: () async {
                               setState(() {});
-                              // initState();
                               fetchUnits();
                             },
                             child: ListView.builder(
@@ -6909,8 +6996,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                                               listProduct.clear();
                                                                               selectedFlag.clear();
                                                                             });
-                                                                            initState();
-                                                                            initState();
                                                                           });
                                                                         });
                                                                       },
@@ -7313,14 +7398,12 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                                     //       idProduct = '';
                                                     //       _pageController.jumpToPage(0);
                                                     //       setState(() {});
-                                                    //       initState();
                                                     //     }
                                                     //   },
                                                     // );
                                                     // refreshDataProduk();
 
                                                     setState(() {});
-                                                    initState();
                                                   },
                                                   child: buttonXLoutline(
                                                     Center(
@@ -8096,7 +8179,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                   });
 
                                   Navigator.pop(context);
-                                  initState();
                                 },
                                 child: buttonXL(
                                   Center(
@@ -8147,11 +8229,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                         final quantityValue =
                             double.tryParse(e['qty'].toString())?.toInt() ?? 0;
 
-                        // Remove qty, set quantity_needed
                         final newMap = {...e};
-                        newMap.remove('qty'); // ✅ Hapus qty lama
-                        newMap['quantity_needed'] =
-                            quantityValue; // ✅ Pakai quantity_needed
+                        newMap.remove('qty');
+                        newMap['quantity_needed'] = quantityValue;
 
                         return newMap;
                       }).toList();
@@ -8168,7 +8248,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       // _pageController.jumpToPage(0);
 
                       setState(() {});
-                      initState();
                     }
                   });
                   print(convertedOrderInventory);
@@ -8195,11 +8274,9 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                             double.tryParse(e['qty'].toString())?.toDouble() ??
                             0;
 
-                        // Remove qty, set quantity_needed
                         final newMap = {...e};
-                        newMap.remove('qty'); // ✅ Hapus qty lama
-                        newMap['quantity_needed'] =
-                            quantityValue; // ✅ Pakai quantity_needed
+                        newMap.remove('qty');
+                        newMap['quantity_needed'] = quantityValue;
 
                         return newMap;
                       }).toList();
@@ -8221,7 +8298,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       orderInventory.clear();
                       ubahProdukBOMid = '';
                       setState(() {});
-                      initState();
                     }
                   });
                   print(searchProductID.text);
@@ -8345,7 +8421,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                         faktorCon.clear();
 
                         setState(() {});
-                        initState();
                       }
                     });
                   });
@@ -8381,7 +8456,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       faktorCon.clear();
 
                       setState(() {});
-                      initState();
                     }
                   });
                   print(orderInventory);
@@ -8510,7 +8584,6 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                       faktorConUnitUbah.clear();
 
                       setState(() {});
-                      initState();
                     }
                   });
 
@@ -8534,10 +8607,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
           setState(() {
+            int previousValue = valueOrderByIngredient;
+            bool confirmed = false;
             showModalBottomSheet(
               constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
@@ -8598,7 +8674,7 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
-                                    orderByProductText.length,
+                                    orderByBahanText.length,
                                     (int index) {
                                       return Padding(
                                         padding: EdgeInsets.only(right: size16),
@@ -8611,7 +8687,8 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
                                               color:
-                                                  valueOrderByProduct == index
+                                                  valueOrderByIngredient ==
+                                                      index
                                                   ? primary500
                                                   : bnw300,
                                             ),
@@ -8620,25 +8697,22 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                                             ),
                                           ),
                                           label: Text(
-                                            orderByProductText[index],
+                                            orderByBahanText[index],
                                             style: heading4(
                                               FontWeight.w400,
-                                              valueOrderByProduct == index
+                                              valueOrderByIngredient == index
                                                   ? primary500
                                                   : bnw900,
                                               'Outfit',
                                             ),
                                           ),
                                           selected:
-                                              valueOrderByProduct == index,
+                                              valueOrderByIngredient == index,
                                           onSelected: (bool selected) {
                                             setState(() {
                                               print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
+                                              valueOrderByIngredient = index;
                                             });
-                                            setState(() {});
                                           },
                                         ),
                                       );
@@ -8652,17 +8726,26 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                           SizedBox(
                             width: double.infinity,
                             child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
+                              onTap: () async {
+                                confirmed = true;
                                 textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
+                                    orderByBahanText[valueOrderByIngredient];
                                 textvalueOrderByBahan =
-                                    orderByBahanInventory[valueOrderByProduct];
-                                orderByBahanInventory[valueOrderByProduct];
+                                    orderByBahanIngredient[valueOrderByIngredient];
+
+                                final result = await getMasterData(
+                                  checkToken,
+                                  merchantId,
+                                  '',
+                                  textvalueOrderByBahan,
+                                );
+
+                                if (!mounted) return;
+                                outerSetState(() {
+                                  datasBahan = result;
+                                });
+
                                 Navigator.pop(context);
-                                initState();
                               },
                               child: buttonXL(
                                 Center(
@@ -8685,7 +8768,13 @@ class _InventoriPageTestState extends State<InventoriPageTest>
                   ),
                 );
               },
-            );
+            ).whenComplete(() {
+              if (!confirmed) {
+                outerSetState(() {
+                  valueOrderByIngredient = previousValue;
+                });
+              }
+            });
           });
         },
         child: buttonLoutline(

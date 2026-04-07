@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/services/apimethod.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../utils/component/component_size.dart';
 import 'package:flutter_svg/svg.dart';
-
 
 import '../utils/component/component_button.dart';
 import '../utils/component/component_color.dart';
@@ -10,9 +13,7 @@ import '../utils/component/component_size.dart';
 class ConnectionChecker {
   Future<bool> checkInternet() async {
     try {
-      var response = await Dio().head(
-        'https://api.prod.amio.my.id/api/test',
-      );
+      var response = await Dio().head(url);
       return response.statusCode == 200;
     } catch (e) {
       return false;
@@ -32,13 +33,9 @@ Future<void> checkConnection(BuildContext context) async {
 
 Future<dynamic> dialogNoConnection(context, VoidCallback retryCallback) {
   return showModalBottomSheet(
-    constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+    constraints: const BoxConstraints(maxWidth: double.infinity),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
     context: context,
     builder: (BuildContext context) {
       return IntrinsicHeight(
@@ -98,13 +95,9 @@ Future<dynamic> dialogNoConnection(context, VoidCallback retryCallback) {
 
 Future<dynamic> dialogNoPrinter(context) {
   return showModalBottomSheet(
-    constraints: const BoxConstraints(
-      maxWidth: double.infinity,
-    ),
+    constraints: const BoxConstraints(maxWidth: double.infinity),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
     context: context,
     builder: (BuildContext context) {
       return IntrinsicHeight(
@@ -142,12 +135,14 @@ Future<dynamic> dialogNoPrinter(context) {
                     Navigator.pop(context);
                   },
                   child: buttonXL(
-                      Center(
-                          child: Text(
+                    Center(
+                      child: Text(
                         'Oke',
                         style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                      )),
-                      double.infinity),
+                      ),
+                    ),
+                    double.infinity,
+                  ),
                 ),
               ),
             ],

@@ -92,38 +92,40 @@ class _BillListPageState extends State<BillListPage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Urutkan",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              ..._sortOptions.map((opt) {
-                final selected = _orderBy == opt["value"];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(opt["label"]!),
-                  trailing: selected ? const Icon(Icons.check) : null,
-                  onTap: () async {
-                    setState(() {
-                      _orderBy = opt["value"]!;
-                      _orderLabel = opt["label"]!;
-                    });
-                    Navigator.pop(context);
-                    await _fetchBills();
-                  },
-                );
-              }).toList(),
-            ],
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Urutkan",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ..._sortOptions.map((opt) {
+                  final selected = _orderBy == opt["value"];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(opt["label"]!),
+                    trailing: selected ? const Icon(Icons.check) : null,
+                    onTap: () async {
+                      setState(() {
+                        _orderBy = opt["value"]!;
+                        _orderLabel = opt["label"]!;
+                      });
+                      Navigator.pop(context);
+                      await _fetchBills();
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         );
       },
@@ -318,11 +320,13 @@ class _BillListPageState extends State<BillListPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => BillDetailModal(
-        token: widget.token,
-        merchantId: widget.merchantId,
-        transactionId: transactionId,
-        baseUrl: widget.baseUrl,
+      builder: (context) => SafeArea(
+        child: BillDetailModal(
+          token: widget.token,
+          merchantId: widget.merchantId,
+          transactionId: transactionId,
+          baseUrl: widget.baseUrl,
+        ),
       ),
     );
 

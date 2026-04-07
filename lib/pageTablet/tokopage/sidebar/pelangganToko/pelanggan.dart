@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/services.dart';
+
 import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
@@ -26,10 +28,7 @@ import '../../../../utils/component/component_color.dart';
 
 class PelangganToko extends StatefulWidget {
   String token;
-  PelangganToko({
-    Key? key,
-    required this.token,
-  }) : super(key: key);
+  PelangganToko({Key? key, required this.token}) : super(key: key);
 
   @override
   State<PelangganToko> createState() => _PelangganTokoState();
@@ -57,23 +56,23 @@ class _PelangganTokoState extends State<PelangganToko> {
   @override
   void initState() {
     checkConnection(context);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [''];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [''];
 
-        await getDataPelanggan(value);
+      await getDataPelanggan(value);
 
+      if (mounted) {
         setState(() {
           datasPelanggan;
         });
+      }
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
 
     refreshDataProduk();
 
@@ -81,7 +80,11 @@ class _PelangganTokoState extends State<PelangganToko> {
   }
 
   Future<dynamic> getDataPelanggan(List<String> value) async {
-    return datasPelanggan = await getPelanggan(context, widget.token, textvalueOrderBy);
+    return datasPelanggan = await getPelanggan(
+      context,
+      widget.token,
+      textvalueOrderBy,
+    );
   }
 
   refreshDataProduk() {
@@ -90,6 +93,7 @@ class _PelangganTokoState extends State<PelangganToko> {
     conPhone.text = '';
     conEmail.text = '';
     conInstagram.text = '';
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -152,7 +156,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   nomorEdit: nomorEdit ?? '',
                   emailEdit: emailEdit ?? '',
                   instagramEdit: instagramEdit ?? '',
-                )
+                ),
               ],
             ),
           ),
@@ -191,7 +195,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
           SizedBox(height: size16),
@@ -206,6 +210,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conName,
                   TextInputType.text,
                   false,
+                  const []
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -214,6 +219,8 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conPhone,
                   TextInputType.number,
                   false,
+                  [FilteringTextInputFormatter.digitsOnly]
+
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -222,6 +229,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conEmail,
                   TextInputType.emailAddress,
                   true,
+                  const []
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -230,6 +238,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conInstagram,
                   TextInputType.text,
                   true,
+                  const []
                 ),
                 SizedBox(height: size16),
               ],
@@ -302,7 +311,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -372,7 +381,6 @@ class _PelangganTokoState extends State<PelangganToko> {
                 //     ),
                 //   ),
                 // ),
-
                 SizedBox(width: size16),
                 GestureDetector(
                   onTap: () {
@@ -392,7 +400,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                     ),
                     130,
                   ),
-                )
+                ),
               ],
             ),
           ],
@@ -405,11 +413,7 @@ class _PelangganTokoState extends State<PelangganToko> {
             buttonLoutlineColor(
               Row(
                 children: [
-                  Icon(
-                    PhosphorIcons.info_fill,
-                    color: succes600,
-                    size: size24,
-                  ),
+                  Icon(PhosphorIcons.info_fill, color: succes600, size: size24),
                   SizedBox(width: size12),
                   Row(
                     children: [
@@ -437,7 +441,7 @@ class _PelangganTokoState extends State<PelangganToko> {
               ),
               succes100,
               succes600,
-            )
+            ),
           ],
         ),
         SizedBox(height: size16),
@@ -509,8 +513,11 @@ class _PelangganTokoState extends State<PelangganToko> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(PhosphorIcons.pencil_line,
-                                  color: bnw900, size: size20),
+                              Icon(
+                                PhosphorIcons.pencil_line,
+                                color: bnw900,
+                                size: size20,
+                              ),
                               SizedBox(width: size12),
                               Text(
                                 'Atur',
@@ -551,11 +558,15 @@ class _PelangganTokoState extends State<PelangganToko> {
                               final dataPelanggan = datasPelanggan![index];
                               return Container(
                                 padding: EdgeInsets.symmetric(
-                                    vertical: size12, horizontal: size16),
+                                  vertical: size12,
+                                  horizontal: size16,
+                                ),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                        color: bnw300, width: width1),
+                                      color: bnw300,
+                                      width: width1,
+                                    ),
                                   ),
                                 ),
                                 child: Row(
@@ -565,7 +576,10 @@ class _PelangganTokoState extends State<PelangganToko> {
                                         datasPelanggan![index].namaMember ??
                                             '-',
                                         style: heading4(
-                                            FontWeight.w600, bnw900, 'Outfit'),
+                                          FontWeight.w600,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
@@ -576,7 +590,10 @@ class _PelangganTokoState extends State<PelangganToko> {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
@@ -587,7 +604,10 @@ class _PelangganTokoState extends State<PelangganToko> {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
@@ -597,284 +617,295 @@ class _PelangganTokoState extends State<PelangganToko> {
                                                     .instagramAccount !=
                                                 null
                                             ? datasPelanggan![index]
-                                                    .instagramAccount!
-                                                    .contains('@')
-                                                ? '${datasPelanggan![index].instagramAccount}'
-                                                : '@${datasPelanggan![index].instagramAccount}'
+                                                      .instagramAccount!
+                                                      .contains('@')
+                                                  ? '${datasPelanggan![index].instagramAccount}'
+                                                  : '@${datasPelanggan![index].instagramAccount}'
                                             : '-',
                                         // '${datasPelanggan![index].price}',
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
                                     Expanded(
                                       child: Text(
                                         FormatCurrency.convertToIdr(
-                                                datasPelanggan![index].saldo)
-                                            .toString(),
+                                          datasPelanggan![index].saldo,
+                                        ).toString(),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
                                     SizedBox(
                                       child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              showModalBottom(
+                                        onTap: () {
+                                          setState(() {
+                                            showModalBottom(
+                                              context,
+                                              MediaQuery.of(
                                                 context,
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .height,
-                                                Padding(
-                                                  padding: EdgeInsets.all(28.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                'Ubah Pelanggan',
-                                                                // datasPelanggan![
-                                                                //             index]
-                                                                //         .namaMember ??
-                                                                //     '',
-                                                                style: heading2(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw900,
-                                                                    'Outfit'),
+                                              ).size.height,
+                                              Padding(
+                                                padding: EdgeInsets.all(28.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              'Ubah Pelanggan',
+                                                              // datasPelanggan![
+                                                              //             index]
+                                                              //         .namaMember ??
+                                                              //     '',
+                                                              style: heading2(
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit',
                                                               ),
-                                                              Text(
-                                                                datasPelanggan![
-                                                                            index]
-                                                                        .namaMember ??
-                                                                    '',
-                                                                style: heading4(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit'),
+                                                            ),
+                                                            Text(
+                                                              datasPelanggan![index]
+                                                                      .namaMember ??
+                                                                  '',
+                                                              style: heading4(
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () =>
+                                                              Navigator.pop(
+                                                                context,
+                                                              ),
+                                                          child: Icon(
+                                                            PhosphorIcons
+                                                                .x_fill,
+                                                            color: bnw900,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: size20),
+                                                    GestureDetector(
+                                                      behavior: HitTestBehavior
+                                                          .translucent,
+                                                      onTap: () {
+                                                        Navigator.pop(context);
+                                                        memberId =
+                                                            datasPelanggan![index]
+                                                                .memberid;
+                                                        nameEdit =
+                                                            datasPelanggan![index]
+                                                                .namaMember;
+                                                        nomorEdit =
+                                                            datasPelanggan![index]
+                                                                .phonenumber;
+                                                        emailEdit =
+                                                            datasPelanggan![index]
+                                                                .email;
+                                                        instagramEdit =
+                                                            datasPelanggan![index]
+                                                                .instagramAccount;
+
+                                                        _pageController
+                                                            .jumpToPage(2);
+                                                        setState(() {});
+                                                      },
+                                                      child: modalBottomValue(
+                                                        'Ubah Pelanggan',
+                                                        PhosphorIcons
+                                                            .pencil_line,
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: size12),
+                                                    GestureDetector(
+                                                      behavior: HitTestBehavior
+                                                          .translucent,
+                                                      onTap: () {
+                                                        String memberid =
+                                                            datasPelanggan![index]
+                                                                .memberid
+                                                                .toString();
+
+                                                        showBottomPilihan(
+                                                          context,
+                                                          Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                children: [
+                                                                  Text(
+                                                                    'Yakin Ingin Menghapus Pelanggan',
+                                                                    style: heading1(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height:
+                                                                        size16,
+                                                                  ),
+                                                                  Text(
+                                                                    'Semua data pelanggan dan koin pelanggan akan hilang.',
+                                                                    style: heading2(
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                height: size16,
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Expanded(
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
+                                                                        List<
+                                                                          String
+                                                                        >
+                                                                        listPelanggan = [
+                                                                          memberid,
+                                                                        ];
+
+                                                                        deletePelanggan(
+                                                                          context,
+                                                                          widget
+                                                                              .token,
+                                                                          listPelanggan,
+                                                                        );
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        );
+
+                                                                        initState();
+                                                                        setState(
+                                                                          () {},
+                                                                        );
+                                                                      },
+                                                                      child: buttonXLoutline(
+                                                                        Center(
+                                                                          child: Text(
+                                                                            'Iya, Hapus',
+                                                                            style: heading3(
+                                                                              FontWeight.w600,
+                                                                              primary500,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width,
+                                                                        primary500,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width:
+                                                                        size12,
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        );
+                                                                      },
+                                                                      child: buttonXL(
+                                                                        Center(
+                                                                          child: Text(
+                                                                            'Batalkan',
+                                                                            style: heading3(
+                                                                              FontWeight.w600,
+                                                                              bnw100,
+                                                                              'Outfit',
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ],
                                                           ),
-                                                          GestureDetector(
-                                                            onTap: () =>
-                                                                Navigator.pop(
-                                                                    context),
-                                                            child: Icon(
-                                                              PhosphorIcons
-                                                                  .x_fill,
-                                                              color: bnw900,
-                                                            ),
-                                                          ),
-                                                        ],
+                                                        );
+                                                      },
+                                                      child: modalBottomValue(
+                                                        'Hapus Pelanggan',
+                                                        PhosphorIcons.trash,
                                                       ),
-                                                      SizedBox(height: size20),
-                                                      GestureDetector(
-                                                        behavior:
-                                                            HitTestBehavior
-                                                                .translucent,
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          memberId =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .memberid;
-                                                          nameEdit =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .namaMember;
-                                                          nomorEdit =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .phonenumber;
-                                                          emailEdit =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .email;
-                                                          instagramEdit =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .instagramAccount;
-
-                                                          _pageController
-                                                              .jumpToPage(2);
-                                                          setState(() {});
-                                                        },
-                                                        child: modalBottomValue(
-                                                          'Ubah Pelanggan',
-                                                          PhosphorIcons
-                                                              .pencil_line,
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: size12),
-                                                      GestureDetector(
-                                                        behavior:
-                                                            HitTestBehavior
-                                                                .translucent,
-                                                        onTap: () {
-                                                          String memberid =
-                                                              datasPelanggan![
-                                                                      index]
-                                                                  .memberid
-                                                                  .toString();
-
-                                                          showBottomPilihan(
-                                                            context,
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Column(
-                                                                  children: [
-                                                                    Text(
-                                                                      'Yakin Ingin Menghapus Pelanggan',
-                                                                      style: heading1(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit'),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            size16),
-                                                                    Text(
-                                                                      'Semua data pelanggan dan koin pelanggan akan hilang.',
-                                                                      style: heading2(
-                                                                          FontWeight
-                                                                              .w400,
-                                                                          bnw900,
-                                                                          'Outfit'),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        size16),
-                                                                Row(
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child:
-                                                                          GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          List<String>
-                                                                              listPelanggan =
-                                                                              [
-                                                                            memberid
-                                                                          ];
-
-                                                                          deletePelanggan(
-                                                                            context,
-                                                                            widget.token,
-                                                                            listPelanggan,
-                                                                          );
-                                                                          Navigator.pop(
-                                                                              context);
-
-                                                                          initState();
-                                                                          setState(
-                                                                              () {});
-                                                                        },
-                                                                        child:
-                                                                            buttonXLoutline(
-                                                                          Center(
-                                                                            child:
-                                                                                Text(
-                                                                              'Iya, Hapus',
-                                                                              style: heading3(FontWeight.w600, primary500, 'Outfit'),
-                                                                            ),
-                                                                          ),
-                                                                          MediaQuery.of(context)
-                                                                              .size
-                                                                              .width,
-                                                                          primary500,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        width:
-                                                                            size12),
-                                                                    Expanded(
-                                                                      child:
-                                                                          GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                        },
-                                                                        child:
-                                                                            buttonXL(
-                                                                          Center(
-                                                                            child:
-                                                                                Text(
-                                                                              'Batalkan',
-                                                                              style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                                                                            ),
-                                                                          ),
-                                                                          MediaQuery.of(context)
-                                                                              .size
-                                                                              .width,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: modalBottomValue(
-                                                          'Hapus Pelanggan',
-                                                          PhosphorIcons.trash,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              );
-                                            });
-                                          },
-                                          child: buttonL(
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(PhosphorIcons.pencil_line,
-                                                    color: bnw900,
-                                                    size: size20),
-                                                SizedBox(width: size12),
-                                                Text(
-                                                  'Atur',
-                                                  style: body1(FontWeight.w600,
-                                                      bnw900, 'Outfit'),
+                                              ),
+                                            );
+                                          });
+                                        },
+                                        child: buttonL(
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                PhosphorIcons.pencil_line,
+                                                color: bnw900,
+                                                size: size20,
+                                              ),
+                                              SizedBox(width: size12),
+                                              Text(
+                                                'Atur',
+                                                style: body1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
                                                 ),
-                                              ],
-                                            ),
-                                            bnw100,
-                                            bnw300,
-                                          )),
+                                              ),
+                                            ],
+                                          ),
+                                          bnw100,
+                                          bnw300,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -899,28 +930,29 @@ class _PelangganTokoState extends State<PelangganToko> {
           children: [
             Icon(icon, color: bnw900),
             SizedBox(width: size12),
-            Text(
-              title,
-              style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-            )
+            Text(title, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
           ],
         ),
-        Divider(color: bnw300)
+        Divider(color: bnw300),
       ],
     );
   }
 
-  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo, bintang) {
+  fieldAddProduk(
+    title,
+    hint,
+    mycontroller,
+    TextInputType numberNo,
+    bintang,
+    List<TextInputFormatter> inputFormat,
+  ) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
               Text(
                 bintang ? '' : ' *',
                 style: heading4(FontWeight.w700, red500, 'Outfit'),
@@ -930,23 +962,18 @@ class _PelangganTokoState extends State<PelangganToko> {
           TextFormField(
             cursorColor: primary500,
             keyboardType: numberNo,
+            inputFormatters: inputFormat,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -957,17 +984,21 @@ class _PelangganTokoState extends State<PelangganToko> {
     );
   }
 
-  fieldEditProduk(title, hint, mycontroller, TextInputType numberNo, bintang) {
+  fieldEditProduk(
+    title,
+    hint,
+    mycontroller,
+    TextInputType numberNo,
+    bintang,
+    List<TextInputFormatter> inputFormat,
+  ) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
               Text(
                 bintang ? '' : ' *',
                 style: heading4(FontWeight.w700, red500, 'Outfit'),
@@ -977,23 +1008,18 @@ class _PelangganTokoState extends State<PelangganToko> {
           TextFormField(
             cursorColor: primary500,
             keyboardType: numberNo,
+            inputFormatters: inputFormat,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1005,14 +1031,14 @@ class _PelangganTokoState extends State<PelangganToko> {
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
+          int previousValue = valueOrderByMember;
+          bool confirmed = false;
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1021,8 +1047,12 @@ class _PelangganTokoState extends State<PelangganToko> {
                 return StatefulBuilder(
                   builder: (BuildContext context, setState) => IntrinsicHeight(
                     child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
+                      ),
                       decoration: BoxDecoration(
                         color: bnw100,
                         borderRadius: BorderRadius.only(
@@ -1043,18 +1073,27 @@ class _PelangganTokoState extends State<PelangganToko> {
                                 Text(
                                   'Urutkan',
                                   style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   'Tentukan data yang akan tampil',
                                   style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(height: 20),
                                 Text(
                                   'Pilih Urutan',
                                   style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Wrap(
                                   children: List<Widget>.generate(
@@ -1064,35 +1103,37 @@ class _PelangganTokoState extends State<PelangganToko> {
                                         padding: EdgeInsets.only(right: size16),
                                         child: ChoiceChip(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           backgroundColor: bnw100,
                                           selectedColor: primary100,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
+                                              color: valueOrderByMember == index
+                                                  ? primary500
+                                                  : bnw300,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
                                           ),
                                           label: Text(
-                                              orderByPelangganText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected:
-                                              valueOrderByProduct == index,
+                                            orderByPelangganText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByMember == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          selected: valueOrderByMember == index,
                                           onSelected: (bool selected) {
                                             setState(() {
                                               print(index);
                                               // _value =
                                               //     selected ? index : null;
-                                              valueOrderByProduct = index;
+                                              valueOrderByMember = index;
                                             });
                                             setState(() {});
                                           },
@@ -1107,25 +1148,41 @@ class _PelangganTokoState extends State<PelangganToko> {
                           SizedBox(height: size32),
                           SizedBox(
                             width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                textOrderBy =
-                                    orderByPelangganText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByPelanggan[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                            child: StatefulBuilder(
+                              builder: (BuildContext context, setState) =>
+                                  GestureDetector(
+                                    onTap: () async {
+                                      confirmed = true;
+                                      textOrderByPelanggan =
+                                          orderByPelangganText[valueOrderByMember];
+                                      textvalueOrderByMember =
+                                          orderByPelanggan[valueOrderByMember];
+                                      final result = await getPelanggan(
+                                        context,
+                                        checkToken,
+                                        textvalueOrderByMember,
+                                      );
+                                      if (!mounted) return;
+                                      outerSetState(() {
+                                        datasPelanggan = result;
+                                      });
+
+                                      Navigator.pop(context);
+                                    },
+                                    child: buttonXL(
+                                      Center(
+                                        child: Text(
+                                          'Tampilkan',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw100,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ),
+                                      0,
+                                    ),
                                   ),
-                                ),
-                                0,
-                              ),
                             ),
                           ),
                         ],
@@ -1134,7 +1191,13 @@ class _PelangganTokoState extends State<PelangganToko> {
                   ),
                 );
               },
-            );
+            ).whenComplete(() {
+              if (!confirmed) {
+                outerSetState(() {
+                  valueOrderByMember = previousValue;
+                });
+              }
+            });
           });
         },
         child: buttonLoutline(
@@ -1143,26 +1206,14 @@ class _PelangganTokoState extends State<PelangganToko> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                ' dari $textOrderByPelanggan',
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,

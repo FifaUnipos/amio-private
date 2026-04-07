@@ -1,19 +1,11 @@
 import 'dart:developer';
 
-import 'package:unipos_app_335/pageTablet/home/sidebar/coaPageGrup/coaPageGrup.dart';
-import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/lihatInventoriGrupPage.dart';
-import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/inventoriGrupSelectMerch.dart';
-import 'package:unipos_app_335/pageTablet/tokopage/sidebar/coaToko/coaPage.dart';
-
 import '../../main.dart';
 import '../../utils/component/component_loading.dart';
 import '../home/sidebar/bantuan.dart';
 import '../home/sidebar/notifikasigrup.dart';
 import '../home/sidebar/profile_page.dart';
 
-import '../home/sidebar/tokoPage/tokogrup.dart';
-import '../home/sidebar/transaksiGrup/transaction.dart';
-import '../tokopage/sidebar/inventoriToko/inventori.dart';
 import '../tokopage/sidebar/transaksiToko/transaksi.dart';
 
 import '../../utils/printer/printerPage.dart';
@@ -26,32 +18,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sidebarx/sidebarx.dart';
-import '../../pagehelper/loginregis/login_page.dart';
 import '../../services/apimethod.dart';
-import '../../services/notification.dart';
+
 import '../../../../utils/component/component_orderBy.dart';
-import '../test/akun.dart';
-import '../test/dashboardnew.dart';
 import '../tokopage/dashboardtoko.dart';
-import '../tokopage/sidebar/laporanToko/laporanToko.dart';
-import '../tokopage/sidebar/produkToko/produk.dart';
-import '../tokopage/sidebar/tokoToko/toko.dart';
 
 import '../../../../utils/component/component_color.dart';
 
 class SidebarXKasirPage extends StatefulWidget {
   final String token, id;
   SidebarXKasirPage({Key? key, required this.token, required this.id})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<SidebarXKasirPage> createState() => _SidebarXExampleAppState();
 }
 
 class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
-  // late FirebaseMessaging messaging;
-
   PageController _pageController = PageController();
   final _key = GlobalKey<ScaffoldState>();
 
@@ -105,10 +88,10 @@ class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
               appBar: isSmallScreen
                   ? AppBar(
                       backgroundColor: canvasColor,
-                      title: Text(_getTitleByIndex(_controller.selectedIndex)),
+                      title: Text(_getTitleByIndex(sidebarController.selectedIndex)),
                       leading: IconButton(
                         onPressed: () {
-                          _controller.setExtended(true);
+                          sidebarController.setExtended(true);
                           _key.currentState?.openDrawer();
                           print(widget.token);
                         },
@@ -117,7 +100,7 @@ class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
                     )
                   : null,
               drawer: ExampleSidebarX(
-                controller: _controller,
+                controller: sidebarController,
                 token: widget.token,
                 pageController: _pageController,
               ),
@@ -125,7 +108,7 @@ class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
                 children: [
                   if (!isSmallScreen)
                     ExampleSidebarX(
-                      controller: _controller,
+                      controller: sidebarController,
                       token: widget.token,
                       pageController: _pageController,
                     ),
@@ -143,10 +126,10 @@ class _SidebarXExampleAppState extends State<SidebarXKasirPage> {
                         },
                         children: [
                           _ScreensExample(
-                            controller: _controller,
+                            controller: sidebarController,
                             token: widget.token,
                           ),
-                          ProfilePage(token: widget.token)
+                          ProfilePage(token: widget.token),
                         ],
                       ),
                     ),
@@ -182,44 +165,49 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
   void initState() {
     // checkEmail(widget.token, identifier, context, emailProfile.toString());
     iconSelectedSidebar = 0;
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        setState(() {
-          myprofile(widget.token);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      setState(() {
+        myprofile(widget.token);
 
-          nameProfile;
-          merchantType;
-          emailProfile;
-          phoneProfile;
-          imageProfile;
-          print("Email " + emailChecker.toString());
-          emailChecker;
-          checkEmail(widget.token, setState);
-        });
-      },
-    );
+        nameProfile;
+        merchantType;
+        emailProfile;
+        phoneProfile;
+        imageProfile;
+        print("Email " + emailChecker.toString());
+        emailChecker;
+        checkEmail(widget.token, setState);
+      });
+    });
     deviceDetails();
     callName();
     super.initState();
+    sidebarController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    sidebarController.removeListener(() {});
+    super.dispose();
   }
 
   Future callName() async {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        setState(() {
-          myprofile(widget.token);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      setState(() {
+        myprofile(widget.token);
 
-          nameProfile;
-          merchantType;
-          emailProfile;
-          phoneProfile;
-          imageProfile;
-          // print("Email " + emailChecker.toString());
-          emailChecker;
-          checkEmail(widget.token, setState);
-        });
-      },
-    );
+        nameProfile;
+        merchantType;
+        emailProfile;
+        phoneProfile;
+        imageProfile;
+        // print("Email " + emailChecker.toString());
+        emailChecker;
+        checkEmail(widget.token, setState);
+      });
+    });
 
     // return nameProfile;
   }
@@ -242,8 +230,10 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         itemTextPadding: EdgeInsets.only(left: size12),
         selectedItemTextPadding: EdgeInsets.only(left: size12),
         itemPadding: EdgeInsets.symmetric(horizontal: size16, vertical: size12),
-        selectedItemPadding:
-            EdgeInsets.symmetric(horizontal: size16, vertical: size12),
+        selectedItemPadding: EdgeInsets.symmetric(
+          horizontal: size16,
+          vertical: size12,
+        ),
         itemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(size12),
         ),
@@ -251,10 +241,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
           borderRadius: BorderRadius.circular(size12),
           color: selectedIndexSideBar == false ? bnw100 : primary500,
         ),
-        iconTheme: IconThemeData(
-          color: bnw100,
-          size: size32,
-        ),
+        iconTheme: IconThemeData(color: bnw100, size: size32),
         selectedIconTheme: IconThemeData(
           color: selectedIndexSideBar == true ? bnw100 : primary500,
           size: size32,
@@ -263,9 +250,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
       extendedTheme: SidebarXTheme(
         width: 160,
         // width: 180,
-        decoration: BoxDecoration(
-          color: primary500,
-        ),
+        decoration: BoxDecoration(color: primary500),
       ),
       // footerDivider: divider,
       showToggleButton: false,
@@ -289,8 +274,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                     Container(
                       height: 1,
                       width: double.infinity,
-                      color:
-                          selectedIndexSideBar != false ? primary500 : bnw100,
+                      color: selectedIndexSideBar != false
+                          ? primary500
+                          : bnw100,
                     ),
                     Container(
                       height: 60,
@@ -298,8 +284,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                           ? EdgeInsets.fromLTRB(size12, 4, size12, 4)
                           : EdgeInsets.all(size12),
                       decoration: BoxDecoration(
-                        color:
-                            selectedIndexSideBar == false ? primary500 : bnw100,
+                        color: selectedIndexSideBar == false
+                            ? primary500
+                            : bnw100,
                         borderRadius: BorderRadius.circular(size8),
                       ),
                       child: Row(
@@ -319,8 +306,11 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                                         child: Center(
                                           child: Text(
                                             getInitials().toUpperCase(),
-                                            style: body1(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: body1(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -333,32 +323,39 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(1000),
                                     child: SizedBox(
-                                        child: Image.network(
-                                      imageProfile,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null) {
-                                          return child;
-                                        }
+                                      child: Image.network(
+                                        imageProfile,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
 
-                                        return Center(child: loading());
-                                      },
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              CircleAvatar(
-                                        backgroundColor: primary200,
-                                        radius: 50,
-                                        // backgroundImage: NetworkImage(imageUrl),
-                                        child: Center(
-                                          child: Text(
-                                            getInitials().toUpperCase(),
-                                            style: body1(FontWeight.w600,
-                                                bnw900, 'Outfit'),
-                                          ),
-                                        ),
+                                              return Center(child: loading());
+                                            },
+                                        errorBuilder:
+                                            (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) => CircleAvatar(
+                                              backgroundColor: primary200,
+                                              radius: 50,
+                                              // backgroundImage: NetworkImage(imageUrl),
+                                              child: Center(
+                                                child: Text(
+                                                  getInitials().toUpperCase(),
+                                                  style: body1(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                       ),
-                                    )),
+                                    ),
                                   ),
                                 ),
                           showingMenuSidebar == true
@@ -379,25 +376,24 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: heading4(
-                                                    FontWeight.w600,
-                                                    selectedIndexSideBar ==
-                                                            false
-                                                        ? bnw100
-                                                        : bnw900,
-                                                    'Outfit'),
+                                                  FontWeight.w600,
+                                                  selectedIndexSideBar == false
+                                                      ? bnw100
+                                                      : bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                               Text(
-                                                merchantType ==
-                                                        'Group_Merchant'
+                                                merchantType == 'Group_Merchant'
                                                     ? 'Grup Toko'
                                                     : 'Toko',
                                                 style: body1(
-                                                    FontWeight.w400,
-                                                    selectedIndexSideBar ==
-                                                            false
-                                                        ? bnw100
-                                                        : bnw900,
-                                                    'Outfit'),
+                                                  FontWeight.w400,
+                                                  selectedIndexSideBar == false
+                                                      ? bnw100
+                                                      : bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ],
                                           )
@@ -411,8 +407,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                     Container(
                       height: 1,
                       width: double.infinity,
-                      color:
-                          selectedIndexSideBar != false ? primary500 : bnw100,
+                      color: selectedIndexSideBar != false
+                          ? primary500
+                          : bnw100,
                     ),
                   ],
                 ),
@@ -439,7 +436,9 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: size16, vertical: size12),
+                      horizontal: size16,
+                      vertical: size12,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -457,7 +456,10 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                                 child: Text(
                                   'Kecilkan Menu',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               )
                             : Container(),
@@ -573,11 +575,8 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
 
 class _ScreensExample extends StatefulWidget {
   String token;
-  _ScreensExample({
-    Key? key,
-    required this.token,
-    required this.controller,
-  }) : super(key: key);
+  _ScreensExample({Key? key, required this.token, required this.controller})
+    : super(key: key);
 
   final SidebarXController controller;
 

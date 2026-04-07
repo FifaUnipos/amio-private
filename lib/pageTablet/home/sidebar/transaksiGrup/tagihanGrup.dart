@@ -1099,9 +1099,6 @@ class _TagihanPageGrupState extends State<TagihanPageGrup> {
                             width: double.infinity,
                             child: GestureDetector(
                               onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByTagihanText[valueOrderByProduct]);
-
                                 textOrderBy =
                                     orderByTagihanText[valueOrderByProduct];
                                 textvalueOrderBy =

@@ -7,11 +7,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sidebarx/sidebarx.dart';
+import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+import 'package:unipos_app_335/pageTablet/home/sidebar/notifikasigrup.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
+import 'package:unipos_app_335/providers/notifications/payload_provider.dart';
+import 'package:unipos_app_335/providers/product/product_cashier_sorting_provider.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
+import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_list_reasons_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/delete_provider.dart';
 import 'package:unipos_app_335/providers/transactions/history/view_deleted_history_provider.dart';
-import 'package:unipos_app_335/providers/unipos_notification_provider.dart';
+import 'package:unipos_app_335/providers/notifications/unipos_notification_provider.dart';
+import 'package:unipos_app_335/routes/navigation_route.dart';
+import 'package:unipos_app_335/services/api/product/product_sorting_service.dart';
+import 'package:unipos_app_335/services/api/merchant/merchant_sorting_service.dart';
 import 'package:unipos_app_335/services/api/transaction/history/delete.dart';
 
 import 'package:unipos_app_335/services/api/transaction/history/delete_get_reasons.dart';
@@ -19,6 +29,7 @@ import 'package:unipos_app_335/services/api/transaction/history/view_deleted_his
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/services/provider.dart';
 import 'package:unipos_app_335/services/unipos_notification_service.dart';
+import 'package:unipos_app_335/services/websocket_service.dart';
 import '../utils/component/component_color.dart';
 import 'pagehelper/splashscreen.dart';
 import 'utils/component/providerModel/refreshTampilanModel.dart';
@@ -27,9 +38,32 @@ import 'utils/component/providerModel/timerModel.dart';
 bool isTabletLayout(BuildContext context) =>
     MediaQuery.of(context).size.shortestSide >= 600;
 
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final SidebarXController sidebarController = SidebarXController(
+  selectedIndex: 0,
+  extended: true,
+);
+final ValueNotifier<int> mobileTabIndex = ValueNotifier<int>(0);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  final notificationAppLaunchDetails = await flutterLocalNotificationsPlugin
+      .getNotificationAppLaunchDetails();
+
+  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+    final notificationResponse =
+        notificationAppLaunchDetails!.notificationResponse;
+    route = NavigationRoute.notificationRoute.name;
+    payload = notificationResponse?.payload;
+  }
+
+
+  final UniposNotificationService notifService = UniposNotificationService();
+  await notifService.init();
+  await notifService.requestPermissions();
 
   var mytokenGet = prefs.getString('token');
   var onBoard = prefs.getString('onboard');
@@ -53,7 +87,11 @@ Future<void> main() async {
   myprofile(prefs.getString('token') ?? '');
   typeAccount = prefs.getString('merchantType');
   roleAccount = prefs.getString('roleProfile');
-  dashboard(identifier, checkToken ?? '');
+  try {
+    await dashboard(identifier, checkToken ?? '');
+  } catch (e) {
+    print('Dashboard skip: $e');
+  }
   merchantType;
 
   // Set status bar
@@ -64,22 +102,50 @@ Future<void> main() async {
     ),
   );
 
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   // Jalankan app
-  runApp(UniPOSApp(mytokenGet: mytokenGet, onBoard: onBoard));
+  runApp(
+    UniPOSApp(
+      mytokenGet: mytokenGet,
+      onBoard: onBoard,
+      notifService: notifService,
+    ),
+  );
 }
 
-// ✅ Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
+// Pisahkan App ke widget agar bisa deteksi phone/tablet pakai MediaQuery
 class UniPOSApp extends StatelessWidget {
   final String? mytokenGet;
   final String? onBoard;
+  final UniposNotificationService notifService;
 
-  const UniPOSApp({super.key, this.mytokenGet, this.onBoard});
+  const UniPOSApp({
+    super.key,
+    this.mytokenGet,
+    this.onBoard,
+    required this.notifService,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // di main.dart atau file terpisah
+
     return MultiProvider(
       providers: [
-        Provider(create: (context) => UniposNotificationService()..init()),
+        Provider<UniposNotificationService>.value(value: notifService),
+        ChangeNotifierProvider(
+          create: (context) {
+            final ws = WebSocketService();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (checkToken != null) {
+                debugPrint('Global WebSocket connect... token: $checkToken');
+                ws.connect(checkToken, identifier);
+              }
+            });
+            return ws;
+          },
+        ),
         ChangeNotifierProvider(
           create: (context) => UniposNotificationProvider(
             context.read<UniposNotificationService>()..requestPermissions(),
@@ -107,8 +173,37 @@ class UniPOSApp extends StatelessWidget {
             context.read<TransactionHistoryDeleteService>(),
           ),
         ),
+        ChangeNotifierProvider(
+          create: (context) => PayloadProvider(payload: payload),
+        ),
+        Provider(create: (context) => ProductSortingService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductSortingProvider(context.read<ProductSortingService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ProductCashierSortingProvider(context.read<ProductSortingService>()),
+        ),
+        Provider(create: (context) => MerchantSortingService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              MerchantSortingProvider(context.read<MerchantSortingService>()),
+        ),
       ],
       child: MaterialApp(
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: MediaQuery.of(context).padding.copyWith(
+                bottom: MediaQuery.of(context).viewPadding.bottom,
+              ),
+            ),
+            child: child!,
+          );
+        },
+        navigatorKey: navigatorKey,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
         title: 'UniPOS',
         theme: ThemeData(
@@ -122,7 +217,10 @@ class UniPOSApp extends StatelessWidget {
           primaryColorDark: primary500,
           primaryColorLight: primary500,
           indicatorColor: primary500,
-          colorScheme: ThemeData().colorScheme.copyWith(primary: primary500),
+          colorScheme: ThemeData().colorScheme.copyWith(
+            primary: primary500,
+            surfaceContainer: bnw200,
+          ),
         ),
         home: OrientationBuilder(
           builder: (context, orientation) {
@@ -144,6 +242,12 @@ class UniPOSApp extends StatelessWidget {
             return _buildHome(isTablet);
           },
         ),
+        routes: {
+          NavigationRoute.notificationRoute.name: (context) =>
+              DashboardPageMobile(token: checkToken, initialIndex: 1),
+        NavigationRoute.notificationGroupTabletRoute.name: (context) =>
+              NotifikasiGrup(),
+        },
       ),
     );
   }
@@ -163,6 +267,8 @@ class UniPOSApp extends StatelessWidget {
 
 // 🔧 Global variables
 var checkToken;
+String? payload;
+String? route;
 
 //! GET Device ID
 String? deviceName;

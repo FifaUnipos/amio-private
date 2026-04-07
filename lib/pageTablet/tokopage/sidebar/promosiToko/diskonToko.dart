@@ -1,5 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';import '../../../../utils/component/component_showModalBottom.dart';
+import 'dart:developer';
+import 'package:flutter/services.dart';
+
+import '../../../../utils/component/component_showModalBottom.dart';
 import 'dart:io' as Io;
 import 'dart:io';
 import '../../../../models/diskonModel.dart';
@@ -7,7 +10,10 @@ import '../../../../utils/component/skeletons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
+import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,17 +26,16 @@ import '../../../../models/promosiModel.dart';
 import '../../../../services/apimethod.dart';
 import '../../../../services/checkConnection.dart';
 
-import '../../../home/sidebar/tokoPage/ubahToko.dart';import '../../../../utils/component/component_button.dart';import '../../../../utils/component/component_color.dart';
+import '../../../home/sidebar/tokoPage/ubahToko.dart';
+import '../../../../utils/component/component_button.dart';
+import '../../../../utils/component/component_color.dart';
 import 'ubahPromosi.dart';
 
 class DiskonToko extends StatefulWidget {
   String token;
   PageController pageController;
-  DiskonToko({
-    Key? key,
-    required this.token,
-    required this.pageController,
-  }) : super(key: key);
+  DiskonToko({Key? key, required this.token, required this.pageController})
+    : super(key: key);
 
   @override
   State<DiskonToko> createState() => _DiskonTokoState();
@@ -44,16 +49,14 @@ class _DiskonTokoState extends State<DiskonToko> {
   Map<int, bool> selectedFlag = {};
   List<String> listProduct = List.empty(growable: true);
 
-  String textOrderBy = 'Nama Diskon A ke Z';
-  String textvalueOrderBy = 'upDownNama';
-
   TextEditingController conNameProduk = TextEditingController();
   TextEditingController conHarga = TextEditingController();
   TextEditingController condiscount = TextEditingController();
 
   void formatInputRpHarga() {
     String text = conHarga.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text) ?? 0;
+    if (value == 0) return;
     String formattedAmount = formatCurrency(value);
 
     conHarga.value = TextEditingValue(
@@ -64,7 +67,8 @@ class _DiskonTokoState extends State<DiskonToko> {
 
   void formatInputRpPoin() {
     String text = condiscount.text.replaceAll('.', '');
-    int value = int.tryParse(text)!;
+    int value = int.tryParse(text) ?? 0;
+    if (value == 0) return;
     String formattedAmount = formatCurrency(value);
 
     condiscount.value = TextEditingValue(
@@ -81,24 +85,22 @@ class _DiskonTokoState extends State<DiskonToko> {
     nameEditPromosi = '';
     poinEditPromosi = '';
     hargaProductPromosi = '';
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [''];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [''];
 
-        await getDataProduk();
+      await getDataProduk();
 
-        setState(() {
-          // log(datasProduk.toString());
-          datasProduk;
-        });
+      setState(() {
+        // log(datasProduk.toString());
+        datasProduk;
+      });
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
     _getProvinceList();
 
     conHarga.addListener(formatInputRpHarga);
@@ -115,8 +117,7 @@ class _DiskonTokoState extends State<DiskonToko> {
     );
   }
 
-  refreshDataProduk() {
-    datasProduk;
+  refreshDataProduk() async {
     conNameProduk.text = '';
     conHarga.text = '';
     condiscount.text = '';
@@ -124,7 +125,13 @@ class _DiskonTokoState extends State<DiskonToko> {
     listProduct = [];
     listProduct.clear();
     selectedFlag.clear();
-    setState(() {});
+
+    if (!mounted) return;
+    final result = await getDiskon(context, widget.token, '', textvalueOrderBy);
+
+    setState(() {
+      datasProduk = result;
+    });
   }
 
   @override
@@ -144,8 +151,11 @@ class _DiskonTokoState extends State<DiskonToko> {
     var picker = ImagePicker();
     PickedFile? image;
 
-    image = await picker.getImage(source: ImageSource.gallery,maxHeight: 900,
-      maxWidth: 900,);
+    image = await picker.getImage(
+      source: ImageSource.gallery,
+      maxHeight: 900,
+      maxWidth: 900,
+    );
     if (image!.path.isEmpty == false) {
       myImage = File(image.path);
 
@@ -210,9 +220,10 @@ class _DiskonTokoState extends State<DiskonToko> {
               GestureDetector(
                 onTap: () {
                   _pageController.previousPage(
-                      duration: Duration(milliseconds: 10), curve: Curves.ease);
+                    duration: Duration(milliseconds: 10),
+                    curve: Curves.ease,
+                  );
                   refreshDataProduk();
-                  initState();
                 },
                 child: Icon(
                   PhosphorIcons.arrow_left,
@@ -233,7 +244,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                     style: heading3(FontWeight.w300, bnw900, 'Outfit'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
           SizedBox(height: size16),
@@ -246,6 +257,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                   'Matcha Latte Cappuchino',
                   conNameProduk,
                   TextInputType.text,
+                  const [],
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -253,6 +265,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                   'Rp. 12.000',
                   condiscount,
                   TextInputType.number,
+                  [FilteringTextInputFormatter.digitsOnly],
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -260,11 +273,13 @@ class _DiskonTokoState extends State<DiskonToko> {
                   'Rp. 12.000',
                   conHarga,
                   TextInputType.number,
+                  [FilteringTextInputFormatter.digitsOnly],
                 ),
                 SizedBox(height: size16),
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
+                    if (!mounted) return;
                     setState(() {
                       onswitchtampikan = !onswitchtampikan;
                       onswitchtampikan
@@ -293,8 +308,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                         height: 28.0,
                         value: onswitchtampikan,
                         padding: 0,
-                        activeIcon:
-                            Icon(PhosphorIcons.check, color: primary500),
+                        activeIcon: Icon(
+                          PhosphorIcons.check,
+                          color: primary500,
+                        ),
                         inactiveIcon: Icon(PhosphorIcons.x, color: bnw100),
                         activeColor: primary500,
                         inactiveColor: bnw100,
@@ -302,8 +319,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                         inactiveToggleColor: bnw900,
                         activeToggleColor: primary200,
                         activeSwitchBorder: Border.all(color: primary500),
-                        inactiveSwitchBorder:
-                            Border.all(color: bnw300, width: 2),
+                        inactiveSwitchBorder: Border.all(
+                          color: bnw300,
+                          width: 2,
+                        ),
                         onToggle: (val) {
                           onswitchtampikan = val;
                           onswitchtampikan
@@ -371,7 +390,6 @@ class _DiskonTokoState extends State<DiskonToko> {
                         _pageController.jumpToPage(0);
                       }
                     });
-                    initState();
                     setState(() {});
                   },
                   child: buttonXL(
@@ -386,7 +404,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -406,8 +424,10 @@ class _DiskonTokoState extends State<DiskonToko> {
               Container(
                 // width: double.infinity,
                 // height: 50,
-                padding:
-                    EdgeInsets.symmetric(horizontal: size16, vertical: size12),
+                padding: EdgeInsets.symmetric(
+                  horizontal: size16,
+                  vertical: size12,
+                ),
                 decoration: BoxDecoration(
                   color: primary500,
                   borderRadius: BorderRadius.only(
@@ -437,16 +457,22 @@ class _DiskonTokoState extends State<DiskonToko> {
                           Expanded(
                             child: Text(
                               'Info Diskon',
-                              style:
-                                  heading4(FontWeight.w700, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           SizedBox(width: size16),
                           Expanded(
                             child: Text(
                               'Harga',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           SizedBox(width: size16),
@@ -458,8 +484,11 @@ class _DiskonTokoState extends State<DiskonToko> {
                             child: Text(
                               'Status Aktif',
                               textAlign: TextAlign.center,
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           SizedBox(width: size16),
@@ -469,8 +498,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                               padding: EdgeInsets.symmetric(horizontal: size12),
                               decoration: BoxDecoration(
                                 color: bnw300,
-                                border:
-                                    Border.all(color: bnw300, width: width1),
+                                border: Border.all(
+                                  color: bnw300,
+                                  width: width1,
+                                ),
                                 borderRadius: BorderRadius.circular(size8),
                               ),
                               child: Row(
@@ -481,12 +512,15 @@ class _DiskonTokoState extends State<DiskonToko> {
                                   Text(
                                     'Atur',
                                     style: body1(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          )
+                          ),
                         ],
                       )
                     : Row(
@@ -501,8 +535,8 @@ class _DiskonTokoState extends State<DiskonToko> {
                                   checkFill == 'penuh'
                                       ? PhosphorIcons.check_square_fill
                                       : isSelectionMode
-                                          ? PhosphorIcons.minus_circle_fill
-                                          : PhosphorIcons.square,
+                                      ? PhosphorIcons.minus_circle_fill
+                                      : PhosphorIcons.square,
                                   color: bnw100,
                                 ),
                               ),
@@ -524,14 +558,20 @@ class _DiskonTokoState extends State<DiskonToko> {
                                       children: [
                                         Text(
                                           'Yakin Ingin Menghapus Diskon?',
-                                          style: heading1(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading1(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                         SizedBox(height: size16),
                                         Text(
                                           'Data Diskon yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                          style: heading2(FontWeight.w400,
-                                              bnw900, 'Outfit'),
+                                          style: heading2(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -540,26 +580,26 @@ class _DiskonTokoState extends State<DiskonToko> {
                                       children: [
                                         Expanded(
                                           child: GestureDetector(
-                                            onTap: () {
+                                            onTap: () async {
                                               Navigator.pop(context);
-                                              deleteDiskon(
+                                              await deleteDiskon(
                                                 context,
                                                 widget.token,
                                                 listProduct,
                                               );
-                                              refreshDataProduk();
+                                              await refreshDataProduk();
 
                                               setState(() {});
-                                              //initState();
                                             },
                                             child: buttonXLoutline(
                                               Center(
                                                 child: Text(
                                                   'Iya, Hapus',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    primary500,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -578,9 +618,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                 child: Text(
                                                   'Batalkan',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw100,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    bnw100,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -605,7 +646,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                                   Text(
                                     'Hapus Semua',
                                     style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -615,17 +659,28 @@ class _DiskonTokoState extends State<DiskonToko> {
                           ),
                           SizedBox(width: size16),
                           GestureDetector(
-                            onTap: () {
-                              changeActiveDiskon(
+                            onTap: () async {
+                              await changeActiveDiskon(
                                 context,
                                 widget.token,
                                 'true',
                                 listProduct,
                                 "",
                               );
-                              refreshDataProduk();
-                              setState(() {});
-                              initState();
+                              final result = await getDiskon(
+                                context,
+                                widget.token,
+                                '',
+                                textvalueOrderBy,
+                              );
+
+                              if (!mounted) return;
+                              setState(() {
+                                datasProduk = result;
+                                isSelectionMode = false;
+                                listProduct = [];
+                                selectedFlag.clear();
+                              });
                             },
                             child: buttonL(
                               Row(
@@ -634,7 +689,10 @@ class _DiskonTokoState extends State<DiskonToko> {
                                   Text(
                                     'Aktifkan Tampilkan dikasir',
                                     style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -652,7 +710,6 @@ class _DiskonTokoState extends State<DiskonToko> {
                         color: bnw100,
                         backgroundColor: primary500,
                         onRefresh: () async {
-                          initState();
                           setState(() {});
                         },
                         child: Container(
@@ -672,16 +729,21 @@ class _DiskonTokoState extends State<DiskonToko> {
                                   selectedFlag[index] ?? false;
                               bool? isSelected = selectedFlag[index];
                               final dataProduk = datasProduk![index];
-                              productIdCheckAll =
-                                  datasProduk!.map((data) => data.id!).toList();
+                              productIdCheckAll = datasProduk!
+                                  .map((data) => data.id!)
+                                  .toList();
 
                               return Container(
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: size16, vertical: size12),
+                                  horizontal: size16,
+                                  vertical: size12,
+                                ),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                        color: bnw300, width: width1),
+                                      color: bnw300,
+                                      width: width1,
+                                    ),
                                   ),
                                 ),
                                 child: Row(
@@ -689,19 +751,17 @@ class _DiskonTokoState extends State<DiskonToko> {
                                     InkWell(
                                       // onTap: () => onTap(isSeleced, index),
                                       onTap: () {
-                                        onTap(
-                                          isSelected,
-                                          index,
-                                          dataProduk.id,
-                                        );
+                                        onTap(isSelected, index, dataProduk.id);
                                         // log(data.name.toString());
                                         // print(dataProduk.is_active);
                                         // print(dataProduk.id);
                                       },
                                       child: SizedBox(
                                         // width: 50,
-                                        child:
-                                            _buildSelectIcon(isSelected!, data),
+                                        child: _buildSelectIcon(
+                                          isSelected!,
+                                          data,
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
@@ -712,15 +772,21 @@ class _DiskonTokoState extends State<DiskonToko> {
                                         children: [
                                           Text(
                                             datasProduk![index].name ?? '',
-                                            style: heading4(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: heading4(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                           Text(
                                             datasProduk![index].type == 'umum'
                                                 ? 'umum'
                                                 : 'per produk',
-                                            style: heading4(FontWeight.w400,
-                                                bnw900, 'Outfit'),
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -731,15 +797,17 @@ class _DiskonTokoState extends State<DiskonToko> {
                                         datasProduk![index].discount_type ==
                                                 'price'
                                             ? FormatCurrency.convertToIdr(
-                                                    datasProduk![index]
-                                                            .discount ??
-                                                        0)
-                                                .toString()
+                                                datasProduk![index].discount ??
+                                                    0,
+                                              ).toString()
                                             : '${datasProduk![index].discount}%',
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: heading4(
-                                            FontWeight.w400, bnw900, 'Outfit'),
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                     SizedBox(width: size16),
@@ -747,13 +815,15 @@ class _DiskonTokoState extends State<DiskonToko> {
                                       children: [
                                         Container(
                                           constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
+                                            maxWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width /
                                                 6,
-                                            minWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
+                                            minWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width /
                                                 8,
                                           ),
                                           child: FlutterSwitch(
@@ -762,10 +832,13 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                 : false,
                                             padding: 1,
                                             activeIcon: Icon(
-                                                PhosphorIcons.check,
-                                                color: primary500),
-                                            inactiveIcon: Icon(PhosphorIcons.x,
-                                                color: bnw100),
+                                              PhosphorIcons.check,
+                                              color: primary500,
+                                            ),
+                                            inactiveIcon: Icon(
+                                              PhosphorIcons.x,
+                                              color: bnw100,
+                                            ),
                                             activeColor: primary500,
                                             inactiveColor: bnw100,
                                             borderRadius: 30.0,
@@ -773,14 +846,23 @@ class _DiskonTokoState extends State<DiskonToko> {
                                             height: 27.0,
                                             inactiveToggleColor: bnw900,
                                             activeToggleColor: primary200,
-                                            activeSwitchBorder:
-                                                Border.all(color: primary500),
+                                            activeSwitchBorder: Border.all(
+                                              color: primary500,
+                                            ),
                                             inactiveSwitchBorder: Border.all(
-                                                color: bnw300, width: 2),
+                                              color: bnw300,
+                                              width: 2,
+                                            ),
                                             onToggle: (bool value) {
+                                              if (!mounted) return;
                                               List<String> listProduct = [
-                                                dataProduk.id!
+                                                dataProduk.id!,
                                               ];
+
+                                              setState(() {
+                                                datasProduk![index].is_active =
+                                                    value;
+                                              });
 
                                               changeActiveDiskon(
                                                 context,
@@ -789,8 +871,6 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                 listProduct,
                                                 "",
                                               );
-                                              setState(() {});
-                                              initState();
                                             },
                                           ),
                                         ),
@@ -801,7 +881,7 @@ class _DiskonTokoState extends State<DiskonToko> {
                                             bnw500,
                                             'Outfit',
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
                                     SizedBox(width: size16),
@@ -834,23 +914,26 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                           Text(
                                                             dataProduk.name!,
                                                             style: heading2(
-                                                                FontWeight.w600,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w600,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                           Text(
                                                             dataProduk.date!,
                                                             style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ],
                                                       ),
                                                       GestureDetector(
                                                         onTap: () =>
                                                             Navigator.pop(
-                                                                context),
+                                                              context,
+                                                            ),
                                                         child: Icon(
                                                           PhosphorIcons.x_fill,
                                                           color: bnw900,
@@ -865,26 +948,22 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                     onTap: () {
                                                       Navigator.pop(context);
                                                       getSingleDiskon(
-                                                              context,
-                                                              widget.token,
-                                                              datasProduk![
-                                                                      index]
-                                                                  .id)
-                                                          .then(
-                                                        (value) async {
-                                                          if (value == '00') {
-                                                            productIdDiskon
-                                                                .clear();
-                                                            Future.delayed(
-                                                                Duration(
-                                                                    milliseconds:
-                                                                        500));
-                                                            widget
-                                                                .pageController
-                                                                .jumpToPage(4);
-                                                          }
-                                                        },
-                                                      );
+                                                        context,
+                                                        widget.token,
+                                                        datasProduk![index].id,
+                                                      ).then((value) async {
+                                                        if (value == '00') {
+                                                          productIdDiskon
+                                                              .clear();
+                                                          Future.delayed(
+                                                            Duration(
+                                                              milliseconds: 500,
+                                                            ),
+                                                          );
+                                                          widget.pageController
+                                                              .jumpToPage(4);
+                                                        }
+                                                      });
 
                                                       setState(() {});
                                                     },
@@ -911,102 +990,105 @@ class _DiskonTokoState extends State<DiskonToko> {
                                                                 Text(
                                                                   'Yakin Ingin Menghapus Diskon?',
                                                                   style: heading1(
-                                                                      FontWeight
-                                                                          .w600,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
-                                                                    height:
-                                                                        size16),
+                                                                  height:
+                                                                      size16,
+                                                                ),
                                                                 Text(
                                                                   'Data Diskon yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                                   style: heading2(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      bnw900,
-                                                                      'Outfit'),
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
                                                                 ),
                                                               ],
                                                             ),
                                                             SizedBox(
-                                                                height: size16),
+                                                              height: size16,
+                                                            ),
                                                             Row(
                                                               children: [
                                                                 Expanded(
-                                                                  child:
-                                                                      GestureDetector(
-                                                                    onTap: () {
-                                                                      List<String>
-                                                                          listIdDiskon =
-                                                                          [
+                                                                  child: GestureDetector(
+                                                                    onTap: () async {
+                                                                      List<
+                                                                        String
+                                                                      >
+                                                                      listIdDiskon = [
                                                                         datasProduk![index]
                                                                             .id
-                                                                            .toString()
+                                                                            .toString(),
                                                                       ];
                                                                       Navigator.pop(
-                                                                          context);
-                                                                      deleteDiskon(
-                                                                          context,
-                                                                          widget
-                                                                              .token,
-                                                                          listIdDiskon);
+                                                                        context,
+                                                                      );
+                                                                      await deleteDiskon(
+                                                                        context,
+                                                                        widget
+                                                                            .token,
+                                                                        listIdDiskon,
+                                                                      );
 
-                                                                      print(datasProduk![
-                                                                              index]
-                                                                          .id);
-                                                                      refreshDataProduk();
+                                                                      print(
+                                                                        datasProduk![index]
+                                                                            .id,
+                                                                      );
+                                                                      await refreshDataProduk();
 
                                                                       setState(
-                                                                          () {});
-                                                                      initState();
+                                                                        () {},
+                                                                      );
                                                                     },
-                                                                    child:
-                                                                        buttonXLoutline(
+                                                                    child: buttonXLoutline(
                                                                       Center(
-                                                                        child:
-                                                                            Text(
+                                                                        child: Text(
                                                                           'Iya, Hapus',
                                                                           style: heading3(
-                                                                              FontWeight.w600,
-                                                                              primary500,
-                                                                              'Outfit'),
+                                                                            FontWeight.w600,
+                                                                            primary500,
+                                                                            'Outfit',
+                                                                          ),
                                                                         ),
                                                                       ),
                                                                       MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width,
+                                                                        context,
+                                                                      ).size.width,
                                                                       primary500,
                                                                     ),
                                                                   ),
                                                                 ),
                                                                 SizedBox(
-                                                                    width:
-                                                                        size16),
+                                                                  width: size16,
+                                                                ),
                                                                 Expanded(
-                                                                  child:
-                                                                      GestureDetector(
+                                                                  child: GestureDetector(
                                                                     onTap: () {
                                                                       Navigator.pop(
-                                                                          context);
+                                                                        context,
+                                                                      );
                                                                     },
-                                                                    child:
-                                                                        buttonXL(
+                                                                    child: buttonXL(
                                                                       Center(
-                                                                        child:
-                                                                            Text(
+                                                                        child: Text(
                                                                           'Batalkan',
                                                                           style: heading3(
-                                                                              FontWeight.w600,
-                                                                              bnw100,
-                                                                              'Outfit'),
+                                                                            FontWeight.w600,
+                                                                            bnw100,
+                                                                            'Outfit',
+                                                                          ),
                                                                         ),
                                                                       ),
                                                                       MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width,
+                                                                        context,
+                                                                      ).size.width,
                                                                     ),
                                                                   ),
                                                                 ),
@@ -1036,8 +1118,11 @@ class _DiskonTokoState extends State<DiskonToko> {
                                             SizedBox(width: size12),
                                             Text(
                                               'Atur',
-                                              style: body1(FontWeight.w600,
-                                                  bnw900, 'Outfit'),
+                                              style: body1(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1068,54 +1153,46 @@ class _DiskonTokoState extends State<DiskonToko> {
           children: [
             Icon(icon, color: bnw900),
             SizedBox(width: size12),
-            Text(
-              title,
-              style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-            )
+            Text(title, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
           ],
         ),
-        Divider(color: bnw300)
+        Divider(color: bnw300),
       ],
     );
   }
 
-  fieldAddProduk(title, hint, mycontroller, TextInputType numberNo) {
+  fieldAddProduk(
+    title,
+    hint,
+    mycontroller,
+    TextInputType numberNo,
+    List<TextInputFormatter> inputFormat,
+  ) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading4(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: heading4(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           TextFormField(
             cursorColor: primary500,
             keyboardType: numberNo,
+            inputFormatters: inputFormat,
             style: heading2(FontWeight.w600, bnw900, 'Outfit'),
             controller: mycontroller,
             onChanged: (value) {},
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: 'Cth : $hint',
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -1164,21 +1241,19 @@ class _DiskonTokoState extends State<DiskonToko> {
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(
-      () {
-        if (selectedFlag.containsValue(false)) {
-          checkFill = 'kosong';
-          listProduct.clear();
-          isSelectionMode = selectedFlag.containsValue(false);
-          isSelectionMode = selectedFlag.containsValue(true);
-        } else {
-          checkFill = 'penuh';
-          listProduct.clear();
-          listProduct.addAll(productId);
-          isSelectionMode = selectedFlag.containsValue(true);
-        }
-      },
-    );
+    setState(() {
+      if (selectedFlag.containsValue(false)) {
+        checkFill = 'kosong';
+        listProduct.clear();
+        isSelectionMode = selectedFlag.containsValue(false);
+        isSelectionMode = selectedFlag.containsValue(true);
+      } else {
+        checkFill = 'penuh';
+        listProduct.clear();
+        listProduct.addAll(productId);
+        isSelectionMode = selectedFlag.containsValue(true);
+      }
+    });
   }
 
   List? typeproductList;
@@ -1186,147 +1261,181 @@ class _DiskonTokoState extends State<DiskonToko> {
 
   String provinceInfoUrl = '$url/api/typeproduct';
   Future _getProvinceList() async {
-    await http.post(Uri.parse(provinceInfoUrl), body: {
-      "deviceid": identifier,
-    }).then((response) {
-      var data = json.decode(response.body);
+    await http
+        .post(Uri.parse(provinceInfoUrl), body: {"deviceid": identifier})
+        .then((response) {
+          var data = json.decode(response.body);
 
-      setState(() {
-        typeproductList = data['data'];
-      });
-    });
+          setState(() {
+            typeproductList = data['data'];
+          });
+        });
   }
 
   orderBy(BuildContext context) {
+    final outerSetState = setState;
     return IntrinsicWidth(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByDiskonText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(orderByDiskonText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                textOrderBy =
-                                    orderByDiskonText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
-                                  ),
-                                ),
-                                0,
-                              ),
-                            ),
-                          ),
-                        ],
+          int previousValue = valueOrderByDiscount;
+          bool confirmed = false;
+          showModalBottomSheet(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, setState) => IntrinsicHeight(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size12),
+                        topLeft: Radius.circular(size12),
                       ),
                     ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        Container(
+                          width: double.infinity,
+                          color: bnw100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Urutkan',
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Text(
+                                'Tentukan data yang akan tampil',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw600,
+                                  'Outfit',
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                'Pilih Urutan',
+                                style: heading3(
+                                  FontWeight.w400,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
+                              Wrap(
+                                children: List<Widget>.generate(
+                                  orderByDiscountText.length,
+                                  (int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(right: size16),
+                                      child: ChoiceChip(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: size12,
+                                        ),
+                                        backgroundColor: bnw100,
+                                        selectedColor: primary100,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: valueOrderByDiscount == index
+                                                ? primary500
+                                                : bnw300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                        ),
+                                        label: Text(
+                                          orderByDiscountText[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            valueOrderByDiscount == index
+                                                ? primary500
+                                                : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        selected: valueOrderByDiscount == index,
+                                        onSelected: (bool selected) {
+                                          setState(() {
+                                            print(index);
+                                            // _value =
+                                            //     selected ? index : null;
+                                            valueOrderByDiscount = index;
+                                          });
+                                          setState(() {});
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: size32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: GestureDetector(
+                            onTap: () async {
+                              confirmed = true;
+                              textOrderByDiscount =
+                                  orderByDiscountText[valueOrderByDiscount];
+                              textvalueOrderByDiscount =
+                                  orderByDiscount[valueOrderByDiscount];
+                              final result = await getDiskon(
+                                context,
+                                checkToken,
+                                merchantId,
+                                textvalueOrderByDiscount,
+                              );
+                              if (!mounted) return;
+                              outerSetState(() {
+                                datasProduk = result;
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: buttonXL(
+                              Center(
+                                child: Text(
+                                  'Tampilkan',
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ),
+                              0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              },
-            );
+                ),
+              );
+            },
+          ).whenComplete(() {
+            if (!confirmed) {
+              outerSetState(() {
+                valueOrderByDiscount = previousValue;
+              });
+            }
           });
         },
         child: buttonLoutline(
@@ -1335,26 +1444,14 @@ class _DiskonTokoState extends State<DiskonToko> {
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
-                ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                ' dari $textOrderByDiscount',
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,

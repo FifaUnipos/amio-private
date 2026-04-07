@@ -1,6 +1,7 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
+import 'package:flutter/material.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';import 'package:unipos_app_335/utils/utilities.dart';import 'package:unipos_app_335/utils/component/component_textHeading.dart';import '../../../../utils/component/component_size.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
 import '../../../../models/tokomodel.dart';
@@ -10,7 +11,7 @@ import '../../../tokopage/sidebar/produkToko/produk.dart';import '../../../../ut
 
 class TambahProdukPage extends StatefulWidget {
   String name;
-  List<ModelDataToko> datas;
+  List<MerchantSortingData> datas;
   PageController pageController;
   TambahProdukPage({
     Key? key,
@@ -146,7 +147,7 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
 }
 
 class CheckBoxLihatProduk extends StatefulWidget {
-  List<ModelDataToko>? datas;
+  List<MerchantSortingData>? datas;
   CheckBoxLihatProduk({
     Key? key,
     required this.datas,
@@ -158,7 +159,7 @@ class CheckBoxLihatProduk extends StatefulWidget {
 class _CheckBoxLihatProdukState extends State<CheckBoxLihatProduk> {
   bool isSelectionMode = false;
 
-  List<ModelDataToko>? staticData;
+  List<MerchantSortingData>? staticData;
   Map<int, bool> selectedFlag = {};
   // Map<int, bool> selectedFlag = {};
 
@@ -177,7 +178,7 @@ class _CheckBoxLihatProdukState extends State<CheckBoxLihatProduk> {
     );
   }
 
-  Column newnew(List<ModelDataToko>? datas) {
+  Column newnew(List<MerchantSortingData>? datas) {
     bool isFalseAvailable = selectedFlag.containsValue(false);
     bool light = true;
 
@@ -261,7 +262,7 @@ class _CheckBoxLihatProdukState extends State<CheckBoxLihatProduk> {
             color: primary100,
             child: ListView.builder(
               itemBuilder: (builder, index) {
-                ModelDataToko data = datas[index];
+                MerchantSortingData data = datas[index];
                 selectedFlag[index] = selectedFlag[index] ?? false;
                 bool? isSelected = selectedFlag[index];
 
@@ -394,7 +395,7 @@ class _CheckBoxLihatProdukState extends State<CheckBoxLihatProduk> {
     });
   }
 
-  Widget _buildSelectIcon(bool isSelected, ModelDataToko data) {
+  Widget _buildSelectIcon(bool isSelected, MerchantSortingData data) {
     return Icon(
       isSelected ? PhosphorIcons.check_square_fill : PhosphorIcons.square,
       color: primary500,
