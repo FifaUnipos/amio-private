@@ -803,20 +803,20 @@ Future getAllToko(context, token, name, orderby) async {
   }
 }
 
-Future<TokoModelToko> getToko(token) async {
-  final response = await http.post(
-    Uri.parse(getMerch),
-    // Uri.parse('$url/api/groupmerchant/user'),
-    headers: {'token': token},
-    body: {"deviceid": identifier},
-  );
+// Future<TokoModelToko> getToko(token) async {
+//   final response = await http.post(
+//     Uri.parse(getMerch),
+//     // Uri.parse('$url/api/groupmerchant/user'),
+//     headers: {'token': token},
+//     body: {"deviceid": identifier},
+//   );
 
-  if (response.statusCode == 200) {
-    return TokoModelToko.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('Failed to load album');
-  }
-}
+//   if (response.statusCode == 200) {
+//     return TokoModelToko.fromJson(jsonDecode(response.body));
+//   } else {
+//     throw Exception('Failed to load album');
+//   }
+// }
 
 Future getUserAkun(token, id, orderby) async {
   final response = await http.post(

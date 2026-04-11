@@ -178,150 +178,145 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
       child: Scaffold(
         floatingActionButton: isCashier
             ? null
-            : SafeArea(
-                child: GestureDetector(
-                  onTap: () {
-                    showMenuBottomDialog(context);
-                  },
-                  child: buttonXL(
-                    Center(
-                      child: Row(
-                        children: [
-                          Icon(
-                            PhosphorIcons.squares_four_fill,
-                            color: bnw100,
-                            size: size32,
-                          ),
-                          SizedBox(width: size16),
-                          Text(
-                            'Menu',
-                            style: heading1(FontWeight.w600, bnw100, 'Outfit'),
-                          ),
-                        ],
+            : GestureDetector(
+              onTap: () {
+                showMenuBottomDialog(context);
+              },
+              child: buttonXL(
+                Center(
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIcons.squares_four_fill,
+                        color: bnw100,
+                        size: size32,
                       ),
-                    ),
-                    double.infinity,
+                      SizedBox(width: size16),
+                      Text(
+                        'Menu',
+                        style: heading1(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                    ],
                   ),
+                ),
+                double.infinity,
+              ),
+            ),
+        body: Column(
+          children: [
+            // 🔹 Navbar Atas
+            Container(
+              padding: const EdgeInsets.only(
+                top: 40,
+                left: 16,
+                right: 16,
+                bottom: 12,
+              ),
+              decoration: BoxDecoration(
+                color: primary500,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(size8),
+                  bottomRight: Radius.circular(size8),
                 ),
               ),
-        body: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // 🔹 Navbar Atas
-              Container(
-                padding: const EdgeInsets.only(
-                  top: 40,
-                  left: 16,
-                  right: 16,
-                  bottom: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: primary500,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(size8),
-                    bottomRight: Radius.circular(size8),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: isCashier
-                      ? [
-                          // Tombol Transaksi
-                          _navButton(
-                            index: 0,
-                            label: 'Transaksi',
-                            icon: PhosphorIcons.shopping_cart_simple_fill,
-                            selectedIndex: selectedIndex,
-                            onTap: () => setState(() => selectedIndex = 0),
-                          ),
-                          const SizedBox(width: 8),
-          
-                          // Tombol Riwayat
-                          _navButton(
-                            index: 1,
-                            label: 'Riwayat',
-                            icon: PhosphorIcons.file_text_fill,
-                            selectedIndex: selectedIndex,
-                            onTap: () => setState(() => selectedIndex = 1),
-                          ),
-                          const SizedBox(width: 8),
-          
-                          // Tombol Pengaturan
-                          _navButton(
-                            index: 2,
-                            label: 'Pengaturan',
-                            icon: PhosphorIcons.gear_six_fill,
-                            selectedIndex: selectedIndex,
-                            onTap: () => setState(() => selectedIndex = 2),
-                          ),
-                        ]
-                      : [
-                          // Tombol Dashboard
-                          _navButton(
-                            index: 0,
-                            label: 'Dashboard',
-                            icon: Icons.speed,
-                            selectedIndex: selectedIndex,
-                            onTap: () => setState(() => selectedIndex = 0),
-                          ),
-                          const SizedBox(width: 8),
-          
-                          // Tombol Notifikasi + badge
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _navButton(
-                                index: 1,
-                                label: 'Notifikasi',
-                                icon: Icons.notifications,
-                                selectedIndex: selectedIndex,
-                                onTap: () => setState(() => selectedIndex = 1),
-                              ),
-                              if (wsNotifications
-                                  .isNotEmpty) // hanya tampil kalau ada notifikasi
-                                Positioned(
-                                  top: -4,
-                                  right: -4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      '${wsNotifications.length}', // jumlah notifikasi dinamis
-                                      style: TextStyle(
-                                        color: bnw100,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: isCashier
+                    ? [
+                        // Tombol Transaksi
+                        _navButton(
+                          index: 0,
+                          label: 'Transaksi',
+                          icon: PhosphorIcons.shopping_cart_simple_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 0),
+                        ),
+                        const SizedBox(width: 8),
+        
+                        // Tombol Riwayat
+                        _navButton(
+                          index: 1,
+                          label: 'Riwayat',
+                          icon: PhosphorIcons.file_text_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 1),
+                        ),
+                        const SizedBox(width: 8),
+        
+                        // Tombol Pengaturan
+                        _navButton(
+                          index: 2,
+                          label: 'Pengaturan',
+                          icon: PhosphorIcons.gear_six_fill,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 2),
+                        ),
+                      ]
+                    : [
+                        // Tombol Dashboard
+                        _navButton(
+                          index: 0,
+                          label: 'Dashboard',
+                          icon: Icons.speed,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 0),
+                        ),
+                        const SizedBox(width: 8),
+        
+                        // Tombol Notifikasi + badge
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _navButton(
+                              index: 1,
+                              label: 'Notifikasi',
+                              icon: Icons.notifications,
+                              selectedIndex: selectedIndex,
+                              onTap: () => setState(() => selectedIndex = 1),
+                            ),
+                            if (wsNotifications
+                                .isNotEmpty) // hanya tampil kalau ada notifikasi
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '${wsNotifications.length}', // jumlah notifikasi dinamis
+                                    style: TextStyle(
+                                      color: bnw100,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-          
-                          // Tombol Profil
-                          _navButton(
-                            index: 2,
-                            label: 'Profil',
-                            icon: Icons.account_circle,
-                            selectedIndex: selectedIndex,
-                            onTap: () => setState(() => selectedIndex = 2),
-                          ),
-                        ],
-                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
+        
+                        // Tombol Profil
+                        _navButton(
+                          index: 2,
+                          label: 'Profil',
+                          icon: Icons.account_circle,
+                          selectedIndex: selectedIndex,
+                          onTap: () => setState(() => selectedIndex = 2),
+                        ),
+                      ],
               ),
-          
-              // 🔹 Isi halaman (berubah sesuai tombol yang diklik)
-              Expanded(child: _buildPages(wsNotifications)[selectedIndex]),
-            ],
-          ),
+            ),
+        
+            // 🔹 Isi halaman (berubah sesuai tombol yang diklik)
+            Expanded(child: _buildPages(wsNotifications)[selectedIndex]),
+          ],
         ),
       ),
     );

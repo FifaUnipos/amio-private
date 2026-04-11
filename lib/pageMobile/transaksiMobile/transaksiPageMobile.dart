@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/services.dart' as services;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -3675,10 +3676,10 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                 // ],
               ),
             ),
-      bottomNavigationBar: (_isGroupMerchant || widget.isEmbedded)
+      bottomNavigationBar: _isGroupMerchant
           ? null
           // _buildBottomBar()
-          : (_currentTabIndex == 0
+          : (_currentTabIndex == 0 || widget.isEmbedded
                 ? _buildBottomBar()
                 : null), // Only show on Kasir tab
     );
@@ -3711,10 +3712,41 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
               ),
               SizedBox(height: size12),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
                     onTap: _showSortModal,
                     child: _buildDropdown(textOrderBy),
+                  ),
+                  SizedBox(width: size8),
+                  GestureDetector(
+                    onTap: _showKustomMainModal,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size12,
+                        vertical: size8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: primary500),
+                        borderRadius: BorderRadius.circular(size8),
+                        color: bnw100,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            PhosphorIcons.plus,
+                            size: size16,
+                            color: primary500,
+                          ),
+                          SizedBox(width: size8),
+                          Text(
+                            'Kustom',
+                            style: body1(FontWeight.w500, primary500, 'Outfit'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -3860,6 +3892,303 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
           SizedBox(width: size4),
           Icon(Icons.arrow_drop_down, size: size32),
         ],
+      ),
+    );
+  }
+
+  void _showKustomMainModal() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Kustom Produk & Digital Produk',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _showKustomProdukModal();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primary500),
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Kustom Produk',
+                          style: TextStyle(
+                            color: primary500,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _navToDigitalProduk();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primary500),
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Digital Produk',
+                          style: TextStyle(
+                            color: primary500,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showKustomProdukModal() {
+    final nameCtrl = TextEditingController(text: 'Produk Kustom');
+    final priceCtrl = TextEditingController();
+    final noteCtrl = TextEditingController();
+    int qty = 1;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateModal) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tambah Kustom Produk',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Nama Produk',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      TextField(
+                        controller: priceCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Harga',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      TextField(
+                        controller: noteCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Catatan',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Kuantitas',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove_circle_outline),
+                                onPressed: () {
+                                  if (qty > 1) setStateModal(() => qty--);
+                                },
+                              ),
+                              Text('$qty', style: TextStyle(fontSize: 16)),
+                              IconButton(
+                                icon: Icon(Icons.add_circle_outline),
+                                onPressed: () => setStateModal(() => qty++),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (priceCtrl.text.isEmpty) return;
+                          int price =
+                              int.tryParse(
+                                priceCtrl.text.replaceAll(
+                                  RegExp(r'[^0-9]'),
+                                  '',
+                                ),
+                              ) ??
+                              0;
+                          if (price == 0) return;
+
+                          Product customP = Product(
+                            id: 'custom',
+                            name: nameCtrl.text,
+                            price: price,
+                            onlinePrice: price,
+                            category: 'custom',
+                            imageUrl:
+                                'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+                            isCustomize: true,
+                          );
+
+                          setState(() {
+                            _cart.add({
+                              'product': customP,
+                              'quantity': qty,
+                              'notes': noteCtrl.text,
+                            });
+                          });
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          minimumSize: Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Tambah Ke Keranjang',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _navToDigitalProduk() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SafeArea(
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(
+                'Produk Digital',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              iconTheme: IconThemeData(color: Colors.black),
+              backgroundColor: Colors.white,
+              elevation: 1,
+            ),
+            body: WebViewWidget(
+              controller: WebViewController()
+                ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                ..addJavaScriptChannel(
+                  'flutterCallback',
+                  onMessageReceived: (JavaScriptMessage message) {
+                    try {
+                      final List<dynamic> jsonData = jsonDecode(message.message);
+            
+                      setState(() {
+                        _cart.removeWhere(
+                          (item) =>
+                              (item['product'] as Product).id == 'digitalProduct',
+                        );
+            
+                        for (var item in jsonData) {
+                          Product digitalP = Product(
+                            id: 'digitalProduct',
+                            name: item['nama_produk'].toString(),
+                            price: int.tryParse(item['total']) ?? 0,
+                            onlinePrice: int.tryParse(item['total']) ?? 0,
+                            category: 'digital',
+                            imageUrl:
+                                'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+                          );
+                          String desc =
+                              "${item['id_request']}-${item['jenis']}-${item['nama_produk']}";
+                          _cart.add({
+                            'product': digitalP,
+                            'quantity': 1,
+                            'notes': desc,
+                          });
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      print("Error webview pass: $e");
+                    }
+                  },
+                )
+                ..loadRequest(Uri.parse(bindingUrl)),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -6061,40 +6390,19 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  String? _selectedMethod; // Initially null
-  int _cashGiven = 0;
-  final TextEditingController _cashController = TextEditingController();
   bool _isLoadingCalculation = true;
   bool _isProcessing = false;
   Map<String, dynamic>? _calculationData;
   DiscountModel? _selectedDiscount;
 
-  List<dynamic> _paymentSubMethods = [];
-  Map<String, dynamic>? _selectedSubMethod;
-  bool _isLoadingSubMethods = false;
+  bool _isLunas = true; // true = Lunas, false = Cicilan/Bayar Nanti
+  List<dynamic> _availableMethods = [];
+  bool _isLoadingMethods = true;
+  String? _methodsError;
 
-  final List<Map<String, dynamic>> _methods = [
-    {
-      'icon': PhosphorIcons.wallet_fill,
-      'label': 'Uang Tunai',
-      'desc': 'Bayar dengan uang fisik',
-    },
-    {
-      'icon': PhosphorIcons.qr_code_fill,
-      'label': 'Dompet Digital',
-      'desc': 'Pindai kode batang (QR Code) untuk membayar',
-    },
-    {
-      'icon': PhosphorIcons.credit_card_fill,
-      'label': 'Kartu Kredit',
-      'desc': 'Masukkan nomor kartu kredit',
-    },
-    {
-      'icon': PhosphorIcons.cardholder_fill,
-      'label': 'Kartu Debit',
-      'desc': 'Masukkan nomor kartu debit',
-    },
-  ];
+  // Each element represents a valid split payment block
+  // with its own controller for the nominal input.
+  List<Map<String, dynamic>> _splitPayments = [];
 
   @override
   void initState() {
@@ -6108,28 +6416,94 @@ class _PaymentPageState extends State<PaymentPage> {
 
     _selectedDiscount = widget.selectedDiscount;
 
-    // Skip calculating if finalAmount is already provided (from bill)
+    _addSplitPayment(); // add one by default
+
     if (widget.finalAmount != null &&
         !_hasCustomInCart &&
         _hasBreakdownEnough) {
       setState(() {
         _isLoadingCalculation = false;
       });
+      // nominal set to 0 initially by user request
     } else {
-      _fetchCalculation();
+      _fetchCalculation().then((_) {
+        if (!_isLoadingCalculation && _totalPay > 0) {
+          // User explicitly requested nominal starts at 0
+          setState(() {});
+        }
+      });
     }
 
-    _cashController.addListener(() {
-      String text = _cashController.text.replaceAll(RegExp(r'[^0-9]'), '');
-      if (text.isEmpty) text = '0';
+    _fetchPaymentMethods();
+  }
 
+  void _addSplitPayment() {
+    final controller = TextEditingController(text: "0");
+    controller.addListener(() {
+      String text = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (text.isEmpty) text = '0';
       int val = int.parse(text);
-      if (_cashGiven != val) {
+
+      // Update the nominal value in the map
+      final idx = _splitPayments.indexWhere(
+        (sp) => sp['controller'] == controller,
+      );
+      if (idx != -1 && _splitPayments[idx]['nominal'] != val) {
         setState(() {
-          _cashGiven = val;
+          _splitPayments[idx]['nominal'] = val;
         });
       }
     });
+
+    _splitPayments.add({
+      'payment_method_id': null,
+      'nominal': 0,
+      'controller': controller,
+    });
+    setState(() {});
+  }
+
+  void _removeSplitPayment(int index) {
+    if (_splitPayments.length > 1) {
+      _splitPayments[index]['controller'].dispose();
+      setState(() {
+        _splitPayments.removeAt(index);
+      });
+    }
+  }
+
+  Future<void> _fetchPaymentMethods() async {
+    try {
+      final response = await http.post(
+        Uri.parse(getCoaMethodLink),
+        headers: {'token': widget.token},
+        body: {"category": "", "orderby": "upDownNama", "deviceid": identifier},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['rc'] == '00') {
+          setState(() {
+            _availableMethods = data['data'] ?? [];
+            _isLoadingMethods = false;
+          });
+        } else {
+          setState(() {
+            _methodsError = data['message'];
+            _isLoadingMethods = false;
+          });
+        }
+      } else {
+        setState(() {
+          _methodsError = 'Error HTTP ${response.statusCode}';
+          _isLoadingMethods = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _methodsError = 'Koneksi error: $e';
+        _isLoadingMethods = false;
+      });
+    }
   }
 
   bool get _hasCustomInCart =>
@@ -6148,70 +6522,16 @@ class _PaymentPageState extends State<PaymentPage> {
     return (isCustomize && customAmount != null) ? customAmount : baseDefault;
   }
 
-  int _variantTotalFromItem(Map<String, dynamic> item) {
-    return (item['variant_total'] as num? ?? 0).toInt();
-  }
-
   int _unitAmountFromItem(Map<String, dynamic> item) {
-    final num? unit = item['unit_amount'] as num?;
-    if (unit != null) return unit.round();
-    return _baseUsedFromItem(item) + _variantTotalFromItem(item);
-  }
+    final int baseUsed = _baseUsedFromItem(item);
+    final List<dynamic> selectedVariants =
+        (item['selected_variants'] ?? []) as List<dynamic>;
 
-  int _totalAmountFromItem(Map<String, dynamic> item) {
-    final int qty = (item['quantity'] as int?) ?? 0;
-    final num? total = item['total_amount'] as num?;
-    if (total != null) return total.round();
-    return _unitAmountFromItem(item) * qty;
-  }
-
-  Future<void> _fetchSubMethods(String categoryLabel) async {
-    String category = '';
-    if (categoryLabel == 'Dompet Digital')
-      category = 'EWallet';
-    else if (categoryLabel == 'Kartu Kredit')
-      category = 'Credit';
-    else if (categoryLabel == 'Kartu Debit')
-      category = 'Debit';
-
-    if (category.isEmpty) {
-      setState(() {
-        _paymentSubMethods = [];
-        _selectedSubMethod = null;
-      });
-      return;
+    int variantTotal = 0;
+    for (var v in selectedVariants) {
+      variantTotal += (v['price'] as num?)?.toInt() ?? 0;
     }
-
-    setState(() => _isLoadingSubMethods = true);
-
-    try {
-      final url = Uri.parse(getCoaMethodLink);
-      final body = {"category": category};
-
-      final response = await http.post(
-        url,
-        headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['rc'] == '00') {
-          setState(() {
-            _paymentSubMethods = data['data'] ?? [];
-            if (_paymentSubMethods.isNotEmpty) {
-              _selectedSubMethod = _paymentSubMethods[0];
-            } else {
-              _selectedSubMethod = null;
-            }
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint("Error fetching sub-methods: $e");
-    } finally {
-      setState(() => _isLoadingSubMethods = false);
-    }
+    return baseUsed + variantTotal;
   }
 
   String? _calcError;
@@ -6224,49 +6544,6 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       final url = Uri.parse(calculateTransaksiUrl);
       print('=== CALCULATING API DEBUG 3===');
-
-      // List<Map<String, dynamic>> details = widget.cart.map((item) {
-      //   Product p = item['product'];
-
-      //   final int baseUsed = _baseUsedFromItem(item);
-      //   final bool isOnline = item['is_online'] == true;
-
-      //   final bool isCustomize = item['is_customize'] == true;
-      //   final List<dynamic> rawVariants = (item['variants'] ?? []) as List;
-
-      //   final List<Map<String, dynamic>> variants = rawVariants.map((cat) {
-      //     final String catId = cat['variant_category_id']?.toString() ?? '';
-
-      //     final List<dynamic> rawVarList = (cat['variant'] ?? []) as List;
-
-      //     final mappedVarList = rawVarList.map((v) {
-      //       final Map<String, dynamic> mapped = {
-      //         "variant_id": v['variant_id']?.toString() ?? '',
-      //       };
-
-      //       if (isCustomize) {
-      //         final dynamic priceVal = v['variant_price'] ?? v['price'] ?? 0;
-
-      //         mapped["variant_price"] = priceVal;
-      //         mapped["is_variant_customize"] = true;
-      //       }
-
-      //       return mapped;
-      //     }).toList();
-
-      //     return {"variant_category_id": catId, "variant": mappedVarList};
-      //   }).toList();
-
-      //   return {
-      //     "product_id": p.id,
-      //     "name": p.name,
-      //     "price": baseUsed,
-      //     "quantity": item['quantity'],
-      //     "description": item['notes'] ?? "",
-      //     "is_online": isOnline,
-      //     "variants": variants,
-      //   };
-      // }).toList();
 
       final details = buildTransactionDetails(
         widget.cart,
@@ -6294,16 +6571,6 @@ class _PaymentPageState extends State<PaymentPage> {
         return;
       }
 
-      // if (response.statusCode == 200) {
-      //   final data = jsonDecode(response.body);
-      //   setState(() {
-      //     _calculationData = data;
-      //     _isLoadingCalculation = false;
-      //   });
-      // } else {
-      //   setState(() => _isLoadingCalculation = false);
-      // }
-
       final json = jsonDecode(response.body);
       if (json['rc'] != '00' || json['data'] == null || json['data'] is! Map) {
         setState(() => _calcError = json['message'] ?? 'Gagal hitung total');
@@ -6311,8 +6578,7 @@ class _PaymentPageState extends State<PaymentPage> {
       }
 
       setState(() {
-        _calculationData =
-            (json['data'] as Map<String, dynamic>); // simpan hanya data-nya
+        _calculationData = (json['data'] as Map<String, dynamic>);
       });
     } catch (e) {
       debugPrint("Error calculating: $e");
@@ -6334,23 +6600,24 @@ class _PaymentPageState extends State<PaymentPage> {
         quantityAsString: true,
       );
 
+      final submittedPayments = _splitPayments
+          .where((sp) => sp['payment_method_id'] != null)
+          .map((sp) {
+            return {
+              "payment_method_id": sp['payment_method_id'],
+              "payment_reference_id": null,
+              "payment_value": sp['nominal'].toString(),
+            };
+          })
+          .toList();
+
       final body = {
         "deviceid": identifier,
         "discount_id": _selectedDiscount?.id ?? null,
         "member_id": widget.memberId,
         "transaction_id": widget.transactionId ?? null,
-        "is_partial_payment": false,
-        "payments": [
-          {
-            "payment_method_id": _selectedMethod == 'Uang Tunai'
-                ? "001"
-                : (_selectedSubMethod?['idpaymentmethode'] ?? ""),
-            "payment_reference_id": null,
-            "payment_value": _selectedMethod == 'Uang Tunai'
-                ? _cashGiven
-                : _totalPay,
-          },
-        ],
+        "is_partial_payment": !_isLunas,
+        "payments": submittedPayments,
         "detail": details,
       };
       debugPrint("PAYMENT request: ${jsonEncode(body)}");
@@ -6361,11 +6628,8 @@ class _PaymentPageState extends State<PaymentPage> {
         body: jsonEncode(body),
       );
 
-      debugPrint('PAYMent status: ${response.statusCode}');
-      debugPrint('PAYMEent body: ${response.body}');
-      debugPrint('breakdown: $_breakdown');
-      debugPrint('billdata raw: ${widget.billData}');
-      debugPrint('ppn raw: ${_breakdown?['ppn']}');
+      debugPrint('PAYMENT status: ${response.statusCode}');
+      debugPrint('PAYMENT body: ${response.body}');
 
       if (response.statusCode != 200) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -6379,15 +6643,219 @@ class _PaymentPageState extends State<PaymentPage> {
       final data = jsonDecode(response.body);
       if (data['rc'] == '00') {
         widget.onSuccess?.call();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TransactionSuccessPage(
-              data: data['data'],
-              localCart: widget.cart,
+
+        final dynamic pData = data['data'];
+        String? qrString;
+
+        if (pData != null && pData['payments'] != null) {
+          final paymentsMap = pData['payments'];
+          if (paymentsMap is Map<String, dynamic> &&
+              paymentsMap['payment_detail'] != null) {
+            final pDetail = paymentsMap['payment_detail'];
+            if (pDetail is Map<String, dynamic> &&
+                pDetail['payment_instructions'] != null) {
+              final pInstr = pDetail['payment_instructions'];
+              if (pInstr is Map<String, dynamic> &&
+                  pInstr['qr_string'] != null) {
+                qrString = pInstr['qr_string'].toString();
+              }
+            }
+          }
+        }
+
+        void _finishAndRedirect() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TransactionSuccessPage(
+                data: data['data'],
+                localCart: widget.cart,
+              ),
             ),
-          ),
-        );
+          );
+        }
+
+        if (qrString != null && qrString.isNotEmpty) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            isDismissible: false,
+            enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            backgroundColor: Colors.white,
+            builder: (context) {
+              return SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24.0,
+                    horizontal: 24.0,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pembayaran QRIS',
+                        style: heading1(
+                          FontWeight.bold,
+                          bnw900,
+                          'Outfit',
+                        ).copyWith(fontSize: 22),
+                      ),
+                      SizedBox(height: 32),
+                      Center(
+                        child: Text(
+                          'Total Bayar',
+                          style: heading2(
+                            FontWeight.w600,
+                            bnw900,
+                            'Outfit',
+                          ).copyWith(fontSize: 18),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Center(
+                        child: Text(
+                          'Rp ${formatCurrency(_totalPay)}',
+                          style: heading1(
+                            FontWeight.w800,
+                            bnw900,
+                            'Outfit',
+                          ).copyWith(fontSize: 32),
+                        ),
+                      ),
+                      SizedBox(height: 32),
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                            border: Border.all(color: Colors.black12),
+                          ),
+                          child: Image.network(
+                            'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=$qrString',
+                            width: 250,
+                            height: 250,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                width: 250,
+                                height: 250,
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 250,
+                                height: 250,
+                                alignment: Alignment.center,
+                                child: Text('Gagal memuat QR Code'),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 40),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                final bluetooth = BlueThermalPrinter.instance;
+                                bluetooth.isConnected.then((isConnected) {
+                                  if (isConnected == true) {
+                                    bluetooth.printCustom("Total Bayar", 1, 1);
+                                    bluetooth.printCustom(
+                                      "Rp ${formatCurrency(_totalPay)}",
+                                      1,
+                                      1,
+                                    );
+                                    bluetooth.printQRcode(
+                                      qrString!,
+                                      200,
+                                      200,
+                                      1,
+                                    );
+                                    bluetooth.printNewLine();
+                                    bluetooth.paperCut();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Printer belum terhubung',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                });
+                              },
+                              icon: Icon(
+                                PhosphorIcons.printer,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                'Cetak',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary500,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _finishAndRedirect();
+                              },
+                              child: Text(
+                                'Tutup',
+                                style: TextStyle(
+                                  color: primary500,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                side: BorderSide(color: primary500, width: 2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        } else {
+          _finishAndRedirect();
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -6445,6 +6913,10 @@ class _PaymentPageState extends State<PaymentPage> {
     return _subTotal + _ppn;
   }
 
+  int get _totalGiven {
+    return _splitPayments.fold(0, (sum, sp) => sum + (sp['nominal'] as int));
+  }
+
   Map<String, dynamic>? get _breakdown {
     final bd = widget.billData;
     if (bd is Map<String, dynamic>) {
@@ -6482,7 +6954,6 @@ class _PaymentPageState extends State<PaymentPage> {
       isScrollControlled: true,
       builder: (context) => SafeArea(
         child: Container(
-          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: bnw100,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -6491,143 +6962,173 @@ class _PaymentPageState extends State<PaymentPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 12),
               Center(
                 child: Container(
-                  width: 40,
+                  width: 50,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: bnw300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Rincian Pesanan',
-                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(PhosphorIcons.x),
-                  ),
-                ],
+              Center(
+                child: Text(
+                  'Rincian Pesanan',
+                  style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                ),
               ),
-              Divider(),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: widget.cart.length,
-                  itemBuilder: (context, index) {
-                    final item = widget.cart[index];
-                    final Product p = item['product'];
-                    final int unitPrice = _unitAmountFromItem(item);
-                    final bool isCustomize = item['is_customize'] == true;
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: size8),
-                      child: Row(
-                        children: [
-                          Text(
-                            'x${item['quantity']}',
-                            style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(width: size12),
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(size8),
+              SizedBox(height: 16),
+              Divider(thickness: 1, color: bnw200, height: 1),
+              SizedBox(height: 16),
+              if (widget.cart.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("Keranjang kosong."),
+                )
+              else
+                ...widget.cart.map((item) {
+                  final p = item['product'] as Product;
+                  final qty = item['quantity'] as int;
+                  final notes = item['notes'] as String;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${qty}x',
+                              style: heading3(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
-                            child: p.imageUrl != null
-                                ? Image.network(p.imageUrl!, fit: BoxFit.cover)
-                                : SvgPicture.asset('assets/logoProduct.svg'),
-                          ),
-                          SizedBox(width: size12),
-                          Expanded(
+                            SizedBox(width: 8),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: bnw300,
+                                borderRadius: BorderRadius.circular(8),
+                                image: p.imageUrl != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(p.imageUrl!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                              ),
+                              child: p.imageUrl == null
+                                  ? Icon(PhosphorIcons.bag, size: 24)
+                                  : null,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    p.name,
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Rp ${formatCurrency(p.price)}',
+                                        style: heading3(
+                                          FontWeight.w400,
+                                          bnw900,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (p.discount != null && p.discount! > 0)
+                                    Container(
+                                      margin: EdgeInsets.only(top: 4),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red[100],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        p.discountType == "Percent"
+                                            ? '${p.discount!.toInt()}%'
+                                            : 'Rp ${formatCurrency(p.discount!.toInt())}',
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (notes.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  p.name,
-                                  style: heading2(
-                                    FontWeight.w600,
+                                  "Catatan:",
+                                  style: body1(
+                                    FontWeight.w400,
                                     bnw900,
                                     'Outfit',
                                   ),
                                 ),
                                 Text(
-                                  NumberFormat.currency(
-                                    locale: 'id',
-                                    symbol: 'Rp. ',
-                                    decimalDigits: 0,
-                                  ).format(unitPrice),
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
+                                  notes,
+                                  style: body1(
+                                    FontWeight.w400,
+                                    bnw700,
                                     'Outfit',
                                   ),
                                 ),
-                                if (isCustomize) ...[
-                                  SizedBox(width: 8),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: primary100,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      'Custom',
-                                      style: heading4(
-                                        FontWeight.w600,
-                                        primary500,
-                                        'Outfit',
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                                if (p.discountType != null)
-                                  Text(
-                                    NumberFormat.currency(
-                                      locale: 'id',
-                                      symbol: 'Rp. ',
-                                      decimalDigits: 0,
-                                    ).format(p.price),
-                                    style: TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      fontFamily: 'Outfit',
-                                      color: bnw500,
-                                      fontSize: sp12,
-                                    ),
-                                  ),
                               ],
                             ),
                           ),
-                        ],
+                        SizedBox(height: 8),
+                        Divider(color: bnw200),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary500,
-                    padding: EdgeInsets.all(16),
-                  ),
-                  child: Text(
-                    'Tutup',
-                    style: TextStyle(
-                      color: bnw100,
-                      fontWeight: FontWeight.bold,
+                    ),
+                    child: Text(
+                      'Tutup',
+                      style: heading2(FontWeight.w600, bnw100, 'Outfit'),
                     ),
                   ),
                 ),
@@ -6639,470 +7140,12 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bnw100,
-      appBar: AppBar(
-        title: Text(
-          'Pembayaran',
-          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-        ),
-        backgroundColor: bnw100,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Rincian Pesanan',
-                          style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        TextButton(
-                          onPressed: _showOrderDetails,
-                          child: Text(
-                            'Lihat Rincian',
-                            style: heading1(
-                              FontWeight.w600,
-                              primary500,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: size12),
-                    // Discount Section
-                    Text(
-                      'Diskon',
-                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(height: size8),
-                    GestureDetector(
-                      onTap: _showSelectDiscountModal,
-                      child: Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: _selectedDiscount != null
-                              ? primary100
-                              : bnw100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _selectedDiscount != null
-                                ? primary500
-                                : bnw200,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              PhosphorIcons.tag_fill,
-                              color: bnw900,
-                              size: 40,
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Voucher & Diskon',
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  Text(
-                                    _selectedDiscount != null
-                                        ? _selectedDiscount!.name
-                                        : 'Gunakan diskon untuk harga lebih murah',
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      bnw600,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (_selectedDiscount != null)
-                              Icon(
-                                PhosphorIcons.check_circle_fill,
-                                color: primary500,
-                                size: 24,
-                              )
-                            else
-                              Icon(Icons.chevron_right, color: bnw500),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: size24),
-
-                    Text(
-                      'Metode Pembayaran',
-                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(height: size12),
-                    ...(_selectedMethod == null
-                            ? _methods
-                            : _methods.where(
-                                (m) => m['label'] == _selectedMethod,
-                              ))
-                        .map((m) => _buildMethodCard(m))
-                        .toList(),
-
-                    if (_selectedMethod != null &&
-                        _selectedMethod != 'Uang Tunai') ...[
-                      SizedBox(height: 24),
-                      Text(
-                        'Pilih $_selectedMethod',
-                        style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                      ),
-                      SizedBox(height: size12),
-                      if (_isLoadingSubMethods)
-                        Center(child: CircularProgressIndicator())
-                      else if (_paymentSubMethods.isEmpty)
-                        Text(
-                          'Tidak ada metode tersedia',
-                          style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-                        )
-                      else
-                        ..._paymentSubMethods
-                            .map((sub) => _buildSubMethodCard(sub))
-                            .toList(),
-                    ],
-
-                    if (_selectedMethod == 'Uang Tunai') ...[
-                      SizedBox(height: 24),
-                      Text(
-                        'Uang Tunai',
-                        style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                      ),
-                      TextField(
-                        controller: _cashController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [CurrencyInputFormatter()],
-                        style: heading1(FontWeight.w600, bnw900, 'Outfit'),
-                        decoration: InputDecoration(
-                          hintText: 'Rp. 0',
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: primary500),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(child: _quickMoneyBtn(50000)),
-                          SizedBox(width: size8),
-                          Expanded(child: _quickMoneyBtn(100000)),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () => _cashController.text =
-                              CurrencyInputFormatter.format(
-                                _totalPay.toString(),
-                              ),
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.all(size16),
-                          ),
-                          child: Text(
-                            'Uang Pas',
-                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                        ),
-                      ),
-                    ],
-                    SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
-            if (_selectedMethod != null)
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: _isLoadingCalculation
-                    ? Center(child: CircularProgressIndicator())
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Rincian Pembayaran',
-                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          SizedBox(height: size16),
-                          _rowSummary('Nama Pembeli', _customerName),
-                          _rowSummary(
-                            'Sub Total',
-                            NumberFormat.currency(
-                              locale: 'id',
-                              symbol: 'Rp. ',
-                              decimalDigits: 0,
-                            ).format(_subTotal),
-                          ),
-                          if (_discount > 0)
-                            _rowSummary(
-                              'Diskon',
-                              "- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_discount)}",
-                              color: succes500,
-                            ),
-                          _rowSummary(
-                            'PPN',
-                            NumberFormat.currency(
-                              locale: 'id',
-                              symbol: 'Rp. ',
-                              decimalDigits: 0,
-                            ).format(_ppn),
-                          ),
-                          if (_cashGiven > _totalPay &&
-                              _selectedMethod == 'Uang Tunai')
-                            _rowSummary(
-                              'Kembalian',
-                              NumberFormat.currency(
-                                locale: 'id',
-                                symbol: 'Rp. ',
-                                decimalDigits: 0,
-                              ).format(_cashGiven - _totalPay),
-                              color: primary500,
-                            ),
-                          Divider(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Total Bayar',
-                                    style: heading3(
-                                      FontWeight.w400,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  Text(
-                                    NumberFormat.currency(
-                                      locale: 'id',
-                                      symbol: 'Rp. ',
-                                      decimalDigits: 0,
-                                    ).format(_totalPay),
-                                    style: heading1(
-                                      FontWeight.w600,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              ElevatedButton(
-                                onPressed:
-                                    (_isProcessing ||
-                                        (_selectedMethod == 'Uang Tunai' &&
-                                            _cashGiven < _totalPay) ||
-                                        (_selectedMethod != 'Uang Tunai' &&
-                                            _selectedSubMethod == null))
-                                    ? null
-                                    : _processPayment,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primary500,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                    vertical: 12,
-                                  ),
-                                ),
-                                child: _isProcessing
-                                    ? CircularProgressIndicator(color: bnw100)
-                                    : Text(
-                                        'Bayar',
-                                        style: heading2(
-                                          FontWeight.w600,
-                                          bnw100,
-                                          'Outfit',
-                                        ),
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _rowSummary(String label, String val, {Color? color}) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
-          Text(
-            val,
-            style: heading3(FontWeight.w600, color ?? bnw900, 'Outfit'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMethodCard(Map<String, dynamic> method) {
-    bool isSelected = _selectedMethod == method['label'];
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedMethod = (_selectedMethod == method['label'])
-              ? null
-              : method['label'];
-          if (_selectedMethod != null) _fetchSubMethods(_selectedMethod!);
-        });
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: size12),
-        padding: EdgeInsets.all(size12),
-        decoration: BoxDecoration(
-          color: isSelected ? primary100 : bnw100,
-          borderRadius: BorderRadius.circular(size8),
-          border: Border.all(color: isSelected ? primary500 : bnw200),
-        ),
-        child: Row(
-          children: [
-            Icon(method['icon'], color: bnw900, size: 40),
-            SizedBox(width: size12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    method['label'],
-                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  Text(
-                    method['desc'],
-                    style: heading4(FontWeight.w400, bnw600, 'Outfit'),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(PhosphorIcons.check_circle_fill, color: primary500),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubMethodCard(Map<String, dynamic> sub) {
-    bool isSelected =
-        _selectedSubMethod?['idpaymentmethode'] == sub['idpaymentmethode'];
-    return GestureDetector(
-      onTap: () => setState(() => _selectedSubMethod = sub),
-      child: Container(
-        margin: EdgeInsets.only(bottom: size12),
-        padding: EdgeInsets.all(size12),
-        decoration: BoxDecoration(
-          color: isSelected ? primary100 : bnw100,
-          borderRadius: BorderRadius.circular(size8),
-          border: Border.all(
-            color: isSelected ? primary500 : bnw300,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected ? primary300 : bnw100,
-                borderRadius: BorderRadius.circular(size8),
-              ),
-              child: Icon(
-                PhosphorIcons.wallet_fill,
-                color: isSelected ? primary100 : bnw300,
-              ),
-            ),
-            SizedBox(width: size12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    sub['payment_method'] ?? 'Unknown',
-                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  Text(
-                    'Pilih untuk membayar via ${sub['payment_method']}',
-                    style: heading4(FontWeight.w400, bnw600, 'Outfit'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _quickMoneyBtn(int amount) {
-    return OutlinedButton(
-      onPressed: () => _cashController.text = CurrencyInputFormatter.format(
-        amount.toString(),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: size16),
-      ),
-      child: Text(
-        NumberFormat.currency(
-          locale: 'id',
-          symbol: 'Rp. ',
-          decimalDigits: 0,
-        ).format(amount),
-        style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-      ),
-    );
-  }
-
   void _showSelectDiscountModal() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        // 1. Initialize temporary state
         DiscountModel? tempSelected = _selectedDiscount;
 
         return SafeArea(
@@ -7167,7 +7210,6 @@ class _PaymentPageState extends State<PaymentPage> {
                                   final isSelected =
                                       tempSelected?.id == discount.id;
 
-                                  // Formatted Value
                                   String valueText = "";
                                   if (discount.discountType == 'price') {
                                     valueText = NumberFormat.currency(
@@ -7182,7 +7224,6 @@ class _PaymentPageState extends State<PaymentPage> {
                                   return GestureDetector(
                                     onTap: () {
                                       setModalState(() {
-                                        // Toggle temporary selection
                                         if (tempSelected?.id == discount.id) {
                                           tempSelected = null;
                                         } else {
@@ -7310,18 +7351,22 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<List<DiscountModel>> _fetchDiscountsModal() async {
     try {
       final response = await http.post(
-        Uri.parse(
-          "https://unipos-dev-unipos-api-dev.yi8k7d.easypanel.host/api/discount",
-        ),
+        Uri.parse(diskonLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({"order_by": "upDownNama"}),
+        body: jsonEncode({
+          "merchantid": widget.merchantId,
+          "deviceid": identifier,
+          "name": "",
+          "orderby": "upDownNama",
+          "isActive": true,
+        }),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['rc'] == '00' && data['data'] != null) {
           return (data['data'] as List)
               .map((e) => DiscountModel.fromJson(e))
-              .where((d) => d.isActive && d.type == 'umum')
+              .where((d) => d.isActive)
               .toList();
         }
       }
@@ -7329,6 +7374,629 @@ class _PaymentPageState extends State<PaymentPage> {
       debugPrint("Error fetching discounts: $e");
     }
     return [];
+  }
+
+  Widget _rowSummary(String label, String val, {Color? color}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: heading3(FontWeight.w400, bnw900, 'Outfit')),
+          Text(
+            val,
+            style: heading3(FontWeight.w600, color ?? bnw900, 'Outfit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bnw100,
+      appBar: AppBar(
+        title: Text(
+          'Pembayaran',
+          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+        ),
+        backgroundColor: bnw100,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Rincian Pesanan',
+                          style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        TextButton(
+                          onPressed: _showOrderDetails,
+                          child: Text(
+                            'Lihat Rincian',
+                            style: heading1(
+                              FontWeight.w600,
+                              primary500,
+                              'Outfit',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: size12),
+                    Text(
+                      'Diskon',
+                      style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: size8),
+                    GestureDetector(
+                      onTap: _showSelectDiscountModal,
+                      child: Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _selectedDiscount != null
+                              ? primary100
+                              : bnw100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _selectedDiscount != null
+                                ? primary500
+                                : bnw200,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              PhosphorIcons.tag_fill,
+                              color: bnw900,
+                              size: 40,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Voucher & Diskon',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    _selectedDiscount != null
+                                        ? _selectedDiscount!.name
+                                        : 'Gunakan diskon untuk harga lebih murah',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_selectedDiscount != null)
+                              Icon(
+                                PhosphorIcons.check_circle_fill,
+                                color: primary500,
+                                size: 24,
+                              )
+                            else
+                              Icon(Icons.chevron_right, color: bnw500),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: size24),
+
+                    // Segmented Lunas / Bayar Nanti
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.all(4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isLunas = true),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _isLunas
+                                      ? primary500
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Lunas',
+                                  style: TextStyle(
+                                    color: _isLunas
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isLunas = false),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: !_isLunas
+                                      ? primary500
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Bayar Nanti/Cicilan',
+                                  style: TextStyle(
+                                    color: !_isLunas
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: size24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Metode Pembayaran',
+                          style: heading1(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        TextButton(
+                          onPressed: _addSplitPayment,
+                          child: Text(
+                            'Add Split Payment',
+                            style: TextStyle(color: primary500),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: size12),
+
+                    if (_isLoadingMethods)
+                      Center(child: CircularProgressIndicator())
+                    else if (_methodsError != null)
+                      Center(
+                        child: Text(
+                          _methodsError!,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: _splitPayments.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var sp = entry.value;
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 16),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: bnw100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: bnw300),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Metode Pembayaran',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: bnw600,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Container(
+                                            height: 40,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: bnw300),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                  16,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                    builder: (context) {
+                                                      return SafeArea(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                vertical: 16.0,
+                                                              ),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Center(
+                                                                child: Container(
+                                                                  width: 40,
+                                                                  height: 4,
+                                                                  margin:
+                                                                      EdgeInsets.only(
+                                                                        bottom:
+                                                                            16,
+                                                                      ),
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors
+                                                                        .grey[300],
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          2,
+                                                                        ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Padding(
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          16.0,
+                                                                      vertical:
+                                                                          8.0,
+                                                                    ),
+                                                                child: Text(
+                                                                  'Pilih Metode Pembayaran',
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Divider(),
+                                                              Expanded(
+                                                                child: ListView.builder(
+                                                                  itemCount:
+                                                                      _availableMethods
+                                                                          .length,
+                                                                  itemBuilder: (context, idx) {
+                                                                    final m =
+                                                                        _availableMethods[idx];
+                                                                    String
+                                                                    label =
+                                                                        m['payment_method'] ??
+                                                                        'Unknown';
+                                                                    if (label ==
+                                                                            'ShopeePay' &&
+                                                                        m['accountNumber'] !=
+                                                                            null) {
+                                                                      label =
+                                                                          "$label - ${m['accountNumber']}";
+                                                                    }
+                                                                    return ListTile(
+                                                                      leading: Icon(
+                                                                        PhosphorIcons
+                                                                            .wallet,
+                                                                        color:
+                                                                            primary500,
+                                                                      ),
+                                                                      title: Text(
+                                                                        label,
+                                                                      ),
+                                                                      onTap: () {
+                                                                        setState(() {
+                                                                          sp['payment_method_id'] =
+                                                                              m['idpaymentmethode'];
+                                                                        });
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        );
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      sp['payment_method_id'] !=
+                                                              null
+                                                          ? (() {
+                                                              var d = _availableMethods.firstWhere(
+                                                                (p) =>
+                                                                    p['idpaymentmethode'] ==
+                                                                    sp['payment_method_id'],
+                                                                orElse: () => {
+                                                                  'payment_method':
+                                                                      'Pilih Metode Pembayaran',
+                                                                },
+                                                              );
+                                                              String label =
+                                                                  d['payment_method']!;
+                                                              if (label ==
+                                                                      'ShopeePay' &&
+                                                                  d['accountNumber'] !=
+                                                                      null) {
+                                                                label =
+                                                                    "$label - ${d['accountNumber']}";
+                                                              }
+                                                              return label;
+                                                            })()
+                                                          : 'Pilih Metode Pembayaran',
+                                                      style: TextStyle(
+                                                        color:
+                                                            sp['payment_method_id'] !=
+                                                                null
+                                                            ? Colors.black
+                                                            : Colors.grey[600],
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.keyboard_arrow_down,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Nominal',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: bnw600,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          SizedBox(
+                                            height: 40,
+                                            child: TextField(
+                                              controller: sp['controller'],
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              inputFormatters: [
+                                                CurrencyInputFormatter(),
+                                              ],
+                                              decoration: InputDecoration(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 8,
+                                                    ),
+                                                enabledBorder:
+                                                    UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: bnw300,
+                                                      ),
+                                                    ),
+                                                focusedBorder:
+                                                    UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: primary500,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (index > 0)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.cancel,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () =>
+                                          _removeSplitPayment(index),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            // SUMMARY SECTION
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: bnw100,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: _isLoadingCalculation
+                  ? Center(child: CircularProgressIndicator())
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Rincian Pembayaran',
+                          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        SizedBox(height: size16),
+                        _rowSummary('Nama Pembeli', _customerName),
+                        _rowSummary(
+                          'Sub Total',
+                          NumberFormat.currency(
+                            locale: 'id',
+                            symbol: 'Rp. ',
+                            decimalDigits: 0,
+                          ).format(_subTotal),
+                        ),
+                        if (_discount > 0)
+                          _rowSummary(
+                            'Diskon',
+                            "- ${NumberFormat.currency(locale: 'id', symbol: 'Rp. ', decimalDigits: 0).format(_discount)}",
+                            color: succes500,
+                          ),
+                        _rowSummary(
+                          'PPN',
+                          NumberFormat.currency(
+                            locale: 'id',
+                            symbol: 'Rp. ',
+                            decimalDigits: 0,
+                          ).format(_ppn),
+                        ),
+                        if (_totalGiven > _totalPay)
+                          _rowSummary(
+                            'Kembalian',
+                            NumberFormat.currency(
+                              locale: 'id',
+                              symbol: 'Rp. ',
+                              decimalDigits: 0,
+                            ).format(_totalGiven - _totalPay),
+                            color: primary500,
+                          ),
+                        Divider(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Total Bayar',
+                                  style: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: 'id',
+                                    symbol: 'Rp. ',
+                                    decimalDigits: 0,
+                                  ).format(_totalPay),
+                                  style: heading1(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ElevatedButton(
+                              onPressed:
+                                  (_isProcessing ||
+                                      (_isLunas && _totalGiven < _totalPay) ||
+                                      _splitPayments.any(
+                                        (sp) => sp['payment_method_id'] == null,
+                                      ))
+                                  ? null
+                                  : _processPayment,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary500,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: _isProcessing
+                                  ? CircularProgressIndicator(color: bnw100)
+                                  : Text(
+                                      'Bayar',
+                                      style: heading2(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
