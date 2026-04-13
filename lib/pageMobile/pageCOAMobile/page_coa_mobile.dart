@@ -172,11 +172,12 @@ class _PageCoaMobileState extends State<PageCoaMobile> {
                   child: ElevatedButton(
                     onPressed: () async {
                       Navigator.pop(context);
+                      
                       if (item.idpaymentmethode != null) {
                         await deleteCoa(
                           context,
                           widget.token,
-                          item.idpaymentmethode,
+                          item.idpaymentmethode!,
                         );
                         _loadData();
                       }

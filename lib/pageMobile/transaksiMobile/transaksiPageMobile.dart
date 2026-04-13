@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/services/websocket_service.dart';
 import 'package:flutter/services.dart' as services;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -6676,6 +6679,71 @@ class _PaymentPageState extends State<PaymentPage> {
         }
 
         if (qrString != null && qrString.isNotEmpty) {
+          int amountQris = _totalPay;
+          if (!_isLunas) {
+            for (var sp in _splitPayments) {
+              if (sp['payment_method_id'] == '003') {
+                amountQris = int.tryParse(sp['nominal'].toString()) ?? 0;
+                break;
+              }
+            }
+          }
+
+          final String transactionId = data['data']['transactionid']?.toString() ?? '';
+
+          final wsService = Provider.of<WebSocketService>(context, listen: false);
+          final existingSocket = wsService.socket;
+
+          void handleTransactionUpdate(dynamic resp) {
+            debugPrint('WebSocket: Update received $resp');
+            if (resp is Map) {
+              String paymentStatus = resp['payment_status']?.toString() ?? '';
+              if (paymentStatus == 'SUCCESS') {
+                existingSocket?.off('transactionUpdate', handleTransactionUpdate);
+                if (Navigator.canPop(context)) Navigator.pop(context);
+                _finishAndRedirect();
+              } else if (paymentStatus == 'FAILED') {
+                existingSocket?.off('transactionUpdate', handleTransactionUpdate);
+                if (Navigator.canPop(context)) Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Transaksi QRIS Gagal')),
+                );
+              }
+            }
+          }
+
+          if (existingSocket == null || !existingSocket.connected) {
+             print('=========== SOCKET MATI! MENGHUBUNGKAN ULANG DARI SERVICE... ===========');
+             wsService.connect(widget.token, identifier);
+          }
+
+          final activeSocket = wsService.socket;
+          if (activeSocket != null) {
+            print('=========== WEBSOCKET MEMULAI TRANSAKSI ${transactionId} ===========');
+            
+            void onSocketConnected(dynamic _) {
+                print('=========== SOCKET RECONNECTED/CONNECTED. MENGIRIM JOINROOM.. ===========');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Menyambungkan Socket: $transactionId...'), duration: Duration(seconds: 2)),
+                );
+                activeSocket.emit('subscribeTransaction', {"transactionId": transactionId, "transaction_id": transactionId});
+                activeSocket.emit('joinRoom', {"room": "subscribeTransaction", "transactionId": transactionId, "transaction_id": transactionId});
+            }
+
+            if (activeSocket.connected) {
+                onSocketConnected(null);
+            } else {
+                activeSocket.once('connect', onSocketConnected);
+            }
+            
+            activeSocket.on('transactionUpdate', handleTransactionUpdate);
+            activeSocket.onAny((event, data) {
+                print('=========== SOCKET MSG [$event]: $data ===========');
+            });
+          } else {
+            print('=========== FATAL: WEBSOCKET PROVIDER KOSONG ===========');
+          }
+
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -6718,7 +6786,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       SizedBox(height: 4),
                       Center(
                         child: Text(
-                          'Rp ${formatCurrency(_totalPay)}',
+                          'Rp ${formatCurrency(amountQris)}',
                           style: heading1(
                             FontWeight.w800,
                             bnw900,
@@ -6777,7 +6845,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   if (isConnected == true) {
                                     bluetooth.printCustom("Total Bayar", 1, 1);
                                     bluetooth.printCustom(
-                                      "Rp ${formatCurrency(_totalPay)}",
+                                      "Rp ${formatCurrency(amountQris)}",
                                       1,
                                       1,
                                     );
@@ -6825,8 +6893,10 @@ class _PaymentPageState extends State<PaymentPage> {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
+                                if (existingSocket != null) {
+                                  existingSocket.off('transactionUpdate', handleTransactionUpdate);
+                                }
                                 Navigator.pop(context);
-                                _finishAndRedirect();
                               },
                               child: Text(
                                 'Tutup',

@@ -562,103 +562,105 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         final FocusNode focusNode = FocusNode();
         List<T> filtered = List.from(items);
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AnimatedPadding(
-              // ⬅️ supaya naik otomatis saat keyboard muncul
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.decelerate,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // 🔹 Garis kecil di atas
-                      Container(
-                        height: 4,
-                        width: 80,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[400],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-
-                      // 🔹 Judul
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 🔹 Search Bar
-                      TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onChanged: (val) {
-                          setState(() {
-                            filtered = items
-                                .where(
-                                  (e) => getName(
-                                    e,
-                                  ).toLowerCase().contains(val.toLowerCase()),
-                                )
-                                .toList();
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Cari $title...',
-                          prefixIcon: const Icon(Icons.search),
-                          filled: true,
-                          fillColor: bnw100,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 12,
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return AnimatedPadding(
+                // ⬅️ supaya naik otomatis saat keyboard muncul
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.decelerate,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // 🔹 Garis kecil di atas
+                        Container(
+                          height: 4,
+                          width: 80,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[400],
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // 🔹 List isi — bisa discroll
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: filtered.length,
-                          itemBuilder: (context, index) {
-                            final e = filtered[index];
-                            final isSelected = selected == e;
-                            return ListTile(
-                              title: Text(getName(e)),
-                              trailing: Icon(
-                                isSelected
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: isSelected ? Colors.blue : Colors.grey,
-                              ),
-                              onTap: () {
-                                onSelected(e);
-                                FocusScope.of(context).unfocus();
-                                Navigator.pop(context, e);
-                              },
-                            );
+          
+                        // 🔹 Judul
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+          
+                        // 🔹 Search Bar
+                        TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          onChanged: (val) {
+                            setState(() {
+                              filtered = items
+                                  .where(
+                                    (e) => getName(
+                                      e,
+                                    ).toLowerCase().contains(val.toLowerCase()),
+                                  )
+                                  .toList();
+                            });
                           },
+                          decoration: InputDecoration(
+                            hintText: 'Cari $title...',
+                            prefixIcon: const Icon(Icons.search),
+                            filled: true,
+                            fillColor: bnw100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 12,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+          
+                        // 🔹 List isi — bisa discroll
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final e = filtered[index];
+                              final isSelected = selected == e;
+                              return ListTile(
+                                title: Text(getName(e)),
+                                trailing: Icon(
+                                  isSelected
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color: isSelected ? Colors.blue : Colors.grey,
+                                ),
+                                onTap: () {
+                                  onSelected(e);
+                                  FocusScope.of(context).unfocus();
+                                  Navigator.pop(context, e);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );

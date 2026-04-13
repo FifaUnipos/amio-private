@@ -15,10 +15,10 @@ class UnitConversionTab extends StatefulWidget {
     : super(key: key);
 
   @override
-  _UnitConversionTabState createState() => _UnitConversionTabState();
+  UnitConversionTabState createState() => UnitConversionTabState();
 }
 
-class _UnitConversionTabState extends State<UnitConversionTab> {
+class UnitConversionTabState extends State<UnitConversionTab> {
   bool _isLoading = true;
   List<dynamic> _conversions = [];
 
@@ -103,7 +103,7 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _navigateToAddPage(unitConversionId: id);
+                  navigateToAdd(unitConversionId: id);
                 },
               ),
               Divider(),
@@ -234,7 +234,7 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
     );
   }
 
-  void _navigateToAddPage({String? unitConversionId}) {
+  void navigateToAdd({String? unitConversionId}) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -252,17 +252,6 @@ class _UnitConversionTabState extends State<UnitConversionTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: merchantType == 'Group_Merchant'
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () => _navigateToAddPage(),
-              backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: bnw100),
-              label: Text(
-                'Unit Conversi',
-                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-              ),
-            ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _conversions.isEmpty

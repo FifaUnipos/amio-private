@@ -26,14 +26,15 @@ class WebSocketService extends ChangeNotifier {
     socket?.dispose();
 
     socket = IO.io(
+      // 'https://amio-unipos-unipos-notification.yi8k7d.easypanel.host/',
       'https://unipos-dev-notification-service-dev.yi8k7d.easypanel.host/',
-      <String, dynamic>{
-        'transports': ['websocket'],
-        'autoConnect': false,
-        'forceNew': true,
-        'extraHeaders': {'token': token, 'deviceid': deviceId},
-        'path': '/socket.io',
-      },
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .enableForceNew()
+          .setExtraHeaders({'token': token ?? '', 'deviceid': deviceId ?? ''})
+          .setPath('/socket.io')
+          .build(),
     );
 
     socket?.connect();
@@ -45,11 +46,13 @@ class WebSocketService extends ChangeNotifier {
     });
 
     socket?.on('connect_error', (err) {
-      debugPrint('❌ Connect error: $err'); // ⬅️ cek error koneksi
+      debugPrint('❌ Connect error: $err');
     });
 
     socket?.on('notificationData', (data) {
-      debugPrint('📦 notificationData received, count: ${data is List ? data.length : '?'}');
+      debugPrint(
+        '📦 notificationData received, count: ${data is List ? data.length : '?'}',
+      );
       if (data is! List) {
         debugPrint('⚠️ notificationData bukan List: ${data.runtimeType}');
         return;
@@ -66,7 +69,9 @@ class WebSocketService extends ChangeNotifier {
     });
 
     socket?.on('newNotifications', (data) async {
-      debugPrint('🔔 newNotifications received, count: ${data is List ? data.length : '?'}');
+      debugPrint(
+        '🔔 newNotifications received, count: ${data is List ? data.length : '?'}',
+      );
       if (data is! List) {
         debugPrint('⚠️ newNotifications bukan List: ${data.runtimeType}');
         return;

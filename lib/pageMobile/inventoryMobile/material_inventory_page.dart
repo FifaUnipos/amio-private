@@ -13,6 +13,7 @@ import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:unipos_app_335/pageMobile/inventoryMobile/purchase_inventory_page.dart';
 import 'package:unipos_app_335/pageMobile/inventoryMobile/adjustment_inventory_page.dart';
 import 'package:unipos_app_335/pageMobile/inventoryMobile/product_material_page.dart';
@@ -59,6 +60,11 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
 
   // form tambah material
   final TextEditingController namaBarangController = TextEditingController();
+
+  final GlobalKey<PurchaseTabState> purchaseTabKey = GlobalKey<PurchaseTabState>();
+  final GlobalKey<AdjustmentTabState> adjustmentTabKey = GlobalKey<AdjustmentTabState>();
+  final GlobalKey<ProductMaterialTabState> productMaterialTabKey = GlobalKey<ProductMaterialTabState>();
+  final GlobalKey<UnitConversionTabState> unitConversionTabKey = GlobalKey<UnitConversionTabState>();
 
   // Unit Master
   List<dynamic> _unitList = [];
@@ -1015,6 +1021,30 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
           widget.merchantName ?? nameToko ?? 'Inventori',
           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
         ),
+        actions: [
+          if (!_isGroupMerchant)
+            if (_tabController.index == 3)
+              IconButton(
+                icon: Icon(PhosphorIcons.plus, color: bnw900),
+                onPressed: () {
+                   productMaterialTabKey.currentState?.navigateToAdd();
+                },
+              )
+            else if (_tabController.index == 4)
+              IconButton(
+                icon: Icon(PhosphorIcons.plus, color: bnw900),
+                onPressed: () {
+                   unitConversionTabKey.currentState?.navigateToAdd();
+                },
+              )
+            else
+              IconButton(
+                icon: Icon(Icons.more_vert, color: bnw900),
+                onPressed: () {
+                  _showMoreBottomSheet();
+                },
+              ),
+        ],
         bottom: _isGroupMerchant
             ? null
             : TabBar(
@@ -1038,40 +1068,163 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ],
               ),
       ),
-      floatingActionButton: _tabController.index == 0
-          ? FloatingActionButton.extended(
-              onPressed: () => _navigateToAddEditMaterial(),
-              backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: bnw100),
-              label: Text(
-                'Tambah Bahan',
-                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-              ),
-            )
-          : null,
       body: TabBarView(
         controller: _tabController,
         children: [
           _buildMaterialTab(),
           PurchaseTab(
+            key: purchaseTabKey,
             token: widget.token,
             merchantId: widget.merchantId,
             typeMerchant: typeAccount ?? '',
           ),
           AdjustmentTab(
+            key: adjustmentTabKey,
             token: widget.token,
             merchantId: widget.merchantId,
             typeMerchant: typeAccount ?? '',
           ),
           ProductMaterialTab(
+            key: productMaterialTabKey,
             token: widget.token,
             merchantId: widget.merchantId,
             typeMerchant: typeAccount ?? '',
           ),
-          UnitConversionTab(token: widget.token, merchantId: widget.merchantId),
+          UnitConversionTab(
+            key: unitConversionTabKey,
+            token: widget.token, 
+            merchantId: widget.merchantId
+          ),
         ],
       ),
     );
+  }
+
+  void _showMoreBottomSheet() {
+    int index = _tabController.index;
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                ListTile(
+                  leading: Icon(PhosphorIcons.plus, color: bnw900),
+                  title: Text('Tambah', style: heading3(FontWeight.w500, bnw900, 'Outfit')),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (index == 0) {
+                      _navigateToAddEditMaterial();
+                    } else if (index == 1) {
+                      purchaseTabKey.currentState?.navigateToAdd();
+                    } else if (index == 2) {
+                      adjustmentTabKey.currentState?.navigateToAdd();
+                    } else if (index == 3) {
+                      productMaterialTabKey.currentState?.navigateToAdd();
+                    } else if (index == 4) {
+                      unitConversionTabKey.currentState?.navigateToAdd();
+                    }
+                  },
+                ),
+                if (index == 0 || index == 1 || index == 2) ...[
+                  ListTile(
+                    leading: Icon(PhosphorIcons.download, color: bnw900),
+                    title: Text('Download', style: heading3(FontWeight.w500, bnw900, 'Outfit')),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await _downloadFile(index);
+                    },
+                  ),
+                ]
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _downloadFile(int index) async {
+    whenLoading(context);
+    String endpoint = '';
+    Map<String, dynamic> reqBody = {};
+
+    if (index == 0) {
+      endpoint = getMasterDataLink; // api/inventory/master
+      reqBody = {
+        "deviceid": identifier,
+        "merchant_id": widget.merchantId.isEmpty ? null : widget.merchantId,
+        "isMinimize": false,
+        "name": "",
+        "order_by": "upDownCreated",
+        "export": true
+      };
+    } else if (index == 1) {
+      endpoint = '$url/api/inventory/purchase/download';
+      reqBody = {
+        "group_id": "",
+        "merchant_id": widget.merchantId,
+        "type": "pdf"
+      };
+    } else if (index == 2) {
+      endpoint = '$url/api/inventory/adjustment/download';
+      reqBody = {
+        "group_id": "",
+        "merchant_id": widget.merchantId,
+        "type": "pdf"
+      };
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode(reqBody),
+      );
+      
+      if (!mounted) return;
+      closeLoading(context);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['rc'] == '00') {
+           String downloadUrl = jsonResponse['data']?.toString() ?? '';
+           if (downloadUrl.isNotEmpty) {
+             try {
+                await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
+             } catch(e) {
+                showSnackbar(context, {"message": "Gagal membuka link url"});
+             }
+           } else {
+             showSnackbar(context, {"message": "Link download kosong"});
+           }
+        } else {
+           showSnackbar(context, jsonResponse);
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan, respon code ${response.statusCode}')));
+      }
+    } catch (e) {
+      closeLoading(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+    }
   }
 
   Widget _buildMaterialTab() {
@@ -1160,41 +1313,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 ),
         ),
 
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: _canInventory
-              ? GestureDetector(
-                  onTap: () async {
-                    namaBarangController.clear();
-                    setState(() {
-                      _selectedUnitId = "";
-                      _selectedUnitLabel = "";
-                    });
-
-                    if (_unitList.isEmpty) {
-                      await _fetchUnitMaster();
-                    }
-
-                    if (_pageController.hasClients) {
-                      _pageController.jumpToPage(1);
-                    }
-                  },
-                  child: buttonXL(
-                    Row(
-                      children: [
-                        Icon(PhosphorIcons.plus, color: bnw100),
-                        SizedBox(width: size16),
-                        Text(
-                          'Bahan',
-                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
-                        ),
-                      ],
-                    ),
-                    0,
-                  ),
-                )
-              : null,
-        ),
+    
       ],
     );
   }
@@ -1840,10 +1959,10 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
         Uri.parse(isEdit ? updateMasterDataLink : createMasterDataLink),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
-          "inventory_master_id": widget.material!['id'],
+          if (isEdit) "inventory_master_id": widget.material!['id'],
           "name_item": name,
           "unit": _selectedUnit!['id'],
-          // "merchant_id": widget.merchantId,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
           if (isEdit) "item_id": widget.material!['id'],
         }),
       );

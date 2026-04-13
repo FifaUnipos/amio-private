@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:unipos_app_335/models/produkmodel.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
@@ -173,6 +175,10 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   String orderby = 'upDownNama';
   String orderLabel = 'Nama Produk (A ke Z)';
   Timer? _debounce;
+
+  bool isUploading = false;
+  String? fileName;
+  String? filePath;
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -366,6 +372,265 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
     );
   }
 
+  void _showUploadBottomSheet() {
+    setState(() {
+      fileName = null;
+      filePath = null;
+    });
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(20).copyWith(
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Icon(PhosphorIcons.file, color: bnw900),
+                        SizedBox(width: 12),
+                        Text(
+                          'Unggah Data Produk',
+                          style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Unggah data produk Anda menggunakan format Excel (.xls, .xlsx) atau CSV. Ukuran file maksimum adalah 5MB.',
+                      style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Berikut adalah contoh data untuk diupload.',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primary500),
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              final url = Uri.parse(
+                                'https://docs.google.com/spreadsheets/d/1ZZQf5wBIBwS2SVRC21eRD20yBxWfmxMO/edit?usp=sharing&ouid=113337689543111418112&rtpof=true&sd=true',
+                              );
+                              launchUrl(url);
+                            },
+                            child: Text(
+                              'Download Excel',
+                              style: heading4(FontWeight.w600, primary500, 'Outfit'),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primary500),
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              final url = Uri.parse(
+                                'https://drive.google.com/file/d/1BHhWQRT3QrlPazCB-YJwTwlts-H31kJd/view?usp=sharing',
+                              );
+                              launchUrl(url);
+                            },
+                            child: Text(
+                              'Download CSV',
+                              style: heading4(FontWeight.w600, primary500, 'Outfit'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Text('Pilih file dari perangkat Anda:'),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () async {
+                            await pickFile(setModalState);
+                          },
+                          child: Text(
+                            'Pilih file',
+                            style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            fileName ?? 'Tidak ada file yang dipilih',
+                            overflow: TextOverflow.ellipsis,
+                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(height: 32),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primary500),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              'Batal',
+                              style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary500,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: isUploading
+                                ? null
+                                : () async {
+                                    if (filePath == null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pilih file terlebih dahulu')));
+                                      return;
+                                    }
+                                    await uploadFile(context, setModalState);
+                                  },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (!isUploading) Icon(PhosphorIcons.file_arrow_up, color: Colors.white, size: 20),
+                                if (!isUploading) SizedBox(width: 8),
+                                Text(
+                                  isUploading ? 'Mengunggah...' : 'Upload',
+                                  style: heading3(FontWeight.w600, Colors.white, 'Outfit'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> pickFile(StateSetter setModalState) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xls', 'xlsx', 'csv'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
+        setModalState(() {
+          fileName = file.name;
+          filePath = file.path;
+        });
+      }
+    } catch (e) {
+      print("Error picking file: \$e");
+    }
+  }
+
+  Future<void> uploadFile(BuildContext context, StateSetter setModalState) async {
+    try {
+      setModalState(() => isUploading = true);
+
+      final uri = Uri.parse(uploadProdukUrl);
+      final request = http.MultipartRequest('POST', uri);
+      request.headers['token'] = widget.token;
+      
+      if (widget.merchantId.isNotEmpty) {
+        request.fields['merchant_id'] = widget.merchantId;
+      } else {
+        request.fields['merchant_id'] = "";
+      }
+
+      request.files.add(await http.MultipartFile.fromPath('file', filePath!));
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      print('=== UPLOAD API RESPONSE ===');
+      print(responseBody);
+      print('===========================');
+      final jsonData = jsonDecode(responseBody);
+
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonData['message']?.toString() ?? responseBody.toString())));
+      }
+
+      if (response.statusCode == 200 && jsonData['rc'] == '00') {
+         loadData();
+      }
+    } catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e')));
+    } finally {
+      if (mounted) {
+        setState(() => isUploading = false);
+      }
+    }
+  }
+
   void _deleteProduct(ModelDataProduk item) {
     _showConfirmBottomSheet(
       context: context,
@@ -405,8 +670,10 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(PhosphorIcons.copy, color: primary500),
+            onPressed: () {
+              _showUploadBottomSheet();
+            },
+            icon: Icon(PhosphorIcons.file_arrow_up, color: primary500),
             style: IconButton.styleFrom(
               side: BorderSide(color: primary500.withOpacity(0.3)),
               shape: RoundedRectangleBorder(
@@ -1184,7 +1451,7 @@ class _TambahProdukPageMobileState extends State<TambahProdukPageMobile> {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50,
+      imageQuality: 30,
       maxWidth: 800,
       maxHeight: 800,
     );

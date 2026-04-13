@@ -24,10 +24,10 @@ class PurchaseTab extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _PurchaseTabState createState() => _PurchaseTabState();
+  PurchaseTabState createState() => PurchaseTabState();
 }
 
-class _PurchaseTabState extends State<PurchaseTab> {
+class PurchaseTabState extends State<PurchaseTab> {
   bool _isLoading = true;
   List<dynamic> _purchases = [];
   String _normalizeType(String t) =>
@@ -271,7 +271,7 @@ class _PurchaseTabState extends State<PurchaseTab> {
     );
   }
 
-  void _navigateToAddPurchase() {
+  void navigateToAdd() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -320,17 +320,6 @@ class _PurchaseTabState extends State<PurchaseTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: _canPurchase
-          ? FloatingActionButton.extended(
-              onPressed: _navigateToAddPurchase,
-              backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: Colors.white),
-              label: Text(
-                'Persediaan',
-                style: heading4(FontWeight.w600, Colors.white, 'Outfit'),
-              ),
-            )
-          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _purchases.isEmpty
@@ -1123,9 +1112,10 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal menyimpan data')));
+      print('SAVE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result?['message'] ?? result?['rm'] ?? 'Gagal menyimpan data')),
+      );
     }
   }
 
@@ -1143,11 +1133,14 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
           "date": date,
           "title": title,
           "order_inventory": orderInventory,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else {
+        print('API ERROR RESPONSE CREATE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
       print('Error: $e');
@@ -1170,11 +1163,14 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
           "date": date,
           "title": title,
           "order_inventory": orderInventory,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else {
+        print('API ERROR RESPONSE UPDATE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
       print('Error: $e');
@@ -1442,7 +1438,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               OutlinedButton(
-                onPressed: _canPurchase ? _showMaterialPicker : null,
+                onPressed: _showMaterialPicker,
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
                   side: BorderSide(color: primary500),
@@ -1461,9 +1457,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _canPurchase
-                          ? () => _savePurchase(addNew: true)
-                          : null,
+                      onPressed: () => _savePurchase(addNew: true),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: primary500),
@@ -1480,9 +1474,7 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _canPurchase
-                          ? () => _savePurchase(addNew: false)
-                          : null,
+                      onPressed: () => _savePurchase(addNew: false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primary500,
                         padding: EdgeInsets.symmetric(vertical: 16),

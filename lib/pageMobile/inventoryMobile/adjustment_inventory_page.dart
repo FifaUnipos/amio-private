@@ -24,10 +24,10 @@ class AdjustmentTab extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _AdjustmentTabState createState() => _AdjustmentTabState();
+  AdjustmentTabState createState() => AdjustmentTabState();
 }
 
-class _AdjustmentTabState extends State<AdjustmentTab> {
+class AdjustmentTabState extends State<AdjustmentTab> {
   bool _isLoading = true;
   List<dynamic> _adjustments = [];
   String _normalizeType(String t) =>
@@ -279,7 +279,7 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
     );
   }
 
-  void _navigateToAddAdjustment() {
+  void navigateToAdd() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -316,17 +316,6 @@ class _AdjustmentTabState extends State<AdjustmentTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: _canAdjust
-          ? FloatingActionButton.extended(
-              onPressed: _navigateToAddAdjustment,
-              backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: bnw100),
-              label: Text(
-                'Sesuaikan',
-                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-              ),
-            )
-          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _adjustments.isEmpty
@@ -1052,9 +1041,9 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       widget.onSuccess();
       Navigator.pop(context);
     } else {
-      print('SAVE RESPONSE: ${jsonEncode(result)}');
+      print('SAVE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result?['rm'] ?? 'Gagal menyimpan data')),
+        SnackBar(content: Text(result?['message'] ?? result?['rm'] ?? 'Gagal menyimpan data')),
       );
     }
   }
@@ -1073,11 +1062,14 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           "date": date,
           "title": title,
           "usage_inventory": usageInventory,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else {
+        print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
       print('Error: $e');
@@ -1100,11 +1092,14 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           "date": date,
           "title": title,
           "usage_inventory": usageInventory,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else {
+        print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
       print('Error: $e');
@@ -1317,7 +1312,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               OutlinedButton(
-                onPressed: _canAdjust ? _showMaterialPicker : null,
+                onPressed: _showMaterialPicker,
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
                   side: BorderSide(color: primary500),
@@ -1336,7 +1331,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _canAdjust ? () {} : null,
+                      onPressed: () {},
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: primary500),
@@ -1353,7 +1348,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _canAdjust ? _saveAdjustment : null,
+                      onPressed: _saveAdjustment,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primary500,
                         padding: EdgeInsets.symmetric(vertical: 16),

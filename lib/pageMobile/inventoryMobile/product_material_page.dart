@@ -80,10 +80,10 @@ class ProductMaterialTab extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ProductMaterialTabState createState() => _ProductMaterialTabState();
+  ProductMaterialTabState createState() => ProductMaterialTabState();
 }
 
-class _ProductMaterialTabState extends State<ProductMaterialTab> {
+class ProductMaterialTabState extends State<ProductMaterialTab> {
   bool _isLoading = true;
   List<dynamic> _productMaterials = [];
   String _searchQuery = "";
@@ -179,7 +179,7 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _navigateToAddPage(productMaterialId: id);
+                    navigateToAdd(productMaterialId: id);
                   },
                 ),
                 Divider(),
@@ -319,17 +319,6 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      floatingActionButton: _canMaterial
-          ? FloatingActionButton.extended(
-              onPressed: () => _navigateToAddPage(),
-              backgroundColor: primary500,
-              icon: Icon(PhosphorIcons.plus, color: bnw100),
-              label: Text(
-                'Produk Material',
-                style: heading4(FontWeight.w600, bnw100, 'Outfit'),
-              ),
-            )
-          : null,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _productMaterials.isEmpty
@@ -388,7 +377,7 @@ class _ProductMaterialTabState extends State<ProductMaterialTab> {
     );
   }
 
-  void _navigateToAddPage({String? productMaterialId}) {
+  void navigateToAdd({String? productMaterialId}) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -1202,6 +1191,9 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
         body: jsonEncode(body),
       );
 
+      print('API STATUS: ${response.statusCode}');
+      print('API BODY: ${response.body}');
+
       final result = jsonDecode(response.body);
       print('PRODUCT MATERIAL SAVE RESPONSE: ${jsonEncode(result)}');
 
@@ -1658,8 +1650,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: _canMaterial
-                              ? () {
+                          onPressed: () {
                                   if (_selectedProduct == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -1669,8 +1660,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                                     return;
                                   }
                                   _showMaterialPicker();
-                                }
-                              : null,
+                                },
                           child: Text(
                             _selectedVariantId == null
                                 ? 'Tambah untuk base produk'
@@ -1694,7 +1684,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _canMaterial ? _handleSave : null,
+                          onPressed: _handleSave,
                           child: Text(
                             widget.productMaterialId == null
                                 ? 'Simpan'
