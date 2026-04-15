@@ -13,10 +13,10 @@ class PaymentMethod {
 
   factory PaymentMethod.fromJson(Map<String, dynamic> json) {
     return PaymentMethod(
-      id: json['idpaymentmethode'],
-      paymentMethod: json['payment_method'],
-      accountNumber: json['accountNumber'] ?? '-',
-      category: json['category'],
+      id: (json['idpaymentmethode'] ?? '').toString(),
+      paymentMethod: (json['payment_method'] ?? '').toString(),
+      accountNumber: (json['accountNumber'] ?? '-').toString(),
+      category: (json['category'] ?? '').toString(),
     );
   }
 }

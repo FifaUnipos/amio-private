@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/payment_shared.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 
@@ -26,7 +27,7 @@ import '../../../../utils/printer/printerPage.dart';
 import '../../../../utils/printer/printerenum.dart';
 import '../../../../utils/component/component_color.dart';
 import '../produkToko/produk.dart';
-import 'pilihPelangganPage.dart';
+// import 'pilihPelangganPage.dart';
 import 'transaksi.dart';
 import '../../../../utils/component/component_button.dart';
 import '../../../../utils/component/component_loading.dart';
@@ -68,7 +69,7 @@ class _SimpanPageState extends State<SimpanPage> {
   List<DetailSingle>? datasSingleRiwayat;
 
   TextEditingController textController = TextEditingController();
-
+  TextEditingController uangTunaiController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   void scrollToTextField() {
@@ -103,7 +104,7 @@ class _SimpanPageState extends State<SimpanPage> {
     super.initState();
     checkConnection(context);
 
-    isTagihan = true;
+    // isTagihan = true;
     if (logoStrukPrinter != '') {
       getStrukPhoto();
     }
@@ -479,9 +480,48 @@ class _SimpanPageState extends State<SimpanPage> {
                                 ),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
-                                    Map<String, dynamic>? data =
-                                        snapshot.data!['data'];
-                                    var detail = data!['detail'];
+                                    // Map<String, dynamic>? data =
+                                    //     snapshot.data!['data'];
+                                    // var detail = data!['detail'];
+                                    // detailUbah = detail;
+
+                                    final result = Map<String, dynamic>.from(
+                                      snapshot.data as Map,
+                                    );
+                                    final data = Map<String, dynamic>.from(
+                                      result['data'] as Map,
+                                    );
+
+                                    final List<Map<String, dynamic>> detail =
+                                        (data['detail'] as List? ?? const [])
+                                            .map<Map<String, dynamic>>(
+                                              (e) => Map<String, dynamic>.from(
+                                                e as Map,
+                                              ),
+                                            )
+                                            .toList();
+
+                                    final List<Map<String, dynamic>> payments =
+                                        readPaymentFromResponse(data);
+
+                                    payments.sort((a, b) {
+                                      DateTime dateA =
+                                          DateTime.tryParse(
+                                            a['payment_date']?.toString() ?? '',
+                                          ) ??
+                                          DateTime(0);
+                                      DateTime dateB =
+                                          DateTime.tryParse(
+                                            b['payment_date']?.toString() ?? '',
+                                          ) ??
+                                          DateTime(0);
+                                      return dateA.compareTo(dateB);
+                                    });
+                                    final totalTagihan = readTotalDue(data);
+                                    final totalDibayar = readTotalPaid(data);
+                                    final sisaBelumDibayar =
+                                        readOutStandingAfter(data);
+
                                     detailUbah = detail;
 
                                     return AnimatedContainer(
@@ -1013,6 +1053,290 @@ class _SimpanPageState extends State<SimpanPage> {
                                                     ],
                                                   ),
                                                 ),
+
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Container(
+                                                        padding: EdgeInsets.all(
+                                                          size12,
+                                                        ),
+                                                        decoration: BoxDecoration(
+                                                          color: succes100,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                size8,
+                                                              ),
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              'Sudah Dibayar',
+                                                              style: body1(
+                                                                FontWeight.w400,
+                                                                succes500,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: size4,
+                                                            ),
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                totalDibayar,
+                                                              ),
+                                                              style: heading4(
+                                                                FontWeight.w600,
+                                                                succes500,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    SizedBox(width: size8),
+                                                    Expanded(
+                                                      child: Container(
+                                                        padding: EdgeInsets.all(
+                                                          size12,
+                                                        ),
+                                                        decoration: BoxDecoration(
+                                                          color: danger100,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                size8,
+                                                              ),
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              'Belum Dibayar',
+                                                              style: body1(
+                                                                FontWeight.w400,
+                                                                danger500,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: size4,
+                                                            ),
+                                                            Text(
+                                                              FormatCurrency.convertToIdr(
+                                                                sisaBelumDibayar,
+                                                              ),
+                                                              style: heading4(
+                                                                FontWeight.w600,
+                                                                danger500,
+                                                                'Outfit',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                SizedBox(height: size12),
+
+                                                if (payments.isNotEmpty) ...[
+                                                  SizedBox(height: size16),
+                                                  Text(
+                                                    'Histori Pembayaran',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  ...payments.asMap().entries.map((
+                                                    entry,
+                                                  ) {
+                                                    final index = entry.key;
+                                                    final payment = entry.value;
+
+                                                    final paymentDate =
+                                                        (payment['payment_date'] ??
+                                                                '')
+                                                            .toString();
+
+                                                    final rawMethod =
+                                                        (payment['payment_method_name'] ??
+                                                                payment['payment_method'] ??
+                                                                payment['method_name'] ??
+                                                                payment['method'] ??
+                                                                '-')
+                                                            .toString()
+                                                            .trim();
+
+                                                    final paymentMethod =
+                                                        rawMethod.isEmpty ||
+                                                            rawMethod == '-'
+                                                        ? 'Pembayaran ${index + 1}'
+                                                        : rawMethod;
+
+                                                    final paymentRef =
+                                                        (payment['payment_reference'] ??
+                                                                payment['payment_reference_id'] ??
+                                                                '')
+                                                            .toString()
+                                                            .trim();
+
+                                                    final showRef =
+                                                        paymentRef.isNotEmpty &&
+                                                        paymentRef != '-';
+
+                                                    final paymentAmount = asInt(
+                                                      payment['payment_amount'] ??
+                                                          payment['amount'] ??
+                                                          payment['payment_value'],
+                                                    );
+
+                                                    return Container(
+                                                      margin: EdgeInsets.only(
+                                                        bottom: size12,
+                                                      ),
+                                                      padding: EdgeInsets.all(
+                                                        size12,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: bnw100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              size8,
+                                                            ),
+                                                        border: Border.all(
+                                                          color: bnw300,
+                                                        ),
+                                                      ),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      paymentMethod
+                                                                              .isEmpty
+                                                                          ? '-'
+                                                                          : paymentMethod,
+                                                                      style: heading4(
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw600,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          size4,
+                                                                    ),
+                                                                    Text(
+                                                                      paymentDate,
+                                                                      style: body1(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw600,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                    if (paymentRef
+                                                                        .isNotEmpty) ...[
+                                                                      SizedBox(
+                                                                        height:
+                                                                            size4,
+                                                                      ),
+                                                                      Text(
+                                                                        'Ref: $paymentRef',
+                                                                        style: body1(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw600,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: size12,
+                                                              ),
+                                                              Text(
+                                                                FormatCurrency.convertToIdr(
+                                                                  paymentAmount,
+                                                                ).toString(),
+                                                                style: heading4(
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  primary500,
+                                                                  'Outfit',
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ] else ...[
+                                                  SizedBox(height: size16),
+                                                  Text(
+                                                    'Histori Pembayaran',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Container(
+                                                    width: double.infinity,
+                                                    padding: EdgeInsets.all(
+                                                      size12,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: bnw100,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            size8,
+                                                          ),
+                                                      border: Border.all(
+                                                        color: bnw300,
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      'Belum ada riwayat pembayaran',
+                                                      style: body1(
+                                                        FontWeight.w400,
+                                                        bnw600,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ],
                                             ),
                                           ),
@@ -1121,51 +1445,7 @@ class _SimpanPageState extends State<SimpanPage> {
                                                       Map<String, dynamic>
                                                     >
                                                     mapCalculateFinal = [];
-                                                    for (final item
-                                                        in mapCalculateFinal) {
-                                                      cartMap.add({
-                                                        "request_id":
-                                                            (item["request_id"] ??
-                                                                    "")
-                                                                .toString(),
-                                                        "product_id":
-                                                            (item["product_id"] ??
-                                                                    "")
-                                                                .toString(),
-                                                        "is_online":
-                                                            (item["is_online"] ??
-                                                                    false)
-                                                                .toString(),
-                                                        "is_customize":
-                                                            (item["is_customize"] ??
-                                                                    false)
-                                                                .toString(),
-                                                        "amount":
-                                                            (item["amount"] ??
-                                                                    "0")
-                                                                .toString(),
-                                                        "name":
-                                                            (item["name"] ?? "")
-                                                                .toString(),
-                                                        "quantity":
-                                                            (item["quantity"] ??
-                                                                    1)
-                                                                .toString(),
-                                                        "description":
-                                                            (item["description"] ??
-                                                                    "")
-                                                                .toString(),
-                                                        // variants bentuknya list/map, tapi cartMap kamu Map<String,String> → simpan sebagai string JSON
-                                                        "variants": jsonEncode(
-                                                          item["variants"] ??
-                                                              [],
-                                                        ),
-                                                      });
-                                                    }
 
-                                                    print(
-                                                      "PAYLOAD cartMap(FIX): ${jsonEncode(cartMap)}",
-                                                    );
                                                     for (final d in detail) {
                                                       final bool isCustom =
                                                           asBool(
@@ -1192,8 +1472,10 @@ class _SimpanPageState extends State<SimpanPage> {
                                                                 false,
                                                           );
 
-                                                      final List variantsReq =
-                                                          [];
+                                                      final List<
+                                                        Map<String, dynamic>
+                                                      >
+                                                      variantsReq = [];
                                                       final variants =
                                                           (d['variants']
                                                               as List?) ??
@@ -1217,44 +1499,31 @@ class _SimpanPageState extends State<SimpanPage> {
 
                                                         for (final vp
                                                             in variantProduct) {
-                                                          final bool
-                                                          isVariantCustom = asBool(
-                                                            vp['is_variant_customize'],
-                                                          );
-
-                                                          final double
-                                                          vpPriceDouble =
-                                                              double.tryParse(
-                                                                (vp['price'] ??
-                                                                        vp['variant_price'] ??
-                                                                        '0')
-                                                                    .toString(),
-                                                              ) ??
-                                                              0.0;
-
-                                                          final int varPrice =
-                                                              vpPriceDouble
-                                                                  .round();
-
                                                           variantArr.add({
                                                             "variant_id":
                                                                 (vp['variant_product_id'] ??
                                                                         '')
                                                                     .toString(),
-                                                            "variant_price":
-                                                                varPrice,
+                                                            "variant_price": asInt(
+                                                              vp['price'] ??
+                                                                  vp['variant_price'],
+                                                            ),
                                                             "is_variant_customize":
-                                                                isVariantCustom
+                                                                asBool(
+                                                                  vp['is_variant_customize'],
+                                                                )
                                                                 ? 1
                                                                 : 0,
                                                           });
                                                         }
+
                                                         variantsReq.add({
                                                           "variant_category_id":
                                                               catId,
                                                           "variant": variantArr,
                                                         });
                                                       }
+
                                                       mapCalculateFinal.add({
                                                         "request_id":
                                                             (d['request_id'] ??
@@ -1280,173 +1549,500 @@ class _SimpanPageState extends State<SimpanPage> {
                                                             d['description'],
                                                         "variants": variantsReq,
                                                       });
-
-                                                      cartMap.clear();
-
-                                                      for (final item
-                                                          in mapCalculateFinal) {
-                                                        cartMap.add({
-                                                          "request_id":
-                                                              (item["request_id"] ??
-                                                                      "")
-                                                                  .toString(),
-                                                          "product_id":
-                                                              (item["product_id"] ??
-                                                                      "")
-                                                                  .toString(),
-                                                          "is_online": asBool(
-                                                            item["is_online"],
-                                                          ).toString(),
-                                                          "is_customize": asBool(
-                                                            item["is_customize"],
-                                                          ).toString(),
-                                                          "amount":
-                                                              (item["amount"] ??
-                                                                      "0")
-                                                                  .toString(),
-                                                          "name":
-                                                              (item["name"] ??
-                                                                      "")
-                                                                  .toString(),
-                                                          "quantity":
-                                                              (item["quantity"] ??
-                                                                      1)
-                                                                  .toString(),
-                                                          "description":
-                                                              (item["description"] ??
-                                                                      "")
-                                                                  .toString(),
-                                                          // ✅ simpan variants sebagai JSON string (biar cartMap tetap Map<String,String>)
-                                                          "variants": jsonEncode(
-                                                            item["variants"] ??
-                                                                [],
-                                                          ),
-                                                        });
-                                                      }
-
-                                                      print(
-                                                        "PAYLOAD cartMap(FINAL): ${jsonEncode(cartMap)}",
-                                                      );
                                                     }
 
-                                                    print(
-                                                      "PAYLOAD cartMap: ${jsonEncode(mapCalculateFinal)}",
-                                                    );
                                                     if (mapCalculateFinal
-                                                        .isNotEmpty) {
-                                                      isTagihan = true;
+                                                        .isEmpty)
+                                                      return;
 
-                                                      final cartForPayment = detail.map<CartTransaksi>((
-                                                        d,
-                                                      ) {
-                                                        final m =
-                                                            d
-                                                                as Map<
-                                                                  String,
-                                                                  dynamic
-                                                                >;
-                                                        final qty = asInt(
-                                                          m['quantity'],
-                                                          fallback: 1,
-                                                        );
-                                                        final priceDouble =
-                                                            double.tryParse(
-                                                              (m['price'] ??
-                                                                      m['amount'] ??
-                                                                      '0')
-                                                                  .toString(),
-                                                            ) ??
-                                                            0;
+                                                    final List<CartTransaksi>
+                                                    cartForPayment = detail.map<CartTransaksi>((
+                                                      Map<String, dynamic> m,
+                                                    ) {
+                                                      final qty = asInt(
+                                                        m['quantity'],
+                                                        fallback: 1,
+                                                      );
+                                                      final priceDouble =
+                                                          double.tryParse(
+                                                            (m['price'] ??
+                                                                    m['amount'] ??
+                                                                    '0')
+                                                                .toString(),
+                                                          ) ??
+                                                          0;
 
-                                                        return CartTransaksi(
-                                                          name:
-                                                              (m['name'] ?? '')
-                                                                  .toString(),
-                                                          productid:
-                                                              (m['product_id'] ??
-                                                                      m['productid'] ??
-                                                                      '')
-                                                                  .toString(),
-                                                          image:
-                                                              (m['product_image'] ??
-                                                                      m['image'] ??
-                                                                      '')
-                                                                  .toString(),
-                                                          price: priceDouble,
-                                                          quantity: qty,
-                                                          desc:
-                                                              (m['description'] ??
-                                                                      '')
-                                                                  .toString(),
-                                                          idRequest:
-                                                              (m['request_id'] ??
-                                                                      '')
-                                                                  .toString(),
-                                                          variants: jsonEncode(
-                                                            m['variants'] ?? [],
-                                                          ),
-                                                        );
-                                                      }).toList();
+                                                      return CartTransaksi(
+                                                        name: (m['name'] ?? '')
+                                                            .toString(),
+                                                        productid:
+                                                            (m['product_id'] ??
+                                                                    m['productid'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        image:
+                                                            (m['product_image'] ??
+                                                                    m['image'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        price: priceDouble,
+                                                        quantity: qty,
+                                                        desc:
+                                                            (m['description'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        idRequest:
+                                                            (m['request_id'] ??
+                                                                    '')
+                                                                .toString(),
+                                                        variants: jsonEncode(
+                                                          m['variants'] ?? [],
+                                                        ),
+                                                      );
+                                                    }).toList();
 
-                                                      // penting: update state utama
-                                                      this.setState(() {
-                                                        cart
-                                                          ..clear()
-                                                          ..addAll(
-                                                            cartForPayment,
-                                                          );
-                                                      });
+                                                    final List<
+                                                      TextEditingController
+                                                    >
+                                                    noteControllers = cartForPayment
+                                                        .map<
+                                                          TextEditingController
+                                                        >(
+                                                          (e) =>
+                                                              TextEditingController(
+                                                                text:
+                                                                    e.desc ??
+                                                                    '',
+                                                              ),
+                                                        )
+                                                        .toList();
 
-                                                      await calculateTransaction(
-                                                        context,
-                                                        widget.token,
-                                                        mapCalculateFinal,
-                                                        this.setState,
-                                                        pelangganId,
-                                                        '', // typePrice (kalau gak dipakai isi kosong / "price")
-                                                        data['discountid'] ??
-                                                            '', // ✅ discount yang bener
-                                                        transactionidValue,
-                                                      ).then((value) {
-                                                        if (value == '00') {
-                                                          width = null;
-                                                          widtValue = 120;
-                                                          heightInformation = 0;
-                                                          widthInformation = 0;
-
-                                                          // Menunda pemindahan halaman untuk memberikan waktu
-                                                          Future.delayed(
-                                                            const Duration(
-                                                              seconds: 1,
-                                                            ),
-                                                            () {
-                                                              widget
-                                                                  .pageController
-                                                                  .jumpToPage(
-                                                                    1,
-                                                                  );
-                                                            },
-                                                          );
-                                                        } else {
-                                                          isTagihan = true;
-                                                        }
-                                                      });
-
-                                                      setState(() {
-                                                        transactionidValue;
-                                                        subTotal;
-                                                        printext;
-                                                        transaksiNama;
-                                                        transaksiMetode;
-                                                        transaksiPesanan;
-                                                        transaksiKasir;
-                                                      });
-                                                    } else {
-                                                      closeLoading(context);
+                                                    for (final c
+                                                        in conCatatan) {
+                                                      c.dispose();
                                                     }
 
+                                                    cart
+                                                      ..clear()
+                                                      ..addAll(cartForPayment);
+
+                                                    conCatatan
+                                                      ..clear()
+                                                      ..addAll(noteControllers);
+
+                                                    total = List<num>.generate(
+                                                      cart.length,
+                                                      (index) =>
+                                                          (cart[index].price ??
+                                                              0) *
+                                                          cart[index].quantity,
+                                                    );
+                                                    sumTotal = total.fold<num>(
+                                                      0,
+                                                      (a, b) => a + b,
+                                                    );
+
+                                                    cartMap
+                                                      ..clear()
+                                                      ..addAll(
+                                                        mapCalculateFinal.map<
+                                                          Map<String, String>
+                                                        >((item) {
+                                                          return {
+                                                            "request_id":
+                                                                (item["request_id"] ??
+                                                                        "")
+                                                                    .toString(),
+                                                            "product_id":
+                                                                (item["product_id"] ??
+                                                                        "")
+                                                                    .toString(),
+                                                            "is_online": asBool(
+                                                              item["is_online"],
+                                                            ).toString(),
+                                                            "is_customize": asBool(
+                                                              item["is_customize"],
+                                                            ).toString(),
+                                                            "amount":
+                                                                (item["amount"] ??
+                                                                        "0")
+                                                                    .toString(),
+                                                            "name":
+                                                                (item["name"] ??
+                                                                        "")
+                                                                    .toString(),
+                                                            "quantity":
+                                                                (item["quantity"] ??
+                                                                        1)
+                                                                    .toString(),
+                                                            "description":
+                                                                (item["description"] ??
+                                                                        "")
+                                                                    .toString(),
+                                                            "variants": jsonEncode(
+                                                              item["variants"] ??
+                                                                  [],
+                                                            ),
+                                                          };
+                                                        }).toList(),
+                                                      );
+
+                                                    selectedTagihanData = {
+                                                      ...data,
+                                                      'detail': detail,
+                                                      'payments': payments,
+                                                    };
+
+                                                    hydratePaymentSummaryFromData(
+                                                      selectedTagihanData!,
+                                                      treatAsOpenBill: true,
+                                                    );
+
+                                                    resetSplitPaymentState();
+
+                                                    uangTunaiController.clear();
+
+                                                    width = null;
+                                                    widtValue = 120;
+                                                    heightInformation = 0;
+                                                    widthInformation = 0;
+
+                                                    if (!mounted) return;
                                                     setState(() {});
+                                                    widget.pageController
+                                                        .jumpToPage(1);
                                                   },
+                                                  // onTap: () async {
+                                                  //   final List<
+                                                  //     Map<String, dynamic>
+                                                  //   >
+                                                  //   mapCalculateFinal = [];
+                                                  //   for (final item
+                                                  //       in mapCalculateFinal) {
+                                                  //     cartMap.add({
+                                                  //       "request_id":
+                                                  //           (item["request_id"] ??
+                                                  //                   "")
+                                                  //               .toString(),
+                                                  //       "product_id":
+                                                  //           (item["product_id"] ??
+                                                  //                   "")
+                                                  //               .toString(),
+                                                  //       "is_online":
+                                                  //           (item["is_online"] ??
+                                                  //                   false)
+                                                  //               .toString(),
+                                                  //       "is_customize":
+                                                  //           (item["is_customize"] ??
+                                                  //                   false)
+                                                  //               .toString(),
+                                                  //       "amount":
+                                                  //           (item["amount"] ??
+                                                  //                   "0")
+                                                  //               .toString(),
+                                                  //       "name":
+                                                  //           (item["name"] ?? "")
+                                                  //               .toString(),
+                                                  //       "quantity":
+                                                  //           (item["quantity"] ??
+                                                  //                   1)
+                                                  //               .toString(),
+                                                  //       "description":
+                                                  //           (item["description"] ??
+                                                  //                   "")
+                                                  //               .toString(),
+                                                  //       // variants bentuknya list/map, tapi cartMap kamu Map<String,String> → simpan sebagai string JSON
+                                                  //       "variants": jsonEncode(
+                                                  //         item["variants"] ??
+                                                  //             [],
+                                                  //       ),
+                                                  //     });
+                                                  //   }
+
+                                                  //   print(
+                                                  //     "PAYLOAD cartMap(FIX): ${jsonEncode(cartMap)}",
+                                                  //   );
+                                                  //   for (final d in detail) {
+                                                  //     final bool isCustom =
+                                                  //         asBool(
+                                                  //           d['is_customize'],
+                                                  //         );
+                                                  //     final bool isOnline =
+                                                  //         asBool(
+                                                  //           d['is_online'],
+                                                  //         );
+
+                                                  //     final dynamic
+                                                  //     basePriceSource = isCustom
+                                                  //         ? (d['amount_display'] ??
+                                                  //               d['custom_amount'] ??
+                                                  //               d['price'] ??
+                                                  //               d['amount'])
+                                                  //         : (d['price'] ??
+                                                  //               d['amount']);
+
+                                                  //     final String baseAmount =
+                                                  //         moneyString(
+                                                  //           basePriceSource,
+                                                  //           isThousandUnit:
+                                                  //               false,
+                                                  //         );
+
+                                                  //     final List variantsReq =
+                                                  //         [];
+                                                  //     final variants =
+                                                  //         (d['variants']
+                                                  //             as List?) ??
+                                                  //         [];
+
+                                                  //     for (final cat
+                                                  //         in variants) {
+                                                  //       final catId =
+                                                  //           (cat['variant_category_id'] ??
+                                                  //                   '')
+                                                  //               .toString();
+                                                  //       final variantProduct =
+                                                  //           (cat['variant_products']
+                                                  //               as List?) ??
+                                                  //           [];
+
+                                                  //       final List<
+                                                  //         Map<String, dynamic>
+                                                  //       >
+                                                  //       variantArr = [];
+
+                                                  //       for (final vp
+                                                  //           in variantProduct) {
+                                                  //         final bool
+                                                  //         isVariantCustom = asBool(
+                                                  //           vp['is_variant_customize'],
+                                                  //         );
+
+                                                  //         final double
+                                                  //         vpPriceDouble =
+                                                  //             double.tryParse(
+                                                  //               (vp['price'] ??
+                                                  //                       vp['variant_price'] ??
+                                                  //                       '0')
+                                                  //                   .toString(),
+                                                  //             ) ??
+                                                  //             0.0;
+
+                                                  //         final int varPrice =
+                                                  //             vpPriceDouble
+                                                  //                 .round();
+
+                                                  //         variantArr.add({
+                                                  //           "variant_id":
+                                                  //               (vp['variant_product_id'] ??
+                                                  //                       '')
+                                                  //                   .toString(),
+                                                  //           "variant_price":
+                                                  //               varPrice,
+                                                  //           "is_variant_customize":
+                                                  //               isVariantCustom
+                                                  //               ? 1
+                                                  //               : 0,
+                                                  //         });
+                                                  //       }
+                                                  //       variantsReq.add({
+                                                  //         "variant_category_id":
+                                                  //             catId,
+                                                  //         "variant": variantArr,
+                                                  //       });
+                                                  //     }
+                                                  //     mapCalculateFinal.add({
+                                                  //       "request_id":
+                                                  //           (d['request_id'] ??
+                                                  //                   '')
+                                                  //               .toString(),
+                                                  //       "product_id":
+                                                  //           (d['product_id'] ??
+                                                  //                   d['productid'] ??
+                                                  //                   '')
+                                                  //               .toString(),
+                                                  //       "is_online": isOnline,
+                                                  //       "is_customize":
+                                                  //           isCustom,
+                                                  //       "amount": baseAmount,
+                                                  //       "name":
+                                                  //           (d['name'] ?? '')
+                                                  //               .toString(),
+                                                  //       "quantity": asInt(
+                                                  //         d['quantity'],
+                                                  //         fallback: 1,
+                                                  //       ),
+                                                  //       "description":
+                                                  //           d['description'],
+                                                  //       "variants": variantsReq,
+                                                  //     });
+
+                                                  //     cartMap.clear();
+
+                                                  //     for (final item
+                                                  //         in mapCalculateFinal) {
+                                                  //       cartMap.add({
+                                                  //         "request_id":
+                                                  //             (item["request_id"] ??
+                                                  //                     "")
+                                                  //                 .toString(),
+                                                  //         "product_id":
+                                                  //             (item["product_id"] ??
+                                                  //                     "")
+                                                  //                 .toString(),
+                                                  //         "is_online": asBool(
+                                                  //           item["is_online"],
+                                                  //         ).toString(),
+                                                  //         "is_customize": asBool(
+                                                  //           item["is_customize"],
+                                                  //         ).toString(),
+                                                  //         "amount":
+                                                  //             (item["amount"] ??
+                                                  //                     "0")
+                                                  //                 .toString(),
+                                                  //         "name":
+                                                  //             (item["name"] ??
+                                                  //                     "")
+                                                  //                 .toString(),
+                                                  //         "quantity":
+                                                  //             (item["quantity"] ??
+                                                  //                     1)
+                                                  //                 .toString(),
+                                                  //         "description":
+                                                  //             (item["description"] ??
+                                                  //                     "")
+                                                  //                 .toString(),
+                                                  //         // ✅ simpan variants sebagai JSON string (biar cartMap tetap Map<String,String>)
+                                                  //         "variants": jsonEncode(
+                                                  //           item["variants"] ??
+                                                  //               [],
+                                                  //         ),
+                                                  //       });
+                                                  //     }
+
+                                                  //     print(
+                                                  //       "PAYLOAD cartMap(FINAL): ${jsonEncode(cartMap)}",
+                                                  //     );
+                                                  //   }
+
+                                                  //   print(
+                                                  //     "PAYLOAD cartMap: ${jsonEncode(mapCalculateFinal)}",
+                                                  //   );
+                                                  //   if (mapCalculateFinal
+                                                  //       .isNotEmpty) {
+                                                  //     isTagihan = true;
+
+                                                  //     final cartForPayment = detail.map<CartTransaksi>((
+                                                  //       d,
+                                                  //     ) {
+                                                  //       final m =
+                                                  //           d
+                                                  //               as Map<
+                                                  //                 String,
+                                                  //                 dynamic
+                                                  //               >;
+                                                  //       final qty = asInt(
+                                                  //         m['quantity'],
+                                                  //         fallback: 1,
+                                                  //       );
+                                                  //       final priceDouble =
+                                                  //           double.tryParse(
+                                                  //             (m['price'] ??
+                                                  //                     m['amount'] ??
+                                                  //                     '0')
+                                                  //                 .toString(),
+                                                  //           ) ??
+                                                  //           0;
+
+                                                  //       return CartTransaksi(
+                                                  //         name:
+                                                  //             (m['name'] ?? '')
+                                                  //                 .toString(),
+                                                  //         productid:
+                                                  //             (m['product_id'] ??
+                                                  //                     m['productid'] ??
+                                                  //                     '')
+                                                  //                 .toString(),
+                                                  //         image:
+                                                  //             (m['product_image'] ??
+                                                  //                     m['image'] ??
+                                                  //                     '')
+                                                  //                 .toString(),
+                                                  //         price: priceDouble,
+                                                  //         quantity: qty,
+                                                  //         desc:
+                                                  //             (m['description'] ??
+                                                  //                     '')
+                                                  //                 .toString(),
+                                                  //         idRequest:
+                                                  //             (m['request_id'] ??
+                                                  //                     '')
+                                                  //                 .toString(),
+                                                  //         variants: jsonEncode(
+                                                  //           m['variants'] ?? [],
+                                                  //         ),
+                                                  //       );
+                                                  //     }).toList();
+
+                                                  //     // penting: update state utama
+                                                  //     this.setState(() {
+                                                  //       cart
+                                                  //         ..clear()
+                                                  //         ..addAll(
+                                                  //           cartForPayment,
+                                                  //         );
+                                                  //     });
+
+                                                  //     await calculateTransaction(
+                                                  //       context,
+                                                  //       widget.token,
+                                                  //       mapCalculateFinal,
+                                                  //       this.setState,
+                                                  //       pelangganId,
+                                                  //       '', // typePrice (kalau gak dipakai isi kosong / "price")
+                                                  //       data['discountid'] ??
+                                                  //           '', // ✅ discount yang bener
+                                                  //       transactionidValue,
+                                                  //     ).then((value) {
+                                                  //       if (value == '00') {
+                                                  //         width = null;
+                                                  //         widtValue = 120;
+                                                  //         heightInformation = 0;
+                                                  //         widthInformation = 0;
+
+                                                  //         // Menunda pemindahan halaman untuk memberikan waktu
+                                                  //         Future.delayed(
+                                                  //           const Duration(
+                                                  //             seconds: 1,
+                                                  //           ),
+                                                  //           () {
+                                                  //             widget
+                                                  //                 .pageController
+                                                  //                 .jumpToPage(
+                                                  //                   1,
+                                                  //                 );
+                                                  //           },
+                                                  //         );
+                                                  //       } else {
+                                                  //         isTagihan = true;
+                                                  //       }
+                                                  //     });
+
+                                                  //     setState(() {
+                                                  //       transactionidValue;
+                                                  //       subTotal;
+                                                  //       printext;
+                                                  //       transaksiNama;
+                                                  //       transaksiMetode;
+                                                  //       transaksiPesanan;
+                                                  //       transaksiKasir;
+                                                  //     });
+                                                  //   } else {
+                                                  //     closeLoading(context);
+                                                  //   }
+
+                                                  //   setState(() {});
+                                                  // },
                                                   child: buttonXL(
                                                     Row(
                                                       mainAxisAlignment:
