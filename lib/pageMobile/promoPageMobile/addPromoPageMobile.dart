@@ -360,7 +360,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
 
       final body = {
         if (widget.editDiscount != null) "id": widget.editDiscount!.id,
-        "merchantid": widget.merchantId,
+        "merchantid": jsonEncode([widget.merchantId]),
         "productid": productIdsString,
         "name": _nameController.text,
         "discount": _valueController.text.replaceAll(RegExp(r'[^0-9]'), ''),

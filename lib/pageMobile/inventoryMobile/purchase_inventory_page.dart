@@ -8,8 +8,10 @@ import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
+import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PurchaseTab extends StatefulWidget {
   final String token;
@@ -33,7 +35,10 @@ class PurchaseTabState extends State<PurchaseTab> {
   String _normalizeType(String t) =>
       t.trim().toLowerCase().replaceAll(' ', '_');
 
-  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
+  bool get _canPurchase {
+    final t = _normalizeType(widget.typeMerchant);
+    return t == 'merchant' || t == 'group_merchant';
+  }
 
   @override
   void initState() {
@@ -88,9 +93,13 @@ class PurchaseTabState extends State<PurchaseTab> {
       final response = await http.post(
         Uri.parse('$url/api/inventory/purchase/delete'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({"deviceid": identifier, "group_id": groupIds}),
+        body: jsonEncode({
+          "deviceid": identifier,
+          "group_id": groupIds,
+          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
+        }),
       );
-
+      print('DELETE PURCHASE RESPONSE: ${response.statusCode} ${response.body}');
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -98,6 +107,43 @@ class PurchaseTabState extends State<PurchaseTab> {
       print('Error: $e');
     }
     return null;
+  }
+
+  Future<void> _downloadItem(String groupId) async {
+    whenLoading(context);
+    try {
+      final response = await http.post(
+        Uri.parse('$url/api/inventory/purchase/download'),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "group_id": groupId,
+          "merchant_id": widget.merchantId,
+          "type": "pdf",
+        }),
+      );
+      if (!mounted) return;
+      closeLoading(context);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['rc'] == '00') {
+          final downloadUrl = data['data']?.toString() ?? '';
+          if (downloadUrl.isNotEmpty) {
+            try {
+              await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
+            } catch (e) {
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal membuka link')));
+            }
+          } else {
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Link kosong')));
+          }
+        } else {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Gagal download')));
+        }
+      }
+    } catch (e) {
+      closeLoading(context);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+    }
   }
 
   Future<void> _fetchPurchases() async {
@@ -139,10 +185,7 @@ class PurchaseTabState extends State<PurchaseTab> {
                 SizedBox(height: 20),
                 ListTile(
                   leading: Icon(PhosphorIcons.pencil, color: primary500),
-                  title: Text(
-                    'Update',
-                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
+                  title: Text('Update', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _navigateToUpdatePurchase(groupId);
@@ -150,11 +193,17 @@ class PurchaseTabState extends State<PurchaseTab> {
                 ),
                 Divider(),
                 ListTile(
+                  leading: Icon(PhosphorIcons.download, color: bnw900),
+                  title: Text('Download', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _downloadItem(groupId);
+                  },
+                ),
+                Divider(),
+                ListTile(
                   leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                  title: Text(
-                    'Delete',
-                    style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
-                  ),
+                  title: Text('Delete', style: heading3(FontWeight.w600, Colors.red, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _confirmDelete(groupId);
@@ -171,94 +220,77 @@ class PurchaseTabState extends State<PurchaseTab> {
   void _confirmDelete(String groupId) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
         return SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: 40, height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
-                Icon(
-                  PhosphorIcons.warning_circle,
-                  size: 64,
-                  color: Colors.orange,
-                ),
-                SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Text(
-                  'Konfirmasi Hapus',
+                  'Yakin Ingin Menghapus Pembelian?',
+                  textAlign: TextAlign.center,
                   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Apakah Anda yakin ingin menghapus data pembelian ini?',
+                  'Data pembelian yang telah dihapus tidak dapat dikembalikan.',
                   textAlign: TextAlign.center,
-                  style: body1(FontWeight.w400, bnw600, 'Outfit'),
+                  style: body1(FontWeight.w400, bnw500, 'Outfit'),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(modalContext),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: bnw300),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Batal',
-                          style: heading3(FontWeight.w600, bnw600, 'Outfit'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(modalContext);
                           final result = await _deletePurchase([groupId]);
+                          print('DELETE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
                           if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(
+                                result != null && result['rc'] == '00'
+                                    ? (result['message'] ?? result['rm'] ?? 'Berhasil menghapus data')
+                                    : (result?['message'] ?? result?['rm'] ?? 'Gagal menghapus data'),
+                              )),
+                            );
                             if (result != null && result['rc'] == '00') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Berhasil menghapus data'),
-                                ),
-                              );
                               _fetchPurchases();
                             }
                           }
                         },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Iya, Hapus', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalContext),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        child: Text(
-                          'Hapus',
-                          style: heading3(
-                            FontWeight.w600,
-                            Colors.white,
-                            'Outfit',
-                          ),
-                        ),
+                        child: Text('Batalkan', style: heading3(FontWeight.w600, bnw100, 'Outfit')),
                       ),
                     ),
                   ],
@@ -424,7 +456,10 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   List<dynamic> _unitConversions = [];
   String _normalizeType(String t) =>
       t.trim().toLowerCase().replaceAll(' ', '_');
-  bool get _canPurchase => _normalizeType(widget.typeMerchant) == 'merchant';
+  bool get _canPurchase {
+    final t = _normalizeType(widget.typeMerchant);
+    return t == 'merchant' || t == 'group_merchant';
+  }
 
   @override
   void initState() {

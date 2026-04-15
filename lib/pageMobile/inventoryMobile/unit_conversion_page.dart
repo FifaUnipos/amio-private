@@ -79,46 +79,48 @@ class UnitConversionTabState extends State<UnitConversionTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                leading: Icon(PhosphorIcons.pencil, color: primary500),
-                title: Text(
-                  'Update',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                SizedBox(height: 20),
+                ListTile(
+                  leading: Icon(PhosphorIcons.pencil, color: primary500),
+                  title: Text(
+                    'Update',
+                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    navigateToAdd(unitConversionId: id);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  navigateToAdd(unitConversionId: id);
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                title: Text(
-                  'Delete',
-                  style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                Divider(),
+                ListTile(
+                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
+                  title: Text(
+                    'Delete',
+                    style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDelete(id);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete(id);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -128,106 +130,105 @@ class UnitConversionTabState extends State<UnitConversionTab> {
   void _confirmDelete(String id) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 24),
-              Icon(
-                PhosphorIcons.warning_circle,
-                size: 64,
-                color: Colors.orange,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Konfirmasi Hapus',
-                style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Apakah Anda yakin ingin menghapus data ini?',
-                textAlign: TextAlign.center,
-                style: body1(FontWeight.w400, bnw600, 'Outfit'),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(modalContext),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: bnw300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Batal',
-                        style: heading3(FontWeight.w600, bnw600, 'Outfit'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(modalContext);
-                        final result = await _deleteUnitConversion(id);
-                        if (mounted) {
-                          if (result != null && result['rc'] == '00') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Berhasil menghapus data'),
-                              ),
-                            );
-                            _fetchUnitConversions();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  result?['rm'] ?? 'Gagal menghapus data',
+                const SizedBox(height: 20),
+                Text(
+                  'Yakin Ingin Menghapus Konversi Unit?',
+                  textAlign: TextAlign.center,
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Konversi unit yang telah dihapus tidak dapat dikembalikan.',
+                  textAlign: TextAlign.center,
+                  style: body1(FontWeight.w400, bnw500, 'Outfit'),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          Navigator.pop(modalContext);
+                          final result = await _deleteUnitConversion(id);
+                          if (mounted) {
+                            if (result != null && result['rc'] == '00') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Berhasil menghapus data'),
                                 ),
-                              ),
-                            );
+                              );
+                              _fetchUnitConversions();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result?['message'] ??
+                                        result?['rm'] ??
+                                        'Gagal menghapus data',
+                                  ),
+                                ),
+                              );
+                            }
                           }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Hapus',
-                        style: heading3(
-                          FontWeight.w600,
-                          bnw100,
-                          'Outfit',
+                        child: Text(
+                          'Iya, Hapus',
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          'Batalkan',
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -261,13 +262,15 @@ class UnitConversionTabState extends State<UnitConversionTab> {
                 style: heading3(FontWeight.w400, bnw500, 'Outfit'),
               ),
             )
-          : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: _conversions.length,
-              itemBuilder: (context, index) {
-                final item = _conversions[index];
-                return _buildCard(item);
-              },
+          : SafeArea(
+              child: ListView.builder(
+                padding: EdgeInsets.all(16),
+                itemCount: _conversions.length,
+                itemBuilder: (context, index) {
+                  final item = _conversions[index];
+                  return _buildCard(item);
+                },
+              ),
             ),
     );
   }
@@ -433,7 +436,9 @@ class _AddUnitConversionPageState extends State<AddUnitConversionPage> {
         backgroundColor: bnw100,
         appBar: AppBar(
           title: Text(
-            widget.unitConversionId == null ? 'Tambah Konversi' : 'Edit Konversi',
+            widget.unitConversionId == null
+                ? 'Tambah Konversi'
+                : 'Edit Konversi',
             style: heading2(FontWeight.w700, bnw900, 'Outfit'),
           ),
           leading: IconButton(

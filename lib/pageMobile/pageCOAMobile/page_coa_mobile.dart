@@ -93,35 +93,37 @@ class _PageCoaMobileState extends State<PageCoaMobile> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(PhosphorIcons.pencil_simple, color: bnw900),
-              title: Text(
-                "Ubah",
-                style: body1(FontWeight.w600, bnw900, 'Outfit'),
+      builder: (context) => SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(PhosphorIcons.pencil_simple, color: bnw900),
+                title: Text(
+                  "Ubah",
+                  style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _navigateToUpdate(item);
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                _navigateToUpdate(item);
-              },
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(PhosphorIcons.trash, color: Colors.red),
-              title: Text(
-                "Hapus",
-                style: body1(FontWeight.w600, Colors.red, 'Outfit'),
+              Divider(),
+              ListTile(
+                leading: Icon(PhosphorIcons.trash, color: Colors.red),
+                title: Text(
+                  "Hapus",
+                  style: body1(FontWeight.w600, Colors.red, 'Outfit'),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDelete(item);
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDelete(item);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -130,76 +132,80 @@ class _PageCoaMobileState extends State<PageCoaMobile> {
   void _confirmDelete(CoaModel item) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Hapus COA",
-              style: heading3(FontWeight.w700, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Apakah anda yakin ingin menghapus akun ini?",
-              style: body1(FontWeight.w400, bnw900, 'Outfit'),
-            ),
-            SizedBox(height: 16),
-            Row(
+      builder: (modalContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      side: BorderSide(color: bnw300),
-                    ),
-                    child: Text(
-                      "Batal",
-                      style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      
-                      if (item.idpaymentmethode != null) {
-                        await deleteCoa(
-                          context,
-                          widget.token,
-                          item.idpaymentmethode!,
-                        );
-                        _loadData();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 20),
+                Text(
+                  'Yakin Ingin Menghapus COA?',
+                  textAlign: TextAlign.center,
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'COA yang telah dihapus tidak dapat dikembalikan.',
+                  textAlign: TextAlign.center,
+                  style: body1(FontWeight.w400, bnw500, 'Outfit'),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          Navigator.pop(modalContext);
+                          if (item.idpaymentmethode != null) {
+                            await deleteCoa(
+                              context,
+                              widget.token,
+                              item.idpaymentmethode!,
+                            );
+                            _loadData();
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Iya, Hapus', style: heading3(FontWeight.w600, primary500, 'Outfit')),
                       ),
                     ),
-                    child: Text(
-                      "Hapus",
-                      style: body1(FontWeight.w600, Colors.white, 'Outfit'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Batalkan', style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -241,175 +247,177 @@ class _PageCoaMobileState extends State<PageCoaMobile> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Filter Dropdown: "Urutkan coa"
-          // Padding(
-          //   padding: const EdgeInsets.all(16.0),
-          //   child: Container(
-          //     padding: EdgeInsets.symmetric(horizontal: 12),
-          //     decoration: BoxDecoration(
-          //       border: Border.all(color: bnw300),
-          //       borderRadius: BorderRadius.circular(8),
-          //     ),
-          //     child: DropdownButtonHideUnderline(
-          //       child: DropdownButton<String>(
-          //         value: _selectedOrder,
-          //         isExpanded: false, // Don't take full width like in image 1
-          //         icon: Icon(PhosphorIcons.caret_up, size: 16, color: bnw500),
-          //         items: [
-          //           DropdownMenuItem(
-          //             value: "upDownNama",
-          //             child: Text(
-          //               "Urutkan coa",
-          //               style: body1(FontWeight.w600, bnw900, 'Outfit'),
-          //             ),
-          //           ),
-          //           DropdownMenuItem(
-          //             value: "downUpNama",
-          //             child: Text(
-          //               "Z-A",
-          //               style: body1(FontWeight.w600, bnw900, 'Outfit'),
-          //             ),
-          //           ),
-          //         ],
-          //         onChanged: _onFilterChanged,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-
-          // Using a tab bar or chips for category filter?
-          // User said "buatkan filter berdasarkan category juga ya, kalau kosong semuanya tampil"
-          // Image doesn't show category filter explicitly, but user asked for it.
-          // I'll add a horizontal SingleChildScrollView of chips below "Urutkan coa" or inline?
-          // I'll put it below.
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: _categories.map((cat) {
-                final isSelected = _selectedCategory == cat;
-                final label = cat.isEmpty ? "Semua" : cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(
-                      label,
-                      style: body2(
-                        FontWeight.w600,
-                        isSelected ? Colors.white : bnw900,
-                        'Outfit',
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: primaryColor,
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: bnw300),
-                    ),
-                    onSelected: (val) {
-                      setState(() {
-                        _selectedCategory = cat;
-                      });
-                      _loadData();
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          SizedBox(height: 16),
-
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : _coaList.isEmpty
-                ? Center(
-                    child: Text(
-                      "Data kosong",
-                      style: body1(FontWeight.w400, bnw500, 'Outfit'),
-                    ),
-                  )
-                : ListView.separated(
-                    itemCount: _coaList.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(height: 1, color: bnw200),
-                    itemBuilder: (context, index) {
-                      final item = _coaList[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Akun",
-                                    style: body2(
-                                      FontWeight.w400,
-                                      bnw500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    item.paymentMethod ?? "-",
-                                    style: body1(
-                                      FontWeight.w700,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Nomor Akun",
-                                    style: body2(
-                                      FontWeight.w400,
-                                      bnw500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    item.accountNumber ?? "-",
-                                    style: body1(
-                                      FontWeight.w700,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                PhosphorIcons.pencil_simple,
-                                size: 20,
-                                color: bnw900,
-                              ),
-                              onPressed: () =>
-                                  _deleteItem(item), // Opens bottomsheet
-                            ),
-                          ],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Filter Dropdown: "Urutkan coa"
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 12),
+            //     decoration: BoxDecoration(
+            //       border: Border.all(color: bnw300),
+            //       borderRadius: BorderRadius.circular(8),
+            //     ),
+            //     child: DropdownButtonHideUnderline(
+            //       child: DropdownButton<String>(
+            //         value: _selectedOrder,
+            //         isExpanded: false, // Don't take full width like in image 1
+            //         icon: Icon(PhosphorIcons.caret_up, size: 16, color: bnw500),
+            //         items: [
+            //           DropdownMenuItem(
+            //             value: "upDownNama",
+            //             child: Text(
+            //               "Urutkan coa",
+            //               style: body1(FontWeight.w600, bnw900, 'Outfit'),
+            //             ),
+            //           ),
+            //           DropdownMenuItem(
+            //             value: "downUpNama",
+            //             child: Text(
+            //               "Z-A",
+            //               style: body1(FontWeight.w600, bnw900, 'Outfit'),
+            //             ),
+            //           ),
+            //         ],
+            //         onChanged: _onFilterChanged,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+        
+            // Using a tab bar or chips for category filter?
+            // User said "buatkan filter berdasarkan category juga ya, kalau kosong semuanya tampil"
+            // Image doesn't show category filter explicitly, but user asked for it.
+            // I'll add a horizontal SingleChildScrollView of chips below "Urutkan coa" or inline?
+            // I'll put it below.
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: _categories.map((cat) {
+                  final isSelected = _selectedCategory == cat;
+                  final label = cat.isEmpty ? "Semua" : cat;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(
+                        label,
+                        style: body2(
+                          FontWeight.w600,
+                          isSelected ? Colors.white : bnw900,
+                          'Outfit',
                         ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                      ),
+                      selected: isSelected,
+                      selectedColor: primaryColor,
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: bnw300),
+                      ),
+                      onSelected: (val) {
+                        setState(() {
+                          _selectedCategory = cat;
+                        });
+                        _loadData();
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 16),
+        
+            Expanded(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : _coaList.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Data kosong",
+                        style: body1(FontWeight.w400, bnw500, 'Outfit'),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: _coaList.length,
+                      separatorBuilder: (context, index) =>
+                          Divider(height: 1, color: bnw200),
+                      itemBuilder: (context, index) {
+                        final item = _coaList[index];
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Akun",
+                                      style: body2(
+                                        FontWeight.w400,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      item.paymentMethod ?? "-",
+                                      style: body1(
+                                        FontWeight.w700,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Nomor Akun",
+                                      style: body2(
+                                        FontWeight.w400,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      item.accountNumber ?? "-",
+                                      style: body1(
+                                        FontWeight.w700,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  PhosphorIcons.pencil_simple,
+                                  size: 20,
+                                  color: bnw900,
+                                ),
+                                onPressed: () =>
+                                    _deleteItem(item), // Opens bottomsheet
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

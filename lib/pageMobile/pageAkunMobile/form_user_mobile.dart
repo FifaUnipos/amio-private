@@ -159,280 +159,282 @@ class _FormUserMobileState extends State<FormUserMobile> {
       ),
       body: _isLoadingDetail
           ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Logo / Foto Toko",
-                          style: body1(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: bnw300),
-                                  borderRadius: BorderRadius.circular(12),
-                                  image: _base64Image != null
-                                      ? DecorationImage(
-                                          image: MemoryImage(
-                                            base64Decode(_base64Image!),
-                                          ),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : (isUpdate &&
-                                                widget.userItem?.accountImage !=
-                                                    null &&
-                                                widget
-                                                    .userItem!
-                                                    .accountImage!
-                                                    .isNotEmpty
-                                            ? DecorationImage(
-                                                image: NetworkImage(
+          : SafeArea(
+            child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Logo / Foto Toko",
+                            style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: 12),
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: bnw300),
+                                    borderRadius: BorderRadius.circular(12),
+                                    image: _base64Image != null
+                                        ? DecorationImage(
+                                            image: MemoryImage(
+                                              base64Decode(_base64Image!),
+                                            ),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : (isUpdate &&
+                                                  widget.userItem?.accountImage !=
+                                                      null &&
                                                   widget
                                                       .userItem!
-                                                      .accountImage!,
-                                                ),
-                                                fit: BoxFit.cover,
-                                              )
-                                            : null),
-                                ),
-                                child:
-                                    _base64Image == null &&
-                                        (!isUpdate ||
-                                            widget.userItem?.accountImage ==
-                                                null ||
-                                            widget
-                                                .userItem!
-                                                .accountImage!
-                                                .isEmpty)
-                                    ? Center(
-                                        child: Icon(
-                                          PhosphorIcons.plus,
-                                          color: bnw900,
-                                          size: 32,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                "Masukkan Foto Terbaikmu. Fotomu akan bisa dilihat siapa saja",
-                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 24),
-
-                        // Nama Lengkap
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Nama Lengkap",
-                                style: body1(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: body1(
-                                  FontWeight.w600,
-                                  Colors.red,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _fullNameController,
-                          decoration: InputDecoration(
-                            hintText: "Muhammad Nabil",
-                            hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-
-                        // Akses
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Akses",
-                                style: body1(FontWeight.w600, bnw900, 'Outfit'),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: body1(
-                                  FontWeight.w600,
-                                  Colors.red,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: bnw300),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              value: _selectedRole,
-                              icon: Icon(
-                                PhosphorIcons.caret_up,
-                                size: 16,
-                                color: bnw500,
-                              ),
-                              items: _roleOptions.map((opt) {
-                                return DropdownMenuItem<String>(
-                                  value: opt['value'],
-                                  child: Text(
-                                    opt['label']!,
-                                    style: body1(
-                                      FontWeight.w600,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
+                                                      .accountImage!
+                                                      .isNotEmpty
+                                              ? DecorationImage(
+                                                  image: NetworkImage(
+                                                    widget
+                                                        .userItem!
+                                                        .accountImage!,
+                                                  ),
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : null),
                                   ),
-                                );
-                              }).toList(),
-                              onChanged: (val) {
-                                if (val != null)
-                                  setState(() => _selectedRole = val);
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-
-                        // Email
-                        Text(
-                          "Email",
-                          style: body1(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            hintText: "nabil@email.com",
-                            hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-
-                        // Nomor Telepon
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Nomor Telepon",
-                                style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                                  child:
+                                      _base64Image == null &&
+                                          (!isUpdate ||
+                                              widget.userItem?.accountImage ==
+                                                  null ||
+                                              widget
+                                                  .userItem!
+                                                  .accountImage!
+                                                  .isEmpty)
+                                      ? Center(
+                                          child: Icon(
+                                            PhosphorIcons.plus,
+                                            color: bnw900,
+                                            size: 32,
+                                          ),
+                                        )
+                                      : null,
+                                ),
                               ),
-                              TextSpan(
-                                text: " *",
-                                style: body1(
-                                  FontWeight.w600,
-                                  Colors.red,
-                                  'Outfit',
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  "Masukkan Foto Terbaikmu. Fotomu akan bisa dilihat siapa saja",
+                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            hintText: "08123456789",
-                            hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
+                          SizedBox(height: 24),
+            
+                          // Nama Lengkap
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Nama Lengkap",
+                                  style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: body1(
+                                    FontWeight.w600,
+                                    Colors.red,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _fullNameController,
+                            decoration: InputDecoration(
+                              hintText: "Muhammad Nabil",
+                              hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 24),
+            
+                          // Akses
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Akses",
+                                  style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: body1(
+                                    FontWeight.w600,
+                                    Colors.red,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: _selectedRole,
+                                icon: Icon(
+                                  PhosphorIcons.caret_up,
+                                  size: 16,
+                                  color: bnw500,
+                                ),
+                                items: _roleOptions.map((opt) {
+                                  return DropdownMenuItem<String>(
+                                    value: opt['value'],
+                                    child: Text(
+                                      opt['label']!,
+                                      style: body1(
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null)
+                                    setState(() => _selectedRole = val);
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 24),
+            
+                          // Email
+                          Text(
+                            "Email",
+                            style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              hintText: "nabil@email.com",
+                              hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 24),
+            
+                          // Nomor Telepon
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Nomor Telepon",
+                                  style: body1(FontWeight.w600, bnw900, 'Outfit'),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: body1(
+                                    FontWeight.w600,
+                                    Colors.red,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              hintText: "08123456789",
+                              hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                // Footer Buttons
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      if (!isUpdate) ...[
+            
+                  // Footer Buttons
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        if (!isUpdate) ...[
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _onSave(true),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: primaryColor),
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                "Save & Add New",
+                                style: body1(
+                                  FontWeight.w600,
+                                  primaryColor,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                        ],
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _onSave(true),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: primaryColor),
+                          child: ElevatedButton(
+                            onPressed: () => _onSave(false),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
                               padding: EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             child: Text(
-                              "Save & Add New",
+                              isUpdate ? "Simpan" : "Create",
                               style: body1(
                                 FontWeight.w600,
-                                primaryColor,
+                                Colors.white,
                                 'Outfit',
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 16),
                       ],
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => _onSave(false),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            isUpdate ? "Simpan" : "Create",
-                            style: body1(
-                              FontWeight.w600,
-                              Colors.white,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+          ),
     );
   }
 }

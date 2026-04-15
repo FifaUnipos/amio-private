@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -70,6 +72,7 @@ Future<void> main() async {
   var role = prefs.getString('roleProfile');
   var type = prefs.getString('merchantType');
 
+  await initializeDateFormatting('id_ID', null);
   await FlutterDownloader.initialize(debug: true);
 
   checkToken = mytokenGet;
@@ -193,13 +196,14 @@ class UniPOSApp extends StatelessWidget {
       ],
       child: MaterialApp(
         builder: (context, child) {
+          if (child == null) return const SizedBox.shrink();
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(
               padding: MediaQuery.of(context).padding.copyWith(
                 bottom: MediaQuery.of(context).viewPadding.bottom,
               ),
             ),
-            child: child!,
+            child: child,
           );
         },
         navigatorKey: navigatorKey,

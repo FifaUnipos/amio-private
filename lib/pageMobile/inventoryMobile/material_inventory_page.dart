@@ -768,41 +768,85 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     required String itemId,
     required String itemName,
   }) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Hapus Bahan?'),
-          content: Text('Yakin ingin menghapus "$itemName"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (modalCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Yakin Ingin Menghapus Bahan?',
+                  textAlign: TextAlign.center,
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Bahan "$itemName" yang telah dihapus tidak dapat dikembalikan.',
+                  textAlign: TextAlign.center,
+                  style: body1(FontWeight.w400, bnw500, 'Outfit'),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          Navigator.pop(modalCtx);
+                          _showLoader();
+                          final res = await deleteInventoryMaster(context, widget.token, [itemId]);
+                          if (!mounted) return;
+                          _hideLoader();
+                          final msg = res != null && res['rc'] == '00'
+                              ? "Bahan berhasil dihapus"
+                              : (res?['message']?.toString() ?? "Gagal menghapus bahan");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(msg)),
+                          );
+                          if (res != null && res['rc'] == '00') {
+                            await _fetchMaterials();
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Iya, Hapus', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalCtx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Batalkan', style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                _showLoader();
-
-                final res = await deleteInventoryMaster(context, widget.token, [
-                  itemId,
-                ]);
-                if (!mounted) return;
-                _hideLoader();
-
-                if (res != null && res['rc'] == '00') {
-                  await _fetchMaterials();
-                  showSnackbar(context, {"message": "Bahan berhasil dihapus"});
-                } else {
-                  showSnackbar(context, {
-                    "message": (res?['message'] ?? "Gagal menghapus bahan")
-                        .toString(),
-                  });
-                }
-              },
-              child: const Text('Hapus'),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -1854,88 +1898,140 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
   }
 
   void _showUnitPicker() {
+    String _searchQuery = '';
+    
+    final unitFuture = http.post(
+      Uri.parse(getUnitMasterDataLink),
+      headers: {
+        'token': widget.token,
+        'Content-type': 'application/json',
+      },
+      body: jsonEncode({"deviceid": identifier}),
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.3,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return SafeArea(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: FutureBuilder<http.Response>(
-                  future: http.post(
-                    Uri.parse(getUnitMasterDataLink),
-                    headers: {
-                      'token': widget.token,
-                      'Content-type': 'application/json',
-                    },
-                    body: jsonEncode({"deviceid": identifier}),
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError || !snapshot.hasData) {
-                      return const Center(child: Text('Gagal memuat data unit'));
-                    }
-              
-                    final res = snapshot.data!;
-                    Map<String, dynamic> decoded;
-              
-                    try {
-                      decoded = jsonDecode(res.body) as Map<String, dynamic>;
-                    } catch (_) {
-                      return const Center(
-                        child: Text('Response unit tidak valid'),
-                      );
-                    }
-              
-                    final List units =
-                        (decoded['data'] ?? decoded['units'] ?? []) as List;
-              
-                    if (units.isEmpty) {
-                      return const Center(child: Text('Data unit kosong'));
-                    }
-              
-                    return ListView.separated(
-                      controller: scrollController,
-                      itemCount: units.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final u = units[index] as Map<String, dynamic>;
-              
-                        final unitId = u['id'] ?? u['unit_id'];
-                        final unitName = u['name'] ?? u['unit_name'] ?? '-';
-                        final isSelected = _selectedUnit?['id'] == unitId;
-              
-                        return ListTile(
-                          title: Text(
-                            unitName.toString(),
-                            style: heading4(FontWeight.w400, bnw900, 'Outfit'),
-                          ),
-                          trailing: isSelected
-                              ? Icon(Icons.check, color: primary500, size: 18)
-                              : null,
-                          onTap: () {
-                            setState(() {
-                              _selectedUnit = {'id': unitId, 'name': unitName};
-                            });
-                            Navigator.pop(context);
-                          },
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.4,
+              maxChildSize: 0.95,
+              builder: (context, scrollController) {
+                return SafeArea(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    child: FutureBuilder<http.Response>(
+                      future: unitFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError || !snapshot.hasData) {
+                          return const Center(child: Text('Gagal memuat data unit'));
+                        }
+                        final res = snapshot.data!;
+                        Map<String, dynamic> decoded;
+                        try {
+                          decoded = jsonDecode(res.body) as Map<String, dynamic>;
+                        } catch (_) {
+                          return const Center(child: Text('Response unit tidak valid'));
+                        }
+                        final List allUnits = (decoded['data'] ?? decoded['units'] ?? []) as List;
+                        if (allUnits.isEmpty) {
+                          return const Center(child: Text('Data unit kosong'));
+                        }
+                        final filtered = _searchQuery.isEmpty
+                            ? allUnits
+                            : allUnits.where((u) {
+                                final name = (u['name'] ?? '').toString().toLowerCase();
+                                final abbr = (u['abbreviation'] ?? '').toString().toLowerCase();
+                                return name.contains(_searchQuery.toLowerCase()) ||
+                                    abbr.contains(_searchQuery.toLowerCase());
+                              }).toList();
+
+                        return Column(
+                          children: [
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Container(
+                                width: 40, height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text('Pilih Satuan/Unit',
+                                style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                            ),
+                            const SizedBox(height: 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: TextField(
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  hintText: 'Cari satuan (contoh: kilogram, kg...)',
+                                  hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
+                                  prefixIcon: Icon(Icons.search, color: bnw500),
+                                  filled: true,
+                                  fillColor: bnw200,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                onChanged: (val) => setModalState(() => _searchQuery = val),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Expanded(
+                              child: filtered.isEmpty
+                                  ? Center(child: Text('Tidak ada satuan yang sesuai',
+                                      style: body1(FontWeight.w400, bnw500, 'Outfit')))
+                                  : ListView.separated(
+                                      controller: scrollController,
+                                      itemCount: filtered.length,
+                                      separatorBuilder: (_, __) => const Divider(height: 1),
+                                      itemBuilder: (context, index) {
+                                        final u = filtered[index] as Map<String, dynamic>;
+                                        final unitId = u['id'] ?? u['unit_id'];
+                                        final unitName = u['name'] ?? u['unit_name'] ?? '-';
+                                        final abbr = u['abbreviation'] ?? '';
+                                        final isSelected = _selectedUnit?['id'] == unitId;
+                                        return ListTile(
+                                          title: Text('$unitName ($abbr)',
+                                            style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+                                          trailing: isSelected
+                                              ? Icon(Icons.check, color: primary500, size: 18)
+                                              : null,
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedUnit = {'id': unitId, 'name': unitName};
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ],
                         );
                       },
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

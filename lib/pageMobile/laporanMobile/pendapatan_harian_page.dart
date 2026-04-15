@@ -132,7 +132,7 @@ class _PendapatanHarianPageState extends State<PendapatanHarianPage> {
           IconButton(
             icon: Icon(PhosphorIcons.share_network, color: primary500),
             onPressed: () {
-              // Share logic
+              _showShareModal();
             },
           ),
           SizedBox(width: 8),
@@ -632,6 +632,101 @@ class _PendapatanHarianPageState extends State<PendapatanHarianPage> {
         _launchURL(downloadUrl);
       }
     }
+  }
+
+  void _exportReportGeneral(String type) async {
+    String keyword = _selectedKeyword;
+    if (keyword == "custom" && _startDate != null && _endDate != null) {
+      keyword =
+          "${DateFormat('yyyy-MM-dd').format(_startDate!)} s/d ${DateFormat('yyyy-MM-dd').format(_endDate!)}";
+    }
+
+    final result = await getLaporanDaily(
+      context,
+      widget.token,
+      _selectedSortValue,
+      keyword,
+      _selectedMerchants,
+      type,
+    );
+
+    if (result != null && result['rc'] == "00") {
+      final String? downloadUrl = result['data'];
+      if (downloadUrl != null && downloadUrl.isNotEmpty) {
+        _launchURL(downloadUrl);
+      }
+    }
+  }
+
+  void _showShareModal() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text("Bagikan Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                Text("Pilih format untuk dibagikan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _exportReportGeneral("pdf");
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: Icon(PhosphorIcons.file_pdf, color: primary500, size: 24),
+                        label: Text("PDF", style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _exportReportGeneral("excel");
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: Icon(PhosphorIcons.file_xls, color: primary500, size: 24),
+                        label: Text("Excel", style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // Modals

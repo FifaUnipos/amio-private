@@ -5965,7 +5965,7 @@ Future deleteCoa(context, token, idPaymentMethod) async {
 
     final response = await http.post(
       Uri.parse(deleteCoaLink),
-      headers: {'token': token, 'Content-Type': 'application/json'},
+      headers: {'token': token},
       body: {"idPaymentMethod": formattedId},
     );
     var jsonResponse = jsonDecode(response.body);

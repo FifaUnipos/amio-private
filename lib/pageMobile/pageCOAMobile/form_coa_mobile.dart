@@ -76,14 +76,16 @@ class _FormCoaMobileState extends State<FormCoaMobile> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return _ReferenceSheetContent(
-          token: widget.token,
-          onSelect: (item) {
-            setState(() {
-              _selectedReference = item;
-            });
-            Navigator.pop(context);
-          },
+        return SafeArea(
+          child: _ReferenceSheetContent(
+            token: widget.token,
+            onSelect: (item) {
+              setState(() {
+                _selectedReference = item;
+              });
+              Navigator.pop(context);
+            },
+          ),
         );
       },
     );
@@ -164,162 +166,177 @@ class _FormCoaMobileState extends State<FormCoaMobile> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Akun
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Akun",
-                                style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                              ),
-                              TextSpan(
-                                text: " *",
-                                style: body1(
-                                  FontWeight.w400,
-                                  Colors.red,
-                                  'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: _showReferenceSheet,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: bnw300),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
+          : SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Akun
+                          RichText(
+                            text: TextSpan(
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    _selectedReference?.paymentReferenceName ??
-                                        "Pilih Akun",
-                                    style: body1(
-                                      FontWeight.w600,
-                                      _selectedReference != null
-                                          ? bnw900
-                                          : bnw500,
-                                      'Outfit',
-                                    ),
+                                TextSpan(
+                                  text: "Akun",
+                                  style: body1(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
                                   ),
                                 ),
-                                Icon(
-                                  PhosphorIcons.caret_up,
-                                  size: 16,
-                                  color: bnw500,
+                                TextSpan(
+                                  text: " *",
+                                  style: body1(
+                                    FontWeight.w400,
+                                    Colors.red,
+                                    'Outfit',
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-
-                        SizedBox(height: 16),
-
-                        // Nomor Akun
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Nomor Akun",
-                                style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                          SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: _showReferenceSheet,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
                               ),
-                              TextSpan(
-                                text: " *",
+                              decoration: BoxDecoration(
+                                border: Border.all(color: bnw300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _selectedReference
+                                              ?.paymentReferenceName ??
+                                          "Pilih Akun",
+                                      style: body1(
+                                        FontWeight.w600,
+                                        _selectedReference != null
+                                            ? bnw900
+                                            : bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    PhosphorIcons.caret_up,
+                                    size: 16,
+                                    color: bnw500,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 16),
+
+                          // Nomor Akun
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Nomor Akun",
+                                  style: body1(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: " *",
+                                  style: body1(
+                                    FontWeight.w400,
+                                    Colors.red,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          TextField(
+                            controller: _accountNumberController,
+                            decoration: InputDecoration(
+                              hintText: "Masukan Nomor Akun",
+                              hintStyle: body1(
+                                FontWeight.w400,
+                                bnw300,
+                                'Outfit',
+                              ),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: bnw300),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: primaryColor),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Bottom Buttons
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        if (!isUpdate) ...[
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _save(true),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: primaryColor),
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                "Save & Add New",
                                 style: body1(
-                                  FontWeight.w400,
-                                  Colors.red,
+                                  FontWeight.w600,
+                                  primaryColor,
                                   'Outfit',
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _accountNumberController,
-                          decoration: InputDecoration(
-                            hintText: "Masukan Nomor Akun",
-                            hintStyle: body1(FontWeight.w400, bnw300, 'Outfit'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: bnw300),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: primaryColor),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Bottom Buttons
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      if (!isUpdate) ...[
+                          SizedBox(width: 16),
+                        ],
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _save(true),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: primaryColor),
+                          child: ElevatedButton(
+                            onPressed: () => _save(false),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
                               padding: EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             child: Text(
-                              "Save & Add New",
+                              isUpdate ? "Simpan" : "Create",
                               style: body1(
                                 FontWeight.w600,
-                                primaryColor,
+                                Colors.white,
                                 'Outfit',
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 16),
                       ],
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => _save(false),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            isUpdate ? "Simpan" : "Create",
-                            style: body1(
-                              FontWeight.w600,
-                              Colors.white,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

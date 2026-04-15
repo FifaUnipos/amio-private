@@ -90,7 +90,10 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
   String _normalizeType(String t) =>
       t.trim().toLowerCase().replaceAll(' ', '_');
 
-  bool get _canMaterial => _normalizeType(widget.typeMerchant) == 'merchant';
+  bool get _canMaterial {
+    final t = _normalizeType(widget.typeMerchant);
+    return t == 'merchant' || t == 'group_merchant';
+  }
 
   @override
   void initState() {
@@ -205,104 +208,80 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
   void _confirmDelete(String id) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalContext) {
         return SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: 40, height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
-                Icon(
-                  PhosphorIcons.warning_circle,
-                  size: 64,
-                  color: Colors.orange,
-                ),
-                SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Text(
-                  'Konfirmasi Hapus',
+                  'Yakin Ingin Menghapus Produk?',
+                  textAlign: TextAlign.center,
                   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Apakah Anda yakin ingin menghapus data ini?',
+                  'Produk yang telah dihapus tidak dapat dikembalikan.',
                   textAlign: TextAlign.center,
-                  style: body1(FontWeight.w400, bnw600, 'Outfit'),
+                  style: body1(FontWeight.w400, bnw500, 'Outfit'),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(modalContext),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: bnw300),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Batal',
-                          style: heading3(FontWeight.w600, bnw600, 'Outfit'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(modalContext);
                           final result = await _deleteProductMaterial(id);
                           if (mounted) {
                             if (result != null && result['rc'] == '00') {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Berhasil menghapus data'),
-                                ),
+                                SnackBar(content: Text('Berhasil menghapus data')),
                               );
                               _fetchProductMaterials();
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    result?['rm'] ??
-                                        result?['message'] ??
-                                        'Gagal menghapus data',
+                                    result?['message'] ?? result?['rm'] ?? 'Gagal menghapus data',
                                   ),
                                 ),
                               );
                             }
                           }
                         },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text('Iya, Hapus', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalContext),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          backgroundColor: primary500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        child: Text(
-                          'Hapus',
-                          style: heading3(
-                            FontWeight.w600,
-                            bnw100,
-                            'Outfit',
-                          ),
-                        ),
+                        child: Text('Batalkan', style: heading3(FontWeight.w600, bnw100, 'Outfit')),
                       ),
                     ),
                   ],
@@ -1241,17 +1220,18 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       );
 
       final result = jsonDecode(response.body);
+      print('PRODUCT MATERIAL DELETE STATUS: ${response.statusCode}');
       print('PRODUCT MATERIAL DELETE RESPONSE: ${jsonEncode(result)}');
 
       if (result['rc'] == '00') {
         widget.onSuccess();
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['rm'] ?? 'Berhasil menghapus data')),
+          SnackBar(content: Text(result['message'] ?? result['rm'] ?? 'Berhasil menghapus data')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['rm'] ?? 'Gagal menghapus data')),
+          SnackBar(content: Text(result['message'] ?? result['rm'] ?? 'Gagal menghapus data')),
         );
       }
     } catch (e) {

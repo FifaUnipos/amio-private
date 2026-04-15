@@ -23,6 +23,7 @@ import 'package:unipos_app_335/pageMobile/pageProductMobile/merchantSelectionPag
 import 'package:unipos_app_335/pageMobile/pageProductMobile/pageProductMobile.dart';
 import 'package:unipos_app_335/pageMobile/pageTokoMobile/pageTokoMobile.dart'
     hide ProductMobilePage;
+import 'package:unipos_app_335/pageMobile/pageDompetMobile/page_dompet_mobile.dart';
 import 'package:unipos_app_335/pageMobile/printerPageMobile.dart';
 import 'package:unipos_app_335/pageMobile/profilePageMobile.dart';
 import 'package:unipos_app_335/pageMobile/promoPageMobile/promoPageMobile.dart';
@@ -179,29 +180,29 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
         floatingActionButton: isCashier
             ? null
             : GestureDetector(
-              onTap: () {
-                showMenuBottomDialog(context);
-              },
-              child: buttonXL(
-                Center(
-                  child: Row(
-                    children: [
-                      Icon(
-                        PhosphorIcons.squares_four_fill,
-                        color: bnw100,
-                        size: size32,
-                      ),
-                      SizedBox(width: size16),
-                      Text(
-                        'Menu',
-                        style: heading1(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
-                    ],
+                onTap: () {
+                  showMenuBottomDialog(context);
+                },
+                child: buttonXL(
+                  Center(
+                    child: Row(
+                      children: [
+                        Icon(
+                          PhosphorIcons.squares_four_fill,
+                          color: bnw100,
+                          size: size32,
+                        ),
+                        SizedBox(width: size16),
+                        Text(
+                          'Menu',
+                          style: heading1(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                      ],
+                    ),
                   ),
+                  double.infinity,
                 ),
-                double.infinity,
               ),
-            ),
         body: Column(
           children: [
             // 🔹 Navbar Atas
@@ -232,7 +233,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           onTap: () => setState(() => selectedIndex = 0),
                         ),
                         const SizedBox(width: 8),
-        
+
                         // Tombol Riwayat
                         _navButton(
                           index: 1,
@@ -242,7 +243,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           onTap: () => setState(() => selectedIndex = 1),
                         ),
                         const SizedBox(width: 8),
-        
+
                         // Tombol Pengaturan
                         _navButton(
                           index: 2,
@@ -262,7 +263,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           onTap: () => setState(() => selectedIndex = 0),
                         ),
                         const SizedBox(width: 8),
-        
+
                         // Tombol Notifikasi + badge
                         Stack(
                           clipBehavior: Clip.none,
@@ -301,7 +302,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           ],
                         ),
                         const SizedBox(width: 8),
-        
+
                         // Tombol Profil
                         _navButton(
                           index: 2,
@@ -313,7 +314,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                       ],
               ),
             ),
-        
+
             // 🔹 Isi halaman (berubah sesuai tombol yang diklik)
             Expanded(child: _buildPages(wsNotifications)[selectedIndex]),
           ],
@@ -442,6 +443,13 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
           //   'text': 'Keuangan',
           //   // 'page': const KeuanganPage(),
           // },
+          if (merchantType == 'Group_Merchant' ||
+              roleProfile?.toLowerCase() == 'admin')
+            {
+              'icon': PhosphorIcons.wallet_fill,
+              'text': 'Dompet',
+              'page': PageDompetMobile(token: widget.token),
+            },
           {
             'icon': PhosphorIcons.file_text_fill,
             'text': 'Laporan',
@@ -625,7 +633,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                         children: [
                           Image.asset(
                             'assets/images/fifapaylogoNew.png',
-                            width: 200,
+                            width: 150,
                           ),
                           // SizedBox(height: size12),
                           Text(
@@ -667,8 +675,8 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                         ),
                                       ),
                                       padding: EdgeInsets.symmetric(
-                                        vertical: size32,
-                                        horizontal: 150,
+                                        vertical: size16,
+                                        horizontal: size12,
                                       ),
                                       child: Column(
                                         children: [
@@ -679,7 +687,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                           ),
                                           SizedBox(height: size12),
                                           Text(
-                                            member.memberCode,
+                                            member.nama,
                                             style: heading2(
                                               FontWeight.w600,
                                               bnw900,
@@ -688,47 +696,68 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                           ),
                                           SizedBox(height: size12),
                                           Text(
-                                            member.nama,
-                                            style: heading2(
+                                            member.isBinded == '1'
+                                                ? 'Terhubung'
+                                                : 'Belum Terhubung',
+                                            style: body1(
                                               FontWeight.w400,
-                                              bnw900,
+                                              bnw600,
                                               'Outfit',
                                             ),
                                           ),
                                           SizedBox(height: size12),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Saldo: ',
-                                                style: heading2(
-                                                  FontWeight.w400,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                              Text(
-                                                FormatCurrency.convertToIdr(
-                                                  int.parse(member.saldo),
-                                                ),
-                                                style: heading2(
-                                                  FontWeight.w400,
-                                                  bnw900,
-                                                  'Outfit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                          member.isBinded == '1'
+                                              ? Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Saldo: ',
+                                                      style: heading2(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      FormatCurrency.convertToIdr(
+                                                        int.parse(member.saldo),
+                                                      ),
+                                                      style: heading2(
+                                                        FontWeight.w400,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SizedBox(),
                                           SizedBox(height: size12),
-                                          Text(
-                                            member.isBinded == '1'
-                                                ? 'Terhubung'
-                                                : 'Tidak Terhubung',
-                                            style: heading2(
-                                              FontWeight.w400,
-                                              orange500,
-                                              'Outfit',
+
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: member.isBinded == '1'
+                                                  ? succes100
+                                                  : danger100,
+                                              borderRadius:
+                                                  BorderRadius.circular(size12),
+                                            ),
+                                            child: Text(
+                                              member.isBinded == '1'
+                                                  ? 'Nomor ini telah terdaftar degan akun Fifapay. Silakan hubungkan akunmu dengan Fifapay.'
+                                                  : 'Belum ada akun yang terdaftar dengan nomor yang sama.',
+                                              textAlign: TextAlign.center,
+                                              style: heading2(
+                                                FontWeight.w400,
+                                                member.isBinded == '1'
+                                                    ? succes500
+                                                    : danger500,
+                                                'Outfit',
+                                              ),
                                             ),
                                           ),
                                         ],
