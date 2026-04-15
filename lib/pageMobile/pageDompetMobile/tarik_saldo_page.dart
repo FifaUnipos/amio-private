@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/dompetToko/tarik_saldo_tablet.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
@@ -13,37 +14,9 @@ class _BankOption {
   final String code;
   final String name;
   final bool isEwallet;
-  const _BankOption(this.code, this.name, {this.isEwallet = false});
+  final String? image;
+  _BankOption(this.code, this.name, {this.isEwallet = false, this.image});
 }
-
-const List<_BankOption> _bankList = [
-  _BankOption('BCA', 'Bank Central Asia (BCA)'),
-  _BankOption('BRI', 'Bank Rakyat Indonesia (BRI)'),
-  _BankOption('BNI', 'Bank Negara Indonesia (BNI)'),
-  _BankOption('MANDIRI', 'Bank Mandiri'),
-  _BankOption('BSI', 'Bank Syariah Indonesia (BSI)'),
-  _BankOption('CIMB', 'CIMB Niaga'),
-  _BankOption('PERMATA', 'Bank Permata'),
-  _BankOption('BTN', 'Bank Tabungan Negara (BTN)'),
-  _BankOption('DANAMON', 'Bank Danamon'),
-  _BankOption('OCBC', 'OCBC NISP'),
-  _BankOption('PANIN', 'Bank Panin'),
-  _BankOption('MEGA', 'Bank Mega'),
-  _BankOption('BUKOPIN', 'Bank Bukopin'),
-  _BankOption('MAYBANK', 'Maybank Indonesia'),
-  _BankOption('SINARMAS', 'Bank Sinarmas'),
-  _BankOption('BJB', 'Bank Jabar Banten (BJB)'),
-  _BankOption('BPD_DIY', 'Bank BPD DIY'),
-  _BankOption('BPD_JATIM', 'Bank Jatim'),
-  _BankOption('BPD_JATENG', 'Bank Jateng'),
-  _BankOption('BPD_SUMUT', 'Bank Sumut'),
-  _BankOption('GOPAY', 'GoPay', isEwallet: true),
-  _BankOption('OVO', 'OVO', isEwallet: true),
-  _BankOption('DANA', 'DANA', isEwallet: true),
-  _BankOption('SHOPEEPAY', 'ShopeePay', isEwallet: true),
-  _BankOption('LINKAJA', 'LinkAja', isEwallet: true),
-  _BankOption('JENIUS', 'Jenius (BTPN)', isEwallet: true),
-];
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  PAGE
@@ -71,6 +44,43 @@ class TarikSaldoPage extends StatefulWidget {
 class _TarikSaldoPageState extends State<TarikSaldoPage> {
   // ── Source dana ──────────────────────────────────────────────────────
   final Set<String> _selectedWalletIds = {};
+  List<_BankOption> _bankList = [];
+  bool _isLoadingBanks = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBanks();
+  }
+
+  Future<void> _fetchBanks() async {
+    try {
+      final res = await http.post(
+        Uri.parse('$url/api/type/payment/references'),
+        headers: {'Content-Type': 'application/json', 'token': widget.token},
+        body: jsonEncode({"category": ""}),
+      );
+      final json = jsonDecode(res.body);
+      if (json['rc'] == '00') {
+        final List data = json['data'] ?? [];
+        List<_BankOption> fetched = [];
+        for (var item in data) {
+           final cat = (item['paymentReferenceCategory'] ?? '').toString().toLowerCase();
+           fetched.add(_BankOption(
+             item['paymentReferenceName'] ?? '',
+             item['paymentReferenceName'] ?? '',
+             isEwallet: cat.contains('ewallet'),
+             image: item['paymentReferenceImage'],
+           ));
+        }
+        if (mounted) setState(() { _bankList = fetched; _isLoadingBanks = false; });
+      } else {
+        if (mounted) setState(() => _isLoadingBanks = false);
+      }
+    } catch(e) {
+      if (mounted) setState(() => _isLoadingBanks = false);
+    }
+  }
 
   double get _selectedBalance {
     if (_selectedWalletIds.isEmpty) return widget.totalAvailable;
@@ -195,6 +205,16 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   // ─────────────────── BUILD ────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    // ── Tablet: delegate to 2-column layout ───────────────────────────────
+    if (MediaQuery.of(context).size.width >= 600) {
+      return TarikSaldoTabletPage(
+        token: widget.token,
+        isGroupMerchant: widget.isGroupMerchant,
+        wallets: widget.wallets,
+        totalAvailable: widget.totalAvailable,
+        onSuccess: widget.onSuccess,
+      );
+    }
     return Scaffold(
       backgroundColor: bnw100,
       appBar: AppBar(
@@ -711,7 +731,9 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
+                      child: _isLoadingBanks 
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
                         controller: sc,
                         padding: const EdgeInsets.fromLTRB(
                             20, 4, 20, 24),
@@ -727,13 +749,15 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                               Navigator.pop(ctx);
                             },
                             leading: Container(
-                              padding: const EdgeInsets.all(8),
+                              width: 36, height: 36,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEFF6FF),
                                 borderRadius:
                                     BorderRadius.circular(8),
                               ),
-                              child: Icon(
+                              child: b.image != null && b.image!.isNotEmpty
+                                  ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(b.image!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(b.isEwallet ? PhosphorIcons.device_mobile : PhosphorIcons.bank, color: primary500, size: 18)))
+                                  : Icon(
                                 b.isEwallet
                                     ? PhosphorIcons.device_mobile
                                     : PhosphorIcons.bank,

@@ -8,6 +8,10 @@ class WebSocketService extends ChangeNotifier {
   IO.Socket? socket;
   List<NotificationModel> notifications = [];
   final UniposNotificationService _notifService = UniposNotificationService();
+  
+  String? _lastToken;
+  String? _lastDeviceId;
+  String? _lastMerchantId;
 
   List<NotificationModel> _deduplicateById(List<NotificationModel> list) {
     final seen = <int>{};
@@ -18,16 +22,33 @@ class WebSocketService extends ChangeNotifier {
     }).toList();
   }
 
-  void connect(String? token, String? deviceId) {
-    debugPrint('🔌 Connecting WebSocket... token: $token, deviceId: $deviceId');
+  void connect(String? token, String? deviceId, {String? merchantId}) {
+    // Prevent redundant connections if already connecting/connected with same credentials
+    if (socket != null && 
+        token == _lastToken && 
+        deviceId == _lastDeviceId &&
+        merchantId == _lastMerchantId) {
+      if (socket!.connected) {
+        debugPrint('🔌 WebSocket already connected. Skipping.');
+      } else {
+        debugPrint('🔌 WebSocket is active or connecting with same credentials. Skipping redundant restart.');
+      }
+      return;
+    }
 
-    socket?.clearListeners();
-    socket?.disconnect();
-    socket?.dispose();
+    debugPrint('🔌 Connecting WebSocket... token: $token, deviceId: $deviceId, merchantId: $merchantId');
+    _lastToken = token;
+    _lastDeviceId = deviceId;
+    _lastMerchantId = merchantId;
+
+    if (socket != null) {
+       socket?.clearListeners();
+       socket?.disconnect();
+       socket?.dispose();
+    }
 
     socket = IO.io(
-      // 'https://amio-unipos-unipos-notification.yi8k7d.easypanel.host/',
-      'https://unipos-dev-notification-service-dev.yi8k7d.easypanel.host/',
+      'https://amio-unipos-unipos-notification.yi8k7d.easypanel.host/',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -41,8 +62,8 @@ class WebSocketService extends ChangeNotifier {
 
     socket?.on('connect', (_) {
       debugPrint('✅ Connected to WebSocket');
-      debugPrint('🏠 Emitting joinRoom...');
-      socket?.emit('joinRoom');
+      debugPrint('🏠 Emitting joinRoom with merchantId: $merchantId...');
+      socket?.emit('joinRoom', {'merchant_id': merchantId});
     });
 
     socket?.on('connect_error', (err) {

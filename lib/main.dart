@@ -142,8 +142,8 @@ class UniPOSApp extends StatelessWidget {
             final ws = WebSocketService();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (checkToken != null) {
-                debugPrint('Global WebSocket connect... token: $checkToken');
-                ws.connect(checkToken, identifier);
+                debugPrint('Global WebSocket connect... token: $checkToken, merchantId: $merchantIdProfile');
+                ws.connect(checkToken, identifier, merchantId: merchantIdProfile);
               }
             });
             return ws;

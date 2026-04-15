@@ -1,14 +1,17 @@
 import 'dart:convert';
-// import 'dart:io';
-
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unipos_app_335/main.dart';
+import 'package:unipos_app_335/utils/component/shared_qris_handler.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/pesananPage.dart';
-// import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/transaksi.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
+import 'package:unipos_app_335/utils/component/transaction_success_page.dart';
+import 'package:unipos_app_335/services/websocket_service.dart';
 
 dynamic blankToNull(dynamic value) {
   if (value == null) return null;
@@ -442,7 +445,7 @@ Future<String> calculateTransactionBayar2(
   }
 }
 
-Future<String> createTransactionBayar2(
+Future<Map<String, dynamic>> createTransactionBayar2(
   BuildContext context,
   String token,
   List<Map<String, dynamic>> details,
@@ -466,19 +469,21 @@ Future<String> createTransactionBayar2(
   );
 
   if (hasAmountWithoutMethod) {
-    showSnackbar(context, {
+    final err = {
       "rc": "99",
       "message": "Pilih metode pembayaran dulu.",
-    });
-    return "99";
+    };
+    showSnackbar(context, err);
+    return err;
   }
 
   if (paymentTypeIndex == 0 && paidTotal > 0 && paidTotal < dueNow) {
-    showSnackbar(context, {
+    final err = {
       "rc": "99",
       "message": "Nominal pembayaran kurang untuk pelunasan",
-    });
-    return "99";
+    };
+    showSnackbar(context, err);
+    return err;
   }
 
   return submitTransactionApi(
@@ -491,108 +496,6 @@ Future<String> createTransactionBayar2(
     payments: payments,
     dueAmountOverride: dueNow,
   );
-
-  // whenLoading(context);
-
-  // try {
-  //   final detailFinal = buildDetailForCalculateFromDynamicMaps(details);
-
-  //   if (detailFinal.isEmpty) {
-  //     showSnackbar(context, {"rc": "99", "message": "Detail Kosong"});
-  //     return "99";
-  //   }
-
-  //   final payments = buildPaymentForCreateBayar();
-  //   final paidTotal = splitLines.fold<int>(
-  //     0,
-  //     (sum, element) => sum + parseIdr(element.amountCon.text),
-  //   );
-
-  //   final totalDue = currentDueNominal;
-  //   // final isExistingTransaction = blankToNull(transactionId) != null;
-  //   final isPartial = paidTotal > 0 && paidTotal < totalDue;
-
-  //   final hasAmountWithoutMethod = splitLines.any(
-  //     (element) =>
-  //         parseIdr(element.amountCon.text) > 0 &&
-  //         element.methodCode.trim().isEmpty,
-  //   );
-
-  //   if (hasAmountWithoutMethod) {
-  //     showSnackbar(context, {
-  //       "rc": "99",
-  //       "message": "Pilih metode pembayaran dulu",
-  //     });
-  //     return "99";
-  //   }
-  //   if (paymentTypeIndex == 0 && paidTotal < totalDue) {
-  //     if (payments.isEmpty) {
-  //       showSnackbar(context, {
-  //         "rc": "99",
-  //         "message": "Pilih metode pembayaran masih kurang",
-  //       });
-  //       return "99";
-  //     }
-  //   }
-
-  //   // if (paymentTypeIndex == 1 && isExistingTransaction && payments.isEmpty) {
-  //   //   showSnackbar(context, {"rc": "99", "message": "Isi nominal pembayaran"});
-  //   //   return "99";
-  //   // }
-  //   final bodyJson = {
-  //     "deviceid": identifier,
-  //     "device_id": identifier,
-  //     "discount_id": blankToNull(discountId),
-  //     "member_id": blankToNull(memberId),
-  //     "transaction_id": blankToNull(transactionId),
-  //     "is_partial_payment": isPartial,
-  //     "payments": payments,
-  //     "detail": detailFinal,
-  //   };
-  //   debugPrint("Req pay create v2: ${jsonEncode(bodyJson)}");
-
-  //   final response = await http.post(
-  //     Uri.parse(createTransaksiUrl),
-  //     headers: {"token": token, "Content-type": "application/json"},
-  //     body: jsonEncode(bodyJson),
-  //   );
-
-  //   final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-  //   debugPrint("Resp pay create: ${jsonEncode(jsonResponse)}");
-
-  //   final rc = (jsonResponse["rc"] ?? "99").toString();
-  //   final data = jsonResponse["data"];
-
-  //   if (rc == '00' && data is Map<String, dynamic>) {
-  //     hydratePaymentSummaryFromData(data, treatAsOpenBill: false);
-
-  //     if (sisaTagihan > 0) {
-  //       isTagihan = true;
-  //       paymentTypeIndex = 1;
-  //     } else {
-  //       isTagihan = false;
-  //       paymentTypeIndex = 0;
-  //       transactionidValue = null;
-  //       totalTransaksi = 0;
-  //       sisaTagihan = 0;
-  //     }
-  //   }
-
-  //   if (rc == '91') {
-  //     resetPaymentSummaryState();
-  //   }
-
-  //   showSnackbar(context, jsonResponse);
-  //   return rc;
-  // } catch (e) {
-  //   showSnackbar(context, {
-  //     "rc": "99",
-  //     "message": "createTransactionV2 error: $e",
-  //   });
-  //   return "99";
-  // } finally {
-  //   closeLoading(context);
-  // }
 }
 
 List<Map<String, dynamic>> buildApiVariantPayload(dynamic rawVariants) {
@@ -674,7 +577,7 @@ List<Map<String, dynamic>> buildApiDetailPayload(
   return result;
 }
 
-Future<String> submitTransactionApi(
+Future<Map<String, dynamic>> submitTransactionApi(
   BuildContext context,
   String token,
   List<Map<String, dynamic>> details, {
@@ -690,8 +593,9 @@ Future<String> submitTransactionApi(
     final detailFinal = buildApiDetailPayload(details);
 
     if (detailFinal.isEmpty) {
-      showSnackbar(context, {"rc": "99", "message": "Detail Kosong"});
-      return "99";
+      final err = {"rc": "99", "message": "Detail Kosong"};
+      showSnackbar(context, err);
+      return err;
     }
 
     final paidTotal = payments.fold<int>(
@@ -749,16 +653,63 @@ Future<String> submitTransactionApi(
     }
 
     showSnackbar(context, jsonResponse);
-    return rc;
+    return jsonResponse;
   } catch (e) {
-    showSnackbar(context, {
+    final err = {
       "rc": "99",
       "message": "submitTransactionApi error: $e",
-    });
-    return "99";
+    };
+    showSnackbar(context, err);
+    return err;
   } finally {
     closeLoading(context);
   }
 }
 
+
 Map<String, dynamic>? selectedTagihanData;
+
+Future<bool> handleQrisResponse({
+  required BuildContext context,
+  required Map<String, dynamic> response,
+  required String token,
+  required VoidCallback onSuccess,
+  List<Map<String, dynamic>>? cart,
+}) async {
+  final rc = response['rc']?.toString();
+  final data = response['data'];
+
+  if (rc == '00' && data is Map<String, dynamic>) {
+    int amountQris = 0;
+
+    // Identify amount for payment method '003' (QRIS)
+    if (data['payments'] != null) {
+      final payments = data['payments'];
+      if (payments is Map<String, dynamic> && payments['payments'] is List) {
+        final paymentList = payments['payments'] as List;
+        for (var p in paymentList) {
+          if (p is Map && p['payment_method_id']?.toString() == '003') {
+            amountQris = asInt(p['payment_value'] ?? 0);
+            break;
+          }
+        }
+      }
+    }
+
+    if (amountQris == 0) {
+      amountQris = asInt(data['amount'] ?? totalTransaksi);
+    }
+
+    await SharedQrisHandler.showSharedQrisFlow(
+      context: context,
+      response: response,
+      token: token,
+      amount: amountQris,
+      cart: cart,
+      onSuccess: onSuccess,
+    );
+
+    return true;
+  }
+  return false;
+}

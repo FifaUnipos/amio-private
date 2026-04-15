@@ -1,5 +1,8 @@
 import 'dart:developer';
 
+import 'package:provider/provider.dart';
+import 'package:unipos_app_335/services/websocket_service.dart';
+
 import '../../main.dart';
 import '../../utils/component/component_loading.dart';
 import '../home/sidebar/bantuan.dart';
@@ -531,6 +534,8 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
+            // Proactive connect when entering Transaksi
+            context.read<WebSocketService>().connect(widget.token, identifier, merchantId: merchantIdProfile);
             setState(() {
               selectedIndexSideBar = false;
               iconSelectedSidebar = 1;

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:unipos_app_335/components/moleculs/lazy_indexed_stack.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/coaPageGrup/coaPageGrup.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/inventoriGrupSelectMerch.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/dompetToko/page_dompet_tablet.dart';
 import 'package:unipos_app_335/services/websocket_service.dart';
 
 import '../../main.dart';
@@ -623,6 +624,20 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         ),
         SidebarXItem(
           icon: sidebarController.selectedIndex == 8
+              ? PhosphorIcons.wallet_fill
+              : PhosphorIcons.wallet,
+          label: 'Dompet',
+          onTap: () {
+            widget.pageController.jumpToPage(0);
+            widget.controller.selectedIndex;
+            setState(() {
+              selectedIndexSideBar = false;
+              iconSelectedSidebar = 8;
+            });
+          },
+        ),
+        SidebarXItem(
+          icon: sidebarController.selectedIndex == 9
               ? PhosphorIcons.shopping_cart_fill
               : PhosphorIcons.shopping_cart,
           label: 'Transaksi',
@@ -631,7 +646,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 8;
+              iconSelectedSidebar = 9;
             });
           },
         ),
@@ -652,7 +667,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
         // ),
         SidebarXItem(
           // icon: sidebarController.selectedIndex == 10
-          icon: sidebarController.selectedIndex == 9
+          icon: sidebarController.selectedIndex == 10
               ? PhosphorIcons.file_text_fill
               : PhosphorIcons.file_text,
           label: 'Laporan',
@@ -661,13 +676,13 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 9;
+              iconSelectedSidebar = 10;
               // iconSelectedSidebar = 10;
             });
           },
         ),
         SidebarXItem(
-          icon: sidebarController.selectedIndex == 10
+          icon: sidebarController.selectedIndex == 11
               ? PhosphorIcons.question_fill
               : PhosphorIcons.question,
           label: 'Bantuan',
@@ -676,12 +691,12 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 10;
+              iconSelectedSidebar = 11;
             });
           },
         ),
         SidebarXItem(
-          icon: sidebarController.selectedIndex == 11
+          icon: sidebarController.selectedIndex == 12
               ? PhosphorIcons.printer_fill
               : PhosphorIcons.printer,
           label: 'Printer',
@@ -690,7 +705,7 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
             widget.controller.selectedIndex;
             setState(() {
               selectedIndexSideBar = false;
-              iconSelectedSidebar = 11;
+              iconSelectedSidebar = 12;
             });
           },
         ),
@@ -727,11 +742,9 @@ class _ScreensExampleState extends State<_ScreensExample> {
             COAPageGrup(token: widget.token),
             PromoGrup(token: widget.token),
             AkunGrup(token: widget.token),
+            PageDompetTablet(token: widget.token),
             TransaksiGrup(token: widget.token),
-            LaporanToko(
-              token: widget.token,
-              controller: widget.controller,
-            ),
+            LaporanToko(token: widget.token, controller: widget.controller),
             BantuanGrup(),
             BluetoothPage(),
           ],
@@ -740,8 +753,6 @@ class _ScreensExampleState extends State<_ScreensExample> {
     );
   }
 }
-
-
 
 String _getTitleByIndex(int index) {
   switch (index) {

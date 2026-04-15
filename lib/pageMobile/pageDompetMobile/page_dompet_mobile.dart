@@ -218,12 +218,21 @@ class _PageDompetMobileState extends State<PageDompetMobile> {
   }
 
   List<dynamic> get _filteredWithdrawals {
-    if (_riwayatQ.isEmpty) return _withdrawals;
-    return _withdrawals
-        .where((e) => (e['payout_batch_id'] ?? '')
-            .toString()
-            .contains(_riwayatQ))
-        .toList();
+    var raw = _withdrawals;
+    if (_selectedStatus != 'Semua Status') {
+      raw = raw
+          .where((e) => _ss(e['payout_status']?.toString()).label == _selectedStatus)
+          .toList();
+    }
+    if (_riwayatQ.isNotEmpty) {
+      raw = raw
+          .where((e) => (e['payout_batch_id'] ?? '')
+              .toString()
+              .toLowerCase()
+              .contains(_riwayatQ.toLowerCase()))
+          .toList();
+    }
+    return raw;
   }
 
   // ─────────────────────── MODALS ──────────────────────────────────────

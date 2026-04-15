@@ -230,7 +230,10 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           label: 'Transaksi',
                           icon: PhosphorIcons.shopping_cart_simple_fill,
                           selectedIndex: selectedIndex,
-                          onTap: () => setState(() => selectedIndex = 0),
+                          onTap: () {
+                            setState(() => selectedIndex = 0);
+                            context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                          },
                         ),
                         const SizedBox(width: 8),
 
@@ -395,15 +398,21 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                 ? MerchantSelectionPage(
                     token: checkToken,
                     featureTitle: 'Transaksi',
-                    featureBuilder: (merchantId) => TransaksiMobilePage(
-                      token: widget.token,
-                      merchantId: merchantId,
-                    ),
+                    featureBuilder: (merchantId) {
+                      context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                      return TransaksiMobilePage(
+                        token: widget.token,
+                        merchantId: merchantId,
+                      );
+                    },
                   )
-                : TransaksiMobilePage(
-                    token: widget.token,
-                    merchantId: merchantIdProfile ?? '',
-                  ),
+                : (() {
+                    context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                    return TransaksiMobilePage(
+                      token: widget.token,
+                      merchantId: merchantIdProfile ?? '',
+                    );
+                  })(),
           },
           {
             'icon': PhosphorIcons.user_fill,

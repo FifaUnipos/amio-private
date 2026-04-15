@@ -33,6 +33,7 @@ import 'sidebar/pelangganToko/pelanggan.dart';
 import 'sidebar/produkToko/produk.dart';
 import 'sidebar/promosiToko/promosi.dart';
 import 'sidebar/tokoToko/toko.dart';
+import 'sidebar/dompetToko/page_dompet_tablet.dart';
 
 bool selectedIndexSideBar = false;
 bool showingMenuSidebar = true;
@@ -702,6 +703,21 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             });
           },
         ),
+        if (merchantType == 'Group_Merchant' || roleProfile?.toLowerCase() == 'admin')
+          SidebarXItem(
+            icon: sidebarController.selectedIndex == 11
+                ? PhosphorIcons.wallet_fill
+                : PhosphorIcons.wallet,
+            label: 'Dompet',
+            onTap: () {
+              widget.pageController.jumpToPage(0);
+              widget.controller.selectedIndex;
+              setState(() {
+                selectedIndexSideBar = false;
+                iconSelectedSidebar = 11;
+              });
+            },
+          ),
       ],
     );
   }
@@ -750,6 +766,8 @@ class _ScreensExampleState extends State<_ScreensExample> {
               LaporanToko(token: widget.token, controller: widget.controller),
               BantuanGrup(),
               BluetoothPage(),
+              if (merchantType == 'Group_Merchant' || roleProfile?.toLowerCase() == 'admin')
+                PageDompetTablet(token: widget.token),
             ],
           );
         },
