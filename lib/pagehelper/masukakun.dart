@@ -31,103 +31,114 @@ class MasukAkunPage extends StatelessWidget {
             child: Container(
               color: Colors.transparent,
               child: Center(
-                  child: SvgPicture.asset(
-                'assets/logoHorizontalUnipos.svg',
-                color: primary500,
-                // width: 240,
-                height: size48,
-              )),
+                child: SvgPicture.asset(
+                  'assets/logoHorizontalUnipos.svg',
+                  color: primary500,
+                  // width: 240,
+                  height: size48,
+                ),
+              ),
             ),
           ),
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: size32),
+          padding: EdgeInsets.symmetric(horizontal: size32, vertical: size16),
           child: Row(
             children: [
               Expanded(
-                child: SvgPicture.asset(
-                  'assets/newIllustration/OnBoarding1.svg',
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/newIllustration/OnBoarding1.svg',
+                  ),
                 ),
               ),
               SizedBox(width: size16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      child: Text('Hai, Pengusaha Kreatif & Inovatif',
-                          style: heading1(FontWeight.w700, bnw900, 'Outfit')),
-                    ),
-                    SizedBox(height: size12),
-                    SizedBox(
-                      child: Text(
-                        'Yuk, Mulai gunakan sistem kasir yang dapat mempermudah dan mempercepat transaksi bisnismu.',
-                        style: heading2(FontWeight.w500, bnw900, 'Outfit'),
-                      ),
-                    ),
-                    SizedBox(height: size32),
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DaftarAkunPage(),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        child: Text(
+                          'Hai, Pengusaha Kreatif & Inovatif',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
                         ),
                       ),
-                      child: buttonXXL(
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.edit_outlined,
-                                color: bnw100,
-                              ),
-                              SizedBox(width: size12),
-                              Text(
-                                'Daftar',
-                                style:
-                                    heading2(FontWeight.w600, bnw100, 'Outfit'),
-                              )
-                            ],
-                          ),
+                      SizedBox(height: size12),
+                      SizedBox(
+                        child: Text(
+                          'Yuk, Mulai gunakan sistem kasir yang dapat mempermudah dan mempercepat transaksi bisnismu.',
+                          style: heading2(FontWeight.w500, bnw900, 'Outfit'),
                         ),
-                        double.infinity,
                       ),
-                    ),
-                    SizedBox(height: size16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: GestureDetector(
+                      SizedBox(height: size32),
+                      GestureDetector(
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => LoginPage(),
+                            builder: (context) => DaftarAkunPage(),
                           ),
                         ),
-                        child: buttonXXLoutline(
+                        child: buttonXXL(
                           Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.login, color: primary500),
+                                Icon(Icons.edit_outlined, color: bnw100),
                                 SizedBox(width: size12),
                                 Text(
-                                  'Masuk',
+                                  'Daftar',
                                   style: heading2(
-                                      FontWeight.w600, primary500, 'Outfit'),
-                                )
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           double.infinity,
-                          primary500,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: size16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginPage(),
+                            ),
+                          ),
+                          child: buttonXXLoutline(
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.login, color: primary500),
+                                  SizedBox(width: size12),
+                                  Text(
+                                    'Masuk',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            double.infinity,
+                            primary500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),

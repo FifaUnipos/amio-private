@@ -81,62 +81,65 @@ class _SidebarXExampleAppState extends State<SidebarXExampleApp> {
               statusBarColor: Colors.transparent,
               statusBarIconBrightness: Brightness.light,
             ),
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              drawerEnableOpenDragGesture: false,
-              key: _key,
-              appBar: isSmallScreen
-                  ? AppBar(
-                      backgroundColor: canvasColor,
-                      title: Text(
-                        _getTitleByIndex(sidebarController.selectedIndex),
+            child: SafeArea(
+              top: false,
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                drawerEnableOpenDragGesture: false,
+                key: _key,
+                appBar: isSmallScreen
+                    ? AppBar(
+                        backgroundColor: canvasColor,
+                        title: Text(
+                          _getTitleByIndex(sidebarController.selectedIndex),
+                        ),
+                        leading: IconButton(
+                          onPressed: () {
+                            sidebarController.setExtended(true);
+                            _key.currentState?.openDrawer();
+                            print(widget.token);
+                          },
+                          icon: Icon(Icons.menu),
+                        ),
+                      )
+                    : null,
+                drawer: ExampleSidebarX(
+                  controller: sidebarController,
+                  token: widget.token,
+                  pageController: _pageController,
+                ),
+                body: Row(
+                  children: [
+                    if (!isSmallScreen)
+                      ExampleSidebarX(
+                        controller: sidebarController,
+                        token: widget.token,
+                        pageController: _pageController,
                       ),
-                      leading: IconButton(
-                        onPressed: () {
-                          sidebarController.setExtended(true);
-                          _key.currentState?.openDrawer();
-                          print(widget.token);
-                        },
-                        icon: Icon(Icons.menu),
+                    Expanded(
+                      child: Center(
+                        child: PageView(
+                          controller: _pageController,
+                          // scrollDirection: Axis.horizontal,
+                          physics: NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                          pageSnapping: true,
+                          reverse: false,
+                          onPageChanged: (index) {
+                            print('$index');
+                          },
+                          children: [
+                            _ScreensExample(
+                              controller: sidebarController,
+                              token: widget.token,
+                            ),
+                            ProfilePage(token: widget.token),
+                          ],
+                        ),
                       ),
-                    )
-                  : null,
-              drawer: ExampleSidebarX(
-                controller: sidebarController,
-                token: widget.token,
-                pageController: _pageController,
-              ),
-              body: Row(
-                children: [
-                  if (!isSmallScreen)
-                    ExampleSidebarX(
-                      controller: sidebarController,
-                      token: widget.token,
-                      pageController: _pageController,
                     ),
-                  Expanded(
-                    child: Center(
-                      child: PageView(
-                        controller: _pageController,
-                        // scrollDirection: Axis.horizontal,
-                        physics: NeverScrollableScrollPhysics(),
-                        scrollDirection: Axis.vertical,
-                        pageSnapping: true,
-                        reverse: false,
-                        onPageChanged: (index) {
-                          print('$index');
-                        },
-                        children: [
-                          _ScreensExample(
-                            controller: sidebarController,
-                            token: widget.token,
-                          ),
-                          ProfilePage(token: widget.token),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

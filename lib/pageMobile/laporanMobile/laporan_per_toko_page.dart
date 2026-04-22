@@ -523,6 +523,8 @@ class _PendapatanPerTokoPageState extends State<PendapatanPerTokoPage> {
                      SizedBox(height: 20),
                     Text("Rentang Waktu", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
                      SizedBox(height: 20),
+                    _buildDateOption("1 Hari Terakhir", "1H", setModalState),
+                    _buildDateOption("7 Hari Terakhir", "7H", setModalState), 
                     _buildDateOption("30 Hari Terakhir", "1B", setModalState),
                     _buildDateOption("3 Bulan Terakhir", "3B", setModalState),
                     _buildDateOption("6 Bulan Terakhir", "6B", setModalState),

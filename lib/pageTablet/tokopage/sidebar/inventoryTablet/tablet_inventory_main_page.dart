@@ -12,19 +12,20 @@ import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
-import 'package:unipos_app_335/utils/utilities.dart';
-import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+
+// Tablet Inventory Module - Unified (replaces inventori.dart monolith)
 import 'package:url_launcher/url_launcher.dart';
-import 'package:unipos_app_335/pageMobile/inventoryMobile/purchase_inventory_page.dart';
-import 'package:unipos_app_335/pageMobile/inventoryMobile/adjustment_inventory_page.dart';
-import 'package:unipos_app_335/pageMobile/inventoryMobile/product_material_page.dart';
-import 'package:unipos_app_335/pageMobile/inventoryMobile/unit_conversion_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_purchase_inventory_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_adjustment_inventory_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_product_material_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_unit_conversion_page.dart';
 
 class MaterialInventoryPage extends StatefulWidget {
   final String token;
   final String merchantId;
   final String? merchantName;
   final String typeMerchant;
+  final VoidCallback? onBackPressed;
 
   MaterialInventoryPage({
     Key? key,
@@ -32,6 +33,7 @@ class MaterialInventoryPage extends StatefulWidget {
     required this.merchantId,
     this.merchantName,
     required this.typeMerchant,
+    this.onBackPressed,
   }) : super(key: key);
 
   @override
@@ -62,10 +64,14 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   // form tambah material
   final TextEditingController namaBarangController = TextEditingController();
 
-  final GlobalKey<PurchaseTabState> purchaseTabKey = GlobalKey<PurchaseTabState>();
-  final GlobalKey<AdjustmentTabState> adjustmentTabKey = GlobalKey<AdjustmentTabState>();
-  final GlobalKey<ProductMaterialTabState> productMaterialTabKey = GlobalKey<ProductMaterialTabState>();
-  final GlobalKey<UnitConversionTabState> unitConversionTabKey = GlobalKey<UnitConversionTabState>();
+  final GlobalKey<PurchaseTabState> purchaseTabKey =
+      GlobalKey<PurchaseTabState>();
+  final GlobalKey<AdjustmentTabState> adjustmentTabKey =
+      GlobalKey<AdjustmentTabState>();
+  final GlobalKey<ProductMaterialTabState> productMaterialTabKey =
+      GlobalKey<ProductMaterialTabState>();
+  final GlobalKey<UnitConversionTabState> unitConversionTabKey =
+      GlobalKey<UnitConversionTabState>();
 
   // Unit Master
   List<dynamic> _unitList = [];
@@ -187,19 +193,13 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
 
       if (res == null) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal memuat data material')),
-        );
+        showSnackbar(context, {"message": 'Gagal memuat data material'});
         return;
       }
 
       if (res['rc'] != '00') {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message']?.toString() ?? 'Gagal memuat data'),
-          ),
-        );
+        showSnackbar(context, res);
         return;
       }
 
@@ -211,9 +211,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Terjadi kesalahan saat memuat data')),
-      );
+      showSnackbar(context, {"message": 'Terjadi kesalahan saat memuat data'});
     }
   }
 
@@ -315,11 +313,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   }
 
   void _showMaterialDetail(String itemId, String itemName) async {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Center(child: CircularProgressIndicator()),
-    );
+    _showLoader();
 
     try {
       final data = await getMaterialInventoryDetail(
@@ -329,21 +323,17 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
       );
 
       if (!mounted) return;
-      Navigator.pop(context); // Close loading dialog
+      _hideLoader();
 
       if (data != null && data['rc'] == '00') {
         _showDetailBottomSheet(Map<String, dynamic>.from(data['data']));
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Gagal memuat detail')));
+        showSnackbar(context, data ?? {"message": 'Gagal memuat detail'});
       }
     } catch (e) {
       if (!mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memuat detail')));
+      _hideLoader();
+      showSnackbar(context, {"message": 'Gagal memuat detail'});
     }
   }
 
@@ -359,116 +349,89 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         builder: (context, scrollController) {
           return SafeArea(
             child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: bnw100,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: bnw200)),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 8),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: primary500),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(Icons.close, color: primary500, size: 20),
+                        ),
+                      ),
                     ),
-                    child: Column(
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: bnw300)),
+                    ),
+                    child: Row(
                       children: [
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: primary500,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            PhosphorIcons.archive_box,
+                            color: bnw100,
+                            size: 24,
                           ),
                         ),
-                        SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: primary500.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                PhosphorIcons.package,
-                                color: primary500,
-                                size: 24,
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    detail['item_name'] ?? '',
-                                    style: heading2(
-                                      FontWeight.w700,
-                                      bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  Text(
-                                    detail['unit_name'] ?? '',
-                                    style: body2(
-                                      FontWeight.w400,
-                                      bnw500,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'Qty',
-                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                detail['item_name'] ?? '',
+                                style: heading3(
+                                  FontWeight.w500,
+                                  bnw900,
+                                  'Outfit',
                                 ),
-                                Text(
-                                  _formatQty(detail['total_qty']),
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 12),
-                            IconButton(
-                              icon: Icon(PhosphorIcons.pencil, color: primary500),
-                              onPressed: () {
-                                Navigator.pop(context); // Close detail modal
-                                _navigateToAddEditMaterial(
-                                  material: {
-                                    'id': detail['item_id'],
-                                    'name_item': detail['item_name'],
-                                    'unit_id': detail['unit_id'],
-                                    'unit_name': detail['unit_name'],
-                                  },
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(PhosphorIcons.trash, color: Colors.red),
-                              onPressed: () {
-                                Navigator.pop(context); // Close detail modal
-                                _confirmDeleteMaterial(
-                                  itemId: detail['item_id'].toString(),
-                                  itemName:
-                                      (detail['name_item'] ??
-                                              detail['item_name'] ??
-                                              '-')
-                                          .toString(),
-                                );
-                              },
-                            ),
-                          ],
+                              ),
+                              Text(
+                                detail['unit_name'] ?? '',
+                                style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(height: 40, width: 2, color: primary500),
+                        SizedBox(width: 16),
+                        SizedBox(
+                          width: 100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Qty',
+                                style: body1(FontWeight.w500, bnw900, 'Outfit'),
+                              ),
+                              Text(
+                                _formatQty(detail['total_qty']),
+                                style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -476,7 +439,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
-                      padding: EdgeInsets.all(16),
+                      padding: EdgeInsets.only(top: 16),
                       itemCount: (detail['detail'] as List?)?.length ?? 0,
                       itemBuilder: (context, index) {
                         final activity = detail['detail'][index];
@@ -521,23 +484,15 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                   );
                   final data = jsonDecode(response.body);
                   if (data['rc'] == '00') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Berhasil menghapus material')),
-                    );
+                    showSnackbar(context, data);
                     _fetchMaterials();
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          data['message'] ?? 'Gagal menghapus material',
-                        ),
-                      ),
-                    );
+                    showSnackbar(context, data);
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Gagal menghubungkan ke server')),
-                  );
+                  showSnackbar(context, {
+                    "message": 'Gagal menghubungkan ke server',
+                  });
                 }
               },
               child: Text('Hapus', style: TextStyle(color: Colors.red)),
@@ -621,20 +576,26 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     final unitIdStr = (data['unit_id'] ?? '').toString();
     final unitId = int.tryParse(unitIdStr) ?? 0;
 
+    final unitName = (data['unit_name'] ?? '').toString();
+
     final detailList = (data['detail'] as List?) ?? [];
     final locked = detailList.isNotEmpty;
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       builder: (ctx) {
         Widget lockedTile({required IconData icon, required String title}) {
           return ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             enabled: false,
             leading: Icon(icon, color: bnw500),
-            title: Text(title, style: body2(FontWeight.w500, bnw500, 'Outfit')),
+            title: Text(
+              title,
+              style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+            ),
             subtitle: Text(
               'Tidak bisa karena sudah ada riwayat',
               style: body2(FontWeight.w400, bnw500, 'Outfit'),
@@ -643,58 +604,112 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         }
 
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              itemName,
+                              style: heading2(
+                                FontWeight.w700,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                            Text(
+                              unitName,
+                              style: heading3(
+                                FontWeight.w400,
+                                bnw500,
+                                'Outfit',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(PhosphorIcons.x, color: bnw900),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
                   ),
                 ),
-          
-                const SizedBox(height: 16),
-                Text(
-                  itemName,
-                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                const SizedBox(height: 12),
-          
+                Divider(height: 1, color: bnw300),
                 if (locked)
                   lockedTile(
                     icon: PhosphorIcons.pencil_line,
-                    title: 'Ubah nama bahan',
+                    title: 'Ubah Bahan',
                   )
                 else
                   ListTile(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
-                    title: const Text('Ubah Nama Bahan'),
+                    title: Text(
+                      'Ubah Bahan',
+                      style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
                     onTap: () {
                       Navigator.pop(ctx);
-                      _showRenameDialog(
-                        itemId: itemId,
-                        currentName: itemName,
-                        unitId: unitId,
-                      );
+                      _navigateToAddEditMaterial(material: material);
                     },
                   ),
-          
+                Divider(height: 1, color: bnw300),
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  leading: Icon(PhosphorIcons.download_simple, color: bnw900),
+                  title: Text(
+                    'Download Bahan',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                  ),
+                  onTap: () {
+                    // Action for download bahan
+                  },
+                ),
+                Divider(height: 1, color: bnw300),
                 if (locked)
                   lockedTile(icon: PhosphorIcons.trash, title: 'Hapus Bahan')
                 else
                   ListTile(
-                    leading: Icon(PhosphorIcons.trash, color: red500),
-                    title: const Text('Hapus Bahan'),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    leading: Icon(PhosphorIcons.trash, color: bnw900),
+                    title: Text(
+                      'Hapus Bahan',
+                      style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                    ),
                     onTap: () {
                       Navigator.pop(ctx);
-                      _confirmDeleteMaterial(itemId: itemId, itemName: itemName);
+                      _confirmDeleteMaterial(
+                        itemId: itemId,
+                        itemName: itemName,
+                      );
                     },
                   ),
               ],
@@ -771,19 +786,29 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   }) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (modalCtx) {
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Center(
                   child: Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(2),
@@ -810,14 +835,16 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                         onPressed: () async {
                           Navigator.pop(modalCtx);
                           _showLoader();
-                          final res = await deleteInventoryMaster(context, widget.token, [itemId]);
+                          final res = await deleteInventoryMaster(
+                            context,
+                            widget.token,
+                            [itemId],
+                          );
                           if (!mounted) return;
                           _hideLoader();
-                          final msg = res != null && res['rc'] == '00'
-                              ? "Bahan berhasil dihapus"
-                              : (res?['message']?.toString() ?? "Gagal menghapus bahan");
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(msg)),
+                          showSnackbar(
+                            context,
+                            res ?? {"message": "Gagal menghapus bahan"},
                           );
                           if (res != null && res['rc'] == '00') {
                             await _fetchMaterials();
@@ -826,9 +853,18 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           side: BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        child: Text('Iya, Hapus', style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                        child: Text(
+                          'Iya, Hapus',
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -838,9 +874,14 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary500,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        child: Text('Batalkan', style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                        child: Text(
+                          'Batalkan',
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
                       ),
                     ),
                   ],
@@ -860,7 +901,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
 
     switch (activityType.toLowerCase()) {
       case 'purchase':
-        badgeColor = Colors.green;
+        badgeColor = Colors.greenAccent.shade700;
         badgeLabel = 'purchase';
         break;
       case 'adjustment':
@@ -868,7 +909,7 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         badgeLabel = 'adjustment';
         break;
       case 'sales':
-        badgeColor = Colors.blue;
+        badgeColor = primary500;
         badgeLabel = 'sales';
         break;
       case 'starting':
@@ -881,42 +922,46 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     }
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         color: bnw100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: bnw200),
+        border: Border(bottom: BorderSide(color: bnw300)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: badgeColor,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   badgeLabel,
-                  style: body2(FontWeight.w600, bnw100, 'Outfit'),
+                  style: body1(FontWeight.w600, bnw100, 'Outfit'),
                 ),
               ),
-              Spacer(),
               Text(
-                _formatDateTime(activity['activity_date']),
-                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                _formatDateTime(activity['activity_date']).split(' ').first,
+                style: body1(FontWeight.w400, bnw900, 'Outfit'),
               ),
             ],
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 8),
           _buildDetailRow('Jumlah', _formatQty(activity['qty'])),
-          // SizedBox(height: 8),
-          // _buildDetailRow('Harga Satuan', _formatCurrency(0)),
-          // SizedBox(height: 8),
-          // _buildDetailRow('Total', _formatCurrency(0)),
+          SizedBox(height: 2),
+          _buildDetailRow(
+            'Harga Satuan',
+            _formatCurrency(activity['price'] ?? 0),
+          ),
+          SizedBox(height: 2),
+          _buildDetailRow(
+            'Total',
+            _formatCurrency((activity['qty'] ?? 0) * (activity['price'] ?? 0)),
+          ),
         ],
       ),
     );
@@ -944,7 +989,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     }
     if (v == null || v == 0) return '0';
     if (v == v.toInt()) return v.toInt().toString();
-    return v.toString().replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+    return v
+        .toString()
+        .replaceAll(RegExp(r'0*$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 
   late final NumberFormat _idr = NumberFormat.currency(
@@ -1060,92 +1108,120 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: bnw100,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.merchantName ?? nameToko ?? 'Inventori',
-          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-        ),
-        actions: [
-          if (!_isGroupMerchant)
-            if (_tabController.index == 3)
-              IconButton(
-                icon: Icon(PhosphorIcons.plus, color: bnw900),
-                onPressed: () {
-                   productMaterialTabKey.currentState?.navigateToAdd();
-                },
-              )
-            else if (_tabController.index == 4)
-              IconButton(
-                icon: Icon(PhosphorIcons.plus, color: bnw900),
-                onPressed: () {
-                   unitConversionTabKey.currentState?.navigateToAdd();
-                },
-              )
-            else
-              IconButton(
-                icon: Icon(Icons.more_vert, color: bnw900),
-                onPressed: () {
-                  _showMoreBottomSheet();
-                },
-              ),
-        ],
-        bottom: _isGroupMerchant
-            ? null
-            : TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                labelColor: primary500,
-                unselectedLabelColor: bnw500,
-                indicatorColor: primary500,
-                labelStyle: heading4(FontWeight.w600, primary500, 'Outfit'),
-                unselectedLabelStyle: heading4(
-                  FontWeight.w400,
-                  bnw500,
-                  'Outfit',
-                ),
-                tabs: [
-                  Tab(text: 'Material'),
-                  Tab(text: 'Purchase'),
-                  Tab(text: 'Adjustment'),
-                  Tab(text: 'Product Material'),
-                  Tab(text: 'Unit Conversi'),
-                ],
-              ),
+    return Container(
+      margin: EdgeInsets.all(size16),
+      padding: EdgeInsets.all(size16),
+      decoration: BoxDecoration(
+        color: bnw100,
+        borderRadius: BorderRadius.circular(size16),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      child: Column(
         children: [
-          _buildMaterialTab(),
-          PurchaseTab(
-            key: purchaseTabKey,
-            token: widget.token,
-            merchantId: widget.merchantId,
-            typeMerchant: typeAccount ?? '',
+          // Custom Header Row
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: size16, vertical: size8),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: bnw300)),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
+                  onPressed:
+                      widget.onBackPressed ?? () => Navigator.pop(context),
+                ),
+                SizedBox(width: size8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.merchantName ?? nameToko ?? 'Inventori',
+                        style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Inventori',
+                        style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!_isGroupMerchant)
+                  if (_tabController.index == 3)
+                    IconButton(
+                      icon: Icon(PhosphorIcons.plus, color: bnw900),
+                      onPressed: () {
+                        productMaterialTabKey.currentState?.navigateToAdd();
+                      },
+                    )
+                  else if (_tabController.index == 4)
+                    IconButton(
+                      icon: Icon(PhosphorIcons.plus, color: bnw900),
+                      onPressed: () {
+                        unitConversionTabKey.currentState?.navigateToAdd();
+                      },
+                    )
+                  else
+                    IconButton(
+                      icon: Icon(Icons.more_vert, color: bnw900),
+                      onPressed: () {
+                        _showMoreBottomSheet();
+                      },
+                    ),
+              ],
+            ),
           ),
-          AdjustmentTab(
-            key: adjustmentTabKey,
-            token: widget.token,
-            merchantId: widget.merchantId,
-            typeMerchant: typeAccount ?? '',
-          ),
-          ProductMaterialTab(
-            key: productMaterialTabKey,
-            token: widget.token,
-            merchantId: widget.merchantId,
-            typeMerchant: typeAccount ?? '',
-          ),
-          UnitConversionTab(
-            key: unitConversionTabKey,
-            token: widget.token, 
-            merchantId: widget.merchantId
+          // TabBar Row
+          if (!_isGroupMerchant)
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              labelColor: primary500,
+              unselectedLabelColor: bnw500,
+              indicatorColor: primary500,
+              labelStyle: heading4(FontWeight.w600, primary500, 'Outfit'),
+              unselectedLabelStyle: heading4(FontWeight.w400, bnw500, 'Outfit'),
+              tabs: [
+                Tab(text: 'Material'),
+                Tab(text: 'Purchase'),
+                Tab(text: 'Adjustment'),
+                Tab(text: 'Product Material'),
+                Tab(text: 'Unit Conversi'),
+              ],
+            ),
+          // TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildMaterialTab(),
+                PurchaseTab(
+                  key: purchaseTabKey,
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  typeMerchant: typeAccount ?? '',
+                ),
+                AdjustmentTab(
+                  key: adjustmentTabKey,
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  typeMerchant: typeAccount ?? '',
+                ),
+                ProductMaterialTab(
+                  key: productMaterialTabKey,
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                  typeMerchant: typeAccount ?? '',
+                ),
+                UnitConversionTab(
+                  key: unitConversionTabKey,
+                  token: widget.token,
+                  merchantId: widget.merchantId,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1156,13 +1232,21 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
     int index = _tabController.index;
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1179,7 +1263,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 SizedBox(height: 10),
                 ListTile(
                   leading: Icon(PhosphorIcons.plus, color: bnw900),
-                  title: Text('Tambah', style: heading3(FontWeight.w500, bnw900, 'Outfit')),
+                  title: Text(
+                    'Tambah',
+                    style: heading3(FontWeight.w500, bnw900, 'Outfit'),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     if (index == 0) {
@@ -1198,13 +1285,16 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                 if (index == 0 || index == 1 || index == 2) ...[
                   ListTile(
                     leading: Icon(PhosphorIcons.download, color: bnw900),
-                    title: Text('Download', style: heading3(FontWeight.w500, bnw900, 'Outfit')),
+                    title: Text(
+                      'Download',
+                      style: heading3(FontWeight.w500, bnw900, 'Outfit'),
+                    ),
                     onTap: () async {
                       Navigator.pop(context);
                       await _downloadFile(index);
                     },
                   ),
-                ]
+                ],
               ],
             ),
           ),
@@ -1226,21 +1316,21 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         "isMinimize": false,
         "name": "",
         "order_by": "upDownCreated",
-        "export": true
+        "export": true,
       };
     } else if (index == 1) {
       endpoint = '$url/api/inventory/purchase/download';
       reqBody = {
         "group_id": "",
         "merchant_id": widget.merchantId,
-        "type": "pdf"
+        "type": "pdf",
       };
     } else if (index == 2) {
       endpoint = '$url/api/inventory/adjustment/download';
       reqBody = {
         "group_id": "",
         "merchant_id": widget.merchantId,
-        "type": "pdf"
+        "type": "pdf",
       };
     }
 
@@ -1250,32 +1340,37 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode(reqBody),
       );
-      
+
       if (!mounted) return;
       closeLoading(context);
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         if (jsonResponse['rc'] == '00') {
-           String downloadUrl = jsonResponse['data']?.toString() ?? '';
-           if (downloadUrl.isNotEmpty) {
-             try {
-                await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
-             } catch(e) {
-                showSnackbar(context, {"message": "Gagal membuka link url"});
-             }
-           } else {
-             showSnackbar(context, {"message": "Link download kosong"});
-           }
+          String downloadUrl = jsonResponse['data']?.toString() ?? '';
+          if (downloadUrl.isNotEmpty) {
+            try {
+              await launchUrl(
+                Uri.parse(downloadUrl),
+                mode: LaunchMode.externalApplication,
+              );
+            } catch (e) {
+              showSnackbar(context, {"message": "Gagal membuka link url"});
+            }
+          } else {
+            showSnackbar(context, {"message": "Link download kosong"});
+          }
         } else {
-           showSnackbar(context, jsonResponse);
+          showSnackbar(context, jsonResponse);
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan, respon code ${response.statusCode}')));
+        showSnackbar(context, {
+          "message": 'Terjadi kesalahan, respon code ${response.statusCode}',
+        });
       }
     } catch (e) {
       closeLoading(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+      showSnackbar(context, {"message": 'Gagal menghubungkan ke server'});
     }
   }
 
@@ -1289,65 +1384,83 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
 
   Widget _materialListPage() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Sort filter
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: size8),
+          child: InkWell(
+            onTap: _showSortModal,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: size16,
+                vertical: size12,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(color: bnw300),
+                borderRadius: BorderRadius.circular(size8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(PhosphorIcons.funnel, color: bnw600, size: size20),
+                  SizedBox(width: size8),
+                  Text(
+                    _selectedSortLabel,
+                    style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                  ),
+                  SizedBox(width: size8),
+                  Icon(Icons.arrow_drop_down, color: bnw900),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Table Header (blue)
         Container(
-          color: bnw100,
-          padding: EdgeInsets.all(16),
-          child: Column(
+          height: 50,
+          decoration: BoxDecoration(
+            color: primary500,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(size16),
+              topRight: Radius.circular(size16),
+            ),
+          ),
+          child: Row(
             children: [
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Cari nama material',
-                  prefixIcon: Icon(
-                    PhosphorIcons.magnifying_glass,
-                    color: bnw500,
-                  ),
-                  filled: true,
-                  fillColor: bnw100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() => _searchQuery = value);
-                  _fetchMaterials();
-                },
-              ),
-              SizedBox(height: 12),
-              InkWell(
-                onTap: _showSortModal,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: bnw300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(PhosphorIcons.funnel, color: bnw600, size: 20),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _selectedSortLabel,
-                          style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                        ),
-                      ),
-                      Icon(Icons.arrow_drop_down, color: bnw900),
-                    ],
+              Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: EdgeInsets.only(left: size16),
+                  child: Text(
+                    'Nama Bahan',
+                    style: heading4(FontWeight.w700, bnw100, 'Outfit'),
                   ),
                 ),
               ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Satuan',
+                  style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Qty',
+                  style: heading4(FontWeight.w600, bnw100, 'Outfit'),
+                ),
+              ),
+              SizedBox(width: 90),
+              SizedBox(width: size16),
             ],
           ),
         ),
+        // Table Body
         Expanded(
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator(color: primary500))
               : _materials.isEmpty
               ? Center(
                   child: Text(
@@ -1355,92 +1468,100 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                     style: heading3(FontWeight.w400, bnw500, 'Outfit'),
                   ),
                 )
-              : ListView.builder(
-                  padding: EdgeInsets.all(16),
-                  itemCount: _materials.length,
-                  itemBuilder: (context, index) {
-                    final material = _materials[index];
-                    return _buildMaterialCard(material);
-                  },
+              : Container(
+                  decoration: BoxDecoration(
+                    color: primary100,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(size12),
+                      bottomRight: Radius.circular(size12),
+                    ),
+                  ),
+                  child: RefreshIndicator(
+                    color: bnw100,
+                    backgroundColor: primary500,
+                    onRefresh: () => _fetchMaterials(),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: _materials.length,
+                      itemBuilder: (context, index) {
+                        final material = Map<String, dynamic>.from(
+                          _materials[index],
+                        );
+                        return _buildMaterialRow(material);
+                      },
+                    ),
+                  ),
                 ),
         ),
-
-    
       ],
     );
   }
 
-  Widget _buildMaterialCard(Map<String, dynamic> material) {
-    return InkWell(
-      onTap: () => _showMaterialDetail(material['id'], material['name_item']),
+  Widget _buildMaterialRow(Map<String, dynamic> material) {
+    return GestureDetector(
+      onTap: () => _showMaterialDetail(
+        (material['id'] ?? '').toString(),
+        (material['name_item'] ?? '').toString(),
+      ),
       child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(vertical: size12),
         decoration: BoxDecoration(
-          color: bnw100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: bnw200),
+          border: Border(bottom: BorderSide(color: bnw300, width: 1)),
         ),
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    material['name_item'] ?? '',
-                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    material['unit_name'] ?? '',
-                    style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                  ),
-                ],
+              flex: 4,
+              child: Padding(
+                padding: EdgeInsets.only(left: size16),
+                child: Text(
+                  (material['name_item'] ?? '').toString(),
+                  style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
-
-            const SizedBox(width: 12),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _formatQty(material['qty']),
-                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                const SizedBox(height: 8),
-
-                if (_canInventory)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => _openAturMaterial(material),
-                    child: buttonL(
-                      Row(
-                        children: [
-                          Icon(
-                            PhosphorIcons.pencil_line_fill,
-                            color: bnw900,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Atur',
-                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                          ),
-                        ],
-                      ),
-                      bnw100,
-                      bnw300,
-                    ),
-                  ),
-              ],
+            Expanded(
+              flex: 2,
+              child: Text(
+                (material['unit_name'] ?? '').toString(),
+                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+              ),
             ),
-            // Text(
-            //   _formatQty(material['qty']),
-            //   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-            // ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                _formatQty(material['qty']),
+                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+              ),
+            ),
+            SizedBox(
+              width: 90,
+              child: GestureDetector(
+                onTap: () => _openAturMaterial(material),
+                child: buttonL(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        PhosphorIcons.pencil_line_fill,
+                        color: bnw900,
+                        size: size20,
+                      ),
+                      SizedBox(width: size4),
+                      Text(
+                        'Atur',
+                        style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                    ],
+                  ),
+                  bnw100,
+                  bnw300,
+                ),
+              ),
+            ),
+            SizedBox(width: size16),
           ],
         ),
       ),
@@ -1625,7 +1746,12 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
                     child: Column(
                       children: [
                         dividerShowdialog(),
@@ -1659,7 +1785,8 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                                   borderRadius: BorderRadius.circular(size8),
                                   borderSide: BorderSide(color: bnw300),
                                 ),
-                                suffixIcon: _searchUnitController.text.isNotEmpty
+                                suffixIcon:
+                                    _searchUnitController.text.isNotEmpty
                                     ? GestureDetector(
                                         onTap: () {
                                           _searchUnitController.text = '';
@@ -1706,10 +1833,10 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
                                 );
                                 final unitId = unit['id'].toString();
                                 final isSelected = unitId == _selectedUnitId;
-                      
+
                                 final label =
                                     '${unit['name']}(${unit['abbreviation']})';
-                      
+
                                 return Container(
                                   decoration: BoxDecoration(
                                     border: Border(
@@ -1784,13 +1911,21 @@ class _MaterialInventoryPageState extends State<MaterialInventoryPage>
   void _showSortModal() {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1907,13 +2042,10 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
 
   void _showUnitPicker() {
     String _searchQuery = '';
-    
+
     final unitFuture = http.post(
       Uri.parse(getUnitMasterDataLink),
-      headers: {
-        'token': widget.token,
-        'Content-type': 'application/json',
-      },
+      headers: {'token': widget.token, 'Content-type': 'application/json'},
       body: jsonEncode({"deviceid": identifier}),
     );
 
@@ -1931,36 +2063,54 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
               builder: (context, scrollController) {
                 return SafeArea(
                   child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: bnw100,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
                     child: FutureBuilder<http.Response>(
                       future: unitFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
                         if (snapshot.hasError || !snapshot.hasData) {
-                          return const Center(child: Text('Gagal memuat data unit'));
+                          return const Center(
+                            child: Text('Gagal memuat data unit'),
+                          );
                         }
                         final res = snapshot.data!;
                         Map<String, dynamic> decoded;
                         try {
-                          decoded = jsonDecode(res.body) as Map<String, dynamic>;
+                          decoded =
+                              jsonDecode(res.body) as Map<String, dynamic>;
                         } catch (_) {
-                          return const Center(child: Text('Response unit tidak valid'));
+                          return const Center(
+                            child: Text('Response unit tidak valid'),
+                          );
                         }
-                        final List allUnits = (decoded['data'] ?? decoded['units'] ?? []) as List;
+                        final List allUnits =
+                            (decoded['data'] ?? decoded['units'] ?? []) as List;
                         if (allUnits.isEmpty) {
                           return const Center(child: Text('Data unit kosong'));
                         }
                         final filtered = _searchQuery.isEmpty
                             ? allUnits
                             : allUnits.where((u) {
-                                final name = (u['name'] ?? '').toString().toLowerCase();
-                                final abbr = (u['abbreviation'] ?? '').toString().toLowerCase();
-                                return name.contains(_searchQuery.toLowerCase()) ||
+                                final name = (u['name'] ?? '')
+                                    .toString()
+                                    .toLowerCase();
+                                final abbr = (u['abbreviation'] ?? '')
+                                    .toString()
+                                    .toLowerCase();
+                                return name.contains(
+                                      _searchQuery.toLowerCase(),
+                                    ) ||
                                     abbr.contains(_searchQuery.toLowerCase());
                               }).toList();
 
@@ -1969,7 +2119,8 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                             const SizedBox(height: 12),
                             Center(
                               child: Container(
-                                width: 40, height: 4,
+                                width: 40,
+                                height: 4,
                                 decoration: BoxDecoration(
                                   color: Colors.grey[300],
                                   borderRadius: BorderRadius.circular(2),
@@ -1978,18 +2129,33 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                             ),
                             const SizedBox(height: 12),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('Pilih Satuan/Unit',
-                                style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                'Pilih Satuan/Unit',
+                                style: heading2(
+                                  FontWeight.w700,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 12),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: TextField(
                                 autofocus: true,
                                 decoration: InputDecoration(
-                                  hintText: 'Cari satuan (contoh: kilogram, kg...)',
-                                  hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
+                                  hintText:
+                                      'Cari satuan (contoh: kilogram, kg...)',
+                                  hintStyle: body2(
+                                    FontWeight.w400,
+                                    bnw400,
+                                    'Outfit',
+                                  ),
                                   prefixIcon: Icon(Icons.search, color: bnw500),
                                   filled: true,
                                   fillColor: bnw200,
@@ -1997,35 +2163,64 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide.none,
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
                                 ),
-                                onChanged: (val) => setModalState(() => _searchQuery = val),
+                                onChanged: (val) =>
+                                    setModalState(() => _searchQuery = val),
                               ),
                             ),
                             const SizedBox(height: 8),
                             Expanded(
                               child: filtered.isEmpty
-                                  ? Center(child: Text('Tidak ada satuan yang sesuai',
-                                      style: body1(FontWeight.w400, bnw500, 'Outfit')))
+                                  ? Center(
+                                      child: Text(
+                                        'Tidak ada satuan yang sesuai',
+                                        style: body1(
+                                          FontWeight.w400,
+                                          bnw500,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    )
                                   : ListView.separated(
                                       controller: scrollController,
                                       itemCount: filtered.length,
-                                      separatorBuilder: (_, __) => const Divider(height: 1),
+                                      separatorBuilder: (_, __) =>
+                                          const Divider(height: 1),
                                       itemBuilder: (context, index) {
-                                        final u = filtered[index] as Map<String, dynamic>;
+                                        final u =
+                                            filtered[index]
+                                                as Map<String, dynamic>;
                                         final unitId = u['id'] ?? u['unit_id'];
-                                        final unitName = u['name'] ?? u['unit_name'] ?? '-';
+                                        final unitName =
+                                            u['name'] ?? u['unit_name'] ?? '-';
                                         final abbr = u['abbreviation'] ?? '';
-                                        final isSelected = _selectedUnit?['id'] == unitId;
+                                        final isSelected =
+                                            _selectedUnit?['id'] == unitId;
                                         return ListTile(
-                                          title: Text('$unitName ($abbr)',
-                                            style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+                                          title: Text(
+                                            '$unitName ($abbr)',
+                                            style: heading4(
+                                              FontWeight.w500,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
                                           trailing: isSelected
-                                              ? Icon(Icons.check, color: primary500, size: 18)
+                                              ? Icon(
+                                                  Icons.check,
+                                                  color: primary500,
+                                                  size: 18,
+                                                )
                                               : null,
                                           onTap: () {
                                             setState(() {
-                                              _selectedUnit = {'id': unitId, 'name': unitName};
+                                              _selectedUnit = {
+                                                'id': unitId,
+                                                'name': unitName,
+                                              };
                                             });
                                             Navigator.pop(context);
                                           },
@@ -2121,7 +2316,7 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : SafeArea(
-            child: Column(
+              child: Column(
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
@@ -2133,7 +2328,11 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                           RichText(
                             text: TextSpan(
                               text: 'Nama Barang',
-                              style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w500,
+                                bnw900,
+                                'Outfit',
+                              ),
                               children: [
                                 TextSpan(
                                   text: ' *',
@@ -2147,7 +2346,11 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                             controller: _nameController,
                             decoration: InputDecoration(
                               hintText: 'Cth: Matcha',
-                              hintStyle: body2(FontWeight.w400, bnw400, 'Outfit'),
+                              hintStyle: body2(
+                                FontWeight.w400,
+                                bnw400,
+                                'Outfit',
+                              ),
                               border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: bnw300),
                               ),
@@ -2157,7 +2360,11 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                           RichText(
                             text: TextSpan(
                               text: 'Unit/Satuan',
-                              style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w500,
+                                bnw900,
+                                'Outfit',
+                              ),
                               children: [
                                 TextSpan(
                                   text: ' *',
@@ -2179,10 +2386,12 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    _selectedUnit?['name'] ?? 'Pilih Unit/Satuan',
+                                    _selectedUnit?['name'] ??
+                                        'Pilih Unit/Satuan',
                                     style: body1(
                                       FontWeight.w500,
                                       _selectedUnit == null ? bnw400 : bnw900,
@@ -2265,8 +2474,7 @@ class _AddEditMaterialPageState extends State<AddEditMaterialPage> {
                   ),
                 ],
               ),
-          ),
+            ),
     );
   }
 }
-

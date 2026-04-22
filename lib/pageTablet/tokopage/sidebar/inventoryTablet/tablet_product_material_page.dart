@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/component/component_button.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:intl/intl.dart';
@@ -9,8 +11,7 @@ import 'package:unipos_app_335/services/apimethod.dart';
 import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
-import 'package:unipos_app_335/utils/utilities.dart';
-import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+// (Multiple imports removed)
 import 'package:unipos_app_335/models/produkmodel.dart';
 
 // --- Local Models ---
@@ -73,12 +74,12 @@ class ProductMaterialTab extends StatefulWidget {
   final String merchantId;
   final String typeMerchant;
 
-  ProductMaterialTab({
-    Key? key,
+  const ProductMaterialTab({
+    super.key,
     required this.token,
     required this.merchantId,
     required this.typeMerchant,
-  }) : super(key: key);
+  });
 
   @override
   ProductMaterialTabState createState() => ProductMaterialTabState();
@@ -94,6 +95,13 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
   bool get _canMaterial {
     final t = _normalizeType(widget.typeMerchant);
     return t == 'merchant' || t == 'group_merchant';
+  }
+
+  void search(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    _fetchProductMaterials();
   }
 
   @override
@@ -126,7 +134,7 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
-      print('Error _fetchProductMaterials: $e');
+      debugPrint('Error _fetchProductMaterials: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -146,52 +154,75 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
 
-  void _showOptionsModal(String id) {
+  void _showOptionsModal(String id, String title, String productName) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              productName,
+                              style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(PhosphorIcons.x, color: bnw900),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.pencil, color: primary500),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
                   title: Text(
-                    'Update',
-                    style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                    'Ubah Produk',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                   ),
                   onTap: () {
                     Navigator.pop(context);
                     navigateToAdd(productMaterialId: id);
                   },
                 ),
-                Divider(),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.trash, color: bnw900),
                   title: Text(
-                    'Delete',
-                    style: heading3(FontWeight.w600, Colors.red, 'Outfit'),
+                    'Hapus Produk',
+                    style: heading3(FontWeight.w400, bnw900, 'Outfit'),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -209,6 +240,9 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
   void _confirmDelete(String id) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -249,19 +283,9 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
                           Navigator.pop(modalContext);
                           final result = await _deleteProductMaterial(id);
                           if (mounted) {
+                            showSnackbar(context, result ?? {"message": "Gagal menghapus data"});
                             if (result != null && result['rc'] == '00') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Berhasil menghapus data')),
-                              );
                               _fetchProductMaterials();
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    result?['message'] ?? result?['rm'] ?? 'Gagal menghapus data',
-                                  ),
-                                ),
-                              );
                             }
                           }
                         },
@@ -299,59 +323,104 @@ class ProductMaterialTabState extends State<ProductMaterialTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _productMaterials.isEmpty
-          ? Center(
-              child: Text(
-                'Tidak ada data Product Material',
-                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+      body: Column(
+        children: [
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: primary500,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(size16),
+                topRight: Radius.circular(size16),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: _productMaterials.length,
-              itemBuilder: (context, index) {
-                final item = _productMaterials[index];
-                return _buildProductMaterialCard(item);
-              },
             ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: size16),
+                    child: Text('Judul', style: heading4(FontWeight.w700, bnw100, 'Outfit')),
+                  ),
+                ),
+                Expanded(flex: 4, child: Text('Nama Produk', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: 90, child: Text('Aksi', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: size16),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _productMaterials.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tidak ada data Product Material',
+                      style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: _productMaterials.length,
+                    itemBuilder: (context, index) {
+                      final item = _productMaterials[index];
+                      return _buildProductMaterialRow(item);
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildProductMaterialCard(Map<String, dynamic> item) {
+  Widget _buildProductMaterialRow(Map<String, dynamic> item) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(vertical: size12),
       decoration: BoxDecoration(
-        color: bnw100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: bnw200),
+        border: Border(bottom: BorderSide(color: bnw300, width: 1)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['title'] ?? '',
-                  style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                ),
-                SizedBox(height: 4),
-                if (item['product_name'] != null)
-                  Text(
-                    item['product_name'],
-                    style: heading4(FontWeight.w600, primary500, 'Outfit'),
-                  ),
-              ],
+            flex: 4,
+            child: Padding(
+              padding: EdgeInsets.only(left: size16),
+              child: Text(
+                item['title'] ?? '',
+                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-          if (_canMaterial)
-            InkWell(
-              onTap: () => _showOptionsModal(item['id']),
-              child: Icon(PhosphorIcons.pencil_simple, color: bnw600, size: 20),
+          Expanded(
+            flex: 4,
+            child: Text(
+              item['product_name'] ?? '',
+              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
+          ),
+          SizedBox(
+            width: 90,
+            child: _canMaterial ? GestureDetector(
+              onTap: () => _showOptionsModal(item['id'], item['title'] ?? '', item['product_name'] ?? ''),
+              child: buttonL(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(PhosphorIcons.pencil_line_fill, color: bnw900, size: size20),
+                    SizedBox(width: size4),
+                    Text('Atur', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                  ],
+                ),
+                bnw100,
+                bnw300,
+              ),
+            ) : SizedBox(),
+          ),
+          SizedBox(width: size16),
         ],
       ),
     );
@@ -381,14 +450,14 @@ class AddProductMaterialPage extends StatefulWidget {
   final String? productMaterialId;
   final VoidCallback onSuccess;
 
-  AddProductMaterialPage({
-    Key? key,
+  const AddProductMaterialPage({
+    super.key,
     required this.token,
     required this.merchantId,
     required this.typeMerchant,
     this.productMaterialId,
     required this.onSuccess,
-  }) : super(key: key);
+  });
 
   @override
   _AddProductMaterialPageState createState() => _AddProductMaterialPageState();
@@ -461,7 +530,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -552,7 +621,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
         });
       }
     } catch (e) {
-      print('Error _fetchSingleProductMaterial: $e');
+      debugPrint('Error _fetchSingleProductMaterial: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -576,14 +645,20 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         final conversions = (material['unit_conversion'] as List?) ?? [];
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -733,7 +808,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primary500.withOpacity(0.1),
+                        color: primary500.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -876,7 +951,8 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
@@ -885,13 +961,21 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
             if (!_isMaterialsLoaded && _allMaterials.isEmpty) {
               return Container(
                 height: 300,
-                child: Center(child: CircularProgressIndicator()),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: const Center(child: CircularProgressIndicator()),
               );
             }
         
             return Container(
               height: MediaQuery.of(context).size.height * 0.7,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
               child: Column(
                 children: [
                   Center(
@@ -1033,14 +1117,15 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       builder: (context) => SafeArea(
         child: Container(
           height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: bnw100,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     Center(
@@ -1171,13 +1256,15 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
         body: jsonEncode(body),
       );
 
-      print('API STATUS: ${response.statusCode}');
-      print('API BODY: ${response.body}');
+      debugPrint('API STATUS: ${response.statusCode}');
+      debugPrint('API BODY: ${response.body}');
 
       final result = jsonDecode(response.body);
-      print('PRODUCT MATERIAL SAVE RESPONSE: ${jsonEncode(result)}');
+      debugPrint('PRODUCT MATERIAL SAVE RESPONSE: ${jsonEncode(result)}');
 
       if (result['rc'] == '00') {
+        if (!mounted) return;
+        showSnackbar(context, result);
         widget.onSuccess();
         if (stayOnPage) {
           setState(() {
@@ -1187,19 +1274,13 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
             _variantMaterials.clear();
             _selectedVariantId = null;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['rm'] ?? 'Berhasil menyimpan data')),
-          );
+          showSnackbar(context, result);
         } else {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['rm'] ?? 'Berhasil menyimpan data')),
-          );
+          showSnackbar(context, result);
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['rm'] ?? 'Gagal menyimpan data')),
-        );
+        showSnackbar(context, result);
       }
     } catch (e) {
       print('Error _handleSave: $e');
@@ -1227,13 +1308,9 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
       if (result['rc'] == '00') {
         widget.onSuccess();
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? result['rm'] ?? 'Berhasil menghapus data')),
-        );
+        showSnackbar(context, result);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? result['rm'] ?? 'Gagal menghapus data')),
-        );
+        showSnackbar(context, result);
       }
     } catch (e) {
       print('Error _handleDelete: $e');
@@ -1262,7 +1339,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                   style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                 ),
                 Text(
-                  '${m['quantity_needed']} ${m['unit_name'] ?? ''}',
+                  '${formatQty(m['quantity_needed'])} ${m['unit_name'] ?? ''}',
                   style: body2(FontWeight.w400, bnw500, 'Outfit'),
                 ),
               ],
@@ -1633,11 +1710,7 @@ class _AddProductMaterialPageState extends State<AddProductMaterialPage>
                         child: OutlinedButton(
                           onPressed: () {
                                   if (_selectedProduct == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Pilih produk dulu'),
-                                      ),
-                                    );
+                                    showSnackbar(context, {"message": 'Pilih produk dulu'});
                                     return;
                                   }
                                   _showMaterialPicker();

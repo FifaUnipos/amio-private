@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
 import 'package:unipos_app_335/components/organisms/merchant_card.dart';
 import 'package:unipos_app_335/data/static/merchant/merchant_sorting_state.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_inventory_main_page.dart';
 import 'package:unipos_app_335/pageTablet/home/sidebar/coaPageGrup/lihatCoaPage.dart';
-import 'package:unipos_app_335/pageTablet/home/sidebar/inventoriGrup/lihatInventoriGrupPage.dart';
 import 'package:unipos_app_335/providers/merchant/merchant_sorting_provider.dart';
 
 import '../../../../utils/component/component_showModalBottom.dart';
@@ -109,26 +109,30 @@ class _COAPageGrupState extends State<InventoriPageGrup>
       child: Scaffold(
         // backgroundColor: primaryColor,
         body: SafeArea(
-          child: Container(
-            margin: EdgeInsets.all(size16),
-            padding: EdgeInsets.all(size16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size16),
-              color: bnw100,
-            ),
-            child: PageView(
-              physics: NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: [
-                homePageCOAGrup(context),
-                LihatInventoryPageGrup(
-                  token: widget.token,
-                  nameMerch: namemerch,
-                  merchID: merchid,
-                  pageController: _pageController,
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: [
+              Container(
+                margin: EdgeInsets.all(size16),
+                padding: EdgeInsets.all(size16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(size16),
+                  color: bnw100,
                 ),
-              ],
-            ),
+                child: homePageCOAGrup(context),
+              ),
+              MaterialInventoryPage(
+                key: ValueKey(merchid),
+                token: widget.token,
+                merchantId: merchid,
+                merchantName: namemerch,
+                typeMerchant: 'group_merchant',
+                onBackPressed: () {
+                  _pageController.jumpToPage(0);
+                },
+              ),
+            ],
           ),
         ),
       ),

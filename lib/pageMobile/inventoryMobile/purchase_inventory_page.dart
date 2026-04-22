@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -1214,8 +1215,9 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
   }
 
   String _formatQtySmart(double v) {
-    final s = v.toStringAsFixed(3);
-    return s.replaceFirst(RegExp(r'\.?0+$'), '');
+    if (v == 0) return '0';
+    if (v == v.toInt()) return v.toInt().toString();
+    return v.toString().replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
   }
 
   String _formatCurrency(dynamic value) {
@@ -1532,3 +1534,4 @@ class _AddPurchasePageState extends State<AddPurchasePage> {
     );
   }
 }
+

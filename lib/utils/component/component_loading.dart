@@ -3,52 +3,47 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../component/component_color.dart';
 
-Completer<void> loadingCompleter = Completer<void>();
+Completer<void>? _loadingCompleter;
+NavigatorState? _loadingNavigator;
 
 void whenLoading(BuildContext context) {
-  loadingCompleter = Completer<void>();
+  if (_loadingCompleter != null && !_loadingCompleter!.isCompleted) {
+    return;
+  }
+  _loadingCompleter = Completer<void>();
+  _loadingNavigator = Navigator.of(context, rootNavigator: true);
+
   showDialog(
     barrierDismissible: false,
     useRootNavigator: true,
     context: context,
     builder: (context) => WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          loadingCompleter = Completer<void>();
-          Future.delayed(Duration(seconds: 10), () {
-            if (!loadingCompleter.isCompleted) {
-              closeLoading(context);
-            }
-          });
-          return Center(
-            child: SizedBox(
-              width: 40,
-              height: 40,
-              child: CircularProgressIndicator(color: primary500),
-            ),
-          );
-        },
+      onWillPop: () async => false,
+      child: Center(
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: CircularProgressIndicator(color: primary500),
+        ),
       ),
     ),
   );
-  Future.delayed(const Duration(seconds: 10), () {
-    if (!loadingCompleter.isCompleted) {
-      closeLoading(context);
+
+  Future.delayed(const Duration(seconds: 7), () {
+    if (_loadingCompleter != null && !_loadingCompleter!.isCompleted) {
+      if (_loadingNavigator != null && _loadingNavigator!.canPop()) {
+        _loadingNavigator!.pop();
+      }
+      _loadingCompleter!.complete();
     }
   });
 }
 
 Future<void> closeLoading(BuildContext context) async {
-  if (!loadingCompleter.isCompleted) {
-    // if (Navigator.of(context, rootNavigator: true).canPop()) {
-    //   Navigator.of(context, rootNavigator: true).pop();
-    // }
-    loadingCompleter.complete();
-    if (context.mounted && Navigator.of(context, rootNavigator: true).canPop()) {
-      Navigator.of(context, rootNavigator: true).pop();
+  if (_loadingCompleter != null && !_loadingCompleter!.isCompleted) {
+    _loadingCompleter!.complete();
+    if (_loadingNavigator != null && _loadingNavigator!.canPop()) {
+      _loadingNavigator!.pop();
     }
   }
 }

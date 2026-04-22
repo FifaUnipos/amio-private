@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:intl/intl.dart';
@@ -10,33 +11,31 @@ import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
-import 'package:unipos_app_335/utils/utilities.dart';
-import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+// (Multiple imports removed)
 import 'package:url_launcher/url_launcher.dart';
-
-class AdjustmentTab extends StatefulWidget {
+import 'package:unipos_app_335/utils/component/component_button.dart';class PurchaseTab extends StatefulWidget {
   final String token;
   final String merchantId;
   final String typeMerchant;
 
-  AdjustmentTab({
-    Key? key,
+  PurchaseTab({
+    super.key,
     required this.token,
     required this.merchantId,
     required this.typeMerchant,
-  }) : super(key: key);
+  });
 
   @override
-  AdjustmentTabState createState() => AdjustmentTabState();
+  PurchaseTabState createState() => PurchaseTabState();
 }
 
-class AdjustmentTabState extends State<AdjustmentTab> {
+class PurchaseTabState extends State<PurchaseTab> {
   bool _isLoading = true;
-  List<dynamic> _adjustments = [];
+  List<dynamic> _purchases = [];
   String _normalizeType(String t) =>
       t.trim().toLowerCase().replaceAll(' ', '_');
 
-  bool get _canAdjust {
+  bool get _canPurchase {
     final t = _normalizeType(widget.typeMerchant);
     return t == 'merchant' || t == 'group_merchant';
   }
@@ -44,13 +43,18 @@ class AdjustmentTabState extends State<AdjustmentTab> {
   @override
   void initState() {
     super.initState();
-    _fetchAdjustments();
+    debugPrint(
+      'PurchaseTab typeMerchant="${widget.typeMerchant}"'
+      'normalized="${_normalizeType(widget.typeMerchant)}"'
+      'canPurchase=$_canPurchase',
+    );
+    _fetchPurchases();
   }
 
-  Future<Map<String, dynamic>?> _getAdjustmentList() async {
+  Future<Map<String, dynamic>?> _getPurchaseList() async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment'),
+        Uri.parse('$url/api/inventory/purchase'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -62,15 +66,15 @@ class AdjustmentTabState extends State<AdjustmentTab> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
 
-  Future<Map<String, dynamic>?> _getAdjustmentDetail(String groupId) async {
+  Future<Map<String, dynamic>?> _getPurchaseDetail(String groupId) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/detail'),
+        Uri.parse('$url/api/inventory/purchase/detail'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({"deviceid": identifier, "group_id": groupId}),
       );
@@ -79,15 +83,15 @@ class AdjustmentTabState extends State<AdjustmentTab> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
 
-  Future<Map<String, dynamic>?> _deleteAdjustment(List<String> groupIds) async {
+  Future<Map<String, dynamic>?> _deletePurchase(List<String> groupIds) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/delete'),
+        Uri.parse('$url/api/inventory/purchase/delete'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
@@ -95,12 +99,12 @@ class AdjustmentTabState extends State<AdjustmentTab> {
           if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
-      print('DELETE ADJ RESPONSE: ${response.statusCode} ${response.body}');
+      print('DELETE PURCHASE RESPONSE: ${response.statusCode} ${response.body}');
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -109,7 +113,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
     whenLoading(context);
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/download'),
+        Uri.parse('$url/api/inventory/purchase/download'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "group_id": groupId,
@@ -127,27 +131,35 @@ class AdjustmentTabState extends State<AdjustmentTab> {
             try {
               await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
             } catch (e) {
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal membuka link')));
+              if (mounted) showSnackbar(context, {"message": 'Gagal membuka link'});
             }
           } else {
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Link kosong')));
+            if (mounted) showSnackbar(context, data ?? {"message": 'Link kosong'});
           }
         } else {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Gagal download')));
+          if (mounted) showSnackbar(context, data ?? {"message": 'Gagal download'});
         }
       }
     } catch (e) {
+      if (!mounted) return;
       closeLoading(context);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+      if (mounted) showSnackbar(context, {"message": 'Gagal menghubungkan ke server'});
     }
   }
 
-  Future<void> _fetchAdjustments() async {
+  Future<void> _fetchPurchases({String? query}) async {
     setState(() => _isLoading = true);
     try {
-      final data = await _getAdjustmentList();
+      final data = await _getPurchaseList();
+      List<dynamic> list = data?['data'] ?? [];
+      if (query != null && query.isNotEmpty) {
+        list = list.where((item) {
+          final title = (item['title'] ?? '').toString().toLowerCase();
+          return title.contains(query.toLowerCase());
+        }).toList();
+      }
       setState(() {
-        _adjustments = data?['data'] ?? [];
+        _purchases = list;
         _isLoading = false;
       });
     } catch (e) {
@@ -155,51 +167,79 @@ class AdjustmentTabState extends State<AdjustmentTab> {
     }
   }
 
-  void _showOptionsModal(String groupId) {
+  void search(String value) {
+    _fetchPurchases(query: value);
+  }
+
+  void _showOptionsModal(String groupId, String title, String date) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              date,
+                              style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(PhosphorIcons.x, color: bnw900),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.pencil, color: primary500),
-                  title: Text('Update', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
+                  title: Text('Ubah Pembelian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
-                    _navigateToUpdateAdjustment(groupId);
+                    _navigateToUpdatePurchase(groupId);
                   },
                 ),
-                Divider(),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.download, color: bnw900),
-                  title: Text('Download', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.download_simple, color: bnw900),
+                  title: Text('Download Pembelian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _downloadItem(groupId);
                   },
                 ),
-                Divider(),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                  title: Text('Delete', style: heading3(FontWeight.w600, Colors.red, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.trash, color: bnw900),
+                  title: Text('Hapus Pembelian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _confirmDelete(groupId);
@@ -216,6 +256,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
   void _confirmDelete(String groupId) {
     showModalBottomSheet(
       context: context,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -237,13 +278,13 @@ class AdjustmentTabState extends State<AdjustmentTab> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Yakin Ingin Menghapus Penyesuaian?',
+                  'Yakin Ingin Menghapus Pembelian?',
                   textAlign: TextAlign.center,
                   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Data penyesuaian yang telah dihapus tidak dapat dikembalikan.',
+                  'Data pembelian yang telah dihapus tidak dapat dikembalikan.',
                   textAlign: TextAlign.center,
                   style: body1(FontWeight.w400, bnw500, 'Outfit'),
                 ),
@@ -254,18 +295,13 @@ class AdjustmentTabState extends State<AdjustmentTab> {
                       child: OutlinedButton(
                         onPressed: () async {
                           Navigator.pop(modalContext);
-                          final result = await _deleteAdjustment([groupId]);
-                          print('DELETE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
+                          final result = await _deletePurchase([groupId]);
+                          debugPrint('DELETE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
+                          if (!mounted) return;
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(
-                                result != null && result['rc'] == '00'
-                                    ? (result['message'] ?? result['rm'] ?? 'Berhasil menghapus data')
-                                    : (result?['message'] ?? result?['rm'] ?? 'Gagal menghapus data'),
-                              )),
-                            );
+                            showSnackbar(context, result ?? {"message": "Gagal menghapus data"});
                             if (result != null && result['rc'] == '00') {
-                              _fetchAdjustments();
+                              _fetchPurchases();
                             }
                           }
                         },
@@ -299,32 +335,33 @@ class AdjustmentTabState extends State<AdjustmentTab> {
     );
   }
 
-
   void navigateToAdd() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddAdjustmentPage(
+        builder: (context) => AddPurchasePage(
           token: widget.token,
           merchantId: widget.merchantId,
-          onSuccess: _fetchAdjustments,
-          typeMerchant: typeAccount ?? '',
+          typeMerchant: widget.typeMerchant,
+          onSuccess: _fetchPurchases,
         ),
       ),
     );
   }
 
-  void _navigateToUpdateAdjustment(String groupId) async {
-    final detail = await _getAdjustmentDetail(groupId);
+  void _navigateToUpdatePurchase(String groupId) async {
+    final detail = await _getPurchaseDetail(groupId);
+    if (!mounted) return;
     if (detail != null && detail['rc'] == '00') {
+      // debugPrint('selectedmaterials: $detail');
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AddAdjustmentPage(
+          builder: (context) => AddPurchasePage(
             token: widget.token,
+            typeMerchant: widget.typeMerchant,
             merchantId: widget.merchantId,
-            typeMerchant: typeAccount ?? '',
-            onSuccess: _fetchAdjustments,
+            onSuccess: _fetchPurchases,
             groupId: groupId,
             existingData: detail['data'],
           ),
@@ -333,98 +370,155 @@ class AdjustmentTabState extends State<AdjustmentTab> {
     }
   }
 
+  String _formatCurrency(dynamic value) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(
+      value is num ? value : (num.tryParse(value.toString()) ?? 0),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _adjustments.isEmpty
-          ? Center(
-              child: Text(
-                'Tidak ada data penyesuaian',
-                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+      body: Column(
+        children: [
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: primary500,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(size16),
+                topRight: Radius.circular(size16),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: _adjustments.length,
-              itemBuilder: (context, index) {
-                final adjustment = _adjustments[index];
-                return Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: bnw100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: bnw200),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: size16),
+                    child: Text('Judul', style: heading4(FontWeight.w700, bnw100, 'Outfit')),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                Expanded(flex: 3, child: Text('Tanggal Pembelian', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                Expanded(flex: 3, child: Text('Total Harga', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: 90, child: Text('Aksi', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: size16),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _purchases.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tidak ada data persediaan',
+                      style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: _purchases.length,
+                    itemBuilder: (context, index) {
+                      final purchase = _purchases[index];
+                      return Container(
+                        padding: EdgeInsets.symmetric(vertical: size12),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: bnw300, width: 1)),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              adjustment['title'] ?? '',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
+                            Expanded(
+                              flex: 4,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: size16),
+                                child: Text(
+                                  purchase['title'] ?? '',
+                                  style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              adjustment['activity_date'] ?? '',
-                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                purchase['activity_date'] ?? '',
+                                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
                             ),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                _formatCurrency(purchase['total_price']),
+                                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 90,
+                                child: _canPurchase ? GestureDetector(
+                                  onTap: () => _showOptionsModal(
+                                    purchase['group_id'],
+                                    purchase['title'] ?? '',
+                                    purchase['activity_date'] ?? '',
+                                  ),
+                                  child: buttonL(
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(PhosphorIcons.pencil_line_fill, color: bnw900, size: size20),
+                                      SizedBox(width: size4),
+                                      Text('Atur', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                                    ],
+                                  ),
+                                  bnw100,
+                                  bnw300,
+                                ),
+                              ) : SizedBox(),
+                            ),
+                            SizedBox(width: size16),
                           ],
                         ),
-                      ),
-                      if (_canAdjust)
-                        InkWell(
-                          onTap: () =>
-                              _showOptionsModal(adjustment['group_id']),
-                          child: Icon(
-                            PhosphorIcons.pencil_simple,
-                            color: bnw600,
-                            size: 20,
-                          ),
-                        ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// Add/Update Adjustment Page
-class AddAdjustmentPage extends StatefulWidget {
+// Add/Update Purchase Page
+class AddPurchasePage extends StatefulWidget {
   final String token;
   final String merchantId;
   final String typeMerchant;
-
   final VoidCallback onSuccess;
   final String? groupId;
   final Map<String, dynamic>? existingData;
 
-  AddAdjustmentPage({
-    Key? key,
+  const AddPurchasePage({
+    super.key,
     required this.token,
-    required this.merchantId,
     required this.typeMerchant,
+    required this.merchantId,
     required this.onSuccess,
     this.groupId,
     this.existingData,
-  }) : super(key: key);
+  });
 
   @override
-  _AddAdjustmentPageState createState() => _AddAdjustmentPageState();
+  _AddPurchasePageState createState() => _AddPurchasePageState();
 }
 
-class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
+class _AddPurchasePageState extends State<AddPurchasePage> {
   final TextEditingController _titleController = TextEditingController();
   DateTime? _selectedDate;
   List<Map<String, dynamic>> _selectedMaterials = [];
@@ -432,11 +526,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   List<dynamic> _unitConversions = [];
   String _normalizeType(String t) =>
       t.trim().toLowerCase().replaceAll(' ', '_');
-
-  bool get _canAdjust {
+  bool get _canPurchase {
     final t = _normalizeType(widget.typeMerchant);
     return t == 'merchant' || t == 'group_merchant';
   }
+
   @override
   void initState() {
     super.initState();
@@ -474,12 +568,13 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           }
         }
       } catch (e) {
-        print('Error parsing date: $e');
+        debugPrint('Error parsing date: $e');
       }
 
       // Load existing materials
       final details = widget.existingData!['detail'] as List?;
       if (details != null) {
+        debugPrint('details: $details');
         setState(() {
           _selectedMaterials = details.map((item) {
             return {
@@ -487,17 +582,19 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
               'name': item['name_item'],
               'unit_name': item['unit_name'],
               'unit_abbreviation': item['unit_abbreviation'],
-              'qty':
-                  double.tryParse(item['qty_after_activity'].toString()) ?? 0,
+              'qty': double.tryParse(item['qty'].toString()) ?? 0,
+              'price': double.tryParse(item['price'].toString()) ?? 0,
               'unit_conversion_id': item['unit_conversion_id'],
               'unit_conversion_name':
                   item['unit_conversion_name'] ?? item['unit_abbreviation'],
               'conversion_factor':
                   double.tryParse(item['conversion_factor'].toString()) ?? 1,
+              'total_price': item['total_price'],
             };
           }).toList();
         });
       }
+      // debugPrint('_selectedMaterials: $_selectedMaterials');
     }
   }
 
@@ -519,7 +616,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -539,7 +636,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -548,7 +645,8 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StatefulBuilder(
@@ -556,7 +654,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           return SafeArea(
             child: Container(
               height: MediaQuery.of(context).size.height * 0.7,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
               child: Column(
                 children: [
                   Center(
@@ -654,7 +756,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                             'Simpan',
                             style: heading3(
                               FontWeight.w600,
-                              bnw100,
+                              Colors.white,
                               'Outfit',
                             ),
                           ),
@@ -676,6 +778,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     Function setParentModalState,
   ) {
     final TextEditingController qtyController = TextEditingController();
+    final TextEditingController priceController = TextEditingController();
     String? selectedConversionId;
     String selectedConversionName = material['unit_abbreviation'] ?? '';
     double conversionFactor = 1.0;
@@ -686,13 +789,13 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          double calculatedQty =
-              (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
-
-          return SafeArea(
-            child: Container(
+      builder: (context) => SafeArea(
+        child: StatefulBuilder(
+          builder: (context, setModalState) {
+            double calculatedQty =
+                (double.tryParse(qtyController.text) ?? 0) * conversionFactor;
+        
+            return Container(
               height: MediaQuery.of(context).size.height * 0.5,
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -721,7 +824,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                       style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                     ),
                     Text(
-                      'Pilih bahan yang sudah terpakai',
+                      'Pilih bahan yang sudah taerpakai',
                       style: body2(FontWeight.w400, bnw500, 'Outfit'),
                     ),
                     SizedBox(height: 20),
@@ -758,11 +861,39 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primary500.withOpacity(0.1),
+                        color: primary500.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Harga Satuan',
+                                  style: body2(FontWeight.w400, bnw900, 'Outfit'),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: priceController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.right,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: '0',
+                                  ),
+                                  style: heading3(
+                                    FontWeight.w600,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                  onChanged: (value) => setModalState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 24),
                           Row(
                             children: [
                               Expanded(
@@ -793,7 +924,8 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           SizedBox(height: 12),
                           if (calculatedQty > 0)
                             Text(
-                              '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                              // '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                              '${qtyController.text} $selectedConversionName = ${_formatQtySmart(calculatedQty)} ${material['unit_abbreviation']}',
                               style: body2(FontWeight.w400, bnw600, 'Outfit'),
                             ),
                           Divider(height: 24),
@@ -808,11 +940,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               Expanded(
                                 child: InkWell(
                                   onTap: () {
-                                    _showUnitConversionPicker(context, material, (
-                                      conversionId,
-                                      conversionName,
-                                      factor,
-                                    ) {
+                                      _showUnitConversionPicker(material, (
+                                        conversionId,
+                                        conversionName,
+                                        factor,
+                                      ) {
                                       setModalState(() {
                                         selectedConversionId = conversionId;
                                         selectedConversionName = conversionName;
@@ -826,7 +958,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: bnw100,
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(color: bnw300),
                                     ),
@@ -885,7 +1017,9 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                             onPressed: () {
                               final qty =
                                   double.tryParse(qtyController.text) ?? 0;
-            
+                              final price =
+                                  double.tryParse(priceController.text) ?? 0;
+        
                               if (qty > 0) {
                                 setState(() {
                                   _selectedMaterials.add({
@@ -895,6 +1029,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                                     'unit_abbreviation':
                                         material['unit_abbreviation'],
                                     'qty': qty,
+                                    'price': price,
                                     'unit_conversion_id': selectedConversionId,
                                     'unit_conversion_name':
                                         selectedConversionName,
@@ -903,14 +1038,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                                 });
                                 setParentModalState(() {});
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Material berhasil ditambahkan',
-                                    ),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
+                                showSnackbar(context, {"message": 'Material berhasil ditambahkan'});
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -924,7 +1052,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               'Simpan',
                               style: heading3(
                                 FontWeight.w600,
-                                bnw100,
+                                Colors.white,
                                 'Outfit',
                               ),
                             ),
@@ -936,29 +1064,36 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
   void _showUnitConversionPicker(
-    BuildContext context,
     Map<String, dynamic> material,
     Function(String?, String, double) onSelected,
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Center(
                   child: Container(
@@ -975,43 +1110,53 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   'Pilih Unit Konversi',
                   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Default unit
-                ListTile(
-                  title: Text(
-                    material['unit_abbreviation'] ?? '',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  onTap: () {
-                    onSelected(null, material['unit_abbreviation'] ?? '', 1.0);
-                    Navigator.pop(context);
-                  },
-                ),
-                Divider(),
-                // Unit conversions
-                ..._unitConversions.map((conversion) {
-                  return ListTile(
-                    title: Text(
-                      conversion['conversion_name'] ?? '',
-                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    subtitle: Text(
-                      'Factor: ${conversion['conversion_factor']}',
-                      style: body2(FontWeight.w400, bnw500, 'Outfit'),
-                    ),
-                    onTap: () {
-                      onSelected(
-                        conversion['id'],
-                        conversion['conversion_name'] ?? '',
-                        double.tryParse(
-                              conversion['conversion_factor'].toString(),
-                            ) ??
+                Flexible(
+                  child: ListView(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          material['unit_abbreviation'] ?? '',
+                          style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        onTap: () {
+                          onSelected(
+                            null,
+                            material['unit_abbreviation'] ?? '',
                             1.0,
-                      );
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
+                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const Divider(),
+                      // Unit conversions
+                      ..._unitConversions.map((conversion) {
+                        return ListTile(
+                          title: Text(
+                            conversion['conversion_name'] ?? '',
+                            style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                          subtitle: Text(
+                            'Factor: ${conversion['conversion_factor']}',
+                            style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                          ),
+                          onTap: () {
+                            onSelected(
+                              conversion['id'],
+                              conversion['conversion_name'] ?? '',
+                              double.tryParse(
+                                    conversion['conversion_factor'].toString(),
+                                  ) ??
+                                  1.0,
+                            );
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -1020,7 +1165,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     );
   }
 
-  Future<void> _saveAdjustment() async {
+  Future<void> _savePurchase({bool addNew = false}) async {
     if (_titleController.text.isEmpty ||
         _selectedDate == null ||
         _selectedMaterials.isEmpty) {
@@ -1030,65 +1175,69 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       return;
     }
 
-    final dateStr = DateFormat('dd-MM-yyyy').format(_selectedDate!);
-    print('=== SAVE ADJUSTMENT DEBUG ===');
-    print('date: $dateStr, title: ${_titleController.text}');
-    print('materials: ${jsonEncode(_selectedMaterials)}');
-    final usageInventory = _selectedMaterials.map((material) {
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+    final orderInventory = _selectedMaterials.map((material) {
       return {
-        'inventory_master_id': material['id'].toString(),
-        'qty': (material['qty'] as num).toDouble(),
+        'inventory_master_id': material['id'],
+        'qty': material['qty'],
+        'price': material['price'],
         'unit_conversion_id': material['unit_conversion_id'],
       };
     }).toList();
-    print('usageInventory: ${jsonEncode(usageInventory)}');
 
     Map<String, dynamic>? result;
 
     if (widget.groupId != null) {
       // Update
-      result = await _updateAdjustment(
+      result = await _updatePurchase(
         dateStr,
         _titleController.text,
-        usageInventory,
+        orderInventory,
       );
     } else {
       // Create
-      result = await _createAdjustment(
+      result = await _createPurchase(
         dateStr,
         _titleController.text,
-        usageInventory,
+        orderInventory,
       );
     }
 
     if (result != null && result['rc'] == '00') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['rm'] ?? 'Berhasil menyimpan data')),
-      );
+      if (!mounted) return;
+      showSnackbar(context, result);
       widget.onSuccess();
-      Navigator.pop(context);
+
+      if (addNew) {
+        setState(() {
+          _titleController.clear();
+          _selectedDate = null;
+          _selectedMaterials.clear();
+        });
+      } else {
+        Navigator.pop(context);
+      }
     } else {
-      print('SAVE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result?['message'] ?? result?['rm'] ?? 'Gagal menyimpan data')),
-      );
+      debugPrint('SAVE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
+      if (!mounted) return;
+      showSnackbar(context, result ?? {"message": "Gagal menyimpan data"});
     }
   }
 
-  Future<Map<String, dynamic>?> _createAdjustment(
+  Future<Map<String, dynamic>?> _createPurchase(
     String date,
     String title,
-    List<Map<String, dynamic>> usageInventory,
+    List<Map<String, dynamic>> orderInventory,
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/create'),
+        Uri.parse('$url/api/inventory/purchase/create'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
           "date": date,
           "title": title,
-          "usage_inventory": usageInventory,
+          "order_inventory": orderInventory,
           if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
@@ -1096,29 +1245,29 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
+        debugPrint('API ERROR RESPONSE CREATE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
 
-  Future<Map<String, dynamic>?> _updateAdjustment(
+  Future<Map<String, dynamic>?> _updatePurchase(
     String date,
     String title,
-    List<Map<String, dynamic>> usageInventory,
+    List<Map<String, dynamic>> orderInventory,
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/update'),
+        Uri.parse('$url/api/inventory/purchase/update'),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier,
           "group_id": widget.groupId,
           "date": date,
           "title": title,
-          "usage_inventory": usageInventory,
+          "order_inventory": orderInventory,
           if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
@@ -1126,12 +1275,29 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
+        debugPrint('API ERROR RESPONSE UPDATE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
+  }
+
+  String _formatQtySmart(double v) {
+    if (v == 0) return '0';
+    if (v == v.toInt()) return v.toInt().toString();
+    return v.toString().replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+  }
+
+  String _formatCurrency(dynamic value) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(
+      value is num ? value : (num.tryParse(value.toString()) ?? 0),
+    );
   }
 
   @override
@@ -1139,197 +1305,236 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     return SafeArea(
       top: false,
       child: Scaffold(
-        backgroundColor: bnw100,
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: bnw100,
+          backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Tambah Penyesuaian',
+            'Tambah Persediaan',
             style: heading1(FontWeight.w700, bnw900, 'Outfit'),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Judul',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    '*',
-                    style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: 'Cth: Pembelian Matcha',
-                  hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
-                  filled: false,
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: bnw300),
-                  ),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: bnw300),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: primary500, width: 2),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12),
-                ),
-                style: body1(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Text(
-                    'Tanggal',
-                    style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    '*',
-                    style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              InkWell(
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (date != null) {
-                    setState(() => _selectedDate = date);
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: bnw300)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _selectedDate != null
-                            ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
-                            : 'Pilih tanggal',
-                        style: body1(
-                          FontWeight.w400,
-                          _selectedDate != null ? bnw900 : bnw400,
-                          'Outfit',
-                        ),
-                      ),
-                      Icon(PhosphorIcons.calendar_blank, color: bnw600),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Penyesuaian yang akan disesuaikan',
-                style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              SizedBox(height: 16),
-              if (_selectedMaterials.isEmpty)
-                InkWell(
-                  onTap: _showMaterialPicker,
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(40),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: bnw300),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Judul',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
                     ),
-                    child: Column(
+                    SizedBox(width: 4),
+                    Text(
+                      '*',
+                      style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    hintText: 'Cth: Pembelian Matcha',
+                    hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
+                    filled: false,
+                    border: UnderlineInputBorder(
+                      borderSide: BorderSide(color: bnw300),
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: bnw300),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: primary500, width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 24),
+                Row(
+                  children: [
+                    Text(
+                      'Tanggal',
+                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '*',
+                      style: heading4(FontWeight.w600, Colors.red, 'Outfit'),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                InkWell(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setState(() => _selectedDate = date);
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: bnw300)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(PhosphorIcons.package, size: 48, color: bnw400),
-                        SizedBox(height: 12),
                         Text(
-                          'Masukan data pembelian',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          _selectedDate != null
+                              ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
+                              : 'Pilih tanggal',
+                          style: body1(
+                            FontWeight.w400,
+                            _selectedDate != null ? bnw900 : bnw400,
+                            'Outfit',
+                          ),
                         ),
+                        Icon(PhosphorIcons.calendar_blank, color: bnw600),
                       ],
                     ),
                   ),
-                )
-              else
-                ..._selectedMaterials.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final material = entry.value;
-      
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 12),
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: bnw300),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Persediaan yang akan dipesan',
+                  style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  '* Jika jumlah bahan (qty) bernilai negatif, maka saat ditambahkan kedalam persediaan, perhitungannya akan dimulai dari nol, bukan dari nilai negatif',
+                  style: body2(FontWeight.w400, Colors.red, 'Outfit'),
+                ),
+                SizedBox(height: 16),
+                if (_selectedMaterials.isEmpty)
+                  InkWell(
+                    onTap: _showMaterialPicker,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(40),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: bnw300),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(PhosphorIcons.package, size: 48, color: bnw400),
+                          SizedBox(height: 12),
+                          Text(
+                            'Masukan data pembelian',
+                            style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  )
+                else
+                  ..._selectedMaterials.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final material = entry.value;
+                    final totalPrice = material['qty'] * material['price'];
+          
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: bnw300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                material['name'],
-                                style: heading3(
-                                  FontWeight.w600,
-                                  bnw900,
-                                  'Outfit',
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      material['name'],
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    Text(
+                                      material['unit_conversion_name'],
+                                      style: body2(
+                                        FontWeight.w400,
+                                        bnw500,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                material['unit_conversion_name'],
-                                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                              IconButton(
+                                icon: Icon(PhosphorIcons.x, color: Colors.red),
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedMaterials.removeAt(index);
+                                  });
+                                },
                               ),
                             ],
                           ),
-                        ),
-                        Text(
-                          '${material['qty'].toStringAsFixed(0)}x',
-                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-                        ),
-                        SizedBox(width: 12),
-                        IconButton(
-                          icon: Icon(PhosphorIcons.x, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _selectedMaterials.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-            ],
+                          SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${formatQty(material['qty'])}x',
+                                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    _formatCurrency(material['price']),
+                                    style: body2(FontWeight.w400, bnw600, 'Outfit'),
+                                  ),
+                                  Text(
+                                    _formatCurrency(totalPrice),
+                                    style: heading3(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: bnw100,
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: Offset(0, -5),
               ),
@@ -1349,7 +1554,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   minimumSize: Size(double.infinity, 50),
                 ),
                 child: Text(
-                  'Penyesuaian',
+                  'Persediaan',
                   style: heading3(FontWeight.w600, primary500, 'Outfit'),
                 ),
               ),
@@ -1358,7 +1563,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => _savePurchase(addNew: true),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: primary500),
@@ -1367,7 +1572,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                         ),
                       ),
                       child: Text(
-                        'Save & Add New',
+                        'Simpan & Tambah Baru',
                         style: heading3(FontWeight.w600, primary500, 'Outfit'),
                       ),
                     ),
@@ -1375,7 +1580,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _saveAdjustment,
+                      onPressed: () => _savePurchase(addNew: false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primary500,
                         padding: EdgeInsets.symmetric(vertical: 16),
@@ -1384,8 +1589,8 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                         ),
                       ),
                       child: Text(
-                        'Create',
-                        style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        'Tambah Persediaan',
+                        style: heading3(FontWeight.w600, Colors.white, 'Outfit'),
                       ),
                     ),
                   ),

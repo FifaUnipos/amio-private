@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:intl/intl.dart';
@@ -10,21 +11,19 @@ import 'package:unipos_app_335/utils/component/component_color.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
-import 'package:unipos_app_335/utils/utilities.dart';
-import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
+// (Multiple imports removed)
 import 'package:url_launcher/url_launcher.dart';
-
-class AdjustmentTab extends StatefulWidget {
+import 'package:unipos_app_335/utils/component/component_button.dart';class AdjustmentTab extends StatefulWidget {
   final String token;
   final String merchantId;
   final String typeMerchant;
 
-  AdjustmentTab({
-    Key? key,
+  const AdjustmentTab({
+    super.key,
     required this.token,
     required this.merchantId,
     required this.typeMerchant,
-  }) : super(key: key);
+  });
 
   @override
   AdjustmentTabState createState() => AdjustmentTabState();
@@ -62,7 +61,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -79,7 +78,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -95,12 +94,12 @@ class AdjustmentTabState extends State<AdjustmentTab> {
           if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
         }),
       );
-      print('DELETE ADJ RESPONSE: ${response.statusCode} ${response.body}');
+      debugPrint('DELETE ADJ RESPONSE: ${response.statusCode} ${response.body}');
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -127,27 +126,34 @@ class AdjustmentTabState extends State<AdjustmentTab> {
             try {
               await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
             } catch (e) {
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal membuka link')));
+              if (mounted) showSnackbar(context, {"message": 'Gagal membuka link'});
             }
           } else {
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Link kosong')));
+            if (mounted) showSnackbar(context, data ?? {"message": 'Link kosong'});
           }
         } else {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Gagal download')));
+          if (mounted) showSnackbar(context, data ?? {"message": 'Gagal download'});
         }
       }
     } catch (e) {
       closeLoading(context);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghubungkan ke server')));
+      if (mounted) showSnackbar(context, {"message": 'Gagal menghubungkan ke server'});
     }
   }
 
-  Future<void> _fetchAdjustments() async {
+  Future<void> _fetchAdjustments({String? query}) async {
     setState(() => _isLoading = true);
     try {
       final data = await _getAdjustmentList();
+      List<dynamic> list = data?['data'] ?? [];
+      if (query != null && query.isNotEmpty) {
+        list = list.where((item) {
+          final title = (item['title'] ?? '').toString().toLowerCase();
+          return title.contains(query.toLowerCase());
+        }).toList();
+      }
       setState(() {
-        _adjustments = data?['data'] ?? [];
+        _adjustments = list;
         _isLoading = false;
       });
     } catch (e) {
@@ -155,51 +161,79 @@ class AdjustmentTabState extends State<AdjustmentTab> {
     }
   }
 
-  void _showOptionsModal(String groupId) {
+  void search(String value) {
+    _fetchAdjustments(query: value);
+  }
+
+  void _showOptionsModal(String groupId, String title, String date) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                            ),
+                            Text(
+                              date,
+                              style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(PhosphorIcons.x, color: bnw900),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.pencil, color: primary500),
-                  title: Text('Update', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.pencil_line, color: bnw900),
+                  title: Text('Ubah Penyesuaian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _navigateToUpdateAdjustment(groupId);
                   },
                 ),
-                Divider(),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.download, color: bnw900),
-                  title: Text('Download', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.download_simple, color: bnw900),
+                  title: Text('Download Penyesuaian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _downloadItem(groupId);
                   },
                 ),
-                Divider(),
+                Divider(height: 1, color: bnw300),
                 ListTile(
-                  leading: Icon(PhosphorIcons.trash, color: Colors.red),
-                  title: Text('Delete', style: heading3(FontWeight.w600, Colors.red, 'Outfit')),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(PhosphorIcons.trash, color: bnw900),
+                  title: Text('Hapus Penyesuaian', style: heading3(FontWeight.w400, bnw900, 'Outfit')),
                   onTap: () {
                     Navigator.pop(context);
                     _confirmDelete(groupId);
@@ -216,6 +250,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
   void _confirmDelete(String groupId) {
     showModalBottomSheet(
       context: context,
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -257,13 +292,7 @@ class AdjustmentTabState extends State<AdjustmentTab> {
                           final result = await _deleteAdjustment([groupId]);
                           print('DELETE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(
-                                result != null && result['rc'] == '00'
-                                    ? (result['message'] ?? result['rm'] ?? 'Berhasil menghapus data')
-                                    : (result?['message'] ?? result?['rm'] ?? 'Gagal menghapus data'),
-                              )),
-                            );
+                            showSnackbar(context, result ?? {"message": "Gagal menghapus data"});
                             if (result != null && result['rc'] == '00') {
                               _fetchAdjustments();
                             }
@@ -337,65 +366,104 @@ class AdjustmentTabState extends State<AdjustmentTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _adjustments.isEmpty
-          ? Center(
-              child: Text(
-                'Tidak ada data penyesuaian',
-                style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+      body: Column(
+        children: [
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: primary500,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(size16),
+                topRight: Radius.circular(size16),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: _adjustments.length,
-              itemBuilder: (context, index) {
-                final adjustment = _adjustments[index];
-                return Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: bnw100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: bnw200),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: size16),
+                    child: Text('Judul', style: heading4(FontWeight.w700, bnw100, 'Outfit')),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                Expanded(flex: 4, child: Text('Tanggal Penyesuaian', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: 90, child: Text('Aksi', style: heading4(FontWeight.w600, bnw100, 'Outfit'))),
+                SizedBox(width: size16),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _adjustments.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tidak ada data penyesuaian',
+                      style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: _adjustments.length,
+                    itemBuilder: (context, index) {
+                      final adjustment = _adjustments[index];
+                      return Container(
+                        padding: EdgeInsets.symmetric(vertical: size12),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: bnw300, width: 1)),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              adjustment['title'] ?? '',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
+                            Expanded(
+                              flex: 4,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: size16),
+                                child: Text(
+                                  adjustment['title'] ?? '',
+                                  style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              adjustment['activity_date'] ?? '',
-                              style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                            Expanded(
+                              flex: 4,
+                              child: Text(
+                                adjustment['activity_date'] ?? '',
+                                style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              ),
                             ),
+                            SizedBox(
+                              width: 90,
+                              child: _canAdjust ? GestureDetector(
+                                onTap: () => _showOptionsModal(
+                                  adjustment['group_id'],
+                                  adjustment['title'] ?? '',
+                                  adjustment['activity_date'] ?? '',
+                                ),
+                                child: buttonL(
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(PhosphorIcons.pencil_line_fill, color: bnw900, size: size20),
+                                      SizedBox(width: size4),
+                                      Text('Atur', style: heading4(FontWeight.w600, bnw900, 'Outfit')),
+                                    ],
+                                  ),
+                                  bnw100,
+                                  bnw300,
+                                ),
+                              ) : SizedBox(),
+                            ),
+                            SizedBox(width: size16),
                           ],
                         ),
-                      ),
-                      if (_canAdjust)
-                        InkWell(
-                          onTap: () =>
-                              _showOptionsModal(adjustment['group_id']),
-                          child: Icon(
-                            PhosphorIcons.pencil_simple,
-                            color: bnw600,
-                            size: 20,
-                          ),
-                        ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -410,15 +478,15 @@ class AddAdjustmentPage extends StatefulWidget {
   final String? groupId;
   final Map<String, dynamic>? existingData;
 
-  AddAdjustmentPage({
-    Key? key,
+  const AddAdjustmentPage({
+    super.key,
     required this.token,
     required this.merchantId,
     required this.typeMerchant,
     required this.onSuccess,
     this.groupId,
     this.existingData,
-  }) : super(key: key);
+  });
 
   @override
   _AddAdjustmentPageState createState() => _AddAdjustmentPageState();
@@ -466,11 +534,19 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         if (dateStr != null) {
           final parts = dateStr.split('-');
           if (parts.length == 3) {
-            _selectedDate = DateTime(
-              int.parse(parts[2]),
-              int.parse(parts[1]),
-              int.parse(parts[0]),
-            );
+            int year, month, day;
+            if (parts[0].length == 4) {
+              // yyyy-MM-dd
+              year = int.parse(parts[0]);
+              month = int.parse(parts[1]);
+              day = int.parse(parts[2]);
+            } else {
+              // dd-MM-yyyy
+              year = int.parse(parts[2]);
+              month = int.parse(parts[1]);
+              day = int.parse(parts[0]);
+            }
+            _selectedDate = DateTime(year, month, day);
           }
         }
       } catch (e) {
@@ -519,7 +595,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -539,7 +615,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
@@ -548,7 +624,8 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StatefulBuilder(
@@ -556,7 +633,11 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           return SafeArea(
             child: Container(
               height: MediaQuery.of(context).size.height * 0.7,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
               child: Column(
                 children: [
                   Center(
@@ -758,7 +839,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primary500.withOpacity(0.1),
+                        color: primary500.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -793,7 +874,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           SizedBox(height: 12),
                           if (calculatedQty > 0)
                             Text(
-                              '${qtyController.text} qty = ${calculatedQty.toStringAsFixed(0)} ${material['unit_abbreviation']}',
+                              '${qtyController.text} qty = ${formatQty(calculatedQty)} ${material['unit_abbreviation']}',
                               style: body2(FontWeight.w400, bnw600, 'Outfit'),
                             ),
                           Divider(height: 24),
@@ -808,7 +889,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                               Expanded(
                                 child: InkWell(
                                   onTap: () {
-                                    _showUnitConversionPicker(context, material, (
+                                    _showUnitConversionPicker(material, (
                                       conversionId,
                                       conversionName,
                                       factor,
@@ -903,14 +984,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                                 });
                                 setParentModalState(() {});
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Material berhasil ditambahkan',
-                                    ),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
+                                showSnackbar(context, {"message": 'Material berhasil ditambahkan'});
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -944,19 +1018,24 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
   }
 
   void _showUnitConversionPicker(
-    BuildContext context,
     Map<String, dynamic> material,
     Function(String?, String, double) onSelected,
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1030,7 +1109,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
       return;
     }
 
-    final dateStr = DateFormat('dd-MM-yyyy').format(_selectedDate!);
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
     print('=== SAVE ADJUSTMENT DEBUG ===');
     print('date: $dateStr, title: ${_titleController.text}');
     print('materials: ${jsonEncode(_selectedMaterials)}');
@@ -1062,16 +1141,12 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
     }
 
     if (result != null && result['rc'] == '00') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['rm'] ?? 'Berhasil menyimpan data')),
-      );
+      showSnackbar(context, result);
       widget.onSuccess();
       Navigator.pop(context);
     } else {
       print('SAVE RESPONSE: ${result != null ? jsonEncode(result) : "NULL"}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result?['message'] ?? result?['rm'] ?? 'Gagal menyimpan data')),
-      );
+      showSnackbar(context, result ?? {"message": "Gagal menyimpan data"});
     }
   }
 
@@ -1099,41 +1174,55 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
         print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
     return null;
   }
 
   Future<Map<String, dynamic>?> _updateAdjustment(
-    String date,
-    String title,
-    List<Map<String, dynamic>> usageInventory,
-  ) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$url/api/inventory/adjustment/update'),
-        headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "deviceid": identifier,
-          "group_id": widget.groupId,
-          "date": date,
-          "title": title,
-          "usage_inventory": usageInventory,
-          if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
-        }),
-      );
+  String date,
+  String title,
+  List<Map<String, dynamic>> usageInventory,
+) async {
+  try {
+    final payload = {
+      "deviceid": identifier,
+      "group_id": widget.groupId,
+      "date": date,
+      "title": title,
+      "usage_inventory": usageInventory,
+      if (widget.merchantId.isNotEmpty) "merchant_id": widget.merchantId,
+    };
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
-      }
-    } catch (e) {
-      print('Error: $e');
+    // ✅ Print payload
+    print('========== _updateAdjustment PAYLOAD ==========');
+    print('URL: $url/api/inventory/adjustment/update');
+    print('token: ${widget.token}');
+    print('payload: ${jsonEncode(payload)}');
+    print('===============================================');
+
+    final response = await http.post(
+      Uri.parse('$url/api/inventory/adjustment/update'),
+      headers: {'token': widget.token, 'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    // ✅ Print response
+    print('========== _updateAdjustment RESPONSE ==========');
+    print('status: ${response.statusCode}');
+    print('body: ${response.body}');
+    print('=================================================');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('API ERROR RESPONSE: ${response.statusCode}\n${response.body}');
     }
-    return null;
+  } catch (e) {
+    debugPrint('Error: $e');
   }
-
+  return null;
+}
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -1153,7 +1242,6 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1227,7 +1315,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                     children: [
                       Text(
                         _selectedDate != null
-                            ? DateFormat('dd-MM-yyyy').format(_selectedDate!)
+                            ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
                             : 'Pilih tanggal',
                         style: body1(
                           FontWeight.w400,
@@ -1304,7 +1392,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
                           ),
                         ),
                         Text(
-                          '${material['qty'].toStringAsFixed(0)}x',
+                          '${formatQty(material['qty'])}x',
                           style: heading3(FontWeight.w600, bnw900, 'Outfit'),
                         ),
                         SizedBox(width: 12),
@@ -1329,7 +1417,7 @@ class _AddAdjustmentPageState extends State<AddAdjustmentPage> {
             color: bnw100,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: Offset(0, -5),
               ),

@@ -108,23 +108,23 @@ class LaporanPage extends StatelessWidget {
                 );
               },
             ),
-            _buildReportCard(
-              context,
-              title: 'Stock Inventaris',
-              subtitle: 'Laporan stok inventaris',
-              icon: PhosphorIcons.package_fill,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LaporanStokPage(
-                      token: token,
-                      merchantId: merchantId,
-                    ),
-                  ),
-                );
-              },
-            ),
+            // _buildReportCard(
+            //   context,
+            //   title: 'Stock Inventaris',
+            //   subtitle: 'Laporan stok inventaris',
+            //   icon: PhosphorIcons.package_fill,
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => LaporanStokPage(
+            //           token: token,
+            //           merchantId: merchantId,
+            //         ),
+            //       ),
+            //     );
+            //   },
+            // ),
             _buildReportCard(
               context,
               title: 'Pergerakan Inventaris',

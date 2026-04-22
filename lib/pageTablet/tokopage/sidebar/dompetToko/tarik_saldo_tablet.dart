@@ -47,10 +47,29 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
   List<_BankOption> _bankList = [];
   bool _isLoadingBanks = true;
 
+  double _feeValue = 0;
+  String _feeOperation = 'nominal';
+
   @override
   void initState() {
     super.initState();
     _fetchBanks();
+    _fetchFee();
+  }
+
+  Future<void> _fetchFee() async {
+    try {
+      final res = await http.post(
+        Uri.parse('$url/api/fee/withdraw'),
+        headers: {'Content-Type': 'application/json', 'token': widget.token},
+      );
+      final json = jsonDecode(res.body);
+      if (json['rc'] == '00') {
+        _feeValue = double.tryParse(json['data']['fee'].toString()) ?? 0;
+        _feeOperation = (json['data']['operation'] ?? 'nominal').toString().toLowerCase();
+      }
+    } catch(e) {}
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchBanks() async {
@@ -96,7 +115,15 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
   // â”€â”€ Nominal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   final _amountCtrl = TextEditingController();
   double _amount = 0;
-  double get _fee => _amount * 0.10;
+  
+  double get _fee {
+    if (_feeOperation == 'percentage') {
+      return _amount * (_feeValue / 100.0);
+    } else {
+      return _amount > 0 ? _feeValue : 0;
+    }
+  }
+
   double get _net => _amount > 0 ? (_amount - _fee) : 0;
 
   final _fmt = NumberFormat('#,###', 'id_ID');
@@ -131,7 +158,7 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
   String _rp(double v) => _fmtRp.format(v.toInt());
 
   bool get _canSubmit =>
-      _amount > 0 &&
+      _amount >= 10000 &&
       _nameCtrl.text.trim().isNotEmpty &&
       _accountCtrl.text.trim().isNotEmpty &&
       _selectedBank != null &&
@@ -246,6 +273,14 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
               _sectionHeader(widget.isGroupMerchant ? '2. Nominal Penarikan' : '1. Nominal Penarikan', null),
               const SizedBox(height: 12),
               _amountCard(),
+              if (_amount > 0 && _amount < 10000)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 4),
+                  child: Text(
+                    'Minimal penarikan adalah Rp 10.000',
+                    style: body2(FontWeight.w500, const Color(0xFFDC2626), 'Outfit'),
+                  ),
+                ),
               const SizedBox(height: 24),
 
               // 3. Tujuan Transfer
@@ -432,7 +467,7 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
         const SizedBox(height: 24),
         _formLabel('NAMA PEMILIK AKUN', required: true),
         const SizedBox(height: 8),
-        _textField(_nameCtrl, 'Contoh: ALEXANDER VANCE', textCapitalization: TextCapitalization.characters),
+        _textField(_nameCtrl, 'Contoh: ALEXANDER VANCE', textCapitalization: TextCapitalization.characters, inputFormatters: [UpperCaseTextFormatter()]),
         const SizedBox(height: 20),
         // Bank code + account number side by side on tablet
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -492,11 +527,12 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
     ]);
   }
 
-  Widget _textField(TextEditingController ctrl, String hint, {TextInputType? keyboardType, TextCapitalization textCapitalization = TextCapitalization.none}) {
+  Widget _textField(TextEditingController ctrl, String hint, {TextInputType? keyboardType, TextCapitalization textCapitalization = TextCapitalization.none, List<TextInputFormatter>? inputFormatters}) {
     return TextField(
       controller: ctrl,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
       onChanged: (_) => setState(() {}),
       style: body1(FontWeight.w400, bnw900, 'Outfit'),
       decoration: InputDecoration(
@@ -511,64 +547,116 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
 
   void _showBankPicker() {
     String q = '';
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx2, setModal) {
-        final filtered = _filteredBanks.where((b) =>
-            b.name.toLowerCase().contains(q.toLowerCase()) || b.code.toLowerCase().contains(q.toLowerCase())).toList();
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 60, vertical: 40),
-          child: SizedBox(
-            width: 480,
-            height: MediaQuery.of(ctx2).size.height * 0.65,
-            child: Column(children: [
-              Padding(padding: const EdgeInsets.fromLTRB(20, 20, 16, 12), child: Row(children: [
-                Expanded(child: Text(_destTab == 0 ? 'Pilih Bank' : 'Pilih E-Wallet', style: heading2(FontWeight.w700, bnw900, 'Outfit'))),
-                IconButton(icon: Icon(Icons.close, color: bnw600), onPressed: () => Navigator.pop(ctx)),
-              ])),
-              Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 12), child: Container(
-                decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(10)),
-                child: TextField(
-                  onChanged: (v) => setModal(() => q = v),
-                  style: body1(FontWeight.w400, bnw900, 'Outfit'),
-                  decoration: InputDecoration(
-                    hintText: 'Cari...',
-                    hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
-                    prefixIcon: Icon(Icons.search, color: bnw400, size: 20),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  ),
-                ),
-              )),
-              Expanded(child: _isLoadingBanks 
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                itemCount: filtered.length,
-                itemBuilder: (_, i) {
-                  final b = filtered[i];
-                  final isSelected = _selectedBank?.code == b.code;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    onTap: () { setState(() => _selectedBank = b); Navigator.pop(ctx); },
-                    leading: Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(8)),
-                      child: b.image != null && b.image!.isNotEmpty
-                          ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(b.image!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(b.isEwallet ? PhosphorIcons.device_mobile : PhosphorIcons.bank, color: primary500, size: 18)))
-                          : Icon(b.isEwallet ? PhosphorIcons.device_mobile : PhosphorIcons.bank, color: primary500, size: 18),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(builder: (ctx2, setModal) {
+          final filtered = _filteredBanks
+              .where((b) =>
+                  b.name.toLowerCase().contains(q.toLowerCase()) ||
+                  b.code.toLowerCase().contains(q.toLowerCase()))
+              .toList();
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx2).viewInsets.bottom),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              maxChildSize: 0.9,
+              minChildSize: 0.4,
+              expand: false,
+              builder: (_, sc) {
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                    title: Text(b.name, style: body1(FontWeight.w600, bnw900, 'Outfit')),
-                    subtitle: Text(b.code, style: body2(FontWeight.w400, bnw500, 'Outfit')),
-                    trailing: isSelected ? Icon(Icons.check_circle, color: primary500) : null,
-                  );
-                },
-              )),
-            ]),
-          ),
-        );
-      }),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _destTab == 0 ? 'Pilih Bank' : 'Pilih E-Wallet',
+                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: TextField(
+                              onChanged: (v) => setModal(() => q = v),
+                              style: body1(FontWeight.w400, bnw900, 'Outfit'),
+                              decoration: InputDecoration(
+                                hintText: 'Cari...',
+                                hintStyle: body1(FontWeight.w400, bnw400, 'Outfit'),
+                                prefixIcon: Icon(Icons.search, color: bnw400, size: 20),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: _isLoadingBanks 
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                        controller: sc,
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                        itemCount: filtered.length,
+                        itemBuilder: (_, i) {
+                          final b = filtered[i];
+                          final isSelected = _selectedBank?.code == b.code;
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            onTap: () {
+                              setState(() => _selectedBank = b);
+                              Navigator.pop(ctx);
+                            },
+                            leading: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: b.image != null && b.image!.isNotEmpty
+                                  ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(b.image!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(b.isEwallet ? PhosphorIcons.device_mobile : PhosphorIcons.bank, color: primary500, size: 18)))
+                                  : Icon(
+                                b.isEwallet
+                                    ? PhosphorIcons.device_mobile
+                                    : PhosphorIcons.bank,
+                                color: primary500,
+                                size: 18,
+                              ),
+                            ),
+                            title: Text(b.name, style: body1(FontWeight.w600, bnw900, 'Outfit')),
+                            subtitle: Text(b.code, style: body2(FontWeight.w400, bnw500, 'Outfit')),
+                            trailing: isSelected ? Icon(Icons.check_circle, color: primary500) : null,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        });
+      },
     );
   }
 
@@ -585,6 +673,16 @@ class _TarikSaldoTabletPageState extends State<TarikSaldoTabletPage> {
     _nameCtrl.dispose();
     _accountCtrl.dispose();
     super.dispose();
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
   }
 }
 

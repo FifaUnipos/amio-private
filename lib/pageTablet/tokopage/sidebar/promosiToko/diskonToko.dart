@@ -1286,145 +1286,147 @@ class _DiskonTokoState extends State<DiskonToko> {
             ),
             context: context,
             builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) => IntrinsicHeight(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      size32,
-                      size16,
-                      size32,
-                      size32,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size12),
-                        topLeft: Radius.circular(size12),
+              return SafeArea(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
                       ),
-                    ),
-                    child: Column(
-                      children: [
-                        dividerShowdialog(),
-                        SizedBox(height: size16),
-                        Container(
-                          width: double.infinity,
-                          color: bnw100,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Urutkan',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                'Tentukan data yang akan tampil',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw600,
-                                  'Outfit',
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              Text(
-                                'Pilih Urutan',
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Wrap(
-                                children: List<Widget>.generate(
-                                  orderByDiscountText.length,
-                                  (int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(right: size16),
-                                      child: ChoiceChip(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: size12,
-                                        ),
-                                        backgroundColor: bnw100,
-                                        selectedColor: primary100,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: valueOrderByDiscount == index
-                                                ? primary500
-                                                : bnw300,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                        ),
-                                        label: Text(
-                                          orderByDiscountText[index],
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            valueOrderByDiscount == index
-                                                ? primary500
-                                                : bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        selected: valueOrderByDiscount == index,
-                                        onSelected: (bool selected) {
-                                          setState(() {
-                                            print(index);
-                                            // _value =
-                                            //     selected ? index : null;
-                                            valueOrderByDiscount = index;
-                                          });
-                                          setState(() {});
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
-                              ),
-                            ],
-                          ),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
                         ),
-                        SizedBox(height: size32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: GestureDetector(
-                            onTap: () async {
-                              confirmed = true;
-                              textOrderByDiscount =
-                                  orderByDiscountText[valueOrderByDiscount];
-                              textvalueOrderByDiscount =
-                                  orderByDiscount[valueOrderByDiscount];
-                              final result = await getDiskon(
-                                context,
-                                checkToken,
-                                merchantId,
-                                textvalueOrderByDiscount,
-                              );
-                              if (!mounted) return;
-                              outerSetState(() {
-                                datasProduk = result;
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: buttonXL(
-                              Center(
-                                child: Text(
-                                  'Tampilkan',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    bnw100,
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                    FontWeight.w700,
+                                    bnw900,
                                     'Outfit',
                                   ),
                                 ),
-                              ),
-                              0,
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByDiscountText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: size12,
+                                          ),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color: valueOrderByDiscount == index
+                                                  ? primary500
+                                                  : bnw300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                          ),
+                                          label: Text(
+                                            orderByDiscountText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByDiscount == index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          selected: valueOrderByDiscount == index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByDiscount = index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: GestureDetector(
+                              onTap: () async {
+                                confirmed = true;
+                                textOrderByDiscount =
+                                    orderByDiscountText[valueOrderByDiscount];
+                                textvalueOrderByDiscount =
+                                    orderByDiscount[valueOrderByDiscount];
+                                final result = await getDiskon(
+                                  context,
+                                  checkToken,
+                                  merchantId,
+                                  textvalueOrderByDiscount,
+                                );
+                                if (!mounted) return;
+                                outerSetState(() {
+                                  datasProduk = result;
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tampilkan',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -137,11 +137,11 @@ class _LaporanTokoState extends State<LaporanToko> {
         'Laporan Pendapatan Per Metode Pembayaran',
         PhosphorIcons.credit_card_fill,
       ),
-      ObjectLaporan(
-        'Stok Inventaris',
-        'Laporan Stok Inventaris',
-        PhosphorIcons.clipboard_fill,
-      ),
+      // ObjectLaporan(
+      //   'Stok Inventaris',
+      //   'Laporan Stok Inventaris',
+      //   PhosphorIcons.clipboard_fill,
+      // ),
       ObjectLaporan(
         'Pergerakan Inventaris',
         'Laporan Pergerakan Inventaris',
@@ -199,10 +199,10 @@ class _LaporanTokoState extends State<LaporanToko> {
                 pageController: pageController,
                 token: widget.token,
               ),
-              LaporanStokInventarisPage(
-                pageController: pageController,
-                token: widget.token,
-              ),
+              // LaporanStokInventarisPage(
+              //   pageController: pageController,
+              //   token: widget.token,
+              // ),
               LaporanPergerakanInventarisPage(
                 pageController: pageController,
                 token: widget.token,

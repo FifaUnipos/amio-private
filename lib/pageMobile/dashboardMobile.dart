@@ -75,6 +75,18 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
   late Future<dynamic> futureDashboard;
   late Future<dynamic> futureDashboardSide;
 
+  Map<String, dynamic>? _walletData;
+  bool _walletLoading = false;
+
+  Future<void> _fetchWalletBalance() async {
+    setState(() => _walletLoading = true);
+    final result = await getWalletBalance(widget.token);
+    setState(() {
+      _walletData = result;
+      _walletLoading = false;
+    });
+  }
+
   bool get isCashier => roleProfile?.toLowerCase() == 'cashier';
 
   int selectedAppBarIndex = 0;
@@ -110,6 +122,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
     selectedIndex = widget.initialIndex;
     checkConnection(context);
     checkEmail(context, setState);
+    _fetchWalletBalance();
     getKulasedaya(context, widget.token, '');
     dashboardKulasedaya(widget.token);
     myprofile(widget.token);
@@ -232,7 +245,11 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                           selectedIndex: selectedIndex,
                           onTap: () {
                             setState(() => selectedIndex = 0);
-                            context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                            context.read<WebSocketService>().connect(
+                              checkToken,
+                              identifier,
+                              merchantId: merchantIdProfile,
+                            );
                           },
                         ),
                         const SizedBox(width: 8),
@@ -399,7 +416,11 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     token: checkToken,
                     featureTitle: 'Transaksi',
                     featureBuilder: (merchantId) {
-                      context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                      context.read<WebSocketService>().connect(
+                        checkToken,
+                        identifier,
+                        merchantId: merchantIdProfile,
+                      );
                       return TransaksiMobilePage(
                         token: widget.token,
                         merchantId: merchantId,
@@ -407,7 +428,11 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     },
                   )
                 : (() {
-                    context.read<WebSocketService>().connect(checkToken, identifier, merchantId: merchantIdProfile);
+                    context.read<WebSocketService>().connect(
+                      checkToken,
+                      identifier,
+                      merchantId: merchantIdProfile,
+                    );
                     return TransaksiMobilePage(
                       token: widget.token,
                       merchantId: merchantIdProfile ?? '',
@@ -1017,8 +1042,10 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                               color: primary100,
                               borderRadius: BorderRadius.circular(size16),
                             ),
-                            child: Column(
+                            child: // ✅ Ganti jadi Column 2 baris:
+                            Column(
                               children: [
+                                // Baris 1 — FifaPay
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -1027,9 +1054,9 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                       children: [
                                         Image.asset(
                                           'assets/images/fifapaylogo.png',
-                                          height: 40,
+                                          height: 32,
                                         ),
-                                        SizedBox(width: size12),
+                                        SizedBox(width: size8),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -1062,7 +1089,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                       FormatCurrency.convertToIdr(
                                         int.tryParse(data.saldo) ?? 0,
                                       ),
-                                      style: heading1(
+                                      style: heading2(
                                         FontWeight.w700,
                                         bnw900,
                                         'Outfit',
@@ -1070,26 +1097,58 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                                     ),
                                   ],
                                 ),
-                                if (!data.status) ...[
-                                  SizedBox(height: size16),
-                                  GestureDetector(
-                                    onTap: () => _pageController.jumpToPage(1),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: buttonXL(
-                                        Center(
-                                          child: Text(
-                                            'Hubungkan FifaPay',
-                                            style: heading3(
+
+                                // Baris 2 — Unipos (hanya kalau Group_Merchant)
+                                if (merchantType == 'Group_Merchant' ||
+                                    roleProfile == 'admin') ...[
+                                  SizedBox(height: size8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/UniPOSLogo.png',
+                                            height: 40,
+                                            color: primary500,
+                                          ),
+                                          SizedBox(width: size8),
+                                          Text(
+                                            'Unipos',
+                                            style: heading2(
                                               FontWeight.w600,
-                                              bnw100,
+                                              bnw900,
                                               'Outfit',
                                             ),
                                           ),
-                                        ),
-                                        MediaQuery.of(context).size.width,
+                                        ],
                                       ),
-                                    ),
+                                      _walletLoading
+                                          ? SizedBox(
+                                              width: 14,
+                                              height: 14,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: primary500,
+                                              ),
+                                            )
+                                          : Text(
+                                              FormatCurrency.convertToIdr(
+                                                int.tryParse(
+                                                      _walletData?['total_available_balance']
+                                                              ?.toString() ??
+                                                          '0',
+                                                    ) ??
+                                                    0,
+                                              ),
+                                              style: heading2(
+                                                FontWeight.w700,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                    ],
                                   ),
                                 ],
                               ],

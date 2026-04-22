@@ -27,14 +27,18 @@ import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_adjustment_inventory_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_purchase_inventory_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_product_material_page.dart';
+import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoryTablet/tablet_unit_conversion_page.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
+
 import '../../../../models/inventoriModel/inventoriModel.dart';
 
 class InventoriPageMerchantOnly extends StatefulWidget {
   String token;
-  InventoriPageMerchantOnly({
-    Key? key,
-    required this.token,
-  }) : super(key: key);
+  InventoriPageMerchantOnly({Key? key, required this.token}) : super(key: key);
 
   @override
   State<InventoriPageMerchantOnly> createState() =>
@@ -56,6 +60,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
   Map<int, bool> selectedFlag = {};
   List<String> cartProductIds = [];
 
+  final GlobalKey<AdjustmentTabState> adjustmentTabKey =
+      GlobalKey<AdjustmentTabState>();
+  final GlobalKey<PurchaseTabState> purchaseTabKey =
+      GlobalKey<PurchaseTabState>();
+  final GlobalKey<ProductMaterialTabState> productMaterialTabKey =
+      GlobalKey<ProductMaterialTabState>();
+  final GlobalKey<UnitConversionTabState> unitConversionTabKey =
+      GlobalKey<UnitConversionTabState>();
+
   int pagesOn = 0;
 
   List<Map<String, String>> cartMap = [];
@@ -69,8 +82,9 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
   TextEditingController satuanController = TextEditingController();
   TextEditingController judulPembelian = TextEditingController();
   TextEditingController judulPenyesuaian = TextEditingController();
-  late TextEditingController judulEditPenyesuaian =
-      TextEditingController(text: titleEdit);
+  late TextEditingController judulEditPenyesuaian = TextEditingController(
+    text: titleEdit,
+  );
 
   String? idproductDetail;
 
@@ -86,13 +100,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
 
   void getMasterDataTokoAndUpdateState() async {
     try {
-      final result = await getMasterDataToko(
-        context,
-        widget.token,
-        "",
-        "",
-        "",
-      );
+      final result = await getMasterDataToko(context, widget.token, "", "", "");
       setState(() {
         dataPemakaian = result;
       });
@@ -104,28 +112,27 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
+
     checkConnection(context);
     getMasterDataTokoAndUpdateState();
     _getProductList();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        List<String> value = [''];
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      List<String> value = [''];
 
-        await getDataProduk(value);
+      await getDataProduk(value);
 
-        setState(() {
-          // log(datasProduk.toString());
-          datasProduk;
-        });
+      setState(() {
+        // log(datasProduk.toString());
+        datasProduk;
+      });
 
-        _pageController = PageController(
-          initialPage: 0,
-          keepPage: true,
-          viewportFraction: 1,
-        );
-      },
-    );
+      _pageController = PageController(
+        initialPage: 0,
+        keepPage: true,
+        viewportFraction: 1,
+      );
+    });
     getDataBahan(['']);
     datasBahan;
 
@@ -139,10 +146,27 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
   Future<dynamic> getDataBahan(List<String> value) async {
     return datasBahan = await getMasterData(
       widget.token,
-      '',
+      value.isNotEmpty ? value[0] : '',
       '',
       '',
     );
+  }
+
+  String _formatQty(dynamic val) {
+    if (val == null) return '0';
+    String strVal = val.toString();
+    try {
+      double v = double.parse(strVal);
+      if (v == v.toInt()) {
+        return v.toInt().toString();
+      }
+      return v
+          .toString()
+          .replaceAll(RegExp(r'0*$'), '')
+          .replaceAll(RegExp(r'\.$'), '');
+    } catch (_) {
+      return strVal;
+    }
   }
 
   Future<dynamic> getDataProduk(List<String> value) async {
@@ -153,14 +177,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
 
   void _onChanged(String value) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(Duration(seconds: 2), () async {
-      // datasTransaksi = await getProductTransaksi(
-      //   context,
-      //   widget.token,
-      //   value,
-      //   [''],
-      //   textvalueOrderBy,
-      // );
+    _debounce = Timer(Duration(seconds: 1), () async {
+      int idx = pagesOn;
+      if (idx == 0) {
+        await getDataBahan([value]);
+      } else if (idx == 1) {
+        purchaseTabKey.currentState?.search(value);
+      } else if (idx == 2) {
+        adjustmentTabKey.currentState?.search(value);
+      } else if (idx == 3) {
+        productMaterialTabKey.currentState?.search(value);
+      } else if (idx == 4) {
+        unitConversionTabKey.currentState?.search(value);
+      }
       setState(() {});
     });
   }
@@ -232,16 +261,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                           controller: searchController,
                           onChanged: _onChanged,
                           decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: size12),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: size12,
+                            ),
                             isDense: true,
                             filled: true,
                             fillColor: bnw200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
-                              borderSide: BorderSide(
-                                color: bnw300,
-                              ),
+                              borderSide: BorderSide(color: bnw300),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
@@ -252,13 +280,13 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(size8),
-                              borderSide: BorderSide(
-                                color: bnw300,
-                              ),
+                              borderSide: BorderSide(color: bnw300),
                             ),
                             prefixIcon: Container(
-                              margin:
-                                  EdgeInsets.only(left: size20, right: size12),
+                              margin: EdgeInsets.only(
+                                left: size20,
+                                right: size12,
+                              ),
                               child: Icon(
                                 PhosphorIcons.magnifying_glass,
                                 color: bnw900,
@@ -279,44 +307,96 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   )
                                 : null,
                             hintText: 'Cari nama persediaan',
-                            hintStyle:
-                                heading3(FontWeight.w500, bnw400, 'Outfit'),
+                            hintStyle: heading3(
+                              FontWeight.w500,
+                              bnw400,
+                              'Outfit',
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: size16),
+                    // 3-dots Menu for Add & Download
                     GestureDetector(
                       onTap: () {
-                        // refreshDataProduk();
-                        if (pagesOn == 0) {
-                          _pageController.jumpToPage(2);
-                        } else if (pagesOn == 1) {
-                          _pageController.jumpToPage(3);
-                        } else if (pagesOn == 2) {
-                          _pageController.jumpToPage(4);
-                        }
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => TestPageAsoy(),));
-                      },
-                      child: buttonXL(
-                        Row(
-                          children: [
-                            Icon(PhosphorIcons.plus, color: bnw100),
-                            SizedBox(width: size16),
-                            Text(
-                              pagesOn == 0
-                                  ? 'Bahan'
-                                  : pagesOn == 1
-                                      ? 'Persediaan'
-                                      : 'Pembelian',
-                              style:
-                                  heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        showModalBottom(
+                          context,
+                          300,
+                          IntrinsicHeight(
+                            child: Padding(
+                              padding: EdgeInsets.all(size24),
+                              child: Column(
+                                children: [
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      int idx = pagesOn;
+                                      if (idx == 0) {
+                                        _pageController.jumpToPage(2);
+                                      } else if (idx == 1) {
+                                        purchaseTabKey.currentState
+                                            ?.navigateToAdd();
+                                      } else if (idx == 2) {
+                                        adjustmentTabKey.currentState
+                                            ?.navigateToAdd();
+                                      } else if (idx == 3) {
+                                        productMaterialTabKey.currentState
+                                            ?.navigateToAdd();
+                                      } else if (idx == 4) {
+                                        unitConversionTabKey.currentState
+                                            ?.navigateToAdd();
+                                      }
+                                    },
+                                    child: modalBottomValue(
+                                      pagesOn == 0
+                                          ? 'Tambah Bahan'
+                                          : pagesOn == 1
+                                          ? 'Tambah Pembelian'
+                                          : pagesOn == 2
+                                          ? 'Tambah Penyesuaian'
+                                          : pagesOn == 3
+                                          ? 'Tambah Resep'
+                                          : 'Tambah Konversi',
+                                      PhosphorIcons.plus,
+                                    ),
+                                  ),
+                                  if (pagesOn <= 2) ...[
+                                    SizedBox(height: size16),
+                                    Divider(color: bnw300),
+                                    SizedBox(height: size16),
+                                    GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        await _downloadPdf(pagesOn);
+                                      },
+                                      child: modalBottomValue(
+                                        'Download PDF',
+                                        PhosphorIcons.download_simple,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(size12),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          border: Border.all(color: bnw300),
+                          borderRadius: BorderRadius.circular(size8),
                         ),
-                        0,
+                        child: Icon(
+                          PhosphorIcons.dots_three_vertical_bold,
+                          color: bnw900,
+                          size: size24,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -333,22 +413,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                         indicatorSize: TabBarIndicatorSize.tab,
                         unselectedLabelColor: bnw600,
                         labelColor: primary500,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
                         labelStyle: heading2(FontWeight.w400, bnw900, 'Outfit'),
-                        physics: NeverScrollableScrollPhysics(),
                         onTap: (value) {
                           pagesOn = value;
                           setState(() {});
                         },
                         tabs: [
-                          Tab(
-                            text: 'Bahan',
-                          ),
-                          Tab(
-                            text: 'Penyesuaian',
-                          ),
-                          Tab(
-                            text: 'Pembelian',
-                          ),
+                          Tab(text: 'Bahan'),
+                          Tab(text: 'Pembelian'),
+                          Tab(text: 'Penyesuaian'),
+                          Tab(text: 'Produk Material'),
+                          Tab(text: 'Konversi Unit'),
                         ],
                       ),
                     ),
@@ -360,23 +437,115 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                           controller: _tabController,
                           children: [
                             bahan(context),
-                            persediaan(context),
-                            // PemesananPage(
-                            //   token: widget.token,
-                            //   pageController: _pageController,
-                            // ),
+                            PurchaseTab(
+                              key: purchaseTabKey,
+                              token: widget.token,
+                              merchantId: merchantId ?? '',
+                              typeMerchant: typeAccount ?? 'Merchant_Only',
+                            ),
+                            AdjustmentTab(
+                              key: adjustmentTabKey,
+                              token: widget.token,
+                              merchantId: merchantId ?? '',
+                              typeMerchant: typeAccount ?? 'Merchant_Only',
+                            ),
+                            ProductMaterialTab(
+                              key: productMaterialTabKey,
+                              token: widget.token,
+                              merchantId: merchantId ?? '',
+                              typeMerchant: typeAccount ?? 'Merchant_Only',
+                            ),
+                            UnitConversionTab(
+                              key: unitConversionTabKey,
+                              token: widget.token,
+                              merchantId: merchantId ?? '',
+                            ),
                           ],
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-        )
+        ),
       ],
     );
+  }
+
+  Future<void> _downloadPdf(int index) async {
+    whenLoading(context);
+    String endpoint = '';
+    Map<String, dynamic> reqBody = {};
+
+    if (index == 0) {
+      endpoint = getMasterDataLink; // api/inventory/master
+      reqBody = {
+        "deviceid": identifier,
+        "merchant_id": merchantId ?? '',
+        "isMinimize": false,
+        "name": "",
+        "order_by": "upDownCreated",
+        "export": true,
+      };
+    } else if (index == 1) {
+      endpoint = '$url/api/inventory/adjustment/download';
+      reqBody = {
+        "group_id": "",
+        "merchant_id": merchantId ?? '',
+        "type": "pdf",
+      };
+    } else if (index == 2) {
+      endpoint = '$url/api/inventory/purchase/download';
+      reqBody = {
+        "group_id": "",
+        "merchant_id": merchantId ?? '',
+        "type": "pdf",
+      };
+    } else {
+      closeLoading(context);
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode(reqBody),
+      );
+
+      if (!mounted) return;
+      closeLoading(context);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['rc'] == '00') {
+          String downloadUrl = jsonResponse['data']?.toString() ?? '';
+          if (downloadUrl.isNotEmpty) {
+            try {
+              await launchUrl(
+                Uri.parse(downloadUrl),
+                mode: LaunchMode.externalApplication,
+              );
+            } catch (e) {
+              showSnackbar(context, {"message": "Gagal membuka link url"});
+            }
+          } else {
+            showSnackbar(context, {"message": "Link download kosong"});
+          }
+        } else {
+          showSnackbar(context, jsonResponse);
+        }
+      } else {
+        showSnackbar(context, {
+          "message": 'Terjadi kesalahan, respon code ${response.statusCode}',
+        });
+      }
+    } catch (e) {
+      closeLoading(context);
+      showSnackbar(context, {"message": 'Gagal menghubungkan ke server'});
+    }
   }
 
   SizedBox persediaan(BuildContext context) {
@@ -462,7 +631,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       child: Text(
                                         'Judul',
                                         style: heading4(
-                                            FontWeight.w700, bnw100, 'Outfit'),
+                                          FontWeight.w700,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -476,7 +648,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 child: Text(
                                   'Tanggal Penyesuaian',
                                   style: heading4(
-                                      FontWeight.w700, bnw100, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -487,7 +662,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 child: Text(
                                   'Total Harga',
                                   style: heading4(
-                                      FontWeight.w700, bnw100, 'Outfit'),
+                                    FontWeight.w700,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                               ),
                             ),
@@ -506,7 +684,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                     Text(
                                       'Atur',
                                       style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -530,8 +711,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                     checkFill == 'penuh'
                                         ? PhosphorIcons.check_square_fill
                                         : isSelectionMode
-                                            ? PhosphorIcons.check_square_fill
-                                            : PhosphorIcons.square,
+                                        ? PhosphorIcons.check_square_fill
+                                        : PhosphorIcons.square,
                                     color: bnw100,
                                   ),
                                 ),
@@ -540,8 +721,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                             Text(
                               '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
                               // 'produk terpilih',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                             SizedBox(width: size8),
                             GestureDetector(
@@ -556,14 +740,20 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         children: [
                                           Text(
                                             'Yakin Ingin Menghapus Produk?',
-                                            style: heading1(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: heading1(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                           SizedBox(height: size16),
                                           Text(
                                             'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                            style: heading2(FontWeight.w400,
-                                                bnw900, 'Outfit'),
+                                            style: heading2(
+                                              FontWeight.w400,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -581,16 +771,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     context,
                                                     widget.token,
                                                     listProduct,
-                                                  ).then(
-                                                    (value) {
-                                                      isSelectionMode = false;
-                                                      listProduct = [];
-                                                      listProduct.clear();
-                                                      selectedFlag.clear();
-                                                      setState(() {});
-                                                      initState();
-                                                    },
-                                                  );
+                                                  ).then((value) {
+                                                    isSelectionMode = false;
+                                                    listProduct = [];
+                                                    listProduct.clear();
+                                                    selectedFlag.clear();
+                                                    setState(() {});
+                                                    initState();
+                                                  });
                                                 });
                                                 initState();
                                               },
@@ -599,14 +787,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                   child: Text(
                                                     'Iya, Hapus',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        primary500,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      primary500,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                                 primary500,
                                               ),
                                             ),
@@ -622,14 +811,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                   child: Text(
                                                     'Batalkan',
                                                     style: heading3(
-                                                        FontWeight.w600,
-                                                        bnw100,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw100,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
-                                                MediaQuery.of(context)
-                                                    .size
-                                                    .width,
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                               ),
                                             ),
                                           ),
@@ -644,12 +834,17 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(PhosphorIcons.trash_fill,
-                                        color: bnw900),
+                                    Icon(
+                                      PhosphorIcons.trash_fill,
+                                      color: bnw900,
+                                    ),
                                     Text(
                                       'Hapus Semua',
                                       style: heading3(
-                                          FontWeight.w600, bnw900, 'Outfit'),
+                                        FontWeight.w600,
+                                        bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -694,12 +889,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                     .toList();
 
                                 return Container(
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: size12),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: size12,
+                                  ),
                                   decoration: BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
-                                          color: bnw300, width: width1),
+                                        color: bnw300,
+                                        width: width1,
+                                      ),
                                     ),
                                   ),
                                   child: Row(
@@ -733,8 +931,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                             ),
                                             Text(
                                               datasProduk![index].title ?? '',
-                                              style: heading4(FontWeight.w600,
-                                                  bnw900, 'Outfit'),
+                                              style: heading4(
+                                                FontWeight.w600,
+                                                bnw900,
+                                                'Outfit',
+                                              ),
                                               maxLines: 3,
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -747,8 +948,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         child: Text(
                                           datasProduk![index].activityDate ??
                                               '',
-                                          style: heading4(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                           maxLines: 3,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -760,8 +964,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                           FormatCurrency.convertToIdr(
                                             datasProduk![index].totalPrice,
                                           ),
-                                          style: heading4(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading4(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                           maxLines: 3,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -793,35 +1000,34 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              datasProduk![
-                                                                          index]
+                                                              datasProduk![index]
                                                                       .groupId ??
                                                                   '',
                                                               // dataProduk
                                                               //     .nameItem!,
                                                               style: heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             Text(
-                                                              datasProduk![
-                                                                          index]
+                                                              datasProduk![index]
                                                                       .activityDate ??
                                                                   '',
                                                               style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w400,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
                                                         GestureDetector(
                                                           onTap: () =>
                                                               Navigator.pop(
-                                                                  context),
+                                                                context,
+                                                              ),
                                                           child: Icon(
                                                             PhosphorIcons
                                                                 .x_fill,
@@ -863,107 +1069,110 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                   Text(
                                                                     'Yakin Ingin Menghapus Bahan?',
                                                                     style: heading1(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        bnw900,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                   SizedBox(
-                                                                      height:
-                                                                          size16),
+                                                                    height:
+                                                                        size16,
+                                                                  ),
                                                                   Text(
                                                                     'Data bahan yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                                     style: heading2(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw900,
-                                                                        'Outfit'),
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                   SizedBox(
-                                                                      height:
-                                                                          size16),
+                                                                    height:
+                                                                        size16,
+                                                                  ),
                                                                 ],
                                                               ),
                                                               Row(
                                                                 children: [
                                                                   Expanded(
-                                                                    child:
-                                                                        GestureDetector(
-                                                                      onTap:
-                                                                          () {
-                                                                        setState(
-                                                                            () {
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
+                                                                        setState(() {
                                                                           // log(dataProduk.id.toString());
-                                                                          List<String>
-                                                                              dataBahan =
-                                                                              [
-                                                                            datasProduk![index].groupId.toString()
+                                                                          List<
+                                                                            String
+                                                                          >
+                                                                          dataBahan = [
+                                                                            datasProduk![index].groupId.toString(),
                                                                           ];
 
                                                                           String
-                                                                              jsonData =
-                                                                              jsonEncode(dataBahan);
+                                                                          jsonData = jsonEncode(
+                                                                            dataBahan,
+                                                                          );
 
-                                                                          log(jsonData
-                                                                              .toString());
+                                                                          log(
+                                                                            jsonData.toString(),
+                                                                          );
 
                                                                           deleteAdjustment(
                                                                             context,
                                                                             widget.token,
                                                                             dataBahan,
-                                                                          ).then(
-                                                                            (value) {
-                                                                              setState(() {});
-                                                                              initState();
-                                                                            },
-                                                                          );
+                                                                          ).then((
+                                                                            value,
+                                                                          ) {
+                                                                            setState(
+                                                                              () {},
+                                                                            );
+                                                                            initState();
+                                                                          });
                                                                         });
                                                                       },
-                                                                      child:
-                                                                          buttonXLoutline(
+                                                                      child: buttonXLoutline(
                                                                         Center(
-                                                                          child:
-                                                                              Text(
+                                                                          child: Text(
                                                                             'Iya, Hapus',
                                                                             style: heading3(
-                                                                                FontWeight.w600,
-                                                                                primary500,
-                                                                                'Outfit'),
+                                                                              FontWeight.w600,
+                                                                              primary500,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                         ),
-                                                                        MediaQuery.of(context)
-                                                                            .size
-                                                                            .width,
+                                                                        MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width,
                                                                         primary500,
                                                                       ),
                                                                     ),
                                                                   ),
                                                                   SizedBox(
-                                                                      width:
-                                                                          12),
+                                                                    width: 12,
+                                                                  ),
                                                                   Expanded(
-                                                                    child:
-                                                                        GestureDetector(
-                                                                      onTap:
-                                                                          () {
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
                                                                         Navigator.pop(
-                                                                            context);
+                                                                          context,
+                                                                        );
                                                                       },
-                                                                      child:
-                                                                          buttonXL(
+                                                                      child: buttonXL(
                                                                         Center(
-                                                                          child:
-                                                                              Text(
+                                                                          child: Text(
                                                                             'Batalkan',
                                                                             style: heading3(
-                                                                                FontWeight.w600,
-                                                                                bnw100,
-                                                                                'Outfit'),
+                                                                              FontWeight.w600,
+                                                                              bnw100,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                         ),
-                                                                        MediaQuery.of(context)
-                                                                            .size
-                                                                            .width,
+                                                                        MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -995,8 +1204,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                               SizedBox(width: size16),
                                               Text(
                                                 'Atur',
-                                                style: heading3(FontWeight.w600,
-                                                    bnw900, 'Outfit'),
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -1093,8 +1305,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                             flex: 4,
                             child: Text(
                               'Nama Produk',
-                              style:
-                                  heading4(FontWeight.w700, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                bnw100,
+                                'Outfit',
+                              ),
                             ),
                           ),
                           SizedBox(width: size16),
@@ -1109,8 +1324,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                               ),
                               child: Text(
                                 'Harga Normal',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                           ),
@@ -1126,8 +1344,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                               ),
                               child: Text(
                                 'Harga Online',
-                                style:
-                                    heading4(FontWeight.w600, bnw100, 'Outfit'),
+                                style: heading4(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
                               ),
                             ),
                           ),
@@ -1139,8 +1360,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                             ),
                             child: Text(
                               'PPN',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -1154,8 +1378,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                             ),
                             child: Text(
                               'Tampil Kasir',
-                              style:
-                                  heading4(FontWeight.w600, bnw100, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -1177,8 +1404,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   checkFill == 'penuh'
                                       ? PhosphorIcons.check_square_fill
                                       : isSelectionMode
-                                          ? PhosphorIcons.minus_circle_fill
-                                          : PhosphorIcons.square,
+                                      ? PhosphorIcons.minus_circle_fill
+                                      : PhosphorIcons.square,
                                   color: bnw100,
                                 ),
                               ),
@@ -1202,14 +1429,20 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       children: [
                                         Text(
                                           'Yakin Ingin Menghapus Produk?',
-                                          style: heading1(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading1(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                         SizedBox(height: size16),
                                         Text(
                                           'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                          style: heading2(FontWeight.w400,
-                                              bnw900, 'Outfit'),
+                                          style: heading2(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1248,9 +1481,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                 child: Text(
                                                   'Iya, Hapus',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      primary500,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    primary500,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -1269,9 +1503,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                 child: Text(
                                                   'Batalkan',
                                                   style: heading3(
-                                                      FontWeight.w600,
-                                                      bnw100,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    bnw100,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                               MediaQuery.of(context).size.width,
@@ -1293,7 +1528,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   Text(
                                     'Hapus Semua',
                                     style: heading3(
-                                        FontWeight.w600, bnw900, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1315,141 +1553,137 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                     ),
                   ),
                   child: RefreshIndicator(
-                      color: bnw100,
-                      backgroundColor: primary500,
-                      onRefresh: () async {
-                        setState(() {});
-                        initState();
-                      },
-                      child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: dataPemakaian.length,
-                        itemBuilder: (context, index) {
-                          // Mendapatkan data dari dataPemakaian
-                          final Map<String, dynamic> data =
-                              dataPemakaian[index];
-                          final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                    color: bnw100,
+                    backgroundColor: primary500,
+                    onRefresh: () async {
+                      setState(() {});
+                      initState();
+                    },
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: dataPemakaian.length,
+                      itemBuilder: (context, index) {
+                        // Mendapatkan data dari dataPemakaian
+                        final Map<String, dynamic> data = dataPemakaian[index];
+                        final productId = data['id'];
+                        final isSelected = selectedDataPemakaian.containsKey(
+                          productId,
+                        );
 
-                          return Column(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(color: bnw300, width: 1),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    // Menampilkan informasi produk
-                                    Expanded(
-                                      flex: 4,
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: size16),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  data['name'] ?? 'Nama Produk',
-                                                  style: heading4(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                  maxLines: 3,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                Text(
-                                                  data['typeproducts'] ??
-                                                      'Tipe Produk',
-                                                  style: heading4(
-                                                    FontWeight.w400,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                  maxLines: 3,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: size16),
-                                    // Menampilkan status pemilihan dan jumlah pemakaian
-                                    Expanded(
-                                      flex: 2,
-                                      child: Column(
-                                        children: [
-                                          // Checkbox untuk memilih item
-                                          InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                if (isSelected) {
-                                                  selectedDataPemakaian
-                                                      .remove(productId);
-                                                } else {
-                                                  selectedDataPemakaian[
-                                                      productId] = {
-                                                    ...data,
-                                                    'quantity':
-                                                        1, // Default quantity
-                                                  };
-                                                }
-                                              });
-                                            },
-                                            child: Icon(
-                                              isSelected
-                                                  ? Icons.check_box
-                                                  : Icons
-                                                      .check_box_outline_blank,
-                                              color: isSelected
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                            ),
-                                          ),
-                                          // TextField untuk mengatur jumlah pemakaian
-                                          if (isSelected)
-                                            TextField(
-                                              decoration: InputDecoration(
-                                                labelText: 'Jumlah',
-                                                border: OutlineInputBorder(),
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  selectedDataPemakaian[
-                                                              productId]![
-                                                          'quantity'] =
-                                                      int.tryParse(value) ?? 1;
-                                                });
-                                              },
-                                              controller: TextEditingController(
-                                                text: selectedDataPemakaian[
-                                                        productId]?['quantity']
-                                                    .toString(),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                        return Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: bnw300, width: 1),
                                 ),
                               ),
-                            ],
-                          );
-                        },
-                      )),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  // Menampilkan informasi produk
+                                  Expanded(
+                                    flex: 4,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(width: size16),
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                data['name'] ?? 'Nama Produk',
+                                                style: heading4(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                data['typeproducts'] ??
+                                                    'Tipe Produk',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: size16),
+                                  // Menampilkan status pemilihan dan jumlah pemakaian
+                                  Expanded(
+                                    flex: 2,
+                                    child: Column(
+                                      children: [
+                                        // Checkbox untuk memilih item
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              if (isSelected) {
+                                                selectedDataPemakaian.remove(
+                                                  productId,
+                                                );
+                                              } else {
+                                                selectedDataPemakaian[productId] =
+                                                    {
+                                                      ...data,
+                                                      'quantity':
+                                                          1, // Default quantity
+                                                    };
+                                              }
+                                            });
+                                          },
+                                          child: Icon(
+                                            isSelected
+                                                ? Icons.check_box
+                                                : Icons.check_box_outline_blank,
+                                            color: isSelected
+                                                ? Colors.green
+                                                : Colors.grey,
+                                          ),
+                                        ),
+                                        // TextField untuk mengatur jumlah pemakaian
+                                        if (isSelected)
+                                          TextField(
+                                            decoration: InputDecoration(
+                                              labelText: 'Jumlah',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedDataPemakaian[productId]!['quantity'] =
+                                                    int.tryParse(value) ?? 1;
+                                              });
+                                            },
+                                            controller: TextEditingController(
+                                              text:
+                                                  selectedDataPemakaian[productId]?['quantity']
+                                                      .toString(),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1464,99 +1698,106 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               StatefulBuilder(
                 builder: (context, setState) => IntrinsicHeight(
                   child: Container(
-                      margin: EdgeInsets.all(size16),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tambah Pemakaian',
-                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            'Pilih bahan yang sudah terpakai.',
-                            style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                          SizedBox(height: size16),
-                          Container(
-                            height: MediaQuery.sizeOf(context).height / 2,
-                            child: ListView.builder(
-                              padding: EdgeInsets.only(
-                                  bottom:
-                                      MediaQuery.of(context).viewInsets.bottom),
-                              shrinkWrap: true,
-                              itemCount: 2, // Jumlah item
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        setState(() {
-                                          if (_selectedIndex == index) {
-                                            _selectedIndex =
-                                                -1; // Jika item yang sama diklik lagi, sembunyikan TextField
-                                          } else {
-                                            _selectedIndex =
-                                                index; // Simpan index item yang diklik
-                                          }
-                                        });
-                                      },
-                                      child: Container(
-                                        margin: EdgeInsets.only(bottom: size16),
-                                        child: Row(
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                print('hello world');
-                                              },
-                                              child: Icon(
-                                                isSelectionMode
-                                                    ? PhosphorIcons.check
-                                                    : PhosphorIcons.square,
-                                                color: bnw900,
+                    margin: EdgeInsets.all(size16),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tambah Pemakaian',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          'Pilih bahan yang sudah terpakai.',
+                          style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                        ),
+                        SizedBox(height: size16),
+                        Container(
+                          height: MediaQuery.sizeOf(context).height / 2,
+                          child: ListView.builder(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            shrinkWrap: true,
+                            itemCount: 2, // Jumlah item
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      setState(() {
+                                        if (_selectedIndex == index) {
+                                          _selectedIndex =
+                                              -1; // Jika item yang sama diklik lagi, sembunyikan TextField
+                                        } else {
+                                          _selectedIndex =
+                                              index; // Simpan index item yang diklik
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: size16),
+                                      child: Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              print('hello world');
+                                            },
+                                            child: Icon(
+                                              isSelectionMode
+                                                  ? PhosphorIcons.check
+                                                  : PhosphorIcons.square,
+                                              color: bnw900,
+                                            ),
+                                          ),
+                                          SizedBox(width: size12),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Matcha',
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(width: size12),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Matcha',
-                                                    style: heading2(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit')),
-                                                Text('Kilogram',
-                                                    style: heading4(
-                                                        FontWeight.w600,
-                                                        bnw700,
-                                                        'Outfit')),
-                                              ],
-                                            ),
-                                          ],
+                                              Text(
+                                                'Kilogram',
+                                                style: heading4(
+                                                  FontWeight.w600,
+                                                  bnw700,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // Jika index yang di klik sama dengan index item, tampilkan TextField
+                                  if (_selectedIndex == index)
+                                    Container(
+                                      margin: EdgeInsets.only(bottom: size12),
+                                      child: TextField(
+                                        decoration: InputDecoration(
+                                          fillColor: primary100,
+                                          labelText: 'Input something here',
+                                          border: OutlineInputBorder(),
                                         ),
                                       ),
                                     ),
-                                    // Jika index yang di klik sama dengan index item, tampilkan TextField
-                                    if (_selectedIndex == index)
-                                      Container(
-                                        margin: EdgeInsets.only(bottom: size12),
-                                        child: TextField(
-                                          decoration: InputDecoration(
-                                            fillColor: primary100,
-                                            labelText: 'Input something here',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          )
-                        ],
-                      )),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );
@@ -1600,7 +1841,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -1653,10 +1894,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                       decoration: BoxDecoration(
                         color: bnw100,
                         border: Border(
-                          bottom: BorderSide(
-                            width: 1.5,
-                            color: bnw500,
-                          ),
+                          bottom: BorderSide(width: 1.5, color: bnw500),
                         ),
                       ),
                       child: Align(
@@ -1675,12 +1913,18 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 Text(
                                   'Waktu Mulai',
                                   style: heading4(
-                                      FontWeight.w400, bnw900, 'Outfit'),
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
                                 Text(
                                   ' *',
                                   style: heading4(
-                                      FontWeight.w400, red500, 'Outfit'),
+                                    FontWeight.w400,
+                                    red500,
+                                    'Outfit',
+                                  ),
                                 ),
                               ],
                             ),
@@ -1699,8 +1943,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                     selectedDate.day,
                                   );
 
-                                  _selectedDate = DateTime(selectedDate.year,
-                                      selectedDate.month, selectedDate.day);
+                                  _selectedDate = DateTime(
+                                    selectedDate.year,
+                                    selectedDate.month,
+                                    selectedDate.day,
+                                  );
 
                                   tanggalAwal =
                                       "${selectedDateTime.year}-${selectedDateTime.month}-${selectedDateTime.day}";
@@ -1719,14 +1966,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                           ? 'Pilih Tanggal'
                                           : tanggalAwal,
                                       style: heading2(
-                                          FontWeight.w600,
-                                          tanggalAwal == '' ? bnw500 : bnw900,
-                                          'Outfit'),
+                                        FontWeight.w600,
+                                        tanggalAwal == '' ? bnw500 : bnw900,
+                                        'Outfit',
+                                      ),
                                     ),
                                     Icon(
                                       PhosphorIcons.calendar_fill,
                                       color: bnw900,
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1783,7 +2031,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Nama Produk',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -1792,7 +2043,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -1801,7 +2055,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Jumlah',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -1810,7 +2067,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Harga Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -1819,14 +2079,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Total Harga',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Icon(
-                                  PhosphorIcons.x_fill,
-                                  color: primary500,
-                                ),
+                                Icon(PhosphorIcons.x_fill, color: primary500),
                                 SizedBox(width: size16),
                               ],
                             )
@@ -1843,9 +2103,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         checkFill == 'penuh'
                                             ? PhosphorIcons.check_square_fill
                                             : isSelectionMode
-                                                ? PhosphorIcons
-                                                    .minus_circle_fill
-                                                : PhosphorIcons.square,
+                                            ? PhosphorIcons.minus_circle_fill
+                                            : PhosphorIcons.square,
                                         color: bnw100,
                                       ),
                                     ),
@@ -1855,7 +2114,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
                                   // 'produk terpilih',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(width: size8),
                                 GestureDetector(
@@ -1870,14 +2132,20 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                             children: [
                                               Text(
                                                 'Yakin Ingin Menghapus Produk?',
-                                                style: heading1(FontWeight.w600,
-                                                    bnw900, 'Outfit'),
+                                                style: heading1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                               SizedBox(height: size16),
                                               Text(
                                                 'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                                style: heading2(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                                style: heading2(
+                                                  FontWeight.w400,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -1916,14 +2184,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Iya, Hapus',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                     primary500,
                                                   ),
                                                 ),
@@ -1939,14 +2208,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Batalkan',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw100,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw100,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                   ),
                                                 ),
                                               ),
@@ -1961,12 +2231,17 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Icon(PhosphorIcons.trash_fill,
-                                            color: bnw900),
+                                        Icon(
+                                          PhosphorIcons.trash_fill,
+                                          color: bnw900,
+                                        ),
                                         Text(
                                           'Hapus Semua',
-                                          style: heading3(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1997,8 +2272,9 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                           final Map<String, dynamic> data =
                               orderInventory[index];
                           final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                          final isSelected = selectedDataPemakaian.containsKey(
+                            productId,
+                          );
 
                           return Container(
                             margin: EdgeInsets.symmetric(vertical: size12),
@@ -2012,11 +2288,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 InkWell(
                                   // onTap: () => onTap(isSelected, index),
                                   onTap: () {
-                                    onTap(
-                                      isSelected,
-                                      index,
-                                      productId,
-                                    );
+                                    onTap(isSelected, index, productId);
                                     // log(data.name.toString());
                                     // print(dataProduk.isActive);
 
@@ -2090,7 +2362,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   flex: 4,
                                   child: Text(
                                     FormatCurrency.convertToIdr(
-                                        (data['price'] * data['qty'])),
+                                      (data['price'] * data['qty']),
+                                    ),
                                     style: heading4(
                                       FontWeight.w400,
                                       bnw900,
@@ -2134,97 +2407,53 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               StatefulBuilder(
                 builder: (context, setState) => IntrinsicHeight(
                   child: Container(
-                      margin: EdgeInsets.all(size16),
-                      padding: EdgeInsets.all(size12),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tambah Pemakaian',
-                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            'Pilih bahan yang sudah terpakai.',
-                            style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                          SizedBox(height: size16),
-                          Container(
-                            height: MediaQuery.sizeOf(context).height / 1.8,
-                            child: dataPemakaian.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'Bahan tidak ditemukan.',
-                                      style: heading3(
-                                          FontWeight.w400, bnw500, 'Outfit'),
+                    margin: EdgeInsets.all(size16),
+                    padding: EdgeInsets.all(size12),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tambah Pemakaian',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          'Pilih bahan yang sudah terpakai.',
+                          style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                        ),
+                        SizedBox(height: size16),
+                        Container(
+                          height: MediaQuery.sizeOf(context).height / 1.8,
+                          child: dataPemakaian.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'Bahan tidak ditemukan.',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
                                     ),
-                                  )
-                                : ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    itemCount: dataPemakaian.length,
-                                    itemBuilder: (context, index) {
-                                      final item = dataPemakaian[index];
-                                      return StatefulBuilder(
-                                        builder: (context, setState) {
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                contentPadding: EdgeInsets.zero,
-                                                leading: Checkbox(
-                                                  activeColor: primary500,
-                                                  value: selectedDataPemakaian
-                                                      .containsKey(item['id']),
-                                                  onChanged: (bool? value) {
-                                                    setState(() {
-                                                      if (value == true) {
-                                                        selectedDataPemakaian[
-                                                            item['id']] = {
-                                                          "inventory_master_id":
-                                                              item['id'],
-                                                          "name":
-                                                              item['name_item'],
-                                                          "category":
-                                                              item['unit_name'],
-                                                          "qty": 0,
-                                                          "price": 0,
-                                                        };
-                                                      } else {
-                                                        selectedDataPemakaian
-                                                            .remove(item['id']);
-                                                      }
-                                                    });
-                                                  },
-                                                ),
-                                                title: Text(
-                                                  item['name_item'] ?? '',
-                                                  style: heading2(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                                subtitle: Text(
-                                                  item['unit_name'] ?? '',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw700,
-                                                      'Outfit'),
-                                                ),
-                                                trailing: Icon(
-                                                    selectedDataPemakaian
-                                                            .containsKey(
-                                                                item['id'])
-                                                        ? Icons.expand_less
-                                                        : Icons.expand_more),
-                                                onTap: () {
+                                  ),
+                                )
+                              : ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: dataPemakaian.length,
+                                  itemBuilder: (context, index) {
+                                    final item = dataPemakaian[index];
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              contentPadding: EdgeInsets.zero,
+                                              leading: Checkbox(
+                                                activeColor: primary500,
+                                                value: selectedDataPemakaian
+                                                    .containsKey(item['id']),
+                                                onChanged: (bool? value) {
                                                   setState(() {
-                                                    if (selectedDataPemakaian
-                                                        .containsKey(
-                                                            item['id'])) {
-                                                      selectedDataPemakaian
-                                                          .remove(item['id']);
-                                                    } else {
-                                                      selectedDataPemakaian[
-                                                          item['id']] = {
+                                                    if (value == true) {
+                                                      selectedDataPemakaian[item['id']] = {
                                                         "inventory_master_id":
                                                             item['id'],
                                                         "name":
@@ -2234,191 +2463,241 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         "qty": 0,
                                                         "price": 0,
                                                       };
+                                                    } else {
+                                                      selectedDataPemakaian
+                                                          .remove(item['id']);
                                                     }
                                                   });
                                                 },
                                               ),
-                                              if (selectedDataPemakaian
-                                                  .containsKey(item['id']))
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.all(size8),
-                                                  decoration: BoxDecoration(
-                                                    color: primary100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            size8),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Jumlah Pesanan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : 10',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'qty'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                      SizedBox(height: size12),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Harga Satuan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : Rp 10.000',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'price'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
+                                              title: Text(
+                                                item['name_item'] ?? '',
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
                                                 ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                          ),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).pop();
+                                              ),
+                                              subtitle: Text(
+                                                item['unit_name'] ?? '',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw700,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              trailing: Icon(
+                                                selectedDataPemakaian
+                                                        .containsKey(item['id'])
+                                                    ? Icons.expand_less
+                                                    : Icons.expand_more,
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  if (selectedDataPemakaian
+                                                      .containsKey(
+                                                        item['id'],
+                                                      )) {
+                                                    selectedDataPemakaian
+                                                        .remove(item['id']);
+                                                  } else {
+                                                    selectedDataPemakaian[item['id']] =
+                                                        {
+                                                          "inventory_master_id":
+                                                              item['id'],
+                                                          "name":
+                                                              item['name_item'],
+                                                          "category":
+                                                              item['unit_name'],
+                                                          "qty": 0,
+                                                          "price": 0,
+                                                        };
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                            if (selectedDataPemakaian
+                                                .containsKey(item['id']))
+                                              Container(
+                                                padding: EdgeInsets.all(size8),
+                                                decoration: BoxDecoration(
+                                                  color: primary100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Jumlah Pesanan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText: 'Cth : 10',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['qty'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                    SizedBox(height: size12),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Harga Satuan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText:
+                                                            'Cth : Rp 10.000',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['price'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: buttonXLoutline(
-                                    Center(
-                                      child: Text(
-                                        'Batal',
-                                        style: heading3(FontWeight.w600,
-                                            primary500, 'Outfit'),
+                                ),
+                        ),
+                        SizedBox(height: size16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: buttonXLoutline(
+                                  Center(
+                                    child: Text(
+                                      'Batal',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
-                                    primary500,
                                   ),
+                                  double.infinity,
+                                  primary500,
                                 ),
                               ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      orderInventory =
-                                          selectedDataPemakaian.values.toList();
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    orderInventory = selectedDataPemakaian
+                                        .values
+                                        .toList();
 
-                                      dataPemakaian = orderInventory;
-                                      print("Saved Data: $orderInventory");
-                                    });
-                                    Navigator.pop(context);
-                                    initState();
-                                  },
-                                  child: buttonXL(
-                                    Center(
-                                      child: Text(
-                                        'Simpan',
-                                        style: heading3(
-                                            FontWeight.w600, bnw100, 'Outfit'),
+                                    dataPemakaian = orderInventory;
+                                    print("Saved Data: $orderInventory");
+                                  });
+                                  Navigator.pop(context);
+                                  initState();
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Simpan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ],
-                          )
-                        ],
-                      )),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );
@@ -2475,21 +2754,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                     tanggalAwal,
                     judulPembelian.text,
                     orderInventory,
-                  ).then(
-                    (value) {
-                      if (value == '00') {
-                        getDataProduk(['']);
-                        pagesOn == 2;
-                        tanggalAwal = '';
-                        orderInventory.clear();
-                        _pageController.jumpToPage(0);
-                        judulPembelian.clear();
+                  ).then((value) {
+                    if (value == '00') {
+                      getDataProduk(['']);
+                      pagesOn == 2;
+                      tanggalAwal = '';
+                      orderInventory.clear();
+                      _pageController.jumpToPage(0);
+                      judulPembelian.clear();
 
-                        setState(() {});
-                        initState();
-                      }
-                    },
-                  );
+                      setState(() {});
+                      initState();
+                    }
+                  });
                   print(orderInventory);
                 },
                 child: buttonXL(
@@ -2504,7 +2781,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -2549,11 +2826,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                 ],
               ),
               SizedBox(height: size16),
-              fieldTambahBahan(
-                'Judul',
-                judulPenyesuaian,
-                'Penyesuaian Matcha',
-              ),
+              fieldTambahBahan('Judul', judulPenyesuaian, 'Penyesuaian Matcha'),
               SizedBox(height: size16),
               Container(
                 height: 200,
@@ -2594,7 +2867,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Nama Produk',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -2603,7 +2879,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -2612,7 +2891,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Jumlah',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -2621,7 +2903,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Harga Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -2630,14 +2915,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Total Harga',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Icon(
-                                  PhosphorIcons.x_fill,
-                                  color: primary500,
-                                ),
+                                Icon(PhosphorIcons.x_fill, color: primary500),
                                 SizedBox(width: size16),
                               ],
                             )
@@ -2654,9 +2939,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         checkFill == 'penuh'
                                             ? PhosphorIcons.check_square_fill
                                             : isSelectionMode
-                                                ? PhosphorIcons
-                                                    .minus_circle_fill
-                                                : PhosphorIcons.square,
+                                            ? PhosphorIcons.minus_circle_fill
+                                            : PhosphorIcons.square,
                                         color: bnw100,
                                       ),
                                     ),
@@ -2666,7 +2950,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
                                   // 'produk terpilih',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(width: size8),
                                 GestureDetector(
@@ -2681,14 +2968,20 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                             children: [
                                               Text(
                                                 'Yakin Ingin Menghapus Produk?',
-                                                style: heading1(FontWeight.w600,
-                                                    bnw900, 'Outfit'),
+                                                style: heading1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                               SizedBox(height: size16),
                                               Text(
                                                 'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                                style: heading2(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                                style: heading2(
+                                                  FontWeight.w400,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -2727,14 +3020,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Iya, Hapus',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                     primary500,
                                                   ),
                                                 ),
@@ -2750,14 +3044,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Batalkan',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw100,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw100,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                   ),
                                                 ),
                                               ),
@@ -2772,12 +3067,17 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Icon(PhosphorIcons.trash_fill,
-                                            color: bnw900),
+                                        Icon(
+                                          PhosphorIcons.trash_fill,
+                                          color: bnw900,
+                                        ),
                                         Text(
                                           'Hapus Semua',
-                                          style: heading3(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -2808,8 +3108,9 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                           final Map<String, dynamic> data =
                               orderInventory[index];
                           final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                          final isSelected = selectedDataPemakaian.containsKey(
+                            productId,
+                          );
 
                           return Container(
                             margin: EdgeInsets.symmetric(vertical: size12),
@@ -2823,11 +3124,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 InkWell(
                                   // onTap: () => onTap(isSelected, index),
                                   onTap: () {
-                                    onTap(
-                                      isSelected,
-                                      index,
-                                      productId,
-                                    );
+                                    onTap(isSelected, index, productId);
                                     // log(data.name.toString());
                                     // print(dataProduk.isActive);
 
@@ -2901,7 +3198,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   flex: 4,
                                   child: Text(
                                     FormatCurrency.convertToIdr(
-                                        (data['price'] * data['qty'])),
+                                      (data['price'] * data['qty']),
+                                    ),
                                     style: heading4(
                                       FontWeight.w400,
                                       bnw900,
@@ -2945,97 +3243,53 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               StatefulBuilder(
                 builder: (context, setState) => IntrinsicHeight(
                   child: Container(
-                      margin: EdgeInsets.all(size16),
-                      padding: EdgeInsets.all(size12),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tambah Pemakaian',
-                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            'Pilih bahan yang sudah terpakai.',
-                            style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                          SizedBox(height: size16),
-                          Container(
-                            height: MediaQuery.sizeOf(context).height / 1.8,
-                            child: dataPemakaian.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'Bahan tidak ditemukan.',
-                                      style: heading3(
-                                          FontWeight.w400, bnw500, 'Outfit'),
+                    margin: EdgeInsets.all(size16),
+                    padding: EdgeInsets.all(size12),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tambah Pemakaian',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          'Pilih bahan yang sudah terpakai.',
+                          style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                        ),
+                        SizedBox(height: size16),
+                        Container(
+                          height: MediaQuery.sizeOf(context).height / 1.8,
+                          child: dataPemakaian.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'Bahan tidak ditemukan.',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
                                     ),
-                                  )
-                                : ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    itemCount: dataPemakaian.length,
-                                    itemBuilder: (context, index) {
-                                      final item = dataPemakaian[index];
-                                      return StatefulBuilder(
-                                        builder: (context, setState) {
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                contentPadding: EdgeInsets.zero,
-                                                leading: Checkbox(
-                                                  activeColor: primary500,
-                                                  value: selectedDataPemakaian
-                                                      .containsKey(item['id']),
-                                                  onChanged: (bool? value) {
-                                                    setState(() {
-                                                      if (value == true) {
-                                                        selectedDataPemakaian[
-                                                            item['id']] = {
-                                                          "inventory_master_id":
-                                                              item['id'],
-                                                          "name":
-                                                              item['name_item'],
-                                                          "category":
-                                                              item['unit_name'],
-                                                          "qty": 0,
-                                                          "price": 0,
-                                                        };
-                                                      } else {
-                                                        selectedDataPemakaian
-                                                            .remove(item['id']);
-                                                      }
-                                                    });
-                                                  },
-                                                ),
-                                                title: Text(
-                                                  item['name_item'] ?? '',
-                                                  style: heading2(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                                subtitle: Text(
-                                                  item['unit_name'] ?? '',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw700,
-                                                      'Outfit'),
-                                                ),
-                                                trailing: Icon(
-                                                    selectedDataPemakaian
-                                                            .containsKey(
-                                                                item['id'])
-                                                        ? Icons.expand_less
-                                                        : Icons.expand_more),
-                                                onTap: () {
+                                  ),
+                                )
+                              : ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: dataPemakaian.length,
+                                  itemBuilder: (context, index) {
+                                    final item = dataPemakaian[index];
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              contentPadding: EdgeInsets.zero,
+                                              leading: Checkbox(
+                                                activeColor: primary500,
+                                                value: selectedDataPemakaian
+                                                    .containsKey(item['id']),
+                                                onChanged: (bool? value) {
                                                   setState(() {
-                                                    if (selectedDataPemakaian
-                                                        .containsKey(
-                                                            item['id'])) {
-                                                      selectedDataPemakaian
-                                                          .remove(item['id']);
-                                                    } else {
-                                                      selectedDataPemakaian[
-                                                          item['id']] = {
+                                                    if (value == true) {
+                                                      selectedDataPemakaian[item['id']] = {
                                                         "inventory_master_id":
                                                             item['id'],
                                                         "name":
@@ -3045,191 +3299,241 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         "qty": 0,
                                                         "price": 0,
                                                       };
+                                                    } else {
+                                                      selectedDataPemakaian
+                                                          .remove(item['id']);
                                                     }
                                                   });
                                                 },
                                               ),
-                                              if (selectedDataPemakaian
-                                                  .containsKey(item['id']))
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.all(size8),
-                                                  decoration: BoxDecoration(
-                                                    color: primary100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            size8),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Jumlah Pesanan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : 10',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'qty'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                      SizedBox(height: size12),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Harga Satuan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : Rp 10.000',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'price'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
+                                              title: Text(
+                                                item['name_item'] ?? '',
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
                                                 ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                          ),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).pop();
+                                              ),
+                                              subtitle: Text(
+                                                item['unit_name'] ?? '',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw700,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              trailing: Icon(
+                                                selectedDataPemakaian
+                                                        .containsKey(item['id'])
+                                                    ? Icons.expand_less
+                                                    : Icons.expand_more,
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  if (selectedDataPemakaian
+                                                      .containsKey(
+                                                        item['id'],
+                                                      )) {
+                                                    selectedDataPemakaian
+                                                        .remove(item['id']);
+                                                  } else {
+                                                    selectedDataPemakaian[item['id']] =
+                                                        {
+                                                          "inventory_master_id":
+                                                              item['id'],
+                                                          "name":
+                                                              item['name_item'],
+                                                          "category":
+                                                              item['unit_name'],
+                                                          "qty": 0,
+                                                          "price": 0,
+                                                        };
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                            if (selectedDataPemakaian
+                                                .containsKey(item['id']))
+                                              Container(
+                                                padding: EdgeInsets.all(size8),
+                                                decoration: BoxDecoration(
+                                                  color: primary100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Jumlah Pesanan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText: 'Cth : 10',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['qty'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                    SizedBox(height: size12),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Harga Satuan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText:
+                                                            'Cth : Rp 10.000',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['price'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: buttonXLoutline(
-                                    Center(
-                                      child: Text(
-                                        'Batal',
-                                        style: heading3(FontWeight.w600,
-                                            primary500, 'Outfit'),
+                                ),
+                        ),
+                        SizedBox(height: size16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: buttonXLoutline(
+                                  Center(
+                                    child: Text(
+                                      'Batal',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
-                                    primary500,
                                   ),
+                                  double.infinity,
+                                  primary500,
                                 ),
                               ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      orderInventory =
-                                          selectedDataPemakaian.values.toList();
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    orderInventory = selectedDataPemakaian
+                                        .values
+                                        .toList();
 
-                                      dataPemakaian = orderInventory;
-                                      print("Saved Data: $orderInventory");
-                                    });
-                                    Navigator.pop(context);
-                                    initState();
-                                  },
-                                  child: buttonXL(
-                                    Center(
-                                      child: Text(
-                                        'Simpan',
-                                        style: heading3(
-                                            FontWeight.w600, bnw100, 'Outfit'),
+                                    dataPemakaian = orderInventory;
+                                    print("Saved Data: $orderInventory");
+                                  });
+                                  Navigator.pop(context);
+                                  initState();
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Simpan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ],
-                          )
-                        ],
-                      )),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );
@@ -3260,17 +3564,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                     tanggalAwal,
                     judulPenyesuaian.text,
                     orderInventory,
-                  ).then(
-                    (value) {
-                      if (value == '00') {
-                        _pageController.jumpToPage(0);
-                        orderInventory.clear();
-                        tanggalAwal = '';
-                        setState(() {});
-                        initState();
-                      }
-                    },
-                  );
+                  ).then((value) {
+                    if (value == '00') {
+                      _pageController.jumpToPage(0);
+                      orderInventory.clear();
+                      tanggalAwal = '';
+                      setState(() {});
+                      initState();
+                    }
+                  });
                   print(orderInventory);
                 },
                 child: buttonXL(
@@ -3285,7 +3587,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -3375,7 +3677,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Nama Produk',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -3384,7 +3689,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -3393,7 +3701,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Jumlah',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -3402,7 +3713,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Harga Satuan',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
@@ -3411,14 +3725,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   child: Text(
                                     'Total Harga',
                                     style: heading4(
-                                        FontWeight.w700, bnw100, 'Outfit'),
+                                      FontWeight.w700,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: size16),
-                                Icon(
-                                  PhosphorIcons.x_fill,
-                                  color: primary500,
-                                ),
+                                Icon(PhosphorIcons.x_fill, color: primary500),
                                 SizedBox(width: size16),
                               ],
                             )
@@ -3435,9 +3749,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         checkFill == 'penuh'
                                             ? PhosphorIcons.check_square_fill
                                             : isSelectionMode
-                                                ? PhosphorIcons
-                                                    .minus_circle_fill
-                                                : PhosphorIcons.square,
+                                            ? PhosphorIcons.minus_circle_fill
+                                            : PhosphorIcons.square,
                                         color: bnw100,
                                       ),
                                     ),
@@ -3447,7 +3760,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   '${listProduct.length}/${datasProduk!.length} Produk Terpilih',
                                   // 'produk terpilih',
                                   style: heading4(
-                                      FontWeight.w600, bnw100, 'Outfit'),
+                                    FontWeight.w600,
+                                    bnw100,
+                                    'Outfit',
+                                  ),
                                 ),
                                 SizedBox(width: size8),
                                 GestureDetector(
@@ -3462,14 +3778,20 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                             children: [
                                               Text(
                                                 'Yakin Ingin Menghapus Produk?',
-                                                style: heading1(FontWeight.w600,
-                                                    bnw900, 'Outfit'),
+                                                style: heading1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                               SizedBox(height: size16),
                                               Text(
                                                 'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
-                                                style: heading2(FontWeight.w400,
-                                                    bnw900, 'Outfit'),
+                                                style: heading2(
+                                                  FontWeight.w400,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -3508,14 +3830,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Iya, Hapus',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          primary500,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                     primary500,
                                                   ),
                                                 ),
@@ -3531,14 +3854,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       child: Text(
                                                         'Batalkan',
                                                         style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw100,
-                                                            'Outfit'),
+                                                          FontWeight.w600,
+                                                          bnw100,
+                                                          'Outfit',
+                                                        ),
                                                       ),
                                                     ),
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .width,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width,
                                                   ),
                                                 ),
                                               ),
@@ -3553,12 +3877,17 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Icon(PhosphorIcons.trash_fill,
-                                            color: bnw900),
+                                        Icon(
+                                          PhosphorIcons.trash_fill,
+                                          color: bnw900,
+                                        ),
                                         Text(
                                           'Hapus Semua',
-                                          style: heading3(FontWeight.w600,
-                                              bnw900, 'Outfit'),
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -3589,8 +3918,9 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                           final Map<String, dynamic> data =
                               orderInventoryEdit[index];
                           final productId = data['id'];
-                          final isSelected =
-                              selectedDataPemakaian.containsKey(productId);
+                          final isSelected = selectedDataPemakaian.containsKey(
+                            productId,
+                          );
 
                           return Container(
                             margin: EdgeInsets.symmetric(vertical: size12),
@@ -3604,11 +3934,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 InkWell(
                                   // onTap: () => onTap(isSelected, index),
                                   onTap: () {
-                                    onTap(
-                                      isSelected,
-                                      index,
-                                      productId,
-                                    );
+                                    onTap(isSelected, index, productId);
                                     // log(data.name.toString());
                                     // print(dataProduk.isActive);
 
@@ -3682,7 +4008,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                   flex: 4,
                                   child: Text(
                                     FormatCurrency.convertToIdr(
-                                        (data['price'] * data['qty'])),
+                                      (data['price'] * data['qty']),
+                                    ),
                                     style: heading4(
                                       FontWeight.w400,
                                       bnw900,
@@ -3726,97 +4053,53 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               StatefulBuilder(
                 builder: (context, setState) => IntrinsicHeight(
                   child: Container(
-                      margin: EdgeInsets.all(size16),
-                      padding: EdgeInsets.all(size12),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tambah Pemakaian',
-                            style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                          ),
-                          Text(
-                            'Pilih bahan yang sudah terpakai.',
-                            style: heading3(FontWeight.w400, bnw500, 'Outfit'),
-                          ),
-                          SizedBox(height: size16),
-                          Container(
-                            height: MediaQuery.sizeOf(context).height / 1.8,
-                            child: dataPemakaian.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'Bahan tidak ditemukan.',
-                                      style: heading3(
-                                          FontWeight.w400, bnw500, 'Outfit'),
+                    margin: EdgeInsets.all(size16),
+                    padding: EdgeInsets.all(size12),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tambah Pemakaian',
+                          style: heading1(FontWeight.w700, bnw900, 'Outfit'),
+                        ),
+                        Text(
+                          'Pilih bahan yang sudah terpakai.',
+                          style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+                        ),
+                        SizedBox(height: size16),
+                        Container(
+                          height: MediaQuery.sizeOf(context).height / 1.8,
+                          child: dataPemakaian.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'Bahan tidak ditemukan.',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
                                     ),
-                                  )
-                                : ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    itemCount: dataPemakaian.length,
-                                    itemBuilder: (context, index) {
-                                      final item = dataPemakaian[index];
-                                      return StatefulBuilder(
-                                        builder: (context, setState) {
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                contentPadding: EdgeInsets.zero,
-                                                leading: Checkbox(
-                                                  activeColor: primary500,
-                                                  value: selectedDataPemakaian
-                                                      .containsKey(item['id']),
-                                                  onChanged: (bool? value) {
-                                                    setState(() {
-                                                      if (value == true) {
-                                                        selectedDataPemakaian[
-                                                            item['id']] = {
-                                                          "inventory_master_id":
-                                                              item['id'],
-                                                          "name":
-                                                              item['name_item'],
-                                                          "category":
-                                                              item['unit_name'],
-                                                          "qty": 0,
-                                                          "price": 0,
-                                                        };
-                                                      } else {
-                                                        selectedDataPemakaian
-                                                            .remove(item['id']);
-                                                      }
-                                                    });
-                                                  },
-                                                ),
-                                                title: Text(
-                                                  item['name_item'] ?? '',
-                                                  style: heading2(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
-                                                ),
-                                                subtitle: Text(
-                                                  item['unit_name'] ?? '',
-                                                  style: heading4(
-                                                      FontWeight.w400,
-                                                      bnw700,
-                                                      'Outfit'),
-                                                ),
-                                                trailing: Icon(
-                                                    selectedDataPemakaian
-                                                            .containsKey(
-                                                                item['id'])
-                                                        ? Icons.expand_less
-                                                        : Icons.expand_more),
-                                                onTap: () {
+                                  ),
+                                )
+                              : ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: dataPemakaian.length,
+                                  itemBuilder: (context, index) {
+                                    final item = dataPemakaian[index];
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              contentPadding: EdgeInsets.zero,
+                                              leading: Checkbox(
+                                                activeColor: primary500,
+                                                value: selectedDataPemakaian
+                                                    .containsKey(item['id']),
+                                                onChanged: (bool? value) {
                                                   setState(() {
-                                                    if (selectedDataPemakaian
-                                                        .containsKey(
-                                                            item['id'])) {
-                                                      selectedDataPemakaian
-                                                          .remove(item['id']);
-                                                    } else {
-                                                      selectedDataPemakaian[
-                                                          item['id']] = {
+                                                    if (value == true) {
+                                                      selectedDataPemakaian[item['id']] = {
                                                         "inventory_master_id":
                                                             item['id'],
                                                         "name":
@@ -3826,191 +4109,241 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         "qty": 0,
                                                         "price": 0,
                                                       };
+                                                    } else {
+                                                      selectedDataPemakaian
+                                                          .remove(item['id']);
                                                     }
                                                   });
                                                 },
                                               ),
-                                              if (selectedDataPemakaian
-                                                  .containsKey(item['id']))
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.all(size8),
-                                                  decoration: BoxDecoration(
-                                                    color: primary100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            size8),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Jumlah Pesanan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : 10',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'qty'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                      SizedBox(height: size12),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            'Harga Satuan ',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit'),
-                                                          ),
-                                                          Text(
-                                                            '*',
-                                                            style: heading4(
-                                                                FontWeight.w400,
-                                                                danger500,
-                                                                'Outfit'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      TextField(
-                                                        decoration:
-                                                            InputDecoration(
-                                                                focusedBorder:
-                                                                    UnderlineInputBorder(
-                                                                  borderSide:
-                                                                      BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                                ),
-                                                                focusColor:
-                                                                    primary500,
-                                                                hintText:
-                                                                    'Cth : Rp 10.000',
-                                                                hintStyle:
-                                                                    heading2(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw400,
-                                                                  'Outfit',
-                                                                )),
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        onChanged: (value) {
-                                                          selectedDataPemakaian[
-                                                                  item['id']]![
-                                                              'price'] = int
-                                                                  .tryParse(
-                                                                      value) ??
-                                                              0;
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
+                                              title: Text(
+                                                item['name_item'] ?? '',
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
                                                 ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                          ),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).pop();
+                                              ),
+                                              subtitle: Text(
+                                                item['unit_name'] ?? '',
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw700,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              trailing: Icon(
+                                                selectedDataPemakaian
+                                                        .containsKey(item['id'])
+                                                    ? Icons.expand_less
+                                                    : Icons.expand_more,
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  if (selectedDataPemakaian
+                                                      .containsKey(
+                                                        item['id'],
+                                                      )) {
+                                                    selectedDataPemakaian
+                                                        .remove(item['id']);
+                                                  } else {
+                                                    selectedDataPemakaian[item['id']] =
+                                                        {
+                                                          "inventory_master_id":
+                                                              item['id'],
+                                                          "name":
+                                                              item['name_item'],
+                                                          "category":
+                                                              item['unit_name'],
+                                                          "qty": 0,
+                                                          "price": 0,
+                                                        };
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                            if (selectedDataPemakaian
+                                                .containsKey(item['id']))
+                                              Container(
+                                                padding: EdgeInsets.all(size8),
+                                                decoration: BoxDecoration(
+                                                  color: primary100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Jumlah Pesanan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText: 'Cth : 10',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['qty'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                    SizedBox(height: size12),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Harga Satuan ',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '*',
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            danger500,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    TextField(
+                                                      decoration: InputDecoration(
+                                                        focusedBorder:
+                                                            UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                    width: 2,
+                                                                    color:
+                                                                        primary500,
+                                                                  ),
+                                                            ),
+                                                        focusColor: primary500,
+                                                        hintText:
+                                                            'Cth : Rp 10.000',
+                                                        hintStyle: heading2(
+                                                          FontWeight.w600,
+                                                          bnw400,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      onChanged: (value) {
+                                                        selectedDataPemakaian[item['id']]!['price'] =
+                                                            int.tryParse(
+                                                              value,
+                                                            ) ??
+                                                            0;
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: buttonXLoutline(
-                                    Center(
-                                      child: Text(
-                                        'Batal',
-                                        style: heading3(FontWeight.w600,
-                                            primary500, 'Outfit'),
+                                ),
+                        ),
+                        SizedBox(height: size16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: buttonXLoutline(
+                                  Center(
+                                    child: Text(
+                                      'Batal',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        primary500,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
-                                    primary500,
                                   ),
+                                  double.infinity,
+                                  primary500,
                                 ),
                               ),
-                              SizedBox(width: size16),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      orderInventoryEdit =
-                                          selectedDataPemakaian.values.toList();
+                            ),
+                            SizedBox(width: size16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    orderInventoryEdit = selectedDataPemakaian
+                                        .values
+                                        .toList();
 
-                                      dataPemakaian = orderInventoryEdit;
-                                      print("Saved Data: $orderInventoryEdit");
-                                    });
-                                    Navigator.pop(context);
-                                    initState();
-                                  },
-                                  child: buttonXL(
-                                    Center(
-                                      child: Text(
-                                        'Simpan',
-                                        style: heading3(
-                                            FontWeight.w600, bnw100, 'Outfit'),
+                                    dataPemakaian = orderInventoryEdit;
+                                    print("Saved Data: $orderInventoryEdit");
+                                  });
+                                  Navigator.pop(context);
+                                  initState();
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Simpan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
                                       ),
                                     ),
-                                    double.infinity,
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ],
-                          )
-                        ],
-                      )),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );
@@ -4041,17 +4374,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                     tanggalAwal,
                     judulPenyesuaian.text,
                     orderInventoryEdit,
-                  ).then(
-                    (value) {
-                      if (value == '00') {
-                        _pageController.jumpToPage(0);
-                        orderInventoryEdit.clear();
-                        tanggalAwal = '';
-                        setState(() {});
-                        initState();
-                      }
-                    },
-                  );
+                  ).then((value) {
+                    if (value == '00') {
+                      _pageController.jumpToPage(0);
+                      orderInventoryEdit.clear();
+                      tanggalAwal = '';
+                      setState(() {});
+                      initState();
+                    }
+                  });
                   print(orderInventoryEdit);
                 },
                 child: buttonXL(
@@ -4066,7 +4397,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -4106,17 +4437,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
         ),
         SizedBox(height: size16),
         Expanded(
-            child: Column(
-          children: [
-            fieldTambahBahan(
-              'Nama Barang',
-              namaBarangController,
-              'Matcha',
-            ),
-            SizedBox(height: size16),
-            kategoriList(context),
-          ],
-        )),
+          child: Column(
+            children: [
+              fieldTambahBahan('Nama Barang', namaBarangController, 'Matcha'),
+              SizedBox(height: size16),
+              kategoriList(context),
+            ],
+          ),
+        ),
         SizedBox(height: size16),
         Row(
           children: [
@@ -4131,14 +4459,12 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                       '',
                       namaBarangController.text,
                       idProduct,
-                    ).then(
-                      (value) {
-                        if (value == "00") {
-                          namaBarangController.clear();
-                          satuanController.clear();
-                        }
-                      },
-                    );
+                    ).then((value) {
+                      if (value == "00") {
+                        namaBarangController.clear();
+                        satuanController.clear();
+                      }
+                    });
                   });
                 },
                 child: buttonXLoutline(
@@ -4166,14 +4492,12 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                       '',
                       namaBarangController.text,
                       idProduct,
-                    ).then(
-                      (value) {
-                        value == '00' ? _pageController.jumpToPage(0) : null;
-                        refreshTextfield();
-                        setState(() {});
-                        initState();
-                      },
-                    );
+                    ).then((value) {
+                      value == '00' ? _pageController.jumpToPage(0) : null;
+                      refreshTextfield();
+                      setState(() {});
+                      initState();
+                    });
                   });
                 },
                 child: buttonXL(
@@ -4188,7 +4512,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -4200,14 +4524,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: body1(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: body1(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: body1(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: body1(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           IntrinsicHeight(
@@ -4222,18 +4540,12 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               },
               decoration: InputDecoration(
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2,
-                    color: primary500,
-                  ),
+                  borderSide: BorderSide(width: 2, color: primary500),
                 ),
                 contentPadding: EdgeInsets.symmetric(vertical: size12),
                 isDense: true,
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1.5,
-                    color: bnw500,
-                  ),
+                  borderSide: BorderSide(width: 1.5, color: bnw500),
                 ),
                 hintText: 'Cth : $hintText',
                 hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -4252,14 +4564,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
         children: [
           Row(
             children: [
-              Text(
-                title,
-                style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' *',
-                style: heading4(FontWeight.w700, red500, 'Outfit'),
-              ),
+              Text(title, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
+              Text(' *', style: heading4(FontWeight.w700, red500, 'Outfit')),
             ],
           ),
           TextFormField(
@@ -4273,18 +4579,12 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
             },
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: primary500,
-                ),
+                borderSide: BorderSide(width: 2, color: primary500),
               ),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: size12),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: bnw500,
-                ),
+                borderSide: BorderSide(width: 1.5, color: bnw500),
               ),
               hintText: hintText,
               hintStyle: heading2(FontWeight.w600, bnw500, 'Outfit'),
@@ -4301,128 +4601,152 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
         onTap: () {
           setState(() {
             showModalBottomSheet(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity,
-              ),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
               context: context,
               builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding:
-                          EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+                return SafeArea(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, setState) => IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                      FontWeight.w700, bnw900, 'Outfit'),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                      FontWeight.w400, bnw600, 'Outfit'),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                      FontWeight.w400, bnw900, 'Outfit'),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByProductText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: size12),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw300,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(size8),
-                                          ),
-                                          label: Text(orderByProductText[index],
-                                              style: heading4(
-                                                  FontWeight.w400,
-                                                  valueOrderByProduct == index
-                                                      ? primary500
-                                                      : bnw900,
-                                                  'Outfit')),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
                           ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Urutkan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                0,
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    'Pilih Urutan',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Wrap(
+                                    children: List<Widget>.generate(
+                                      orderByProductText.length,
+                                      (int index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: size16,
+                                          ),
+                                          child: ChoiceChip(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            backgroundColor: bnw100,
+                                            selectedColor: primary100,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color:
+                                                    valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(size8),
+                                            ),
+                                            label: Text(
+                                              orderByProductText[index],
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                valueOrderByProduct == index
+                                                    ? primary500
+                                                    : bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            selected:
+                                                valueOrderByProduct == index,
+                                            onSelected: (bool selected) {
+                                              setState(() {
+                                                print(index);
+                                                // _value =
+                                                //     selected ? index : null;
+                                                valueOrderByProduct = index;
+                                              });
+                                              setState(() {});
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  print(valueOrderByProduct);
+                                  print(
+                                    orderByProductText[valueOrderByProduct],
+                                  );
+
+                                  textOrderBy =
+                                      orderByProductText[valueOrderByProduct];
+                                  textvalueOrderBy =
+                                      orderByProduct[valueOrderByProduct];
+                                  orderByProduct[valueOrderByProduct];
+                                  Navigator.pop(context);
+                                  initState();
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -4437,26 +4761,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
             children: [
               Text(
                 'Urutkan',
-                style: heading3(
-                  FontWeight.w600,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
               ),
               Text(
                 ' dari $textOrderBy',
-                style: heading3(
-                  FontWeight.w400,
-                  bnw900,
-                  'Outfit',
-                ),
+                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
               ),
               SizedBox(width: size12),
-              Icon(
-                PhosphorIcons.caret_down,
-                color: bnw900,
-                size: size24,
-              )
+              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
             ],
           ),
           bnw300,
@@ -4506,29 +4818,47 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: [
-                                  SizedBox(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        _selectAll(productIdCheckAll);
-                                      },
-                                      child: SizedBox(
-                                        width: 50,
-                                        child: Icon(
-                                          isSelectionMode
-                                              ? PhosphorIcons.check
-                                              : PhosphorIcons.square,
-                                          color: bnw100,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  // SizedBox(
+                                  //   child: GestureDetector(
+                                  //     onTap: () {
+                                  //       _selectAll(productIdCheckAll);
+                                  //     },
+                                  //     child: SizedBox(
+                                  //       width: 50,
+                                  //       child: Icon(
+                                  //         isSelectionMode
+                                  //             ? PhosphorIcons.check
+                                  //             : PhosphorIcons.square,
+                                  //         color: bnw100,
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  SizedBox(width: size8),
                                   Expanded(
                                     flex: 3,
                                     child: Container(
                                       child: Text(
                                         'Nama Bahan',
                                         style: heading4(
-                                            FontWeight.w700, bnw100, 'Outfit'),
+                                          FontWeight.w700,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: size16),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: Text(
+                                        'Qty',
+                                        style: heading4(
+                                          FontWeight.w600,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -4539,31 +4869,29 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       child: Text(
                                         'Satuan',
                                         style: heading4(
-                                            FontWeight.w600, bnw100, 'Outfit'),
+                                          FontWeight.w600,
+                                          bnw100,
+                                          'Outfit',
+                                        ),
                                       ),
                                     ),
                                   ),
                                   SizedBox(width: size16),
                                   Opacity(
                                     opacity: 0,
-                                    child: buttonL(
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            PhosphorIcons.pencil_line_fill,
-                                            color: bnw900,
-                                            size: size24,
-                                          ),
-                                          SizedBox(width: size16),
-                                          Text(
-                                            'Atur',
-                                            style: heading3(FontWeight.w600,
-                                                bnw900, 'Outfit'),
-                                          ),
-                                        ],
+                                    child: Container(
+                                      padding: EdgeInsets.all(size8),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: bnw300),
+                                        borderRadius: BorderRadius.circular(
+                                          size8,
+                                        ),
                                       ),
-                                      bnw100,
-                                      bnw300,
+                                      child: Icon(
+                                        PhosphorIcons.dots_three_vertical_bold,
+                                        color: bnw900,
+                                        size: size24,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(width: size16),
@@ -4582,9 +4910,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                           checkFill == 'penuh'
                                               ? PhosphorIcons.check_square_fill
                                               : isSelectionMode
-                                                  ? PhosphorIcons
-                                                      .check_square_fill
-                                                  : PhosphorIcons.square,
+                                              ? PhosphorIcons.check_square_fill
+                                              : PhosphorIcons.square,
                                           color: bnw100,
                                         ),
                                       ),
@@ -4594,7 +4921,10 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                     '${listProduct.length}/${datasBahan!.length} Bahan Terpilih',
                                     // 'produk terpilih',
                                     style: heading4(
-                                        FontWeight.w600, bnw100, 'Outfit'),
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                   SizedBox(width: size8),
                                   GestureDetector(
@@ -4610,17 +4940,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                 Text(
                                                   'Yakin Ingin Menghapus Produk?',
                                                   style: heading1(
-                                                      FontWeight.w600,
-                                                      bnw900,
-                                                      'Outfit'),
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                                 SizedBox(height: size16),
                                                 Text(
                                                   'Data produk yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                   style: heading2(
-                                                      FontWeight.w400,
-                                                      bnw900,
-                                                      'Outfit'),
+                                                    FontWeight.w400,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -4638,18 +4970,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                           context,
                                                           widget.token,
                                                           listProduct,
-                                                        ).then(
-                                                          (value) {
-                                                            isSelectionMode =
-                                                                false;
-                                                            listProduct = [];
-                                                            listProduct.clear();
-                                                            selectedFlag
-                                                                .clear();
-                                                            setState(() {});
-                                                            initState();
-                                                          },
-                                                        );
+                                                        ).then((value) {
+                                                          isSelectionMode =
+                                                              false;
+                                                          listProduct = [];
+                                                          listProduct.clear();
+                                                          selectedFlag.clear();
+                                                          setState(() {});
+                                                          initState();
+                                                        });
                                                       });
                                                       initState();
                                                     },
@@ -4658,14 +4987,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         child: Text(
                                                           'Iya, Hapus',
                                                           style: heading3(
-                                                              FontWeight.w600,
-                                                              primary500,
-                                                              'Outfit'),
+                                                            FontWeight.w600,
+                                                            primary500,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                       ),
-                                                      MediaQuery.of(context)
-                                                          .size
-                                                          .width,
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width,
                                                       primary500,
                                                     ),
                                                   ),
@@ -4681,14 +5011,15 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         child: Text(
                                                           'Batalkan',
                                                           style: heading3(
-                                                              FontWeight.w600,
-                                                              bnw100,
-                                                              'Outfit'),
+                                                            FontWeight.w600,
+                                                            bnw100,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                       ),
-                                                      MediaQuery.of(context)
-                                                          .size
-                                                          .width,
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width,
                                                     ),
                                                   ),
                                                 ),
@@ -4703,12 +5034,17 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Icon(PhosphorIcons.trash_fill,
-                                              color: bnw900),
+                                          Icon(
+                                            PhosphorIcons.trash_fill,
+                                            color: bnw900,
+                                          ),
                                           Text(
                                             'Hapus Semua',
-                                            style: heading3(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -4756,60 +5092,51 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                       return GestureDetector(
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
-                                          idproductDetail = dataProduk.id;
-                                          expandedPage =
-                                              MediaQuery.of(context).size.width;
-
-                                          if (cartProductIds
-                                              .contains(dataProduk.id)) {
-                                            cartProductIds.clear();
-                                            expandedPage = 0;
-                                          } else {
-                                            cartProductIds.clear();
-                                            cartProductIds.add(dataProduk.id!);
-                                          }
-                                          setState(() {});
+                                          _showMaterialDetailData(
+                                            dataProduk.id!,
+                                            dataProduk.nameItem!,
+                                          );
                                         },
                                         child: Container(
                                           padding: EdgeInsets.symmetric(
-                                              vertical: size12),
+                                            vertical: size12,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: cartProductIds.contains(
-                                                    datasBahan![index]
-                                                        .id
-                                                        .toString())
+                                            color:
+                                                cartProductIds.contains(
+                                                  datasBahan![index].id
+                                                      .toString(),
+                                                )
                                                 ? primary200
                                                 : null,
                                             border: Border(
                                               bottom: BorderSide(
-                                                  color: bnw300, width: width1),
+                                                color: bnw300,
+                                                width: width1,
+                                              ),
                                             ),
                                           ),
                                           child: Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceAround,
                                             children: [
-                                              InkWell(
-                                                // onTap: () => onTap(isSelected, index),
-                                                onTap: () {
-                                                  onTap(
-                                                    isSelected,
-                                                    index,
-                                                    dataProduk.id,
-                                                  );
-                                                  // log(data.nameItem.toString());
-                                                  // print(dataProduk.isActive);
-
-                                                  print(listProduct);
-                                                },
-                                                child: SizedBox(
-                                                  width: 50,
-                                                  child: _buildSelectIconBahan(
-                                                    isSelected!,
-                                                    data,
-                                                  ),
-                                                ),
-                                              ),
+                                              // InkWell(
+                                              //   onTap: () {
+                                              //     onTap(
+                                              //       isSelected,
+                                              //       index,
+                                              //       dataProduk.id,
+                                              //     );
+                                              //   },
+                                              //   child: SizedBox(
+                                              //     width: 50,
+                                              //     child: _buildSelectIconBahan(
+                                              //       isSelected!,
+                                              //       data,
+                                              //     ),
+                                              //   ),
+                                              // ),
+                                              SizedBox(width: size8),
                                               Expanded(
                                                 flex: 3,
                                                 child: Container(
@@ -4821,15 +5148,35 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                   .nameItem ??
                                                               '',
                                                           style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                           maxLines: 3,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                         ),
                                                       ),
                                                     ],
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: size16),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Container(
+                                                  child: Text(
+                                                    formatQty(
+                                                      datasBahan![index].qty,
+                                                    ),
+                                                    maxLines: 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -4850,10 +5197,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                         style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit'),
-                                                      )
+                                                          FontWeight.w400,
+                                                          bnw900,
+                                                          'Outfit',
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -4863,13 +5211,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                 onTap: () {
                                                   showModalBottom(
                                                     context,
-                                                    MediaQuery.of(context)
-                                                        .size
-                                                        .height,
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height,
                                                     IntrinsicHeight(
                                                       child: Padding(
                                                         padding: EdgeInsets.all(
-                                                            28.0),
+                                                          28.0,
+                                                        ),
                                                         child: Column(
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
@@ -4892,26 +5241,29 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                       dataProduk
                                                                           .nameItem!,
                                                                       style: heading2(
-                                                                          FontWeight
-                                                                              .w600,
-                                                                          bnw900,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w600,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                     Text(
                                                                       dataProduk
                                                                           .unitName!,
                                                                       style: heading4(
-                                                                          FontWeight
-                                                                              .w400,
-                                                                          bnw900,
-                                                                          'Outfit'),
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        bnw900,
+                                                                        'Outfit',
+                                                                      ),
                                                                     ),
                                                                   ],
                                                                 ),
                                                                 GestureDetector(
                                                                   onTap: () =>
                                                                       Navigator.pop(
-                                                                          context),
+                                                                        context,
+                                                                      ),
                                                                   child: Icon(
                                                                     PhosphorIcons
                                                                         .x_fill,
@@ -4922,63 +5274,90 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                               ],
                                                             ),
                                                             SizedBox(
-                                                                height: 20),
+                                                              height: 20,
+                                                            ),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 setState(() {
                                                                   Navigator.pop(
-                                                                      context);
+                                                                    context,
+                                                                  );
                                                                   whenLoading(
-                                                                      context);
+                                                                    context,
+                                                                  );
                                                                   getSingleMasterData(
                                                                     context,
                                                                     widget
                                                                         .token,
                                                                     dataProduk
                                                                         .id,
-                                                                  ).then(
-                                                                    (value) {
-                                                                      namaBarangController
-                                                                              .text =
-                                                                          name_itemBahan;
+                                                                  ).then((
+                                                                    value,
+                                                                  ) {
+                                                                    namaBarangController
+                                                                            .text =
+                                                                        name_itemBahan;
 
-                                                                      satuanController
-                                                                              .text =
-                                                                          unit_idBahan;
+                                                                    satuanController
+                                                                            .text =
+                                                                        unit_idBahan;
+                                                                    idProduct = unit_idBahan;
+                                                                    jenisProduct = unit_nameBahan;
 
-                                                                      value ==
-                                                                              '00'
-                                                                          ? _pageController
-                                                                              .jumpToPage(
-                                                                              5,
-                                                                            )
-                                                                          : null;
+                                                                    value ==
+                                                                            '00'
+                                                                        ? _pageController.jumpToPage(
+                                                                            5,
+                                                                          )
+                                                                        : null;
 
-                                                                      setState(
-                                                                          () {});
-                                                                    },
-                                                                  );
+                                                                    setState(
+                                                                      () {},
+                                                                    );
+                                                                  });
                                                                 });
                                                               },
                                                               behavior:
                                                                   HitTestBehavior
                                                                       .translucent,
-                                                              child:
-                                                                  modalBottomValue(
+                                                              child: modalBottomValue(
                                                                 'Ubah Bahan',
                                                                 PhosphorIcons
                                                                     .pencil_line,
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                                height: 10),
+                                                              height: 10,
+                                                            ),
+                                                            GestureDetector(
+                                                              behavior:
+                                                                  HitTestBehavior
+                                                                      .translucent,
+                                                              onTap: () async {
+                                                                Navigator.pop(
+                                                                  context,
+                                                                );
+                                                                await _downloadPdf(
+                                                                  0,
+                                                                );
+                                                              },
+                                                              child: modalBottomValue(
+                                                                'Download Bahan',
+                                                                PhosphorIcons
+                                                                    .download_simple,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 10,
+                                                            ),
                                                             GestureDetector(
                                                               behavior:
                                                                   HitTestBehavior
                                                                       .translucent,
                                                               onTap: () {
                                                                 Navigator.pop(
-                                                                    context);
+                                                                  context,
+                                                                );
                                                                 showBottomPilihan(
                                                                   context,
                                                                   Column(
@@ -4991,75 +5370,104 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                           Text(
                                                                             'Yakin Ingin Menghapus Bahan?',
                                                                             style: heading1(
-                                                                                FontWeight.w600,
-                                                                                bnw900,
-                                                                                'Outfit'),
+                                                                              FontWeight.w600,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                           SizedBox(
-                                                                              height: size16),
+                                                                            height:
+                                                                                size16,
+                                                                          ),
                                                                           Text(
                                                                             'Data bahan yang sudah dihapus tidak dapat dikembalikan lagi.',
                                                                             style: heading2(
-                                                                                FontWeight.w400,
-                                                                                bnw900,
-                                                                                'Outfit'),
+                                                                              FontWeight.w400,
+                                                                              bnw900,
+                                                                              'Outfit',
+                                                                            ),
                                                                           ),
                                                                           SizedBox(
-                                                                              height: size16),
+                                                                            height:
+                                                                                size16,
+                                                                          ),
                                                                         ],
                                                                       ),
                                                                       Row(
                                                                         children: [
                                                                           Expanded(
-                                                                            child:
-                                                                                GestureDetector(
+                                                                            child: GestureDetector(
                                                                               onTap: () {
                                                                                 // print(datasBahan![index].id.toString());
-                                                                                List<String> dataBahan = [
-                                                                                  datasBahan![index].id.toString()
+                                                                                List<
+                                                                                  String
+                                                                                >
+                                                                                dataBahan = [
+                                                                                  datasBahan![index].id.toString(),
                                                                                 ];
 
-                                                                                setState(() {
-                                                                                  deleteMasterData(
-                                                                                    context,
-                                                                                    widget.token,
-                                                                                    dataBahan,
-                                                                                  ).then(
-                                                                                    (value) {
-                                                                                      setState(() {});
-                                                                                      initState();
-                                                                                    },
-                                                                                  );
-                                                                                });
+                                                                                setState(
+                                                                                  () {
+                                                                                    deleteMasterData(
+                                                                                      context,
+                                                                                      widget.token,
+                                                                                      dataBahan,
+                                                                                    ).then(
+                                                                                      (
+                                                                                        value,
+                                                                                      ) {
+                                                                                        setState(
+                                                                                          () {},
+                                                                                        );
+                                                                                        initState();
+                                                                                      },
+                                                                                    );
+                                                                                  },
+                                                                                );
                                                                               },
                                                                               child: buttonXLoutline(
                                                                                 Center(
                                                                                   child: Text(
                                                                                     'Iya, Hapus',
-                                                                                    style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                                                                                    style: heading3(
+                                                                                      FontWeight.w600,
+                                                                                      primary500,
+                                                                                      'Outfit',
+                                                                                    ),
                                                                                   ),
                                                                                 ),
-                                                                                MediaQuery.of(context).size.width,
+                                                                                MediaQuery.of(
+                                                                                  context,
+                                                                                ).size.width,
                                                                                 primary500,
                                                                               ),
                                                                             ),
                                                                           ),
                                                                           SizedBox(
-                                                                              width: 12),
+                                                                            width:
+                                                                                12,
+                                                                          ),
                                                                           Expanded(
-                                                                            child:
-                                                                                GestureDetector(
+                                                                            child: GestureDetector(
                                                                               onTap: () {
-                                                                                Navigator.pop(context);
+                                                                                Navigator.pop(
+                                                                                  context,
+                                                                                );
                                                                               },
                                                                               child: buttonXL(
                                                                                 Center(
                                                                                   child: Text(
                                                                                     'Batalkan',
-                                                                                    style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                                                                                    style: heading3(
+                                                                                      FontWeight.w600,
+                                                                                      bnw100,
+                                                                                      'Outfit',
+                                                                                    ),
                                                                                   ),
                                                                                 ),
-                                                                                MediaQuery.of(context).size.width,
+                                                                                MediaQuery.of(
+                                                                                  context,
+                                                                                ).size.width,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -5069,8 +5477,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                   ),
                                                                 );
                                                               },
-                                                              child:
-                                                                  modalBottomValue(
+                                                              child: modalBottomValue(
                                                                 'Hapus Bahan',
                                                                 PhosphorIcons
                                                                     .trash,
@@ -5082,30 +5489,28 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     ),
                                                   );
                                                 },
-                                                child: buttonL(
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        PhosphorIcons
-                                                            .pencil_line_fill,
-                                                        color: bnw900,
-                                                        size: size24,
-                                                      ),
-                                                      SizedBox(width: size16),
-                                                      Text(
-                                                        'Atur',
-                                                        style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw900,
-                                                            'Outfit'),
-                                                      ),
-                                                    ],
+                                                child: Container(
+                                                  padding: EdgeInsets.all(
+                                                    size8,
                                                   ),
-                                                  bnw100,
-                                                  bnw300,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color: bnw300,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          size8,
+                                                        ),
+                                                  ),
+                                                  child: Icon(
+                                                    PhosphorIcons
+                                                        .dots_three_vertical_bold,
+                                                    color: bnw900,
+                                                    size: size24,
+                                                  ),
                                                 ),
                                               ),
-                                              SizedBox(width: size16)
+                                              SizedBox(width: size16),
                                             ],
                                           ),
                                         ),
@@ -5161,17 +5566,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              size8),
+                                                            size8,
+                                                          ),
                                                       color: primary100,
                                                     ),
-                                                    padding:
-                                                        EdgeInsets.all(size8),
+                                                    padding: EdgeInsets.all(
+                                                      size8,
+                                                    ),
                                                     child: Icon(
                                                       PhosphorIcons
                                                           .archive_box_fill,
                                                       color: primary500,
                                                     ),
-                                                  )
+                                                  ),
                                                 ],
                                               ),
                                               SizedBox(width: size12),
@@ -5183,17 +5590,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     detail[0]['item_name'] ??
                                                         '',
                                                     style: heading4(
-                                                        FontWeight.w600,
-                                                        bnw900,
-                                                        'Outfit'),
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                   Text(
                                                     detail[0]['unit_name'] ??
                                                         '',
                                                     style: heading4(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit'),
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -5201,8 +5610,9 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                           ),
                                           SizedBox(height: size16),
                                           Container(
-                                            padding:
-                                                EdgeInsets.only(bottom: size12),
+                                            padding: EdgeInsets.only(
+                                              bottom: size12,
+                                            ),
                                             decoration: BoxDecoration(
                                               border: Border(
                                                 bottom: BorderSide(
@@ -5231,20 +5641,21 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                         Text(
                                                           "Jumlah",
                                                           style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                         Text(
-                                                          double.parse(detail[0]
-                                                                      ['qty']
-                                                                  .toString())
-                                                              .toInt()
-                                                              .toString(),
+                                                          double.parse(
+                                                            detail[0]['qty']
+                                                                .toString(),
+                                                          ).toInt().toString(),
                                                           style: heading4(
-                                                              FontWeight.w600,
-                                                              bnw900,
-                                                              'Outfit'),
+                                                            FontWeight.w600,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -5284,8 +5695,11 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                           SizedBox(height: size16),
                                           Text(
                                             "Riwayat Persediaan",
-                                            style: heading3(FontWeight.w600,
-                                                bnw900, 'Outfit'),
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw900,
+                                              'Outfit',
+                                            ),
                                           ),
                                           SizedBox(height: size16),
                                           orderBy(context),
@@ -5301,7 +5715,8 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                               children: [
                                                 Container(
                                                   padding: EdgeInsets.only(
-                                                      bottom: size8),
+                                                    bottom: size8,
+                                                  ),
                                                   decoration: BoxDecoration(
                                                     border: Border(
                                                       bottom: BorderSide(
@@ -5313,16 +5728,16 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                   child: Row(
                                                     children: [
                                                       Container(
-                                                        decoration:
-                                                            BoxDecoration(
+                                                        decoration: BoxDecoration(
                                                           borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      size8),
+                                                              BorderRadius.circular(
+                                                                size8,
+                                                              ),
                                                           color: bnw200,
                                                         ),
                                                         padding: EdgeInsets.all(
-                                                            size8),
+                                                          size8,
+                                                        ),
                                                         child: Icon(
                                                           PhosphorIcons
                                                               .file_text_fill,
@@ -5337,14 +5752,13 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              detail[0][
-                                                                      'activity_date'] ??
+                                                              detail[0]['activity_date'] ??
                                                                   '',
                                                               style: heading4(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw900,
-                                                                  'Outfit'),
+                                                                FontWeight.w600,
+                                                                bnw900,
+                                                                'Outfit',
+                                                              ),
                                                             ),
                                                             Text(
                                                               'Oleh ${detail[0]['merchant_name']}',
@@ -5363,26 +5777,26 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                       ),
                                                       SizedBox(width: size12),
                                                       Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: size16,
-                                                          vertical: size4,
-                                                        ),
-                                                        decoration:
-                                                            BoxDecoration(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal:
+                                                                  size16,
+                                                              vertical: size4,
+                                                            ),
+                                                        decoration: BoxDecoration(
                                                           color: waring100,
                                                           borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      size8),
+                                                              BorderRadius.circular(
+                                                                size8,
+                                                              ),
                                                         ),
                                                         child: Text(
-                                                          data[
-                                                              'lastest_activity'],
+                                                          data['lastest_activity'],
                                                           style: heading4(
-                                                              FontWeight.w600,
-                                                              waring500,
-                                                              'Outfit'),
+                                                            FontWeight.w600,
+                                                            waring500,
+                                                            'Outfit',
+                                                          ),
                                                         ),
                                                       ),
                                                     ],
@@ -5397,17 +5811,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     Text(
                                                       'Jumlah',
                                                       style: body1(
-                                                          FontWeight.w400,
-                                                          bnw800,
-                                                          'Outfit'),
+                                                        FontWeight.w400,
+                                                        bnw800,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                     Text(
                                                       data['total_qty']
                                                           .toString(),
                                                       style: body1(
-                                                          FontWeight.w400,
-                                                          bnw800,
-                                                          'Outfit'),
+                                                        FontWeight.w400,
+                                                        bnw800,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -5420,16 +5836,18 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     Text(
                                                       'Harga Satuan',
                                                       style: body1(
-                                                          FontWeight.w400,
-                                                          bnw800,
-                                                          'Outfit'),
+                                                        FontWeight.w400,
+                                                        bnw800,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                     Text(
                                                       data['price'].toString(),
                                                       style: body1(
-                                                          FontWeight.w400,
-                                                          bnw800,
-                                                          'Outfit'),
+                                                        FontWeight.w400,
+                                                        bnw800,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -5442,16 +5860,18 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                                     Text(
                                                       'Total Harga',
                                                       style: heading4(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                     Text(
                                                       data['price'].toString(),
                                                       style: heading4(
-                                                          FontWeight.w600,
-                                                          bnw900,
-                                                          'Outfit'),
+                                                        FontWeight.w600,
+                                                        bnw900,
+                                                        'Outfit',
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -5516,21 +5936,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
         ),
         SizedBox(height: size16),
         Expanded(
-            child: Column(
-          children: [
-            fieldTambahBahan(
-              'Nama Barang',
-              namaBarangController,
-              'Matcha',
-            ),
-            // SizedBox(height: size16),
-            // fieldTambahBahan(
-            //   'Satuan',
-            //   satuanController,
-            //   'Kilogram, Gram, Miligram',
-            // ),
-          ],
-        )),
+          child: Column(
+            children: [
+              fieldTambahBahan('Nama Barang', namaBarangController, 'Matcha'),
+              SizedBox(height: size16),
+              kategoriList(context),
+            ],
+          ),
+        ),
         SizedBox(height: size16),
         Row(
           children: [
@@ -5545,15 +5958,14 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                       widget.token,
                       idBahan,
                       namaBarangController.text,
-                    ).then(
-                      (value) {
-                        value == '00' ? _pageController.jumpToPage(0) : null;
-                        namaBarangController.clear();
-                        satuanController.clear();
-                        setState(() {});
-                        initState();
-                      },
-                    );
+                      idProduct,
+                    ).then((value) {
+                      value == '00' ? _pageController.jumpToPage(0) : null;
+                      namaBarangController.clear();
+                      satuanController.clear();
+                      setState(() {});
+                      initState();
+                    });
                   });
                 },
                 child: buttonXL(
@@ -5568,7 +5980,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -5578,23 +5990,16 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
 
     return GestureDetector(
       onTap: () {
-        setState(
-          () {
-            // log(jenisProduct.toString());
-            kategoriListForm(context, isKeyboardActive);
-          },
-        );
+        setState(() {
+          // log(jenisProduct.toString());
+          kategoriListForm(context, isKeyboardActive);
+        });
       },
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           color: bnw100,
-          border: Border(
-            bottom: BorderSide(
-              width: 1.5,
-              color: bnw500,
-            ),
-          ),
+          border: Border(bottom: BorderSide(width: 1.5, color: bnw500)),
         ),
         child: Align(
           alignment: Alignment.centerLeft,
@@ -5622,13 +6027,13 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                       jenisProduct == ''
                           ? 'Pilih Kategori'
                           : capitalizeEachWord(jenisProduct.toString()),
-                      style: heading2(FontWeight.w600,
-                          jenisProduct == '' ? bnw500 : bnw900, 'Outfit'),
+                      style: heading2(
+                        FontWeight.w600,
+                        jenisProduct == '' ? bnw500 : bnw900,
+                        'Outfit',
+                      ),
                     ),
-                    Icon(
-                      PhosphorIcons.caret_down,
-                      color: bnw900,
-                    )
+                    Icon(PhosphorIcons.caret_down, color: bnw900),
                   ],
                 ),
               ),
@@ -5640,66 +6045,70 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
   }
 
   Future<dynamic> kategoriListForm(
-      BuildContext context, bool isKeyboardActive) {
+    BuildContext context,
+    bool isKeyboardActive,
+  ) {
     setState(() {});
     return showModalBottomSheet(
-      constraints: const BoxConstraints(
-        maxWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, setState) => FractionallySizedBox(
-            heightFactor: isKeyboardActive ? 0.9 : 0.80,
-            child: GestureDetector(
-              onTap: () => textFieldFocusNode.unfocus(),
-              child: Container(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                // height: MediaQuery.of(context).size.height / 1,
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(size12),
-                    topLeft: Radius.circular(size12),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (BuildContext context, setState) => FractionallySizedBox(
+              heightFactor: isKeyboardActive ? 0.9 : 0.80,
+              child: GestureDetector(
+                onTap: () => textFieldFocusNode.unfocus(),
+                child: Container(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                  child: Column(
-                    children: [
-                      dividerShowdialog(),
-                      SizedBox(height: size16),
-                      FocusScope(
-                        child: Focus(
-                          onFocusChange: (value) {
-                            isKeyboardActive = value;
-                            setState(() {});
-                          },
-                          child: TextField(
-                            cursorColor: primary500,
-                            controller: searchController,
-                            focusNode: textFieldFocusNode,
-                            onChanged: (value) {
-                              //   isKeyboardActive = value.isNotEmpty;
-                              _runSearchProduct(value);
+                  // height: MediaQuery.of(context).size.height / 1,
+                  decoration: BoxDecoration(
+                    color: bnw100,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(size12),
+                      topLeft: Radius.circular(size12),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      size32,
+                      size16,
+                      size32,
+                      size32,
+                    ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        FocusScope(
+                          child: Focus(
+                            onFocusChange: (value) {
+                              isKeyboardActive = value;
                               setState(() {});
                             },
-                            decoration: InputDecoration(
-                                contentPadding:
-                                    EdgeInsets.symmetric(vertical: size12),
+                            child: TextField(
+                              cursorColor: primary500,
+                              controller: searchController,
+                              focusNode: textFieldFocusNode,
+                              onChanged: (value) {
+                                //   isKeyboardActive = value.isNotEmpty;
+                                _runSearchProduct(value);
+                                setState(() {});
+                              },
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: size12,
+                                ),
                                 isDense: true,
                                 filled: true,
                                 fillColor: bnw200,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(size8),
-                                  borderSide: BorderSide(
-                                    color: bnw300,
-                                  ),
+                                  borderSide: BorderSide(color: bnw300),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(size8),
@@ -5710,9 +6119,7 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(size8),
-                                  borderSide: BorderSide(
-                                    color: bnw300,
-                                  ),
+                                  borderSide: BorderSide(color: bnw300),
                                 ),
                                 suffixIcon: searchController.text.isNotEmpty
                                     ? GestureDetector(
@@ -5734,92 +6141,107 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
                                 ),
                                 hintText: 'Cari',
                                 hintStyle: heading3(
-                                    FontWeight.w500, bnw500, 'Outfit')),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            _getProductList();
-                            setState(() {});
-                            initState();
-                          },
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            physics: BouncingScrollPhysics(),
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            itemCount: searchResultListProduct?.length,
-                            itemBuilder: (context, index) {
-                              final product = searchResultListProduct?[index];
-                              final isSelected = product == selectedProduct;
-
-                              return Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                            color: bnw300, width: width1),
-                                      ),
-                                    ),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: size16),
-                                      title: Text(
-                                        product['name'] != null
-                                            ? capitalizeEachWord(
-                                                product['name'].toString())
-                                            : '',
-                                      ),
-                                      trailing: Icon(
-                                        isSelected
-                                            ? PhosphorIcons.radio_button_fill
-                                            : PhosphorIcons.radio_button,
-                                        color: isSelected ? primary500 : bnw900,
-                                      ),
-                                      onTap: () {
-                                        setState(() {
-                                          textFieldFocusNode.unfocus();
-                                          jenisProduct = product['name'];
-
-                                          jenisProduct = product['name'];
-
-                                          idProduct = product['id'].toString();
-
-                                          _selectProduct(product);
-
-                                          print(product['name']);
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          autoReload();
-                          Navigator.pop(context);
-                        },
-                        child: buttonXXL(
-                          Center(
-                            child: Text(
-                              'Selesai',
-                              style:
-                                  heading2(FontWeight.w600, bnw100, 'Outfit'),
+                                  FontWeight.w500,
+                                  bnw500,
+                                  'Outfit',
+                                ),
+                              ),
                             ),
                           ),
-                          double.infinity,
                         ),
-                      ),
-                      SizedBox(height: size8)
-                    ],
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              _getProductList();
+                              setState(() {});
+                              initState();
+                            },
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: BouncingScrollPhysics(),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              itemCount: searchResultListProduct?.length,
+                              itemBuilder: (context, index) {
+                                final product = searchResultListProduct?[index];
+                                final isSelected = product == selectedProduct;
+
+                                return Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: bnw300,
+                                            width: width1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: ListTile(
+                                        contentPadding: EdgeInsets.symmetric(
+                                          vertical: size16,
+                                        ),
+                                        title: Text(
+                                          product['name'] != null
+                                              ? capitalizeEachWord(
+                                                  product['name'].toString(),
+                                                )
+                                              : '',
+                                        ),
+                                        trailing: Icon(
+                                          isSelected
+                                              ? PhosphorIcons.radio_button_fill
+                                              : PhosphorIcons.radio_button,
+                                          color: isSelected
+                                              ? primary500
+                                              : bnw900,
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            textFieldFocusNode.unfocus();
+                                            jenisProduct = product['name'];
+
+                                            jenisProduct = product['name'];
+
+                                            idProduct = product['id']
+                                                .toString();
+
+                                            _selectProduct(product);
+
+                                            print(product['name']);
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            autoReload();
+                            Navigator.pop(context);
+                          },
+                          child: buttonXXL(
+                            Center(
+                              child: Text(
+                                'Selesai',
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw100,
+                                  'Outfit',
+                                ),
+                              ),
+                            ),
+                            double.infinity,
+                          ),
+                        ),
+                        SizedBox(height: size8),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -5899,21 +6321,19 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
     bool isFalseAvailable = selectedFlag.containsValue(false);
 
     selectedFlag.updateAll((key, value) => isFalseAvailable);
-    setState(
-      () {
-        if (selectedFlag.containsValue(false)) {
-          checkFill = 'kosong';
-          listProduct.clear();
-          isSelectionMode = selectedFlag.containsValue(false);
-          isSelectionMode = selectedFlag.containsValue(true);
-        } else {
-          checkFill = 'penuh';
-          listProduct.clear();
-          listProduct.addAll(productId);
-          isSelectionMode = selectedFlag.containsValue(true);
-        }
-      },
-    );
+    setState(() {
+      if (selectedFlag.containsValue(false)) {
+        checkFill = 'kosong';
+        listProduct.clear();
+        isSelectionMode = selectedFlag.containsValue(false);
+        isSelectionMode = selectedFlag.containsValue(true);
+      } else {
+        checkFill = 'penuh';
+        listProduct.clear();
+        listProduct.addAll(productId);
+        isSelectionMode = selectedFlag.containsValue(true);
+      }
+    });
   }
 
   refreshTextfield() {
@@ -5933,33 +6353,277 @@ class _InventoriPageMerchantOnlyState extends State<InventoriPageMerchantOnly>
 
   String provinceInfoUrl = '$url/api/unit';
   Future _getProductList() async {
-    await http.post(Uri.parse(provinceInfoUrl), body: {
-      "deviceid": identifier,
-    }, headers: {
-      "token": widget.token,
-    }).then((response) {
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        // log("data product $data");
-        if (data != null && data['data'] != null) {
-          setState(() {
-            typeproductList = List<dynamic>.from(data['data']);
-            searchResultListProduct = typeproductList;
-          });
-        }
-      }
-    });
+    await http
+        .post(
+          Uri.parse(provinceInfoUrl),
+          body: {"deviceid": identifier},
+          headers: {"token": widget.token},
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            // log("data product $data");
+            if (data != null && data['data'] != null) {
+              setState(() {
+                typeproductList = List<dynamic>.from(data['data']);
+                searchResultListProduct = typeproductList;
+              });
+            }
+          }
+        });
   }
 
   void _runSearchProduct(String searchText) {
     setState(() {
       searchResultListProduct = typeproductList
-          ?.where((product) => product
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()))
+          ?.where(
+            (product) => product.toString().toLowerCase().contains(
+              searchText.toLowerCase(),
+            ),
+          )
           .toList();
     });
+  }
+
+  void _showMaterialDetailData(String itemId, String itemName) async {
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (context) => const Center(child: CircularProgressIndicator()),
+    // );
+
+    try {
+      final response = await http.post(
+        Uri.parse(getMasterDataSingleDetailLink),
+        headers: {'token': widget.token, 'Content-Type': 'application/json'},
+        body: jsonEncode({"deviceid": identifier, "item_id": itemId}),
+      );
+
+      // Navigator.pop(context); // Close loading dialog
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['rc'] == '00') {
+          _showDetailBottomSheet(Map<String, dynamic>.from(data['data']));
+        } else {
+          showSnackbar(context, data);
+        }
+      } else {
+        showSnackbar(context, {"message": "Gagal memuat detail"});
+      }
+    } catch (e) {
+      // Navigator.pop(context); // Close loading
+      showSnackbar(context, {"message": "Gagal memuat: $e"});
+    }
+  }
+
+  void _showDetailBottomSheet(Map<String, dynamic> detail) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) {
+          return SafeArea(
+            child: Container(
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: primary500.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                PhosphorIcons.package,
+                                color: primary500,
+                                size: 32,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    detail['item_name'] ?? '',
+                                    style: heading1(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  Text(
+                                    detail['unit_name'] ?? '',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Qty',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Text(
+                                  formatQty(detail['total_qty'] ?? 0),
+                                  style: heading1(
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            IconButton(
+                              icon: Icon(
+                                PhosphorIcons.x_fill,
+                                color: bnw900,
+                                size: 28,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: (detail['detail'] as List?)?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final activity = detail['detail'][index];
+                        return _buildActivityCard(
+                          Map<String, dynamic>.from(activity),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildActivityCard(Map<String, dynamic> activity) {
+    final String type = (activity['activity_type'] ?? '')
+        .toString()
+        .toLowerCase();
+    Color badgeColor;
+
+    if (type == 'purchase') {
+      badgeColor = succes600;
+    } else if (type == 'adjustment') {
+      badgeColor = Colors.orange;
+    } else if (type == 'sales') {
+      badgeColor = primary500;
+    } else if (type == 'starting') {
+      badgeColor = bnw500;
+    } else {
+      badgeColor = bnw500;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bnw100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: bnw300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: badgeColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  type.toUpperCase(),
+                  style: heading4(FontWeight.w700, bnw100, 'Outfit'),
+                ),
+              ),
+              Text(
+                activity['date'] ?? '',
+                style: body2(FontWeight.w400, bnw500, 'Outfit'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _activityRow(
+            'Jumlah',
+            '${formatQty(activity['qty'] ?? 0)} ${activity['unit_name'] ?? ''}',
+          ),
+          _activityRow('Harga Satuan', formatCurrency(activity['price'] ?? 0)),
+          _activityRow('Total', formatCurrency(activity['total'] ?? 0)),
+        ],
+      ),
+    );
+  }
+
+  Widget _activityRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: body1(FontWeight.w400, bnw500, 'Outfit')),
+          Text(value, style: heading3(FontWeight.w600, bnw900, 'Outfit')),
+        ],
+      ),
+    );
   }
 
   void _selectProduct(dynamic product) {

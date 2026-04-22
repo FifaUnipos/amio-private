@@ -188,7 +188,8 @@ class _OtppageState extends State<Otppage> {
                 padding: const EdgeInsets.symmetric(horizontal: 1), //bagian ini di ganti jadi 1 dari 103
                 child: Column(
                   children: [
-                    Container(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 340),
                       child: Form(
                         key: formKey,
                         child: PinCodeTextField(
@@ -248,7 +249,8 @@ class _OtppageState extends State<Otppage> {
                       ),
                     ),
                     SizedBox(height: errorText.isNotEmpty ? size16 : 0),
-                    SizedBox(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 340),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

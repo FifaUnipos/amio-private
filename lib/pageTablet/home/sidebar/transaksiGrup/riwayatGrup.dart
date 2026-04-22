@@ -987,7 +987,7 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                               spacing: 16,
                                               children: [
                                                 Expanded(
-                                                  child: UniposInformation(
+                                                  child: UniposInformation( isFullWidth: true, 
                                                     text:
                                                         data['status_transactions'] ??
                                                         '-',
@@ -1005,29 +1005,31 @@ class _RiwayatPageGrupState extends State<RiwayatPageGrup> {
                                                         .contains(
                                                           data['isPaid'],
                                                         ))
-                                                  UniposButton(
-                                                    onTap: () {
-                                                      whenLoading(context);
-                                                      transaksiViewReference(
-                                                        context,
-                                                        widget.token,
-                                                        data['transactionid'],
-                                                      ).then((value) {
-                                                        if (value['rc'] ==
-                                                            '00') {
-                                                          closeLoading(context);
-                                                          showBottomRiwayatPerubahan(
-                                                            context,
-                                                            data,
-                                                          );
-                                                        } else {
-                                                          closeLoading(context);
-                                                        }
-                                                      });
-                                                    },
-                                                    variant: UniposButtonVariant
-                                                        .tertiary,
-                                                    text: 'Lihat Riwayat',
+                                                  Expanded(
+                                                    child: UniposButton(
+                                                      onTap: () {
+                                                        whenLoading(context);
+                                                        transaksiViewReference(
+                                                          context,
+                                                          widget.token,
+                                                          data['transactionid'],
+                                                        ).then((value) {
+                                                          if (value['rc'] ==
+                                                              '00') {
+                                                            closeLoading(context);
+                                                            showBottomRiwayatPerubahan(
+                                                              context,
+                                                              data,
+                                                            );
+                                                          } else {
+                                                            closeLoading(context);
+                                                          }
+                                                        });
+                                                      },
+                                                      variant: UniposButtonVariant
+                                                          .tertiary,
+                                                      text: 'Lihat Riwayat',
+                                                    ),
                                                   ),
                                               ],
                                             ),

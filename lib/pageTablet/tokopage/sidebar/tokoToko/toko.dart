@@ -794,188 +794,190 @@ class _TokoPageTokoState extends State<TokoPageToko> {
             builder: (context) {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) =>
-                    FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                      child: GestureDetector(
-                        onTap: () => textFieldFocusNode.unfocus(),
-                        child: Container(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                          height: MediaQuery.of(context).size.height / 1.8,
-                          decoration: BoxDecoration(
-                            color: bnw100,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(12),
-                              topLeft: Radius.circular(12),
+                    SafeArea(
+                      child: FractionallySizedBox(
+                        heightFactor: isKeyboardActive ? 0.9 : 0.80,
+                        child: GestureDetector(
+                          onTap: () => textFieldFocusNode.unfocus(),
+                          child: Container(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: size12),
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.all(8),
-                                  height: 4,
-                                  width: 140,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: bnw300,
+                            height: MediaQuery.of(context).size.height / 1.8,
+                            decoration: BoxDecoration(
+                              color: bnw100,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(12),
+                                topLeft: Radius.circular(12),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: size12),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.all(8),
+                                    height: 4,
+                                    width: 140,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: bnw300,
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    8,
-                                    16,
-                                    8,
-                                    16,
-                                  ),
-                                  child: FocusScope(
-                                    child: Focus(
-                                      onFocusChange: (value) {
-                                        isKeyboardActive = value;
-                                        setState(() {});
-                                      },
-                                      child: TextField(
-                                        cursorColor: primary500,
-                                        controller: searchController,
-                                        focusNode: textFieldFocusNode,
-                                        onChanged: (value) {
-                                          _runSearchTipeUsaha(value);
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      16,
+                                      8,
+                                      16,
+                                    ),
+                                    child: FocusScope(
+                                      child: Focus(
+                                        onFocusChange: (value) {
+                                          isKeyboardActive = value;
                                           setState(() {});
                                         },
-                                        decoration: InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          isDense: true,
-                                          filled: true,
-                                          fillColor: bnw200,
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: bnw300,
+                                        child: TextField(
+                                          cursorColor: primary500,
+                                          controller: searchController,
+                                          focusNode: textFieldFocusNode,
+                                          onChanged: (value) {
+                                            _runSearchTipeUsaha(value);
+                                            setState(() {});
+                                          },
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            isDense: true,
+                                            filled: true,
+                                            fillColor: bnw200,
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: bnw300,
+                                              ),
+                                            ),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                width: 2,
+                                                color: primary500,
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: bnw300,
+                                              ),
+                                            ),
+                                            suffixIcon:
+                                                searchController.text.isNotEmpty
+                                                ? GestureDetector(
+                                                    onTap: () {
+                                                      searchController.text = '';
+                                                      _runSearchTipeUsaha('');
+                                                      setState(() {});
+                                                    },
+                                                    child: Icon(
+                                                      PhosphorIcons.x_fill,
+                                                      size: 20,
+                                                      color: bnw900,
+                                                    ),
+                                                  )
+                                                : null,
+                                            prefixIcon: Icon(
+                                              PhosphorIcons.magnifying_glass,
+                                              color: bnw500,
+                                            ),
+                                            hintText: 'Cari',
+                                            hintStyle: heading3(
+                                              FontWeight.w500,
+                                              bnw500,
+                                              'Outfit',
                                             ),
                                           ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: primary500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
+                                      physics: BouncingScrollPhysics(),
+                                      itemCount:
+                                          searchResultListTipeUsaha?.length,
+                                      itemBuilder: (context, index) {
+                                        final tipeUsaha =
+                                            searchResultListTipeUsaha?[index];
+                                        final isSelected =
+                                            tipeUsaha == selectedTipeUsaha;
+                      
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              title: Text(
+                                                tipeUsaha['nama_tipe'] != null
+                                                    ? capitalizeEachWord(
+                                                        tipeUsaha['nama_tipe']
+                                                            .toString(),
+                                                      )
+                                                    : '',
+                                              ),
+                                              trailing: Icon(
+                                                isSelected
+                                                    ? PhosphorIcons
+                                                          .radio_button_fill
+                                                    : PhosphorIcons.radio_button,
+                                                color: isSelected
+                                                    ? primary500
+                                                    : bnw900,
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  textFieldFocusNode.unfocus();
+                                                  _mytipe =
+                                                      tipeUsaha['tipeusaha_id'];
+                                                  idtipe =
+                                                      tipeUsaha['tipeusaha_id'];
+                                                  tipe = tipeUsaha['nama_tipe'];
+                      
+                                                  selectedTipeUsaha = tipeUsaha
+                                                      .toString();
+                                                  _selectTipeUsaha(tipeUsaha);
+                                                  _getRegenciesList(_myProvince);
+                                                  print(tipeUsaha['nama_tipe']);
+                                                });
+                                              },
                                             ),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: bnw300,
-                                            ),
-                                          ),
-                                          suffixIcon:
-                                              searchController.text.isNotEmpty
-                                              ? GestureDetector(
-                                                  onTap: () {
-                                                    searchController.text = '';
-                                                    _runSearchTipeUsaha('');
-                                                    setState(() {});
-                                                  },
-                                                  child: Icon(
-                                                    PhosphorIcons.x_fill,
-                                                    size: 20,
-                                                    color: bnw900,
-                                                  ),
-                                                )
-                                              : null,
-                                          prefixIcon: Icon(
-                                            PhosphorIcons.magnifying_glass,
-                                            color: bnw500,
-                                          ),
-                                          hintText: 'Cari',
-                                          hintStyle: heading3(
-                                            FontWeight.w500,
-                                            bnw500,
+                                            Divider(color: bnw300),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      confirmed = true;
+                                      _getRegenciesList(_myProvince);
+                                      Navigator.pop(context);
+                                    },
+                                    child: buttonXXL(
+                                      Center(
+                                        child: Text(
+                                          'Selesai',
+                                          style: heading2(
+                                            FontWeight.w600,
+                                            bnw100,
                                             'Outfit',
                                           ),
                                         ),
                                       ),
+                                      double.infinity,
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    keyboardDismissBehavior:
-                                        ScrollViewKeyboardDismissBehavior
-                                            .onDrag,
-                                    physics: BouncingScrollPhysics(),
-                                    itemCount:
-                                        searchResultListTipeUsaha?.length,
-                                    itemBuilder: (context, index) {
-                                      final tipeUsaha =
-                                          searchResultListTipeUsaha?[index];
-                                      final isSelected =
-                                          tipeUsaha == selectedTipeUsaha;
-
-                                      return Column(
-                                        children: [
-                                          ListTile(
-                                            title: Text(
-                                              tipeUsaha['nama_tipe'] != null
-                                                  ? capitalizeEachWord(
-                                                      tipeUsaha['nama_tipe']
-                                                          .toString(),
-                                                    )
-                                                  : '',
-                                            ),
-                                            trailing: Icon(
-                                              isSelected
-                                                  ? PhosphorIcons
-                                                        .radio_button_fill
-                                                  : PhosphorIcons.radio_button,
-                                              color: isSelected
-                                                  ? primary500
-                                                  : bnw900,
-                                            ),
-                                            onTap: () {
-                                              setState(() {
-                                                textFieldFocusNode.unfocus();
-                                                _mytipe =
-                                                    tipeUsaha['tipeusaha_id'];
-                                                idtipe =
-                                                    tipeUsaha['tipeusaha_id'];
-                                                tipe = tipeUsaha['nama_tipe'];
-
-                                                selectedTipeUsaha = tipeUsaha
-                                                    .toString();
-                                                _selectTipeUsaha(tipeUsaha);
-                                                _getRegenciesList(_myProvince);
-                                                print(tipeUsaha['nama_tipe']);
-                                              });
-                                            },
-                                          ),
-                                          Divider(color: bnw300),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    confirmed = true;
-                                    _getRegenciesList(_myProvince);
-                                    Navigator.pop(context);
-                                  },
-                                  child: buttonXXL(
-                                    Center(
-                                      child: Text(
-                                        'Selesai',
-                                        style: heading2(
-                                          FontWeight.w600,
-                                          bnw100,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ),
-                                    double.infinity,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -1068,196 +1070,198 @@ class _TokoPageTokoState extends State<TokoPageToko> {
             ),
             context: context,
             builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) => FractionallySizedBox(
-                  heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                  child: GestureDetector(
-                    onTap: () => textFieldFocusNode.unfocus(),
-                    child: Container(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                      height: MediaQuery.of(context).size.height / 1.8,
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(12),
-                          topLeft: Radius.circular(12),
+              return SafeArea(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, setState) => FractionallySizedBox(
+                    heightFactor: isKeyboardActive ? 0.9 : 0.80,
+                    child: GestureDetector(
+                      onTap: () => textFieldFocusNode.unfocus(),
+                      child: Container(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: 12),
-                              height: 4,
-                              width: 140,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: bnw300,
+                        height: MediaQuery.of(context).size.height / 1.8,
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            topLeft: Radius.circular(12),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 12),
+                                height: 4,
+                                width: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: bnw300,
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-                              child: FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
-                                    setState(() {});
-                                  },
-                                  child: TextField(
-                                    cursorColor: primary500,
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: (value) {
-                                      //   isKeyboardActive = value.isNotEmpty;
-                                      _runSearchProvince(value);
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
+                                child: FocusScope(
+                                  child: Focus(
+                                    onFocusChange: (value) {
+                                      isKeyboardActive = value;
                                       setState(() {});
                                     },
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                        vertical: size12,
-                                      ),
-                                      isDense: true,
-                                      filled: true,
-                                      fillColor: bnw200,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                    child: TextField(
+                                      cursorColor: primary500,
+                                      controller: searchController,
+                                      focusNode: textFieldFocusNode,
+                                      onChanged: (value) {
+                                        //   isKeyboardActive = value.isNotEmpty;
+                                        _runSearchProvince(value);
+                                        setState(() {});
+                                      },
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                          vertical: size12,
                                         ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                        isDense: true,
+                                        filled: true,
+                                        fillColor: bnw200,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
                                         ),
-                                        borderSide: BorderSide(
-                                          width: 2,
-                                          color: primary500,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(
+                                            width: 2,
+                                            color: primary500,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
+                                        ),
+                                        suffixIcon:
+                                            searchController.text.isNotEmpty
+                                            ? GestureDetector(
+                                                onTap: () {
+                                                  searchController.text = '';
+                                                  _runSearchProvince('');
+                                                  setState(() {});
+                                                },
+                                                child: Icon(
+                                                  PhosphorIcons.x_fill,
+                                                  size: 20,
+                                                  color: bnw900,
+                                                ),
+                                              )
+                                            : null,
+                                        prefixIcon: Icon(
+                                          PhosphorIcons.magnifying_glass,
+                                          color: bnw500,
+                                        ),
+                                        hintText: 'Cari',
+                                        hintStyle: heading3(
+                                          FontWeight.w500,
+                                          bnw500,
+                                          'Outfit',
                                         ),
                                       ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: searchResultList?.length,
+                                  itemBuilder: (context, index) {
+                                    final province = searchResultList?[index];
+                                    final isSelected =
+                                        province == selectedProvince;
+                                    return Column(
+                                      children: [
+                                        ListTile(
+                                          title: Text(
+                                            province['NAME'] != null
+                                                ? capitalizeEachWord(
+                                                    province['NAME'].toString(),
+                                                  )
+                                                : '',
+                                          ),
+                                          trailing: Icon(
+                                            isSelected
+                                                ? PhosphorIcons.radio_button_fill
+                                                : PhosphorIcons.radio_button,
+                                            color: isSelected
+                                                ? primary500
+                                                : bnw900,
+                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              textFieldFocusNode.unfocus();
+                                              _myProvince = province['ID'];
+                                              idprov = province['ID'];
+                                              prov = province['NAME'];
+                
+                                              selectedProvince = province
+                                                  .toString();
+                                              _selectProvince(province);
+                                            });
+                                          },
                                         ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      suffixIcon:
-                                          searchController.text.isNotEmpty
-                                          ? GestureDetector(
-                                              onTap: () {
-                                                searchController.text = '';
-                                                _runSearchProvince('');
-                                                setState(() {});
-                                              },
-                                              child: Icon(
-                                                PhosphorIcons.x_fill,
-                                                size: 20,
-                                                color: bnw900,
-                                              ),
-                                            )
-                                          : null,
-                                      prefixIcon: Icon(
-                                        PhosphorIcons.magnifying_glass,
-                                        color: bnw500,
-                                      ),
-                                      hintText: 'Cari',
-                                      hintStyle: heading3(
-                                        FontWeight.w500,
-                                        bnw500,
+                                        Divider(color: bnw300),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                
+                                  kab = '';
+                                  kec = '';
+                                  desa = '';
+                                  idkab = '';
+                                  idkec = '';
+                                  iddesa = '';
+                                  _myRegencies = null;
+                                  _mydistrict = null;
+                                  _myvillage = null;
+                                  searchResultListRegencies = null;
+                                  searchResultListDistrict = null;
+                                  searchResultListVillage = null;
+                                  selectedRegencies = null;
+                                  selectedDistrict = null;
+                                  selectedVillage = null;
+                                  _getRegenciesList(_myProvince);
+                                  Navigator.pop(context);
+                                },
+                                child: buttonXXL(
+                                  Center(
+                                    child: Text(
+                                      'Selesai',
+                                      style: heading2(
+                                        FontWeight.w600,
+                                        bnw100,
                                         'Outfit',
                                       ),
                                     ),
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                keyboardDismissBehavior:
-                                    ScrollViewKeyboardDismissBehavior.onDrag,
-                                physics: BouncingScrollPhysics(),
-                                itemCount: searchResultList?.length,
-                                itemBuilder: (context, index) {
-                                  final province = searchResultList?[index];
-                                  final isSelected =
-                                      province == selectedProvince;
-                                  return Column(
-                                    children: [
-                                      ListTile(
-                                        title: Text(
-                                          province['NAME'] != null
-                                              ? capitalizeEachWord(
-                                                  province['NAME'].toString(),
-                                                )
-                                              : '',
-                                        ),
-                                        trailing: Icon(
-                                          isSelected
-                                              ? PhosphorIcons.radio_button_fill
-                                              : PhosphorIcons.radio_button,
-                                          color: isSelected
-                                              ? primary500
-                                              : bnw900,
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            textFieldFocusNode.unfocus();
-                                            _myProvince = province['ID'];
-                                            idprov = province['ID'];
-                                            prov = province['NAME'];
-
-                                            selectedProvince = province
-                                                .toString();
-                                            _selectProvince(province);
-                                          });
-                                        },
-                                      ),
-                                      Divider(color: bnw300),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                confirmed = true;
-
-                                kab = '';
-                                kec = '';
-                                desa = '';
-                                idkab = '';
-                                idkec = '';
-                                iddesa = '';
-                                _myRegencies = null;
-                                _mydistrict = null;
-                                _myvillage = null;
-                                searchResultListRegencies = null;
-                                searchResultListDistrict = null;
-                                searchResultListVillage = null;
-                                selectedRegencies = null;
-                                selectedDistrict = null;
-                                selectedVillage = null;
-                                _getRegenciesList(_myProvince);
-                                Navigator.pop(context);
-                              },
-                              child: buttonXXL(
-                                Center(
-                                  child: Text(
-                                    'Selesai',
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                double.infinity,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                              const SizedBox(height: 8),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1349,209 +1353,211 @@ class _TokoPageTokoState extends State<TokoPageToko> {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) => FractionallySizedBox(
                   heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                  child: GestureDetector(
-                    onTap: () => textFieldFocusNode.unfocus(),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height / 1.8,
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(12),
-                          topLeft: Radius.circular(12),
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => textFieldFocusNode.unfocus(),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height / 1.8,
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.all(8),
-                              height: 4,
-                              width: 140,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: bnw300,
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            topLeft: Radius.circular(12),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(8),
+                                height: 4,
+                                width: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: bnw300,
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-                              child: FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
-                                    setState(() {});
-                                  },
-                                  child: TextField(
-                                    cursorColor: primary500,
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: ((value) {
-                                      _runSearchRegencies(value);
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
+                                child: FocusScope(
+                                  child: Focus(
+                                    onFocusChange: (value) {
+                                      isKeyboardActive = value;
                                       setState(() {});
-                                    }),
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                        vertical: size12,
-                                      ),
-                                      isDense: true,
-                                      filled: true,
-                                      fillColor: bnw200,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                    },
+                                    child: TextField(
+                                      cursorColor: primary500,
+                                      controller: searchController,
+                                      focusNode: textFieldFocusNode,
+                                      onChanged: ((value) {
+                                        _runSearchRegencies(value);
+                                        setState(() {});
+                                      }),
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                          vertical: size12,
                                         ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                        isDense: true,
+                                        filled: true,
+                                        fillColor: bnw200,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
                                         ),
-                                        borderSide: BorderSide(
-                                          width: 2,
-                                          color: primary500,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(
+                                            width: 2,
+                                            color: primary500,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
+                                        ),
+                                        suffixIcon:
+                                            searchController.text.isNotEmpty
+                                            ? GestureDetector(
+                                                onTap: () {
+                                                  searchController.text = '';
+                                                  _runSearchRegencies('');
+                                                  setState(() {});
+                                                },
+                                                child: Icon(
+                                                  PhosphorIcons.x_fill,
+                                                  size: 20,
+                                                  color: bnw900,
+                                                ),
+                                              )
+                                            : null,
+                                        prefixIcon: Icon(
+                                          PhosphorIcons.magnifying_glass,
+                                          color: bnw500,
+                                        ),
+                                        hintText: 'Cari',
+                                        hintStyle: heading3(
+                                          FontWeight.w500,
+                                          bnw500,
+                                          'Outfit',
                                         ),
                                       ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
-                                        ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      suffixIcon:
-                                          searchController.text.isNotEmpty
-                                          ? GestureDetector(
-                                              onTap: () {
-                                                searchController.text = '';
-                                                _runSearchRegencies('');
-                                                setState(() {});
-                                              },
-                                              child: Icon(
-                                                PhosphorIcons.x_fill,
-                                                size: 20,
-                                                color: bnw900,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: searchResultListRegencies == null
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: const [
+                                          Text("Isi Provinsi terlebih dahulu"),
+                                        ],
+                                      )
+                                    : ListView.builder(
+                                        keyboardDismissBehavior:
+                                            ScrollViewKeyboardDismissBehavior
+                                                .onDrag,
+                                        itemCount:
+                                            searchResultListRegencies?.length ??
+                                            0,
+                                        physics: BouncingScrollPhysics(),
+                                        itemBuilder: (context, index) {
+                                          final regencies =
+                                              searchResultListRegencies?[index];
+                                          final isSelected =
+                                              regencies == selectedRegencies;
+                    
+                                          return Column(
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  regencies['NAME'] != null
+                                                      ? capitalizeEachWord(
+                                                          regencies['NAME']
+                                                              .toString(),
+                                                        )
+                                                      : '',
+                                                ),
+                                                trailing: Icon(
+                                                  isSelected
+                                                      ? PhosphorIcons
+                                                            .radio_button_fill
+                                                      : PhosphorIcons
+                                                            .radio_button,
+                                                  color: isSelected
+                                                      ? primary500
+                                                      : bnw900,
+                                                ),
+                                                onTap: () {
+                                                  setState(() {
+                                                    textFieldFocusNode.unfocus();
+                                                    _myRegencies =
+                                                        regencies['ID'];
+                                                    idkab = regencies['ID'];
+                                                    kab = regencies['NAME']
+                                                        .toString();
+                    
+                                                    selectedRegencies = regencies
+                                                        .toString();
+                                                    _selectRegencies(regencies);
+                                                    print(regencies['NAME']);
+                                                  });
+                                                },
                                               ),
-                                            )
-                                          : null,
-                                      prefixIcon: Icon(
-                                        PhosphorIcons.magnifying_glass,
-                                        color: bnw500,
+                                              Divider(color: bnw300),
+                                            ],
+                                          );
+                                        },
                                       ),
-                                      hintText: 'Cari',
-                                      hintStyle: heading3(
-                                        FontWeight.w500,
-                                        bnw500,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                                  kec = '';
+                                  desa = '';
+                                  idkec = '';
+                                  iddesa = '';
+                                  _mydistrict = null;
+                                  _myvillage = null;
+                                  searchResultListDistrict = null;
+                                  searchResultListVillage = null;
+                                  selectedDistrict = null;
+                                  selectedVillage = null;
+                    
+                                  _getDistrictList(_myRegencies);
+                    
+                                  Navigator.pop(context);
+                                },
+                                child: buttonXXL(
+                                  Center(
+                                    child: Text(
+                                      'Selesai',
+                                      style: heading2(
+                                        FontWeight.w600,
+                                        bnw100,
                                         'Outfit',
                                       ),
                                     ),
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: searchResultListRegencies == null
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: const [
-                                        Text("Isi Provinsi terlebih dahulu"),
-                                      ],
-                                    )
-                                  : ListView.builder(
-                                      keyboardDismissBehavior:
-                                          ScrollViewKeyboardDismissBehavior
-                                              .onDrag,
-                                      itemCount:
-                                          searchResultListRegencies?.length ??
-                                          0,
-                                      physics: BouncingScrollPhysics(),
-                                      itemBuilder: (context, index) {
-                                        final regencies =
-                                            searchResultListRegencies?[index];
-                                        final isSelected =
-                                            regencies == selectedRegencies;
-
-                                        return Column(
-                                          children: [
-                                            ListTile(
-                                              title: Text(
-                                                regencies['NAME'] != null
-                                                    ? capitalizeEachWord(
-                                                        regencies['NAME']
-                                                            .toString(),
-                                                      )
-                                                    : '',
-                                              ),
-                                              trailing: Icon(
-                                                isSelected
-                                                    ? PhosphorIcons
-                                                          .radio_button_fill
-                                                    : PhosphorIcons
-                                                          .radio_button,
-                                                color: isSelected
-                                                    ? primary500
-                                                    : bnw900,
-                                              ),
-                                              onTap: () {
-                                                setState(() {
-                                                  textFieldFocusNode.unfocus();
-                                                  _myRegencies =
-                                                      regencies['ID'];
-                                                  idkab = regencies['ID'];
-                                                  kab = regencies['NAME']
-                                                      .toString();
-
-                                                  selectedRegencies = regencies
-                                                      .toString();
-                                                  _selectRegencies(regencies);
-                                                  print(regencies['NAME']);
-                                                });
-                                              },
-                                            ),
-                                            Divider(color: bnw300),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                confirmed = true;
-                                kec = '';
-                                desa = '';
-                                idkec = '';
-                                iddesa = '';
-                                _mydistrict = null;
-                                _myvillage = null;
-                                searchResultListDistrict = null;
-                                searchResultListVillage = null;
-                                selectedDistrict = null;
-                                selectedVillage = null;
-
-                                _getDistrictList(_myRegencies);
-
-                                Navigator.pop(context);
-                              },
-                              child: buttonXXL(
-                                Center(
-                                  child: Text(
-                                    'Selesai',
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                double.infinity,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                              const SizedBox(height: 8),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1643,202 +1649,204 @@ class _TokoPageTokoState extends State<TokoPageToko> {
               return StatefulBuilder(
                 builder: (BuildContext context, setState) => FractionallySizedBox(
                   heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                  child: GestureDetector(
-                    onTap: () => textFieldFocusNode.unfocus(),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height / 1.8,
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(12),
-                          topLeft: Radius.circular(12),
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => textFieldFocusNode.unfocus(),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height / 1.8,
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.all(8),
-                              height: 4,
-                              width: 140,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: bnw300,
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            topLeft: Radius.circular(12),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(8),
+                                height: 4,
+                                width: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: bnw300,
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-                              child: FocusScope(
-                                child: Focus(
-                                  onFocusChange: (value) {
-                                    isKeyboardActive = value;
-                                    setState(() {});
-                                  },
-                                  child: TextField(
-                                    cursorColor: primary500,
-                                    controller: searchController,
-                                    focusNode: textFieldFocusNode,
-                                    onChanged: ((value) {
-                                      _runSearchDistrict(value);
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
+                                child: FocusScope(
+                                  child: Focus(
+                                    onFocusChange: (value) {
+                                      isKeyboardActive = value;
                                       setState(() {});
-                                    }),
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                        vertical: size12,
-                                      ),
-                                      isDense: true,
-                                      filled: true,
-                                      fillColor: bnw200,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                    },
+                                    child: TextField(
+                                      cursorColor: primary500,
+                                      controller: searchController,
+                                      focusNode: textFieldFocusNode,
+                                      onChanged: ((value) {
+                                        _runSearchDistrict(value);
+                                        setState(() {});
+                                      }),
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                          vertical: size12,
                                         ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                        isDense: true,
+                                        filled: true,
+                                        fillColor: bnw200,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
                                         ),
-                                        borderSide: BorderSide(
-                                          width: 2,
-                                          color: primary500,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(
+                                            width: 2,
+                                            color: primary500,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                          borderSide: BorderSide(color: bnw300),
+                                        ),
+                                        suffixIcon:
+                                            searchController.text.isNotEmpty
+                                            ? GestureDetector(
+                                                onTap: () {
+                                                  searchController.text = '';
+                                                  _runSearchDistrict('');
+                                                  setState(() {});
+                                                },
+                                                child: Icon(
+                                                  PhosphorIcons.x_fill,
+                                                  size: 20,
+                                                  color: bnw900,
+                                                ),
+                                              )
+                                            : null,
+                                        prefixIcon: Icon(
+                                          PhosphorIcons.magnifying_glass,
+                                          color: bnw500,
+                                        ),
+                                        hintText: 'Cari',
+                                        hintStyle: heading3(
+                                          FontWeight.w500,
+                                          bnw500,
+                                          'Outfit',
                                         ),
                                       ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
-                                        ),
-                                        borderSide: BorderSide(color: bnw300),
-                                      ),
-                                      suffixIcon:
-                                          searchController.text.isNotEmpty
-                                          ? GestureDetector(
-                                              onTap: () {
-                                                searchController.text = '';
-                                                _runSearchDistrict('');
-                                                setState(() {});
-                                              },
-                                              child: Icon(
-                                                PhosphorIcons.x_fill,
-                                                size: 20,
-                                                color: bnw900,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: searchResultListDistrict == null
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: const [
+                                          Text(
+                                            "Isi Kabupaten/Kota terlebih dahulu",
+                                          ),
+                                        ],
+                                      )
+                                    : ListView.builder(
+                                        keyboardDismissBehavior:
+                                            ScrollViewKeyboardDismissBehavior
+                                                .onDrag,
+                                        physics: BouncingScrollPhysics(),
+                                        itemCount:
+                                            searchResultListDistrict?.length ?? 0,
+                                        itemBuilder: (context, index) {
+                                          final district =
+                                              searchResultListDistrict?[index];
+                                          final isSelected =
+                                              district == selectedDistrict;
+                    
+                                          return Column(
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  district['NAME'] != null
+                                                      ? capitalizeEachWord(
+                                                          district['NAME']
+                                                              .toString(),
+                                                        )
+                                                      : '',
+                                                ),
+                                                trailing: Icon(
+                                                  isSelected
+                                                      ? PhosphorIcons
+                                                            .radio_button_fill
+                                                      : PhosphorIcons
+                                                            .radio_button,
+                                                  color: isSelected
+                                                      ? primary500
+                                                      : bnw900,
+                                                ),
+                                                onTap: () {
+                                                  setState(() {
+                                                    textFieldFocusNode.unfocus();
+                                                    _mydistrict = district['ID'];
+                                                    idkec = district['ID'];
+                    
+                                                    kec = district['NAME'];
+                    
+                                                    selectedRegencies = district
+                                                        .toString();
+                                                    _selectDistrict(district);
+                                                    print(district['NAME']);
+                                                  });
+                                                },
                                               ),
-                                            )
-                                          : null,
-                                      prefixIcon: Icon(
-                                        PhosphorIcons.magnifying_glass,
-                                        color: bnw500,
+                                              Divider(color: bnw300),
+                                            ],
+                                          );
+                                        },
                                       ),
-                                      hintText: 'Cari',
-                                      hintStyle: heading3(
-                                        FontWeight.w500,
-                                        bnw500,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  confirmed = true;
+                                  desa = '';
+                                  iddesa = '';
+                                  _myvillage = null;
+                                  searchResultListVillage = null;
+                                  selectedVillage = null;
+                                  _getVillageList(_mydistrict);
+                                  Navigator.pop(context);
+                                },
+                                child: buttonXXL(
+                                  Center(
+                                    child: Text(
+                                      'Selesai',
+                                      style: heading2(
+                                        FontWeight.w600,
+                                        bnw100,
                                         'Outfit',
                                       ),
                                     ),
                                   ),
+                                  double.infinity,
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: searchResultListDistrict == null
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: const [
-                                        Text(
-                                          "Isi Kabupaten/Kota terlebih dahulu",
-                                        ),
-                                      ],
-                                    )
-                                  : ListView.builder(
-                                      keyboardDismissBehavior:
-                                          ScrollViewKeyboardDismissBehavior
-                                              .onDrag,
-                                      physics: BouncingScrollPhysics(),
-                                      itemCount:
-                                          searchResultListDistrict?.length ?? 0,
-                                      itemBuilder: (context, index) {
-                                        final district =
-                                            searchResultListDistrict?[index];
-                                        final isSelected =
-                                            district == selectedDistrict;
-
-                                        return Column(
-                                          children: [
-                                            ListTile(
-                                              title: Text(
-                                                district['NAME'] != null
-                                                    ? capitalizeEachWord(
-                                                        district['NAME']
-                                                            .toString(),
-                                                      )
-                                                    : '',
-                                              ),
-                                              trailing: Icon(
-                                                isSelected
-                                                    ? PhosphorIcons
-                                                          .radio_button_fill
-                                                    : PhosphorIcons
-                                                          .radio_button,
-                                                color: isSelected
-                                                    ? primary500
-                                                    : bnw900,
-                                              ),
-                                              onTap: () {
-                                                setState(() {
-                                                  textFieldFocusNode.unfocus();
-                                                  _mydistrict = district['ID'];
-                                                  idkec = district['ID'];
-
-                                                  kec = district['NAME'];
-
-                                                  selectedRegencies = district
-                                                      .toString();
-                                                  _selectDistrict(district);
-                                                  print(district['NAME']);
-                                                });
-                                              },
-                                            ),
-                                            Divider(color: bnw300),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                confirmed = true;
-                                desa = '';
-                                iddesa = '';
-                                _myvillage = null;
-                                searchResultListVillage = null;
-                                selectedVillage = null;
-                                _getVillageList(_mydistrict);
-                                Navigator.pop(context);
-                              },
-                              child: buttonXXL(
-                                Center(
-                                  child: Text(
-                                    'Selesai',
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                double.infinity,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                              const SizedBox(height: 8),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1927,220 +1935,222 @@ class _TokoPageTokoState extends State<TokoPageToko> {
             ),
             context: context,
             builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) =>
-                    FractionallySizedBox(
-                      heightFactor: isKeyboardActive ? 0.9 : 0.80,
-                      child: GestureDetector(
-                        onTap: () => textFieldFocusNode.unfocus(),
-                        child: Container(
-                          height: MediaQuery.of(context).size.height / 1.8,
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                          decoration: BoxDecoration(
-                            color: bnw100,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(12),
-                              topLeft: Radius.circular(12),
+              return SafeArea(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, setState) =>
+                      FractionallySizedBox(
+                        heightFactor: isKeyboardActive ? 0.9 : 0.80,
+                        child: GestureDetector(
+                          onTap: () => textFieldFocusNode.unfocus(),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height / 1.8,
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 12.0,
-                              right: 12.0,
+                            decoration: BoxDecoration(
+                              color: bnw100,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(12),
+                                topLeft: Radius.circular(12),
+                              ),
                             ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.all(8),
-                                  height: 4,
-                                  width: 140,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: bnw300,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 12.0,
+                                right: 12.0,
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.all(8),
+                                    height: 4,
+                                    width: 140,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: bnw300,
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    8,
-                                    16,
-                                    8,
-                                    16,
-                                  ),
-                                  child: FocusScope(
-                                    child: Focus(
-                                      onFocusChange: (value) {
-                                        isKeyboardActive = value;
-                                        setState(() {});
-                                      },
-                                      child: TextField(
-                                        cursorColor: primary500,
-                                        controller: searchController,
-                                        focusNode: textFieldFocusNode,
-                                        onChanged: ((value) {
-                                          _runSearchVillage(value);
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      16,
+                                      8,
+                                      16,
+                                    ),
+                                    child: FocusScope(
+                                      child: Focus(
+                                        onFocusChange: (value) {
+                                          isKeyboardActive = value;
                                           setState(() {});
-                                        }),
-                                        decoration: InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                            vertical: size12,
+                                        },
+                                        child: TextField(
+                                          cursorColor: primary500,
+                                          controller: searchController,
+                                          focusNode: textFieldFocusNode,
+                                          onChanged: ((value) {
+                                            _runSearchVillage(value);
+                                            setState(() {});
+                                          }),
+                                          decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.symmetric(
+                                              vertical: size12,
+                                            ),
+                                            isDense: true,
+                                            filled: true,
+                                            fillColor: bnw200,
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                size8,
+                                              ),
+                                              borderSide: BorderSide(
+                                                color: bnw300,
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                size8,
+                                              ),
+                                              borderSide: BorderSide(
+                                                width: 2,
+                                                color: primary500,
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                size8,
+                                              ),
+                                              borderSide: BorderSide(
+                                                color: bnw300,
+                                              ),
+                                            ),
+                                            suffixIcon:
+                                                searchController.text.isNotEmpty
+                                                ? GestureDetector(
+                                                    onTap: () {
+                                                      searchController.text = '';
+                                                      _runSearchVillage('');
+                                                      setState(() {});
+                                                    },
+                                                    child: Icon(
+                                                      PhosphorIcons.x_fill,
+                                                      size: 20,
+                                                      color: bnw900,
+                                                    ),
+                                                  )
+                                                : null,
+                                            prefixIcon: Icon(
+                                              PhosphorIcons.magnifying_glass,
+                                              color: bnw500,
+                                            ),
+                                            hintText: 'Cari',
+                                            hintStyle: heading3(
+                                              FontWeight.w500,
+                                              bnw500,
+                                              'Outfit',
+                                            ),
                                           ),
-                                          isDense: true,
-                                          filled: true,
-                                          fillColor: bnw200,
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            borderSide: BorderSide(
-                                              color: bnw300,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            borderSide: BorderSide(
-                                              width: 2,
-                                              color: primary500,
-                                            ),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            borderSide: BorderSide(
-                                              color: bnw300,
-                                            ),
-                                          ),
-                                          suffixIcon:
-                                              searchController.text.isNotEmpty
-                                              ? GestureDetector(
-                                                  onTap: () {
-                                                    searchController.text = '';
-                                                    _runSearchVillage('');
-                                                    setState(() {});
-                                                  },
-                                                  child: Icon(
-                                                    PhosphorIcons.x_fill,
-                                                    size: 20,
-                                                    color: bnw900,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: searchResultListVillage == null
+                                        ? Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: const [
+                                              Text(
+                                                "Isi Kecamatan terlebih dahulu",
+                                              ),
+                                            ],
+                                          )
+                                        : ListView.builder(
+                                            keyboardDismissBehavior:
+                                                ScrollViewKeyboardDismissBehavior
+                                                    .onDrag,
+                                            physics: BouncingScrollPhysics(),
+                                            itemCount:
+                                                searchResultListVillage?.length ??
+                                                0,
+                                            itemBuilder: (context, index) {
+                                              final village =
+                                                  searchResultListVillage?[index];
+                                              final isSelected =
+                                                  village == selectedVillage;
+                
+                                              return Column(
+                                                children: [
+                                                  ListTile(
+                                                    title: Text(
+                                                      village['NAME'] != null
+                                                          ? capitalizeEachWord(
+                                                              village['NAME']
+                                                                  .toString(),
+                                                            )
+                                                          : '',
+                                                    ),
+                                                    trailing: Icon(
+                                                      isSelected
+                                                          ? PhosphorIcons
+                                                                .radio_button_fill
+                                                          : PhosphorIcons
+                                                                .radio_button,
+                                                      color: isSelected
+                                                          ? primary500
+                                                          : bnw900,
+                                                    ),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        textFieldFocusNode
+                                                            .unfocus();
+                                                        _myvillage =
+                                                            village['ID'];
+                                                        desa = village['NAME'];
+                                                        iddesa = village['ID'];
+                
+                                                        selectedVillage = village
+                                                            .toString();
+                                                        _selectVillage(village);
+                                                        print(village['NAME']);
+                                                      });
+                                                    },
                                                   ),
-                                                )
-                                              : null,
-                                          prefixIcon: Icon(
-                                            PhosphorIcons.magnifying_glass,
-                                            color: bnw500,
+                                                  Divider(color: bnw300),
+                                                ],
+                                              );
+                                            },
                                           ),
-                                          hintText: 'Cari',
-                                          hintStyle: heading3(
-                                            FontWeight.w500,
-                                            bnw500,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      confirmed = true;
+                                      // _getVillageList(_);
+                                      Navigator.pop(context);
+                                    },
+                                    child: buttonXXL(
+                                      Center(
+                                        child: Text(
+                                          'Selesai',
+                                          style: heading2(
+                                            FontWeight.w600,
+                                            bnw100,
                                             'Outfit',
                                           ),
                                         ),
                                       ),
+                                      double.infinity,
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: searchResultListVillage == null
-                                      ? Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: const [
-                                            Text(
-                                              "Isi Kecamatan terlebih dahulu",
-                                            ),
-                                          ],
-                                        )
-                                      : ListView.builder(
-                                          keyboardDismissBehavior:
-                                              ScrollViewKeyboardDismissBehavior
-                                                  .onDrag,
-                                          physics: BouncingScrollPhysics(),
-                                          itemCount:
-                                              searchResultListVillage?.length ??
-                                              0,
-                                          itemBuilder: (context, index) {
-                                            final village =
-                                                searchResultListVillage?[index];
-                                            final isSelected =
-                                                village == selectedVillage;
-
-                                            return Column(
-                                              children: [
-                                                ListTile(
-                                                  title: Text(
-                                                    village['NAME'] != null
-                                                        ? capitalizeEachWord(
-                                                            village['NAME']
-                                                                .toString(),
-                                                          )
-                                                        : '',
-                                                  ),
-                                                  trailing: Icon(
-                                                    isSelected
-                                                        ? PhosphorIcons
-                                                              .radio_button_fill
-                                                        : PhosphorIcons
-                                                              .radio_button,
-                                                    color: isSelected
-                                                        ? primary500
-                                                        : bnw900,
-                                                  ),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      textFieldFocusNode
-                                                          .unfocus();
-                                                      _myvillage =
-                                                          village['ID'];
-                                                      desa = village['NAME'];
-                                                      iddesa = village['ID'];
-
-                                                      selectedVillage = village
-                                                          .toString();
-                                                      _selectVillage(village);
-                                                      print(village['NAME']);
-                                                    });
-                                                  },
-                                                ),
-                                                Divider(color: bnw300),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    confirmed = true;
-                                    // _getVillageList(_);
-                                    Navigator.pop(context);
-                                  },
-                                  child: buttonXXL(
-                                    Center(
-                                      child: Text(
-                                        'Selesai',
-                                        style: heading2(
-                                          FontWeight.w600,
-                                          bnw100,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ),
-                                    double.infinity,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                ),
               );
             },
           ).then((_) {
@@ -2457,143 +2467,145 @@ class _TokoPageTokoState extends State<TokoPageToko> {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
-      builder: (context) => IntrinsicHeight(
-        child: Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(size8),
-              topLeft: Radius.circular(size8),
+      builder: (context) => SafeArea(
+        child: IntrinsicHeight(
+          child: Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                dividerShowdialog(),
-                SizedBox(height: size16),
-                imageEditToko.isNotEmpty
-                    ? Container(
-                        height: 200,
-                        width: 200,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(120),
-                          child: Image.network(
-                            imageEditToko,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                SizedBox(
-                                  child: SvgPicture.asset(
-                                    'assets/logoProduct.svg',
-                                  ),
-                                ),
-                          ),
-                        ),
-                      )
-                    : myImage != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(120),
-                        child: Container(
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(size8),
+                topLeft: Radius.circular(size8),
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  dividerShowdialog(),
+                  SizedBox(height: size16),
+                  imageEditToko.isNotEmpty
+                      ? Container(
                           height: 200,
                           width: 200,
-                          color: bnw400,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(size8),
-                            child: Image.file(myImage!, fit: BoxFit.cover),
-                          ),
-                        ),
-                      )
-                    : Container(
-                        height: 200,
-                        width: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(120),
-                        ),
-                        child: SvgPicture.asset(
-                          'assets/logoProduct.svg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                SizedBox(height: size16),
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        await getImage();
-                        Navigator.pop(context);
-                      },
-                      child: SizedBox(
-                        child: TextFormField(
-                          cursorColor: primary500,
-                          enabled: false,
-                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                          decoration: InputDecoration(
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                width: 2,
-                                color: primary500,
-                              ),
-                            ),
-                            focusColor: primary500,
-                            prefixIcon: Icon(PhosphorIcons.plus, color: bnw900),
-                            hintText: 'Tambah Foto',
-                            hintStyle: heading3(
-                              FontWeight.w400,
-                              bnw900,
-                              'Outfit',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    (myImage != null || imageEditToko != '')
-                        ? GestureDetector(
-                            onTap: () async {
-                              img64 = '';
-                              myImage = null;
-                              imageEditToko = '';
-                              Navigator.pop(context);
-                              setState(() {});
-                            },
-                            child: SizedBox(
-                              child: TextFormField(
-                                cursorColor: primary500,
-                                enabled: false,
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                                decoration: InputDecoration(
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      width: 2,
-                                      color: primary500,
+                            borderRadius: BorderRadius.circular(120),
+                            child: Image.network(
+                              imageEditToko,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  SizedBox(
+                                    child: SvgPicture.asset(
+                                      'assets/logoProduct.svg',
                                     ),
                                   ),
-                                  focusColor: primary500,
-                                  prefixIcon: Icon(
-                                    PhosphorIcons.trash,
-                                    color: bnw900,
-                                  ),
-                                  hintText: 'Hapus Foto',
-                                  hintStyle: heading3(
+                            ),
+                          ),
+                        )
+                      : myImage != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(120),
+                          child: Container(
+                            height: 200,
+                            width: 200,
+                            color: bnw400,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(size8),
+                              child: Image.file(myImage!, fit: BoxFit.cover),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          height: 200,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(120),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/logoProduct.svg',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                  SizedBox(height: size16),
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          await getImage();
+                          Navigator.pop(context);
+                        },
+                        child: SizedBox(
+                          child: TextFormField(
+                            cursorColor: primary500,
+                            enabled: false,
+                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                            decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 2,
+                                  color: primary500,
+                                ),
+                              ),
+                              focusColor: primary500,
+                              prefixIcon: Icon(PhosphorIcons.plus, color: bnw900),
+                              hintText: 'Tambah Foto',
+                              hintStyle: heading3(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      (myImage != null || imageEditToko != '')
+                          ? GestureDetector(
+                              onTap: () async {
+                                img64 = '';
+                                myImage = null;
+                                imageEditToko = '';
+                                Navigator.pop(context);
+                                setState(() {});
+                              },
+                              child: SizedBox(
+                                child: TextFormField(
+                                  cursorColor: primary500,
+                                  enabled: false,
+                                  style: heading3(
                                     FontWeight.w400,
                                     bnw900,
                                     'Outfit',
                                   ),
+                                  decoration: InputDecoration(
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        width: 2,
+                                        color: primary500,
+                                      ),
+                                    ),
+                                    focusColor: primary500,
+                                    prefixIcon: Icon(
+                                      PhosphorIcons.trash,
+                                      color: bnw900,
+                                    ),
+                                    hintText: 'Hapus Foto',
+                                    hintStyle: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
-                        : SizedBox(),
-                  ],
-                ),
-              ],
+                            )
+                          : SizedBox(),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

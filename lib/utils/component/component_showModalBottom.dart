@@ -32,33 +32,36 @@ Future<dynamic> showBottomPilihan(BuildContext context, Widget child) {
       maxWidth: double.infinity,
     ),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
+    backgroundColor: Colors.transparent,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
     ),
     context: context,
     builder: (context) {
-      return Container(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        decoration: ShapeDecoration(
-          color: bnw100,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(size16),
-              topRight: Radius.circular(size16),
+      return SafeArea(
+        child: Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          decoration: ShapeDecoration(
+            color: bnw100,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(size16),
+                topRight: Radius.circular(size16),
+              ),
             ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-          child: IntrinsicHeight(
-              child: Column(
-            children: [
-              dividerShowdialog(),
-              SizedBox(height: size16),
-              child,
-            ],
-          )),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(size16, size16, size16, size32),
+            child: IntrinsicHeight(
+                child: Column(
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                child,
+              ],
+            )),
+          ),
         ),
       );
     },
@@ -71,25 +74,25 @@ showModalBottom(BuildContext context, height, child) {
       maxWidth: double.infinity,
     ),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
+    backgroundColor: Colors.transparent,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
     ),
     context: context,
     builder: (context) {
       return StatefulBuilder(
-        // dipakein IntrinsicHeight dan height dihapus
-        builder: (context, setState) => IntrinsicHeight(
-          child: Container(
-            // height: height,
-            // width: double.infinity,
-            decoration: BoxDecoration(
-              color: bnw100,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                topLeft: Radius.circular(12),
+        builder: (context, setState) => SafeArea(
+          child: IntrinsicHeight(
+            child: Container(
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(25),
+                  topLeft: Radius.circular(25),
+                ),
               ),
+              child: child,
             ),
-            child: child,
           ),
         ),
       );
@@ -103,24 +106,25 @@ showModalBottomDropdownAtur(BuildContext context, height, child) {
       maxWidth: double.infinity,
     ),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    backgroundColor: Colors.transparent,
+    shape:  RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
     ),
     context: context,
     builder: (context) {
       return StatefulBuilder(
-        // dipakein IntrinsicHeight dan height dihapus
-        builder: (context, setState) => IntrinsicHeight(
-          child: Container(
-            // width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: bnw100,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                topLeft: Radius.circular(12),
+        builder: (context, setState) => SafeArea(
+          child: IntrinsicHeight(
+            child: Container(
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(25),
+                  topLeft: Radius.circular(25),
+                ),
               ),
+              child: child,
             ),
-            child: child,
           ),
         ),
       );
@@ -134,27 +138,25 @@ showModalBottomProfile(BuildContext context, height, child) {
       maxWidth: double.infinity,
     ),
     isScrollControlled: true,
-    shape: RoundedRectangleBorder(
+    backgroundColor: Colors.transparent,
+    shape:  RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(25),
     ),
     context: context,
     builder: (context) {
       return SafeArea(
         child: StatefulBuilder(
-          // dipakein IntrinsicHeight dan height dihapus
           builder: (context, setState) => IntrinsicHeight(
-            child: SafeArea(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    topLeft: Radius.circular(12),
-                  ),
+            child: Container(
+              padding: EdgeInsets.fromLTRB(size16, size16, size16, size32),
+              decoration: BoxDecoration(
+                color: bnw100,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(25),
+                  topLeft: Radius.circular(25),
                 ),
-                child: child,
               ),
+              child: child,
             ),
           ),
         ),

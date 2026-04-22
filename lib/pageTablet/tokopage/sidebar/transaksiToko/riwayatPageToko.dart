@@ -1513,452 +1513,454 @@ class _RiwayatPageState extends State<RiwayatPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       context: context,
       builder: (BuildContext context) {
-        return FutureBuilder(
-          future: transaksiViewReference(
-            context,
-            widget.token,
-            data['transactionid'],
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              var dataPerubahan = snapshot.data['data'] ?? {};
-              var detail = dataPerubahan['detail'] ?? [];
-              return StatefulBuilder(
-                builder: (context, setState) => Container(
-                  margin: EdgeInsets.only(top: size32),
-                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                  decoration: BoxDecoration(
-                    color: bnw100,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(size12),
-                      topLeft: Radius.circular(size12),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      dividerShowdialog(),
-                      SizedBox(height: size16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Riwayat Perubahan',
-                              style: heading1(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            Text(
-                              'Rincian riwayat perubahan transaksi',
-                              style: heading4(
-                                FontWeight.w400,
-                                bnw500,
-                                'Outfit',
-                              ),
-                            ),
-                          ],
-                        ),
+        return SafeArea(
+          child: FutureBuilder(
+            future: transaksiViewReference(
+              context,
+              widget.token,
+              data['transactionid'],
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var dataPerubahan = snapshot.data['data'] ?? {};
+                var detail = dataPerubahan['detail'] ?? [];
+                return StatefulBuilder(
+                  builder: (context, setState) => Container(
+                    margin: EdgeInsets.only(top: size32),
+                    padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                    decoration: BoxDecoration(
+                      color: bnw100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(size12),
+                        topLeft: Radius.circular(size12),
                       ),
-                      SizedBox(height: size32),
-                      GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          isDropdownOpen = !isDropdownOpen;
-                          print(isDropdownOpen);
-                          setState(() {});
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: size16),
-                          padding: EdgeInsets.symmetric(
-                            vertical: size12,
-                            horizontal: size16,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(size16),
-                            border: Border.all(color: bnw300),
-                          ),
+                    ),
+                    child: Column(
+                      children: [
+                        dividerShowdialog(),
+                        SizedBox(height: size16),
+                        SizedBox(
+                          width: double.infinity,
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'Pembatalan Transaksi',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw700,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    height: size40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        size8,
-                                      ),
-                                      color: danger100,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size16,
-                                            vertical: size12,
-                                          ),
-                                          child: Text(
-                                            'Pengisian Terakhir',
-                                            style: heading3(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: size16),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size12,
-                                            vertical: size8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                            color: danger500,
-                                          ),
-                                          child: Text(
-                                            dataPerubahan['estimate'] ?? '-',
-                                            style: heading3(
-                                              FontWeight.w400,
-                                              bnw100,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: size16),
-                                  Icon(
-                                    PhosphorIcons.caret_down,
-                                    color: bnw900,
-                                    size: size24,
-                                  ),
-                                ],
-                              ),
-                              AnimatedContainer(
-                                duration: Duration(milliseconds: 300),
-                                margin: EdgeInsets.only(
-                                  top: isDropdownOpen ? size16 : 0,
+                              Text(
+                                'Riwayat Perubahan',
+                                style: heading1(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
                                 ),
-                                child: isDropdownOpen
-                                    ? Container(
-                                        height:
-                                            MediaQuery.of(context).size.height /
-                                            2,
-                                        width: double.infinity,
-                                        padding: EdgeInsets.all(size16),
-                                        decoration: BoxDecoration(
-                                          color: bnw200,
-                                          borderRadius: BorderRadius.circular(
-                                            size16,
-                                          ),
+                              ),
+                              Text(
+                                'Rincian riwayat perubahan transaksi',
+                                style: heading4(
+                                  FontWeight.w400,
+                                  bnw500,
+                                  'Outfit',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: size32),
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            isDropdownOpen = !isDropdownOpen;
+                            print(isDropdownOpen);
+                            setState(() {});
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: size16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: size12,
+                              horizontal: size16,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(size16),
+                              border: Border.all(color: bnw300),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Pembatalan Transaksi',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw700,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    Container(
+                                      height: size40,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                          size8,
                                         ),
-                                        child: ListView(
-                                          padding: EdgeInsets.zero,
-                                          physics: BouncingScrollPhysics(),
-                                          children: [
-                                            Text(
-                                              'Status Transaksi',
+                                        color: danger100,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: size16,
+                                              vertical: size12,
+                                            ),
+                                            child: Text(
+                                              'Pengisian Terakhir',
                                               style: heading3(
                                                 FontWeight.w600,
                                                 bnw900,
                                                 'Outfit',
                                               ),
                                             ),
-                                            SizedBox(height: size12),
-                                            SizedBox(
-                                              width: double.infinity,
-                                              child: UniposInformation(
-                                                text:
-                                                    data['status_transactions'] ??
-                                                    '-',
-                                                variant:
-                                                    UniposInformationVariantExt.fromIsPaid(
-                                                      data['isPaid'],
-                                                    ),
+                                          ),
+                                          SizedBox(width: size16),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: size12,
+                                              vertical: size8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(
+                                                size8,
+                                              ),
+                                              color: danger500,
+                                            ),
+                                            child: Text(
+                                              dataPerubahan['estimate'] ?? '-',
+                                              style: heading3(
+                                                FontWeight.w400,
+                                                bnw100,
+                                                'Outfit',
                                               ),
                                             ),
-                                            SizedBox(height: size16),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Informasi Transaksi',
-                                                  style: heading3(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                SizedBox(height: size12),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Waktu Tagihan',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          'Nomor Tagihan',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          'Kasir',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          'Alasan Batal',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text(
-                                                          dataPerubahan['entrydate'] ??
-                                                              '-',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          dataPerubahan['transactionid'] ??
-                                                              '-',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          dataPerubahan['pic'] ??
-                                                              '-',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: size8),
-                                                        Text(
-                                                          dataPerubahan['reference']['alasan_reference'] ??
-                                                              '-',
-                                                          style: heading4(
-                                                            FontWeight.w400,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: size16),
-                                                Text(
-                                                  'Detail Alasan',
-                                                  style: heading3(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                SizedBox(height: size8),
-                                                Wrap(
-                                                  children: [
-                                                    for (final paragraph
-                                                        in (dataPerubahan['reference']['detail_alasan_reference'] ??
-                                                                '')
-                                                            .split('\n'))
-                                                      Text(
-                                                        paragraph,
-                                                        style: heading4(
-                                                          FontWeight.w400,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: size16),
-                                                Text(
-                                                  'Rincian Produk',
-                                                  style: heading3(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  child: ListView.builder(
-                                                    shrinkWrap: true,
-                                                    padding: EdgeInsets.zero,
-                                                    physics:
-                                                        NeverScrollableScrollPhysics(),
-                                                    itemCount: detail.length,
-                                                    itemBuilder: (context, index) {
-                                                      return SizedBox(
-                                                        child: Column(
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  'x${detail[index]['quantity']}',
-                                                                  style: heading3(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw900,
-                                                                    'Outfit',
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: size8,
-                                                                ),
-                                                                SizedBox(
-                                                                  height:
-                                                                      size48,
-                                                                  width: size48,
-                                                                  child: AspectRatio(
-                                                                    aspectRatio:
-                                                                        1,
-                                                                    child: Container(
-                                                                      child: Image.network(
-                                                                        detail[index]['product_image'],
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                        errorBuilder:
-                                                                            (
-                                                                              context,
-                                                                              error,
-                                                                              stackTrace,
-                                                                            ) => SvgPicture.asset(
-                                                                              'assets/logoProduct.svg',
-                                                                              fit: BoxFit.cover,
-                                                                            ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: size8,
-                                                                ),
-                                                                Column(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      detail[index]['name'] ??
-                                                                          '-',
-                                                                      style: heading3(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        bnw900,
-                                                                        'Outfit',
-                                                                      ),
-                                                                    ),
-                                                                    Text(
-                                                                      FormatCurrency.convertToIdr(
-                                                                        double.parse(
-                                                                          detail[index]['amount'],
-                                                                        ),
-                                                                      ).toString(),
-                                                                      style: body1(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw900,
-                                                                        'Outfit',
-                                                                      ),
-                                                                    ),
-                                                                    Text(
-                                                                      'Catatan : ${detail[index]['description'] ?? '-'}',
-                                                                      style: body1(
-                                                                        FontWeight
-                                                                            .w400,
-                                                                        bnw900,
-                                                                        'Outfit',
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Divider(),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: size16),
+                                    Icon(
+                                      PhosphorIcons.caret_down,
+                                      color: bnw900,
+                                      size: size24,
+                                    ),
+                                  ],
+                                ),
+                                AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  margin: EdgeInsets.only(
+                                    top: isDropdownOpen ? size16 : 0,
+                                  ),
+                                  child: isDropdownOpen
+                                      ? Container(
+                                          height:
+                                              MediaQuery.of(context).size.height /
+                                              2,
+                                          width: double.infinity,
+                                          padding: EdgeInsets.all(size16),
+                                          decoration: BoxDecoration(
+                                            color: bnw200,
+                                            borderRadius: BorderRadius.circular(
+                                              size16,
                                             ),
-                                          ],
-                                        ),
-                                      )
-                                    : SizedBox(),
-                              ),
-                            ],
+                                          ),
+                                          child: ListView(
+                                            padding: EdgeInsets.zero,
+                                            physics: BouncingScrollPhysics(),
+                                            children: [
+                                              Text(
+                                                'Status Transaksi',
+                                                style: heading3(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              SizedBox(height: size12),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: UniposInformation(
+                                                  text:
+                                                      data['status_transactions'] ??
+                                                      '-',
+                                                  variant:
+                                                      UniposInformationVariantExt.fromIsPaid(
+                                                        data['isPaid'],
+                                                      ),
+                                                ),
+                                              ),
+                                              SizedBox(height: size16),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Informasi Transaksi',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size12),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            'Waktu Tagihan',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            'Nomor Tagihan',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            'Kasir',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            'Alasan Batal',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Text(
+                                                            dataPerubahan['entrydate'] ??
+                                                                '-',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            dataPerubahan['transactionid'] ??
+                                                                '-',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            dataPerubahan['pic'] ??
+                                                                '-',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: size8),
+                                                          Text(
+                                                            dataPerubahan['reference']['alasan_reference'] ??
+                                                                '-',
+                                                            style: heading4(
+                                                              FontWeight.w400,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: size16),
+                                                  Text(
+                                                    'Detail Alasan',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: size8),
+                                                  Wrap(
+                                                    children: [
+                                                      for (final paragraph
+                                                          in (dataPerubahan['reference']['detail_alasan_reference'] ??
+                                                                  '')
+                                                              .split('\n'))
+                                                        Text(
+                                                          paragraph,
+                                                          style: heading4(
+                                                            FontWeight.w400,
+                                                            bnw900,
+                                                            'Outfit',
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: size16),
+                                                  Text(
+                                                    'Rincian Produk',
+                                                    style: heading3(
+                                                      FontWeight.w600,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    child: ListView.builder(
+                                                      shrinkWrap: true,
+                                                      padding: EdgeInsets.zero,
+                                                      physics:
+                                                          NeverScrollableScrollPhysics(),
+                                                      itemCount: detail.length,
+                                                      itemBuilder: (context, index) {
+                                                        return SizedBox(
+                                                          child: Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    'x${detail[index]['quantity']}',
+                                                                    style: heading3(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: size8,
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height:
+                                                                        size48,
+                                                                    width: size48,
+                                                                    child: AspectRatio(
+                                                                      aspectRatio:
+                                                                          1,
+                                                                      child: Container(
+                                                                        child: Image.network(
+                                                                          detail[index]['product_image'],
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                          errorBuilder:
+                                                                              (
+                                                                                context,
+                                                                                error,
+                                                                                stackTrace,
+                                                                              ) => SvgPicture.asset(
+                                                                                'assets/logoProduct.svg',
+                                                                                fit: BoxFit.cover,
+                                                                              ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: size8,
+                                                                  ),
+                                                                  Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Text(
+                                                                        detail[index]['name'] ??
+                                                                            '-',
+                                                                        style: heading3(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw900,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                      Text(
+                                                                        FormatCurrency.convertToIdr(
+                                                                          double.parse(
+                                                                            detail[index]['amount'],
+                                                                          ),
+                                                                        ).toString(),
+                                                                        style: body1(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw900,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                      Text(
+                                                                        'Catatan : ${detail[index]['description'] ?? '-'}',
+                                                                        style: body1(
+                                                                          FontWeight
+                                                                              .w400,
+                                                                          bnw900,
+                                                                          'Outfit',
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Divider(),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }
-            return SizedBox();
-          },
+                );
+              }
+              return SizedBox();
+            },
+          ),
         );
       },
     );
@@ -1978,156 +1980,158 @@ class _RiwayatPageState extends State<RiwayatPage> {
             ),
             context: context,
             builder: (context) {
-              return StatefulBuilder(
-                builder: (BuildContext context, setState) => IntrinsicHeight(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      size32,
-                      size16,
-                      size32,
-                      size32,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bnw100,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(size12),
-                        topLeft: Radius.circular(size12),
+              return SafeArea(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, setState) => IntrinsicHeight(
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        size32,
+                        size16,
+                        size32,
+                        size32,
                       ),
-                    ),
-                    child: Column(
-                      children: [
-                        dividerShowdialog(),
-                        SizedBox(height: size16),
-                        Container(
-                          width: double.infinity,
-                          color: bnw100,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Urutkan',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                'Tentukan data yang akan tampil',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw600,
-                                  'Outfit',
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              Text(
-                                'Pilih Urutan',
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Wrap(
-                                children: List<Widget>.generate(
-                                  orderByRiwayatTransaksiText.length,
-                                  (int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(right: size16),
-                                      child: ChoiceChip(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: size12,
-                                        ),
-                                        backgroundColor: bnw100,
-                                        selectedColor: primary100,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color:
-                                                valueOrderByHistoryTransaction ==
-                                                    index
-                                                ? primary500
-                                                : bnw300,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            size8,
-                                          ),
-                                        ),
-                                        label: Text(
-                                          orderByRiwayatTransaksiText[index],
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            valueOrderByHistoryTransaction ==
-                                                    index
-                                                ? primary500
-                                                : bnw900,
-                                            'Outfit',
-                                          ),
-                                        ),
-                                        selected:
-                                            valueOrderByHistoryTransaction ==
-                                            index,
-                                        onSelected: (bool selected) {
-                                          setState(() {
-                                            print(index);
-                                            // _value =
-                                            //     selected ? index : null;
-                                            valueOrderByHistoryTransaction =
-                                                index;
-                                          });
-                                          setState(() {});
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
-                              ),
-                            ],
-                          ),
+                      decoration: BoxDecoration(
+                        color: bnw100,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(size12),
+                          topLeft: Radius.circular(size12),
                         ),
-                        SizedBox(height: size32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: StatefulBuilder(
-                            builder: (BuildContext context, setState) => GestureDetector(
-                              onTap: () async {
-                                confirmed = true;
-                                textOrderByRiwayatTransaksi =
-                                    orderByRiwayatTransaksiText[valueOrderByHistoryTransaction];
-                                textvalueOrderByRiwayatTransaksi =
-                                    orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
-                                orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
-
-                                final result = await getRiwayatTransaksi(
-                                  context,
-                                  checkToken,
-                                  '0',
-                                  merchantId,
-                                  textvalueOrderByRiwayatTransaksi,
-                                );
-                                if (!mounted) return;
-                                outerSetState(() {
-                                  datasRiwayat = result;
-                                });
-                                Navigator.pop(context);
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
+                      ),
+                      child: Column(
+                        children: [
+                          dividerShowdialog(),
+                          SizedBox(height: size16),
+                          Container(
+                            width: double.infinity,
+                            color: bnw100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Urutkan',
+                                  style: heading2(
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
                                   ),
                                 ),
-                                0,
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                Wrap(
+                                  children: List<Widget>.generate(
+                                    orderByRiwayatTransaksiText.length,
+                                    (int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: size16),
+                                        child: ChoiceChip(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: size12,
+                                          ),
+                                          backgroundColor: bnw100,
+                                          selectedColor: primary100,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                              color:
+                                                  valueOrderByHistoryTransaction ==
+                                                      index
+                                                  ? primary500
+                                                  : bnw300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              size8,
+                                            ),
+                                          ),
+                                          label: Text(
+                                            orderByRiwayatTransaksiText[index],
+                                            style: heading4(
+                                              FontWeight.w400,
+                                              valueOrderByHistoryTransaction ==
+                                                      index
+                                                  ? primary500
+                                                  : bnw900,
+                                              'Outfit',
+                                            ),
+                                          ),
+                                          selected:
+                                              valueOrderByHistoryTransaction ==
+                                              index,
+                                          onSelected: (bool selected) {
+                                            setState(() {
+                                              print(index);
+                                              // _value =
+                                              //     selected ? index : null;
+                                              valueOrderByHistoryTransaction =
+                                                  index;
+                                            });
+                                            setState(() {});
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: size32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: StatefulBuilder(
+                              builder: (BuildContext context, setState) => GestureDetector(
+                                onTap: () async {
+                                  confirmed = true;
+                                  textOrderByRiwayatTransaksi =
+                                      orderByRiwayatTransaksiText[valueOrderByHistoryTransaction];
+                                  textvalueOrderByRiwayatTransaksi =
+                                      orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
+                                  orderByRiwayatTransaksi[valueOrderByHistoryTransaction];
+                
+                                  final result = await getRiwayatTransaksi(
+                                    context,
+                                    checkToken,
+                                    '0',
+                                    merchantId,
+                                    textvalueOrderByRiwayatTransaksi,
+                                  );
+                                  if (!mounted) return;
+                                  outerSetState(() {
+                                    datasRiwayat = result;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

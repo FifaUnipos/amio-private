@@ -39,104 +39,106 @@ class SortBottomSheetButton extends StatelessWidget {
       builder: (sheetContext) {
         int localIndex = initialIndex;
 
-        return StatefulBuilder(
-          builder: (_, setSheet) => IntrinsicHeight(
-            child: Container(
-              padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-              decoration: BoxDecoration(
-                color: bnw100,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(size12),
-                  topLeft: Radius.circular(size12),
-                ),
-              ),
-              child: Column(
-                children: [
-                  dividerShowdialog(),
-                  SizedBox(height: size16),
-                  Container(
-                    width: double.infinity,
-                    color: bnw100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          sheetTitle,
-                          style: heading2(FontWeight.w700, bnw900, 'Outfit'),
-                        ),
-                        Text(
-                          sheetSubtitle,
-                          style: heading4(FontWeight.w400, bnw600, 'Outfit'),
-                        ),
-                        SizedBox(height: size20),
-                        Text(
-                          sectionLabel,
-                          style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-                        ),
-                        Wrap(
-                          children: List<Widget>.generate(
-                            options.length,
-                            (int index) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: size16),
-                                child: ChoiceChip(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: size12,
-                                  ),
-                                  backgroundColor: bnw100,
-                                  selectedColor: primary100,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      color: localIndex == index
-                                          ? primary500
-                                          : bnw300,
-                                    ),
-                                    borderRadius: BorderRadius.circular(size8),
-                                  ),
-                                  label: Text(
-                                    options[index],
-                                    style: heading4(
-                                      FontWeight.w400,
-                                      localIndex == index
-                                          ? primary500
-                                          : bnw900,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                  selected: localIndex == index,
-                                  onSelected: (_) =>
-                                      setSheet(() => localIndex = index),
-                                ),
-                              );
-                            },
-                          ).toList(),
-                        ),
-                      ],
-                    ),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (_, setSheet) => IntrinsicHeight(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                decoration: BoxDecoration(
+                  color: bnw100,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(size12),
+                    topLeft: Radius.circular(size12),
                   ),
-                  SizedBox(height: size32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(sheetContext, localIndex);
-                      },
-                      child: buttonXL(
-                        Center(
-                          child: Text(
-                            confirmLabel,
-                            style: heading3(
-                              FontWeight.w600,
-                              bnw100,
-                              'Outfit',
-                            ),
+                ),
+                child: Column(
+                  children: [
+                    dividerShowdialog(),
+                    SizedBox(height: size16),
+                    Container(
+                      width: double.infinity,
+                      color: bnw100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sheetTitle,
+                            style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                           ),
-                        ),
-                        0,
+                          Text(
+                            sheetSubtitle,
+                            style: heading4(FontWeight.w400, bnw600, 'Outfit'),
+                          ),
+                          SizedBox(height: size20),
+                          Text(
+                            sectionLabel,
+                            style: heading3(FontWeight.w400, bnw900, 'Outfit'),
+                          ),
+                          Wrap(
+                            children: List<Widget>.generate(
+                              options.length,
+                              (int index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(right: size16),
+                                  child: ChoiceChip(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: size12,
+                                    ),
+                                    backgroundColor: bnw100,
+                                    selectedColor: primary100,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                        color: localIndex == index
+                                            ? primary500
+                                            : bnw300,
+                                      ),
+                                      borderRadius: BorderRadius.circular(size8),
+                                    ),
+                                    label: Text(
+                                      options[index],
+                                      style: heading4(
+                                        FontWeight.w400,
+                                        localIndex == index
+                                            ? primary500
+                                            : bnw900,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                    selected: localIndex == index,
+                                    onSelected: (_) =>
+                                        setSheet(() => localIndex = index),
+                                  ),
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: size32),
+                    SizedBox(
+                      width: double.infinity,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(sheetContext, localIndex);
+                        },
+                        child: buttonXL(
+                          Center(
+                            child: Text(
+                              confirmLabel,
+                              style: heading3(
+                                FontWeight.w600,
+                                bnw100,
+                                'Outfit',
+                              ),
+                            ),
+                          ),
+                          0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

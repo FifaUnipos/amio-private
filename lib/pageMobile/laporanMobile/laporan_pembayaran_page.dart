@@ -16,7 +16,7 @@ class LaporanPembayaranPage extends StatefulWidget {
   final String token;
   final String merchantId;
 
-   LaporanPembayaranPage({
+  LaporanPembayaranPage({
     Key? key,
     required this.token,
     required this.merchantId,
@@ -45,10 +45,7 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     "Nama Pembayaran Z-A",
   ];
 
-  final List<String> _pendapatanText = [
-    "nameCoaAsc",
-    "nameCoaDesc",
-  ];
+  final List<String> _pendapatanText = ["nameCoaAsc", "nameCoaDesc"];
 
   @override
   void initState() {
@@ -61,7 +58,8 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     setState(() => _isLoading = true);
     String keyword = _selectedKeyword;
     if (keyword == "custom" && _startDate != null && _endDate != null) {
-      keyword = "${DateFormat('yyyy-MM-dd').format(_startDate!)} s/d ${DateFormat('yyyy-MM-dd').format(_endDate!)}";
+      keyword =
+          "${DateFormat('yyyy-MM-dd').format(_startDate!)} s/d ${DateFormat('yyyy-MM-dd').format(_endDate!)}";
     }
     try {
       final data = await getLaporanPembayaran(
@@ -83,8 +81,14 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
 
   String _formatCurrency(dynamic value) {
     if (value == null) return "Rp 0";
-    final formatter = NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0);
-    return formatter.format(value is num ? value : (num.tryParse(value.toString()) ?? 0));
+    final formatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(
+      value is num ? value : (num.tryParse(value.toString()) ?? 0),
+    );
   }
 
   Future<void> _launchURL(String urlString) async {
@@ -97,7 +101,8 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
   void _exportReport(String type) async {
     String keyword = _selectedKeyword;
     if (keyword == "custom" && _startDate != null && _endDate != null) {
-      keyword = "${DateFormat('yyyy-MM-dd').format(_startDate!)} s/d ${DateFormat('yyyy-MM-dd').format(_endDate!)}";
+      keyword =
+          "${DateFormat('yyyy-MM-dd').format(_startDate!)} s/d ${DateFormat('yyyy-MM-dd').format(_endDate!)}";
     }
 
     final result = await getLaporanPembayaran(
@@ -120,21 +125,24 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Color(0xFFF8F9FA),
+      backgroundColor: Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: bnw100,
         elevation: 0,
-        leading: IconButton(icon:  Icon(PhosphorIcons.arrow_left, color: bnw900), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(
+          icon: Icon(PhosphorIcons.arrow_left, color: bnw900),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           'Pendapatan Per COA',
           style: heading1(FontWeight.w700, bnw900, 'Outfit'),
         ),
         actions: [
           IconButton(
-            icon:  Icon(PhosphorIcons.share_network, color: primary500),
+            icon: Icon(PhosphorIcons.share_network, color: primary500),
             onPressed: _showShareModal,
           ),
-           SizedBox(width: 8),
+          SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
@@ -142,21 +150,25 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
           children: [
             Container(
               color: bnw100,
-              padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
                     _buildFilterChip(_selectedSortLabel, _showSortModal),
-                     SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _buildFilterChip(_dateRangeLabel, _showDateRangeModal),
-                     SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _buildFilterChip(_storeFilterLabel, _showStoreModal),
                   ],
                 ),
               ),
             ),
-            Expanded(child: _isLoading ?  Center(child: CircularProgressIndicator()) : _buildReportList()),
+            Expanded(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : _buildReportList(),
+            ),
             if (!_isLoading && _reportData != null) _buildBottomBar(),
           ],
         ),
@@ -168,13 +180,16 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding:  EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: bnw300),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Row(
           children: [
             Text(label, style: heading4(FontWeight.w500, bnw900, 'Outfit')),
-             SizedBox(width: 4),
-             Icon(Icons.arrow_drop_down, size: 20, color: bnw900),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 20, color: bnw900),
           ],
         ),
       ),
@@ -183,15 +198,23 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
 
   Widget _buildReportList() {
     final List<dynamic> details = _reportData?['data']?['detail'] ?? [];
-    if (details.isEmpty) return Center(child: Text("Tidak ada data laporan", style: heading3(FontWeight.w400, bnw500, 'Outfit')));
+    if (details.isEmpty)
+      return Center(
+        child: Text(
+          "Tidak ada data laporan",
+          style: heading3(FontWeight.w400, bnw500, 'Outfit'),
+        ),
+      );
     return ListView.builder(
-      padding:  EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       itemCount: details.length,
       itemBuilder: (context, index) {
         final merchantData = details[index];
         final List coaList = merchantData['transaction_coa'] ?? [];
         return Column(
-          children: coaList.map((coa) => _buildCOACard(merchantData['merchant_name'], coa)).toList(),
+          children: coaList
+              .map((coa) => _buildCOACard(merchantData['merchant_name'], coa))
+              .toList(),
         );
       },
     );
@@ -199,8 +222,8 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
 
   Widget _buildCOACard(String? merchantName, Map<String, dynamic> coa) {
     return Container(
-      margin:  EdgeInsets.only(bottom: 16),
-      padding:  EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bnw100,
         borderRadius: BorderRadius.circular(12),
@@ -214,10 +237,13 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: bnw200, borderRadius: BorderRadius.circular(8)),
-                child:  Icon(PhosphorIcons.credit_card, color: bnw600, size: 20),
+                decoration: BoxDecoration(
+                  color: bnw200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(PhosphorIcons.credit_card, color: bnw600, size: 20),
               ),
-               SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Text(
                   merchantName ?? 'Nama Toko',
@@ -226,7 +252,7 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
               ),
             ],
           ),
-           SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -251,8 +277,8 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     return GestureDetector(
       onTap: _showSummaryModal,
       child: Container(
-        padding:  EdgeInsets.all(16),
-        decoration:  BoxDecoration(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
           color: primary500,
           borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
         ),
@@ -262,9 +288,12 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
             Text("Total", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
             Row(
               children: [
-                Text(_formatCurrency(total), style: heading3(FontWeight.w600, bnw100, 'Outfit')),
-                 SizedBox(width: 8),
-                 Icon(Icons.keyboard_arrow_up, color: bnw100),
+                Text(
+                  _formatCurrency(total),
+                  style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                ),
+                SizedBox(width: 8),
+                Icon(Icons.keyboard_arrow_up, color: bnw100),
               ],
             ),
           ],
@@ -276,13 +305,13 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
   void _showShareModal() {
     showModalBottomSheet(
       context: context,
-      shape:  RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding:  EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,10 +326,16 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                     ),
                   ),
                 ),
-                 SizedBox(height: 24),
-                Text("Bagikan Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                Text("Pilih format untuk dibagikan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
-                 SizedBox(height: 24),
+                SizedBox(height: 24),
+                Text(
+                  "Bagikan Laporan",
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                Text(
+                  "Pilih format untuk dibagikan",
+                  style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+                ),
+                SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
@@ -310,15 +345,24 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                           _exportReport("pdf");
                         },
                         style: OutlinedButton.styleFrom(
-                          padding:  EdgeInsets.symmetric(vertical: 16),
-                          side:  BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        icon:  Icon(PhosphorIcons.file_pdf, color: primary500),
-                        label: Text("PDF", style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                        icon: Icon(PhosphorIcons.file_pdf, color: primary500),
+                        label: Text(
+                          "PDF",
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
-                     SizedBox(width: 16),
+                    SizedBox(width: 16),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
@@ -326,17 +370,26 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                           _exportReport("excel");
                         },
                         style: OutlinedButton.styleFrom(
-                          padding:  EdgeInsets.symmetric(vertical: 16),
-                          side:  BorderSide(color: primary500),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: primary500),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        icon:  Icon(PhosphorIcons.file_xls, color: primary500),
-                        label: Text("Excel", style: heading3(FontWeight.w600, primary500, 'Outfit')),
+                        icon: Icon(PhosphorIcons.file_xls, color: primary500),
+                        label: Text(
+                          "Excel",
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                 SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
             ),
           ),
@@ -348,7 +401,7 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
   void _showSortModal() {
     showModalBottomSheet(
       context: context,
-      shape:  RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
@@ -357,7 +410,7 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
           child: StatefulBuilder(
             builder: (context, setModalState) {
               return Container(
-                padding:  EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,13 +419,22 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                       child: Container(
                         width: 40,
                         height: 4,
-                        decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                     SizedBox(height: 20),
-                    Text("Urutkan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                    Text("Pilih Urutan yang ingin ditampilkan", style: heading4(FontWeight.w400, bnw500, 'Outfit')),
-                     SizedBox(height: 20),
+                    SizedBox(height: 20),
+                    Text(
+                      "Urutkan",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      "Pilih Urutan yang ingin ditampilkan",
+                      style: heading4(FontWeight.w400, bnw500, 'Outfit'),
+                    ),
+                    SizedBox(height: 20),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
@@ -387,11 +449,18 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                             });
                           },
                           child: Container(
-                            padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
-                              color: isSelected ? primary500.withOpacity(0.1) : bnw100,
+                              color: isSelected
+                                  ? primary500.withOpacity(0.1)
+                                  : bnw100,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: isSelected ? primary500 : bnw300),
+                              border: Border.all(
+                                color: isSelected ? primary500 : bnw300,
+                              ),
                             ),
                             child: Text(
                               label,
@@ -405,24 +474,32 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
                         );
                       }),
                     ),
-                     SizedBox(height: 30),
+                    SizedBox(height: 30),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
                           setState(() {
                             _selectedSortValue = tempOrder;
-                            _selectedSortLabel = _pilihUrutan[_pendapatanText.indexOf(tempOrder)];
+                            _selectedSortLabel =
+                                _pilihUrutan[_pendapatanText.indexOf(
+                                  tempOrder,
+                                )];
                           });
                           _fetchData();
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary500,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding:  EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: Text("Tampilkan", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                        child: Text(
+                          "Tampilkan",
+                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                        ),
                       ),
                     ),
                   ],
@@ -439,67 +516,168 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => StatefulBuilder(builder: (context, setModalState) => Container(
-        padding:  EdgeInsets.all(20),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-               SizedBox(height: 20),
-              Text("Rentang Waktu", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-               SizedBox(height: 10),
-              _buildDateOption("30 Hari Terakhir", "1B", setModalState),
-              _buildDateOption("3 Bulan Terakhir", "3M", setModalState),
-              _buildDateOption("6 Bulan Terakhir", "6M", setModalState),
-              _buildDateOption("1 Tahun Terakhir", "1Y", setModalState),
-              _buildDateOption("Kustom Hari", "custom", setModalState),
-              if (_selectedKeyword == "custom") ...[
-                 SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(child: InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(context: context, initialDate: _startDate ?? DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime.now());
-                        if (picked != null) setModalState(() => _startDate = picked);
-                      },
-                      child: Container(padding:  EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)), alignment: Alignment.center, child: Text(_startDate == null ? "Dari Tanggal" : DateFormat('dd-MM-yyyy').format(_startDate!))),
-                    )),
-                     Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("-")),
-                    Expanded(child: InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(context: context, initialDate: _endDate ?? DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime.now());
-                        if (picked != null) setModalState(() => _endDate = picked);
-                      },
-                      child: Container(padding:  EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(border: Border.all(color: bnw300), borderRadius: BorderRadius.circular(8)), alignment: Alignment.center, child: Text(_endDate == null ? "Sampai Tanggal" : DateFormat('dd-MM-yyyy').format(_endDate!))),
-                    )),
-                  ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: EdgeInsets.all(20),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Rentang Waktu",
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 10),
+                _buildDateOption("1 Hari Terakhir", "1H", setModalState),
+                _buildDateOption("7 Hari Terakhir", "7H", setModalState),
+                _buildDateOption("30 Hari Terakhir", "1B", setModalState),
+                _buildDateOption("3 Bulan Terakhir", "3M", setModalState),
+                _buildDateOption("6 Bulan Terakhir", "6M", setModalState),
+                _buildDateOption("1 Tahun Terakhir", "1Y", setModalState),
+                _buildDateOption("Kustom Hari", "custom", setModalState),
+                if (_selectedKeyword == "custom") ...[
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _startDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null)
+                              setModalState(() => _startDate = picked);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              _startDate == null
+                                  ? "Dari Tanggal"
+                                  : DateFormat(
+                                      'dd-MM-yyyy',
+                                    ).format(_startDate!),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text("-"),
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _endDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null)
+                              setModalState(() => _endDate = picked);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              _endDate == null
+                                  ? "Sampai Tanggal"
+                                  : DateFormat('dd-MM-yyyy').format(_endDate!),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _dateRangeLabel = _selectedKeyword == "custom"
+                            ? "Kustom Hari"
+                            : {
+                                    "1B": "30 Hari Terakhir",
+                                    "3M": "3 Bulan Terakhir",
+                                    "6M": "6 Bulan Terakhir",
+                                    "1Y": "1 Tahun Terakhir",
+                                  }[_selectedKeyword] ??
+                                  "30 Hari Terakhir";
+                      });
+                      _fetchData();
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      "Tampilkan",
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
                 ),
               ],
-               SizedBox(height: 24),
-              SizedBox(width: double.infinity, child: ElevatedButton(
-                onPressed: () {
-                  setState(() { _dateRangeLabel = _selectedKeyword == "custom" ? "Kustom Hari" : {"1B": "30 Hari Terakhir", "3M": "3 Bulan Terakhir", "6M": "6 Bulan Terakhir", "1Y": "1 Tahun Terakhir"}[_selectedKeyword] ?? "30 Hari Terakhir"; });
-                  _fetchData();
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
-                child: Text("Tampilkan", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
-              )),
-            ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
-  Widget _buildDateOption(String label, String value, StateSetter setModalState) {
+  Widget _buildDateOption(
+    String label,
+    String value,
+    StateSetter setModalState,
+  ) {
     bool isSelected = _selectedKeyword == value;
     return ListTile(
-      title: Text(label, style: heading3(FontWeight.w500, isSelected ? primary500 : bnw900, 'Outfit')),
-      trailing: Radio<String>(value: value, groupValue: _selectedKeyword, activeColor: primary500, onChanged: (val) => setModalState(() => _selectedKeyword = val!)),
+      title: Text(
+        label,
+        style: heading3(
+          FontWeight.w500,
+          isSelected ? primary500 : bnw900,
+          'Outfit',
+        ),
+      ),
+      trailing: Radio<String>(
+        value: value,
+        groupValue: _selectedKeyword,
+        activeColor: primary500,
+        onChanged: (val) => setModalState(() => _selectedKeyword = val!),
+      ),
       onTap: () => setModalState(() => _selectedKeyword = value),
     );
   }
@@ -509,45 +687,93 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     if (stores == null || stores.isEmpty) return;
     showModalBottomSheet(
       context: context,
-      shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => StatefulBuilder(builder: (context, setModalState) => Container(
-        padding:  EdgeInsets.all(20),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-               SizedBox(height: 20),
-              Text("Daftar Toko", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-               SizedBox(height: 10),
-              Expanded(child: ListView.builder(
-                itemCount: stores.length,
-                itemBuilder: (context, index) {
-                  final store = stores[index];
-                  final isSelected = _selectedMerchants.contains(store.merchantid);
-                  return CheckboxListTile(
-                    value: isSelected,
-                    activeColor: primary500,
-                    title: Text(store.name ?? '', style: heading3(FontWeight.w600, bnw900, 'Outfit')),
-                    onChanged: (val) => setModalState(() { if (val == true) _selectedMerchants.add(store.merchantid!); else _selectedMerchants.remove(store.merchantid); }),
-                  );
-                },
-              )),
-               SizedBox(height: 16),
-              SizedBox(width: double.infinity, child: ElevatedButton(
-                onPressed: () {
-                  setState(() { if (_selectedMerchants.length == stores.length) _storeFilterLabel = "Semua toko"; else if (_selectedMerchants.isEmpty) _storeFilterLabel = "Pilih toko"; else _storeFilterLabel = "${_selectedMerchants.length} toko dipilih"; });
-                  _fetchData();
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: primary500, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding:  EdgeInsets.symmetric(vertical: 16)),
-                child: Text("Selesai", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
-              )),
-            ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: EdgeInsets.all(20),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Daftar Toko",
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: stores.length,
+                    itemBuilder: (context, index) {
+                      final store = stores[index];
+                      final isSelected = _selectedMerchants.contains(
+                        store.merchantid,
+                      );
+                      return CheckboxListTile(
+                        value: isSelected,
+                        activeColor: primary500,
+                        title: Text(
+                          store.name ?? '',
+                          style: heading3(FontWeight.w600, bnw900, 'Outfit'),
+                        ),
+                        onChanged: (val) => setModalState(() {
+                          if (val == true)
+                            _selectedMerchants.add(store.merchantid!);
+                          else
+                            _selectedMerchants.remove(store.merchantid);
+                        }),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_selectedMerchants.length == stores.length)
+                          _storeFilterLabel = "Semua toko";
+                        else if (_selectedMerchants.isEmpty)
+                          _storeFilterLabel = "Pilih toko";
+                        else
+                          _storeFilterLabel =
+                              "${_selectedMerchants.length} toko dipilih";
+                      });
+                      _fetchData();
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      "Selesai",
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
@@ -556,32 +782,52 @@ class _LaporanPembayaranPageState extends State<LaporanPembayaranPage> {
     if (header == null) return;
     showModalBottomSheet(
       context: context,
-      shape:  RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Container(
-            padding:  EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Total Laporan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                 SizedBox(height: 24),
-                _buildSummaryRow("Total Pendapatan", _formatCurrency(header['total'])),
-                 Divider(height: 32),
+                Text(
+                  "Total Laporan",
+                  style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                ),
+                SizedBox(height: 24),
+                _buildSummaryRow(
+                  "Total Pendapatan",
+                  _formatCurrency(header['total']),
+                ),
+                Divider(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text("Total Keseluruhan", style: heading2(FontWeight.w700, bnw900, 'Outfit')),
-                     Text(_formatCurrency(header['total']), style: heading2(FontWeight.w700, bnw900, 'Outfit')),
+                    Text(
+                      "Total Keseluruhan",
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
+                    Text(
+                      _formatCurrency(header['total']),
+                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                    ),
                   ],
                 ),
-                 SizedBox(height: 32),
+                SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(backgroundColor: primary500, padding:  EdgeInsets.symmetric(vertical: 16)),
-                    child: Text("Tutup", style: heading3(FontWeight.w600, bnw100, 'Outfit')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary500,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      "Tutup",
+                      style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                    ),
                   ),
                 ),
               ],

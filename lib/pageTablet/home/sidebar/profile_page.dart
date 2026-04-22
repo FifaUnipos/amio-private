@@ -1103,7 +1103,8 @@ class ProfilePageState extends State<ProfilePage> {
                                                         Navigator.of(context)
                                                             .popUntil((route) =>
                                                                 route.isFirst);
-                                                        myprofile(widget.token);        
+                                                        await myprofile(widget.token);
+                                                        _reloadPage();
                                                       }
                                                     },
                                                   );
@@ -2211,6 +2212,8 @@ class ProfilePageState extends State<ProfilePage> {
                                                     Navigator.of(context)
                                                         .popUntil((route) =>
                                                             route.isFirst);
+                                                    await myprofile(widget.token);
+                                                    _reloadPage();
                                                   }
                                                 });
                                               });
@@ -2693,10 +2696,12 @@ class ProfilePageState extends State<ProfilePage> {
                                         setState(() {
                                           verifiedEmailbyOTP(
                                                   context, widget.token, pin)
-                                              .then((value) {
+                                              .then((value) async {
                                             if (value == '00') {
                                               Navigator.of(context).popUntil(
                                                   (route) => route.isFirst);
+                                              await myprofile(widget.token);
+                                              _reloadPage();
                                               showSnackBarComponent(
                                                   context,
                                                   'Berhasil verifikasi email',
@@ -3431,12 +3436,14 @@ class ProfilePageState extends State<ProfilePage> {
                                 controllerChangePass.text,
                                 controllerConfirmPass.text,
                                 phone ? 'whatsapp' : 'email',
-                              ).then((value) {
+                              ).then((value) async {
                                 if (value == '00') {
                                   refreshField();
                                   errorText = '';
                                   // Navigator.of(context)
                                   //     .popUntil((route) => route.isFirst);
+                                  await myprofile(widget.token);
+                                  _reloadPage();
                                 } else {
                                   setState(() {
                                     errorText = value;

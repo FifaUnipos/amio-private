@@ -796,18 +796,21 @@ class _DiskonGrupState extends State<DiskonGrup> {
                                                 Border.all(color: primary500),
                                             inactiveSwitchBorder: Border.all(
                                                 color: bnw300, width: 2),
-                                            onToggle: (bool value) {
+                                            onToggle: (bool value) async {
                                               List<String> listProduct = [
                                                 dataProduk.id!
                                               ];
 
-                                              changeActiveDiskon(
+                                              String rc = await changeActiveDiskon(
                                                 context,
                                                 widget.token,
                                                 value.toString(),
                                                 listProduct,
                                                 "",
                                               );
+                                              if (rc == '00') {
+                                                dataProduk.is_active = value;
+                                              }
                                               setState(() {});
                                               initState();
                                             },

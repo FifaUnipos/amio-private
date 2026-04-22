@@ -33,6 +33,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../../models/inventoriModel/bomModel.dart';
 
@@ -359,6 +362,123 @@ class _InventoriPageTestState extends State<InventoriPageTest>
 
     return result;
   }
+
+
+  // --- START RE-IMPLEMENTED DOWNLOAD & UPLOAD LOGIC ---
+  String? filePath;
+  String? fileName;
+  bool isUploading = false;
+
+  Future<void> pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx', 'xls', 'csv'],
+      );
+
+      if (result != null) {
+        setState(() {
+          filePath = result.files.single.path;
+          fileName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    }
+  }
+
+  Future<void> uploadFile(BuildContext context) async {
+    if (filePath == null) return;
+
+    setState(() => isUploading = true);
+    
+    try {
+      // Logic placeholder mirroring produk.dart
+      // final result = await uploadBulkInventory(widget.token, filePath!);
+      // ... handling result ...
+      
+      showSnackbar(context, {"message": "Fitur upload sedang dalam pengembangan"});
+    } catch (e) {
+      print("Upload error: $e");
+    } finally {
+      setState(() => isUploading = false);
+    }
+  }
+
+  void showMenuDownload(BuildContext context) {
+    showModalBottom(
+      context,
+      MediaQuery.of(context).size.height,
+      IntrinsicHeight(
+        child: Padding(
+          padding: EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pilihan Aksi',
+                        style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                      Text(
+                        'Download template atau upload data massal',
+                        style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(PhosphorIcons.x_fill, color: bnw900),
+                  ),
+                ],
+              ),
+              SizedBox(height: size24),
+              GestureDetector(
+                onTap: () {
+                  final url = Uri.parse(
+                    'https://docs.google.com/spreadsheets/d/1ZZQf5wBIBwS2SVRC21eRD20yBxWfmxMO/edit?usp=sharing',
+                  );
+                  launchUrl(url);
+                },
+                behavior: HitTestBehavior.translucent,
+                child: modalBottomValue('Unduh Template Excel', PhosphorIcons.file_xls_fill),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final url = Uri.parse(
+                    'https://drive.google.com/file/d/1BHhWQRT3QrlPazCB-YJwTwlts-H31kJd/view?usp=sharing',
+                  );
+                  launchUrl(url);
+                },
+                behavior: HitTestBehavior.translucent,
+                child: modalBottomValue('Unduh Template CSV', PhosphorIcons.file_csv_fill),
+              ),
+              Divider(thickness: 1, color: bnw300, height: size32),
+              GestureDetector(
+                onTap: () async {
+                  Navigator.pop(context);
+                  // Trigger upload dialog or logic
+                  await pickFile();
+                  if (filePath != null) {
+                    await uploadFile(context);
+                  }
+                },
+                behavior: HitTestBehavior.translucent,
+                child: modalBottomValue('Bulk Upload', PhosphorIcons.file_arrow_up_fill),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  // --- END RE-IMPLEMENTED DOWNLOAD & UPLOAD LOGIC ---
 
   Future<dynamic> getDatabahan(List<String> value) async {
     return datasBahan = await getMasterData(

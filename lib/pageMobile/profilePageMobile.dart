@@ -160,7 +160,10 @@ class _ProfilPageMobileState extends State<ProfilPageMobile> {
                             telepon: widget.nomor,
                           ),
                         ),
-                      );
+                      ).then((_) async {
+                        await myprofile(checkToken);
+                        setState(() {});
+                      });
                     },
                   ),
                 ],

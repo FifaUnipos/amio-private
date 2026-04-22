@@ -286,7 +286,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                   ],
                 ),
               ),
-              SizedBox(
+              Flexible(
                 // width: 420,
                 child: Row(
                   children: [
@@ -393,7 +393,7 @@ class _TokoSidePageState extends State<TokoSidePage> {
                 MerchantSortingResultLoadingState() => Center(
                   child: SkeletonCard(),
                 ),
-                MerchantSortingResultLoadedState(data: var dataStore) => Expanded(
+                MerchantSortingResultLoadedState(data: var dataStore) => SizedBox.expand(
                   child: RefreshIndicator(
                     color: bnw100,
                     backgroundColor: primary500,

@@ -6,12 +6,14 @@ import 'dart:io' as Io;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:unipos_app_335/components/organisms/sort_bottom_sheet_button.dart';
 import 'package:unipos_app_335/models/coaModel.dart';
 import 'package:unipos_app_335/models/productVariantModel.dart';
 import 'package:unipos_app_335/pageTablet/test/dashboardnew.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/produkToko/produk.dart';
 import 'package:unipos_app_335/pageTablet/tokopage/sidebar/transaksiToko/payment_shared.dart';
 import 'package:unipos_app_335/pagehelper/loginregis/daftar_akun_toko.dart';
+import 'package:unipos_app_335/providers/product/product_sorting_provider.dart';
 import 'package:unipos_app_335/utils/component/providerModel/refreshTampilanModel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
@@ -281,6 +283,7 @@ class _TransactionPageState extends State<TransactionPage>
   TextEditingController customProdukPrice = TextEditingController();
 
   TextEditingController searchController = TextEditingController();
+  TextEditingController discountSearchController = TextEditingController();
 
   PageController _pageController = PageController();
   PageController dompetDigitalPageCon = PageController();
@@ -903,284 +906,285 @@ class _TransactionPageState extends State<TransactionPage>
           Expanded(
             child: Row(
               children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(size16),
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: bnw300),
-                      borderRadius: BorderRadius.circular(size16),
-                      color: bnw100,
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(size12),
-                            height: double.infinity,
-                            width: double.infinity,
-                            child: Image.asset(
-                              'assets/qrislogo.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Pembayaran QRIS',
-                              style: heading2(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            Text(
-                              logoQris != '' ? 'Terhubung' : 'Belum Terhubung',
-                              style: heading4(
-                                FontWeight.w400,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            SizedBox(height: size16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: GestureDetector(
-                                onTap: () {
-                                  getQris(context, widget.token, '').then((
-                                    value,
-                                  ) {
-                                    showBottomPilihan(
-                                      context,
-                                      Center(
-                                        // child: myImage != null
-                                        child:
-                                            // logoQris.isNotEmpty
-                                            //     ? Image.network(
-                                            //         logoQris,
-                                            //         fit: BoxFit.fill,
-                                            //       )
-                                            //     :
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  'Pembayaran QRIS',
-                                                  style: heading1(
-                                                    FontWeight.w600,
-                                                    bnw900,
-                                                    'Outfit',
-                                                  ),
-                                                ),
-                                                SizedBox(height: size16),
-                                                Container(
-                                                  height: 200,
-                                                  width: 200,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          size8,
-                                                        ),
-                                                    border: Border.all(
-                                                      color: bnw300,
-                                                    ),
-                                                  ),
-                                                  child: logoQris == ''
-                                                      ? Icon(PhosphorIcons.plus)
-                                                      : ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                size8,
-                                                              ),
-                                                          child: Image.network(
-                                                            logoQris ?? '',
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () async {
-                                                    await getImage().then(
-                                                      (value) =>
-                                                          uploadQris(
-                                                            context,
-                                                            widget.token,
-                                                            img64,
-                                                            '',
-                                                          ).then((value) {
-                                                            // Navigator.pop(context);
-                                                          }),
-                                                    );
-                                                    setState(() {});
-                                                    // initState();
-                                                  },
-                                                  child: SizedBox(
-                                                    child: TextFormField(
-                                                      cursorColor: primary500,
-                                                      enabled: false,
-                                                      style: heading3(
-                                                        FontWeight.w400,
-                                                        bnw900,
-                                                        'Outfit',
-                                                      ),
-                                                      decoration: InputDecoration(
-                                                        focusedBorder:
-                                                            UnderlineInputBorder(
-                                                              borderSide:
-                                                                  BorderSide(
-                                                                    width: 2,
-                                                                    color:
-                                                                        primary500,
-                                                                  ),
-                                                            ),
-                                                        contentPadding:
-                                                            EdgeInsets.symmetric(
-                                                              vertical: size16,
-                                                            ),
-                                                        isDense: true,
-                                                        focusColor: primary500,
-                                                        prefixIcon: Icon(
-                                                          size: size24,
-                                                          logoQris != ''
-                                                              ? PhosphorIcons
-                                                                    .pencil_line
-                                                              : PhosphorIcons
-                                                                    .plus,
-                                                          color: bnw900,
-                                                        ),
-                                                        hintText: logoQris != ''
-                                                            ? 'Ganti QRIS'
-                                                            : 'Tambah QRIS',
-                                                        hintStyle: heading3(
-                                                          FontWeight.w400,
-                                                          bnw900,
-                                                          'Outfit',
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: size16),
-                                                logoQris != ''
-                                                    ? GestureDetector(
-                                                        onTap: () async {
-                                                          deleteQris(
-                                                            context,
-                                                            widget.token,
-                                                            '',
-                                                          );
-                                                          setState(() {});
-                                                          // initState();
-                                                        },
-                                                        child: SizedBox(
-                                                          child: TextFormField(
-                                                            cursorColor:
-                                                                primary500,
-                                                            enabled: false,
-                                                            style: heading3(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit',
-                                                            ),
-                                                            decoration: InputDecoration(
-                                                              focusedBorder:
-                                                                  UnderlineInputBorder(
-                                                                    borderSide:
-                                                                        BorderSide(
-                                                                          width:
-                                                                              2,
-                                                                          color:
-                                                                              primary500,
-                                                                        ),
-                                                                  ),
-                                                              focusColor:
-                                                                  primary500,
-                                                              prefixIcon: Icon(
-                                                                PhosphorIcons
-                                                                    .trash,
-                                                                size: size24,
-                                                                color: bnw900,
-                                                              ),
-                                                              hintText:
-                                                                  'Hapus QRIS',
-                                                              hintStyle:
-                                                                  heading3(
-                                                                    FontWeight
-                                                                        .w400,
-                                                                    bnw900,
-                                                                    'Outfit',
-                                                                  ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      )
-                                                    : SizedBox(),
-                                              ],
-                                            ),
-                                      ),
-                                    );
-                                    setState(() {});
-                                  });
-                                },
-                                child: logoQris == ''
-                                    ? buttonXL(
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              PhosphorIcons.pencil_line,
-                                              color: bnw100,
-                                              size: size24,
-                                            ),
-                                            SizedBox(width: size12),
-                                            Text(
-                                              'Tambah QRIS',
-                                              style: heading3(
-                                                FontWeight.w600,
-                                                bnw100,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        0,
-                                      )
-                                    : buttonXLoutline(
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              PhosphorIcons.pencil_line,
-                                              color: primary500,
-                                              size: size24,
-                                            ),
-                                            SizedBox(width: size12),
-                                            Text(
-                                              'Atur QRIS',
-                                              style: heading3(
-                                                FontWeight.w600,
-                                                primary500,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        0,
-                                        primary500,
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: size12),
+                // Expanded(
+                //   child: Container(
+                //     padding: EdgeInsets.all(size16),
+                //     height: MediaQuery.of(context).size.height,
+                //     width: MediaQuery.of(context).size.width,
+                //     decoration: BoxDecoration(
+                //       border: Border.all(color: bnw300),
+                //       borderRadius: BorderRadius.circular(size16),
+                //       color: bnw100,
+                //     ),
+                //     child: Column(
+                //       children: [
+                //         Expanded(
+                //           child: Container(
+                //             padding: EdgeInsets.all(size12),
+                //             height: double.infinity,
+                //             width: double.infinity,
+                //             child: Image.asset(
+                //               'assets/qrislogo.png',
+                //               fit: BoxFit.contain,
+                //             ),
+                //           ),
+                //         ),
+                //         Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             Text(
+                //               'Pembayaran QRIS',
+                //               style: heading2(
+                //                 FontWeight.w600,
+                //                 bnw900,
+                //                 'Outfit',
+                //               ),
+                //             ),
+                //             Text(
+                //               logoQris != '' ? 'Terhubung' : 'Belum Terhubung',
+                //               style: heading4(
+                //                 FontWeight.w400,
+                //                 bnw900,
+                //                 'Outfit',
+                //               ),
+                //             ),
+                //             SizedBox(height: size16),
+                //             SizedBox(
+                //               width: double.infinity,
+                //               child: GestureDetector(
+                //                 onTap: () {
+                //                   getQris(context, widget.token, '').then((
+                //                     value,
+                //                   ) {
+                //                     showBottomPilihan(
+                //                       context,
+                //                       Center(
+                //                         // child: myImage != null
+                //                         child:
+                //                             // logoQris.isNotEmpty
+                //                             //     ? Image.network(
+                //                             //         logoQris,
+                //                             //         fit: BoxFit.fill,
+                //                             //       )
+                //                             //     :
+                //                             Column(
+                //                               children: [
+                //                                 Text(
+                //                                   'Pembayaran QRIS',
+                //                                   style: heading1(
+                //                                     FontWeight.w600,
+                //                                     bnw900,
+                //                                     'Outfit',
+                //                                   ),
+                //                                 ),
+                //                                 SizedBox(height: size16),
+                //                                 Container(
+                //                                   height: 200,
+                //                                   width: 200,
+                //                                   decoration: BoxDecoration(
+                //                                     borderRadius:
+                //                                         BorderRadius.circular(
+                //                                           size8,
+                //                                         ),
+                //                                     border: Border.all(
+                //                                       color: bnw300,
+                //                                     ),
+                //                                   ),
+                //                                   child: logoQris == ''
+                //                                       ? Icon(PhosphorIcons.plus)
+                //                                       : ClipRRect(
+                //                                           borderRadius:
+                //                                               BorderRadius.circular(
+                //                                                 size8,
+                //                                               ),
+                //                                           child: Image.network(
+                //                                             logoQris ?? '',
+                //                                             fit: BoxFit.cover,
+                //                                           ),
+                //                                         ),
+                //                                 ),
+                //                                 GestureDetector(
+                //                                   onTap: () async {
+                //                                     await getImage().then(
+                //                                       (value) =>
+                //                                           uploadQris(
+                //                                             context,
+                //                                             widget.token,
+                //                                             img64,
+                //                                             '',
+                //                                           ).then((value) {
+                //                                             // Navigator.pop(context);
+                //                                           }),
+                //                                     );
+                //                                     setState(() {});
+                //                                     // initState();
+                //                                   },
+                //                                   child: SizedBox(
+                //                                     child: TextFormField(
+                //                                       cursorColor: primary500,
+                //                                       enabled: false,
+                //                                       style: heading3(
+                //                                         FontWeight.w400,
+                //                                         bnw900,
+                //                                         'Outfit',
+                //                                       ),
+                //                                       decoration: InputDecoration(
+                //                                         focusedBorder:
+                //                                             UnderlineInputBorder(
+                //                                               borderSide:
+                //                                                   BorderSide(
+                //                                                     width: 2,
+                //                                                     color:
+                //                                                         primary500,
+                //                                                   ),
+                //                                             ),
+                //                                         contentPadding:
+                //                                             EdgeInsets.symmetric(
+                //                                               vertical: size16,
+                //                                             ),
+                //                                         isDense: true,
+                //                                         focusColor: primary500,
+                //                                         prefixIcon: Icon(
+                //                                           size: size24,
+                //                                           logoQris != ''
+                //                                               ? PhosphorIcons
+                //                                                     .pencil_line
+                //                                               : PhosphorIcons
+                //                                                     .plus,
+                //                                           color: bnw900,
+                //                                         ),
+                //                                         hintText: logoQris != ''
+                //                                             ? 'Ganti QRIS'
+                //                                             : 'Tambah QRIS',
+                //                                         hintStyle: heading3(
+                //                                           FontWeight.w400,
+                //                                           bnw900,
+                //                                           'Outfit',
+                //                                         ),
+                //                                       ),
+                //                                     ),
+                //                                   ),
+                //                                 ),
+                //                                 SizedBox(height: size16),
+                //                                 logoQris != ''
+                //                                     ? GestureDetector(
+                //                                         onTap: () async {
+                //                                           deleteQris(
+                //                                             context,
+                //                                             widget.token,
+                //                                             '',
+                //                                           );
+                //                                           setState(() {});
+                //                                           // initState();
+                //                                         },
+                //                                         child: SizedBox(
+                //                                           child: TextFormField(
+                //                                             cursorColor:
+                //                                                 primary500,
+                //                                             enabled: false,
+                //                                             style: heading3(
+                //                                               FontWeight.w400,
+                //                                               bnw900,
+                //                                               'Outfit',
+                //                                             ),
+                //                                             decoration: InputDecoration(
+                //                                               focusedBorder:
+                //                                                   UnderlineInputBorder(
+                //                                                     borderSide:
+                //                                                         BorderSide(
+                //                                                           width:
+                //                                                               2,
+                //                                                           color:
+                //                                                               primary500,
+                //                                                         ),
+                //                                                   ),
+                //                                               focusColor:
+                //                                                   primary500,
+                //                                               prefixIcon: Icon(
+                //                                                 PhosphorIcons
+                //                                                     .trash,
+                //                                                 size: size24,
+                //                                                 color: bnw900,
+                //                                               ),
+                //                                               hintText:
+                //                                                   'Hapus QRIS',
+                //                                               hintStyle:
+                //                                                   heading3(
+                //                                                     FontWeight
+                //                                                         .w400,
+                //                                                     bnw900,
+                //                                                     'Outfit',
+                //                                                   ),
+                //                                             ),
+                //                                           ),
+                //                                         ),
+                //                                       )
+                //                                     : SizedBox(),
+                //                               ],
+                //                             ),
+                //                       ),
+                //                     );
+                //                     setState(() {});
+                //                   });
+                //                 },
+                //                 child: logoQris == ''
+                //                     ? buttonXL(
+                //                         Row(
+                //                           mainAxisAlignment:
+                //                               MainAxisAlignment.center,
+                //                           children: [
+                //                             Icon(
+                //                               PhosphorIcons.pencil_line,
+                //                               color: bnw100,
+                //                               size: size24,
+                //                             ),
+                //                             SizedBox(width: size12),
+                //                             Text(
+                //                               'Tambah QRIS',
+                //                               style: heading3(
+                //                                 FontWeight.w600,
+                //                                 bnw100,
+                //                                 'Outfit',
+                //                               ),
+                //                             ),
+                //                           ],
+                //                         ),
+                //                         0,
+                //                       )
+                //                     : buttonXLoutline(
+                //                         Row(
+                //                           mainAxisAlignment:
+                //                               MainAxisAlignment.center,
+                //                           children: [
+                //                             Icon(
+                //                               PhosphorIcons.pencil_line,
+                //                               color: primary500,
+                //                               size: size24,
+                //                             ),
+                //                             SizedBox(width: size12),
+                //                             Text(
+                //                               'Atur QRIS',
+                //                               style: heading3(
+                //                                 FontWeight.w600,
+                //                                 primary500,
+                //                                 'Outfit',
+                //                               ),
+                //                             ),
+                //                           ],
+                //                         ),
+                //                         0,
+                //                         primary500,
+                //                       ),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // SizedBox(width: size12),
+                
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.all(size16),
@@ -1871,7 +1875,10 @@ class _TransactionPageState extends State<TransactionPage>
                             ),
                             context: context,
                             builder: (context) {
-                              return FractionallySizedBox(
+                              return SafeArea(
+                                child: StatefulBuilder(
+                                  builder: (context, setModalState) {
+                                    return FractionallySizedBox(
                                 heightFactor: isKeyboardActive ? 0.9 : 0.80,
                                 child: GestureDetector(
                                   onTap: () => textFieldFocusNode.unfocus(),
@@ -1919,11 +1926,11 @@ class _TransactionPageState extends State<TransactionPage>
                                               },
                                               child: TextField(
                                                 cursorColor: primary500,
-                                                controller: searchController,
+                                                controller: discountSearchController,
                                                 focusNode: textFieldFocusNode,
                                                 onChanged: (value) {
                                                   _runSearchProduct(value);
-                                                  setState(() {});
+                                                  setModalState(() {});
                                                 },
                                                 decoration: InputDecoration(
                                                   contentPadding:
@@ -1964,18 +1971,18 @@ class _TransactionPageState extends State<TransactionPage>
                                                         ),
                                                       ),
                                                   suffixIcon:
-                                                      searchController
+                                                      discountSearchController
                                                           .text
                                                           .isNotEmpty
                                                       ? GestureDetector(
                                                           onTap: () {
-                                                            searchController
+                                                            discountSearchController
                                                                     .text =
                                                                 '';
                                                             _runSearchProduct(
                                                               '',
                                                             );
-                                                            setState(() {});
+                                                            setModalState(() {});
                                                           },
                                                           child: Icon(
                                                             PhosphorIcons
@@ -2020,7 +2027,7 @@ class _TransactionPageState extends State<TransactionPage>
                                                   ),
                                                   SizedBox(height: size16),
                                                   StatefulBuilder(
-                                                    builder: (context, setState) => ListView.builder(
+                                                    builder: (context, _) => ListView.builder(
                                                       shrinkWrap: true,
                                                       padding: EdgeInsets.zero,
                                                       physics:
@@ -2040,7 +2047,7 @@ class _TransactionPageState extends State<TransactionPage>
 
                                                         return GestureDetector(
                                                           onTap: () {
-                                                            setState(() {
+                                                            setModalState(() {
                                                               textFieldFocusNode
                                                                   .unfocus();
 
@@ -2292,6 +2299,9 @@ class _TransactionPageState extends State<TransactionPage>
                                       ),
                                     ),
                                   ),
+                                ),
+                              );
+                                  },
                                 ),
                               );
                             },
@@ -4016,7 +4026,12 @@ class _TransactionPageState extends State<TransactionPage>
                                         context: context,
                                         response: response,
                                         token: widget.token,
-                                        cart: cartMap.map((e) => Map<String, dynamic>.from(e)).toList(),
+                                        cart: cartMap
+                                            .map(
+                                              (e) =>
+                                                  Map<String, dynamic>.from(e),
+                                            )
+                                            .toList(),
                                         onSuccess: () {
                                           refreshTampilan();
                                           uangTunaiController.clear();
@@ -4812,7 +4827,9 @@ class _TransactionPageState extends State<TransactionPage>
                               context: context,
                               response: response,
                               token: widget.token,
-                              cart: cartMap.map((e) => Map<String, dynamic>.from(e)).toList(),
+                              cart: cartMap
+                                  .map((e) => Map<String, dynamic>.from(e))
+                                  .toList(),
                               onSuccess: () async {
                                 await _finishPaymentSuccess();
                               },
@@ -5393,7 +5410,9 @@ class _TransactionPageState extends State<TransactionPage>
                               context: context,
                               response: response,
                               token: widget.token,
-                              cart: cartMap.map((e) => Map<String, dynamic>.from(e)).toList(),
+                              cart: cartMap
+                                  .map((e) => Map<String, dynamic>.from(e))
+                                  .toList(),
                               onSuccess: () {
                                 setState(() {});
                               },
@@ -5650,134 +5669,431 @@ class _TransactionPageState extends State<TransactionPage>
                                     borderRadius: BorderRadius.circular(25),
                                   ),
                                   context: context,
-                                  builder: (context) => IntrinsicHeight(
-                                    child: Container(
-                                      padding: EdgeInsets.only(
-                                        bottom: MediaQuery.of(
-                                          context,
-                                        ).viewInsets.bottom,
-                                      ),
-                                      // height: MediaQuery.of(context).size.height / 1,
-                                      decoration: BoxDecoration(
-                                        color: bnw100,
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(12),
-                                          topLeft: Radius.circular(12),
+                                  builder: (context) => SafeArea(
+                                    child: IntrinsicHeight(
+                                      child: Container(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(
+                                            context,
+                                          ).viewInsets.bottom,
                                         ),
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsets.fromLTRB(
-                                          size32,
-                                          size16,
-                                          size32,
-                                          size32,
+                                        // height: MediaQuery.of(context).size.height / 1,
+                                        decoration: BoxDecoration(
+                                          color: bnw100,
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(12),
+                                            topLeft: Radius.circular(12),
+                                          ),
                                         ),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(height: size12),
-                                            dividerShowdialog(),
-                                            SizedBox(height: size12),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      Navigator.pop(context);
-                                                      // Navigator.of(context)
-                                                      //     .popUntil((route) =>
-                                                      //         route.isFirst);
-                                                      // errorText = '';
-
-                                                      showModalBottomSheet(
-                                                        constraints:
-                                                            const BoxConstraints(
-                                                              maxWidth: double
-                                                                  .infinity,
-                                                            ),
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        useRootNavigator: false,
-                                                        isScrollControlled:
-                                                            true,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                size16,
+                                        child: Padding(
+                                          padding: EdgeInsets.fromLTRB(
+                                            size32,
+                                            size16,
+                                            size32,
+                                            size32,
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(height: size12),
+                                              dividerShowdialog(),
+                                              SizedBox(height: size12),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.spaceAround,
+                                                children: [
+                                                  Expanded(
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.pop(context);
+                                                        // Navigator.of(context)
+                                                        //     .popUntil((route) =>
+                                                        //         route.isFirst);
+                                                        // errorText = '';
+                                    
+                                                        showModalBottomSheet(
+                                                          constraints:
+                                                              const BoxConstraints(
+                                                                maxWidth: double
+                                                                    .infinity,
                                                               ),
-                                                        ),
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return StatefulBuilder(
-                                                            builder: (context, setState) => Container(
-                                                              margin:
-                                                                  EdgeInsets.only(
-                                                                    top: size16,
-                                                                  ),
-                                                              padding: EdgeInsets.only(
-                                                                bottom:
-                                                                    MediaQuery.of(
-                                                                          context,
-                                                                        )
-                                                                        .viewInsets
-                                                                        .bottom,
-                                                              ),
-                                                              decoration: ShapeDecoration(
-                                                                color: bnw100,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.only(
-                                                                    topLeft:
-                                                                        Radius.circular(
-                                                                          size16,
-                                                                        ),
-                                                                    topRight:
-                                                                        Radius.circular(
-                                                                          size16,
-                                                                        ),
-                                                                  ),
+                                                          backgroundColor:
+                                                              Colors.transparent,
+                                                          useRootNavigator: false,
+                                                          isScrollControlled:
+                                                              true,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  size16,
                                                                 ),
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    EdgeInsets.fromLTRB(
-                                                                      size32,
-                                                                      size16,
-                                                                      size32,
-                                                                      size32,
+                                                          ),
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return SafeArea(
+                                                              child: StatefulBuilder(
+                                                                builder: (context, setState) => Container(
+                                                                  margin:
+                                                                      EdgeInsets.only(
+                                                                        top: size16,
+                                                                      ),
+                                                                  padding: EdgeInsets.only(
+                                                                    bottom:
+                                                                        MediaQuery.of(
+                                                                              context,
+                                                                            )
+                                                                            .viewInsets
+                                                                            .bottom,
+                                                                  ),
+                                                                  decoration: ShapeDecoration(
+                                                                    color: bnw100,
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius.only(
+                                                                        topLeft:
+                                                                            Radius.circular(
+                                                                              size16,
+                                                                            ),
+                                                                        topRight:
+                                                                            Radius.circular(
+                                                                              size16,
+                                                                            ),
+                                                                      ),
                                                                     ),
-                                                                child: SingleChildScrollView(
-                                                                  child: Column(
-                                                                    children: [
-                                                                      dividerShowdialog(),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            size16,
-                                                                      ),
-                                                                      Align(
-                                                                        alignment:
-                                                                            Alignment.centerLeft,
-                                                                        child: Text(
-                                                                          'Kustom Produk',
-                                                                          style: heading1(
-                                                                            FontWeight.w700,
-                                                                            bnw900,
-                                                                            'Outfit',
-                                                                          ),
+                                                                  ),
+                                                                  child: Padding(
+                                                                    padding:
+                                                                        EdgeInsets.fromLTRB(
+                                                                          size32,
+                                                                          size16,
+                                                                          size32,
+                                                                          size32,
                                                                         ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            size16,
-                                                                      ),
-                                                                      Row(
+                                                                    child: SingleChildScrollView(
+                                                                      child: Column(
                                                                         children: [
-                                                                          Expanded(
+                                                                          dividerShowdialog(),
+                                                                          SizedBox(
+                                                                            height:
+                                                                                size16,
+                                                                          ),
+                                                                          Align(
+                                                                            alignment:
+                                                                                Alignment.centerLeft,
+                                                                            child: Text(
+                                                                              'Kustom Produk',
+                                                                              style: heading1(
+                                                                                FontWeight.w700,
+                                                                                bnw900,
+                                                                                'Outfit',
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                size16,
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Column(
+                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                  children: [
+                                                                                    Text(
+                                                                                      'Nama Produk',
+                                                                                      style: body1(
+                                                                                        FontWeight.w500,
+                                                                                        bnw900,
+                                                                                        'Outfit',
+                                                                                      ),
+                                                                                    ),
+                                                                                    IntrinsicHeight(
+                                                                                      child: TextFormField(
+                                                                                        // keyboardType: numberNo,
+                                                                                        cursorColor: primary500,
+                                                                                        style: heading2(
+                                                                                          FontWeight.w600,
+                                                                                          bnw900,
+                                                                                          'Outfit',
+                                                                                        ),
+                                                                                        controller: customProdukName,
+                                                                                                  
+                                                                                        decoration: InputDecoration(
+                                                                                          isDense: true,
+                                                                                          focusedBorder: UnderlineInputBorder(
+                                                                                            borderSide: BorderSide(
+                                                                                              width: 2,
+                                                                                              color: primary500,
+                                                                                            ),
+                                                                                          ),
+                                                                                          contentPadding: EdgeInsets.symmetric(
+                                                                                            vertical: size12,
+                                                                                          ),
+                                                                                          enabledBorder: UnderlineInputBorder(
+                                                                                            borderSide: BorderSide(
+                                                                                              width: 1.5,
+                                                                                              color: bnw500,
+                                                                                            ),
+                                                                                          ),
+                                                                                          hintText: 'Cth : Lemon Tea',
+                                                                                          hintStyle: heading2(
+                                                                                            FontWeight.w600,
+                                                                                            bnw500,
+                                                                                            'Outfit',
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    errorText.isNotEmpty
+                                                                                        ? Column(
+                                                                                            children: [
+                                                                                              SizedBox(
+                                                                                                height: size16,
+                                                                                              ),
+                                                                                              Text(
+                                                                                                errorText,
+                                                                                                style: body1(
+                                                                                                  FontWeight.w500,
+                                                                                                  bnw100,
+                                                                                                  'Outfit',
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          )
+                                                                                        : SizedBox(),
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                width:
+                                                                                    size16,
+                                                                              ),
+                                                                              Expanded(
+                                                                                child: Column(
+                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                  children: [
+                                                                                    Row(
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'Harga',
+                                                                                          style: body1(
+                                                                                            FontWeight.w500,
+                                                                                            bnw900,
+                                                                                            'Outfit',
+                                                                                          ),
+                                                                                        ),
+                                                                                        Text(
+                                                                                          '*',
+                                                                                          style: body1(
+                                                                                            FontWeight.w500,
+                                                                                            danger500,
+                                                                                            'Outfit',
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                    IntrinsicHeight(
+                                                                                      child: TextFormField(
+                                                                                        cursorColor: primary500,
+                                                                                        keyboardType: TextInputType.number,
+                                                                                        style: heading2(
+                                                                                          FontWeight.w600,
+                                                                                          bnw900,
+                                                                                          'Outfit',
+                                                                                        ),
+                                                                                        controller: customProdukPrice,
+                                                                                        decoration: InputDecoration(
+                                                                                          isDense: true,
+                                                                                          focusedBorder: UnderlineInputBorder(
+                                                                                            borderSide: BorderSide(
+                                                                                              width: 2,
+                                                                                              color: primary500,
+                                                                                            ),
+                                                                                          ),
+                                                                                          contentPadding: EdgeInsets.symmetric(
+                                                                                            vertical: size12,
+                                                                                          ),
+                                                                                          enabledBorder: UnderlineInputBorder(
+                                                                                            borderSide: BorderSide(
+                                                                                              width: 1.5,
+                                                                                              color: errorText.isEmpty
+                                                                                                  ? bnw500
+                                                                                                  : danger500,
+                                                                                            ),
+                                                                                          ),
+                                                                                          hintText: 'Cth : 25.000',
+                                                                                          hintStyle: heading2(
+                                                                                            FontWeight.w600,
+                                                                                            bnw500,
+                                                                                            'Outfit',
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    errorText.isNotEmpty
+                                                                                        ? Column(
+                                                                                            children: [
+                                                                                              SizedBox(
+                                                                                                height: size16,
+                                                                                              ),
+                                                                                              Text(
+                                                                                                errorText,
+                                                                                                style: body1(
+                                                                                                  FontWeight.w500,
+                                                                                                  red500,
+                                                                                                  'Outfit',
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          )
+                                                                                        : SizedBox(),
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                width:
+                                                                                    size16,
+                                                                              ),
+                                                                              Column(
+                                                                                mainAxisAlignment:
+                                                                                    MainAxisAlignment.center,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    'Jumlah',
+                                                                                    style: heading3(
+                                                                                      FontWeight.w400,
+                                                                                      bnw900,
+                                                                                      'Outfit',
+                                                                                    ),
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: size8,
+                                                                                  ),
+                                                                                  Row(
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: [
+                                                                                      GestureDetector(
+                                                                                        onTap: () {
+                                                                                          if (counterCart >
+                                                                                              1) {
+                                                                                            counterCart--;
+                                                                                            conCounterPreview.text = counterCart.toString();
+                                                                                          }
+                                                                                          setState(
+                                                                                            () {},
+                                                                                          );
+                                                                                          // initState();
+                                                                                        },
+                                                                                        child: buttonMoutlineColor(
+                                                                                          Icon(
+                                                                                            PhosphorIcons.minus,
+                                                                                            color: primary500,
+                                                                                            size: size24,
+                                                                                          ),
+                                                                                          primary500,
+                                                                                        ),
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        width: size8,
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        height: size48,
+                                                                                        width: size56,
+                                                                                        child: TextFormField(
+                                                                                          cursorColor: primary500,
+                                                                                          enabled: true,
+                                                                                          controller: conCounterPreview,
+                                                                                          keyboardType: TextInputType.number,
+                                                                                          onChanged:
+                                                                                              (
+                                                                                                value,
+                                                                                              ) {
+                                                                                                setState(
+                                                                                                  () {
+                                                                                                    int parsedValue =
+                                                                                                        int.tryParse(
+                                                                                                          value,
+                                                                                                        ) ??
+                                                                                                        0;
+                                                                                                    counterCart = parsedValue;
+                                                                                                    conCounterPreview.text = counterCart.toString();
+                                                                                                  },
+                                                                                                );
+                                                                                              },
+                                                                                          textAlign: TextAlign.center,
+                                                                                          decoration: InputDecoration(
+                                                                                            focusedBorder: UnderlineInputBorder(
+                                                                                              borderSide: BorderSide(
+                                                                                                width: 2,
+                                                                                                color: primary500,
+                                                                                              ),
+                                                                                            ),
+                                                                                            // alignLabelWithHint: true,
+                                                                                            hintText: counterCart.toString(),
+                                                                                                  
+                                                                                            // .toString(),
+                                                                                            // _itemCount.toString(),
+                                                                                            hintStyle: heading4(
+                                                                                              FontWeight.w600,
+                                                                                              bnw800,
+                                                                                              'Outfit',
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        width: size8,
+                                                                                      ),
+                                                                                      GestureDetector(
+                                                                                        onTap: () {
+                                                                                          counterCart++;
+                                                                                          conCounterPreview.text = counterCart.toString();
+                                                                                          setState(
+                                                                                            () {},
+                                                                                          );
+                                                                                        },
+                                                                                        child: buttonMoutlineColor(
+                                                                                          Icon(
+                                                                                            PhosphorIcons.plus,
+                                                                                            color: primary500,
+                                                                                            size: size24,
+                                                                                          ),
+                                                                                          primary500,
+                                                                                          // 50,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  errorText.isNotEmpty
+                                                                                      ? Column(
+                                                                                          children: [
+                                                                                            SizedBox(
+                                                                                              height: size16,
+                                                                                            ),
+                                                                                            Text(
+                                                                                              errorText,
+                                                                                              style: body1(
+                                                                                                FontWeight.w500,
+                                                                                                bnw100,
+                                                                                                'Outfit',
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        )
+                                                                                      : SizedBox(),
+                                                                                ],
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height:
+                                                                                size16,
+                                                                          ),
+                                                                          Container(
                                                                             child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              crossAxisAlignment:
+                                                                                  CrossAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  'Nama Produk',
+                                                                                  'Catatan',
                                                                                   style: body1(
                                                                                     FontWeight.w500,
                                                                                     bnw900,
@@ -5793,16 +6109,20 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                       bnw900,
                                                                                       'Outfit',
                                                                                     ),
-                                                                                    controller: customProdukName,
-
+                                                                                    controller: conCatatanPreview,
+                                                                                    onChanged:
+                                                                                        (
+                                                                                          value,
+                                                                                        ) {
+                                                                                          // String formattedValue = formatCurrency(value);
+                                                                                          // conHarga.value = TextEditingValue(
+                                                                                          //   text: formattedValue,
+                                                                                          //   selection:
+                                                                                          //       TextSelection.collapsed(offset: formattedValue.length),
+                                                                                          // );
+                                                                                        },
                                                                                     decoration: InputDecoration(
                                                                                       isDense: true,
-                                                                                      focusedBorder: UnderlineInputBorder(
-                                                                                        borderSide: BorderSide(
-                                                                                          width: 2,
-                                                                                          color: primary500,
-                                                                                        ),
-                                                                                      ),
                                                                                       contentPadding: EdgeInsets.symmetric(
                                                                                         vertical: size12,
                                                                                       ),
@@ -5812,93 +6132,13 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                           color: bnw500,
                                                                                         ),
                                                                                       ),
-                                                                                      hintText: 'Cth : Lemon Tea',
-                                                                                      hintStyle: heading2(
-                                                                                        FontWeight.w600,
-                                                                                        bnw500,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                errorText.isNotEmpty
-                                                                                    ? Column(
-                                                                                        children: [
-                                                                                          SizedBox(
-                                                                                            height: size16,
-                                                                                          ),
-                                                                                          Text(
-                                                                                            errorText,
-                                                                                            style: body1(
-                                                                                              FontWeight.w500,
-                                                                                              bnw100,
-                                                                                              'Outfit',
-                                                                                            ),
-                                                                                          ),
-                                                                                        ],
-                                                                                      )
-                                                                                    : SizedBox(),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                size16,
-                                                                          ),
-                                                                          Expanded(
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                Row(
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      'Harga',
-                                                                                      style: body1(
-                                                                                        FontWeight.w500,
-                                                                                        bnw900,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                    Text(
-                                                                                      '*',
-                                                                                      style: body1(
-                                                                                        FontWeight.w500,
-                                                                                        danger500,
-                                                                                        'Outfit',
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                IntrinsicHeight(
-                                                                                  child: TextFormField(
-                                                                                    cursorColor: primary500,
-                                                                                    keyboardType: TextInputType.number,
-                                                                                    style: heading2(
-                                                                                      FontWeight.w600,
-                                                                                      bnw900,
-                                                                                      'Outfit',
-                                                                                    ),
-                                                                                    controller: customProdukPrice,
-                                                                                    decoration: InputDecoration(
-                                                                                      isDense: true,
                                                                                       focusedBorder: UnderlineInputBorder(
                                                                                         borderSide: BorderSide(
                                                                                           width: 2,
                                                                                           color: primary500,
                                                                                         ),
                                                                                       ),
-                                                                                      contentPadding: EdgeInsets.symmetric(
-                                                                                        vertical: size12,
-                                                                                      ),
-                                                                                      enabledBorder: UnderlineInputBorder(
-                                                                                        borderSide: BorderSide(
-                                                                                          width: 1.5,
-                                                                                          color: errorText.isEmpty
-                                                                                              ? bnw500
-                                                                                              : danger500,
-                                                                                        ),
-                                                                                      ),
-                                                                                      hintText: 'Cth : 25.000',
+                                                                                      hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
                                                                                       hintStyle: heading2(
                                                                                         FontWeight.w600,
                                                                                         bnw500,
@@ -5907,721 +6147,504 @@ class _TransactionPageState extends State<TransactionPage>
                                                                                     ),
                                                                                   ),
                                                                                 ),
-                                                                                errorText.isNotEmpty
-                                                                                    ? Column(
-                                                                                        children: [
-                                                                                          SizedBox(
-                                                                                            height: size16,
-                                                                                          ),
-                                                                                          Text(
-                                                                                            errorText,
-                                                                                            style: body1(
-                                                                                              FontWeight.w500,
-                                                                                              red500,
-                                                                                              'Outfit',
-                                                                                            ),
-                                                                                          ),
-                                                                                        ],
-                                                                                      )
-                                                                                    : SizedBox(),
                                                                               ],
                                                                             ),
                                                                           ),
                                                                           SizedBox(
-                                                                            width:
-                                                                                size16,
+                                                                            height:
+                                                                                size32,
                                                                           ),
-                                                                          Column(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
+                                                                          Row(
                                                                             children: [
-                                                                              Text(
-                                                                                'Jumlah',
-                                                                                style: heading3(
-                                                                                  FontWeight.w400,
-                                                                                  bnw900,
-                                                                                  'Outfit',
-                                                                                ),
-                                                                              ),
-                                                                              SizedBox(
-                                                                                height: size8,
-                                                                              ),
-                                                                              Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                                children: [
-                                                                                  GestureDetector(
-                                                                                    onTap: () {
-                                                                                      if (counterCart >
-                                                                                          1) {
-                                                                                        counterCart--;
-                                                                                        conCounterPreview.text = counterCart.toString();
-                                                                                      }
-                                                                                      setState(
-                                                                                        () {},
-                                                                                      );
-                                                                                      // initState();
-                                                                                    },
-                                                                                    child: buttonMoutlineColor(
-                                                                                      Icon(
-                                                                                        PhosphorIcons.minus,
-                                                                                        color: primary500,
-                                                                                        size: size24,
-                                                                                      ),
-                                                                                      primary500,
-                                                                                    ),
-                                                                                  ),
-                                                                                  SizedBox(
-                                                                                    width: size8,
-                                                                                  ),
-                                                                                  SizedBox(
-                                                                                    height: size48,
-                                                                                    width: size56,
-                                                                                    child: TextFormField(
-                                                                                      cursorColor: primary500,
-                                                                                      enabled: true,
-                                                                                      controller: conCounterPreview,
-                                                                                      keyboardType: TextInputType.number,
-                                                                                      onChanged:
-                                                                                          (
-                                                                                            value,
-                                                                                          ) {
-                                                                                            setState(
-                                                                                              () {
-                                                                                                int parsedValue =
-                                                                                                    int.tryParse(
-                                                                                                      value,
-                                                                                                    ) ??
-                                                                                                    0;
-                                                                                                counterCart = parsedValue;
-                                                                                                conCounterPreview.text = counterCart.toString();
-                                                                                              },
-                                                                                            );
-                                                                                          },
-                                                                                      textAlign: TextAlign.center,
-                                                                                      decoration: InputDecoration(
-                                                                                        focusedBorder: UnderlineInputBorder(
-                                                                                          borderSide: BorderSide(
-                                                                                            width: 2,
-                                                                                            color: primary500,
-                                                                                          ),
-                                                                                        ),
-                                                                                        // alignLabelWithHint: true,
-                                                                                        hintText: counterCart.toString(),
-
-                                                                                        // .toString(),
-                                                                                        // _itemCount.toString(),
-                                                                                        hintStyle: heading4(
+                                                                              Expanded(
+                                                                                child: GestureDetector(
+                                                                                  onTap: () {
+                                                                                    setState(
+                                                                                      () {},
+                                                                                    );
+                                                                                    Navigator.pop(
+                                                                                      context,
+                                                                                    );
+                                                                                  },
+                                                                                  child: buttonXLoutline(
+                                                                                    Center(
+                                                                                      child: Text(
+                                                                                        'Batalkan',
+                                                                                        style: heading3(
                                                                                           FontWeight.w600,
-                                                                                          bnw800,
+                                                                                          primary500,
                                                                                           'Outfit',
                                                                                         ),
                                                                                       ),
                                                                                     ),
+                                                                                    MediaQuery.of(
+                                                                                      context,
+                                                                                    ).size.width,
+                                                                                    primary500,
                                                                                   ),
-                                                                                  SizedBox(
-                                                                                    width: size8,
-                                                                                  ),
-                                                                                  GestureDetector(
-                                                                                    onTap: () {
-                                                                                      counterCart++;
-                                                                                      conCounterPreview.text = counterCart.toString();
-                                                                                      setState(
-                                                                                        () {},
-                                                                                      );
-                                                                                    },
-                                                                                    child: buttonMoutlineColor(
-                                                                                      Icon(
-                                                                                        PhosphorIcons.plus,
-                                                                                        color: primary500,
-                                                                                        size: size24,
-                                                                                      ),
-                                                                                      primary500,
-                                                                                      // 50,
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
+                                                                                ),
                                                                               ),
-                                                                              errorText.isNotEmpty
-                                                                                  ? Column(
-                                                                                      children: [
-                                                                                        SizedBox(
-                                                                                          height: size16,
+                                                                              SizedBox(
+                                                                                width:
+                                                                                    size16,
+                                                                              ),
+                                                                              Expanded(
+                                                                                child: GestureDetector(
+                                                                                  onTap: () {
+                                                                                    setState(
+                                                                                      () {
+                                                                                        if (customProdukPrice.text.isNotEmpty &&
+                                                                                            customProdukPrice.text !=
+                                                                                                '0') {
+                                                                                          if (!isItemAdded) {
+                                                                                            Navigator.pop(
+                                                                                              context,
+                                                                                            );
+                                                                                            if (customProdukName.text.isEmpty) {
+                                                                                              customProdukName.text = 'Produk Kustom';
+                                                                                            }
+                                                                                            Map<
+                                                                                              String,
+                                                                                              String
+                                                                                            >
+                                                                                            map1 = {};
+                                                                                            map1['name'] = customProdukName.text;
+                                                                                            map1['product_id'] = 'custom';
+                                                                                            // map1['quantity'] = '1';
+                                                                                            map1['quantity'] = counterCart.toString();
+                                                                                                  
+                                                                                            map1['image'] = 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
+                                                                                            map1['amount'] = customProdukPrice.text.replaceAll(
+                                                                                              RegExp(
+                                                                                                r'[^0-9]',
+                                                                                              ),
+                                                                                              '',
+                                                                                            );
+                                                                                            map1['amount_display'] = customProdukPrice.text.replaceAll(
+                                                                                              RegExp(
+                                                                                                r'[^0-9]',
+                                                                                              ),
+                                                                                              '',
+                                                                                            );
+                                                                                            map1['description'] = conCatatanPreview.text;
+                                                                                            map1['id_request'] = '';
+                                                                                                  
+                                                                                            cartMap.add(
+                                                                                              map1,
+                                                                                            );
+                                                                                                  
+                                                                                            // log(datasTransaksi![i].product_image.toString());
+                                                                                                  
+                                                                                            String name = customProdukName.text;
+                                                                                            String productid = 'custom';
+                                                                                            String image = 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
+                                                                                            cartProductIds.add(
+                                                                                              'custom',
+                                                                                            );
+                                                                                            int? price = int.parse(
+                                                                                              customProdukPrice.text.replaceAll(
+                                                                                                RegExp(
+                                                                                                  r'[^0-9]',
+                                                                                                ),
+                                                                                                '',
+                                                                                              ),
+                                                                                            );
+                                                                                                  
+                                                                                            int index = 0;
+                                                                                            for (
+                                                                                              index;
+                                                                                              index <
+                                                                                                  cart.length;
+                                                                                              index++
+                                                                                            ) {}
+                                                                                                  
+                                                                                            sumTotal =
+                                                                                                sumTotal +
+                                                                                                (price *
+                                                                                                    counterCart);
+                                                                                                  
+                                                                                            total.add(
+                                                                                              price *
+                                                                                                  counterCart,
+                                                                                            );
+                                                                                                  
+                                                                                            conCatatan.add(
+                                                                                              TextEditingController(
+                                                                                                text: conCatatanPreview.text,
+                                                                                              ),
+                                                                                            );
+                                                                                                  
+                                                                                            cart.add(
+                                                                                              CartTransaksi(
+                                                                                                name: name,
+                                                                                                productid: productid,
+                                                                                                image: image,
+                                                                                                price: price,
+                                                                                                quantity: counterCart,
+                                                                                                desc: conCatatanPreview.text,
+                                                                                                idRequest: "",
+                                                                                                baseUsed: price,
+                                                                                                isCustomize: true,
+                                                                                                isOnline: false,
+                                                                                                // quantity: cart[i]
+                                                                                                //     .quantity
+                                                                                                //     .toInt(),
+                                                                                              ),
+                                                                                            );
+                                                                                                  
+                                                                                            setState(
+                                                                                              () {},
+                                                                                            );
+                                                                                                  
+                                                                                            num totalku = 0;
+                                                                                            cartMap.forEach(
+                                                                                              (
+                                                                                                element,
+                                                                                              ) {
+                                                                                                var myelement = int.parse(
+                                                                                                  element['amount']!,
+                                                                                                );
+                                                                                                totalku =
+                                                                                                    totalku +
+                                                                                                    (myelement *
+                                                                                                        counterCart);
+                                                                                              },
+                                                                                            );
+                                                                                                  
+                                                                                            sumTotal = totalku;
+                                                                                            initState();
+                                                                                            refreshColor();
+                                                                                          }
+                                                                                        } else {
+                                                                                          errorText = 'Wajib diisi';
+                                                                                        }
+                                                                                      },
+                                                                                    );
+                                                                                  },
+                                                                                  child: buttonXL(
+                                                                                    Center(
+                                                                                      child: Text(
+                                                                                        'Tambah Ke Keranjang',
+                                                                                        style: heading3(
+                                                                                          FontWeight.w600,
+                                                                                          bnw100,
+                                                                                          'Outfit',
                                                                                         ),
-                                                                                        Text(
-                                                                                          errorText,
-                                                                                          style: body1(
-                                                                                            FontWeight.w500,
-                                                                                            bnw100,
-                                                                                            'Outfit',
-                                                                                          ),
-                                                                                        ),
-                                                                                      ],
-                                                                                    )
-                                                                                  : SizedBox(),
+                                                                                      ),
+                                                                                    ),
+                                                                                    MediaQuery.of(
+                                                                                      context,
+                                                                                    ).size.width,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
                                                                             ],
                                                                           ),
                                                                         ],
                                                                       ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            size16,
-                                                                      ),
-                                                                      Container(
-                                                                        child: Column(
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            Text(
-                                                                              'Catatan',
-                                                                              style: body1(
-                                                                                FontWeight.w500,
-                                                                                bnw900,
-                                                                                'Outfit',
-                                                                              ),
-                                                                            ),
-                                                                            IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                // keyboardType: numberNo,
-                                                                                cursorColor: primary500,
-                                                                                style: heading2(
-                                                                                  FontWeight.w600,
-                                                                                  bnw900,
-                                                                                  'Outfit',
-                                                                                ),
-                                                                                controller: conCatatanPreview,
-                                                                                onChanged:
-                                                                                    (
-                                                                                      value,
-                                                                                    ) {
-                                                                                      // String formattedValue = formatCurrency(value);
-                                                                                      // conHarga.value = TextEditingValue(
-                                                                                      //   text: formattedValue,
-                                                                                      //   selection:
-                                                                                      //       TextSelection.collapsed(offset: formattedValue.length),
-                                                                                      // );
-                                                                                    },
-                                                                                decoration: InputDecoration(
-                                                                                  isDense: true,
-                                                                                  contentPadding: EdgeInsets.symmetric(
-                                                                                    vertical: size12,
-                                                                                  ),
-                                                                                  enabledBorder: UnderlineInputBorder(
-                                                                                    borderSide: BorderSide(
-                                                                                      width: 1.5,
-                                                                                      color: bnw500,
-                                                                                    ),
-                                                                                  ),
-                                                                                  focusedBorder: UnderlineInputBorder(
-                                                                                    borderSide: BorderSide(
-                                                                                      width: 2,
-                                                                                      color: primary500,
-                                                                                    ),
-                                                                                  ),
-                                                                                  hintText: 'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                                                                  hintStyle: heading2(
-                                                                                    FontWeight.w600,
-                                                                                    bnw500,
-                                                                                    'Outfit',
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            size32,
-                                                                      ),
-                                                                      Row(
-                                                                        children: [
-                                                                          Expanded(
-                                                                            child: GestureDetector(
-                                                                              onTap: () {
-                                                                                setState(
-                                                                                  () {},
-                                                                                );
-                                                                                Navigator.pop(
-                                                                                  context,
-                                                                                );
-                                                                              },
-                                                                              child: buttonXLoutline(
-                                                                                Center(
-                                                                                  child: Text(
-                                                                                    'Batalkan',
-                                                                                    style: heading3(
-                                                                                      FontWeight.w600,
-                                                                                      primary500,
-                                                                                      'Outfit',
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                MediaQuery.of(
-                                                                                  context,
-                                                                                ).size.width,
-                                                                                primary500,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                size16,
-                                                                          ),
-                                                                          Expanded(
-                                                                            child: GestureDetector(
-                                                                              onTap: () {
-                                                                                setState(
-                                                                                  () {
-                                                                                    if (customProdukPrice.text.isNotEmpty &&
-                                                                                        customProdukPrice.text !=
-                                                                                            '0') {
-                                                                                      if (!isItemAdded) {
-                                                                                        Navigator.pop(
-                                                                                          context,
-                                                                                        );
-                                                                                        if (customProdukName.text.isEmpty) {
-                                                                                          customProdukName.text = 'Produk Kustom';
-                                                                                        }
-                                                                                        Map<
-                                                                                          String,
-                                                                                          String
-                                                                                        >
-                                                                                        map1 = {};
-                                                                                        map1['name'] = customProdukName.text;
-                                                                                        map1['product_id'] = 'custom';
-                                                                                        // map1['quantity'] = '1';
-                                                                                        map1['quantity'] = counterCart.toString();
-
-                                                                                        map1['image'] = 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
-                                                                                        map1['amount'] = customProdukPrice.text.replaceAll(
-                                                                                          RegExp(
-                                                                                            r'[^0-9]',
-                                                                                          ),
-                                                                                          '',
-                                                                                        );
-                                                                                        map1['amount_display'] = customProdukPrice.text.replaceAll(
-                                                                                          RegExp(
-                                                                                            r'[^0-9]',
-                                                                                          ),
-                                                                                          '',
-                                                                                        );
-                                                                                        map1['description'] = conCatatanPreview.text;
-                                                                                        map1['id_request'] = '';
-
-                                                                                        cartMap.add(
-                                                                                          map1,
-                                                                                        );
-
-                                                                                        // log(datasTransaksi![i].product_image.toString());
-
-                                                                                        String name = customProdukName.text;
-                                                                                        String productid = 'custom';
-                                                                                        String image = 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png';
-                                                                                        cartProductIds.add(
-                                                                                          'custom',
-                                                                                        );
-                                                                                        int? price = int.parse(
-                                                                                          customProdukPrice.text.replaceAll(
-                                                                                            RegExp(
-                                                                                              r'[^0-9]',
-                                                                                            ),
-                                                                                            '',
-                                                                                          ),
-                                                                                        );
-
-                                                                                        int index = 0;
-                                                                                        for (
-                                                                                          index;
-                                                                                          index <
-                                                                                              cart.length;
-                                                                                          index++
-                                                                                        ) {}
-
-                                                                                        sumTotal =
-                                                                                            sumTotal +
-                                                                                            (price *
-                                                                                                counterCart);
-
-                                                                                        total.add(
-                                                                                          price *
-                                                                                              counterCart,
-                                                                                        );
-
-                                                                                        conCatatan.add(
-                                                                                          TextEditingController(
-                                                                                            text: conCatatanPreview.text,
-                                                                                          ),
-                                                                                        );
-
-                                                                                        cart.add(
-                                                                                          CartTransaksi(
-                                                                                            name: name,
-                                                                                            productid: productid,
-                                                                                            image: image,
-                                                                                            price: price,
-                                                                                            quantity: counterCart,
-                                                                                            desc: conCatatanPreview.text,
-                                                                                            idRequest: "",
-                                                                                            baseUsed: price,
-                                                                                            isCustomize: true,
-                                                                                            isOnline: false,
-                                                                                            // quantity: cart[i]
-                                                                                            //     .quantity
-                                                                                            //     .toInt(),
-                                                                                          ),
-                                                                                        );
-
-                                                                                        setState(
-                                                                                          () {},
-                                                                                        );
-
-                                                                                        num totalku = 0;
-                                                                                        cartMap.forEach(
-                                                                                          (
-                                                                                            element,
-                                                                                          ) {
-                                                                                            var myelement = int.parse(
-                                                                                              element['amount']!,
-                                                                                            );
-                                                                                            totalku =
-                                                                                                totalku +
-                                                                                                (myelement *
-                                                                                                    counterCart);
-                                                                                          },
-                                                                                        );
-
-                                                                                        sumTotal = totalku;
-                                                                                        initState();
-                                                                                        refreshColor();
-                                                                                      }
-                                                                                    } else {
-                                                                                      errorText = 'Wajib diisi';
-                                                                                    }
-                                                                                  },
-                                                                                );
-                                                                              },
-                                                                              child: buttonXL(
-                                                                                Center(
-                                                                                  child: Text(
-                                                                                    'Tambah Ke Keranjang',
-                                                                                    style: heading3(
-                                                                                      FontWeight.w600,
-                                                                                      bnw100,
-                                                                                      'Outfit',
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                MediaQuery.of(
-                                                                                  context,
-                                                                                ).size.width,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: buttonXLoutline(
+                                                        Center(
+                                                          child: Text(
+                                                            'Produk Kustom',
+                                                            style: heading3(
+                                                              FontWeight.w600,
+                                                              primary500,
+                                                              'Outfit',
                                                             ),
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                    child: buttonXLoutline(
-                                                      Center(
-                                                        child: Text(
-                                                          'Produk Kustom',
-                                                          style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit',
                                                           ),
                                                         ),
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width,
+                                                        primary500,
                                                       ),
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width,
-                                                      primary500,
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(width: size16),
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      Future.delayed(
-                                                        Duration(seconds: 1),
-                                                      ).then(
-                                                        (
-                                                          value,
-                                                        ) => Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) => Scaffold(
-                                                              appBar: AppBar(
-                                                                title: Text(
-                                                                  'Produk Digital',
-                                                                  style: heading2(
-                                                                    FontWeight
-                                                                        .w600,
-                                                                    bnw900,
-                                                                    'Outfit',
+                                                  SizedBox(width: size16),
+                                                  Expanded(
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Future.delayed(
+                                                          Duration(seconds: 1),
+                                                        ).then(
+                                                          (
+                                                            value,
+                                                          ) => Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) => Scaffold(
+                                                                appBar: AppBar(
+                                                                  title: Text(
+                                                                    'Produk Digital',
+                                                                    style: heading2(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw900,
+                                                                      'Outfit',
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              body: WebViewWidget(
-                                                                controller: webController
-                                                                  ..setJavaScriptMode(
-                                                                    JavaScriptMode
-                                                                        .unrestricted,
-                                                                  ) // Aktifkan JavaScript
-                                                                  ..addJavaScriptChannel(
-                                                                    'flutterCallback', // Nama channel yang digunakan
-                                                                    onMessageReceived:
-                                                                        (
-                                                                          JavaScriptMessage
-                                                                          message,
-                                                                        ) {
-                                                                          print(
-                                                                            "Message from web: ${message.message}",
-                                                                          );
-
-                                                                          int
-                                                                          indexToRemove = cart.indexWhere(
-                                                                            (
-                                                                              item,
-                                                                            ) =>
-                                                                                item.productid ==
-                                                                                'digitalProduct',
-                                                                          );
-
-                                                                          if (indexToRemove !=
-                                                                              -1) {
-                                                                            // Produk sudah ada di dalam keranjang
-                                                                            cart.removeAt(
-                                                                              indexToRemove,
-                                                                            );
-                                                                            cartMap.removeAt(
-                                                                              indexToRemove,
-                                                                            );
-                                                                            total.removeAt(
-                                                                              indexToRemove,
-                                                                            );
-                                                                            conCatatan.removeAt(
-                                                                              indexToRemove,
-                                                                            );
-
-                                                                            // Clear some variables
-                                                                            conCounterPreview.clear();
-                                                                            conCatatanPreview.text =
-                                                                                '';
-
-                                                                            isItemAdded =
-                                                                                true;
-
-                                                                            if (cart.isEmpty) {
-                                                                              sumTotal = 0;
-                                                                              isItemAdded = false;
-                                                                            }
-                                                                          }
-
-                                                                          cartMap.removeWhere(
-                                                                            (
-                                                                              map,
-                                                                            ) =>
-                                                                                map['product_id'] ==
-                                                                                'digitalProduct',
-                                                                          );
-                                                                          cart.removeWhere(
-                                                                            (
-                                                                              cartItem,
-                                                                            ) =>
-                                                                                cartItem.productid !=
-                                                                                    null &&
-                                                                                cartItem.productid!.trim() ==
-                                                                                    'digitalProduct',
-                                                                          );
-                                                                          conCatatan.removeWhere(
-                                                                            (
-                                                                              controller,
-                                                                            ) => controller.text.contains(
-                                                                              'digitalProduct',
-                                                                            ),
-                                                                          );
-
-                                                                          final jsonResponse =
-                                                                              message.message;
-                                                                          try {
-                                                                            // Parse JSON
-                                                                            final List<
-                                                                              dynamic
-                                                                            >
-                                                                            jsonData = jsonDecode(
-                                                                              jsonResponse,
-                                                                            );
-
-                                                                            for (var item
-                                                                                in jsonData) {
-                                                                              cart.add(
-                                                                                CartTransaksi(
-                                                                                  name: item['nama_produk'].toString(),
-                                                                                  productid: 'digitalProduct',
-                                                                                  image: 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
-                                                                                  price: int.parse(
-                                                                                    item['total'],
-                                                                                  ),
-                                                                                  quantity: 1,
-                                                                                  desc:
-                                                                                      (item['id_request'] +
-                                                                                              "-" +
-                                                                                              item['jenis'] +
-                                                                                              "-" +
-                                                                                              item['nama_produk'])
-                                                                                          .toString(),
-                                                                                  idRequest: item['id_request'].toString(),
-                                                                                  baseUsed: int.tryParse(
-                                                                                    item['total'],
-                                                                                  ),
-                                                                                  isCustomize: false,
-                                                                                  isOnline: false,
-                                                                                ),
-                                                                              );
-
-                                                                              Map<
-                                                                                String,
-                                                                                String
-                                                                              >
-                                                                              map = {
-                                                                                'name': item['nama_produk'].toString(),
-                                                                                'product_id': 'digitalProduct',
-                                                                                'image': 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
-                                                                                'amount':
-                                                                                    item['total'] ??
-                                                                                    '0',
-                                                                                'amount_display':
-                                                                                    item['total'] ??
-                                                                                    '0',
-                                                                                'quantity': '1',
-                                                                                'description':
-                                                                                    (item['id_request'] +
-                                                                                            "-" +
-                                                                                            item['jenis'] +
-                                                                                            "-" +
-                                                                                            item['nama_produk'])
-                                                                                        .toString(),
-                                                                                // 'description': item['pesan'].toString(),
-                                                                                'id_request': item['id_request'].toString(),
-                                                                              };
-                                                                              cartMap.add(
-                                                                                map,
-                                                                              );
-
-                                                                              sumTotal =
-                                                                                  sumTotal +
-                                                                                  (int.parse(
-                                                                                        item['total'],
-                                                                                      ) *
-                                                                                      1);
-                                                                              // subTotal =
-                                                                              //     subTotal + price.toInt();
-                                                                              total.add(
-                                                                                int.parse(
-                                                                                      item['total'],
-                                                                                    ) *
-                                                                                    1,
-                                                                              );
-
-                                                                              conCatatan.add(
-                                                                                TextEditingController(
-                                                                                  // text: (item['id_request'] + "-" + item['jenis'] + "-" + item['nama_produk']).toString(),
-                                                                                  text:
-                                                                                      (item['id_request'] +
-                                                                                              "-" +
-                                                                                              item['jenis'] +
-                                                                                              "-" +
-                                                                                              item['nama_produk'])
-                                                                                          .toString(),
-                                                                                ),
-                                                                              );
-
-                                                                              setState(
-                                                                                () {
-                                                                                  // log(cart.toString());
-                                                                                },
-                                                                              );
-                                                                            }
-
-                                                                            // Update UI
-                                                                          } catch (
-                                                                            e
+                                                                body: WebViewWidget(
+                                                                  controller: webController
+                                                                    ..setJavaScriptMode(
+                                                                      JavaScriptMode
+                                                                          .unrestricted,
+                                                                    ) // Aktifkan JavaScript
+                                                                    ..addJavaScriptChannel(
+                                                                      'flutterCallback', // Nama channel yang digunakan
+                                                                      onMessageReceived:
+                                                                          (
+                                                                            JavaScriptMessage
+                                                                            message,
                                                                           ) {
                                                                             print(
-                                                                              "Error parsing JSON: $e",
+                                                                              "Message from web: ${message.message}",
                                                                             );
-                                                                          }
-                                                                          setState(
-                                                                            () {},
-                                                                          );
-                                                                          Navigator.of(
-                                                                            context,
-                                                                          ).popUntil(
+                                    
+                                                                            int
+                                                                            indexToRemove = cart.indexWhere(
+                                                                              (
+                                                                                item,
+                                                                              ) =>
+                                                                                  item.productid ==
+                                                                                  'digitalProduct',
+                                                                            );
+                                    
+                                                                            if (indexToRemove !=
+                                                                                -1) {
+                                                                              // Produk sudah ada di dalam keranjang
+                                                                              cart.removeAt(
+                                                                                indexToRemove,
+                                                                              );
+                                                                              cartMap.removeAt(
+                                                                                indexToRemove,
+                                                                              );
+                                                                              total.removeAt(
+                                                                                indexToRemove,
+                                                                              );
+                                                                              conCatatan.removeAt(
+                                                                                indexToRemove,
+                                                                              );
+                                    
+                                                                              // Clear some variables
+                                                                              conCounterPreview.clear();
+                                                                              conCatatanPreview.text =
+                                                                                  '';
+                                    
+                                                                              isItemAdded =
+                                                                                  true;
+                                    
+                                                                              if (cart.isEmpty) {
+                                                                                sumTotal = 0;
+                                                                                isItemAdded = false;
+                                                                              }
+                                                                            }
+                                    
+                                                                            cartMap.removeWhere(
+                                                                              (
+                                                                                map,
+                                                                              ) =>
+                                                                                  map['product_id'] ==
+                                                                                  'digitalProduct',
+                                                                            );
+                                                                            cart.removeWhere(
+                                                                              (
+                                                                                cartItem,
+                                                                              ) =>
+                                                                                  cartItem.productid !=
+                                                                                      null &&
+                                                                                  cartItem.productid!.trim() ==
+                                                                                      'digitalProduct',
+                                                                            );
+                                                                            conCatatan.removeWhere(
+                                                                              (
+                                                                                controller,
+                                                                              ) => controller.text.contains(
+                                                                                'digitalProduct',
+                                                                              ),
+                                                                            );
+                                    
+                                                                            final jsonResponse =
+                                                                                message.message;
+                                                                            try {
+                                                                              // Parse JSON
+                                                                              final List<
+                                                                                dynamic
+                                                                              >
+                                                                              jsonData = jsonDecode(
+                                                                                jsonResponse,
+                                                                              );
+                                    
+                                                                              for (var item
+                                                                                  in jsonData) {
+                                                                                cart.add(
+                                                                                  CartTransaksi(
+                                                                                    name: item['nama_produk'].toString(),
+                                                                                    productid: 'digitalProduct',
+                                                                                    image: 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+                                                                                    price: int.parse(
+                                                                                      item['total'],
+                                                                                    ),
+                                                                                    quantity: 1,
+                                                                                    desc:
+                                                                                        (item['id_request'] +
+                                                                                                "-" +
+                                                                                                item['jenis'] +
+                                                                                                "-" +
+                                                                                                item['nama_produk'])
+                                                                                            .toString(),
+                                                                                    idRequest: item['id_request'].toString(),
+                                                                                    baseUsed: int.tryParse(
+                                                                                      item['total'],
+                                                                                    ),
+                                                                                    isCustomize: false,
+                                                                                    isOnline: false,
+                                                                                  ),
+                                                                                );
+                                    
+                                                                                Map<
+                                                                                  String,
+                                                                                  String
+                                                                                >
+                                                                                map = {
+                                                                                  'name': item['nama_produk'].toString(),
+                                                                                  'product_id': 'digitalProduct',
+                                                                                  'image': 'https://cdn.icon-icons.com/icons2/2718/PNG/512/package_icon_174342.png',
+                                                                                  'amount':
+                                                                                      item['total'] ??
+                                                                                      '0',
+                                                                                  'amount_display':
+                                                                                      item['total'] ??
+                                                                                      '0',
+                                                                                  'quantity': '1',
+                                                                                  'description':
+                                                                                      (item['id_request'] +
+                                                                                              "-" +
+                                                                                              item['jenis'] +
+                                                                                              "-" +
+                                                                                              item['nama_produk'])
+                                                                                          .toString(),
+                                                                                  // 'description': item['pesan'].toString(),
+                                                                                  'id_request': item['id_request'].toString(),
+                                                                                };
+                                                                                cartMap.add(
+                                                                                  map,
+                                                                                );
+                                    
+                                                                                sumTotal =
+                                                                                    sumTotal +
+                                                                                    (int.parse(
+                                                                                          item['total'],
+                                                                                        ) *
+                                                                                        1);
+                                                                                // subTotal =
+                                                                                //     subTotal + price.toInt();
+                                                                                total.add(
+                                                                                  int.parse(
+                                                                                        item['total'],
+                                                                                      ) *
+                                                                                      1,
+                                                                                );
+                                    
+                                                                                conCatatan.add(
+                                                                                  TextEditingController(
+                                                                                    // text: (item['id_request'] + "-" + item['jenis'] + "-" + item['nama_produk']).toString(),
+                                                                                    text:
+                                                                                        (item['id_request'] +
+                                                                                                "-" +
+                                                                                                item['jenis'] +
+                                                                                                "-" +
+                                                                                                item['nama_produk'])
+                                                                                            .toString(),
+                                                                                  ),
+                                                                                );
+                                    
+                                                                                setState(
+                                                                                  () {
+                                                                                    // log(cart.toString());
+                                                                                  },
+                                                                                );
+                                                                              }
+                                    
+                                                                              // Update UI
+                                                                            } catch (
+                                                                              e
+                                                                            ) {
+                                                                              print(
+                                                                                "Error parsing JSON: $e",
+                                                                              );
+                                                                            }
+                                                                            setState(
+                                                                              () {},
+                                                                            );
+                                                                            Navigator.of(
+                                                                              context,
+                                                                            ).popUntil(
+                                                                              (
+                                                                                route,
+                                                                              ) =>
+                                                                                  route.isFirst,
+                                                                            );
+                                                                          },
+                                                                    )
+                                                                    ..setNavigationDelegate(
+                                                                      NavigationDelegate(
+                                                                        onPageFinished:
                                                                             (
-                                                                              route,
-                                                                            ) =>
-                                                                                route.isFirst,
-                                                                          );
-                                                                        },
-                                                                  )
-                                                                  ..setNavigationDelegate(
-                                                                    NavigationDelegate(
-                                                                      onPageFinished:
-                                                                          (
-                                                                            String
-                                                                            url,
-                                                                          ) {
-                                                                            // Pastikan halaman sudah selesai dimuat sebelum menjalankan kode JavaScript
-                                                                            webController.runJavaScript(
-                                                                              """
+                                                                              String
+                                                                              url,
+                                                                            ) {
+                                                                              // Pastikan halaman sudah selesai dimuat sebelum menjalankan kode JavaScript
+                                                                              webController.runJavaScript(
+                                                                                """
                                               console.log('flutterCallback tersedia:', typeof flutterCallback !== 'undefined');
                                               console.log('Menguji pengiriman pesan');
                                               FlutterCallback.postMessage('Halo dari Web!');
                                             """,
-                                                                            );
-                                                                          },
-                                                                    ),
-                                                                  )
-                                                                  ..loadRequest(
-                                                                    Uri.parse(
-                                                                      bindingUrl,
-                                                                    ),
-                                                                  ), // Ganti dengan URL halaman web
+                                                                              );
+                                                                            },
+                                                                      ),
+                                                                    )
+                                                                    ..loadRequest(
+                                                                      Uri.parse(
+                                                                        bindingUrl,
+                                                                      ),
+                                                                    ), // Ganti dengan URL halaman web
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
-                                                        ),
-                                                      );
-                                                    },
-                                                    child: buttonXL(
-                                                      Center(
-                                                        child: Text(
-                                                          'Produk Digital',
-                                                          style: heading3(
-                                                            FontWeight.w600,
-                                                            bnw100,
-                                                            'Outfit',
+                                                        );
+                                                      },
+                                                      child: buttonXL(
+                                                        Center(
+                                                          child: Text(
+                                                            'Produk Digital',
+                                                            style: heading3(
+                                                              FontWeight.w600,
+                                                              bnw100,
+                                                              'Outfit',
+                                                            ),
                                                           ),
                                                         ),
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width,
                                                       ),
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width,
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -6724,7 +6747,28 @@ class _TransactionPageState extends State<TransactionPage>
                                             children: [
                                               Row(
                                                 children: [
-                                                  orderBy(context),
+                                                  SortBottomSheetButton(
+                                                    options: orderByProductText,
+                                                    initialIndex:
+                                                        valueOrderByProduct,
+                                                    onConfirm: (i) async {
+                                                      setState(() {
+                                                        valueOrderByProduct = i;
+                                                        textvalueOrderByProduct =
+                                                            orderByProduct[i];
+                                                      });
+                                                      await context
+                                                          .read<
+                                                            ProductSortingProvider
+                                                          >()
+                                                          .fetchProductSorting(
+                                                            widget.token,
+                                                            merchantId,
+                                                            '',
+                                                            textvalueOrderByProduct,
+                                                          );
+                                                    },
+                                                  ),
                                                   SizedBox(width: size12),
                                                   buttonL(
                                                     Row(
@@ -8251,99 +8295,101 @@ class _TransactionPageState extends State<TransactionPage>
                                                           ),
                                                           context: context,
                                                           builder: (BuildContext context) {
-                                                            return Container(
-                                                              width: double
-                                                                  .infinity,
-                                                              padding: EdgeInsets.only(
-                                                                bottom:
-                                                                    MediaQuery.of(
-                                                                          context,
-                                                                        )
-                                                                        .viewInsets
-                                                                        .bottom,
-                                                              ),
-                                                              decoration: ShapeDecoration(
-                                                                color: bnw100,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.only(
-                                                                    topLeft:
-                                                                        Radius.circular(
-                                                                          size16,
-                                                                        ),
-                                                                    topRight:
-                                                                        Radius.circular(
-                                                                          size16,
-                                                                        ),
+                                                            return SafeArea(
+                                                              child: Container(
+                                                                width: double
+                                                                    .infinity,
+                                                                padding: EdgeInsets.only(
+                                                                  bottom:
+                                                                      MediaQuery.of(
+                                                                            context,
+                                                                          )
+                                                                          .viewInsets
+                                                                          .bottom,
+                                                                ),
+                                                                decoration: ShapeDecoration(
+                                                                  color: bnw100,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.only(
+                                                                      topLeft:
+                                                                          Radius.circular(
+                                                                            size16,
+                                                                          ),
+                                                                      topRight:
+                                                                          Radius.circular(
+                                                                            size16,
+                                                                          ),
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    EdgeInsets.fromLTRB(
-                                                                      size32,
-                                                                      size16,
-                                                                      size32,
-                                                                      size32,
-                                                                    ),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: [
-                                                                    SvgPicture.asset(
-                                                                      'assets/newIllustration/Help.svg',
-                                                                      height:
-                                                                          200,
-                                                                      width:
-                                                                          200,
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          size12,
-                                                                    ),
-                                                                    Text(
-                                                                      'Silahkan buka menu Produk Digital pada "Kustom"\ndidalam keranjang untuk menghapus Item ini',
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                      style: heading2(
-                                                                        FontWeight
-                                                                            .w600,
-                                                                        bnw900,
-                                                                        'Outfit',
+                                                                child: Padding(
+                                                                  padding:
+                                                                      EdgeInsets.fromLTRB(
+                                                                        size32,
+                                                                        size16,
+                                                                        size32,
+                                                                        size32,
                                                                       ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          size12,
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: double
-                                                                          .infinity,
-                                                                      child: GestureDetector(
-                                                                        onTap: () =>
-                                                                            Navigator.pop(
-                                                                              context,
-                                                                            ),
-                                                                        child: buttonXLoutline(
-                                                                          Center(
-                                                                            child: Text(
-                                                                              'Batalkan',
-                                                                              style: heading3(
-                                                                                FontWeight.w600,
-                                                                                primary500,
-                                                                                'Outfit',
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          MediaQuery.of(
-                                                                            context,
-                                                                          ).size.width,
-                                                                          primary500,
+                                                                  child: Column(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
+                                                                    children: [
+                                                                      SvgPicture.asset(
+                                                                        'assets/newIllustration/Help.svg',
+                                                                        height:
+                                                                            200,
+                                                                        width:
+                                                                            200,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            size12,
+                                                                      ),
+                                                                      Text(
+                                                                        'Silahkan buka menu Produk Digital pada "Kustom"\ndidalam keranjang untuk menghapus Item ini',
+                                                                        textAlign:
+                                                                            TextAlign
+                                                                                .center,
+                                                                        style: heading2(
+                                                                          FontWeight
+                                                                              .w600,
+                                                                          bnw900,
+                                                                          'Outfit',
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ],
+                                                                      SizedBox(
+                                                                        height:
+                                                                            size12,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width: double
+                                                                            .infinity,
+                                                                        child: GestureDetector(
+                                                                          onTap: () =>
+                                                                              Navigator.pop(
+                                                                                context,
+                                                                              ),
+                                                                          child: buttonXLoutline(
+                                                                            Center(
+                                                                              child: Text(
+                                                                                'Batalkan',
+                                                                                style: heading3(
+                                                                                  FontWeight.w600,
+                                                                                  primary500,
+                                                                                  'Outfit',
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            MediaQuery.of(
+                                                                              context,
+                                                                            ).size.width,
+                                                                            primary500,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                               ),
                                                             );
@@ -8891,88 +8937,90 @@ class _TransactionPageState extends State<TransactionPage>
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (ctx) {
-          return StatefulBuilder(
-            builder: (ctx, setM) {
-              return Container(
-                padding: EdgeInsets.only(
-                  left: size16,
-                  right: size16,
-                  top: size16,
-                  bottom: MediaQuery.of(ctx).viewInsets.bottom + size16,
-                ),
-                decoration: BoxDecoration(
-                  color: bnw100,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(size16),
+          return SafeArea(
+            child: StatefulBuilder(
+              builder: (ctx, setM) {
+                return Container(
+                  padding: EdgeInsets.only(
+                    left: size16,
+                    right: size16,
+                    top: size16,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + size16,
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ubah Harga Varian',
-                      style: heading2(FontWeight.w700, bnw900, 'Outfit'),
+                  decoration: BoxDecoration(
+                    color: bnw100,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(size16),
                     ),
-                    SizedBox(height: size8),
-                    Text(
-                      variantName,
-                      style: heading3(FontWeight.w400, bnw600, 'Outfit'),
-                    ),
-                    SizedBox(height: size12),
-                    TextField(
-                      controller: ctrl,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        prefixText: 'Rp. ',
-                        border: UnderlineInputBorder(),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ubah Harga Varian',
+                        style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                       ),
-                      onChanged: (v) {
-                        final n = parseMoneyToInt(v);
-                        setM(() => tmp = n);
-                      },
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          setM(() {
-                            tmp = defaultPrice;
-                            ctrl.text = defaultPrice.toString();
-                          });
-                        },
-                        child: const Text('Reset ke harga normal'),
+                      SizedBox(height: size8),
+                      Text(
+                        variantName,
+                        style: heading3(FontWeight.w400, bnw600, 'Outfit'),
                       ),
-                    ),
-                    SizedBox(height: size12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary500,
+                      SizedBox(height: size12),
+                      TextField(
+                        controller: ctrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        decoration: const InputDecoration(
+                          prefixText: 'Rp. ',
+                          border: UnderlineInputBorder(),
                         ),
-                        onPressed: () {
-                          // 🔒 Normalisasi + sync ke selectedVariantsByProduct
-                          upsertSelectedVariantPrice(
-                            setModalState: setModalState,
-                            categoryId: categoryId,
-                            variantId: variantId,
-                            defaultPrice: defaultPrice,
-                            newPrice: tmp,
-                          );
-                          Navigator.pop(ctx);
+                        onChanged: (v) {
+                          final n = parseMoneyToInt(v);
+                          setM(() => tmp = n);
                         },
-                        child: Text(
-                          'Simpan',
-                          style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setM(() {
+                              tmp = defaultPrice;
+                              ctrl.text = defaultPrice.toString();
+                            });
+                          },
+                          child: const Text('Reset ke harga normal'),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                      SizedBox(height: size12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary500,
+                          ),
+                          onPressed: () {
+                            // 🔒 Normalisasi + sync ke selectedVariantsByProduct
+                            upsertSelectedVariantPrice(
+                              setModalState: setModalState,
+                              categoryId: categoryId,
+                              variantId: variantId,
+                              defaultPrice: defaultPrice,
+                              newPrice: tmp,
+                            );
+                            Navigator.pop(ctx);
+                          },
+                          child: Text(
+                            'Simpan',
+                            style: heading3(FontWeight.w600, bnw100, 'Outfit'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           );
         },
       );
@@ -8987,1280 +9035,1282 @@ class _TransactionPageState extends State<TransactionPage>
       ),
       context: context,
       builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            syncCustomBaseCtrlIfNeeded();
-
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.8,
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              decoration: ShapeDecoration(
-                color: bnw100,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(size16),
-                    topRight: Radius.circular(size16),
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              syncCustomBaseCtrlIfNeeded();
+          
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                decoration: ShapeDecoration(
+                  color: bnw100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(size16),
+                      topRight: Radius.circular(size16),
+                    ),
                   ),
                 ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-                child: Column(
-                  children: [
-                    dividerShowdialog(),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          SizedBox(height: size16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(size12),
-                              border: Border.all(color: bnw300),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(size8),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    height: size120,
-                                    width: size120,
-                                    child: Image.network(
-                                      item.product_image.toString(),
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                            if (loadingProgress == null) {
-                                              return child;
-                                            }
-
-                                            return Center(child: loading());
-                                          },
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              SvgPicture.asset(
-                                                'assets/logoProduct.svg',
-                                                fit: BoxFit.cover,
-                                              ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+                  child: Column(
+                    children: [
+                      dividerShowdialog(),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            SizedBox(height: size16),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(size12),
+                                border: Border.all(color: bnw300),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(size8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      height: size120,
+                                      width: size120,
+                                      child: Image.network(
+                                        item.product_image.toString(),
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+          
+                                              return Center(child: loading());
+                                            },
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                SvgPicture.asset(
+                                                  'assets/logoProduct.svg',
+                                                  fit: BoxFit.cover,
+                                                ),
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: size12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.name ?? '',
-                                        style: heading3(
-                                          FontWeight.w600,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      Text(
-                                        FormatCurrency.convertToIdr(baseUsed()),
-                                        style: heading3(
-                                          FontWeight.w400,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      if (baseIsCustom())
+                                    SizedBox(width: size12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
-                                          'Custom',
-                                          style: heading4(
-                                            FontWeight.w400,
-                                            primary500,
+                                          item.name ?? '',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw900,
                                             'Outfit',
                                           ),
                                         ),
-                                      Text(
-                                        item.typeproducts ?? '',
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          bnw500,
-                                          'Outfit',
+                                        Text(
+                                          FormatCurrency.convertToIdr(baseUsed()),
+                                          style: heading3(
+                                            FontWeight.w400,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Jumlah',
-                                        style: body1(
-                                          FontWeight.w500,
-                                          bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      SizedBox(height: size8),
-                                      Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              if (counterCart > 1) {
-                                                setModalState(() {
-                                                  counterCart--;
-                                                  conCounterPreview.text =
-                                                      counterCart.toString();
-                                                });
-                                              }
-                                            },
-                                            child: buttonMoutlineColor(
-                                              Icon(
-                                                PhosphorIcons.minus,
-                                                color: primary500,
-                                                size: size24,
-                                              ),
+                                        if (baseIsCustom())
+                                          Text(
+                                            'Custom',
+                                            style: heading4(
+                                              FontWeight.w400,
                                               primary500,
+                                              'Outfit',
                                             ),
                                           ),
-                                          SizedBox(width: size8),
-                                          SizedBox(
-                                            height: size48,
-                                            width: size56,
-                                            child: TextFormField(
-                                              cursorColor: primary500,
-                                              enabled: true,
-                                              controller: conCounterPreview,
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              onChanged: (value) {
-                                                final parsed =
-                                                    int.tryParse(value) ?? 0;
-                                                setState(() {
-                                                  counterCart = parsed <= 0
-                                                      ? 1
-                                                      : parsed;
+                                        Text(
+                                          item.typeproducts ?? '',
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            bnw500,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Jumlah',
+                                          style: body1(
+                                            FontWeight.w500,
+                                            bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        SizedBox(height: size8),
+                                        Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                if (counterCart > 1) {
+                                                  setModalState(() {
+                                                    counterCart--;
+                                                    conCounterPreview.text =
+                                                        counterCart.toString();
+                                                  });
+                                                }
+                                              },
+                                              child: buttonMoutlineColor(
+                                                Icon(
+                                                  PhosphorIcons.minus,
+                                                  color: primary500,
+                                                  size: size24,
+                                                ),
+                                                primary500,
+                                              ),
+                                            ),
+                                            SizedBox(width: size8),
+                                            SizedBox(
+                                              height: size48,
+                                              width: size56,
+                                              child: TextFormField(
+                                                cursorColor: primary500,
+                                                enabled: true,
+                                                controller: conCounterPreview,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                onChanged: (value) {
+                                                  final parsed =
+                                                      int.tryParse(value) ?? 0;
+                                                  setState(() {
+                                                    counterCart = parsed <= 0
+                                                        ? 1
+                                                        : parsed;
+                                                    conCounterPreview.text =
+                                                        counterCart.toString();
+                                                  });
+                                                },
+                                                textAlign: TextAlign.center,
+                                                decoration: InputDecoration(
+                                                  // alignLabelWithHint: true,
+                                                  hintText: counterCart
+                                                      .toString(),
+          
+                                                  // .toString(),
+                                                  // _itemCount.toString(),
+                                                  hintStyle: heading4(
+                                                    FontWeight.w600,
+                                                    bnw800,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: size8),
+                                            GestureDetector(
+                                              onTap: () {
+                                                setModalState(() {
+                                                  counterCart++;
                                                   conCounterPreview.text =
                                                       counterCart.toString();
                                                 });
                                               },
-                                              textAlign: TextAlign.center,
-                                              decoration: InputDecoration(
-                                                // alignLabelWithHint: true,
-                                                hintText: counterCart
-                                                    .toString(),
-
-                                                // .toString(),
-                                                // _itemCount.toString(),
-                                                hintStyle: heading4(
-                                                  FontWeight.w600,
-                                                  bnw800,
-                                                  'Outfit',
+                                              child: buttonMoutlineColor(
+                                                Icon(
+                                                  PhosphorIcons.plus,
+                                                  color: primary500,
+                                                  size: size24,
                                                 ),
+                                                primary500,
+                                                // 50,
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(width: size8),
-                                          GestureDetector(
-                                            onTap: () {
-                                              setModalState(() {
-                                                counterCart++;
-                                                conCounterPreview.text =
-                                                    counterCart.toString();
-                                              });
-                                            },
-                                            child: buttonMoutlineColor(
-                                              Icon(
-                                                PhosphorIcons.plus,
-                                                color: primary500,
-                                                size: size24,
-                                              ),
-                                              primary500,
-                                              // 50,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: size16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Varian Harga',
-                                style: body1(FontWeight.w500, bnw900, 'Outfit'),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setModalState(() {
-                                    showCustomBaseSection =
-                                        !showCustomBaseSection;
-                                    customBaseError = null;
-                                    customBaseEdited = false;
-                                  });
-                                  syncCustomBaseCtrlIfNeeded();
-                                },
-                                child: Text(
-                                  showCustomBaseSection
-                                      ? 'Tutup'
-                                      : 'Ubah Harga',
-                                  style: heading4(
-                                    FontWeight.w600,
-                                    primary500,
-                                    'Outfit',
-                                  ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(height: size16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
+                            ),
+                            SizedBox(height: size16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Varian Harga',
+                                  style: body1(FontWeight.w500, bnw900, 'Outfit'),
+                                ),
+                                GestureDetector(
                                   onTap: () {
                                     setModalState(() {
-                                      tapTrue = 1;
+                                      showCustomBaseSection =
+                                          !showCustomBaseSection;
                                       customBaseError = null;
                                       customBaseEdited = false;
                                     });
                                     syncCustomBaseCtrlIfNeeded();
                                   },
-                                  child: Container(
-                                    height: size56,
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: size20,
+                                  child: Text(
+                                    showCustomBaseSection
+                                        ? 'Tutup'
+                                        : 'Ubah Harga',
+                                    style: heading4(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
                                     ),
-                                    decoration: ShapeDecoration(
-                                      color: tapTrue == 1 ? primary100 : bnw100,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                          width: width2,
-                                          color: tapTrue == 1
-                                              ? primary500
-                                              : bnw300,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: size16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        tapTrue = 1;
+                                        customBaseError = null;
+                                        customBaseEdited = false;
+                                      });
+                                      syncCustomBaseCtrlIfNeeded();
+                                    },
+                                    child: Container(
+                                      height: size56,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: size20,
+                                      ),
+                                      decoration: ShapeDecoration(
+                                        color: tapTrue == 1 ? primary100 : bnw100,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            width: width2,
+                                            color: tapTrue == 1
+                                                ? primary500
+                                                : bnw300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Normal',
-                                        style: heading3(
-                                          FontWeight.w400,
-                                          tapTrue == 1 ? primary500 : bnw900,
-                                          'Outfit',
+                                      child: Center(
+                                        child: Text(
+                                          'Normal',
+                                          style: heading3(
+                                            FontWeight.w400,
+                                            tapTrue == 1 ? primary500 : bnw900,
+                                            'Outfit',
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              (item.price_online_shop_after == 0)
-                                  ? SizedBox()
-                                  : SizedBox(width: size16),
-                              (item.price_online_shop_after == 0)
-                                  ? SizedBox()
-                                  : Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setModalState(() {
-                                            tapTrue = 2;
-                                            customBaseError = null;
-                                            customBaseEdited = false;
-                                          });
-                                          syncCustomBaseCtrlIfNeeded();
-                                        },
-                                        child: Container(
-                                          height: size56,
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: size20,
-                                          ),
-                                          decoration: ShapeDecoration(
-                                            color: tapTrue == 2
-                                                ? primary100
-                                                : bnw100,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                width: width2,
-                                                color: tapTrue == 2
-                                                    ? primary500
-                                                    : bnw300,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(size8),
+                                (item.price_online_shop_after == 0)
+                                    ? SizedBox()
+                                    : SizedBox(width: size16),
+                                (item.price_online_shop_after == 0)
+                                    ? SizedBox()
+                                    : Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setModalState(() {
+                                              tapTrue = 2;
+                                              customBaseError = null;
+                                              customBaseEdited = false;
+                                            });
+                                            syncCustomBaseCtrlIfNeeded();
+                                          },
+                                          child: Container(
+                                            height: size56,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: size20,
                                             ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'Online',
-                                              style: heading3(
-                                                FontWeight.w400,
-                                                tapTrue == 2
-                                                    ? primary500
-                                                    : bnw900,
-                                                'Outfit',
+                                            decoration: ShapeDecoration(
+                                              color: tapTrue == 2
+                                                  ? primary100
+                                                  : bnw100,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                  width: width2,
+                                                  color: tapTrue == 2
+                                                      ? primary500
+                                                      : bnw300,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(size8),
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'Online',
+                                                style: heading3(
+                                                  FontWeight.w400,
+                                                  tapTrue == 2
+                                                      ? primary500
+                                                      : bnw900,
+                                                  'Outfit',
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                            ],
-                          ),
-
-                          if (showCustomBaseSection) ...[
-                            SizedBox(height: size16),
-                            Text(
-                              'Harga',
-                              style: heading3(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
-                              ),
-                            ),
-                            SizedBox(height: size8),
-                            TextField(
-                              controller: customBaseCtrl,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
                               ],
-                              decoration: InputDecoration(
-                                prefixText: 'Rp. ',
-                                hintText: baseDefault().toString(),
-                                errorText: customBaseError,
-                                border: UnderlineInputBorder(),
-                                suffixIcon: IconButton(
-                                  icon: Icon(Icons.check, color: primary500),
-                                  onPressed: () =>
-                                      saveCustomBaseFromField(setModalState),
+                            ),
+          
+                            if (showCustomBaseSection) ...[
+                              SizedBox(height: size16),
+                              Text(
+                                'Harga',
+                                style: heading3(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
                                 ),
                               ),
-                              onSubmitted: (_) =>
-                                  saveCustomBaseFromField(setModalState),
+                              SizedBox(height: size8),
+                              TextField(
+                                controller: customBaseCtrl,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  prefixText: 'Rp. ',
+                                  hintText: baseDefault().toString(),
+                                  errorText: customBaseError,
+                                  border: UnderlineInputBorder(),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(Icons.check, color: primary500),
+                                    onPressed: () =>
+                                        saveCustomBaseFromField(setModalState),
+                                  ),
+                                ),
+                                onSubmitted: (_) =>
+                                    saveCustomBaseFromField(setModalState),
+                              ),
+                              SizedBox(height: size8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () => resetCustomBase(setModalState),
+                                  child: Text(
+                                    'Reset ke harga normal',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+          
+                            SizedBox(height: size16),
+          
+                            // 🔹 FUTUREBUILDER VARIAN (SUDAH DIBERI ERROR + KEY)
+                            FutureBuilder<List<ProductVariantCategory>?>(
+                              future: variantFuture,
+                              // getProductVariantTransaksi(
+                              //   context,
+                              //   widget.token,
+                              //   '',
+                              //   datasTransaksi![i].productid.toString(),
+                              // ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(child: loading());
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    "Terjadi kesalahan: ${snapshot.error}",
+                                  );
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Text(
+                                    "Tidak ada varian untuk produk ini",
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw500,
+                                      'Outfit',
+                                    ),
+                                  );
+                                }
+          
+                                final data = snapshot.data!;
+                                // simpan untuk validasi di tombol Tambah
+                                lastVariantData = data;
+          
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: data.map((variantCategory) {
+                                    // state lokal tiap kategori
+          
+                                    final String categoryId = variantCategory.id
+                                        .toString();
+                                    selectedOrderByCategory.putIfAbsent(
+                                      categoryId,
+                                      () => [],
+                                    );
+                                    final order =
+                                        selectedOrderByCategory[categoryId]!;
+                                    variantCategoryKeys.putIfAbsent(
+                                      categoryId,
+                                      () => GlobalKey(),
+                                    );
+          
+                                    return StatefulBuilder(
+                                      builder: (context, setStateVariant) {
+                                        final String? errorText =
+                                            variantErrorByCategory[categoryId];
+          
+                                        return Container(
+                                          key: variantCategoryKeys[categoryId],
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                variantCategory.title,
+                                                style: body1(
+                                                  FontWeight.w600,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              SizedBox(height: size4),
+                                              Text(
+                                                variantCategory.isRequired == 1
+                                                    ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
+                                                    : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
+                                                style: body2(
+                                                  FontWeight.w400,
+                                                  danger500,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              SizedBox(height: size12),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        size8,
+                                                      ),
+                                                  border: Border.all(
+                                                    color: errorText != null
+                                                        ? danger500
+                                                        : bnw300,
+                                                  ),
+                                                ),
+                                                child: Column(
+                                                  children: List.generate(
+                                                    variantCategory
+                                                        .productVariants
+                                                        .length,
+                                                    (index) {
+                                                      final opt = variantCategory
+                                                          .productVariants[index];
+                                                      final String vid = opt.id
+                                                          .toString();
+                                                      final int defaultVarPrice =
+                                                          (double.tryParse(
+                                                                    opt.price,
+                                                                  ) ??
+                                                                  0)
+                                                              .round();
+                                                      final int shownVarPrice =
+                                                          customVariantPriceById[vid] ??
+                                                          defaultVarPrice;
+                                                      final bool isVarianCustom =
+                                                          customVariantPriceById
+                                                              .containsKey(vid);
+                                                      final bool isSelected =
+                                                          order.contains(vid);
+          
+                                                      return CheckboxListTile(
+                                                        key: ValueKey('cb_$vid'),
+                                                        value: isSelected,
+                                                        // onChanged: (value) {
+                                                        //   setStateVariant(() {
+                                                        //     if (value ==
+                                                        //         true) {
+                                                        //       // 🔹 kalau maximumSelected == 1 → radio behaviour
+                                                        //       if (variantCategory
+                                                        //               .maximumSelected ==
+                                                        //           1) {
+                                                        //         for (
+                                                        //           int j = 0;
+                                                        //           j <
+                                                        //               selected
+                                                        //                   .length;
+                                                        //           j++
+                                                        //         ) {
+                                                        //           selected[j] =
+                                                        //               false;
+                                                        //         }
+                                                        //         selectedIndexes
+                                                        //             .clear();
+                                                        //       }
+          
+                                                        //       // 🔹 kalau maximumSelected > 1 → geser pilihan lama
+                                                        //       if (variantCategory
+                                                        //                   .maximumSelected >
+                                                        //               1 &&
+                                                        //           selectedIndexes
+                                                        //                   .length >=
+                                                        //               variantCategory
+                                                        //                   .maximumSelected) {
+                                                        //         // hapus index pertama (paling lama dipilih)
+                                                        //         final removedIndex =
+                                                        //             selectedIndexes
+                                                        //                 .removeAt(
+                                                        //                   0,
+                                                        //                 );
+                                                        //         selected[removedIndex] =
+                                                        //             false;
+                                                        //       }
+          
+                                                        //       // set pilihan baru
+                                                        //       selected[index] =
+                                                        //           true;
+                                                        //       if (!selectedIndexes
+                                                        //           .contains(
+                                                        //             index,
+                                                        //           )) {
+                                                        //         selectedIndexes
+                                                        //             .add(
+                                                        //               index,
+                                                        //             );
+                                                        //       }
+                                                        //     } else {
+                                                        //       // uncheck
+                                                        //       selected[index] =
+                                                        //           false;
+                                                        //       selectedIndexes
+                                                        //           .remove(
+                                                        //             index,
+                                                        //           );
+                                                        //     }
+          
+                                                        //     // hitung ulang count
+                                                        //     selectedCount =
+                                                        //         selected
+                                                        //             .where(
+                                                        //               (e) =>
+                                                        //                   e,
+                                                        //             )
+                                                        //             .length;
+          
+                                                        //     final String
+                                                        //     productId =
+                                                        //         datasTransaksi![i]
+                                                        //             .productid
+                                                        //             .toString();
+          
+                                                        //     if (selectedCount >
+                                                        //         0) {
+                                                        //       variantErrorByCategory
+                                                        //           .remove(
+                                                        //             categoryId,
+                                                        //           );
+                                                        //     }
+          
+                                                        //     // sync ke selectedVariantsByProduct
+                                                        //     selectedVariantsByProduct[productId] ??=
+                                                        //         [];
+                                                        //     selectedVariantsByProduct[productId]!
+                                                        //         .removeWhere(
+                                                        //           (e) =>
+                                                        //               e['variant_category_id'] ==
+                                                        //               categoryId,
+                                                        //         );
+          
+                                                        //     final List<
+                                                        //       String
+                                                        //     >
+                                                        //     selectedIds =
+                                                        //         [];
+                                                        //     final List<
+                                                        //       Map<
+                                                        //         String,
+                                                        //         dynamic
+                                                        //       >
+                                                        //     >
+                                                        //     variantDetails =
+                                                        //         [];
+          
+                                                        //     for (
+                                                        //       int j = 0;
+                                                        //       j <
+                                                        //           selected
+                                                        //               .length;
+                                                        //       j++
+                                                        //     ) {
+                                                        //       if (selected[j]) {
+                                                        //         final v =
+                                                        //             variantCategory
+                                                        //                 .productVariants[j];
+                                                        //         selectedIds
+                                                        //             .add(
+                                                        //               v.id,
+                                                        //             );
+                                                        //         variantDetails.add({
+                                                        //           "variant_id":
+                                                        //               v.id,
+                                                        //           "variant_name":
+                                                        //               v.name,
+                                                        //           "variant_price":
+                                                        //               num.tryParse(
+                                                        //                 v.price,
+                                                        //               ) ??
+                                                        //               0,
+                                                        //           "is_online":
+                                                        //               (tapTrue ==
+                                                        //               2),
+                                                        //         });
+                                                        //       }
+                                                        //     }
+          
+                                                        //     if (selectedIds
+                                                        //         .isNotEmpty) {
+                                                        //       selectedVariantsByProduct[productId]!.add({
+                                                        //         "variant_category_id":
+                                                        //             categoryId,
+                                                        //         "variant_id":
+                                                        //             selectedIds,
+                                                        //         "variant_detail":
+                                                        //             variantDetails,
+                                                        //       });
+                                                        //     }
+                                                        //   });
+                                                        // },
+                                                        onChanged: (value) {
+                                                          setStateVariant(() {
+                                                            if (value == true) {
+                                                              if (variantCategory
+                                                                      .maximumSelected ==
+                                                                  1) {
+                                                                order.clear();
+                                                              } else if (order
+                                                                      .length >=
+                                                                  variantCategory
+                                                                      .maximumSelected) {
+                                                                order.removeAt(
+                                                                  0,
+                                                                ); // buang yang paling lama
+                                                              }
+                                                              if (!order.contains(
+                                                                vid,
+                                                              ))
+                                                                order.add(vid);
+                                                            } else {
+                                                              order.remove(vid);
+                                                            }
+          
+                                                            // hapus error kalau sudah ada pilihan
+                                                            if (order
+                                                                .isNotEmpty) {
+                                                              variantErrorByCategory
+                                                                  .remove(
+                                                                    categoryId,
+                                                                  );
+                                                            }
+          
+                                                            // rebuild selectedVariantsByProduct untuk kategori ini
+                                                            selectedVariantsByProduct[productId] ??=
+                                                                [];
+                                                            selectedVariantsByProduct[productId]!
+                                                                .removeWhere(
+                                                                  (e) =>
+                                                                      e['variant_category_id'] ==
+                                                                      categoryId,
+                                                                );
+          
+                                                            if (order
+                                                                .isNotEmpty) {
+                                                              final List<
+                                                                Map<
+                                                                  String,
+                                                                  dynamic
+                                                                >
+                                                              >
+                                                              picked = [];
+                                                              for (final v
+                                                                  in variantCategory
+                                                                      .productVariants) {
+                                                                final vId = v.id
+                                                                    .toString();
+                                                                if (!order
+                                                                    .contains(
+                                                                      vId,
+                                                                    ))
+                                                                  continue;
+                                                                final int
+                                                                defaultP =
+                                                                    (double.tryParse(
+                                                                              v.price,
+                                                                            ) ??
+                                                                            0)
+                                                                        .round();
+                                                                final customP =
+                                                                    customVariantPriceById[vId];
+                                                                picked.add({
+                                                                  "variant_id":
+                                                                      vId,
+                                                                  "variant_name":
+                                                                      v.name,
+                                                                  "variant_price":
+                                                                      customP ??
+                                                                      defaultP,
+                                                                  "is_variant_customize":
+                                                                      customP !=
+                                                                          null
+                                                                      ? 1
+                                                                      : 0,
+                                                                });
+                                                              }
+          
+                                                              selectedVariantsByProduct[productId]!.add({
+                                                                "variant_category_id":
+                                                                    categoryId,
+                                                                "variant_category_title":
+                                                                    variantCategory
+                                                                        .title,
+                                                                "variant": picked,
+                                                              });
+                                                            }
+                                                          });
+          
+                                                          // // supaya UI harga varian yang diedit juga refresh
+                                                          // setModalState(
+                                                          //   () {},
+                                                          // );
+                                                        },
+                                                        activeColor: primary500,
+          
+                                                        // title: Row(
+                                                        //   mainAxisAlignment:
+                                                        //       MainAxisAlignment
+                                                        //           .spaceBetween,
+                                                        //   children: [
+                                                        //     Expanded(
+                                                        //       child: Text(
+                                                        //         opt.name,
+                                                        //         style: heading3(
+                                                        //           FontWeight
+                                                        //               .w400,
+                                                        //           bnw900,
+                                                        //           'Outfit',
+                                                        //         ),
+                                                        //         overflow:
+                                                        //             TextOverflow
+                                                        //                 .ellipsis,
+                                                        //       ),
+                                                        //     ),
+                                                        //     Text(
+                                                        //       FormatCurrency.convertToIdr(
+                                                        //         double.tryParse(
+                                                        //               opt.price,
+                                                        //             ) ??
+                                                        //             0,
+                                                        //       ),
+                                                        //       style: heading4(
+                                                        //         FontWeight
+                                                        //             .w400,
+                                                        //         bnw900,
+                                                        //         'Outfit',
+                                                        //       ),
+                                                        //     ),
+                                                        //   ],
+                                                        // ),
+                                                        title: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Expanded(
+                                                              child: Text(
+                                                                opt.name,
+                                                                style: heading3(
+                                                                  FontWeight.w400,
+                                                                  bnw900,
+                                                                  'Outfit',
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              width: size12,
+                                                            ),
+          
+                                                            // kanan: harga + tombol "Ubah Harga" ATAU textfield
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Text(
+                                                                  FormatCurrency.convertToIdr(
+                                                                    shownVarPrice,
+                                                                  ),
+                                                                  style: heading4(
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    bnw900,
+                                                                    'Outfit',
+                                                                  ),
+                                                                ),
+                                                                if (isVarianCustom) ...[
+                                                                  SizedBox(
+                                                                    width: 6,
+                                                                  ),
+                                                                  Container(
+                                                                    padding:
+                                                                        EdgeInsets.symmetric(
+                                                                          horizontal:
+                                                                              6,
+                                                                          vertical:
+                                                                              2,
+                                                                        ),
+                                                                    decoration: BoxDecoration(
+                                                                      color:
+                                                                          primary100,
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                            6,
+                                                                          ),
+                                                                    ),
+                                                                    child: Text(
+                                                                      'Custom',
+                                                                      style: heading4(
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        primary500,
+                                                                        'Outfit',
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                                SizedBox(
+                                                                  width: 8,
+                                                                ),
+                                                                OutlinedButton(
+                                                                  onPressed:
+                                                                      isSelected
+                                                                      ? () {
+                                                                          showEditVariantPriceSheet(
+                                                                            categoryId:
+                                                                                categoryId,
+                                                                            variantId:
+                                                                                vid,
+                                                                            variantName:
+                                                                                opt.name,
+                                                                            defaultPrice:
+                                                                                defaultVarPrice,
+                                                                            currentShownPrice:
+                                                                                shownVarPrice,
+                                                                            setModalState:
+                                                                                setModalState,
+                                                                          );
+                                                                        }
+                                                                      : null,
+                                                                  child: const Text(
+                                                                    'Ubah Harga',
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        controlAffinity:
+                                                            ListTileControlAffinity
+                                                                .trailing,
+                                                        contentPadding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: size8,
+                                                            ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: size8),
+                                              Text(
+                                                "${order.length} dari ${variantCategory.productVariants.length}",
+                                                style: heading4(
+                                                  FontWeight.w400,
+                                                  bnw900,
+                                                  'Outfit',
+                                                ),
+                                              ),
+                                              SizedBox(height: size24),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
+                                );
+                              },
                             ),
-                            SizedBox(height: size8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () => resetCustomBase(setModalState),
-                                child: Text(
-                                  'Reset ke harga normal',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    primary500,
+          
+                            SizedBox(height: size16),
+                            Text(
+                              'Catatan',
+                              style: body1(FontWeight.w500, bnw900, 'Outfit'),
+                            ),
+                            IntrinsicHeight(
+                              child: TextFormField(
+                                cursorColor: primary500,
+                                style: heading2(
+                                  FontWeight.w600,
+                                  bnw900,
+                                  'Outfit',
+                                ),
+                                controller: conCatatanPreview,
+                                decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 2,
+                                      color: primary500,
+                                    ),
+                                  ),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: size12,
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 1.5,
+                                      color: bnw500,
+                                    ),
+                                  ),
+                                  hintText:
+                                      'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
+                                  hintStyle: heading2(
+                                    FontWeight.w600,
+                                    bnw500,
                                     'Outfit',
                                   ),
                                 ),
                               ),
                             ),
                           ],
-
-                          SizedBox(height: size16),
-
-                          // 🔹 FUTUREBUILDER VARIAN (SUDAH DIBERI ERROR + KEY)
-                          FutureBuilder<List<ProductVariantCategory>?>(
-                            future: variantFuture,
-                            // getProductVariantTransaksi(
-                            //   context,
-                            //   widget.token,
-                            //   '',
-                            //   datasTransaksi![i].productid.toString(),
-                            // ),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(child: loading());
-                              } else if (snapshot.hasError) {
-                                return Text(
-                                  "Terjadi kesalahan: ${snapshot.error}",
-                                );
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return Text(
-                                  "Tidak ada varian untuk produk ini",
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw500,
-                                    'Outfit',
-                                  ),
-                                );
-                              }
-
-                              final data = snapshot.data!;
-                              // simpan untuk validasi di tombol Tambah
-                              lastVariantData = data;
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: data.map((variantCategory) {
-                                  // state lokal tiap kategori
-
-                                  final String categoryId = variantCategory.id
-                                      .toString();
-                                  selectedOrderByCategory.putIfAbsent(
-                                    categoryId,
-                                    () => [],
-                                  );
-                                  final order =
-                                      selectedOrderByCategory[categoryId]!;
-                                  variantCategoryKeys.putIfAbsent(
-                                    categoryId,
-                                    () => GlobalKey(),
-                                  );
-
-                                  return StatefulBuilder(
-                                    builder: (context, setStateVariant) {
-                                      final String? errorText =
-                                          variantErrorByCategory[categoryId];
-
-                                      return Container(
-                                        key: variantCategoryKeys[categoryId],
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              variantCategory.title,
-                                              style: body1(
-                                                FontWeight.w600,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            SizedBox(height: size4),
-                                            Text(
-                                              variantCategory.isRequired == 1
-                                                  ? "Wajib dipilih - Maks pilih ${variantCategory.maximumSelected}"
-                                                  : "Opsional dipilih - Maks pilih ${variantCategory.maximumSelected}",
-                                              style: body2(
-                                                FontWeight.w400,
-                                                danger500,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            SizedBox(height: size12),
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      size8,
-                                                    ),
-                                                border: Border.all(
-                                                  color: errorText != null
-                                                      ? danger500
-                                                      : bnw300,
-                                                ),
-                                              ),
-                                              child: Column(
-                                                children: List.generate(
-                                                  variantCategory
-                                                      .productVariants
-                                                      .length,
-                                                  (index) {
-                                                    final opt = variantCategory
-                                                        .productVariants[index];
-                                                    final String vid = opt.id
-                                                        .toString();
-                                                    final int defaultVarPrice =
-                                                        (double.tryParse(
-                                                                  opt.price,
-                                                                ) ??
-                                                                0)
-                                                            .round();
-                                                    final int shownVarPrice =
-                                                        customVariantPriceById[vid] ??
-                                                        defaultVarPrice;
-                                                    final bool isVarianCustom =
-                                                        customVariantPriceById
-                                                            .containsKey(vid);
-                                                    final bool isSelected =
-                                                        order.contains(vid);
-
-                                                    return CheckboxListTile(
-                                                      key: ValueKey('cb_$vid'),
-                                                      value: isSelected,
-                                                      // onChanged: (value) {
-                                                      //   setStateVariant(() {
-                                                      //     if (value ==
-                                                      //         true) {
-                                                      //       // 🔹 kalau maximumSelected == 1 → radio behaviour
-                                                      //       if (variantCategory
-                                                      //               .maximumSelected ==
-                                                      //           1) {
-                                                      //         for (
-                                                      //           int j = 0;
-                                                      //           j <
-                                                      //               selected
-                                                      //                   .length;
-                                                      //           j++
-                                                      //         ) {
-                                                      //           selected[j] =
-                                                      //               false;
-                                                      //         }
-                                                      //         selectedIndexes
-                                                      //             .clear();
-                                                      //       }
-
-                                                      //       // 🔹 kalau maximumSelected > 1 → geser pilihan lama
-                                                      //       if (variantCategory
-                                                      //                   .maximumSelected >
-                                                      //               1 &&
-                                                      //           selectedIndexes
-                                                      //                   .length >=
-                                                      //               variantCategory
-                                                      //                   .maximumSelected) {
-                                                      //         // hapus index pertama (paling lama dipilih)
-                                                      //         final removedIndex =
-                                                      //             selectedIndexes
-                                                      //                 .removeAt(
-                                                      //                   0,
-                                                      //                 );
-                                                      //         selected[removedIndex] =
-                                                      //             false;
-                                                      //       }
-
-                                                      //       // set pilihan baru
-                                                      //       selected[index] =
-                                                      //           true;
-                                                      //       if (!selectedIndexes
-                                                      //           .contains(
-                                                      //             index,
-                                                      //           )) {
-                                                      //         selectedIndexes
-                                                      //             .add(
-                                                      //               index,
-                                                      //             );
-                                                      //       }
-                                                      //     } else {
-                                                      //       // uncheck
-                                                      //       selected[index] =
-                                                      //           false;
-                                                      //       selectedIndexes
-                                                      //           .remove(
-                                                      //             index,
-                                                      //           );
-                                                      //     }
-
-                                                      //     // hitung ulang count
-                                                      //     selectedCount =
-                                                      //         selected
-                                                      //             .where(
-                                                      //               (e) =>
-                                                      //                   e,
-                                                      //             )
-                                                      //             .length;
-
-                                                      //     final String
-                                                      //     productId =
-                                                      //         datasTransaksi![i]
-                                                      //             .productid
-                                                      //             .toString();
-
-                                                      //     if (selectedCount >
-                                                      //         0) {
-                                                      //       variantErrorByCategory
-                                                      //           .remove(
-                                                      //             categoryId,
-                                                      //           );
-                                                      //     }
-
-                                                      //     // sync ke selectedVariantsByProduct
-                                                      //     selectedVariantsByProduct[productId] ??=
-                                                      //         [];
-                                                      //     selectedVariantsByProduct[productId]!
-                                                      //         .removeWhere(
-                                                      //           (e) =>
-                                                      //               e['variant_category_id'] ==
-                                                      //               categoryId,
-                                                      //         );
-
-                                                      //     final List<
-                                                      //       String
-                                                      //     >
-                                                      //     selectedIds =
-                                                      //         [];
-                                                      //     final List<
-                                                      //       Map<
-                                                      //         String,
-                                                      //         dynamic
-                                                      //       >
-                                                      //     >
-                                                      //     variantDetails =
-                                                      //         [];
-
-                                                      //     for (
-                                                      //       int j = 0;
-                                                      //       j <
-                                                      //           selected
-                                                      //               .length;
-                                                      //       j++
-                                                      //     ) {
-                                                      //       if (selected[j]) {
-                                                      //         final v =
-                                                      //             variantCategory
-                                                      //                 .productVariants[j];
-                                                      //         selectedIds
-                                                      //             .add(
-                                                      //               v.id,
-                                                      //             );
-                                                      //         variantDetails.add({
-                                                      //           "variant_id":
-                                                      //               v.id,
-                                                      //           "variant_name":
-                                                      //               v.name,
-                                                      //           "variant_price":
-                                                      //               num.tryParse(
-                                                      //                 v.price,
-                                                      //               ) ??
-                                                      //               0,
-                                                      //           "is_online":
-                                                      //               (tapTrue ==
-                                                      //               2),
-                                                      //         });
-                                                      //       }
-                                                      //     }
-
-                                                      //     if (selectedIds
-                                                      //         .isNotEmpty) {
-                                                      //       selectedVariantsByProduct[productId]!.add({
-                                                      //         "variant_category_id":
-                                                      //             categoryId,
-                                                      //         "variant_id":
-                                                      //             selectedIds,
-                                                      //         "variant_detail":
-                                                      //             variantDetails,
-                                                      //       });
-                                                      //     }
-                                                      //   });
-                                                      // },
-                                                      onChanged: (value) {
-                                                        setStateVariant(() {
-                                                          if (value == true) {
-                                                            if (variantCategory
-                                                                    .maximumSelected ==
-                                                                1) {
-                                                              order.clear();
-                                                            } else if (order
-                                                                    .length >=
-                                                                variantCategory
-                                                                    .maximumSelected) {
-                                                              order.removeAt(
-                                                                0,
-                                                              ); // buang yang paling lama
-                                                            }
-                                                            if (!order.contains(
-                                                              vid,
-                                                            ))
-                                                              order.add(vid);
-                                                          } else {
-                                                            order.remove(vid);
-                                                          }
-
-                                                          // hapus error kalau sudah ada pilihan
-                                                          if (order
-                                                              .isNotEmpty) {
-                                                            variantErrorByCategory
-                                                                .remove(
-                                                                  categoryId,
-                                                                );
-                                                          }
-
-                                                          // rebuild selectedVariantsByProduct untuk kategori ini
-                                                          selectedVariantsByProduct[productId] ??=
-                                                              [];
-                                                          selectedVariantsByProduct[productId]!
-                                                              .removeWhere(
-                                                                (e) =>
-                                                                    e['variant_category_id'] ==
-                                                                    categoryId,
-                                                              );
-
-                                                          if (order
-                                                              .isNotEmpty) {
-                                                            final List<
-                                                              Map<
-                                                                String,
-                                                                dynamic
-                                                              >
-                                                            >
-                                                            picked = [];
-                                                            for (final v
-                                                                in variantCategory
-                                                                    .productVariants) {
-                                                              final vId = v.id
-                                                                  .toString();
-                                                              if (!order
-                                                                  .contains(
-                                                                    vId,
-                                                                  ))
-                                                                continue;
-                                                              final int
-                                                              defaultP =
-                                                                  (double.tryParse(
-                                                                            v.price,
-                                                                          ) ??
-                                                                          0)
-                                                                      .round();
-                                                              final customP =
-                                                                  customVariantPriceById[vId];
-                                                              picked.add({
-                                                                "variant_id":
-                                                                    vId,
-                                                                "variant_name":
-                                                                    v.name,
-                                                                "variant_price":
-                                                                    customP ??
-                                                                    defaultP,
-                                                                "is_variant_customize":
-                                                                    customP !=
-                                                                        null
-                                                                    ? 1
-                                                                    : 0,
-                                                              });
-                                                            }
-
-                                                            selectedVariantsByProduct[productId]!.add({
-                                                              "variant_category_id":
-                                                                  categoryId,
-                                                              "variant_category_title":
-                                                                  variantCategory
-                                                                      .title,
-                                                              "variant": picked,
-                                                            });
-                                                          }
-                                                        });
-
-                                                        // // supaya UI harga varian yang diedit juga refresh
-                                                        // setModalState(
-                                                        //   () {},
-                                                        // );
-                                                      },
-                                                      activeColor: primary500,
-
-                                                      // title: Row(
-                                                      //   mainAxisAlignment:
-                                                      //       MainAxisAlignment
-                                                      //           .spaceBetween,
-                                                      //   children: [
-                                                      //     Expanded(
-                                                      //       child: Text(
-                                                      //         opt.name,
-                                                      //         style: heading3(
-                                                      //           FontWeight
-                                                      //               .w400,
-                                                      //           bnw900,
-                                                      //           'Outfit',
-                                                      //         ),
-                                                      //         overflow:
-                                                      //             TextOverflow
-                                                      //                 .ellipsis,
-                                                      //       ),
-                                                      //     ),
-                                                      //     Text(
-                                                      //       FormatCurrency.convertToIdr(
-                                                      //         double.tryParse(
-                                                      //               opt.price,
-                                                      //             ) ??
-                                                      //             0,
-                                                      //       ),
-                                                      //       style: heading4(
-                                                      //         FontWeight
-                                                      //             .w400,
-                                                      //         bnw900,
-                                                      //         'Outfit',
-                                                      //       ),
-                                                      //     ),
-                                                      //   ],
-                                                      // ),
-                                                      title: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Expanded(
-                                                            child: Text(
-                                                              opt.name,
-                                                              style: heading3(
-                                                                FontWeight.w400,
-                                                                bnw900,
-                                                                'Outfit',
-                                                              ),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            width: size12,
-                                                          ),
-
-                                                          // kanan: harga + tombol "Ubah Harga" ATAU textfield
-                                                          Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              Text(
-                                                                FormatCurrency.convertToIdr(
-                                                                  shownVarPrice,
-                                                                ),
-                                                                style: heading4(
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  bnw900,
-                                                                  'Outfit',
-                                                                ),
-                                                              ),
-                                                              if (isVarianCustom) ...[
-                                                                SizedBox(
-                                                                  width: 6,
-                                                                ),
-                                                                Container(
-                                                                  padding:
-                                                                      EdgeInsets.symmetric(
-                                                                        horizontal:
-                                                                            6,
-                                                                        vertical:
-                                                                            2,
-                                                                      ),
-                                                                  decoration: BoxDecoration(
-                                                                    color:
-                                                                        primary100,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                          6,
-                                                                        ),
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Custom',
-                                                                    style: heading4(
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      primary500,
-                                                                      'Outfit',
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                              SizedBox(
-                                                                width: 8,
-                                                              ),
-                                                              OutlinedButton(
-                                                                onPressed:
-                                                                    isSelected
-                                                                    ? () {
-                                                                        showEditVariantPriceSheet(
-                                                                          categoryId:
-                                                                              categoryId,
-                                                                          variantId:
-                                                                              vid,
-                                                                          variantName:
-                                                                              opt.name,
-                                                                          defaultPrice:
-                                                                              defaultVarPrice,
-                                                                          currentShownPrice:
-                                                                              shownVarPrice,
-                                                                          setModalState:
-                                                                              setModalState,
-                                                                        );
-                                                                      }
-                                                                    : null,
-                                                                child: const Text(
-                                                                  'Ubah Harga',
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      controlAffinity:
-                                                          ListTileControlAffinity
-                                                              .trailing,
-                                                      contentPadding:
-                                                          EdgeInsets.symmetric(
-                                                            horizontal: size8,
-                                                          ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(height: size8),
-                                            Text(
-                                              "${order.length} dari ${variantCategory.productVariants.length}",
-                                              style: heading4(
-                                                FontWeight.w400,
-                                                bnw900,
-                                                'Outfit',
-                                              ),
-                                            ),
-                                            SizedBox(height: size24),
-                                          ],
-                                        ),
+                        ),
+                      ),
+          
+                      SizedBox(height: size32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                for (var product in datasTransaksi!) {
+                                  print('Produk: ${product.name}');
+                                  for (var cat in product.variants) {
+                                    print(
+                                      '  Kategori: ${cat.variantCategoryTitle}',
+                                    );
+                                    for (var opt in cat.variants) {
+                                      print(
+                                        '    - ${opt.variantProductName} (Rp${opt.variantProductPrice})',
                                       );
-                                    },
-                                  );
-                                }).toList(),
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: size16),
-                          Text(
-                            'Catatan',
-                            style: body1(FontWeight.w500, bnw900, 'Outfit'),
-                          ),
-                          IntrinsicHeight(
-                            child: TextFormField(
-                              cursorColor: primary500,
-                              style: heading2(
-                                FontWeight.w600,
-                                bnw900,
-                                'Outfit',
+                                    }
+                                  }
+                                }
+          
+                                Navigator.pop(context);
+                              },
+                              child: buttonXLoutline(
+                                Center(
+                                  child: Text(
+                                    'Batalkan',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      primary500,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                ),
+                                MediaQuery.of(context).size.width,
+                                primary500,
                               ),
-                              controller: conCatatanPreview,
-                              decoration: InputDecoration(
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    width: 2,
-                                    color: primary500,
+                            ),
+                          ),
+                          SizedBox(width: size16),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                final selectedVariantList =
+                                    (selectedVariantsByProduct[productId]
+                                        as List<Map<String, dynamic>>?) ??
+                                    [];
+          
+                                final Map<String, String> newError = {};
+                                print(
+                                  'selectedVariants: ${selectedVariantsByProduct[productId]}',
+                                );
+                                for (final cat in lastVariantData) {
+                                  final catId = cat.id.toString();
+                                  if (cat.isRequired == 1) {
+                                    // ambil list pilihan di kategori ini
+                                    final List<dynamic> selectedInCat =
+                                        (selectedVariantList ?? [])
+                                            .where(
+                                              (v) =>
+                                                  v['variant_category_id'] ==
+                                                  catId,
+                                            )
+                                            .toList();
+          
+                                    // hitung total varian yang dipilih di kategori ini
+                                    // int selectedCount = 0;
+                                    // if (selectedInCat.isNotEmpty) {
+                                    //   final details =
+                                    //       selectedInCat.first['variant_detail']
+                                    //           as List<dynamic>?;
+                                    //   if (details != null) {
+                                    //     selectedCount = details.length;
+                                    //   }
+                                    // }
+          
+                                    final picked = selectedInCat.isNotEmpty
+                                        ? ((selectedInCat.first['variant']
+                                                  as List?) ??
+                                              const [])
+                                        : const [];
+          
+                                    final selectedCount = picked.length;
+          
+                                    final int minRequired = cat.maximumSelected;
+                                    // kalau logikanya: wajib pilih tepat = maximumSelected
+                                    // kalau mau beda, bikin field minimumSelected sendiri
+          
+                                    if (selectedCount < minRequired) {
+                                      newError[catId] =
+                                          'Wajib pilih minimal $minRequired varian di kategori ini';
+                                    }
+                                  }
+                                }
+          
+                                if (newError.isNotEmpty) {
+                                  setState(() {
+                                    variantErrorByCategory
+                                      ..clear()
+                                      ..addAll(newError);
+                                  });
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    _scrollToFirstErrorCategory(
+                                      newError.keys.first,
+                                    );
+                                  });
+                                  return;
+                                }
+          
+                                // num basePrice = (tapTrue == 2
+                                //     ? datasTransaksi![i]
+                                //           .price_online_shop_after!
+                                //     : datasTransaksi![i].price_after!);
+          
+                                // num totalVariantPrice = 0;
+                                // List<Map<String, dynamic>>?
+                                // selectedVariantList =
+                                //     selectedVariantsByProduct[productId];
+          
+                                // if (selectedVariantList != null &&
+                                //     selectedVariantList.isNotEmpty) {
+                                //   for (var variantCat in selectedVariantList) {
+                                //     List<dynamic>? details =
+                                //         variantCat['variant_detail'];
+                                //     if (details != null && details.isNotEmpty) {
+                                //       for (var detail in details) {
+                                //         final hargaVarian =
+                                //             num.tryParse(
+                                //               detail['variant_price']
+                                //                   .toString(),
+                                //             ) ??
+                                //             0;
+                                //         totalVariantPrice += hargaVarian;
+                                //       }
+                                //     }
+                                //   }
+                                // }
+          
+                                // num finalPrice = basePrice + totalVariantPrice;
+          
+                                final int basePriceUsed = baseUsed();
+                                final bool baseIsCustomFlag = baseIsCustom();
+          
+                                num totalVariantPrice = 0;
+          
+                                for (final cat in selectedVariantList) {
+                                  final list = (cat['variant'] as List?) ?? [];
+                                  for (final v in list) {
+                                    totalVariantPrice +=
+                                        (v['variant_price'] as num? ?? 0);
+                                  }
+                                }
+          
+                                final num finalPrice =
+                                    basePriceUsed + totalVariantPrice;
+          
+                                // 🆕 Buat "signature" unik dari kombinasi
+                                final String variantSignature = jsonEncode(
+                                  selectedVariantList,
+                                );
+                                final String catatan = conCatatanPreview.text
+                                    .trim();
+          
+                                // 🧾 Cek apakah item dengan kombinasi ini sudah ada
+                                final String isOnlineStr = tapTrue == 2
+                                    ? 'true'
+                                    : 'false';
+                                int existingIndex = cart.indexWhere(
+                                  (e) =>
+                                      // e.productid == productId &&
+                                      // (cartMap[cart.indexOf(e)]['variants'] ??
+                                      //         '[]') ==
+                                      //     variantSignature &&
+                                      // e.desc == catatan &&
+                                      // (cartMap[cart.indexOf(e)]['is_online'] ??
+                                      //         'false') ==
+                                      //     (tapTrue == 2 ? true : false),
+                                      e.productid == productId &&
+                                      (cartMap[cart.indexOf(e)]['variants'] ??
+                                              '[]') ==
+                                          variantSignature &&
+                                      e.desc == catatan &&
+                                      (cartMap[cart.indexOf(e)]['is_online'] ??
+                                              'false') ==
+                                          isOnlineStr &&
+                                      (cartMap[cart.indexOf(e)]['amount'] ??
+                                              '0') ==
+                                          basePriceUsed.toString() &&
+                                      (cartMap[cart.indexOf(e)]['is_customize'] ??
+                                              'false') ==
+                                          (baseIsCustomFlag ? 'true' : 'false'),
+                                );
+          
+                                setState(() {
+                                  final String name = (item.name ?? '').trim();
+                                  final String image = (item.product_image ?? '')
+                                      .trim();
+          
+                                  if (existingIndex != -1) {
+                                    // ✅ Item dengan varian & catatan yang sama → tambah qty
+                                    cart[existingIndex].baseUsed ??=
+                                        basePriceUsed;
+                                    cart[existingIndex].quantity += counterCart;
+                                    total[existingIndex] =
+                                        cart[existingIndex].price! *
+                                        cart[existingIndex].quantity;
+                                    sumTotal = total.fold(0, (a, b) => a + b);
+          
+                                    cartMap[existingIndex]['quantity'] =
+                                        cart[existingIndex].quantity.toString();
+                                  } else {
+                                    // 🆕 Item baru → tambahkan baris baru
+                                    sumTotal += (finalPrice * counterCart);
+                                    total.add(finalPrice * counterCart);
+          
+                                    conCatatan.add(
+                                      TextEditingController(text: catatan),
+                                    );
+          
+                                    cart.add(
+                                      CartTransaksi(
+                                        name: name,
+                                        productid: productId,
+                                        image: image,
+                                        baseUsed: basePriceUsed,
+                                        price: finalPrice,
+                                        quantity: counterCart,
+                                        desc: catatan,
+                                        idRequest: "",
+                                        variants: selectedVariantList.isNotEmpty
+                                            ? jsonEncode(
+                                                selectedVariantList,
+                                              ) // Encode list of variants to JSON string
+                                            : null, // Jika tidak ada variants, set ke null
+                                      ),
+                                    );
+          
+                                    // for (var cartItem in cart) {
+                                    //   print(
+                                    //     'Cart Item: ${cartItem.name}, Variants: ${cartItem.variants}',
+                                    //   );
+                                    // }
+          
+                                    // print('ini adalah cart baru ${cart}');
+          
+                                    cartProductIds.add(productId);
+          
+                                    Map<String, String> map1 = {};
+                                    map1['name'] = name;
+                                    map1['product_id'] = productId;
+                                    map1['quantity'] = counterCart.toString();
+                                    map1['image'] = image;
+                                    // map1['amount_display'] = finalPrice
+                                    //     .toString();
+                                    // map1['amount'] = finalPrice.toString();
+          
+                                    map1['amount'] = basePriceUsed
+                                        .toString(); // ✅ base price buat BE
+                                    map1['is_customize'] = baseIsCustomFlag
+                                        ? 'true'
+                                        : 'false';
+          
+                                    map1['amount_display'] = finalPrice
+                                        .toString(); // ✅ total buat UI
+                                    map1['description'] = catatan;
+                                    map1['id_request'] = '';
+                                    map1['is_online'] = isOnlineStr;
+          
+                                    // Menambahkan variants jika ada
+                                    map1['variants'] =
+                                        selectedVariantList.isNotEmpty
+                                        ? jsonEncode(selectedVariantList)
+                                        : '[]';
+                                    cartMap.add(map1);
+                                    print(
+                                      '🆕 Produk baru ditambahkan: ${cartMap}',
+                                    );
+                                  }
+                                  Navigator.pop(context);
+                                });
+                              },
+          
+                              child: buttonXL(
+                                Center(
+                                  child: Text(
+                                    'Tambah Ke Keranjang',
+                                    style: heading3(
+                                      FontWeight.w600,
+                                      bnw100,
+                                      'Outfit',
+                                    ),
                                   ),
                                 ),
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: size12,
-                                ),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    width: 1.5,
-                                    color: bnw500,
-                                  ),
-                                ),
-                                hintText:
-                                    'Cth : Tambah ekstra topping Boba dan Gula 2 sendok',
-                                hintStyle: heading2(
-                                  FontWeight.w600,
-                                  bnw500,
-                                  'Outfit',
-                                ),
+                                MediaQuery.of(context).size.width,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-
-                    SizedBox(height: size32),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              for (var product in datasTransaksi!) {
-                                print('Produk: ${product.name}');
-                                for (var cat in product.variants) {
-                                  print(
-                                    '  Kategori: ${cat.variantCategoryTitle}',
-                                  );
-                                  for (var opt in cat.variants) {
-                                    print(
-                                      '    - ${opt.variantProductName} (Rp${opt.variantProductPrice})',
-                                    );
-                                  }
-                                }
-                              }
-
-                              Navigator.pop(context);
-                            },
-                            child: buttonXLoutline(
-                              Center(
-                                child: Text(
-                                  'Batalkan',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    primary500,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                              MediaQuery.of(context).size.width,
-                              primary500,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: size16),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              final selectedVariantList =
-                                  (selectedVariantsByProduct[productId]
-                                      as List<Map<String, dynamic>>?) ??
-                                  [];
-
-                              final Map<String, String> newError = {};
-                              print(
-                                'selectedVariants: ${selectedVariantsByProduct[productId]}',
-                              );
-                              for (final cat in lastVariantData) {
-                                final catId = cat.id.toString();
-                                if (cat.isRequired == 1) {
-                                  // ambil list pilihan di kategori ini
-                                  final List<dynamic> selectedInCat =
-                                      (selectedVariantList ?? [])
-                                          .where(
-                                            (v) =>
-                                                v['variant_category_id'] ==
-                                                catId,
-                                          )
-                                          .toList();
-
-                                  // hitung total varian yang dipilih di kategori ini
-                                  // int selectedCount = 0;
-                                  // if (selectedInCat.isNotEmpty) {
-                                  //   final details =
-                                  //       selectedInCat.first['variant_detail']
-                                  //           as List<dynamic>?;
-                                  //   if (details != null) {
-                                  //     selectedCount = details.length;
-                                  //   }
-                                  // }
-
-                                  final picked = selectedInCat.isNotEmpty
-                                      ? ((selectedInCat.first['variant']
-                                                as List?) ??
-                                            const [])
-                                      : const [];
-
-                                  final selectedCount = picked.length;
-
-                                  final int minRequired = cat.maximumSelected;
-                                  // kalau logikanya: wajib pilih tepat = maximumSelected
-                                  // kalau mau beda, bikin field minimumSelected sendiri
-
-                                  if (selectedCount < minRequired) {
-                                    newError[catId] =
-                                        'Wajib pilih minimal $minRequired varian di kategori ini';
-                                  }
-                                }
-                              }
-
-                              if (newError.isNotEmpty) {
-                                setState(() {
-                                  variantErrorByCategory
-                                    ..clear()
-                                    ..addAll(newError);
-                                });
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  _scrollToFirstErrorCategory(
-                                    newError.keys.first,
-                                  );
-                                });
-                                return;
-                              }
-
-                              // num basePrice = (tapTrue == 2
-                              //     ? datasTransaksi![i]
-                              //           .price_online_shop_after!
-                              //     : datasTransaksi![i].price_after!);
-
-                              // num totalVariantPrice = 0;
-                              // List<Map<String, dynamic>>?
-                              // selectedVariantList =
-                              //     selectedVariantsByProduct[productId];
-
-                              // if (selectedVariantList != null &&
-                              //     selectedVariantList.isNotEmpty) {
-                              //   for (var variantCat in selectedVariantList) {
-                              //     List<dynamic>? details =
-                              //         variantCat['variant_detail'];
-                              //     if (details != null && details.isNotEmpty) {
-                              //       for (var detail in details) {
-                              //         final hargaVarian =
-                              //             num.tryParse(
-                              //               detail['variant_price']
-                              //                   .toString(),
-                              //             ) ??
-                              //             0;
-                              //         totalVariantPrice += hargaVarian;
-                              //       }
-                              //     }
-                              //   }
-                              // }
-
-                              // num finalPrice = basePrice + totalVariantPrice;
-
-                              final int basePriceUsed = baseUsed();
-                              final bool baseIsCustomFlag = baseIsCustom();
-
-                              num totalVariantPrice = 0;
-
-                              for (final cat in selectedVariantList) {
-                                final list = (cat['variant'] as List?) ?? [];
-                                for (final v in list) {
-                                  totalVariantPrice +=
-                                      (v['variant_price'] as num? ?? 0);
-                                }
-                              }
-
-                              final num finalPrice =
-                                  basePriceUsed + totalVariantPrice;
-
-                              // 🆕 Buat "signature" unik dari kombinasi
-                              final String variantSignature = jsonEncode(
-                                selectedVariantList,
-                              );
-                              final String catatan = conCatatanPreview.text
-                                  .trim();
-
-                              // 🧾 Cek apakah item dengan kombinasi ini sudah ada
-                              final String isOnlineStr = tapTrue == 2
-                                  ? 'true'
-                                  : 'false';
-                              int existingIndex = cart.indexWhere(
-                                (e) =>
-                                    // e.productid == productId &&
-                                    // (cartMap[cart.indexOf(e)]['variants'] ??
-                                    //         '[]') ==
-                                    //     variantSignature &&
-                                    // e.desc == catatan &&
-                                    // (cartMap[cart.indexOf(e)]['is_online'] ??
-                                    //         'false') ==
-                                    //     (tapTrue == 2 ? true : false),
-                                    e.productid == productId &&
-                                    (cartMap[cart.indexOf(e)]['variants'] ??
-                                            '[]') ==
-                                        variantSignature &&
-                                    e.desc == catatan &&
-                                    (cartMap[cart.indexOf(e)]['is_online'] ??
-                                            'false') ==
-                                        isOnlineStr &&
-                                    (cartMap[cart.indexOf(e)]['amount'] ??
-                                            '0') ==
-                                        basePriceUsed.toString() &&
-                                    (cartMap[cart.indexOf(e)]['is_customize'] ??
-                                            'false') ==
-                                        (baseIsCustomFlag ? 'true' : 'false'),
-                              );
-
-                              setState(() {
-                                final String name = (item.name ?? '').trim();
-                                final String image = (item.product_image ?? '')
-                                    .trim();
-
-                                if (existingIndex != -1) {
-                                  // ✅ Item dengan varian & catatan yang sama → tambah qty
-                                  cart[existingIndex].baseUsed ??=
-                                      basePriceUsed;
-                                  cart[existingIndex].quantity += counterCart;
-                                  total[existingIndex] =
-                                      cart[existingIndex].price! *
-                                      cart[existingIndex].quantity;
-                                  sumTotal = total.fold(0, (a, b) => a + b);
-
-                                  cartMap[existingIndex]['quantity'] =
-                                      cart[existingIndex].quantity.toString();
-                                } else {
-                                  // 🆕 Item baru → tambahkan baris baru
-                                  sumTotal += (finalPrice * counterCart);
-                                  total.add(finalPrice * counterCart);
-
-                                  conCatatan.add(
-                                    TextEditingController(text: catatan),
-                                  );
-
-                                  cart.add(
-                                    CartTransaksi(
-                                      name: name,
-                                      productid: productId,
-                                      image: image,
-                                      baseUsed: basePriceUsed,
-                                      price: finalPrice,
-                                      quantity: counterCart,
-                                      desc: catatan,
-                                      idRequest: "",
-                                      variants: selectedVariantList.isNotEmpty
-                                          ? jsonEncode(
-                                              selectedVariantList,
-                                            ) // Encode list of variants to JSON string
-                                          : null, // Jika tidak ada variants, set ke null
-                                    ),
-                                  );
-
-                                  // for (var cartItem in cart) {
-                                  //   print(
-                                  //     'Cart Item: ${cartItem.name}, Variants: ${cartItem.variants}',
-                                  //   );
-                                  // }
-
-                                  // print('ini adalah cart baru ${cart}');
-
-                                  cartProductIds.add(productId);
-
-                                  Map<String, String> map1 = {};
-                                  map1['name'] = name;
-                                  map1['product_id'] = productId;
-                                  map1['quantity'] = counterCart.toString();
-                                  map1['image'] = image;
-                                  // map1['amount_display'] = finalPrice
-                                  //     .toString();
-                                  // map1['amount'] = finalPrice.toString();
-
-                                  map1['amount'] = basePriceUsed
-                                      .toString(); // ✅ base price buat BE
-                                  map1['is_customize'] = baseIsCustomFlag
-                                      ? 'true'
-                                      : 'false';
-
-                                  map1['amount_display'] = finalPrice
-                                      .toString(); // ✅ total buat UI
-                                  map1['description'] = catatan;
-                                  map1['id_request'] = '';
-                                  map1['is_online'] = isOnlineStr;
-
-                                  // Menambahkan variants jika ada
-                                  map1['variants'] =
-                                      selectedVariantList.isNotEmpty
-                                      ? jsonEncode(selectedVariantList)
-                                      : '[]';
-                                  cartMap.add(map1);
-                                  print(
-                                    '🆕 Produk baru ditambahkan: ${cartMap}',
-                                  );
-                                }
-                                Navigator.pop(context);
-                              });
-                            },
-
-                            child: buttonXL(
-                              Center(
-                                child: Text(
-                                  'Tambah Ke Keranjang',
-                                  style: heading3(
-                                    FontWeight.w600,
-                                    bnw100,
-                                    'Outfit',
-                                  ),
-                                ),
-                              ),
-                              MediaQuery.of(context).size.width,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
@@ -10275,312 +10325,316 @@ class _TransactionPageState extends State<TransactionPage>
       ),
       context: context,
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height / 2,
-          padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
-          decoration: BoxDecoration(
-            color: bnw100,
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(size16),
-              topLeft: Radius.circular(size16),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              dividerShowdialog(),
-              SizedBox(height: size16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Pilih Tipe Pembeli',
-                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Icon(PhosphorIcons.x, color: bnw900, size: size32),
-                  ),
-                ],
+        return SafeArea(
+          child: Container(
+            height: MediaQuery.of(context).size.height / 2,
+            padding: EdgeInsets.fromLTRB(size32, size16, size32, size32),
+            decoration: BoxDecoration(
+              color: bnw100,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(size16),
+                topLeft: Radius.circular(size16),
               ),
-              SizedBox(height: size16),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                dividerShowdialog(),
+                SizedBox(height: size16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          _pageController.jumpToPage(index);
-                          Navigator.pop(context);
-                          setState(() {});
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(size16),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: bnw300),
-                            borderRadius: BorderRadius.circular(size16),
-                          ),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: SvgPicture.asset(
-                                  'assets/newIllustration/OnBoarding1.svg',
+                    Text(
+                      'Pilih Tipe Pembeli',
+                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(PhosphorIcons.x, color: bnw900, size: size32),
+                    ),
+                  ],
+                ),
+                SizedBox(height: size16),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            _pageController.jumpToPage(index);
+                            Navigator.pop(context);
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(size16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(size16),
+                            ),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: SvgPicture.asset(
+                                    'assets/newIllustration/OnBoarding1.svg',
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: size8),
-                              Text(
-                                'Pelanggan',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
+                                SizedBox(height: size8),
+                                Text(
+                                  'Pelanggan',
+                                  style: heading2(
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: size16),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                          controllerPelangganName.text = '';
-                          pelangganId = '';
-                          showModalBottomSheet(
-                            constraints: const BoxConstraints(
-                              maxWidth: double.infinity,
-                            ),
-                            isScrollControlled: true,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            context: context,
-                            builder: (context) => IntrinsicHeight(
-                              child: Container(
-                                padding: EdgeInsets.only(
-                                  bottom: MediaQuery.of(
-                                    context,
-                                  ).viewInsets.bottom,
-                                ),
-                                // height: MediaQuery.of(context).size.height / 1,
-                                decoration: BoxDecoration(
-                                  color: bnw100,
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(12),
-                                    topLeft: Radius.circular(12),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    size32,
-                                    size16,
-                                    size32,
-                                    size32,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      dividerShowdialog(),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                      SizedBox(width: size16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                            controllerPelangganName.text = '';
+                            pelangganId = '';
+                            showModalBottomSheet(
+                              constraints: const BoxConstraints(
+                                maxWidth: double.infinity,
+                              ),
+                              isScrollControlled: true,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              context: context,
+                              builder: (context) => SafeArea(
+                                child: IntrinsicHeight(
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(
+                                        context,
+                                      ).viewInsets.bottom,
+                                    ),
+                                    // height: MediaQuery.of(context).size.height / 1,
+                                    decoration: BoxDecoration(
+                                      color: bnw100,
+                                      borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(12),
+                                        topLeft: Radius.circular(12),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        size32,
+                                        size16,
+                                        size32,
+                                        size32,
+                                      ),
+                                      child: Column(
                                         children: [
-                                          SizedBox(height: size16),
-                                          Text(
-                                            'Pilih Pembeli',
-                                            style: heading1(
-                                              FontWeight.w700,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          SizedBox(height: size16),
-                                          Row(
+                                          dividerShowdialog(),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
+                                              SizedBox(height: size16),
                                               Text(
-                                                'Nama Pembeli ',
-                                                style: heading4(
-                                                  FontWeight.w400,
+                                                'Pilih Pembeli',
+                                                style: heading1(
+                                                  FontWeight.w700,
                                                   bnw900,
                                                   'Outfit',
                                                 ),
                                               ),
-                                              Text(
-                                                '*',
-                                                style: heading4(
-                                                  FontWeight.w400,
-                                                  danger500,
+                                              SizedBox(height: size16),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    'Nama Pembeli ',
+                                                    style: heading4(
+                                                      FontWeight.w400,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '*',
+                                                    style: heading4(
+                                                      FontWeight.w400,
+                                                      danger500,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              TextFormField(
+                                                style: heading2(
+                                                  FontWeight.w600,
+                                                  bnw900,
                                                   'Outfit',
+                                                ),
+                                                controller: controllerPelangganName,
+                                                onChanged: (value) {
+                                                  setState(() {});
+                                                },
+                                                cursorColor: primary500,
+                                                decoration: InputDecoration(
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                        vertical: size12,
+                                                      ),
+                                                  isDense: true,
+                                                  focusedBorder:
+                                                      UnderlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              size8,
+                                                            ),
+                                                        borderSide: BorderSide(
+                                                          width: 2,
+                                                          color: primary500,
+                                                        ),
+                                                      ),
+                                                  focusColor: primary500,
+                                                  hintText:
+                                                      'Cth : Muhammad Nabil Musyaffa',
+                                                  hintStyle: heading2(
+                                                    FontWeight.w600,
+                                                    bnw400,
+                                                    'Outfit',
+                                                  ),
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          TextFormField(
-                                            style: heading2(
-                                              FontWeight.w600,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                            controller: controllerPelangganName,
-                                            onChanged: (value) {
-                                              setState(() {});
-                                            },
-                                            cursorColor: primary500,
-                                            decoration: InputDecoration(
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    vertical: size12,
-                                                  ),
-                                              isDense: true,
-                                              focusedBorder:
-                                                  UnderlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          size8,
-                                                        ),
-                                                    borderSide: BorderSide(
-                                                      width: 2,
-                                                      color: primary500,
-                                                    ),
-                                                  ),
-                                              focusColor: primary500,
-                                              hintText:
-                                                  'Cth : Muhammad Nabil Musyaffa',
-                                              hintStyle: heading2(
-                                                FontWeight.w600,
-                                                bnw400,
-                                                'Outfit',
-                                              ),
-                                            ),
+                                          SizedBox(
+                                            height:
+                                                controllerPelangganName
+                                                    .text
+                                                    .isNotEmpty
+                                                ? size32
+                                                : 0,
                                           ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            controllerPelangganName
-                                                .text
-                                                .isNotEmpty
-                                            ? size32
-                                            : 0,
-                                      ),
-                                      controllerPelangganName.text.isNotEmpty
-                                          ? Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      pelangganId = '';
-                                                      Navigator.pop(context);
-                                                      pilihPembeliShowBottom(
-                                                        context,
-                                                        index,
-                                                      );
-                                                    },
-                                                    child: buttonXLoutline(
-                                                      Center(
-                                                        child: Text(
-                                                          'Batal',
-                                                          style: heading3(
-                                                            FontWeight.w600,
-                                                            primary500,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width,
-                                                      primary500,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(width: size16),
-                                                Expanded(
-                                                  child: Consumer<RefreshTampilan>(
-                                                    builder:
-                                                        (
-                                                          context,
-                                                          value,
-                                                          child,
-                                                        ) => GestureDetector(
-                                                          onTap: () {
-                                                            pelangganId =
-                                                                controllerPelangganName
-                                                                    .text;
-                                                            value.namaPelanggan =
-                                                                controllerPelangganName
-                                                                    .text;
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                            setState(() {});
-                                                            // initState();
-                                                          },
-                                                          child: buttonXL(
-                                                            Center(
-                                                              child: Text(
-                                                                'Simpan',
-                                                                style: heading3(
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  bnw100,
-                                                                  'Outfit',
-                                                                ),
+                                          controllerPelangganName.text.isNotEmpty
+                                              ? Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.spaceAround,
+                                                  children: [
+                                                    Expanded(
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          pelangganId = '';
+                                                          Navigator.pop(context);
+                                                          pilihPembeliShowBottom(
+                                                            context,
+                                                            index,
+                                                          );
+                                                        },
+                                                        child: buttonXLoutline(
+                                                          Center(
+                                                            child: Text(
+                                                              'Batal',
+                                                              style: heading3(
+                                                                FontWeight.w600,
+                                                                primary500,
+                                                                'Outfit',
                                                               ),
                                                             ),
-                                                            MediaQuery.of(
-                                                              context,
-                                                            ).size.width,
                                                           ),
+                                                          MediaQuery.of(
+                                                            context,
+                                                          ).size.width,
+                                                          primary500,
                                                         ),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          : SizedBox(),
-                                    ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: size16),
+                                                    Expanded(
+                                                      child: Consumer<RefreshTampilan>(
+                                                        builder:
+                                                            (
+                                                              context,
+                                                              value,
+                                                              child,
+                                                            ) => GestureDetector(
+                                                              onTap: () {
+                                                                pelangganId =
+                                                                    controllerPelangganName
+                                                                        .text;
+                                                                value.namaPelanggan =
+                                                                    controllerPelangganName
+                                                                        .text;
+                                                                Navigator.pop(
+                                                                  context,
+                                                                );
+                                                                setState(() {});
+                                                                // initState();
+                                                              },
+                                                              child: buttonXL(
+                                                                Center(
+                                                                  child: Text(
+                                                                    'Simpan',
+                                                                    style: heading3(
+                                                                      FontWeight
+                                                                          .w600,
+                                                                      bnw100,
+                                                                      'Outfit',
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                MediaQuery.of(
+                                                                  context,
+                                                                ).size.width,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SizedBox(),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(size16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: bnw300),
+                              borderRadius: BorderRadius.circular(size16),
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(size16),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: bnw300),
-                            borderRadius: BorderRadius.circular(size16),
-                          ),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: SvgPicture.asset(
-                                  'assets/newIllustration/OnBoarding3.svg',
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: SvgPicture.asset(
+                                    'assets/newIllustration/OnBoarding3.svg',
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: size8),
-                              Text(
-                                'Bukan Pelanggan',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
+                                SizedBox(height: size8),
+                                Text(
+                                  'Bukan Pelanggan',
+                                  style: heading2(
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -10671,183 +10725,6 @@ class _TransactionPageState extends State<TransactionPage>
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  orderBy(BuildContext context) {
-    return IntrinsicWidth(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            showModalBottomSheet(
-              constraints: const BoxConstraints(maxWidth: double.infinity),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByProductText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color:
-                                                  valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw300,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
-                                            ),
-                                          ),
-                                          label: Text(
-                                            orderByProductText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByProduct == index
-                                                  ? primary500
-                                                  : bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
-                                          selected:
-                                              valueOrderByProduct == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByProduct = index;
-                                            });
-                                            setState(() {});
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                print(valueOrderByProduct);
-                                print(orderByProductText[valueOrderByProduct]);
-
-                                textOrderBy =
-                                    orderByProductText[valueOrderByProduct];
-                                textvalueOrderBy =
-                                    orderByProduct[valueOrderByProduct];
-                                orderByProduct[valueOrderByProduct];
-                                Navigator.pop(context);
-                                initState();
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          });
-        },
-        child: buttonLoutline(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Urutkan',
-                style: heading3(FontWeight.w600, bnw900, 'Outfit'),
-              ),
-              Text(
-                ' dari $textOrderBy',
-                style: heading3(FontWeight.w400, bnw900, 'Outfit'),
-              ),
-              SizedBox(width: size12),
-              Icon(PhosphorIcons.caret_down, color: bnw900, size: size24),
-            ],
-          ),
-          bnw300,
         ),
       ),
     );

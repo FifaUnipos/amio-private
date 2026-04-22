@@ -938,18 +938,22 @@ class _PromosiGrupState extends State<PromosiGrup>
                                         Border.all(color: primary500),
                                     inactiveSwitchBorder:
                                         Border.all(color: bnw300, width: 2),
-                                    onToggle: (bool value) {
+                                    onToggle: (bool value) async {
                                       // print('hello');
                                       List<String> listProduct = [
                                         dataProduk.productid!
                                       ];
-                                      changeActive(
+                                      String rc = await changeActive(
                                         context,
                                         widget.token,
                                         value.toString(),
                                         listProduct,
                                         widget.merchid,
                                       );
+                                      if (rc == '00') {
+                                        dataProduk.isActive = value ? 1 : 0;
+                                        // refreshDataProduk();
+                                      }
                                       setState(() {});
                                       initState();
                                     },

@@ -47,10 +47,29 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   List<_BankOption> _bankList = [];
   bool _isLoadingBanks = true;
 
+  double _feeValue = 0;
+  String _feeOperation = 'nominal';
+
   @override
   void initState() {
     super.initState();
     _fetchBanks();
+    _fetchFee();
+  }
+
+  Future<void> _fetchFee() async {
+    try {
+      final res = await http.post(
+        Uri.parse('$url/api/fee/withdraw'),
+        headers: {'Content-Type': 'application/json', 'token': widget.token},
+      );
+      final json = jsonDecode(res.body);
+      if (json['rc'] == '00') {
+        _feeValue = double.tryParse(json['data']['fee'].toString()) ?? 0;
+        _feeOperation = (json['data']['operation'] ?? 'nominal').toString().toLowerCase();
+      }
+    } catch(e) {}
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchBanks() async {
@@ -98,7 +117,15 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   // ── Nominal ───────────────────────────────────────────────────────────
   final _amountCtrl = TextEditingController();
   double _amount = 0;
-  double get _fee => _amount * 0.10;
+  
+  double get _fee {
+    if (_feeOperation == 'percentage') {
+      return _amount * (_feeValue / 100.0);
+    } else {
+      return _amount > 0 ? _feeValue : 0;
+    }
+  }
+
   double get _net => _amount > 0 ? (_amount - _fee) : 0;
 
   final _fmt = NumberFormat('#,###', 'id_ID');
@@ -138,7 +165,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   String _rp(double v) => _fmtRp.format(v.toInt());
 
   bool get _canSubmit =>
-      _amount > 0 &&
+      _amount >= 10000 &&
       _nameCtrl.text.trim().isNotEmpty &&
       _accountCtrl.text.trim().isNotEmpty &&
       _selectedBank != null &&
@@ -262,6 +289,14 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                   ),
                   const SizedBox(height: 10),
                   _amountCard(),
+                  if (_amount > 0 && _amount < 10000)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4),
+                      child: Text(
+                        'Minimal penarikan adalah Rp 10.000',
+                        style: body2(FontWeight.w500, const Color(0xFFDC2626), 'Outfit'),
+                      ),
+                    ),
                   const SizedBox(height: 20),
         
                   // ── 3. Tujuan Transfer ───────────────────────────────
@@ -523,6 +558,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
             _nameCtrl,
             'Contoh: ALEXANDER VANCE',
             textCapitalization: TextCapitalization.characters,
+            inputFormatters: [UpperCaseTextFormatter()],
           ),
           const SizedBox(height: 16),
           // Bank code picker
@@ -632,11 +668,13 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
     String hint, {
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
       onChanged: (_) => setState(() {}),
       style: body1(FontWeight.w400, bnw900, 'Outfit'),
       decoration: InputDecoration(
@@ -877,5 +915,15 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
     _nameCtrl.dispose();
     _accountCtrl.dispose();
     super.dispose();
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
   }
 }

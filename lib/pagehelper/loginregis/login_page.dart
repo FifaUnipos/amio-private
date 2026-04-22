@@ -144,143 +144,134 @@ class _LoginPageState extends State<LoginPage> {
   Widget loginForm(bool isTablet) {
     return ScrollConfiguration(
       behavior: ScrollBehavior().copyWith(overscroll: false),
-      child: Container(
+      child: Center(
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.only(bottom: size16),
-          child: IntrinsicHeight(
-            child: Column(
-              mainAxisAlignment: isTablet
-                  ? MainAxisAlignment.center
-                  : MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Masuk',
-                  style: heading1(FontWeight.w700, bnw900, 'Outfit'),
-                ),
-                Text(
-                  'Masukkan nomor telepon atau email yang telah terdaftar.',
-                  style: heading3(FontWeight.w500, bnw500, 'Outfit'),
-                ),
-                SizedBox(height: size24),
-                Row(
-                  children: [
-                    Text(
-                      'Nomor Telpon / Email ',
-                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                    ),
-                    Text(
-                      '*',
-                      style: heading4(FontWeight.w700, red500, 'Outfit'),
-                    ),
-                  ],
-                ),
-                Container(
-                  child: IntrinsicHeight(
-                    child: TextFormField(
-                      // focusNode: _focusScopeNode,
-                      style: heading2(FontWeight.w600, bnw900, 'Outfit'),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value.contains('@') || value.endsWith('.com')) {
-                            validated = 'email';
-                            onOffButton = primary500;
-                          } else if (value.startsWith('08') ||
-                              value.length < 10) {
-                            validated = 'number';
-                            onOffButton = primary500;
-                          }
-                        });
-                      },
-                      cursorColor: primary500,
-                      controller: phoneEmailController,
-                      decoration: InputDecoration(
-                        errorText: _validate ? errorText : null,
-                        errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 2, color: primary500),
-                        ),
-                        focusedErrorBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(width: 2, color: red500),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: size12),
-                        hintText: 'Cth : 08123456789 / nabil@email.com ',
-                        hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
-                      ),
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: isTablet
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Masuk', style: heading1(FontWeight.w700, bnw900, 'Outfit')),
+              Text(
+                'Masukkan nomor telepon atau email yang telah terdaftar.',
+                style: heading3(FontWeight.w500, bnw500, 'Outfit'),
+              ),
+              SizedBox(height: size24),
+              Row(
+                children: [
+                  Text(
+                    'Nomor Telpon / Email ',
+                    style: heading4(FontWeight.w500, bnw900, 'Outfit'),
                   ),
-                ),
-                SizedBox(height: size32),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: GestureDetector(
-                    onTap: () async {
+                  Text('*', style: heading4(FontWeight.w700, red500, 'Outfit')),
+                ],
+              ),
+              Container(
+                child: IntrinsicHeight(
+                  child: TextFormField(
+                    // focusNode: _focusScopeNode,
+                    style: heading2(FontWeight.w600, bnw900, 'Outfit'),
+                    onChanged: (value) {
                       setState(() {
-                        errorText = '';
-                        _focusScopeNode.unfocus();
-                        if (validated == 'number') {
-                          getOtp(
-                            Otppage(
-                              phoneEmailController.text,
-                              name.toString(),
-                              // pass.toString(),
-                              email.toString(),
-                              'login_page',
-                            ),
-                          );
-                        } else if (validated == 'email') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginWithEmail(
-                                email: phoneEmailController.text,
-                              ),
-                            ),
-                          );
-                          // getOtpEmail(
-                          // );
+                        if (value.contains('@') || value.endsWith('.com')) {
+                          validated = 'email';
+                          onOffButton = primary500;
+                        } else if (value.startsWith('08') ||
+                            value.length < 10) {
+                          validated = 'number';
+                          onOffButton = primary500;
                         }
                       });
                     },
-                    child: buttonXXLonOff(
-                      Center(
-                        child: Text(
-                          'Masuk',
-                          style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                        ),
+                    cursorColor: primary500,
+                    controller: phoneEmailController,
+                    decoration: InputDecoration(
+                      errorText: _validate ? errorText : null,
+                      errorStyle: body1(FontWeight.w500, red500, 'Outfit'),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(width: 2, color: primary500),
                       ),
-                      double.infinity,
-                      onOffButton,
+                      focusedErrorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(width: 2, color: red500),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: size12),
+                      hintText: 'Cth : 08123456789 / nabil@email.com ',
+                      hintStyle: heading2(FontWeight.w600, bnw400, 'Outfit'),
                     ),
                   ),
                 ),
-                SizedBox(height: size32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Belum Memiliki Akun?',
-                      style: heading4(FontWeight.w500, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(width: size12),
-                    GestureDetector(
-                      // onTap: () async => getOtp(),
-                      onTap: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DaftarAkunPage(),
-                        ),
-                      ),
+              ),
+              SizedBox(height: size32),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: GestureDetector(
+                  onTap: () async {
+                    setState(() {
+                      errorText = '';
+                      _focusScopeNode.unfocus();
+                      if (validated == 'number') {
+                        getOtp(
+                          Otppage(
+                            phoneEmailController.text,
+                            name.toString(),
+                            // pass.toString(),
+                            email.toString(),
+                            'login_page',
+                          ),
+                        );
+                      } else if (validated == 'email') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginWithEmail(
+                              email: phoneEmailController.text,
+                            ),
+                          ),
+                        );
+                        // getOtpEmail(
+                        // );
+                      }
+                    });
+                  },
+                  child: buttonXXLonOff(
+                    Center(
                       child: Text(
-                        'Daftar',
-                        style: heading4(FontWeight.w500, primary500, 'Outfit'),
+                        'Masuk',
+                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
                       ),
                     ),
-                  ],
+                    double.infinity,
+                    onOffButton,
+                  ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: size32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Belum Memiliki Akun?',
+                    style: heading4(FontWeight.w500, bnw900, 'Outfit'),
+                  ),
+                  SizedBox(width: size12),
+                  GestureDetector(
+                    // onTap: () async => getOtp(),
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => DaftarAkunPage()),
+                    ),
+                    child: Text(
+                      'Daftar',
+                      style: heading4(FontWeight.w500, primary500, 'Outfit'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -300,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
     var jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      Navigator.of(context, rootNavigator: true).pop();
+      closeLoading(context);
       print(jsonResponse['data']);
       print("succes");
       _validate = false;
@@ -377,6 +368,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: size16),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SafeArea(
                 child: Container(
@@ -421,17 +413,20 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                       ? Row(
                           children: [
                             Expanded(
-                              child: Container(
+                              child: Center(
                                 child: SvgPicture.asset(
                                   'assets/newIllustration/Login.svg',
                                 ),
                               ),
                             ),
                             SizedBox(width: size16),
-                            Expanded(child: loginEmailForm(isTablet)),
+                            Expanded(
+                              child: Center(child: loginEmailForm(isTablet)),
+                            ),
                           ],
                         )
                       : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
                               height: MediaQuery.of(context).size.height / 3,
@@ -537,7 +532,6 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
             ],
           ),
           SizedBox(height: size32),
-          Spacer(),
           GestureDetector(
             onTap: () {
               loginEmail();

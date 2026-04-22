@@ -470,6 +470,8 @@ class _LaporanStokPageState extends State<LaporanStokPage> {
                   style: heading2(FontWeight.w700, bnw900, 'Outfit'),
                 ),
                 SizedBox(height: 10),
+                    _buildDateOption("1 Hari Terakhir", "1H", setModalState),
+                    _buildDateOption("7 Hari Terakhir", "7H", setModalState),
                 _buildDateOption("30 Hari Terakhir", "1B", setModalState),
                 _buildDateOption("3 Bulan Terakhir", "3M", setModalState),
                 _buildDateOption("6 Bulan Terakhir", "6M", setModalState),

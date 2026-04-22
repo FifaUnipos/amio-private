@@ -332,7 +332,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     print(jsonResponse['data']);
     if (response.statusCode == 200) {
-      Navigator.of(context, rootNavigator: true).pop();
+      closeLoading(context);
       print("succes");
       Navigator.push(
         context,
@@ -341,7 +341,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } else {
-      Navigator.of(context, rootNavigator: true).pop();
+      closeLoading(context);
       emailError = jsonResponse['data']['email'];
       showSnackbar(context, jsonResponse);
     }

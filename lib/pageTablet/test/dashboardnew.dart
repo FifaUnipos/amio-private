@@ -56,12 +56,25 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
   List<MerchantSortingData>? datas;
   WebViewController? webController;
 
+  Map<String, dynamic>? _walletData;
+  bool _walletLoading = false;
+
+  Future<void> _fetchWalletBalance() async {
+    setState(() => _walletLoading = true);
+    final result = await getWalletBalance(widget.token);
+    setState(() {
+      _walletData = result;
+      _walletLoading = false;
+    });
+  }
+
   late Future<List<KulasedayaMember>> futureMembers;
 
   @override
   void initState() {
     print("token $checkToken");
     checkConnection(context);
+    _fetchWalletBalance();
     getKulasedaya(context, widget.token, '');
     // connectWeb();
     dashboardKulasedaya(widget.token);
@@ -556,6 +569,7 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
+                                          // ✅ Kiri — FifaPay
                                           Row(
                                             children: [
                                               Image.asset(
@@ -591,16 +605,63 @@ class _DashboarpagenewState extends State<Dashboarpagenew> {
                                               ),
                                             ],
                                           ),
-                                          Text(
-                                            FormatCurrency.convertToIdr(
-                                              int.tryParse(data.saldo) ?? 0,
+
+                                          // ✅ Tengah — divider + Unipos logo + nama
+                                          if (merchantType ==
+                                                  'Group_Merchant' ||
+                                              roleProfile == 'admin') ...[
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  height: 40,
+                                                  width: 1,
+                                                  color: bnw300,
+                                                ), // garis pemisah
+                                                SizedBox(width: size12),
+                                                Image.asset(
+                                                  'assets/images/UniPOSLogo.png',
+                                                  height: 50,
+                                                  color: primary500,
+                                                ),
+                                                SizedBox(width: size8),
+                                                Text(
+                                                  'Unipos',
+                                                  style: heading2(
+                                                    FontWeight.w600,
+                                                    bnw900,
+                                                    'Outfit',
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            style: heading1(
-                                              FontWeight.w700,
-                                              bnw900,
-                                              'Outfit',
-                                            ),
-                                          ),
+
+                                            // ✅ Kanan — saldo Unipos
+                                            _walletLoading
+                                                ? SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          color: primary500,
+                                                        ),
+                                                  )
+                                                : Text(
+                                                    FormatCurrency.convertToIdr(
+                                                      int.tryParse(
+                                                            _walletData?['total_available_balance']
+                                                                    ?.toString() ??
+                                                                '0',
+                                                          ) ??
+                                                          0,
+                                                    ),
+                                                    style: heading1(
+                                                      FontWeight.w700,
+                                                      bnw900,
+                                                      'Outfit',
+                                                    ),
+                                                  ),
+                                          ],
                                         ],
                                       ),
                                       if (!data.status) ...[

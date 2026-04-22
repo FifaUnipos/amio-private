@@ -210,7 +210,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conName,
                   TextInputType.text,
                   false,
-                  const []
+                  const [],
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -219,8 +219,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conPhone,
                   TextInputType.number,
                   false,
-                  [FilteringTextInputFormatter.digitsOnly]
-
+                  [FilteringTextInputFormatter.digitsOnly],
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -229,7 +228,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conEmail,
                   TextInputType.emailAddress,
                   true,
-                  const []
+                  const [],
                 ),
                 SizedBox(height: size16),
                 fieldAddProduk(
@@ -238,7 +237,7 @@ class _PelangganTokoState extends State<PelangganToko> {
                   conInstagram,
                   TextInputType.text,
                   true,
-                  const []
+                  const [],
                 ),
                 SizedBox(height: size16),
               ],
@@ -1042,150 +1041,157 @@ class _PelangganTokoState extends State<PelangganToko> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
+              isScrollControlled: true,
+              useSafeArea: true,
+              constraints: BoxConstraints(
+                maxWidth: double.infinity, // ✅ Force full width
+              ),
               context: context,
               builder: (context) {
-                return StatefulBuilder(
-                  builder: (BuildContext context, setState) => IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+                return SafeArea(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, setState) => IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          dividerShowdialog(),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Urutkan',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            dividerShowdialog(),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Urutkan',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 20),
-                                Text(
-                                  'Pilih Urutan',
-                                  style: heading3(
-                                    FontWeight.w400,
-                                    bnw900,
-                                    'Outfit',
+                                  SizedBox(height: 20),
+                                  Text(
+                                    'Pilih Urutan',
+                                    style: heading3(
+                                      FontWeight.w400,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
                                   ),
-                                ),
-                                Wrap(
-                                  children: List<Widget>.generate(
-                                    orderByPelangganText.length,
-                                    (int index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(right: size16),
-                                        child: ChoiceChip(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: size12,
-                                          ),
-                                          backgroundColor: bnw100,
-                                          selectedColor: primary100,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                              color: valueOrderByMember == index
-                                                  ? primary500
-                                                  : bnw300,
+                                  Wrap(
+                                    children: List<Widget>.generate(
+                                      orderByPelangganText.length,
+                                      (int index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(right: size16),
+                                          child: ChoiceChip(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: size12,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              size8,
+                                            backgroundColor: bnw100,
+                                            selectedColor: primary100,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color: valueOrderByMember == index
+                                                    ? primary500
+                                                    : bnw300,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                size8,
+                                              ),
                                             ),
+                                            label: Text(
+                                              orderByPelangganText[index],
+                                              style: heading4(
+                                                FontWeight.w400,
+                                                valueOrderByMember == index
+                                                    ? primary500
+                                                    : bnw900,
+                                                'Outfit',
+                                              ),
+                                            ),
+                                            selected: valueOrderByMember == index,
+                                            onSelected: (bool selected) {
+                                              setState(() {
+                                                print(index);
+                                                // _value =
+                                                //     selected ? index : null;
+                                                valueOrderByMember = index;
+                                              });
+                                              setState(() {});
+                                            },
                                           ),
-                                          label: Text(
-                                            orderByPelangganText[index],
-                                            style: heading4(
-                                              FontWeight.w400,
-                                              valueOrderByMember == index
-                                                  ? primary500
-                                                  : bnw900,
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: StatefulBuilder(
+                                builder: (BuildContext context, setState) =>
+                                    GestureDetector(
+                                      onTap: () async {
+                                        confirmed = true;
+                                        textOrderByPelanggan =
+                                            orderByPelangganText[valueOrderByMember];
+                                        textvalueOrderByMember =
+                                            orderByPelanggan[valueOrderByMember];
+                                        final result = await getPelanggan(
+                                          context,
+                                          checkToken,
+                                          textvalueOrderByMember,
+                                        );
+                                        if (!mounted) return;
+                                        outerSetState(() {
+                                          datasPelanggan = result;
+                                        });
+                  
+                                        Navigator.pop(context);
+                                      },
+                                      child: buttonXL(
+                                        Center(
+                                          child: Text(
+                                            'Tampilkan',
+                                            style: heading3(
+                                              FontWeight.w600,
+                                              bnw100,
                                               'Outfit',
                                             ),
                                           ),
-                                          selected: valueOrderByMember == index,
-                                          onSelected: (bool selected) {
-                                            setState(() {
-                                              print(index);
-                                              // _value =
-                                              //     selected ? index : null;
-                                              valueOrderByMember = index;
-                                            });
-                                            setState(() {});
-                                          },
                                         ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: StatefulBuilder(
-                              builder: (BuildContext context, setState) =>
-                                  GestureDetector(
-                                    onTap: () async {
-                                      confirmed = true;
-                                      textOrderByPelanggan =
-                                          orderByPelangganText[valueOrderByMember];
-                                      textvalueOrderByMember =
-                                          orderByPelanggan[valueOrderByMember];
-                                      final result = await getPelanggan(
-                                        context,
-                                        checkToken,
-                                        textvalueOrderByMember,
-                                      );
-                                      if (!mounted) return;
-                                      outerSetState(() {
-                                        datasPelanggan = result;
-                                      });
-
-                                      Navigator.pop(context);
-                                    },
-                                    child: buttonXL(
-                                      Center(
-                                        child: Text(
-                                          'Tampilkan',
-                                          style: heading3(
-                                            FontWeight.w600,
-                                            bnw100,
-                                            'Outfit',
-                                          ),
-                                        ),
+                                        0,
                                       ),
-                                      0,
                                     ),
-                                  ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

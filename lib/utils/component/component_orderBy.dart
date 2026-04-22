@@ -136,8 +136,8 @@ List orderByAkunText = [
 ];
 
 List orderByBahanText = [
-  "Nama Akun A ke Z",
-  "Nama Akun Z ke A",
+  "Nama Bahan A ke Z",
+  "Nama Bahan Z ke A",
   "Bahan Terbaru",
   "Bahan Terlama",
   "Aktifitas Terbaru",

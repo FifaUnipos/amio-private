@@ -60,6 +60,40 @@ String formatCurrency(int amount) {
   return formatter.format(amount);
 }
 
+String formatQty(dynamic val) {
+  if (val == null) return '0';
+  String strVal = val.toString();
+  try {
+    double v = double.parse(strVal);
+    if (v == v.toInt()) {
+      return v.toInt().toString();
+    }
+    return v.toStringAsFixed(2).replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+  } catch (_) {
+    return strVal;
+  }
+}
+
+
+String normalizeDecimalQuantity(dynamic qty) {
+  if (qty == null) return '0';
+  String qString = qty.toString().trim();
+  if (qString.isEmpty || qString == 'null') return '0';
+  
+  double? v;
+  if (qty is int) {
+    v = qty.toDouble();
+  } else if (qty is double) {
+    v = qty;
+  } else {
+    v = double.tryParse(qString);
+  }
+  
+  if (v == null || v == 0) return '0';
+  if (v == v.toInt()) return v.toInt().toString();
+  return v.toString().replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+}
+
 dividerShowdialog() {
   return Container(
     width: 120,

@@ -713,12 +713,14 @@ class LaporanPendapatanPerProdukState extends State<LaporanPembayaranPage> {
 
   keyword(BuildContext context) {
     final List<String> orderByLaporanPembayaran = [
+      '1 Hari Terakhir',
+      '7 Hari Terakhir',
       '30 Hari Terakhir',
       '3 Bulan Terakhir',
       '6 Bulan Terakhir',
       '1 Tahun Terakhir',
     ];
-    final List<String> textvalueKeyword = ['1M', '3M', '6M', '1Y'];
+    final List<String> textvalueKeyword = ['1H', '7H', '1B', '3B', '6B', '1Y'];
 
     return SizedBox(
       height: 48, // tinggi konsisten seperti orderBy
@@ -738,129 +740,133 @@ class LaporanPendapatanPerProdukState extends State<LaporanPembayaranPage> {
                 maxWidth: MediaQuery.of(context).size.width,
               ),
               builder: (context) {
-                return SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  child: StatefulBuilder(
-                    builder: (context, setModalState) => IntrinsicHeight(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: bnw100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(size16),
-                            topLeft: Radius.circular(size16),
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: StatefulBuilder(
+                      builder: (context, setModalState) => IntrinsicHeight(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: bnw100,
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(size16),
+                              topLeft: Radius.circular(size16),
+                            ),
                           ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: size16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize:
-                                MainAxisSize.min, // tinggi ikut konten
-                            children: [
-                              SizedBox(height: size16),
-                              Center(child: dividerShowdialog()),
-                              SizedBox(height: size16),
-                              Text(
-                                'Pilih Tanggal',
-                                style: heading2(
-                                  FontWeight.w700,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              Text(
-                                'Tentukan data yang akan tampil',
-                                style: heading4(
-                                  FontWeight.w400,
-                                  bnw600,
-                                  'Outfit',
-                                ),
-                              ),
-                              SizedBox(height: size24),
-                              Text(
-                                'Pilih Urutan',
-                                style: heading3(
-                                  FontWeight.w400,
-                                  bnw900,
-                                  'Outfit',
-                                ),
-                              ),
-                              SizedBox(height: size12),
-
-                              // Wrap aman untuk lebar sempit/luas
-                              Wrap(
-                                spacing: size12,
-                                runSpacing: size12,
-                                children: List<Widget>.generate(
-                                  orderByLaporanPembayaran.length,
-                                  (int index) {
-                                    final selected = _valueKeyword == index;
-                                    return ChoiceChip(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
-                                      backgroundColor: bnw100,
-                                      selectedColor: primary200,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                          color: selected ? primary500 : bnw300,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          size8,
-                                        ),
-                                      ),
-                                      label: Text(
-                                        orderByLaporanPembayaran[index],
-                                        style: heading4(
-                                          FontWeight.w400,
-                                          selected ? primary500 : bnw900,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                      selected: selected,
-                                      onSelected: (_) {
-                                        setModalState(
-                                          () => _valueKeyword = index,
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              SizedBox(height: size24),
-                              SizedBox(
-                                width: double.infinity,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    _textKeyword =
-                                        orderByLaporanPembayaran[_valueKeyword];
-                                    _textvalueKeyword =
-                                        textvalueKeyword[_valueKeyword];
-                                    setState(() {
-                                      _fetchLaporan();
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: buttonXL(
-                                    Center(
-                                      child: Text(
-                                        'Tampilkan',
-                                        style: heading3(
-                                          FontWeight.w600,
-                                          bnw100,
-                                          'Outfit',
-                                        ),
-                                      ),
-                                    ),
-                                    0, // wrap konten
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: size16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize:
+                                  MainAxisSize.min, // tinggi ikut konten
+                              children: [
+                                SizedBox(height: size16),
+                                Center(child: dividerShowdialog()),
+                                SizedBox(height: size16),
+                                Text(
+                                  'Pilih Tanggal',
+                                  style: heading2(
+                                    FontWeight.w700,
+                                    bnw900,
+                                    'Outfit',
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: size16),
-                            ],
+                                Text(
+                                  'Tentukan data yang akan tampil',
+                                  style: heading4(
+                                    FontWeight.w400,
+                                    bnw600,
+                                    'Outfit',
+                                  ),
+                                ),
+                                SizedBox(height: size24),
+                                Text(
+                                  'Pilih Urutan',
+                                  style: heading3(
+                                    FontWeight.w400,
+                                    bnw900,
+                                    'Outfit',
+                                  ),
+                                ),
+                                SizedBox(height: size12),
+
+                                // Wrap aman untuk lebar sempit/luas
+                                Wrap(
+                                  spacing: size12,
+                                  runSpacing: size12,
+                                  children: List<Widget>.generate(
+                                    orderByLaporanPembayaran.length,
+                                    (int index) {
+                                      final selected = _valueKeyword == index;
+                                      return ChoiceChip(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 10,
+                                        ),
+                                        backgroundColor: bnw100,
+                                        selectedColor: primary200,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: selected
+                                                ? primary500
+                                                : bnw300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            size8,
+                                          ),
+                                        ),
+                                        label: Text(
+                                          orderByLaporanPembayaran[index],
+                                          style: heading4(
+                                            FontWeight.w400,
+                                            selected ? primary500 : bnw900,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                        selected: selected,
+                                        onSelected: (_) {
+                                          setModalState(
+                                            () => _valueKeyword = index,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                                SizedBox(height: size24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _textKeyword =
+                                          orderByLaporanPembayaran[_valueKeyword];
+                                      _textvalueKeyword =
+                                          textvalueKeyword[_valueKeyword];
+                                      setState(() {
+                                        _fetchLaporan();
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: buttonXL(
+                                      Center(
+                                        child: Text(
+                                          'Tampilkan',
+                                          style: heading3(
+                                            FontWeight.w600,
+                                            bnw100,
+                                            'Outfit',
+                                          ),
+                                        ),
+                                      ),
+                                      0, // wrap konten
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: size16),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -911,244 +917,248 @@ class LaporanPendapatanPerProdukState extends State<LaporanPembayaranPage> {
             ),
             context: context,
             builder: (context) {
-              return FutureBuilder(
-                future: getAllToko(context, widget.token, '', ''),
-                builder: (context, snapshot) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, setState) => Container(
-                      height: MediaQuery.of(context).size.height / 1.4,
-                      padding: EdgeInsets.fromLTRB(
-                        size32,
-                        size16,
-                        size32,
-                        size32,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bnw100,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(size12),
-                          topLeft: Radius.circular(size12),
+              return SafeArea(
+                child: FutureBuilder(
+                  future: getAllToko(context, widget.token, '', ''),
+                  builder: (context, snapshot) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, setState) => Container(
+                        height: MediaQuery.of(context).size.height / 1.4,
+                        padding: EdgeInsets.fromLTRB(
+                          size32,
+                          size16,
+                          size32,
+                          size32,
                         ),
-                      ),
-                      child: Column(
-                        children: [
-                          Center(child: dividerShowdialog()),
-                          SizedBox(height: size16),
-                          Container(
-                            width: double.infinity,
-                            color: bnw100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Pilih Toko',
-                                  style: heading2(
-                                    FontWeight.w700,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                Text(
-                                  'Tentukan data yang akan tampil',
-                                  style: heading4(
-                                    FontWeight.w400,
-                                    bnw600,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: size20),
-                                Text(
-                                  '${listToko.length} Toko Terpilih',
-                                  style: heading2(
-                                    FontWeight.w600,
-                                    bnw900,
-                                    'Outfit',
-                                  ),
-                                ),
-                                SizedBox(height: size24),
-                              ],
-                            ),
+                        decoration: BoxDecoration(
+                          color: bnw100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(size12),
+                            topLeft: Radius.circular(size12),
                           ),
-                          snapshot.data == null
-                              ? Center(child: CircularProgressIndicator())
-                              : Expanded(
-                                  child: GridView.builder(
-                                    physics: BouncingScrollPhysics(),
-                                    padding: EdgeInsets.zero,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                          mainAxisExtent: size120,
-                                          // childAspectRatio: 2.977,
-                                          crossAxisCount: 2,
-                                          crossAxisSpacing: size16,
-                                          mainAxisSpacing: size16,
-                                        ),
-                                    itemCount: snapshot.data!.length,
-                                    itemBuilder: (context, i) {
-                                      ModelDataToko data = snapshot.data![i];
-                                      selectedFlag[i] =
-                                          selectedFlag[i] ?? false;
-                                      bool? isSelected = selectedFlag[i];
-                                      return GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onTap: () {
-                                          // valueMerchid.add(data.merchantid);
-                                          // log(data.name.toString());
-                                          setState(() {
-                                            onTap(
-                                              isSelected,
-                                              i,
-                                              data.merchantid,
-                                            );
-                                            print(listToko);
-                                          });
-
-                                          // print(dataProduk.productid);
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(size16),
-                                          // margin:  EdgeInsets.only(right: size16),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              size16,
-                                            ),
-                                            border: Border.all(color: bnw300),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          1000,
-                                                        ),
-                                                    child: SizedBox(
-                                                      height: 60,
-                                                      width: 60,
-                                                      child:
-                                                          snapshot
-                                                                  .data![i]
-                                                                  .logomerchant_url !=
-                                                              null
-                                                          ? Image.network(
-                                                              snapshot
-                                                                  .data![i]
-                                                                  .logomerchant_url
-                                                                  .toString(),
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder:
-                                                                  (
-                                                                    context,
-                                                                    error,
-                                                                    stackTrace,
-                                                                  ) => SizedBox(
-                                                                    child: Icon(
-                                                                      PhosphorIcons
-                                                                          .storefront_fill,
-                                                                      size: 60,
-                                                                      color:
-                                                                          bnw900,
-                                                                    ),
-                                                                  ),
-                                                            )
-                                                          : Icon(
-                                                              PhosphorIcons
-                                                                  .storefront_fill,
-                                                              size: 60,
-                                                            ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: size20),
-                                                  Flexible(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          snapshot
-                                                                  .data![i]
-                                                                  .name ??
-                                                              '',
-                                                          style: heading2(
-                                                            FontWeight.w700,
-                                                            bnw900,
-                                                            'Outfit',
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          '${snapshot.data![i].address}',
-                                                          style: body1(
-                                                            FontWeight.w400,
-                                                            bnw800,
-                                                            'Outfit',
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 2,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 50,
-                                                    child: _buildSelectIcon(
-                                                      isSelected!,
-                                                      data,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                          snapshot.data == null
-                              ? Spacer()
-                              : SizedBox(height: size32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: GestureDetector(
-                              onTap: () {
-                                listToko;
-                                getLaporanPerProduk(
-                                  context,
-                                  widget.token,
-                                  textvalueOrderByReportByPayment,
-                                  _textvalueKeyword,
-                                  listToko,
-                                  "",
-                                );
-
-                                Navigator.pop(context);
-                                setState(() {});
-                              },
-                              child: buttonXL(
-                                Center(
-                                  child: Text(
-                                    'Tampilkan',
-                                    style: heading3(
-                                      FontWeight.w600,
-                                      bnw100,
+                        ),
+                        child: Column(
+                          children: [
+                            Center(child: dividerShowdialog()),
+                            SizedBox(height: size16),
+                            Container(
+                              width: double.infinity,
+                              color: bnw100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pilih Toko',
+                                    style: heading2(
+                                      FontWeight.w700,
+                                      bnw900,
                                       'Outfit',
                                     ),
                                   ),
-                                ),
-                                0,
+                                  Text(
+                                    'Tentukan data yang akan tampil',
+                                    style: heading4(
+                                      FontWeight.w400,
+                                      bnw600,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size20),
+                                  Text(
+                                    '${listToko.length} Toko Terpilih',
+                                    style: heading2(
+                                      FontWeight.w600,
+                                      bnw900,
+                                      'Outfit',
+                                    ),
+                                  ),
+                                  SizedBox(height: size24),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            snapshot.data == null
+                                ? Center(child: CircularProgressIndicator())
+                                : Expanded(
+                                    child: GridView.builder(
+                                      physics: BouncingScrollPhysics(),
+                                      padding: EdgeInsets.zero,
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                            mainAxisExtent: size120,
+                                            // childAspectRatio: 2.977,
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: size16,
+                                            mainAxisSpacing: size16,
+                                          ),
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: (context, i) {
+                                        ModelDataToko data = snapshot.data![i];
+                                        selectedFlag[i] =
+                                            selectedFlag[i] ?? false;
+                                        bool? isSelected = selectedFlag[i];
+                                        return GestureDetector(
+                                          behavior: HitTestBehavior.translucent,
+                                          onTap: () {
+                                            // valueMerchid.add(data.merchantid);
+                                            // log(data.name.toString());
+                                            setState(() {
+                                              onTap(
+                                                isSelected,
+                                                i,
+                                                data.merchantid,
+                                              );
+                                              print(listToko);
+                                            });
+
+                                            // print(dataProduk.productid);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(size16),
+                                            // margin:  EdgeInsets.only(right: size16),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(size16),
+                                              border: Border.all(color: bnw300),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            1000,
+                                                          ),
+                                                      child: SizedBox(
+                                                        height: 60,
+                                                        width: 60,
+                                                        child:
+                                                            snapshot
+                                                                    .data![i]
+                                                                    .logomerchant_url !=
+                                                                null
+                                                            ? Image.network(
+                                                                snapshot
+                                                                    .data![i]
+                                                                    .logomerchant_url
+                                                                    .toString(),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorBuilder:
+                                                                    (
+                                                                      context,
+                                                                      error,
+                                                                      stackTrace,
+                                                                    ) => SizedBox(
+                                                                      child: Icon(
+                                                                        PhosphorIcons
+                                                                            .storefront_fill,
+                                                                        size:
+                                                                            60,
+                                                                        color:
+                                                                            bnw900,
+                                                                      ),
+                                                                    ),
+                                                              )
+                                                            : Icon(
+                                                                PhosphorIcons
+                                                                    .storefront_fill,
+                                                                size: 60,
+                                                              ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: size20),
+                                                    Flexible(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            snapshot
+                                                                    .data![i]
+                                                                    .name ??
+                                                                '',
+                                                            style: heading2(
+                                                              FontWeight.w700,
+                                                              bnw900,
+                                                              'Outfit',
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            '${snapshot.data![i].address}',
+                                                            style: body1(
+                                                              FontWeight.w400,
+                                                              bnw800,
+                                                              'Outfit',
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            maxLines: 2,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 50,
+                                                      child: _buildSelectIcon(
+                                                        isSelected!,
+                                                        data,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                            snapshot.data == null
+                                ? Spacer()
+                                : SizedBox(height: size32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  listToko;
+                                  getLaporanPerProduk(
+                                    context,
+                                    widget.token,
+                                    textvalueOrderByReportByPayment,
+                                    _textvalueKeyword,
+                                    listToko,
+                                    "",
+                                  );
+
+                                  Navigator.pop(context);
+                                  setState(() {});
+                                },
+                                child: buttonXL(
+                                  Center(
+                                    child: Text(
+                                      'Tampilkan',
+                                      style: heading3(
+                                        FontWeight.w600,
+                                        bnw100,
+                                        'Outfit',
+                                      ),
+                                    ),
+                                  ),
+                                  0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             },
           );

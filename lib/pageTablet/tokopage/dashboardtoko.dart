@@ -8,7 +8,6 @@ import 'package:unipos_app_335/pageTablet/tokopage/sidebar/inventoriToko/invento
 import '../../main.dart';
 import '../../utils/component/component_orderBy.dart';
 import '../../utils/component/component_size.dart';
-import 'sidebar/inventoriToko/inventori.dart';
 
 import 'sidebar/transaksiToko/transaksi.dart';
 
@@ -93,60 +92,63 @@ class _SidebarXExampleAppTokoState extends State<SidebarXExampleAppToko> {
               statusBarColor: Colors.transparent,
               statusBarIconBrightness: Brightness.light,
             ),
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              drawerEnableOpenDragGesture: false,
-              key: _key,
-              appBar: isSmallScreen
-                  ? AppBar(
-                      title: Text(
-                        _getTitleByIndex(sidebarController.selectedIndex),
+            child: SafeArea(
+              top: false,
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                drawerEnableOpenDragGesture: false,
+                key: _key,
+                appBar: isSmallScreen
+                    ? AppBar(
+                        title: Text(
+                          _getTitleByIndex(sidebarController.selectedIndex),
+                        ),
+                        leading: IconButton(
+                          onPressed: () {
+                            sidebarController.setExtended(true);
+                            _key.currentState?.openDrawer();
+                            print(widget.token);
+                          },
+                          icon: Icon(Icons.menu),
+                        ),
+                      )
+                    : null,
+                drawer: ExampleSidebarXToko(
+                  controller: sidebarController,
+                  token: widget.token,
+                  pageController: _pageController,
+                ),
+                body: Row(
+                  children: [
+                    if (!isSmallScreen)
+                      ExampleSidebarXToko(
+                        controller: sidebarController,
+                        token: widget.token,
+                        pageController: _pageController,
                       ),
-                      leading: IconButton(
-                        onPressed: () {
-                          sidebarController.setExtended(true);
-                          _key.currentState?.openDrawer();
-                          print(widget.token);
-                        },
-                        icon: Icon(Icons.menu),
+                    Expanded(
+                      child: Center(
+                        child: PageView(
+                          physics: NeverScrollableScrollPhysics(),
+                          controller: _pageController,
+                          scrollDirection: Axis.vertical,
+                          pageSnapping: true,
+                          reverse: false,
+                          onPageChanged: (index) {
+                            print('index ke $index');
+                          },
+                          children: [
+                            _ScreensExample(
+                              controller: sidebarController,
+                              token: widget.token,
+                            ),
+                            ProfilePage(token: widget.token),
+                          ],
+                        ),
                       ),
-                    )
-                  : null,
-              drawer: ExampleSidebarXToko(
-                controller: sidebarController,
-                token: widget.token,
-                pageController: _pageController,
-              ),
-              body: Row(
-                children: [
-                  if (!isSmallScreen)
-                    ExampleSidebarXToko(
-                      controller: sidebarController,
-                      token: widget.token,
-                      pageController: _pageController,
                     ),
-                  Expanded(
-                    child: Center(
-                      child: PageView(
-                        physics: NeverScrollableScrollPhysics(),
-                        controller: _pageController,
-                        scrollDirection: Axis.vertical,
-                        pageSnapping: true,
-                        reverse: false,
-                        onPageChanged: (index) {
-                          print('index ke $index');
-                        },
-                        children: [
-                          _ScreensExample(
-                            controller: sidebarController,
-                            token: widget.token,
-                          ),
-                          ProfilePage(token: widget.token),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -633,25 +635,27 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         //     });
         //   },
         // ),
+        if (merchantType == 'Group_Merchant' ||
+            roleProfile?.toLowerCase() == 'admin')
+          SidebarXItem(
+            icon: sidebarController.selectedIndex == 6
+                ? PhosphorIcons.wallet_fill
+                : PhosphorIcons.wallet,
+            label: 'Dompet',
+            onTap: () {
+              widget.pageController.jumpToPage(0);
+              widget.controller.selectedIndex;
+              setState(() {
+                selectedIndexSideBar = false;
+                iconSelectedSidebar = 6;
+              });
+            },
+          ),
         SidebarXItem(
-          icon: sidebarController.selectedIndex == 6
+          icon: sidebarController.selectedIndex == 7
               ? PhosphorIcons.identification_card_fill
               : PhosphorIcons.identification_card,
           label: 'Pelanggan',
-          onTap: () {
-            widget.pageController.jumpToPage(0);
-            widget.controller.selectedIndex;
-            setState(() {
-              selectedIndexSideBar = false;
-              iconSelectedSidebar = 6;
-            });
-          },
-        ),
-        SidebarXItem(
-          icon: sidebarController.selectedIndex == 7
-              ? PhosphorIcons.tag_fill
-              : PhosphorIcons.tag,
-          label: 'Promo',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -663,9 +667,9 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: sidebarController.selectedIndex == 8
-              ? PhosphorIcons.file_text_fill
-              : PhosphorIcons.file_text,
-          label: 'Laporan',
+              ? PhosphorIcons.tag_fill
+              : PhosphorIcons.tag,
+          label: 'Promo',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -677,9 +681,9 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: sidebarController.selectedIndex == 9
-              ? PhosphorIcons.question_fill
-              : PhosphorIcons.question,
-          label: 'Bantuan',
+              ? PhosphorIcons.file_text_fill
+              : PhosphorIcons.file_text,
+          label: 'Laporan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -691,9 +695,9 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
         ),
         SidebarXItem(
           icon: sidebarController.selectedIndex == 10
-              ? PhosphorIcons.printer_fill
-              : PhosphorIcons.printer,
-          label: 'Printer',
+              ? PhosphorIcons.question_fill
+              : PhosphorIcons.question,
+          label: 'Bantuan',
           onTap: () {
             widget.pageController.jumpToPage(0);
             widget.controller.selectedIndex;
@@ -703,21 +707,20 @@ class _ExampleSidebarXTokoState extends State<ExampleSidebarXToko> {
             });
           },
         ),
-        if (merchantType == 'Group_Merchant' || roleProfile?.toLowerCase() == 'admin')
-          SidebarXItem(
-            icon: sidebarController.selectedIndex == 11
-                ? PhosphorIcons.wallet_fill
-                : PhosphorIcons.wallet,
-            label: 'Dompet',
-            onTap: () {
-              widget.pageController.jumpToPage(0);
-              widget.controller.selectedIndex;
-              setState(() {
-                selectedIndexSideBar = false;
-                iconSelectedSidebar = 11;
-              });
-            },
-          ),
+        SidebarXItem(
+          icon: sidebarController.selectedIndex == 11
+              ? PhosphorIcons.printer_fill
+              : PhosphorIcons.printer,
+          label: 'Printer',
+          onTap: () {
+            widget.pageController.jumpToPage(0);
+            widget.controller.selectedIndex;
+            setState(() {
+              selectedIndexSideBar = false;
+              iconSelectedSidebar = 11;
+            });
+          },
+        ),
       ],
     );
   }
@@ -757,17 +760,16 @@ class _ScreensExampleState extends State<_ScreensExample> {
               NotifikasiGrup(),
               TokoPageToko(token: widget.token),
               ProdukToko(token: widget.token),
-              typeAccount == 'Merchant_Only'
-                  ? InventoriPageMerchantOnly(token: widget.token)
-                  : InventoriPageTest(token: widget.token),
+              InventoriPageMerchantOnly(token: widget.token),
               TransactionPage(token: widget.token),
+              if (merchantType == 'Group_Merchant' ||
+                  roleProfile?.toLowerCase() == 'admin')
+                PageDompetTablet(token: widget.token),
               PelangganToko(token: widget.token),
               PromosiToko(token: widget.token),
               LaporanToko(token: widget.token, controller: widget.controller),
               BantuanGrup(),
               BluetoothPage(),
-              if (merchantType == 'Group_Merchant' || roleProfile?.toLowerCase() == 'admin')
-                PageDompetTablet(token: widget.token),
             ],
           );
         },

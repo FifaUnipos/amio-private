@@ -450,7 +450,9 @@ Future ubahKategoriForm(context, token, idkategori, name) async {
       return jsonResponse['rc'];
     }
   } catch (e) {
-    throw Exception(e.toString());
+    closeLoading(context);
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return 'error';
   }
 }
 
@@ -862,36 +864,43 @@ late String nameMerchantUbah = '',
     imageEditToko = '';
 
 Future getSingleMerch(context, token, String merchid) async {
-  final response = await http.post(
-    Uri.parse(getSingleMerchant),
-    headers: {'token': token},
-    body: {"deviceid": identifier, "merchantid": merchid},
-  );
+  try {
+    final response = await http.post(
+      Uri.parse(getSingleMerchant),
+      headers: {'token': token},
+      body: {"deviceid": identifier, "merchantid": merchid},
+    );
 
-  var jsonResponse = jsonDecode(response.body);
-  var data = jsonResponse['data'];
-  log(data.toString());
-  if (response.statusCode == 200) {
-    nameMerchantUbah = data['name'];
-    addressMerchantUbah = data['address'];
-    zipMerchantUbah = data['zipcode'];
-    nameProvUbah = data['nama_province'];
-    kodeProvUbah = data['kode_province'];
-    nameregUbah = data['nama_regencies'];
-    kodeRegUbah = data['kode_regencies'];
-    nameDisUbah = data['nama_district'];
-    kodeDisUbah = data['kode_district'];
-    nameVillageUbah = data['nama_village'];
-    kodeVillageUbah = data['kode_village'];
-    zipcodeUbah = data['zipcode'];
-    tipeUbah = data['nama_tipe_usaha'] ?? '';
-    idtipeUbah = data['tipeusaha'];
-    imageEditToko = data['logomerchant_url'];
+    var jsonResponse = jsonDecode(response.body);
+    var data = jsonResponse['data'];
+    log(data.toString());
+    if (response.statusCode == 200) {
+      nameMerchantUbah = data['name'];
+      addressMerchantUbah = data['address'];
+      zipMerchantUbah = data['zipcode'];
+      nameProvUbah = data['nama_province'];
+      kodeProvUbah = data['kode_province'];
+      nameregUbah = data['nama_regencies'];
+      kodeRegUbah = data['kode_regencies'];
+      nameDisUbah = data['nama_district'];
+      kodeDisUbah = data['kode_district'];
+      nameVillageUbah = data['nama_village'];
+      kodeVillageUbah = data['kode_village'];
+      zipcodeUbah = data['zipcode'];
+      tipeUbah = data['nama_tipe_usaha'] ?? '';
+      idtipeUbah = data['tipeusaha'];
+      imageEditToko = data['logomerchant_url'];
 
-    return jsonResponse;
-  } else {
+      return jsonResponse;
+    } else {
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return {'rc': 'failed'};
+    }
+  } catch (e) {
     closeLoading(context);
-    showSnackbar(context, jsonResponse);
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return {'rc': 'error'};
   }
 }
 
@@ -1213,7 +1222,9 @@ Future updateProduk(
       return jsonResponse['rc'];
     }
   } catch (e) {
-    throw Exception(e.toString());
+    closeLoading(context);
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return {'rc': 'error'};
   }
 }
 
@@ -1378,7 +1389,7 @@ Future changePpn(
   List productid,
   merchid,
 ) async {
-  // whenLoading(context);
+  whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1416,34 +1427,35 @@ Future changeActive(
   List productid,
   merchid,
 ) async {
-  // whenLoading(context);
-  String jsonData = jsonEncode(productid);
+  try {
+    whenLoading(context);
+    String jsonData = jsonEncode(productid);
 
-  final response = await http.post(
-    Uri.parse(changeActiveUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchantid": merchid,
-      "isActive": isActive,
-      'productid': jsonData,
-    },
-  );
+    final response = await http.post(
+      Uri.parse(changeActiveUrl),
+      headers: {'token': token},
+      body: {
+        "deviceid": identifier,
+        "merchantid": merchid,
+        "isActive": isActive,
+        'productid': jsonData,
+      },
+    );
 
-  var jsonResponse = jsonDecode(response.body);
-  if (response.statusCode == 200) {
-    //print('Sukses Ganti Data');
-    // Navigator.pop(context);
-
-    //print(jsonResponse['data'].toString());
+    var jsonResponse = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    }
+  } catch (e) {
     closeLoading(context);
-    showSnackbar(context, jsonResponse);
-    return jsonResponse['rc'];
-  } else {
-    //print(jsonResponse['message'].toString());
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
-    return jsonResponse['rc'];
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return 'error';
   }
 }
 
@@ -1454,32 +1466,36 @@ Future changeActiveDiskon(
   productid,
   merchid,
 ) async {
-  String jsonData = jsonEncode(productid);
+  try {
+    whenLoading(context);
+    String jsonData = jsonEncode(productid);
 
-  final response = await http.post(
-    Uri.parse(aktifDiskonLink),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchantid": merchid,
-      "is_active": isActive,
-      // 'id': productid,
-      'id': jsonData,
-    },
-  );
+    final response = await http.post(
+      Uri.parse(aktifDiskonLink),
+      headers: {'token': token},
+      body: {
+        "deviceid": identifier,
+        "merchantid": merchid,
+        "is_active": isActive,
+        // 'id': productid,
+        'id': jsonData,
+      },
+    );
 
-  var jsonResponse = jsonDecode(response.body);
-  if (response.statusCode == 200) {
-    //print('Sukses Ganti Data');
-    // Navigator.pop(context);
-
-    //print(jsonResponse['data'].toString());
+    var jsonResponse = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    } else {
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    }
+  } catch (e) {
     closeLoading(context);
-    showSnackbar(context, jsonResponse);
-  } else {
-    //print(jsonResponse['message'].toString());
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return 'error';
   }
 }
 
@@ -3784,40 +3800,46 @@ Future getSingleProduct(
   productid,
   setState,
 ) async {
-  whenLoading(context);
-  final response = await http.post(
-    Uri.parse(getSingleProductUrl),
-    headers: {'token': token},
-    body: {
-      "deviceid": identifier,
-      "merchantid": merchid,
-      "productid": productid,
-    },
-  );
+  try {
+    whenLoading(context);
+    final response = await http.post(
+      Uri.parse(getSingleProductUrl),
+      headers: {'token': token},
+      body: {
+        "deviceid": identifier,
+        "merchantid": merchid,
+        "productid": productid,
+      },
+    );
 
-  var jsonResponse = jsonDecode(response.body);
-  // log(jsonResponse.toString());
-  if (response.statusCode == 200) {
-    var dataku = jsonResponse['data'];
-    // log("${dataku['name']}");
-    log("dataku $dataku");
+    var jsonResponse = jsonDecode(response.body);
+    // log(jsonResponse.toString());
+    if (response.statusCode == 200) {
+      var dataku = jsonResponse['data'];
+      // log("${dataku['name']}");
+      log("dataku $dataku");
 
-    nameEditProduk = dataku['name'];
-    hargaEditProduk = dataku['price'].toString();
-    hargaEditOnlineProduk = dataku['price_online_shop'].toString();
-    jenisProductEdit = dataku['typeproducts'];
-    kodejenisProductEdit = dataku['kodeproduct'];
-    ppnEdit = dataku['isPPN'].toString();
-    tampilEdit = dataku['isActive'].toString();
-    imageEdit = dataku['product_image'].toString();
+      nameEditProduk = dataku['name'];
+      hargaEditProduk = dataku['price'].toString();
+      hargaEditOnlineProduk = dataku['price_online_shop'].toString();
+      jenisProductEdit = dataku['typeproducts'];
+      kodejenisProductEdit = dataku['kodeproduct'];
+      ppnEdit = dataku['isPPN'].toString();
+      tampilEdit = dataku['isActive'].toString();
+      imageEdit = dataku['product_image'].toString();
+      closeLoading(context);
+      // setState(() {});
+      return jsonResponse['rc'];
+    } else {
+      // print(jsonResponse['message'].toString());
+      closeLoading(context);
+      showSnackbar(context, jsonResponse);
+      return jsonResponse['rc'];
+    }
+  } catch (e) {
     closeLoading(context);
-    // setState(() {});
-    return jsonResponse['rc'];
-  } else {
-    // print(jsonResponse['message'].toString());
-    closeLoading(context);
-    showSnackbar(context, jsonResponse);
-    return jsonResponse['rc'];
+    showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
+    return 'error';
   }
 }
 
@@ -4453,11 +4475,16 @@ Future createMasterData(context, token, merchid, nameItem, unit) async {
   }
 }
 
-Future updateMasterData(context, token, id, nameItem) async {
+Future updateMasterData(context, token, id, nameItem, [String? unit]) async {
+  final Map<String, dynamic> body = {"inventory_master_id": id, "name_item": nameItem};
+  if (unit != null && unit.isNotEmpty) {
+    body["unit"] = unit;
+  }
+
   final response = await http.post(
     Uri.parse(updateMasterDataLink),
     headers: {'token': token},
-    body: {"inventory_master_id": id, "name_item": nameItem},
+    body: body,
   );
 
   var jsonResponse = jsonDecode(response.body);
@@ -6274,5 +6301,24 @@ Future<String> deleteReceiptLogo(
     debugPrint("Error deleteReceiptLogo: $e");
     closeLoading(context);
     return 'XX';
+  }
+}
+
+Future<Map<String, dynamic>?> getWalletBalance(String token) async {
+  try {
+    final res = await http.post(
+      Uri.parse('$url/api/wallet'),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+      body: jsonEncode({'search': '', 'order_by': ''}),
+    );
+    final json = jsonDecode(res.body);
+    if (res.statusCode == 200 && json['rc'] == '00') {
+      print('Success getWalletBalance UniPOS: ${res.body}');
+      return json['data'];
+    }
+    return null;
+  } catch (e) {
+    debugPrint('getWalletBalance error: $e');
+    return null;
   }
 }
