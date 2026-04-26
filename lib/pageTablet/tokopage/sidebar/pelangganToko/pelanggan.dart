@@ -83,7 +83,7 @@ class _PelangganTokoState extends State<PelangganToko> {
     return datasPelanggan = await getPelanggan(
       context,
       widget.token,
-      textvalueOrderBy,
+      textvalueOrderByMember,
     );
   }
 

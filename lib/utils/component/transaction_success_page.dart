@@ -297,7 +297,7 @@ class TransactionSuccessPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: primary500),

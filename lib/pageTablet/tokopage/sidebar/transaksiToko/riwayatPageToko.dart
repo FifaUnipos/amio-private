@@ -709,7 +709,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             height: size8,
                                                           ),
                                                           Text(
-                                                            'Nomor Transaksi',
+                                                            'Nomor Pesanan',
                                                             style: heading4(
                                                               FontWeight.w400,
                                                               bnw900,
@@ -854,6 +854,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     }
                                                   }
 
+                                                  final qtyRaw = detail[index]['quantity']?.toString() ?? '1';
+                                                  final qtyDouble = double.tryParse(qtyRaw) ?? 1.0;
+                                                  final qtyStr = qtyDouble == qtyDouble.toInt() ? qtyDouble.toInt().toString() : qtyDouble.toString();
+
                                                   return SizedBox(
                                                     child: Column(
                                                       children: [
@@ -864,7 +868,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                           children: [
                                                             // Quantity text
                                                             Text(
-                                                              'x${detail[index]['quantity']}',
+                                                              'x$qtyStr',
                                                               style: heading3(
                                                                 FontWeight.w600,
                                                                 bnw900,
@@ -993,17 +997,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          Text(
-                                                            'Metode Pembayaran',
-                                                            style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit',
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: size8,
-                                                          ),
+
                                                           Text(
                                                             'Sub Total',
                                                             style: heading4(
@@ -1041,18 +1035,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             CrossAxisAlignment
                                                                 .end,
                                                         children: [
-                                                          Text(
-                                                            data['payment_name'] ??
-                                                                '-',
-                                                            style: heading4(
-                                                              FontWeight.w400,
-                                                              bnw900,
-                                                              'Outfit',
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: size8,
-                                                          ),
+
                                                           Text(
                                                             FormatCurrency.convertToIdr(
                                                               double.tryParse(
@@ -1145,10 +1128,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                             height: size8,
                                                           ),
                                                           Text(
-                                                            data['payment_method_id'] ==
-                                                                    '001'
-                                                                ? 'Uang Tunai'
-                                                                : 'Non Tunai',
+                                                            'Nominal Pembayaran',
                                                             style: heading4(
                                                               FontWeight.w400,
                                                               bnw900,
@@ -1700,7 +1680,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    'Informasi Transaksi',
+                                                    'Informasi Pesanan',
                                                     style: heading3(
                                                       FontWeight.w600,
                                                       bnw900,

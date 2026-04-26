@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:unipos_app_335/components/atoms/button/unipos_button.dart';
 import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
@@ -31,10 +32,10 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
 
   Color onOffButton = bnw300;
   bool bttnValidate = false;
+  bool _isLoading = false;
 
   refreshData() {
-    if (phoneController.text.isNotEmpty &&
-        nameController.text.isNotEmpty) {
+    if (phoneController.text.isNotEmpty && nameController.text.isNotEmpty) {
       bttnValidate = true;
     } else {
       bttnValidate = false;
@@ -81,11 +82,19 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                           children: [
                             Text(
                               'Nama Lengkap ',
-                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               '*',
-                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                red500,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -98,11 +107,19 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                           children: [
                             Text(
                               'Nomor Telepon ',
-                              style: heading4(FontWeight.w400, bnw900, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w400,
+                                bnw900,
+                                'Outfit',
+                              ),
                             ),
                             Text(
                               '*',
-                              style: heading4(FontWeight.w700, red500, 'Outfit'),
+                              style: heading4(
+                                FontWeight.w700,
+                                red500,
+                                'Outfit',
+                              ),
                             ),
                           ],
                         ),
@@ -122,8 +139,9 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                         children: [
                           SizedBox(height: size48),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: GestureDetector(
+                            child: UniposButton(
+                              text: 'Daftar',
+                              loading: _isLoading,
                               onTap: () => register(
                                 context,
                                 OtpPageMobile(
@@ -132,20 +150,6 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
                                   email: emailController.text,
                                   pageidentify: 'register_page',
                                 ),
-                              ),
-                              child: buttonXXLonOff(
-                                Center(
-                                  child: Text(
-                                    'Daftar',
-                                    style: heading2(
-                                      FontWeight.w600,
-                                      bnw100,
-                                      'Outfit',
-                                    ),
-                                  ),
-                                ),
-                                double.infinity,
-                                onOffButton,
                               ),
                             ),
                           ),
@@ -232,7 +236,9 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
   }
 
   Future register(context, page) async {
-    whenLoading(context);
+    setState(() {
+      _isLoading = true;
+    });
     try {
       final response = await http.post(
         Uri.parse(registerLink),
@@ -259,7 +265,18 @@ class _RegisterGrupPageMobileState extends State<RegisterGrupPageMobile> {
       }
       return null;
     } catch (e) {
-      throw Exception(e.toString());
+      if (mounted) {
+        showSnackbar(context, {
+          "rc": "99",
+          "message": "Terjadi kesalahan jaringan atau server.",
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

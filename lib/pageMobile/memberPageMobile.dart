@@ -50,14 +50,14 @@ class MemberModel {
 class MemberService {
   // Replace this with your actual base URL
 
-  static Future<List<MemberModel>?> getMembers(BuildContext context) async {
+  static Future<List<MemberModel>?> getMembers(BuildContext context, {String orderby = "upDownNama"}) async {
     try {
       final response = await http.post(
         Uri.parse(getPelanggantUrl), // Common domain seen in printerPage
         headers: {'token': checkToken, 'Content-Type': 'application/json'},
         body: jsonEncode({
           "deviceid": identifier, // from main.dart
-          "orderby": "upDownNama",
+          "orderby": orderby,
         }),
       );
 
@@ -196,6 +196,16 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
   Set<String> selectedIds = {};
   bool selectionMode = false;
 
+  String _selectedSortText = "Nama Pelanggan A ke Z";
+  String _selectedSortTag = "upDownNama";
+
+  final List<Map<String, String>> sortOptions = [
+    {"label": "Nama Pelanggan A ke Z", "tag": "upDownNama"},
+    {"label": "Nama Pelanggan Z ke A", "tag": "downUpNama"},
+    {"label": "Pelanggan Terbaru", "tag": "upDownCreate"},
+    {"label": "Pelanggan Terlama", "tag": "downUpCreate"},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -204,12 +214,119 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
 
   Future<void> _loadMembers() async {
     setState(() => isLoading = true);
-    final data = await MemberService.getMembers(context);
+    final data = await MemberService.getMembers(context, orderby: _selectedSortTag);
     setState(() {
       members = data ?? [];
       selectedIds.clear();
       isLoading = false;
     });
+  }
+
+  void _showSortModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Urutkan',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Pilih urutan yang ingin ditampilkan',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: List.generate(sortOptions.length, (index) {
+                    final label = sortOptions[index]["label"]!;
+                    final tag = sortOptions[index]["tag"]!;
+                    bool isSelected = _selectedSortTag == tag;
+          
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedSortTag = tag;
+                          _selectedSortText = label;
+                        });
+                        Navigator.pop(context);
+                        _loadMembers();
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primary500.withOpacity(0.1)
+                              : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? primary500 : Colors.grey[300]!,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: isSelected ? primary500 : Colors.black,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _onSearchChanged(String query) {
@@ -442,21 +559,24 @@ class _MemberPageMobileState extends State<MemberPageMobile> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(color: bnw300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "Urutkan",
-                      style: heading4(FontWeight.w600, bnw900, 'Outfit'),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_drop_down, color: bnw900),
-                  ],
+              GestureDetector(
+                onTap: _showSortModal,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: bnw300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        _selectedSortText,
+                        style: heading4(FontWeight.w600, bnw900, 'Outfit'),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_drop_down, color: bnw900),
+                    ],
+                  ),
                 ),
               ),
               Container(

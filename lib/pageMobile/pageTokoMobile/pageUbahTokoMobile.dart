@@ -10,6 +10,7 @@ import 'package:unipos_app_335/utils/component/component_loading.dart';
 import 'package:unipos_app_335/utils/component/component_size.dart';
 import 'package:unipos_app_335/utils/component/component_snackbar.dart';
 import 'package:unipos_app_335/utils/component/component_textHeading.dart';
+import 'package:unipos_app_335/utils/component/tap_to_unfocus.dart';
 
 class UbahTokoPageMobile extends StatefulWidget {
   final String token;
@@ -157,7 +158,8 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         foregroundColor: Colors.black,
       ),
       backgroundColor: bnw100,
-      body: SingleChildScrollView(
+      body: TapToUnfocus(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: SafeArea(
           child: Column(
@@ -407,6 +409,7 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -447,6 +450,7 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         const SizedBox(height: 4),
         TextFormField(
           controller: controller,
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -502,7 +506,12 @@ class _UbahTokoPageState extends State<UbahTokoPageMobile> {
         ),
         const SizedBox(height: 4),
         GestureDetector(
-          onTap: isDisabled ? null : onTap,
+          onTap: isDisabled
+              ? null
+              : () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  onTap!();
+                },
           child: Opacity(
             opacity: isDisabled ? 0.5 : 1,
             child: Container(

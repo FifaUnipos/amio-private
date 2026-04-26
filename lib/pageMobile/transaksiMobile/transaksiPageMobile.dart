@@ -29,7 +29,6 @@ import 'bill_page.dart';
 import 'package:unipos_app_335/utils/component/transaction_success_page.dart';
 import 'package:unipos_app_335/utils/component/shared_qris_handler.dart';
 
-
 enum DetailMode { calculate, create }
 
 int _toIntSafe(dynamic v, {int def = 0}) {
@@ -3452,9 +3451,9 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
         "discount_id": _selectedDiscount?.id ?? null,
         "member_id": _selectedMemberId ?? null,
         "transaction_id": null,
-        "value": null,
-        "payment_method": null,
-        "payment_reference": null, // Default empty as requested
+        "is_partial_payment": false,
+        // "value": null,
+        "payments": [],
         "detail": details,
       };
 
@@ -4158,14 +4157,17 @@ class _TransaksiMobilePageState extends State<TransaksiMobilePage>
                   'flutterCallback',
                   onMessageReceived: (JavaScriptMessage message) {
                     try {
-                      final List<dynamic> jsonData = jsonDecode(message.message);
-            
+                      final List<dynamic> jsonData = jsonDecode(
+                        message.message,
+                      );
+
                       setState(() {
                         _cart.removeWhere(
                           (item) =>
-                              (item['product'] as Product).id == 'digitalProduct',
+                              (item['product'] as Product).id ==
+                              'digitalProduct',
                         );
-            
+
                         for (var item in jsonData) {
                           Product digitalP = Product(
                             id: 'digitalProduct',
@@ -6648,8 +6650,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
       final data = jsonDecode(response.body);
       if (data['rc'] == '00') {
-        widget.onSuccess?.call();
-
         int amountQris = _totalPay;
         if (!_isLunas) {
           for (var sp in _splitPayments) {
@@ -6660,14 +6660,42 @@ class _PaymentPageState extends State<PaymentPage> {
           }
         }
 
-        await SharedQrisHandler.showSharedQrisFlow(
+        bool showedQris = await SharedQrisHandler.showSharedQrisFlow(
           context: context,
           response: data,
           token: widget.token,
           amount: amountQris,
           cart: widget.cart,
-          onSuccess: () {},
+          onSuccess: () {
+            widget.onSuccess?.call();
+          },
         );
+
+        if (!showedQris) {
+          widget.onSuccess?.call();
+          final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+          if (isTablet) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TransactionSuccessPage(
+                  data: data['data'] ?? data,
+                  localCart: widget.cart,
+                ),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TransactionSuccessPage(
+                  data: data['data'] ?? data,
+                  localCart: widget.cart,
+                ),
+              ),
+            );
+          }
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

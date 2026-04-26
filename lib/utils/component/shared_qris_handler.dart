@@ -11,7 +11,7 @@ import 'package:unipos_app_335/utils/utilities.dart';
 import 'package:unipos_app_335/utils/component/transaction_success_page.dart';
 
 class SharedQrisHandler {
-  static Future<void> showSharedQrisFlow({
+  static Future<bool> showSharedQrisFlow({
     required BuildContext context,
     required Map<String, dynamic> response,
     required String token,
@@ -40,7 +40,7 @@ class SharedQrisHandler {
 
     if (qrString == null || qrString.isEmpty) {
       debugPrint('QRIS: qr_string not found in response');
-      return;
+      return false;
     }
 
     final String transactionId = data['transactionid']?.toString() ?? '';
@@ -75,11 +75,15 @@ class SharedQrisHandler {
         String paymentStatus = resp['payment_status']?.toString() ?? '';
         if (paymentStatus == 'SUCCESS') {
           wsService.disconnectTransaction(); // ✅
-          if (Navigator.canPop(context)) Navigator.pop(context);
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context); // Pops the bottom sheet
+          }
           _finishAndRedirect();
         } else if (paymentStatus == 'FAILED') {
           wsService.disconnectTransaction(); // ✅
-          if (Navigator.canPop(context)) Navigator.pop(context);
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context); // Pops the bottom sheet
+          }
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Transaksi QRIS Gagal')));
@@ -274,5 +278,6 @@ class SharedQrisHandler {
 
     // ✅ Cleanup setelah bottom sheet ditutup manual
     wsService.disconnectTransaction();
+    return true;
   }
 }

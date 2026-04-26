@@ -1315,7 +1315,6 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                 ? const Center(child: Text("Gagal memuat detail"))
                 : SingleChildScrollView(
                     child: Column(
-                      spacing: 16,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
@@ -1382,15 +1381,17 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                               ),
                           ],
                         ),
+                        const SizedBox(height: 16),
                         const Text(
-                          'Informasi Transaksi',
+                          'Informasi Pesanan',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
+                        const SizedBox(height: 12),
                         _buildInfoRow(
-                          'Nomor Transaksi',
+                          'Nomor Pesanan',
                           '#${_detailData!['transactionid'] ?? '-'}',
                         ),
                         _buildInfoRow(
@@ -1398,6 +1399,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                           _detailData!['customer'] ?? 'Walking Customer',
                         ),
                         _buildInfoRow('Kasir', _detailData!['pic'] ?? '-'),
+                        const SizedBox(height: 16),
                         const Text(
                           'Rincian Pesanan',
                           style: TextStyle(
@@ -1405,23 +1407,73 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                             fontSize: 16,
                           ),
                         ),
-                        const Divider(height: 1),
+                        const SizedBox(height: 8),
                         if (_detailData!['detail'] != null)
                           ...(_detailData!['detail'] as List).map((item) {
                             return _buildProductItem(item);
                           }).toList(),
+                        
+                        const SizedBox(height: 16),
                         const Text(
-                          'Rincian Pembayaran',
+                          'Riwayat Pembayaran',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        _buildSummaryRow(
-                          'Metode Pembayaran',
-                          _detailData!['payment_name'] ?? '-',
-                        ),
+                        const SizedBox(height: 8),
+                        if (_detailData!['payments'] != null && (_detailData!['payments'] as List).isNotEmpty)
+                          ...(_detailData!['payments'] as List).map((p) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: primary100,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      p['payment_name'] ?? '-',
+                                      style: TextStyle(color: primary500, fontWeight: FontWeight.bold, fontSize: 12),
+                                    ),
+                                  ),
+                                  Text(
+                                    p['entrydate'] ?? '-',
+                                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList()
+                        else if (_detailData!['payment_name'] != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: primary100,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    _detailData!['payment_name'] ?? '-',
+                                    style: TextStyle(color: primary500, fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ),
+                                Text(
+                                  _detailData!['entrydate'] ?? '-',
+                                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
                         _buildSummaryRow(
                           'Sub Total',
                           _detailData!['total_before_dsc_tax'],
@@ -1444,7 +1496,7 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
                           thickness: 1,
                         ), // dashed mimic skipped for simplicity
                         _buildSummaryRow(
-                          'Uang Tunai',
+                          'Nominal Pembayaran',
                           _detailData!['money_paid'],
                           isCurrency: true,
                         ),
@@ -1657,7 +1709,9 @@ class _TransactionDetailModalState extends State<TransactionDetailModal> {
 
   Widget _buildProductItem(Map<String, dynamic> item) {
     print('Product item: $item');
-    final qty = _pickStr(item, ['quantity'], fallback: '1');
+    final qtyRaw = _pickStr(item, ['quantity'], fallback: '1');
+    final qtyDouble = double.tryParse(qtyRaw) ?? 1.0;
+    final qty = qtyDouble == qtyDouble.toInt() ? qtyDouble.toInt().toString() : qtyDouble.toString();
     final name = _pickStr(item, ['name'], fallback: '-');
     final image = _pickStr(item, ['product_image'], fallback: '');
     final note = _pickStr(item, ['description'], fallback: '').trim();

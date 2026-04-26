@@ -17,6 +17,11 @@ class UniposTextField extends StatelessWidget {
     this.keyboardType = TextInputType.multiline,
     this.inputFormatters = const [],
     this.required = false,
+    this.focusNode,
+    this.onFieldSubmitted,
+    this.textInputAction,
+    this.readOnly = false,
+    this.onTapOutside,
   });
 
   final String title;
@@ -29,6 +34,11 @@ class UniposTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final List<TextInputFormatter> inputFormatters;
   final bool required;
+  final FocusNode? focusNode;
+  final ValueChanged<String>? onFieldSubmitted;
+  final TextInputAction? textInputAction;
+  final bool readOnly;
+  final TapRegionCallback? onTapOutside;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +53,11 @@ class UniposTextField extends StatelessWidget {
             ],
           ),
         TextFormField(
+          focusNode: focusNode,
+          onFieldSubmitted: onFieldSubmitted,
+          textInputAction: textInputAction,
+          readOnly: readOnly,
+          onTapOutside: onTapOutside ?? (_) => FocusScope.of(context).unfocus(),
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           maxLines: maxLines,

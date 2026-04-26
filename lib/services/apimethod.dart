@@ -1389,7 +1389,6 @@ Future changePpn(
   List productid,
   merchid,
 ) async {
-  whenLoading(context);
   String jsonData = jsonEncode(productid);
 
   final response = await http.post(
@@ -1406,15 +1405,10 @@ Future changePpn(
   var jsonResponse = jsonDecode(response.body);
   if (response.statusCode == 200) {
     print('Sukses Ganti Data');
-    // Navigator.pop(context);
-
-    print(jsonResponse['data'].toString());
-    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   } else {
     print(jsonResponse['message'].toString());
-    closeLoading(context);
     showSnackbar(context, jsonResponse);
     return jsonResponse['rc'];
   }
@@ -1428,7 +1422,6 @@ Future changeActive(
   merchid,
 ) async {
   try {
-    whenLoading(context);
     String jsonData = jsonEncode(productid);
 
     final response = await http.post(
@@ -1444,16 +1437,13 @@ Future changeActive(
 
     var jsonResponse = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      closeLoading(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     } else {
-      closeLoading(context);
       showSnackbar(context, jsonResponse);
       return jsonResponse['rc'];
     }
   } catch (e) {
-    closeLoading(context);
     showSnackbar(context, {'message': 'Terjadi kesalahan: $e'});
     return 'error';
   }
@@ -6040,7 +6030,7 @@ Future<List<UserModel>> getGroupUsers(
       }),
     );
 
-    print('Response getGroupUsers: ${response.body}');
+    debugPrint('Response getGroupUsers: ${response.body}');
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> decoded = jsonDecode(response.body);

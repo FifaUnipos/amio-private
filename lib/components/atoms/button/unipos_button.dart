@@ -8,11 +8,6 @@ enum UniposButtonVariant {
   secondary,
   tertiary;
 
-  Color get bgColor =>
-      this == UniposButtonVariant.primary ? primary500 : Colors.transparent;
-  Color get fgColor =>
-      this == UniposButtonVariant.primary ? bnw100 : primary500;
-
   Color get colorLoading {
     switch (this) {
       case UniposButtonVariant.primary:
@@ -21,6 +16,16 @@ enum UniposButtonVariant {
       case UniposButtonVariant.tertiary:
         return primary500;
     }
+  }
+
+  Color getBgColor(bool isDisabled) {
+    if (isDisabled) return bnw300;
+    return this == UniposButtonVariant.primary ? primary500 : Colors.transparent;
+  }
+
+  Color getFgColor(bool isDisabled) {
+    if (isDisabled) return bnw500;
+    return this == UniposButtonVariant.primary ? bnw100 : primary500;
   }
 }
 
@@ -117,8 +122,9 @@ class UniposButton extends StatelessWidget {
       }
     }
 
-    final bgColor = variant.bgColor;
-    final fgColor = variant.fgColor;
+    final isDisabled = onTap == null && !loading;
+    final bgColor = variant.getBgColor(isDisabled);
+    final fgColor = variant.getFgColor(isDisabled);
 
     return GestureDetector(
       onTap: loading ? null : onTap,

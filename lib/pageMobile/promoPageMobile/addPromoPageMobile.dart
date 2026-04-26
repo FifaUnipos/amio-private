@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:unipos_app_335/main.dart';
@@ -128,8 +129,10 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
       final response = await http.post(
         Uri.parse(_getProductsUrl),
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
-        body: jsonEncode({"merchantid": ""}), // Empty per instructions
+        body: jsonEncode({"merchantid": widget.merchantId}),
       );
+
+      print("Fetch Products Response: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -237,8 +240,9 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                           bool isUnavailable =
                               product.discountStatus.isNotEmpty &&
                               (widget.editDiscount == null ||
-                                  product.discountId != widget.editDiscount!.id);
-          
+                                  product.discountId !=
+                                      widget.editDiscount!.id);
+
                           return CheckboxListTile(
                             title: Text(
                               product.name,
@@ -255,7 +259,11 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                               children: [
                                 Text(
                                   FormatCurrency.convertToIdr(product.price),
-                                  style: body2(FontWeight.w400, bnw500, 'Outfit'),
+                                  style: body2(
+                                    FontWeight.w400,
+                                    bnw500,
+                                    'Outfit',
+                                  ),
                                 ),
                                 if (isUnavailable)
                                   Padding(
@@ -462,7 +470,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                   ],
                 ),
                 SizedBox(height: 16),
-      
+
                 if (_type == "Per Produk") ...[
                   _buildLabel("Produk *"),
                   GestureDetector(
@@ -486,7 +494,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                   ),
                   SizedBox(height: 16),
                 ],
-      
+
                 _buildLabel("Nama Diskon *"),
                 TextFormField(
                   controller: _nameController,
@@ -500,7 +508,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                       val == null || val.isEmpty ? "Nama wajib diisi" : null,
                 ),
                 SizedBox(height: 16),
-      
+
                 _buildLabel("Harga Diskon *"),
                 Row(
                   children: [
@@ -541,19 +549,29 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                   TextFormField(
                     controller: _valueController,
                     keyboardType: TextInputType.number,
-                    // inputFormatters: [CurrencyInputFormatter()],
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
                       prefixIcon: Icon(PhosphorIcons.percent, color: bnw900),
                       suffixText: '%',
                       hintText: "0",
                       border: UnderlineInputBorder(),
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Nilai wajib diisi" : null,
+                    validator: (val) {
+                      if (val == null || val.isEmpty)
+                        return "Nilai wajib diisi";
+                      int? parsed = int.tryParse(val);
+                      if (parsed != null && parsed > 100)
+                        return "Maksimal 100%";
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
-      
+
                 SizedBox(height: 16),
-      
+
                 _buildLabel("Masa Aktif Diskon *"),
                 Column(
                   children: [
@@ -572,7 +590,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                     ),
                   ],
                 ),
-      
+
                 if (_activePeriod == "Kustom Waktu") ...[
                   SizedBox(height: 16),
                   _buildLabel("Waktu Mulai *"),
@@ -619,7 +637,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                     ),
                   ),
                 ],
-      
+
                 SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -637,7 +655,7 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                         ),
                       ],
                     ),
-      
+
                     Switch(
                       value: _isActive,
                       activeColor: primary500,
@@ -645,9 +663,9 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                     ),
                   ],
                 ),
-      
+
                 SizedBox(height: 32),
-      
+
                 Row(
                   children: [
                     Expanded(
@@ -685,7 +703,11 @@ class _AddPromoPageMobileState extends State<AddPromoPageMobile> {
                         ),
                         child: Text(
                           "Simpan & Tambah Baru",
-                          style: heading3(FontWeight.w600, primary500, 'Outfit'),
+                          style: heading3(
+                            FontWeight.w600,
+                            primary500,
+                            'Outfit',
+                          ),
                         ),
                       ),
                     ),

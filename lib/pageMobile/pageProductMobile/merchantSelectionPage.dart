@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:unipos_app_335/data/model/merchant/merchant_sorting_data.dart';
 import 'package:unipos_app_335/main.dart';
 import 'package:unipos_app_335/pageMobile/dashboardMobile.dart';
 import 'package:unipos_app_335/services/apimethod.dart';
@@ -27,8 +28,8 @@ class MerchantSelectionPage extends StatefulWidget {
 
 class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
   bool _isLoading = true;
-  List<dynamic> _merchants = [];
-  List<dynamic> _filteredMerchants = [];
+  List<MerchantSortingData> _merchants = [];
+  List<MerchantSortingData> _filteredMerchants = [];
   String _selectedOrder = "upDownNama";
   String _searchQuery = "";
   final TextEditingController _searchController = TextEditingController();
@@ -46,9 +47,10 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
       // Reusing getAllToko from apimethod.dart
       final data = await getAllToko(context, widget.token, "", _selectedOrder);
       if (data != null) {
+        final typed = List<MerchantSortingData>.from(data);
         setState(() {
-          _merchants = data;
-          _filteredMerchants = data;
+          _merchants = typed;
+          _filteredMerchants = typed;
         });
       }
     } catch (e) {
@@ -61,12 +63,16 @@ class _MerchantSelectionPageState extends State<MerchantSelectionPage> {
   void _filterMerchants(String query) {
     setState(() {
       _searchQuery = query;
-      _filteredMerchants = _merchants.where((m) {
-        final name = m.name?.toLowerCase() ?? "";
-        final address = m.address?.toLowerCase() ?? "";
-        return name.contains(query.toLowerCase()) ||
-            address.contains(query.toLowerCase());
-      }).toList();
+      if (query.isEmpty) {
+        _filteredMerchants = List.from(_merchants);
+      } else {
+        final lower = query.toLowerCase();
+        _filteredMerchants = _merchants.where((m) {
+          final name = m.name?.toLowerCase() ?? '';
+          final address = m.address?.toLowerCase() ?? '';
+          return name.contains(lower) || address.contains(lower);
+        }).toList();
+      }
     });
   }
 

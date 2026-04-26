@@ -268,7 +268,10 @@ class _PageUserMobileState extends State<PageUserMobile> {
                 },
                 decoration: InputDecoration(
                   hintText: "Cari nama atau alamat",
-                  prefixIcon: Icon(PhosphorIcons.magnifying_glass, color: bnw500),
+                  prefixIcon: Icon(
+                    PhosphorIcons.magnifying_glass,
+                    color: bnw500,
+                  ),
                   filled: true,
                   fillColor: bnw100,
                   border: OutlineInputBorder(
@@ -282,7 +285,7 @@ class _PageUserMobileState extends State<PageUserMobile> {
                 ),
               ),
             ),
-        
+
             // Sort Dropdown
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -323,9 +326,9 @@ class _PageUserMobileState extends State<PageUserMobile> {
                 ],
               ),
             ),
-        
+
             SizedBox(height: 16),
-        
+
             Expanded(
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
@@ -346,16 +349,26 @@ class _PageUserMobileState extends State<PageUserMobile> {
                           leading: CircleAvatar(
                             radius: 24,
                             backgroundColor: bnw100,
-                            backgroundImage:
-                                user.accountImage != null &&
-                                    user.accountImage!.isNotEmpty
-                                ? NetworkImage(user.accountImage!)
-                                : null,
+                            backgroundImage: null,
                             child:
-                                user.accountImage == null ||
-                                    user.accountImage!.isEmpty
-                                ? Icon(PhosphorIcons.user, color: bnw500)
-                                : null,
+                                (user.accountImage != null &&
+                                    user.accountImage!.trim().isNotEmpty)
+                                ? ClipOval(
+                                    child: Image.network(
+                                      user.accountImage!,
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Icon(
+                                              PhosphorIcons.user,
+                                              color: bnw500,
+                                            );
+                                          },
+                                    ),
+                                  )
+                                : Icon(PhosphorIcons.user, color: bnw500),
                           ),
                           title: Text(
                             user.fullname ?? "-",

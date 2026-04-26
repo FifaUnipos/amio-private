@@ -29,6 +29,7 @@ import '../../../services/apimethod.dart';
 
 import '../../../utils/component/component_appbar.dart';
 import '../../../../../utils/component/component_button.dart';
+import '../../../../components/atoms/button/unipos_button.dart';
 
 class DaftarAkunTokoPageMobile extends StatefulWidget {
   DaftarAkunTokoPageMobile({super.key});
@@ -51,6 +52,7 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
   Color onOffButton = bnw300;
   bool bttnValidated = false;
   bool bttnValidated2 = false;
+  bool _isLoading = false;
 
   TextEditingController searchController = TextEditingController();
 
@@ -1919,32 +1921,22 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
                       SizedBox(height: size48),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        child: GestureDetector(
-                          onTap: () {
-                            register(
-                              context,
-                              OtpPageMobile(
-                                phone: phoneController.text,
-                                name: nameController.text,
-                                email: emailController.text,
-                                pageidentify: 'public_register_page',
-                              ),
-                            );
-                          },
-                          child: buttonXXLonOff(
-                            Center(
-                              child: Text(
-                                'Daftar',
-                                style: heading2(
-                                  FontWeight.w600,
-                                  bnw100,
-                                  'Outfit',
-                                ),
-                              ),
-                            ),
-                            0,
-                            onOffButton,
-                          ),
+                        child: UniposButton(
+                          text: 'Daftar',
+                          loading: _isLoading,
+                          onTap: !bttnValidated2
+                              ? null
+                              : () async {
+                                  await register(
+                                    context,
+                                    OtpPageMobile(
+                                      phone: phoneController.text,
+                                      name: nameController.text,
+                                      email: emailController.text,
+                                      pageidentify: 'public_register_page',
+                                    ),
+                                  );
+                                },
                         ),
                       ),
                     ],
@@ -2024,6 +2016,9 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
   }
 
   Future register(context, page) async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       final response = await http.post(
         Uri.parse(ApiEndpoints.registerLink),
@@ -2057,9 +2052,19 @@ class _DaftarAkunTokoPageMobileState extends State<DaftarAkunTokoPageMobile> {
 
         showSnackbar(context, jsonResponse);
       }
-      return null;
     } catch (e) {
-      throw Exception(e.toString());
+      if (mounted) {
+        showSnackbar(context, {
+          "rc": "99",
+          "message": "Terjadi kesalahan jaringan atau server.",
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

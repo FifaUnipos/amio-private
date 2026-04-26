@@ -20,6 +20,7 @@ import 'package:flutter_svg/svg.dart';
 import '../../../../utils/component/component_color.dart';
 import '../../../utils/component/component_appbar.dart';
 import '../../../../../utils/component/component_button.dart';
+import '../../../../components/atoms/button/unipos_button.dart';
 
 class LoginPageMobile extends StatefulWidget {
   const LoginPageMobile({super.key});
@@ -32,6 +33,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
   TextEditingController phoneEmailCon = TextEditingController();
 
   bool _validate = false;
+  bool _isLoading = false;
 
   String validated = '';
 
@@ -165,57 +167,60 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: GestureDetector(
-                  onTap: () async {
-                    phoneEmailCon.text.isEmpty
-                        ? null
-                        : setState(() {
+                child: UniposButton(
+                  text: 'Berikutnya',
+                  loading: _isLoading,
+                  onTap: phoneEmailCon.text.isEmpty
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true;
                             errorText = '';
                             emailProfile = phoneEmailCon.text;
-                            if (validated == 'number') {
-                              getOtp(
-                                OtpPageMobile(
-                                  phone: phoneEmailCon.text,
-                                  name: '',
-                                  email: '',
-                                  pageidentify: 'login_page',
-                                ),
-                              );
-                            } else if (validated == 'email') {
-                              checkEmail(checkToken, setState).then((value) {
-                                if (value == '00') {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          // Container(),
-                                          LoginWithEmail(
-                                            email: phoneEmailCon.text,
-                                          ),
-                                    ),
-                                  );
-                                } else {
-                                  setState(() {
-                                    errorText = 'Email tidak terdaftar';
-                                    _validate = true;
-                                  });
-                                }
-                              });
-                              // getOtpEmail(
-                              // );
-                            }
                           });
-                  },
-                  child: buttonXXLonOff(
-                    Center(
-                      child: Text(
-                        'Berikutnya',
-                        style: heading2(FontWeight.w600, bnw100, 'Outfit'),
-                      ),
-                    ),
-                    double.infinity,
-                    phoneEmailCon.text.isEmpty ? bnw300 : primary500,
-                  ),
+
+                          if (validated == 'number') {
+                            await getOtp(
+                              OtpPageMobile(
+                                phone: phoneEmailCon.text,
+                                name: '',
+                                email: '',
+                                pageidentify: 'login_page',
+                              ),
+                            );
+                          } else if (validated == 'email') {
+                            try {
+                              final value = await checkEmail(checkToken, setState);
+                              if (value == '00') {
+                                if (!mounted) return;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginWithEmail(
+                                      email: phoneEmailCon.text,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  errorText = 'Email tidak terdaftar';
+                                  _validate = true;
+                                });
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                showSnackbar(context, {
+                                  "message": "Terjadi kesalahan: ${e.toString()}"
+                                });
+                              }
+                            }
+                          }
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        },
                 ),
               ),
               SizedBox(height: size16),
@@ -251,7 +256,12 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
         });
       }
     } catch (e) {
-      throw Exception(e.toString());
+      if (mounted) {
+        showSnackbar(context, {
+          "rc": "99",
+          "message": "Terjadi kesalahan jaringan atau server."
+        });
+      }
     }
   }
 

@@ -234,7 +234,7 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: isCashier
                     ? [
                         // Tombol Transaksi
@@ -416,11 +416,6 @@ class _DashboardPageMobileState extends State<DashboardPageMobile> {
                     token: checkToken,
                     featureTitle: 'Transaksi',
                     featureBuilder: (merchantId) {
-                      context.read<WebSocketService>().connect(
-                        checkToken,
-                        identifier,
-                        merchantId: merchantIdProfile,
-                      );
                       return TransaksiMobilePage(
                         token: widget.token,
                         merchantId: merchantId,

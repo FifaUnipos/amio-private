@@ -175,6 +175,7 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
   String orderby = 'upDownNama';
   String orderLabel = 'Nama Produk (A ke Z)';
   Timer? _debounce;
+  Set<String> _updatingProductIds = {};
 
   bool isUploading = false;
   String? fileName;
@@ -799,6 +800,9 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
                         final item = listProduk[index];
                         final bool isPpn = item.isPPN == 1;
                         final bool isDisplayed = item.isActive == 1;
+                        
+                        final bool isUpdatingPpn = _updatingProductIds.contains('${item.productid}_ppn');
+                        final bool isUpdatingActive = _updatingProductIds.contains('${item.productid}_active');
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,32 +942,48 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
                                         ),
                                       ),
                                       Spacer(),
-                                      FlutterSwitch(
-                                        value: isPpn,
-                                        width: 44.0,
-                                        height: 24.0,
-                                        toggleSize: 20.0,
-                                        padding: 2.0,
-                                        activeColor: primary500,
-                                        inactiveColor: bnw300,
-                                        onToggle: (val) async {
-                                          String status = val
-                                              ? "true"
-                                              : "false";
-                                          final rc = await changePpn(
-                                            context,
-                                            widget.token,
-                                            status,
-                                            [item.productid],
-                                            widget.merchantId,
-                                          );
-                                          if (rc == "00") {
-                                            setState(() {
-                                              item.isPPN = val ? 1 : 0;
-                                            });
-                                          }
-                                        },
-                                      ),
+                                      isUpdatingPpn
+                                          ? SizedBox(
+                                              width: 44.0,
+                                              height: 24.0,
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(strokeWidth: 2, color: primary500),
+                                                ),
+                                              ),
+                                            )
+                                          : FlutterSwitch(
+                                              value: isPpn,
+                                              width: 44.0,
+                                              height: 24.0,
+                                              toggleSize: 20.0,
+                                              padding: 2.0,
+                                              activeColor: primary500,
+                                              inactiveColor: bnw300,
+                                              onToggle: (val) async {
+                                                setState(() {
+                                                  _updatingProductIds.add('${item.productid}_ppn');
+                                                });
+                                                String status = val ? "true" : "false";
+                                                final rc = await changePpn(
+                                                  context,
+                                                  widget.token,
+                                                  status,
+                                                  [item.productid],
+                                                  widget.merchantId,
+                                                );
+                                                if (mounted) {
+                                                  setState(() {
+                                                    _updatingProductIds.remove('${item.productid}_ppn');
+                                                    if (rc == "00") {
+                                                      item.isPPN = val ? 1 : 0;
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                            ),
                                     ],
                                   ),
                                 ),
@@ -987,32 +1007,48 @@ class _ProductMobilePageState extends State<ProductMobilePage> {
                                         ),
                                       ),
                                       Spacer(),
-                                      FlutterSwitch(
-                                        value: isDisplayed,
-                                        width: 44.0,
-                                        height: 24.0,
-                                        toggleSize: 20.0,
-                                        padding: 2.0,
-                                        activeColor: primary500,
-                                        inactiveColor: bnw300,
-                                        onToggle: (val) async {
-                                          String status = val
-                                              ? "true"
-                                              : "false";
-                                          final rc = await changeActive(
-                                            context,
-                                            widget.token,
-                                            status,
-                                            [item.productid],
-                                            widget.merchantId,
-                                          );
-                                          if (rc == "00") {
-                                            setState(() {
-                                              item.isActive = val ? 1 : 0;
-                                            });
-                                          }
-                                        },
-                                      ),
+                                      isUpdatingActive
+                                          ? SizedBox(
+                                              width: 44.0,
+                                              height: 24.0,
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(strokeWidth: 2, color: primary500),
+                                                ),
+                                              ),
+                                            )
+                                          : FlutterSwitch(
+                                              value: isDisplayed,
+                                              width: 44.0,
+                                              height: 24.0,
+                                              toggleSize: 20.0,
+                                              padding: 2.0,
+                                              activeColor: primary500,
+                                              inactiveColor: bnw300,
+                                              onToggle: (val) async {
+                                                setState(() {
+                                                  _updatingProductIds.add('${item.productid}_active');
+                                                });
+                                                String status = val ? "true" : "false";
+                                                final rc = await changeActive(
+                                                  context,
+                                                  widget.token,
+                                                  status,
+                                                  [item.productid],
+                                                  widget.merchantId,
+                                                );
+                                                if (mounted) {
+                                                  setState(() {
+                                                    _updatingProductIds.remove('${item.productid}_active');
+                                                    if (rc == "00") {
+                                                      item.isActive = val ? 1 : 0;
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                            ),
                                     ],
                                   ),
                                 ),

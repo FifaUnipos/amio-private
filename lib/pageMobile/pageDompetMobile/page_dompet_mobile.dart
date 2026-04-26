@@ -114,7 +114,7 @@ class _PageDompetMobileState extends State<PageDompetMobile> {
         headers: {'token': widget.token, 'Content-Type': 'application/json'},
         body: jsonEncode({
           'search': _riwayatQ,
-          'order_by': 'downUpCreate',
+          'order_by': 'upDownCreate',
           'filter_by': filterBy,
         }),
       );
